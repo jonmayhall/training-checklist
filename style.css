@@ -908,7 +908,7 @@ main {
             3 Hours
             4 Customer Pay Rate
             5 Warranty Pay Rate
-            6 Description (wide)
+            6 Description (wide, left aligned)
 */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
@@ -943,7 +943,7 @@ main {
             3 List Price
             4 Cost
             5 Markup %
-            6 Description (wide)
+            6 Description (wide, header centered, text left)
 */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
@@ -951,24 +951,31 @@ main {
   min-width: 60px;
 }
 
+/* Match spacing feel of Opcodes */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3) {
+  width: 70px;          /* List Price */
+  min-width: 70px;
+}
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
-  width: 90px;   /* List Price, Cost, Markup% – small */
-  min-width: 90px;
+  width: 110px;         /* Cost + Markup % */
+  min-width: 110px;
 }
 
-/* Description for parts table – widest column, left aligned */
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6),
+/* Description wide; header centered, cell text left */
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6) {
+  min-width: 260px;
+  text-align: center;
+}
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: left;
 }
 
-/* Make Description text inputs stretch nicely & left-align text */
+/* Make ALL Description text inputs (both tables) left-aligned */
 #opcodes-pricing .training-table td:nth-child(6) input[type="text"] {
   text-align: left;
 }
