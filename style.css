@@ -370,18 +370,15 @@ main {
 }
 
 /* ===== Dealership Contacts – dividers per manager/POC ===== */
-#dealership-info .section-block:nth-of-type(2) .checklist-row:has(input[placeholder="Name"]) {
-  border-top: 2px solid #bdbdbd;
-  padding-top: 12px;
-  margin-top: 8px;
-}
-
-/* Extra Additional POC clones – divide above each extra POC input (if present) */
-#dealership-info .section-block:nth-of-type(2)
-  .checklist-row.integrated-plus input[type="text"] + input[type="text"] {
-  margin-top: 10px;
+/* Contacts card is the 3rd section-block in #dealership-info */
+/* This adds a dashed divider above each NAME row that starts a new contact block
+   (Parts Manager, General Manager, Additional POC, and cloned POCs),
+   but NOT above the very first Service Manager block. */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row + .checklist-row:has(input[placeholder="Name"]) {
+  border-top: 1px dashed #d4d4d4;
   padding-top: 10px;
-  border-top: 2px solid #bdbdbd;
+  margin-top: 10px;
 }
 
 /* Indented Qs */
@@ -397,7 +394,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0; /* no gap so they truly touch */
+  gap: 12px;
 }
 
 /* Label behaves like normal rows */
@@ -407,18 +404,15 @@ main {
   padding-right: 16px;
 }
 
-/* Text box column:
-   - combined width (input + 34px button) = var(--input-width)
-   - remove right border so it fuses visually with the button */
+/* Text box column: same width as other text boxes, right-aligned */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
   margin-left: 0;
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  border-right: none;
 }
 
 /* Integrated + button – pill on the right, touching the input */
@@ -426,7 +420,7 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: 0;
+  margin-left: -1px; /* ensures input & button visually touch */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -436,7 +430,7 @@ main {
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
-  cursor: button;
+  cursor: pointer;
   transition: .18s ease-in-out;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   display: flex;
@@ -453,16 +447,12 @@ main {
    POST-TRAINING – divide Champions vs Blockers
    ======================================================= */
 
-/* Strong line between Champion group and Blockers group */
-#post-training .section-block h2
-  + .checklist-row
-  + .checklist-row.integrated-plus
-  + .checklist-row.integrated-plus
-  + .checklist-row.integrated-plus
-  + .checklist-row {
-  border-top: 2px solid #bdbdbd;
-  margin-top: 12px;
-  padding-top: 12px;
+/* Single subtle divider above the first Blocker row,
+   even if extra Champion rows are added. */
+#post-training .section-block .checklist-row.blocker-start {
+  border-top: 1px dashed #d4d4d4;
+  margin-top: 10px;
+  padding-top: 10px;
 }
 
 /* ===== Training TABLES (page 5 & 6) ===== */
@@ -523,19 +513,19 @@ main {
   color: #fff;
 }
 
-/* Sticky first column – ONLY on Training Checklist page (page 5) */
-#training-checklist .training-table th:first-child,
-#training-checklist .training-table td:first-child {
+/* Sticky first column */
+.training-table th:first-child,
+.training-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
   width: 240px;
   min-width: 240px;
 }
-#training-checklist .training-table thead th:first-child { 
+.training-table thead th:first-child { 
   text-align: center;
 }
-#training-checklist .training-table td:first-child {
+.training-table td:first-child {
   background: #fff;
   display: flex;
   align-items: center;
@@ -543,12 +533,12 @@ main {
   padding-left: 8px;
   padding-right: 8px;
 }
-#training-checklist .training-table td:first-child input[type="checkbox"] {
+.training-table td:first-child input[type="checkbox"] {
   flex-shrink: 0;
   transform: scale(1.05);
   margin-right: 8px;
 }
-#training-checklist .training-table td:first-child input[type="text"] {
+.training-table td:first-child input[type="text"] {
   width: 95%;
   padding: 7px 8px;
   font-size: 13px;
@@ -717,7 +707,7 @@ main {
 }
 
 /* =======================================================
-   DMS PAGE – VERTICAL CARDS (original)
+   DMS PAGE – VERTICAL CARDS (original version)
    ======================================================= */
 
 /* Overview block spacing */
@@ -820,165 +810,4 @@ main {
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
-}
-
-/* =======================================================
-   DMS CARDS + DOT TAGS FOR NEW DMS HTML
-   ======================================================= */
-
-/* Legend dots */
-.dms-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-/* Colors chosen for clarity */
-.dms-dot-auto {
-  background: #22c55e; /* green */
-}
-.dms-dot-ondemand {
-  background: #f97316; /* orange */
-}
-.dms-dot-withro {
-  background: #0ea5e9; /* cyan/blue */
-}
-.dms-dot-planned {
-  background: #6b7280; /* slate gray */
-}
-.dms-dot-na {
-  background: #9ca3af; /* light gray */
-}
-
-/* DMS card grid */
-.dms-table-container {
-  margin-top: 10px;
-}
-.dms-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  margin-top: 12px;
-}
-
-/* Each DMS provider card */
-.dms-card {
-  margin: 0;
-  padding: 14px 16px 16px;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
-}
-
-/* Card header */
-.dms-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.dms-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Push / Pull chip */
-.dms-chip {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-.dms-chip-push {
-  border-color: #fed7aa;
-  background: #fff7ed;
-  color: #c2410c;
-}
-.dms-chip-pull {
-  border-color: #bae6fd;
-  background: #ecfeff;
-  color: #0369a1;
-}
-
-/* List of fields inside card */
-.dms-list {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-}
-.dms-list li {
-  padding: 6px 0 6px;
-  border-top: 1px solid #f3f4f6;
-}
-.dms-list li:first-child {
-  border-top: none;
-}
-
-.dms-row-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 3px;
-}
-
-.dms-field {
-  font-size: 13px;
-  font-weight: 500;
-  color: #111827;
-}
-
-.dms-list p {
-  margin: 0;
-  font-size: 12px;
-  color: #4b5563;
-  line-height: 1.4;
-}
-
-/* Tag pills – DOTS ONLY, hide label text */
-.dms-tag {
-  border-radius: 999px;
-  padding: 3px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0; /* hide the inner text like "Auto" */
-}
-.dms-tag::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-/* Tag colors (match legend) */
-.dms-tag-auto::before {
-  background: #22c55e; /* green */
-}
-.dms-tag-ondemand::before {
-  background: #f97316; /* orange */
-}
-.dms-tag-withro::before {
-  background: #0ea5e9; /* cyan */
-}
-.dms-tag-planned::before {
-  background: #6b7280; /* slate gray */
-}
-.dms-tag-na::before {
-  background: #9ca3af; /* light gray */
-}
-.dms-tag-display::before {
-  background: #6366f1; /* indigo */
-}
-.dms-tag-limited::before {
-  background: #e11d48; /* rose */
 }
