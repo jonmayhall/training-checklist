@@ -419,7 +419,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 12px;
+  gap: 0;  /* no gap between input and + button; we’ll add left margin to the input */
 }
 
 /* Label behaves like normal rows */
@@ -429,12 +429,16 @@ main {
   padding-right: 16px;
 }
 
-/* Text box column: same width as other text boxes, right-aligned */
+/* Text box column:
+   - Same width as other text boxes
+   - 12px spacing from label
+   - Right side squared off so it can touch the + button cleanly
+*/
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
-  margin-left: 0;
+  margin-left: 12px;  /* replaces row gap between label and input */
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -445,7 +449,7 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: -1px; /* ensures input & button visually touch */
+  margin-left: -1px; /* ensures input & button visually touch (overlaps borders) */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -943,7 +947,7 @@ main {
             3 List Price
             4 Cost
             5 Markup %
-            6 Description (wide, header centered, text left)
+            6 Description (takes the rest)
 */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
@@ -951,21 +955,19 @@ main {
   min-width: 60px;
 }
 
-/* Match spacing feel of Opcodes */
+/* Make these numeric columns as small as reasonable */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3) {
-  width: 70px;          /* List Price */
-  min-width: 70px;
-}
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
-  width: 110px;         /* Cost + Markup % */
-  min-width: 110px;
+  width: 80px;     /* List Price, Cost, Markup % */
+  min-width: 80px;
 }
 
-/* Description wide; header centered, cell text left */
+/* Description: wide, takes remaining width.
+   Header centered, cell text left for easier reading. */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6) {
   min-width: 260px;
   text-align: center;
