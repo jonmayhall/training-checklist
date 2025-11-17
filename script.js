@@ -27,25 +27,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* === ROLE MINI-NAV (Training Checklist page) === */
-  document.querySelectorAll('.role-nav-btn[data-scroll-target]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetSelector = btn.getAttribute('data-scroll-target');
-      const target = document.querySelector(targetSelector);
-      if (!target) return;
-
-      const offset = 100; // account for fixed top bar
-      const rect = target.getBoundingClientRect();
-      const y = rect.top + window.scrollY - offset;
-
-      // update active state
-      document.querySelectorAll('.role-nav-btn').forEach(b => b.classList.remove('is-active'));
-      btn.classList.add('is-active');
-
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    });
-  });
-
   /* === ADD ROW HANDLER FOR TRAINING TABLES === */
   document.querySelectorAll('.table-footer .add-row').forEach(button => {
     button.addEventListener('click', () => {
@@ -63,8 +44,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Reset inputs
       newRow.querySelectorAll('input, select').forEach(el => {
-        if (el.type === 'checkbox') el.checked = false;
-        else el.value = '';
+        if (el.type === 'checkbox') {
+          el.checked = false;
+        } else {
+          el.value = '';
+        }
       });
 
       tbody.appendChild(newRow);
@@ -89,6 +73,39 @@ window.addEventListener('DOMContentLoaded', () => {
       children.forEach(el => groupWrapper.appendChild(el));
       block.appendChild(groupWrapper);
     });
+
+    // === NEW: Move ticket between Open / Closed when status changes ===
+    supportSection.addEventListener('change', (e) => {
+      const select = e.target;
+      if (!select || select.tagName !== 'SELECT') return;
+
+      const row = select.closest('.checklist-row');
+      const label = row ? row.querySelector('label') : null;
+      if (!label) return;
+
+      // Only react to the "Ticket Status" dropdown
+      if (!label.textContent.trim().startsWith('Ticket Status')) return;
+
+      const value = select.value;
+      const group = select.closest('.ticket-group');
+      if (!group) return;
+
+      const blocks = supportSection.querySelectorAll('.section-block');
+      const openBlock = blocks[0];
+      const closedBlock = blocks[1];
+
+      // Move to Closed section if status is Closed
+      if (value === 'Closed') {
+        if (closedBlock && !closedBlock.contains(group)) {
+          closedBlock.appendChild(group);
+        }
+      } else {
+        // Any other status: make sure it's in Open section
+        if (openBlock && !openBlock.contains(group)) {
+          openBlock.appendChild(group);
+        }
+      }
+    });
   }
 
   /* === ADDITIONAL TRAINERS / POC / CHAMPIONS / SUPPORT TICKETS === */
@@ -103,9 +120,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const newGroup = group.cloneNode(true);
 
-        // Clear all text inputs and textareas in the new group
-        newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-          el.value = '';
+        // Clear all text inputs, textareas, and selects in the new group
+        newGroup.querySelectorAll('input[type="text"], textarea, select').forEach(el => {
+          if (el.tagName === 'SELECT') {
+            el.selectedIndex = 0;
+          } else {
+            el.value = '';
+          }
         });
 
         block.appendChild(newGroup);
