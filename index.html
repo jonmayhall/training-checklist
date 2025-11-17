@@ -1289,71 +1289,78 @@
 
 </section>
 
-    <!-- ========================================================= -->
-    <!-- PAGE 7: SUPPORT TICKET                                    -->
-    <!-- ========================================================= -->
-    <section id="support-ticket" class="page-section">
-      <h1>Support Ticket</h1>
-      <p class="page-subtitle">
-        Track open and closed support tickets related to this dealership and training rollout.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
+<!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKET                                    -->
+<!-- ========================================================= -->
+<section id="support-ticket" class="page-section">
+  <h1>Support Ticket</h1>
+  <p class="page-subtitle">
+    Track open and closed support tickets related to this dealership and training rollout.
+  </p>
+  <button class="clear-page-btn">Reset This Page</button>
 
-      <!-- Open Support Tickets -->
-      <div class="section-block">
-        <h2>Open Support Tickets</h2>
+  <!-- Open Support Tickets -->
+  <div class="section-block">
+    <h2>Open Support Tickets</h2>
 
-        <div class="ticket-group">
-          <div class="checklist-row integrated-plus">
-            <label>Support Ticket Number</label>
-            <input type="text" placeholder="Ticket #">
-            <button class="add-row" type="button">+</button>
-          </div>
-
-          <div class="checklist-row">
-            <label>Issue Summary</label>
-            <input type="text" placeholder="Short summary of the issue">
-          </div>
-
-          <div class="checklist-row">
-            <label>Ticket Status</label>
-            <select>
-              <option></option>
-              <option>Open</option>
-              <option>Tier Two</option>
-              <option>Closed</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Detailed Description</label>
-          </div>
-          <textarea placeholder="Full description, steps to reproduce, impact, related users or roles, and any troubleshooting already performed …"></textarea>
-        </div>
+    <div class="ticket-group">
+      <div class="checklist-row integrated-plus">
+        <label>Support Ticket Number</label>
+        <input type="text" placeholder="Ticket #">
+        <button class="add-row" type="button">+</button>
       </div>
 
-      <!-- Closed Support Tickets -->
-      <div class="section-block">
-        <h2>Closed Support Tickets</h2>
-
-        <div class="ticket-group">
-          <div class="checklist-row">
-            <label>Support Ticket Number</label>
-            <input type="text" placeholder="Ticket #">
-          </div>
-
-          <div class="checklist-row">
-            <label>Issue Summary</label>
-            <input type="text" placeholder="Short summary of the resolved issue">
-          </div>
-
-          <div class="checklist-row">
-            <label>Resolution / Notes</label>
-          </div>
-          <textarea placeholder="Description of the resolution, who handled it, any permanent fixes put in place, and follow-up items …"></textarea>
-        </div>
+      <div class="checklist-row">
+        <label>Issue Summary</label>
+        <input type="text" placeholder="Short summary of the issue">
       </div>
-    </section>
+
+      <div class="checklist-row">
+        <label>Ticket Status</label>
+        <select>
+          <option></option>
+          <option>Open</option>
+          <option>Tier Two</option>
+          <option>Closed</option>
+        </select>
+      </div>
+
+      <!-- 🔁 REPLACED this:
+           <div class="checklist-row">
+             <label>Detailed Description</label>
+           </div>
+           <textarea ...></textarea>
+      -->
+
+      <div class="checklist-row">
+        <label>Support Ticket Link</label>
+        <input type="text" placeholder="Paste support ticket URL (Jira, Zendesk, etc.)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Closed Support Tickets -->
+  <div class="section-block">
+    <h2>Closed Support Tickets</h2>
+
+    <div class="ticket-group">
+      <div class="checklist-row">
+        <label>Support Ticket Number</label>
+        <input type="text" placeholder="Ticket #">
+      </div>
+
+      <div class="checklist-row">
+        <label>Issue Summary</label>
+        <input type="text" placeholder="Short summary of the resolved issue">
+      </div>
+
+      <div class="checklist-row">
+        <label>Resolution / Notes</label>
+      </div>
+      <textarea placeholder="Description of the resolution, who handled it, any permanent fixes put in place, and follow-up items …"></textarea>
+    </div>
+  </div>
+</section>
 
         <!-- ========================================================= -->
     <!-- PAGE 8: DMS INTEGRATION                                   -->
