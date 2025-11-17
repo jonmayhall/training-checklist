@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
   /* === SUPPORT TICKET PAGE – GROUP SETUP + AUTO MOVE OPEN/CLOSED === */
   const supportSection = document.getElementById('support-ticket');
   if (supportSection) {
-    // (Safety) If a block ever had no .ticket-group, wrap its contents once.
+    // Wrap contents once if a section-block is missing .ticket-group (safety)
     const ticketBlocks = supportSection.querySelectorAll('.section-block');
     ticketBlocks.forEach(block => {
       if (block.querySelector('.ticket-group')) return;
@@ -108,7 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
   /* === INTEGRATED PLUS BUTTONS: TRAINERS / POC / DEAD SPOTS / CHAMPIONS, ETC. === */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // Special behavior on Support Ticket page: clone FULL ticket group
+      // 1) SUPPORT TICKET PAGE – clone FULL ticket group
       if (btn.closest('#support-ticket')) {
         const block = btn.closest('.section-block');
         if (!block) return;
@@ -130,30 +130,72 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Default behavior for all other + buttons:
-      // clone the associated text input inside the SAME checklist-row
       const row = btn.closest('.checklist-row');
-      const container = row || btn.closest('.section-block');
-      if (!container) return;
+      if (!row) return;
+
+      const labelEl = row.querySelector('label');
+      const labelText = labelEl ? labelEl.textContent.trim() : '';
+
+      // 2) SPECIAL CASE: "Additional POC" – clone the three-row block: Name / Cell / Email
+      if (labelText.startsWith('Additional POC')) {
+        const cellRow = row.nextElementSibling;
+        const emailRow = cellRow && cellRow.nextElementSibling;
+
+        if (!cellRow || !emailRow) return;
+        if (!cellRow.classList.contains('checklist-row') || !emailRow.classList.contains('checklist-row')) return;
+
+        const rowsToClone = [row, cellRow, emailRow];
+        let insertionPoint = emailRow;
+
+        rowsToClone.forEach(sourceRow => {
+          const cloneRow = sourceRow.cloneNode(true);
+
+          // Clear values in all inputs/selects/textareas
+          cloneRow.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.type === 'checkbox') {
+              el.checked = false;
+            } else if (el.tagName === 'SELECT') {
+              el.selectedIndex = 0;
+            } else {
+              el.value = '';
+            }
+          });
+
+          insertionPoint.parentNode.insertBefore(cloneRow, insertionPoint.nextSibling);
+          insertionPoint = cloneRow;
+        });
+
+        return;
+      }
+
+      // 3) DEFAULT BEHAVIOR FOR OTHER "+" ROWS:
+      //    - Add a new line BELOW the question
+      //    - Empty label (no repeated question)
+      //    - New text box aligned like the original
 
       // Prefer the input immediately before the button
       let input = btn.previousElementSibling;
       if (!input || input.tagName !== 'INPUT' || input.type !== 'text') {
-        input = container.querySelector('input[type="text"]');
+        // Fallback: first text input in this row
+        input = row.querySelector('input[type="text"]');
       }
       if (!input) return;
 
-      const clone = input.cloneNode(true);
-      clone.value = '';
-      clone.style.marginTop = '6px';
+      const cloneInput = input.cloneNode(true);
+      cloneInput.value = '';
+      cloneInput.style.marginTop = '0';
 
-      if (row) {
-        // Add the new input inside the same row, just before the +
-        row.insertBefore(clone, btn);
-      } else {
-        // Fallback: insert in the section-block
-        container.insertBefore(clone, btn);
-      }
+      // New row below: no question text, just an aligned text box
+      const newRow = document.createElement('div');
+      newRow.className = 'checklist-row indent-sub';
+
+      const spacerLabel = document.createElement('label');
+      spacerLabel.textContent = ''; // no question text repeated
+
+      newRow.appendChild(spacerLabel);
+      newRow.appendChild(cloneInput);
+
+      row.parentNode.insertBefore(newRow, row.nextElementSibling);
     });
   });
 
