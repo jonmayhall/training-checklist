@@ -397,7 +397,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 12px;
+  gap: 0; /* no gap so they truly touch */
 }
 
 /* Label behaves like normal rows */
@@ -407,15 +407,18 @@ main {
   padding-right: 16px;
 }
 
-/* Text box column: same width as other text boxes, right-aligned */
+/* Text box column:
+   - combined width (input + 34px button) = var(--input-width)
+   - remove right border so it fuses visually with the button */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
   margin-left: 0;
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  border-right: none;
 }
 
 /* Integrated + button – pill on the right, touching the input */
@@ -423,7 +426,7 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: -1px; /* ensures input & button visually touch */
+  margin-left: 0;
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -433,7 +436,7 @@ main {
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
-  cursor: pointer;
+  cursor: button;
   transition: .18s ease-in-out;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   display: flex;
@@ -520,19 +523,19 @@ main {
   color: #fff;
 }
 
-/* Sticky first column */
-.training-table th:first-child,
-.training-table td:first-child {
+/* Sticky first column – ONLY on Training Checklist page (page 5) */
+#training-checklist .training-table th:first-child,
+#training-checklist .training-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child { 
+#training-checklist .training-table thead th:first-child { 
   text-align: center;
 }
-.training-table td:first-child {
+#training-checklist .training-table td:first-child {
   background: #fff;
   display: flex;
   align-items: center;
@@ -540,12 +543,12 @@ main {
   padding-left: 8px;
   padding-right: 8px;
 }
-.training-table td:first-child input[type="checkbox"] {
+#training-checklist .training-table td:first-child input[type="checkbox"] {
   flex-shrink: 0;
   transform: scale(1.05);
   margin-right: 8px;
 }
-.training-table td:first-child input[type="text"] {
+#training-checklist .training-table td:first-child input[type="text"] {
   width: 95%;
   padding: 7px 8px;
   font-size: 13px;
@@ -821,7 +824,6 @@ main {
 
 /* =======================================================
    DMS CARDS + DOT TAGS FOR NEW DMS HTML
-   (these override / supplement the old DMS styles)
    ======================================================= */
 
 /* Legend dots */
