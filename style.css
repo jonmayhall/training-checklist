@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable Build + Opcodes Fix + DMS Dot Cards
+   Refined Build (cards, darker sidebar, fixed tables)
    ======================================================= */
 
 :root {
@@ -370,14 +370,14 @@ main {
 }
 
 /* ===== Dealership Contacts – dividers per manager/POC ===== */
-#dealership-info .section-block:nth-of-type(3) .checklist-row:has(input[placeholder="Name"]) {
+#dealership-info .section-block:nth-of-type(2) .checklist-row:has(input[placeholder="Name"]) {
   border-top: 2px solid #bdbdbd;
   padding-top: 12px;
   margin-top: 8px;
 }
 
 /* Extra Additional POC clones – divide above each extra POC input (if present) */
-#dealership-info .section-block:nth-of-type(3)
+#dealership-info .section-block:nth-of-type(2)
   .checklist-row.integrated-plus input[type="text"] + input[type="text"] {
   margin-top: 10px;
   padding-top: 10px;
@@ -397,7 +397,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0;
+  gap: 12px;
 }
 
 /* Label behaves like normal rows */
@@ -407,11 +407,11 @@ main {
   padding-right: 16px;
 }
 
-/* Text box column: combined width (input + button) matches normal inputs */
+/* Text box column: same width as other text boxes, right-aligned */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
   margin-left: 0;
   margin-right: 0;
   border-top-right-radius: 0;
@@ -520,16 +520,14 @@ main {
   color: #fff;
 }
 
-/* Sticky first column (default for role tables) */
+/* Sticky first column */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 240px;
-  min-width: 240px;
 }
-.training-table thead th:first-child { 
+.training-table th:first-child {
   text-align: center;
 }
 .training-table td:first-child {
@@ -581,6 +579,11 @@ main {
   box-shadow: 0 0 4px rgba(243,111,33,0.4);
   outline: none;
   background: #fff9f5;
+}
+
+/* Wider description cells (opcodes / parts) */
+.training-table .wide-desc {
+  min-width: 220px;
 }
 
 /* Alternating rows */
@@ -713,15 +716,8 @@ main {
   margin-bottom: 10px;
 }
 
-/* Align Detailed Description / Resolution textareas to label */
-#support-ticket .section-block .checklist-row + textarea {
-  width: calc(100% - 80px);
-  margin: 6px 40px 10px 40px;
-  display: block;
-}
-
 /* =======================================================
-   DMS PAGE – LEGEND + DOT CARDS
+   DMS PAGE – LEGEND + CARD GRID WITH DOT TAGS
    ======================================================= */
 
 /* Overview block spacing */
@@ -737,154 +733,120 @@ main {
   font-size: 13px;
   margin-top: 8px;
 }
+.dms-legend div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
+/* Legend dots */
 .dms-dot {
-  display: inline-block;
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  margin-right: 6px;
-  flex-shrink: 0;
+  display: inline-block;
 }
 
-/* Container for the entire matrix of cards */
+/* Colors chosen for clarity (color-blind friendly-ish mix) */
+.dms-dot-auto {
+  background: #22c55e; /* green */
+}
+.dms-dot-ondemand {
+  background: #f97316; /* orange */
+}
+.dms-dot-withro {
+  background: #0ea5e9; /* cyan/blue */
+}
+.dms-dot-planned {
+  background: #6b7280; /* slate gray (vs purple) */
+}
+.dms-dot-na {
+  background: #9ca3af; /* light gray */
+}
+
+/* DMS card grid */
 .dms-table-container {
-  margin-top: 18px;
+  margin-top: 10px;
 }
-
-/* Responsive grid of DMS cards */
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
-  padding: 12px 4px 4px;
+  margin-top: 12px;
 }
 
-/* Individual DMS card */
+/* Each DMS provider card */
 .dms-card {
-  background: #ffffff;
+  margin: 0;
+  padding: 14px 16px 16px;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-  padding: 14px 16px 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
 }
 
-/* Card header: DMS name + chip (Push-based / Pull-based) */
+/* Card header */
 .dms-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
-
 .dms-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
 
-/* “Push-Based / Pull-Based” pill */
+/* Push / Pull chip */
 .dms-chip {
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10px;
   text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.dms-chip-push {
-  background: rgba(34, 197, 94, 0.12);
-  color: #15803d;
-  border: 1px solid rgba(34, 197, 94, 0.5);
-}
-
-.dms-chip-pull {
-  background: rgba(59, 130, 246, 0.12);
+  letter-spacing: 0.12em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #eff6ff;
   color: #1d4ed8;
-  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+.dms-chip-push {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+.dms-chip-pull {
+  border-color: #bae6fd;
+  background: #ecfeff;
+  color: #0369a1;
 }
 
-/* List inside each card */
+/* List of fields inside card */
 .dms-list {
   list-style: none;
-  margin: 0;
-  padding: 4px 0 0;
+  margin: 8px 0 0;
+  padding: 0;
 }
-
 .dms-list li {
-  padding: 6px 0 8px;
-  border-top: 1px dashed #e5e7eb;
+  padding: 6px 0 6px;
+  border-top: 1px solid #f3f4f6;
 }
-
 .dms-list li:first-child {
   border-top: none;
 }
 
-/* Top line: field name on left, dot on right */
 .dms-row-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .dms-field {
-  font-weight: 500;
   font-size: 13px;
+  font-weight: 500;
   color: #111827;
-}
-
-/* Dot-only tag on right (no text) */
-.dms-tag {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  padding: 0;
-  margin-left: 8px;
-  overflow: hidden;
-  font-size: 0; /* hides any text inside */
-}
-
-.dms-tag::before {
-  content: none !important;
-}
-
-/* Color-blind–friendly palette for dots */
-.dms-dot-auto,
-.dms-tag-auto {
-  background: #22c55e;    /* green */
-}
-.dms-dot-ondemand,
-.dms-tag-ondemand {
-  background: #3b82f6;    /* blue */
-}
-.dms-dot-withro,
-.dms-tag-withro {
-  background: #f97316;    /* orange */
-}
-.dms-dot-planned,
-.dms-tag-planned {
-  background: #eab308;    /* yellow */
-}
-.dms-dot-na,
-.dms-tag-na {
-  background: #9ca3af;    /* gray */
-}
-.dms-dot-limited,
-.dms-tag-limited {
-  background: #ef4444;    /* red */
-}
-.dms-dot-display,
-.dms-tag-display {
-  background: #06b6d4;    /* teal */
 }
 
 .dms-list p {
@@ -894,45 +856,44 @@ main {
   line-height: 1.4;
 }
 
-.dms-list .muted-note {
+/* Tag pills – DOTS ONLY, hide label text */
+.dms-tag {
+  border-radius: 999px;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0; /* hide the inner text like "Auto" */
+}
+.dms-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
   display: inline-block;
-  font-size: 0.85em;
-  color: #777;
 }
 
-/* =======================================================
-   OPCODES & PARTS PRICING – COLUMN TWEAKS
-   ======================================================= */
-
-/* Wider description columns on Opcodes & Parts Pricing tables */
-.opcodes-table th:nth-child(6),
-.opcodes-table td:nth-child(6),
-.parts-pricing-table th:nth-child(6),
-.parts-pricing-table td:nth-child(6) {
-  min-width: 260px;
+/* Tag colors (match-ish legend but varied) */
+.dms-tag-auto::before {
+  background: #22c55e; /* green */
 }
-
-/* Slightly wider input feel for description cells */
-.training-table input.wide-desc {
-  min-width: 240px;
-  text-align: left;
+.dms-tag-ondemand::before {
+  background: #f97316; /* orange */
 }
-
-/* Make the first column (Updated) as small as possible on Opcodes & Parts tables */
-.opcodes-table th:first-child,
-.opcodes-table td:first-child,
-.parts-pricing-table th:first-child,
-.parts-pricing-table td:first-child {
-  width: 40px;
-  min-width: 40px;
+.dms-tag-withro::before {
+  background: #0ea5e9; /* cyan */
 }
-
-/* Override flex behavior ONLY for these first cells so checkboxes don't stretch */
-.opcodes-table td:first-child,
-.parts-pricing-table td:first-child {
-  display: table-cell;
-  padding-left: 6px;
-  padding-right: 6px;
+.dms-tag-planned::before {
+  background: #6b7280; /* slate gray */
+}
+.dms-tag-na::before {
+  background: #9ca3af; /* light gray */
+}
+.dms-tag-display::before {
+  background: #6366f1; /* indigo */
+}
+.dms-tag-limited::before {
+  background: #e11d48; /* rose */
 }
 
 /* =======================================================
@@ -945,4 +906,116 @@ main {
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
+}
+
+/* =======================================================
+   UI POLISH – TITLES, SHADOWS, TABLE HOVER, COMMENTS
+   ======================================================= */
+
+/* Slightly softer global shadow for a more modern SaaS feel */
+:root {
+  --shadow: 0 1px 4px rgba(15,23,42,0.16);
+}
+
+/* Eyebrow label above page titles (optional per page) */
+.page-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-left: 4px;
+  margin-bottom: 2px;
+}
+
+/* Ensure h1 spacing works nicely with eyebrow */
+.page-section h1 {
+  margin-top: 0;
+}
+
+/* Training table readability: row hover + stronger header bottom border */
+.training-table tbody tr:hover {
+  background: #fff7f1;
+}
+
+.training-table thead th {
+  border-bottom: 2px solid rgba(0,0,0,0.12);
+}
+
+/* Comments blocks look a bit different (notes vs. checklists) */
+.section-block.comments-block textarea {
+  background: #f9fafb;
+  border-style: dashed;
+}
+.section-block.comments-block h2 {
+  background: linear-gradient(90deg, var(--orange), #f97316);
+}
+
+/* Slightly more consistent width for dropdowns (esp. Yes/No/N/A) */
+.section-block select {
+  min-width: 110px;
+}
+
+/* Sidebar active nav feels more "tab-like" */
+.nav-btn {
+  font-weight: 500;
+}
+.nav-btn.active {
+  background: radial-gradient(circle at left, rgba(243,111,33,0.35), transparent 55%);
+  border-color: var(--orange);
+}
+
+/* Subtle visual separation between stacked cards */
+.section-block + .section-block {
+  margin-top: 26px;
+  border-top: 1px solid rgba(156,163,175,0.2);
+}
+
+/* Label readability: slightly darker + nicer line height */
+.checklist-row label {
+  line-height: 1.35;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* =======================================================
+   TRAINING PAGE – ROLE MINI-NAV
+   ======================================================= */
+
+.role-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 18px 4px;
+}
+
+.role-nav-btn {
+  padding: 5px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.9);
+  background: #f9fafb;
+  color: #374151;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background .16s, color .16s, border-color .16s, box-shadow .16s, transform .16s;
+}
+
+.role-nav-btn:hover {
+  background: #fff;
+  border-color: var(--orange);
+  color: #111827;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.18);
+  transform: translateY(-1px);
+}
+
+.role-nav-btn.is-active {
+  background: linear-gradient(90deg, var(--orange), #22c55e);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
