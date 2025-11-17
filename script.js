@@ -55,26 +55,23 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* === SUPPORT TICKET PAGE – GROUP SETUP === */
+  /* === SUPPORT TICKET PAGE – GROUP SETUP + AUTO MOVE OPEN/CLOSED === */
   const supportSection = document.getElementById('support-ticket');
   if (supportSection) {
-    // For each section-block (Open / Closed), wrap its ticket fields into a .ticket-group
+    // (Safety) If a block ever had no .ticket-group, wrap its contents once.
     const ticketBlocks = supportSection.querySelectorAll('.section-block');
     ticketBlocks.forEach(block => {
-      // Avoid double-wrapping if already processed
       if (block.querySelector('.ticket-group')) return;
-
       const children = Array.from(block.children).filter(el => !el.matches('h2'));
       if (!children.length) return;
 
       const groupWrapper = document.createElement('div');
       groupWrapper.className = 'ticket-group';
-
       children.forEach(el => groupWrapper.appendChild(el));
       block.appendChild(groupWrapper);
     });
 
-    // === NEW: Move ticket between Open / Closed when status changes ===
+    // Move ticket between Open / Closed when status changes
     supportSection.addEventListener('change', (e) => {
       const select = e.target;
       if (!select || select.tagName !== 'SELECT') return;
@@ -108,10 +105,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* === ADDITIONAL TRAINERS / POC / CHAMPIONS / SUPPORT TICKETS === */
+  /* === INTEGRATED PLUS BUTTONS: TRAINERS / POC / DEAD SPOTS / CHAMPIONS, ETC. === */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // If this "+" is on the Support Ticket page, clone the FULL ticket group
+      // Special behavior on Support Ticket page: clone FULL ticket group
       if (btn.closest('#support-ticket')) {
         const block = btn.closest('.section-block');
         if (!block) return;
@@ -133,22 +130,30 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Default behavior for other integrated-plus buttons:
-      // clone the associated text input inside that section-block.
-      const parent = btn.closest('.section-block');
-      if (!parent) return;
+      // Default behavior for all other + buttons:
+      // clone the associated text input inside the SAME checklist-row
+      const row = btn.closest('.checklist-row');
+      const container = row || btn.closest('.section-block');
+      if (!container) return;
 
       // Prefer the input immediately before the button
       let input = btn.previousElementSibling;
-      if (!input || input.tagName !== 'INPUT') {
-        input = parent.querySelector('input[type="text"]');
+      if (!input || input.tagName !== 'INPUT' || input.type !== 'text') {
+        input = container.querySelector('input[type="text"]');
       }
       if (!input) return;
 
       const clone = input.cloneNode(true);
       clone.value = '';
       clone.style.marginTop = '6px';
-      parent.insertBefore(clone, btn);
+
+      if (row) {
+        // Add the new input inside the same row, just before the +
+        row.insertBefore(clone, btn);
+      } else {
+        // Fallback: insert in the section-block
+        container.insertBefore(clone, btn);
+      }
     });
   });
 
