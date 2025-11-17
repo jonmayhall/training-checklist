@@ -27,6 +27,25 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* === ROLE MINI-NAV (Training Checklist page) === */
+  document.querySelectorAll('.role-nav-btn[data-scroll-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetSelector = btn.getAttribute('data-scroll-target');
+      const target = document.querySelector(targetSelector);
+      if (!target) return;
+
+      const offset = 100; // account for fixed top bar
+      const rect = target.getBoundingClientRect();
+      const y = rect.top + window.scrollY - offset;
+
+      // update active state
+      document.querySelectorAll('.role-nav-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    });
+  });
+
   /* === ADD ROW HANDLER FOR TRAINING TABLES === */
   document.querySelectorAll('.table-footer .add-row').forEach(button => {
     button.addEventListener('click', () => {
