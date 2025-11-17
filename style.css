@@ -372,10 +372,7 @@ main {
 /* =======================================================
    DEALERSHIP CONTACTS – individual mini-cards
    (Service / Parts / GM / Additional POC)
-   Same tint as Blockers card
    ======================================================= */
-
-/* Contacts card is the 3rd section-block under #dealership-info */
 
 /* Top row of each contact block (Name) */
 #dealership-info .section-block:nth-of-type(3)
@@ -387,7 +384,7 @@ main {
   border-right: 1px solid #fdba74;
   border-bottom: none;
   border-radius: 14px 14px 0 0;
-  background: #fff7ed;             /* same tint family as Blockers */
+  background: #fff7ed;             /* tint to match blockers family */
 }
 
 /* Middle row (Cell) */
@@ -546,7 +543,7 @@ main {
   color: #fff;
 }
 
-/* Sticky first column – for checklists (not Opcodes) */
+/* Sticky first column – for checklists (not Opcodes; Opcodes overridden later) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -702,7 +699,7 @@ main {
 }
 
 /* =======================================================
-   SUPPORT TICKET – clearer Ticket 1 / Ticket 2 groups
+   SUPPORT TICKET – clearer Ticket groups
    ======================================================= */
 
 .ticket-group {
@@ -714,7 +711,7 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* “Ticket 1 / Ticket 2” pill */
+/* “Ticket” pill (if used) */
 .ticket-pill {
   display: inline-flex;
   align-items: center;
@@ -766,7 +763,7 @@ main {
   margin-right: 6px;
 }
 
-/* Color-blind friendly palette: green / orange / teal / gold / gray */
+/* Color-blind-friendly palette */
 .dms-dot-auto      { background: #22c55e; } /* green */
 .dms-dot-ondemand  { background: #f97316; } /* orange */
 .dms-dot-withro    { background: #0ea5e9; } /* teal/blue */
@@ -865,17 +862,17 @@ main {
   height: 12px;
   border-radius: 999px;
   flex-shrink: 0;
-  font-size: 0;      /* hide text */
+  font-size: 0;      /* hide label text */
   color: transparent;
 }
 
-/* Same color palette as legend */
+/* Same palette as legend */
 .dms-tag-auto      { background: #22c55e; }
 .dms-tag-ondemand  { background: #f97316; }
 .dms-tag-withro    { background: #0ea5e9; }
 .dms-tag-planned   { background: #eab308; }
 .dms-tag-na        { background: #9ca3af; }
-.dms-tag-limited   { background: #6366f1; } /* still distinct but we can shift if needed */
+.dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
 
 .dms-list p {
@@ -883,6 +880,97 @@ main {
   font-size: 12px;
   line-height: 1.45;
   color: #4b5563;
+}
+
+/* =======================================================
+   OPCODES PAGE – fix first column & column widths
+   ======================================================= */
+
+/* Reset the sticky/flex first column just for Opcodes tables */
+#opcodes-pricing .training-table th:first-child,
+#opcodes-pricing .training-table td:first-child {
+  position: static;
+  left: auto;
+  z-index: 1;
+  width: auto;
+  min-width: auto;
+}
+
+#opcodes-pricing .training-table td:first-child {
+  display: table-cell;
+  padding: 6px 6px;
+  background: inherit;
+}
+
+/* LABOR OPCODES TABLE (first .section inside #opcodes-pricing)
+   Columns: 1 Updated (checkbox)
+            2 Opcode
+            3 Hours
+            4 Customer Pay Rate
+            5 Warranty Pay Rate
+            6 Description (wide)
+*/
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
+  width: 60px;
+  min-width: 60px;
+}
+
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
+  width: 70px;   /* Hours */
+  min-width: 70px;
+}
+
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
+  width: 110px;  /* Customer Pay + Warranty Pay */
+  min-width: 110px;
+}
+
+/* Description gets the remainder and is left-aligned */
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
+  min-width: 260px;
+  text-align: left;
+}
+
+/* PARTS PRICING VERIFICATION TABLE (second .section inside #opcodes-pricing)
+   Columns: 1 Updated (checkbox)
+            2 Part Number
+            3 List Price
+            4 Cost
+            5 Markup %
+            6 Description (wide)
+*/
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
+  width: 60px;
+  min-width: 60px;
+}
+
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
+  width: 90px;   /* List Price, Cost, Markup% – small */
+  min-width: 90px;
+}
+
+/* Description for parts table – widest column, left aligned */
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(6) {
+  min-width: 260px;
+  text-align: left;
+}
+
+/* Make Description text inputs stretch nicely & left-align text */
+#opcodes-pricing .training-table td:nth-child(6) input[type="text"] {
+  text-align: left;
 }
 
 /* =======================================================
