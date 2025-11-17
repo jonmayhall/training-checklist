@@ -370,44 +370,44 @@ main {
 }
 
 /* =======================================================
-   DEALERSHIP CONTACTS – "CARDS INSIDE CARD"
-   Service / Parts / GM / Additional POC blocks
+   DEALERSHIP CONTACTS – individual mini-cards
+   (Service / Parts / GM / Additional POC)
+   Same tint as Blockers card
    ======================================================= */
-/* Contacts card is the 3rd section-block in #dealership-info */
-/* We treat each Name/Cell/Email triad as a mini-card, including
-   any Additional POC blocks created with the + button. */
 
-/* Top row of each contact mini-card (Name) */
+/* Contacts card is the 3rd section-block under #dealership-info */
+
+/* Top row of each contact block (Name) */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) {
-  margin-top: 16px;
+  margin-top: 18px;
   padding-top: 10px;
-  border-top: 1px solid #cbd5e1;
-  border-left: 1px solid #cbd5e1;
-  border-right: 1px solid #cbd5e1;
+  border-top: 1px solid #fdba74;   /* soft orange */
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
   border-bottom: none;
   border-radius: 14px 14px 0 0;
-  background: #f9fafb;
+  background: #fff7ed;             /* same tint family as Blockers */
 }
 
 /* Middle row (Cell) */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) + .checklist-row {
-  border-left: 1px solid #cbd5e1;
-  border-right: 1px solid #cbd5e1;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
   border-bottom: none;
-  background: #f9fafb;
+  background: #fff7ed;
 }
 
 /* Bottom row (Email) */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) + .checklist-row + .checklist-row {
-  border-left: 1px solid #cbd5e1;
-  border-right: 1px solid #cbd5e1;
-  border-bottom: 1px solid #cbd5e1;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+  border-bottom: 1px solid #fdba74;
   border-radius: 0 0 14px 14px;
-  background: #f9fafb;
-  margin-bottom: 16px;
+  background: #fff7ed;
+  margin-bottom: 18px;
 }
 
 /* Indented Qs */
@@ -416,8 +416,7 @@ main {
 }
 
 /* ===== Integrated “+” button rows ===== */
-/* Make them use flex so they align with other rows:
-   [label..............] [input same width][+ button touching] */
+/* Layout: [label..............] [input same width][+ button touching] */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -475,24 +474,21 @@ main {
 /* =======================================================
    POST-TRAINING – clearer divide Champions vs Blockers
    ======================================================= */
-/* Requires: add class `blocker-start` to the "Blocker – Advisors" row:
-   <div class="checklist-row integrated-plus blocker-start"> … </div>
-*/
+/* Requires: add class `blocker-start` to "Blocker – Advisors" row */
 
-/* Make the Blocker section look like a separate inner card. */
 #post-training .section-block:first-of-type .checklist-row.blocker-start,
 #post-training .section-block:first-of-type .checklist-row.blocker-start ~ .checklist-row {
   background: #fff7ed;
 }
 
-/* Stronger, clear divider line right above first Blocker row */
+/* Strong, clear divider above first Blocker row */
 #post-training .section-block .checklist-row.blocker-start {
   border-top: 2px solid var(--orange);
   margin-top: 18px;
   padding-top: 14px;
 }
 
-/* ===== Training TABLES (page 5 & 6) ===== */
+/* ===== Training TABLES (page 5 & 6 & 6 Opcodes) ===== */
 .section { 
   margin-bottom: 40px; 
 }
@@ -550,7 +546,7 @@ main {
   color: #fff;
 }
 
-/* Sticky first column */
+/* Sticky first column – for checklists (not Opcodes) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -744,7 +740,7 @@ main {
 }
 
 /* =======================================================
-   DMS PAGE – VERTICAL CARDS (original version)
+   DMS PAGE – GRID CARDS with DOTS (color-blind safe)
    ======================================================= */
 
 /* Overview block spacing */
@@ -752,7 +748,7 @@ main {
   margin-bottom: 28px;
 }
 
-/* Legend for DMS */
+/* Legend */
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -761,80 +757,132 @@ main {
   margin-top: 8px;
 }
 
-/* Each DMS provider is a vertical card */
-.dms-provider-block {
-  margin: 18px 0;
-  padding: 16px 18px 14px;
+/* Small dots for legend */
+.dms-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+/* Color-blind friendly palette: green / orange / teal / gold / gray */
+.dms-dot-auto      { background: #22c55e; } /* green */
+.dms-dot-ondemand  { background: #f97316; } /* orange */
+.dms-dot-withro    { background: #0ea5e9; } /* teal/blue */
+.dms-dot-planned   { background: #eab308; } /* gold */
+.dms-dot-na        { background: #9ca3af; } /* gray */
+
+/* Cards grid */
+.dms-table-container {
+  margin-top: 16px;
+}
+
+.dms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  padding: 18px;
+}
+
+/* Each DMS section card */
+.dms-card {
   border-radius: 16px;
-  border: 1px solid #e1e1e1;
+  border: 1px solid #e5e7eb;
   background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15,23,42,0.08);
+  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+  padding: 14px 16px 12px;
 }
 
-/* subtle separation between cards */
-.dms-provider-block + .dms-provider-block {
-  margin-top: 20px;
+/* Header row */
+.dms-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-/* Provider titles */
-.dms-provider-title {
-  margin: 0 0 10px;
+.dms-name {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
 
-/* Clean 2-column DMS tables inside each card */
-.clean-dms-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 4px;
+/* Push / Pull chip */
+.dms-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+}
+.dms-chip-push {
+  background: #f97316;
+  color: #fff;
+  border-color: #ea580c;
+}
+.dms-chip-pull {
+  background: #0f172a;
+  color: #e5e7eb;
+  border-color: #020617;
+}
+
+/* List of rows inside card */
+.dms-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.dms-list li {
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+.dms-list li:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 2px;
+}
+
+/* Top row: field + dot tag */
+.dms-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.dms-field {
+  font-weight: 600;
   font-size: 13px;
 }
 
-/* Turn off sticky behavior inside DMS tables */
-.clean-dms-table th,
-.clean-dms-table td {
-  position: static !important;
-}
-
-/* Left column (labels) */
-.clean-dms-table th {
-  width: 190px;
-  min-width: 190px;
-  padding: 6px 10px;
-  text-align: left;
-  vertical-align: top;
-  font-weight: 600;
-  background: #f9fafb;
-  border: none;
-  border-right: 1px solid #e1e1e1;
-  color: #374151;
-}
-
-/* Right column (descriptions) */
-.clean-dms-table td {
-  padding: 6px 10px 8px;
-  text-align: left;
-  white-space: normal;
-  line-height: 1.45;
-  border: none;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-/* Slight zebra striping */
-.clean-dms-table tbody tr:nth-child(odd) td {
-  background: #ffffff;
-}
-.clean-dms-table tbody tr:nth-child(even) td {
-  background: #fafafa;
-}
-
-/* Muted notes inside DMS tables */
-.clean-dms-table .muted-note {
+/* Tag – DOT ONLY (hide text visually, keep colored dot) */
+.dms-tag {
   display: inline-block;
-  font-size: 0.85em;
-  color: #777;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-size: 0;      /* hide text */
+  color: transparent;
+}
+
+/* Same color palette as legend */
+.dms-tag-auto      { background: #22c55e; }
+.dms-tag-ondemand  { background: #f97316; }
+.dms-tag-withro    { background: #0ea5e9; }
+.dms-tag-planned   { background: #eab308; }
+.dms-tag-na        { background: #9ca3af; }
+.dms-tag-limited   { background: #6366f1; } /* still distinct but we can shift if needed */
+.dms-tag-display   { background: #6b7280; }
+
+.dms-list p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4b5563;
 }
 
 /* =======================================================
