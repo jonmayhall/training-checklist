@@ -924,21 +924,25 @@ main {
   min-width: 60px;
 }
 
-/* Make List Price / Cost / Markup % as small as possible */
+/* Make List Price / Cost as small as possible; give Markup % a bit more room */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(4) {
+  width: 70px;
+  min-width: 70px;
 }
 
-/* Description takes remaining width; center header + cell text */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
+  width: 90px;
+  min-width: 90px;
+}
+
+/* Description takes the rest; center header + cell text */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
-  min-width: 260px;
+  min-width: 320px;
   text-align: center;
 }
 
@@ -952,14 +956,4 @@ main {
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
-}
-
-/* =======================================================
-   EXTRA: MANAGER & POC HEADERS – no extra indent
-   ======================================================= */
-
-/* Keep these aligned like normal rows (40px from left edge of card) */
-#dealership-info .checklist-row.manager-header,
-#dealership-info .checklist-row.poc-header {
-  padding-left: 40px !important;
 }
