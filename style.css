@@ -411,7 +411,7 @@ main {
 .mini-card-title {
   margin: 0 0 10px 2px;
   padding: 0;
-  background: transparent;         /* remove light-orange bar */
+  background: transparent;
   color: var(--orange);
   font-weight: 700;
   font-size: 15px;
@@ -520,36 +520,55 @@ main {
 }
 
 /* =======================================================
-   SUPPORT TICKETS – lighter layout & separation
+   SUPPORT TICKETS – cleaner, lighter layout
    ======================================================= */
 
-/* Open Support Tickets card: keep it as the primary, full-width block */
+/* 1) OPEN SUPPORT TICKETS – primary, strong card */
 #support-ticket .section-block:first-of-type {
-  margin-bottom: 26px;   /* space before the grouped buckets */
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--orange);
+  box-shadow: var(--shadow);
+  padding: 0 22px 14px;
+  margin-bottom: 28px;
 }
 
-/* Default ticket-group – lighter by default */
+/* keep the orange header bar for the first block */
+#support-ticket .section-block:first-of-type h2 {
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin-left: -22px;
+  margin-right: -22px;
+}
+
+/* ticket-group base */
 #support-ticket .ticket-group {
   margin: 10px 0;
-  padding: 8px 12px 10px;
+  padding: 10px 14px 12px;
   border-radius: 14px;
   border: 1px solid #e5e7eb;
   background: #fff;
   box-shadow: 0 1px 3px rgba(15,23,42,0.06);
 }
 
-/* Open Tickets get the stronger myKaarma orange frame */
+/* Open Ticket groups get myKaarma orange emphasis */
 #openTicketsContainer .ticket-group {
   border-color: var(--orange);
   box-shadow: var(--shadow);
 }
 
-/* Open ticket rows alignment */
+/* Align rows inside ticket groups */
 #support-ticket .ticket-group .checklist-row {
   padding-left: 24px;
 }
 
-/* Only show + buttons on Open Support Tickets section */
+/* Only show + buttons on OPEN Support Tickets */
 #support-ticket .ticket-group .add-row {
   display: none;
 }
@@ -573,7 +592,7 @@ main {
 }
 
 .ticket-group .checklist-row:first-of-type {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .ticket-status-row {
@@ -582,50 +601,57 @@ main {
   margin-bottom: 10px;
 }
 
-/* Lighter, grouped “other” buckets (Tier Two / Closed / Feature Not Supported) */
-.support-buckets-row {
-  margin-top: 4px;
-  background: #f9fafb;
-  padding: 12px 14px 8px;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  box-sizing: border-box;
-}
+/* 2) TIER TWO / CLOSED buckets – lighter & grouped visually */
 
-/* the inner containers for each bucket */
-#tierTwoTicketsContainer,
-#closedResolvedTicketsContainer,
-#closedUnsupportedTicketsContainer {
-  padding-top: 2px;
-}
-
-/* bucket titles (their h2 inside) a bit smaller so they don’t compete with page header */
-#support-ticket .support-buckets-row .section-block {
-  box-shadow: none;
+/* any support-ticket section-block AFTER the first one = light, no big card */
+#support-ticket .section-block:not(:first-of-type) {
+  background: transparent;
   border: none;
-  padding: 0;
-  margin: 0;
+  box-shadow: none;
+  padding: 0 4px 10px;
+  margin-bottom: 14px;
 }
 
-#support-ticket .support-buckets-row .section-block h2 {
-  margin: 0 0 8px;
+/* headings become small, subtle labels instead of big orange bars */
+#support-ticket .section-block:not(:first-of-type) h2 {
+  margin: 0 0 6px;
   padding: 0;
   background: transparent;
-  color: #444;
+  color: #555;
   font-size: 14px;
   font-weight: 600;
   border: none;
+  border-radius: 0;
 }
 
-/* ticket groups inside the lower buckets: extra subtle */
+/* ticket-groups in Tier Two / Closed buckets = soft, minimal cards */
 #tierTwoTicketsContainer .ticket-group,
 #closedResolvedTicketsContainer .ticket-group,
 #closedUnsupportedTicketsContainer .ticket-group {
-  border-color: #d8d8d8;
-  box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+  border-color: #dcdcdc;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  padding: 8px 10px 10px;
+  margin: 6px 0 10px;
+}
+
+/* light background strip behind the three lower buckets */
+#support-ticket .section-block:not(:first-of-type) > div {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 8px 10px 6px;
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+/* Ensure checklists inside these buckets don’t feel cramped */
+#support-ticket .section-block:not(:first-of-type) .ticket-group .checklist-row {
+  padding-left: 18px;
+}
+
+/* keep dropdowns & inputs consistent with rest of app */
+#support-ticket select,
+#support-ticket input[type="text"] {
+  border-radius: var(--radius-sm);
 }
 
 /* =======================================================
