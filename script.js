@@ -44,158 +44,98 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Reset inputs
       newRow.querySelectorAll('input, select').forEach(el => {
-        if (el.type === 'checkbox') {
-          el.checked = false;
-        } else {
-          el.value = '';
-        }
+        if (el.type === 'checkbox') el.checked = false;
+        else el.value = '';
       });
 
       tbody.appendChild(newRow);
     });
   });
 
-  /* === SUPPORT TICKET PAGE – GROUP SETUP + AUTO MOVE OPEN/CLOSED === */
+  /* === SUPPORT TICKET – MOVE CLOSED TICKETS TO CLOSED CARD === */
   const supportSection = document.getElementById('support-ticket');
-  if (supportSection) {
-    // Wrap contents once if a section-block is missing .ticket-group (safety)
-    const ticketBlocks = supportSection.querySelectorAll('.section-block');
-    ticketBlocks.forEach(block => {
-      if (block.querySelector('.ticket-group')) return;
-      const children = Array.from(block.children).filter(el => !el.matches('h2'));
-      if (!children.length) return;
+  const openTicketsContainer = document.getElementById('openTicketsContainer');
+  const closedTicketsContainer = document.getElementById('closedTicketsContainer');
 
-      const groupWrapper = document.createElement('div');
-      groupWrapper.className = 'ticket-group';
-      children.forEach(el => groupWrapper.appendChild(el));
-      block.appendChild(groupWrapper);
-    });
+  function attachTicketStatusHandlers(scope) {
+    if (!scope || !openTicketsContainer || !closedTicketsContainer) return;
 
-    // Move ticket between Open / Closed when status changes
-    supportSection.addEventListener('change', (e) => {
-      const select = e.target;
-      if (!select || select.tagName !== 'SELECT') return;
+    scope.querySelectorAll('.ticket-status-select').forEach(select => {
+      // avoid duplicate listeners
+      select.dataset.boundStatus = '1';
+      select.addEventListener('change', () => {
+        const group = select.closest('.ticket-group');
+        if (!group) return;
 
-      const row = select.closest('.checklist-row');
-      const label = row ? row.querySelector('label') : null;
-      if (!label) return;
-
-      // Only react to the "Ticket Status" dropdown
-      if (!label.textContent.trim().startsWith('Ticket Status')) return;
-
-      const value = select.value;
-      const group = select.closest('.ticket-group');
-      if (!group) return;
-
-      const blocks = supportSection.querySelectorAll('.section-block');
-      const openBlock = blocks[0];
-      const closedBlock = blocks[1];
-
-      // Move to Closed section if status is Closed
-      if (value === 'Closed') {
-        if (closedBlock && !closedBlock.contains(group)) {
-          closedBlock.appendChild(group);
+        if (select.value === 'Closed') {
+          closedTicketsContainer.appendChild(group);
+        } else {
+          openTicketsContainer.appendChild(group);
         }
-      } else {
-        // Any other status: make sure it's in Open section
-        if (openBlock && !openBlock.contains(group)) {
-          openBlock.appendChild(group);
-        }
-      }
+      });
     });
   }
 
-  /* === INTEGRATED PLUS BUTTONS: TRAINERS / POC / DEAD SPOTS / CHAMPIONS, ETC. === */
+  if (supportSection) {
+    attachTicketStatusHandlers(supportSection);
+  }
+
+  /* === ADDITIONAL TRAINERS / POC / SUPPORT TICKETS / OTHER + BUTTONS === */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // 1) SUPPORT TICKET PAGE – clone FULL ticket group
+      // 1) Support Ticket page – clone whole ticket-group into Open
       if (btn.closest('#support-ticket')) {
-        const block = btn.closest('.section-block');
-        if (!block) return;
         const group = btn.closest('.ticket-group');
         if (!group) return;
+        if (!openTicketsContainer || !closedTicketsContainer) return;
 
         const newGroup = group.cloneNode(true);
 
-        // Clear all text inputs, textareas, and selects in the new group
-        newGroup.querySelectorAll('input[type="text"], textarea, select').forEach(el => {
-          if (el.tagName === 'SELECT') {
-            el.selectedIndex = 0;
-          } else {
-            el.value = '';
-          }
+        // Clear all text inputs and textareas
+        newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
+          el.value = '';
+        });
+        // Reset selects
+        newGroup.querySelectorAll('select').forEach(sel => {
+          sel.selectedIndex = 0;
         });
 
-        block.appendChild(newGroup);
+        openTicketsContainer.appendChild(newGroup);
+        attachTicketStatusHandlers(newGroup);
         return;
       }
 
-      const row = btn.closest('.checklist-row');
-      if (!row) return;
+      // 2) Additional POC – clone entire contact card (Name/Cell/Email)
+      const pocCard = btn.closest('.poc-card');
+      const pocContainer = document.getElementById('additionalPocContainer');
+      if (pocCard && pocContainer && btn.closest('#dealership-info')) {
+        const newCard = pocCard.cloneNode(true);
 
-      const labelEl = row.querySelector('label');
-      const labelText = labelEl ? labelEl.textContent.trim() : '';
-
-      // 2) SPECIAL CASE: "Additional POC" – clone the three-row block: Name / Cell / Email
-      if (labelText.startsWith('Additional POC')) {
-        const cellRow = row.nextElementSibling;
-        const emailRow = cellRow && cellRow.nextElementSibling;
-
-        if (!cellRow || !emailRow) return;
-        if (!cellRow.classList.contains('checklist-row') || !emailRow.classList.contains('checklist-row')) return;
-
-        const rowsToClone = [row, cellRow, emailRow];
-        let insertionPoint = emailRow;
-
-        rowsToClone.forEach(sourceRow => {
-          const cloneRow = sourceRow.cloneNode(true);
-
-          // Clear values in all inputs/selects/textareas
-          cloneRow.querySelectorAll('input, select, textarea').forEach(el => {
-            if (el.type === 'checkbox') {
-              el.checked = false;
-            } else if (el.tagName === 'SELECT') {
-              el.selectedIndex = 0;
-            } else {
-              el.value = '';
-            }
-          });
-
-          insertionPoint.parentNode.insertBefore(cloneRow, insertionPoint.nextSibling);
-          insertionPoint = cloneRow;
+        // clear values
+        newCard.querySelectorAll('input[type="text"], input[type="email"]').forEach(el => {
+          el.value = '';
         });
 
+        pocContainer.appendChild(newCard);
         return;
       }
 
-      // 3) DEFAULT BEHAVIOR FOR OTHER "+" ROWS:
-      //    - Add a new line BELOW the question
-      //    - Empty label (no repeated question)
-      //    - New text box aligned like the original
+      // 3) Default behavior for other integrated-plus buttons:
+      //    clone the associated text input in that section-block.
+      const parent = btn.closest('.section-block');
+      if (!parent) return;
 
       // Prefer the input immediately before the button
       let input = btn.previousElementSibling;
-      if (!input || input.tagName !== 'INPUT' || input.type !== 'text') {
-        // Fallback: first text input in this row
-        input = row.querySelector('input[type="text"]');
+      if (!input || input.tagName !== 'INPUT') {
+        input = parent.querySelector('input[type="text"]');
       }
       if (!input) return;
 
-      const cloneInput = input.cloneNode(true);
-      cloneInput.value = '';
-      cloneInput.style.marginTop = '0';
-
-      // New row below: no question text, just an aligned text box
-      const newRow = document.createElement('div');
-      newRow.className = 'checklist-row indent-sub';
-
-      const spacerLabel = document.createElement('label');
-      spacerLabel.textContent = ''; // no question text repeated
-
-      newRow.appendChild(spacerLabel);
-      newRow.appendChild(cloneInput);
-
-      row.parentNode.insertBefore(newRow, row.nextElementSibling);
+      const clone = input.cloneNode(true);
+      clone.value = '';
+      clone.style.marginTop = '6px';
+      parent.insertBefore(clone, btn);
     });
   });
 
@@ -230,17 +170,17 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       // Special handling for Support Ticket page:
-      // keep only the first .ticket-group in each section-block
+      // keep only the first ticket-group in Open, empty Closed
       if (page.id === 'support-ticket') {
-        const blocks = page.querySelectorAll('.section-block');
-        blocks.forEach(block => {
-          const groups = block.querySelectorAll('.ticket-group');
+        if (openTicketsContainer) {
+          const groups = openTicketsContainer.querySelectorAll('.ticket-group');
           groups.forEach((group, index) => {
-            if (index > 0) {
-              group.remove();
-            }
+            if (index > 0) group.remove();
           });
-        });
+        }
+        if (closedTicketsContainer) {
+          closedTicketsContainer.innerHTML = '';
+        }
       }
     });
   });
@@ -278,16 +218,15 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      // 4) Support ticket groups – keep only the first ticket-group per block
-      const supportPage = document.getElementById('support-ticket');
-      if (supportPage) {
-        const blocks = supportPage.querySelectorAll('.section-block');
-        blocks.forEach(block => {
-          const groups = block.querySelectorAll('.ticket-group');
-          groups.forEach((group, index) => {
-            if (index > 0) group.remove();
-          });
+      // 4) Support ticket groups – keep only first ticket-group in Open, none in Closed
+      if (openTicketsContainer) {
+        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+        groups.forEach((group, index) => {
+          if (index > 0) group.remove();
         });
+      }
+      if (closedTicketsContainer) {
+        closedTicketsContainer.innerHTML = '';
       }
 
       // NOTE: We are NOT removing extra rows in training tables –
