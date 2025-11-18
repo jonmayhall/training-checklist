@@ -467,8 +467,8 @@ main {
    (input + button) total = var(--input-width) width. */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
+  flex: 0 0 calc(var(--input-width) - 30px);
+  width: calc(var(--input-width) - 30px);
   margin-left: auto;
   margin-right: 0;
   border-top-right-radius: 0;
@@ -483,19 +483,19 @@ main {
   margin-top: 6px;
 }
 
-/* Integrated + button – pill touching the input on the right */
+/* Integrated + button – slightly smaller pill touching the input on the right */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
-  flex: 0 0 34px;
+  flex: 0 0 30px;
   position: relative;
   margin-left: -1px; /* overlap borders so they “touch” */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -948,21 +948,6 @@ main {
   transform: scale(1.05);
 }
 
-/* ===== Scrollbar (horizontal) ===== */
-.scroll-wrapper::-webkit-scrollbar, 
-.table-container::-webkit-scrollbar { 
-  height: 8px; 
-}
-.scroll-wrapper::-webkit-scrollbar-thumb,
-.table-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 6px;
-}
-.scroll-wrapper::-webkit-scrollbar-thumb:hover,
-.table-container::-webkit-scrollbar-thumb:hover { 
-  background-color: #999; 
-}
-
 /* ===== Floating PDF button (summary page) ===== */
 #training-summary .floating-btn {
   background: var(--orange);
@@ -1071,6 +1056,30 @@ main {
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: center;
+}
+
+/* =======================================================
+   CHAMPIONS & BLOCKERS – remove outer card, keep inner two
+   ======================================================= */
+
+/* First section-block on Post Training page = Champions & Blockers */
+#post-training .section-block:first-of-type {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Make its h2 look like a page subheading, not another big card header */
+#post-training .section-block:first-of-type h2 {
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--orange);
+  border-bottom: 2px solid var(--orange);
+  padding-left: 4px;
 }
 
 /* =======================================================
