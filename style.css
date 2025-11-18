@@ -330,7 +330,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (base) */
+/* Inputs on the RIGHT (base) – unified width */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -342,7 +342,6 @@ main {
   margin-right: 0;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
-  border: 1px sealed var(--border);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
@@ -384,10 +383,27 @@ main {
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
-  padding: 8px 16px 6px; /* side padding for better border connection */
+  padding: 8px 16px 6px;
 }
 
-/* light orange title bar inside mini-cards (Champions / Blockers) */
+/* More appealing Champions / Blockers cards */
+.champions-card,
+.blockers-card {
+  background: #fff8f3;
+  border-color: #fbbf94;
+}
+
+/* place Champions and Blockers side-by-side on wide screens */
+.section-block .champions-card,
+.section-block .blockers-card {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 14px);
+}
+.section-block .champions-card { margin-right: 6px; }
+.section-block .blockers-card { margin-left: 6px; }
+
+/* light orange / accented title bar inside mini-cards */
 .mini-card-title {
   margin: -8px -16px 8px;
   padding: 6px 16px;
@@ -397,14 +413,20 @@ main {
   font-weight: 600;
   font-size: 14px;
 }
+.champions-card .mini-card-title {
+  background: linear-gradient(90deg, #f97316, #fdba74);
+}
+.blockers-card .mini-card-title {
+  background: linear-gradient(90deg, #0f172a, #4b5563);
+}
 
 /* rows inside mini-card */
 .mini-card .checklist-row {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 16px;  /* less inside indent so border looks continuous */
-  padding-right: 8px;  /* space between input and right border */
+  padding-left: 16px;
+  padding-right: 10px;  /* extra right padding between inputs & border */
 }
 
 /* last row: no double bottom line */
@@ -417,27 +439,22 @@ main {
   background: #fff !important;
 }
 
-/* more right spacing for inputs inside mini-cards */
-.mini-card .checklist-row input[type="text"],
-.mini-card .checklist-row input[type="email"],
-.mini-card .checklist-row input[type="number"],
-.mini-card .checklist-row select {
-  margin-right: 8px;
-}
-
 /* semantic aliases */
 .contact-card { }
 .champions-card { }
 .blockers-card { }
 
-/* ===== Integrated “+” button rows ===== */
-/* Layout: [label..............] [input same width][+ button touching] */
+/* =======================================================
+   Integrated “+” rows (add more lines under same label)
+   ======================================================= */
 
+/* Layout: label on left, input(s) + button on right stacked under each other */
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
-  align-items: stretch;
-  gap: 0; /* no gap between input and + button */
+  align-items: flex-start;
+  flex-wrap: wrap;      /* allows extra inputs to wrap to new line under label */
+  gap: 6px;
 }
 
 /* Label behaves like normal rows */
@@ -447,28 +464,35 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated + rows:
-   reduce width so (input + 34px button) = var(--input-width) total */
+/* All inputs – same width as normal; right aligned */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
   margin-left: auto;
   margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-radius: var(--radius-sm);
 }
 
-/* Integrated + button – pill on the right, touching the input */
+/* For rows where the + button has been removed (cloned cards),
+   keep them as totally normal rounded textboxes */
+.section-block .checklist-row.integrated-plus:not(:has(> .add-row)) input[type="text"] {
+  border-radius: var(--radius-sm);
+}
+
+/* extra lines (cloned inputs) get spacing from the first box */
+.section-block .checklist-row.integrated-plus input[type="text"].stacked-input {
+  margin-top: 6px;
+}
+
+/* Integrated + button – small pill on the right */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
-  position: relative;
-  margin-left: -1px; /* overlap borders so they “touch” */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: var(--radius-sm);
   width: 34px;
   height: 34px;
   font-size: 18px;
@@ -480,6 +504,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 8px;
 }
 .section-block .checklist-row.integrated-plus > .add-row:hover,
 .section-block .checklist-row:has(> .add-row) > .add-row:hover {
@@ -488,16 +513,21 @@ main {
 }
 
 /* =======================================================
-   SUPPORT TICKET – clearer Ticket groups
+   SUPPORT TICKET – clearer Ticket groups / unified look
    ======================================================= */
 
 .ticket-group {
   margin: 12px 0;
   padding: 8px 12px 10px;
   border-radius: 14px;
-  border: 1px solid var(--orange); /* match contact/champion cards */
+  border: 1px solid var(--orange);
   background: #fff;
   box-shadow: var(--shadow);
+}
+
+/* First row in each ticket (Ticket #) uses same alignment rules */
+.ticket-group .checklist-row {
+  padding-left: 24px;
 }
 
 /* “Ticket” pill (if used) */
@@ -525,12 +555,27 @@ main {
   margin-bottom: 10px;
 }
 
-/* Only show + buttons on Open Support Tickets */
+/* Only show + buttons on Open Support Tickets.
+   Cloned tickets (Tier Two / Closed buckets) show full-width rounded boxes. */
 #support-ticket .ticket-group .add-row {
   display: none;
 }
 #openTicketsContainer .ticket-group .add-row {
   display: flex;
+}
+
+/* Put Tier Two / Closed buckets in a cleaner grid underneath Open */
+.support-buckets-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedUnsupportedTicketsContainer {
+  padding-top: 4px;
 }
 
 /* =======================================================
@@ -961,6 +1006,13 @@ main {
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
+
+  .section-block .champions-card,
+  .section-block .blockers-card {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
