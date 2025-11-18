@@ -180,7 +180,7 @@
         <textarea placeholder="Notes specific to General Info …"></textarea>
       </div>
 
-           <!-- Dealership Contacts -->
+              <!-- Dealership Contacts -->
       <div class="section-block">
         <h2>Dealership Contacts</h2>
 
@@ -249,6 +249,15 @@
               <input type="email" placeholder="Email">
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Additional Comments — Dealership Contacts (separate card) -->
+      <div class="section-block">
+        <h2>Additional Comments — Dealership Contacts</h2>
+        <textarea placeholder="Notes specific to Contacts …"></textarea>
+      </div>
+
 
       <div class="section-block">
         <h2>Additional Comments — Dealership Contacts</h2>
@@ -1166,7 +1175,7 @@
       </div>
     </section>
 
-       <!-- ========================================================= -->
+          <!-- ========================================================= -->
     <!-- PAGE 7: SUPPORT TICKETS                                   -->
     <!-- ========================================================= -->
     <section id="support-ticket" class="page-section">
@@ -1179,7 +1188,6 @@
       <!-- Open Support Tickets -->
       <div class="section-block">
         <h2>Open Support Tickets</h2>
-
         <div id="openTicketsContainer">
           <div class="ticket-group">
             <div class="checklist-row integrated-plus">
@@ -1196,10 +1204,10 @@
             <div class="checklist-row">
               <label>Ticket Status</label>
               <select class="ticket-status-select">
-                <option></option>
                 <option>Open</option>
                 <option>Tier Two</option>
-                <option>Closed</option>
+                <option>Closed - Resolved</option>
+                <option>Closed – Feature Not Supported</option>
               </select>
             </div>
 
@@ -1211,11 +1219,27 @@
         </div>
       </div>
 
-      <!-- Closed Support Tickets -->
+      <!-- Tier Two Support Tickets -->
       <div class="section-block">
-        <h2>Closed Support Tickets</h2>
-        <div id="closedTicketsContainer">
-          <!-- Closed ticket cards are moved here automatically -->
+        <h2>Tier Two Support Tickets</h2>
+        <div id="tierTwoTicketsContainer">
+          <!-- Tickets moved here when status = Tier Two -->
+        </div>
+      </div>
+
+      <!-- Closed - Resolved Support Tickets -->
+      <div class="section-block">
+        <h2>Closed - Resolved Support Tickets</h2>
+        <div id="closedResolvedTicketsContainer">
+          <!-- Tickets moved here when status = Closed - Resolved -->
+        </div>
+      </div>
+
+      <!-- Closed – Feature Not Supported Support Tickets -->
+      <div class="section-block">
+        <h2>Closed – Feature Not Supported Support Tickets</h2>
+        <div id="closedFeatureTicketsContainer">
+          <!-- Tickets moved here when status = Closed – Feature Not Supported -->
         </div>
       </div>
     </section>
@@ -1635,7 +1659,7 @@
       </p>
       <button class="clear-page-btn" type="button">Reset This Page</button>
 
-           <!-- Champions & Blockers -->
+             <!-- Champions & Blockers -->
       <div class="section-block">
         <h2>Champions &amp; Blockers</h2>
 
