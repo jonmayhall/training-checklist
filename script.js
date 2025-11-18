@@ -64,17 +64,19 @@ window.addEventListener('DOMContentLoaded', () => {
     const group = select.closest('.ticket-group');
     if (!group) return;
 
-    const value = select.value;
+    const raw = (select.value || '').toLowerCase().trim();
+    let target = openTicketsContainer;
 
-    if (value === 'Tier Two') {
-      if (tierTwoTicketsContainer) tierTwoTicketsContainer.appendChild(group);
-    } else if (value === 'Closed - Resolved') {
-      if (closedResolvedTicketsContainer) closedResolvedTicketsContainer.appendChild(group);
-    } else if (value === 'Closed – Feature Not Supported' || value === 'Closed - Feature Not Supported') {
-      if (closedUnsupportedTicketsContainer) closedUnsupportedTicketsContainer.appendChild(group);
-    } else {
-      // Default / Open
-      if (openTicketsContainer) openTicketsContainer.appendChild(group);
+    if (raw.startsWith('tier')) {
+      target = tierTwoTicketsContainer || openTicketsContainer;
+    } else if (raw.includes('resolved')) {
+      target = closedResolvedTicketsContainer || openTicketsContainer;
+    } else if (raw.includes('not supported')) {
+      target = closedUnsupportedTicketsContainer || openTicketsContainer;
+    }
+
+    if (target) {
+      target.appendChild(group);
     }
   }
 
@@ -120,7 +122,7 @@ window.addEventListener('DOMContentLoaded', () => {
           sel.value = 'Open';
         });
 
-        // Remove the add button from the NEW ticket (only template keeps +)
+        // Remove the add button from the NEW ticket
         const newAddBtn = newGroup.querySelector('.add-row');
         if (newAddBtn) {
           newAddBtn.remove();
@@ -169,10 +171,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!row) return;
 
       let input = btn.previousElementSibling;
-      if (
-        !input ||
-        input.tagName !== 'INPUT'
-      ) {
+      if (!input || input.tagName !== 'INPUT') {
         input = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
       }
       if (!input) return;
@@ -181,7 +180,7 @@ window.addEventListener('DOMContentLoaded', () => {
       clone.value = '';
       clone.classList.add('stacked-input');
 
-      // Insert directly before the button, so it appears UNDER the current box (flex-wrap handles the wrap)
+      // Insert directly before the button, so it appears under the current textbox
       row.insertBefore(clone, btn);
     });
   });
