@@ -470,12 +470,12 @@ main {
    ======================================================= */
 
 .ticket-group {
-  margin: 16px 0;
-  padding: 14px 18px 18px;
-  border-radius: 16px;
-  border: 1px solid #e1e1e1;
+  margin: 12px 0;
+  padding: 8px 12px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--orange); /* match contact/champion cards */
   background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow);
 }
 
 /* “Ticket” pill (if used) */
