@@ -568,11 +568,8 @@ main {
   padding-left: 24px;
 }
 
-/* Only show + buttons on OPEN Support Tickets */
+/* ALWAYS show + buttons in ticket groups (so Support Ticket Number can add) */
 #support-ticket .ticket-group .add-row {
-  display: none;
-}
-#openTicketsContainer .ticket-group .add-row {
   display: flex;
 }
 
