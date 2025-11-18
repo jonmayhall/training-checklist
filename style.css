@@ -918,13 +918,28 @@ main {
 }
 
 /* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
-  width: 60px;
-  min-width: 60px;
+/* Reset widths first so we fully control them here */
+#opcodes-pricing .section:last-of-type .training-table th,
+#opcodes-pricing .section:last-of-type .training-table td {
+  width: auto;
+  min-width: auto;
 }
 
-/* Make List Price / Cost / Markup % as small as possible */
+/* 1) Updated (checkbox) – very small */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
+  width: 55px;
+  min-width: 55px;
+}
+
+/* 2) Part Number – modest width */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(2),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(2) {
+  width: 120px;
+  min-width: 120px;
+}
+
+/* 3–5) List Price / Cost / Markup % – small money fields */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
@@ -935,7 +950,7 @@ main {
   min-width: 80px;
 }
 
-/* Description takes remaining width; center header + cell text */
+/* 6) Description – takes remaining width; centered */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
