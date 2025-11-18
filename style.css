@@ -383,7 +383,7 @@ main {
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
-  padding: 6px 0 4px;
+  padding: 8px 16px 6px; /* side padding for better border connection */
 }
 
 /* rows inside mini-card */
@@ -391,6 +391,8 @@ main {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
+  padding-left: 16px;  /* less inside indent so border looks continuous */
+  padding-right: 8px;  /* space between input and right border */
 }
 
 /* last row: no double bottom line */
@@ -401,6 +403,14 @@ main {
 /* ensure no background tint sneaks in */
 .mini-card .checklist-row {
   background: #fff !important;
+}
+
+/* more right spacing for inputs inside mini-cards */
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="number"],
+.mini-card .checklist-row select {
+  margin-right: 8px;
 }
 
 /* semantic aliases */
