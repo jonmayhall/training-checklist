@@ -27,7 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* === ADD ROW HANDLER FOR TRAINING TABLES === */
+  /* === ADD ROW HANDLER FOR TRAINING TABLES (+ in table footers) === */
   document.querySelectorAll('.table-footer .add-row').forEach(button => {
     button.addEventListener('click', () => {
       const section = button.closest('.section');
@@ -62,7 +62,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     scope.querySelectorAll('.ticket-status-select').forEach(select => {
       // avoid duplicate listeners
+      if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
+
       select.addEventListener('change', () => {
         const group = select.closest('.ticket-group');
         if (!group) return;
@@ -80,63 +82,69 @@ window.addEventListener('DOMContentLoaded', () => {
     attachTicketStatusHandlers(supportSection);
   }
 
-  /* === ADDITIONAL TRAINERS / POC / SUPPORT TICKETS / OTHER + BUTTONS === */
-  document.querySelectorAll('.section-block .add-row').forEach(btn => {
-    btn.addEventListener('click', () => {
-      // 1) Support Ticket page – clone whole ticket-group into Open
-      if (btn.closest('#support-ticket')) {
-        const group = btn.closest('.ticket-group');
-        if (!group) return;
-        if (!openTicketsContainer || !closedTicketsContainer) return;
+  /* === GLOBAL EVENT DELEGATION FOR OTHER + BUTTONS (non-table-footer) === */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.add-row');
+    if (!btn) return;
 
-        const newGroup = group.cloneNode(true);
+    // Training table + buttons have their own handler
+    if (btn.closest('.table-footer')) return;
 
-        // Clear all text inputs and textareas
-        newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-          el.value = '';
-        });
-        // Reset selects
-        newGroup.querySelectorAll('select').forEach(sel => {
-          sel.selectedIndex = 0;
-        });
+    // 1) Support Ticket page – clone whole ticket-group into Open
+    if (btn.closest('#support-ticket')) {
+      const group = btn.closest('.ticket-group');
+      if (!group) return;
+      if (!openTicketsContainer || !closedTicketsContainer) return;
 
-        openTicketsContainer.appendChild(newGroup);
-        attachTicketStatusHandlers(newGroup);
-        return;
-      }
+      const newGroup = group.cloneNode(true);
 
-      // 2) Additional POC – clone entire contact card (Name/Cell/Email)
-      const pocCard = btn.closest('.poc-card');
-      const pocContainer = document.getElementById('additionalPocContainer');
-      if (pocCard && pocContainer && btn.closest('#dealership-info')) {
-        const newCard = pocCard.cloneNode(true);
+      // Clear all text inputs and textareas
+      newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
+        el.value = '';
+      });
+      // Reset selects
+      newGroup.querySelectorAll('select').forEach(sel => {
+        sel.selectedIndex = 0;
+      });
 
-        // clear values
-        newCard.querySelectorAll('input[type="text"], input[type="email"]').forEach(el => {
-          el.value = '';
-        });
+      openTicketsContainer.appendChild(newGroup);
+      attachTicketStatusHandlers(newGroup);
+      return;
+    }
 
-        pocContainer.appendChild(newCard);
-        return;
-      }
+    // 2) Additional POC – clone entire contact card (Name/Cell/Email)
+    const pocCard = btn.closest('.poc-card');
+    const pocContainer = document.getElementById('additionalPocContainer');
+    if (pocCard && pocContainer && btn.closest('#dealership-info')) {
+      const newCard = pocCard.cloneNode(true);
 
-      // 3) Default behavior for other integrated-plus buttons:
-      //    clone the associated text input in that section-block.
-      const parent = btn.closest('.section-block');
-      if (!parent) return;
+      // clear values
+      newCard.querySelectorAll('input[type="text"], input[type="email"]').forEach(el => {
+        el.value = '';
+      });
 
-      // Prefer the input immediately before the button
-      let input = btn.previousElementSibling;
-      if (!input || input.tagName !== 'INPUT') {
-        input = parent.querySelector('input[type="text"]');
-      }
-      if (!input) return;
+      pocContainer.appendChild(newCard);
+      return;
+    }
 
-      const clone = input.cloneNode(true);
-      clone.value = '';
-      clone.style.marginTop = '6px';
-      parent.insertBefore(clone, btn);
-    });
+    // 3) Default behavior for other integrated-plus buttons:
+    //    add another input inside the SAME row
+    const row = btn.closest('.checklist-row');
+    if (!row) return;
+
+    // Prefer the last text input in this row
+    let input = Array.from(row.querySelectorAll('input[type="text"]')).pop();
+    if (!input) {
+      input = row.querySelector('input, select');
+    }
+    if (!input) return;
+
+    const clone = input.cloneNode(true);
+    clone.value = '';
+    clone.style.marginTop = '6px';
+
+    // Insert just before the + button
+    row.insertBefore(clone, btn);
   });
 
   /* === CLEAR PAGE BUTTONS (per-page reset) === */
