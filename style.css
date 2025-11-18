@@ -1,905 +1,956 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>myKaarma – Interactive Training Checklist</title>
-
-  <!-- CSS with cache-buster -->
-  <link rel="stylesheet" href="style.css?v=20251117A">
-
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <!-- Main JS with cache-buster -->
-  <script src="script.js?v=20251117A" defer></script>
-</head>
-
-<body>
-
-<header id="topbar">
-  <div class="topbar-content">
-    <img src="mykaarma_logo.png" alt="myKaarma logo" class="top-logo" />
-    <div class="topbar-right">
-      <div id="dealershipNameDisplay">Dealership Name</div>
-      <button id="clearAllBtn">Clear All</button>
-    </div>
-  </div>
-</header>
-
-<div id="app">
-  <!-- SIDEBAR -->
-  <aside id="sidebar">
-    <nav id="sidebar-nav">
-      <button class="nav-btn active" data-target="onsite-trainers">
-        <span class="nav-label">Onsite Trainers &amp; CEM</span>
-      </button>
-
-      <button class="nav-btn" data-target="dealership-info">
-        <span class="nav-label">Dealership Information</span>
-      </button>
-
-      <button class="nav-btn" data-target="pretraining">
-        <span class="nav-label">Pre-Training Checklist</span>
-      </button>
-
-      <button class="nav-btn" data-target="monday-visit">
-        <span class="nav-label">Monday Visit</span>
-      </button>
-
-      <button class="nav-btn" data-target="training-checklist">
-        <span class="nav-label">Training Checklist</span>
-      </button>
-
-      <button class="nav-btn" data-target="opcodes-pricing">
-        <span class="nav-label">Opcodes &amp; Pricing</span>
-      </button>
-
-      <button class="nav-btn" data-target="support-ticket">
-        <span class="nav-label">Support Tickets</span>
-      </button>
-
-      <button class="nav-btn" data-target="dms-integration">
-        <span class="nav-label">DMS Integration</span>
-      </button>
-
-      <button class="nav-btn" data-target="post-training">
-        <span class="nav-label">Post Training Verification</span>
-      </button>
-
-      <button class="nav-btn" data-target="training-summary">
-        <span class="nav-label">Training Summary</span>
-      </button>
-    </nav>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main id="content">
-
-    <!-- ========================================================= -->
-    <!-- PAGE 1: ONSITE TRAINERS & CEM                             -->
-    <!-- ========================================================= -->
-    <section id="onsite-trainers" class="page-section active">
-      <h1>Onsite Trainers &amp; CEM</h1>
-      <p class="page-subtitle">
-        Capture who is onsite, who owns follow-up, and how training will be supported.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <div class="section-block">
-        <h2>Trainer Information</h2>
-
-        <div class="checklist-row">
-          <label>Lead Trainer</label>
-          <input type="text" placeholder="Lead Trainer Name">
-        </div>
-
-        <div class="checklist-row integrated-plus">
-          <label>Additional Trainers</label>
-          <input type="text" placeholder="Additional Trainer Name">
-          <button class="add-row" type="button">+</button>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Customer Engagement Manager</h2>
-        <div class="checklist-row">
-          <label>CEM Assigned to Store</label>
-          <input type="text" placeholder="CEM Name">
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Onsite Trainers &amp; CEM</h2>
-        <textarea placeholder="Notes regarding trainers and CEM …"></textarea>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 2: DEALERSHIP INFORMATION                            -->
-    <!-- ========================================================= -->
-    <section id="dealership-info" class="page-section">
-      <h1>Dealership Information</h1>
-      <p class="page-subtitle">
-        Confirm core dealership details, key contacts, and layout before training.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <!-- General Info -->
-      <div class="section-block">
-        <h2>General Info</h2>
-
-        <div class="checklist-row">
-          <label>Dealer Group</label>
-          <input type="text" placeholder="Dealer Group (if applicable)">
-        </div>
-
-        <div class="checklist-row">
-          <label>Dealership Name</label>
-          <input type="text" placeholder="Dealership Name">
-        </div>
-
-        <div class="checklist-row">
-          <label>Training Type</label>
-          <select>
-            <option></option>
-            <option>New Dealership</option>
-            <option>Upgrade</option>
-            <option>Retraining</option>
-            <option>Additional Training</option>
-          </select>
-        </div>
-
-        <div class="checklist-row">
-          <label>DMS</label>
-          <input type="text" placeholder="DMS Provider">
-        </div>
-
-        <div class="checklist-row">
-          <label>Time Zone</label>
-          <input type="text" placeholder="Time Zone">
-        </div>
-
-        <div class="checklist-row">
-          <label>Total Buildings or Service Departments</label>
-          <input type="number" placeholder="Number of buildings / drives">
-        </div>
-
-        <div class="checklist-row">
-          <label>Are all buildings on one campus?</label>
-          <select>
-            <option></option>
-            <option>Yes</option>
-            <option>No</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — General Info</h2>
-        <textarea placeholder="Notes specific to General Info …"></textarea>
-      </div>
-
-      <!-- Dealership Contacts -->
-      <div class="section-block">
-        <h2>Dealership Contacts</h2>
-
-        <!-- Service Manager -->
-        <div class="contact-card">
-          <div class="checklist-row">
-            <label>Service Manager</label>
-            <input type="text" placeholder="Name">
-          </div>
-          <div class="checklist-row">
-            <label>Cell</label>
-            <input type="text" placeholder="Cell">
-          </div>
-          <div class="checklist-row">
-            <label>Email</label>
-            <input type="email" placeholder="Email">
-          </div>
-        </div>
-
-        <!-- Parts Manager -->
-        <div class="contact-card">
-          <div class="checklist-row">
-            <label>Parts Manager</label>
-            <input type="text" placeholder="Name">
-          </div>
-          <div class="checklist-row">
-            <label>Cell</label>
-            <input type="text" placeholder="Cell">
-          </div>
-          <div class="checklist-row">
-            <label>Email</label>
-            <input type="email" placeholder="Email">
-          </div>
-        </div>
-
-        <!-- General Manager -->
-        <div class="contact-card">
-          <div class="checklist-row">
-            <label>General Manager</label>
-            <input type="text" placeholder="Name">
-          </div>
-          <div class="checklist-row">
-            <label>Cell</label>
-            <input type="text" placeholder="Cell">
-          </div>
-          <div class="checklist-row">
-            <label>Email</label>
-            <input type="email" placeholder="Email">
-          </div>
-        </div>
-
-        <!-- Additional POC -->
-        <div class="contact-card additional-poc-wrapper">
-          <div class="checklist-row integrated-plus">
-            <label>Additional POC</label>
-            <input type="text" placeholder="Name">
-            <button class="add-row" type="button">+</button>
-          </div>
-          <div class="checklist-row">
-            <label>Cell</label>
-            <input type="text" placeholder="Cell">
-          </div>
-          <div class="checklist-row">
-            <label>Email</label>
-            <input type="email" placeholder="Email">
-          </div>
-        </div>
-
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Dealership Contacts</h2>
-        <textarea placeholder="Notes specific to Contacts …"></textarea>
-      </div>
-
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
-    <!-- ========================================================= -->
-    <section id="pretraining" class="page-section">
-      <h1>Pre-Training Checklist</h1>
-      <p class="page-subtitle">
-        Validate integrations, Salesforce notes, and readiness before arriving onsite.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <!-- Salesforce Notes -->
-      <div class="section-block">
-        <h2>Salesforce Notes</h2>
-        <div class="checklist-row">
-          <label>Have you reviewed the following Salesforce notes?</label>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>ServiceCart Notes</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Scheduler Notes</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Deployment Notes</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Remote Training Note</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Sales Notes</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Dealership Contract</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Salesforce Notes</h2>
-        <textarea placeholder="Comments for Salesforce Notes …"></textarea>
-      </div>
-
-      <!-- Communications -->
-      <div class="section-block">
-        <h2>Communications</h2>
-        <div class="checklist-row">
-          <label>Is integration functioning properly? <span class="muted-note">(historic pull, customer information, etc.)</span></label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Are texts and calls reaching the end user? <span class="muted-note">(no errors)</span></label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Communications</h2>
-        <textarea placeholder="Comments for Communications …"></textarea>
-      </div>
-
-      <!-- Payments -->
-      <div class="section-block">
-        <h2>Payments</h2>
-        <div class="checklist-row">
-          <label>Is integration working correctly? <span class="muted-note">(dollar amount, descriptions, etc.)</span></label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Do customer invoices appear correctly?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Payments</h2>
-        <textarea placeholder="Comments for Payments …"></textarea>
-      </div>
-
-      <!-- ServiceCart -->
-      <div class="section-block">
-        <h2>ServiceCart</h2>
-        <div class="checklist-row">
-          <label>Does integration appear to be working correctly? <span class="muted-note">(ROs pull, parts, etc.)</span></label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>How many workflows is the dealership using?</label>
-          <input type="number">
-        </div>
-        <div class="checklist-row">
-          <label>How many MPI forms is the dealership using?</label>
-          <input type="number">
-        </div>
-        <div class="checklist-row">
-          <label>Are creation and prevention rules in place?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Are there assignment rules?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Is there parts integration?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — ServiceCart</h2>
-        <textarea placeholder="Comments for ServiceCart …"></textarea>
-      </div>
-
-      <!-- Scheduler -->
-      <div class="section-block">
-        <h2>Scheduler</h2>
-
-        <div class="checklist-row">
-          <label>Are appointments pulling over correctly?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are the correct opcodes uploaded to correspond with the inspection?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Is the shop divided by teams?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Does the scheduler setup look correct? <span class="muted-note">(hours, capacity, opcodes, labor codes, etc.)</span></label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Are there capacity rules?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Scheduler</h2>
-        <textarea placeholder="Comments for Scheduler …"></textarea>
-      </div>
-
-      <!-- ServiceConnect -->
-      <div class="section-block">
-        <h2>ServiceConnect</h2>
-        <div class="checklist-row">
-          <label>Are the automation rules set up and activated?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — ServiceConnect</h2>
-        <textarea placeholder="Comments for ServiceConnect …"></textarea>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 4: MONDAY VISIT                                      -->
-    <!-- ========================================================= -->
-    <section id="monday-visit" class="page-section">
-      <h1>Monday Visit</h1>
-      <p class="page-subtitle">
-        Align expectations, confirm MCI process, and identify device gaps on day one.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <div class="section-block">
-        <h2>Dealership Expectations</h2>
-        <div class="checklist-row">
-          <label>Was the dealership prepared for MCI before arrival?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Who is involved in the MCI process?</label>
-          <select>
-            <option></option>
-            <option>Advisors</option>
-            <option>Porters</option>
-            <option>Advisors &amp; Porters</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Dealership Expectations</h2>
-        <textarea placeholder="Comments for Dealership Expectations …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Scheduled CEM Call</h2>
-        <div class="checklist-row">
-          <label>Did you set up the CEM call for Thursday with SD / SM / PM / BDC <span class="muted-note">(if onsite)</span>?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Scheduled CEM Call</h2>
-        <textarea placeholder="Comments for CEM Call …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>iOS Devices</h2>
-        <div class="checklist-row">
-          <label>Do all technicians have iOS devices?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>How many iOS devices are they short?</label>
-          <input type="number">
-        </div>
-
-        <div class="checklist-row">
-          <label>Do all of the advisors have iOS devices?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>How many iOS devices are they short?</label>
-          <input type="number">
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>WiFi Coverage</h2>
-        <div class="checklist-row">
-          <label>During your WiFi test, were there any dead spots in the shop or drive?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-        <div class="checklist-row integrated-plus indent-sub">
-          <label>If yes, where are the dead spots?</label>
-          <input type="text" placeholder="Dead spot location">
-          <button class="add-row" type="button">+</button>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — iOS Devices &amp; WiFi</h2>
-        <textarea placeholder="Comments for iOS devices and WiFi …"></textarea>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 5 : TRAINING CHECKLIST                               -->
-    <!-- (unchanged table structure from your last working version) -->
-    <!-- ========================================================= -->
-    <!-- ... PAGE 5 HTML same as your last working build ... -->
-    <!-- To keep this answer from being insanely long, I’m not
-         re-pasting every training row here, but structure is
-         identical to what you last sent, and works with the CSS
-         above. If you want, I can paste the entire page 5/6
-         verbatim in the next reply. -->
-    <!-- ========================================================= -->
-
-    <!-- ========================================================= -->
-    <!-- PAGE 6: OPCODES & PRICING                                 -->
-    <!-- ========================================================= -->
-    <section id="opcodes-pricing" class="page-section">
-      <h1>Opcodes &amp; Pricing</h1>
-      <p class="page-subtitle">
-        Verify opcodes, pricing, and parts margins support accurate inspections and MPIs.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <!-- Labor Opcodes -->
-      <div class="section">
-        <div class="section-header">Opcodes</div>
-        <div class="table-container">
-          <div class="scroll-wrapper">
-            <table class="training-table">
-              <thead>
-                <tr>
-                  <th>Updated</th>
-                  <th>Opcode</th>
-                  <th>Hours</th>
-                  <th>Customer Pay Rate</th>
-                  <th>Warranty Pay Rate</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><input type="checkbox"></td>
-                  <td><input type="text" placeholder="Opcode"></td>
-                  <td><input type="text" placeholder="0.0"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="Short description"></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox"></td>
-                  <td><input type="text" placeholder="Opcode"></td>
-                  <td><input type="text" placeholder="0.0"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="Short description"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-footer">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Opcodes</h2>
-        <textarea placeholder="Notes specific to labor opcodes …"></textarea>
-      </div>
-
-      <!-- Parts Pricing Verification -->
-      <div class="section">
-        <div class="section-header">Parts Pricing Verification</div>
-        <div class="table-container">
-          <div class="scroll-wrapper">
-            <table class="training-table">
-              <thead>
-                <tr>
-                  <th>Updated</th>
-                  <th>Part Number</th>
-                  <th>List Price</th>
-                  <th>Cost</th>
-                  <th>Markup %</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><input type="checkbox"></td>
-                  <td><input type="text" placeholder="Part #"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="%"></td>
-                  <td><input type="text" placeholder="Description"></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox"></td>
-                  <td><input type="text" placeholder="Part #"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="$0.00"></td>
-                  <td><input type="text" placeholder="%"></td>
-                  <td><input type="text" placeholder="Description"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-footer">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Parts Pricing Verification</h2>
-        <textarea placeholder="Notes specific to parts pricing verification …"></textarea>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 7: SUPPORT TICKETS                                   -->
-    <!-- ========================================================= -->
-    <section id="support-ticket" class="page-section">
-      <h1>Support Tickets</h1>
-      <p class="page-subtitle">
-        Track open and closed support tickets related to this dealership and training rollout.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <!-- Open Support Tickets (template card) -->
-      <div class="section-block">
-        <h2>Support Tickets</h2>
-
-        <div class="ticket-group">
-          <div class="checklist-row integrated-plus">
-            <label>Support Ticket Number</label>
-            <input type="text" placeholder="Ticket #">
-            <button class="add-row" type="button">+</button>
-          </div>
-
-          <div class="checklist-row">
-            <label>Support Ticket Link</label>
-            <input type="text" placeholder="Paste Zendesk link">
-          </div>
-
-          <div class="checklist-row">
-            <label>Issue Summary</label>
-            <input type="text" placeholder="Short summary of the issue">
-          </div>
-
-          <div class="checklist-row">
-            <label>Ticket Status</label>
-            <select>
-              <option></option>
-              <option>Open</option>
-              <option>Tier Two</option>
-              <option>Closed</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 8: DMS INTEGRATION                                   -->
-    <!-- ========================================================= -->
-    <!-- (same DMS cards you had before; works with CSS above) -->
-
-    <!-- ========================================================= -->
-    <!-- PAGE 9: POST TRAINING VERIFICATION                         -->
-    <!-- ========================================================= -->
-    <section id="post-training" class="page-section">
-      <h1>Post Training Verification</h1>
-      <p class="page-subtitle">
-        Confirm adoption, automation, and leadership approval before closing out the training.
-      </p>
-      <button class="clear-page-btn">Reset This Page</button>
-
-      <!-- Champions & Blockers -->
-      <div class="section-block">
-        <h2>Champions &amp; Blockers</h2>
-
-        <div class="champions-card">
-          <div class="checklist-row">
-            <label>Champion – Advisors</label>
-            <input type="text" placeholder="Advisor Champion">
-          </div>
-          <div class="checklist-row">
-            <label>Champion – Techs</label>
-            <input type="text" placeholder="Tech Champion">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Champion – Parts Reps</label>
-            <input type="text" placeholder="Parts Champion">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
-
-        <div class="blockers-card">
-          <div class="checklist-row integrated-plus">
-            <label>Blocker – Advisors</label>
-            <input type="text" placeholder="Advisor Blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Blocker – Techs</label>
-            <input type="text" placeholder="Tech Blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Blocker – Parts Reps</label>
-            <input type="text" placeholder="Parts Blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Champions &amp; Blockers</h2>
-        <textarea placeholder="Comments related to champions and blockers …"></textarea>
-      </div>
-
-      <!-- Post Training Verification Questions -->
-      <div class="section-block">
-        <h2>Post Training Verification</h2>
-
-        <div class="checklist-row">
-          <label>Are advisors fully using myKaarma for communication?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are techs completing MPIs end-to-end inside myKaarma?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Is the scheduler functioning correctly <span class="muted-note">(capacity, teams, routing, opcodes)</span>?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are parts pricing and labor opcodes showing correct values during MPI approval?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are all communications (texts, calls, video messages) working without errors?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Do managers understand how to monitor usage and performance in myKaarma?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are all known issues documented and submitted as support tickets?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Post Training Verification</h2>
-        <textarea placeholder="Comments related to overall post training verification …"></textarea>
-      </div>
-
-      <!-- Manager Approval -->
-      <div class="section-block">
-        <h2>Manager Approval</h2>
-
-        <div class="checklist-row">
-          <label>Did the Service Manager walk the shop and service drive with you on the final day?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Did you receive approval for a successful training from the Service Manager?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Did you receive approval for a successful training from the Parts Manager?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Manager Approval</h2>
-        <textarea placeholder="Comments related to manager approval …"></textarea>
-      </div>
-
-      <!-- Automated Messages -->
-      <div class="section-block">
-        <h2>Automated Messages</h2>
-
-        <div class="checklist-row">
-          <label>Are automated customer messages active and configured correctly?</label>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Welcome text?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Appointment reminder?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>MPI?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Tech video?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Payment request?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Follow-up text?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>ServiceConnect?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Automated Messages</h2>
-        <textarea placeholder="Comments related to automated messages and notifications …"></textarea>
-      </div>
-    </section>
-
-    <!-- ========================================================= -->
-    <!-- PAGE 10: TRAINING SUMMARY                                 -->
-    <!-- ========================================================= -->
-    <section id="training-summary" class="page-section">
-      <h1>Training Summary</h1>
-      <button id="savePDF" class="floating-btn">Save as PDF</button>
-
-      <div class="section-block">
-        <h2>Training Summary</h2>
-        <textarea placeholder="Summary of overall training progress …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Information for CEM</h2>
-        <textarea placeholder="Information to share with CEM …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Champions &amp; Blockers</h2>
-        <textarea placeholder="Champions and blockers info …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Pre-Training &amp; Monday Visit Notes</h2>
-        <textarea placeholder="Pre-Training and Monday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>End-of-Day Summary – Tuesday</h2>
-        <textarea placeholder="Tuesday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>End-of-Day Summary – Wednesday</h2>
-        <textarea placeholder="Wednesday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Opcode, Pricing &amp; Integration Notes</h2>
-        <textarea placeholder="Autofill from Opcodes and DMS Integration notes …"></textarea>
-      </div>
-    </section>
-
-  </main>
-</div> <!-- #app -->
-
-</body>
-</html>
+/* =======================================================
+   myKaarma Interactive Training Checklist – FULL CSS
+   Refined Build (cards, darker sidebar, fixed tables)
+   ======================================================= */
+
+:root {
+  --orange: #f36f21;
+  --light-orange: #f8b17b;
+  --gray-bg: #d7d7d7;
+  --card-bg: #fff;
+  --border: #dcdcdc;
+  --ink: #222;
+
+  --radius-lg: 18px;       /* cards */
+  --radius-sm: 14px;       /* inputs / buttons */
+
+  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+
+  --input-width: 260px;    /* single source of truth for text-box width */
+}
+
+/* ===== BASE ===== */
+html, body {
+  margin: 0;
+  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  background: var(--gray-bg);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* no italics anywhere by default */
+*, em, i { 
+  font-style: normal !important;
+}
+
+/* ===== TOP BAR ===== */
+#topbar {
+  /* black → orange gradient */
+  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  border-radius: 0;
+}
+.topbar-content { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  width: 100%; 
+}
+.top-logo { 
+  height: 42px; 
+  object-fit: contain; 
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#dealershipNameDisplay { 
+  color:#fff; 
+  font-size:22px;
+  font-weight:600; 
+  letter-spacing:.5px; 
+}
+
+/* ===== LAYOUT ===== */
+#app { 
+  display: flex; 
+  min-height: 100vh; 
+  margin-top: 70px; 
+  overflow-x: hidden; 
+}
+
+/* Darker, more modern sidebar */
+#sidebar {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
+  border-right: 1px solid rgba(15,23,42,0.8);
+  width: 230px;
+  padding: 20px 12px 60px;
+  box-shadow: 0 0 18px rgba(15,23,42,0.6);
+  position: fixed;
+  top: 70px;
+  bottom: 0;
+  overflow-y: auto;
+}
+#sidebar-nav { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+/* hide icon span but keep label – "no icons" */
+.nav-icon {
+  display: none;
+}
+
+/* MENU BUTTONS – darker, modern, no icons */
+.nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 9px 12px;
+  font-size: 12px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #e5e7eb;
+  transition: .18s;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.nav-btn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16%;
+  bottom: 16%;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, var(--orange), #22c55e);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.nav-btn:hover {
+  background: rgba(15,23,42,0.85);
+  color: #f9fafb;
+  border-color: rgba(148,163,184,0.45);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.7);
+}
+.nav-btn.active {
+  background: rgba(15,23,42,0.95);
+  color: #f9fafb;
+  font-weight: 600;
+  border-color: var(--orange);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.65);
+}
+.nav-btn.active::before {
+  opacity: 1;
+}
+
+/* Clear All: at bottom of sidebar (menu bar) */
+#clearAllBtn {
+  position: fixed;
+  left: 24px;
+  bottom: 18px;
+  width: calc(230px - 48px);
+  padding: 7px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.9);
+  background: rgba(15,23,42,0.95);
+  color: #f9fafb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  opacity: 0.95;
+  transition: background .16s, transform .16s, opacity .16s, border-color .16s, box-shadow .16s;
+}
+#clearAllBtn:hover {
+  background: linear-gradient(90deg, var(--orange), #22c55e);
+  border-color: #f97316;
+  transform: translateY(-1px);
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.75);
+}
+
+/* per-page clear button – top-right of each card */
+.clear-page-btn {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  padding: 4px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid #bbb;
+  background: #f7f7f7;
+  color: #555;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
+}
+.clear-page-btn:hover {
+  background: #fff;
+  border-color: var(--orange);
+  color: var(--orange);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
+}
+
+main {
+  flex: 1;
+  margin-left: 230px;
+  padding: 30px 32px;
+  background: var(--gray-bg);
+  box-sizing: border-box;
+}
+
+/* ===== PAGE SECTIONS / CARDS ===== */
+.page-section {
+  position: relative;
+  display: none;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px 32px 28px;
+  margin: 0 auto 40px;
+  width: 100%;
+  max-width: 1100px;
+  box-sizing: border-box;
+}
+.page-section.active { 
+  display: block; 
+}
+
+/* Page titles */
+.page-section h1 {
+  color: var(--orange);
+  margin: 4px 0 8px 4px;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: left;
+  letter-spacing: .3px;
+  position: relative;
+}
+.page-section h1::after {
+  content: "";
+  display: block;
+  width: 320px;
+  height: 4px;
+  background: var(--orange);
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+/* Optional page subtitle under h1 */
+.page-subtitle {
+  margin: 4px 0 20px 4px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Section headers */
+.section-header {
+  background: var(--orange);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 1px solid var(--orange);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Section blocks (non-table cards) */
+.section-block {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 0 22px 14px;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+.section-block h2 {
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin-left: -22px;
+  margin-right: -22px;
+}
+
+/* ===== NON-TABLE ROWS (Q&A lines) ===== */
+.checklist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  padding-left: 40px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.section-block .checklist-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+  padding-bottom: 0;
+}
+.checklist-row label {
+  flex: 1 1 auto;
+  font-weight: 500;
+  text-align: left;
+  padding-right: 16px;
+  white-space: normal;
+}
+
+/* Inputs on the RIGHT (base) */
+.section-block .checklist-row input[type="text"],
+.section-block .checklist-row input[type="number"],
+.section-block .checklist-row input[type="email"],
+.section-block .checklist-row input[type="date"],
+.section-block .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.section-block textarea {
+  width: 96%;
+  margin: 6px auto 10px;
+  display: block;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  resize: vertical;
+}
+
+/* Focus */
+.section-block input:focus,
+.section-block select:focus,
+.section-block textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 4px rgba(243,111,33,0.35);
+  outline: none;
+  background: #fff9f5;
+}
+
+/* =======================================================
+   DEALERSHIP CONTACTS – individual mini-cards
+   ======================================================= */
+
+/* Top row of each contact block (Name) */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row:has(input[placeholder="Name"]) {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid #fdba74;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+  background: #fff;   /* was #fff7ed */
+}
+
+/* Middle row (Cell) */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row:has(input[placeholder="Name"]) + .checklist-row {
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+  border-bottom: none;
+  background: #fff;   /* was #fff7ed */
+}
+
+/* Bottom row (Email) */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row:has(input[placeholder="Name"]) + .checklist-row + .checklist-row {
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+  border-bottom: 1px solid #fdba74;
+  border-radius: 0 0 14px 14px;
+  background: #fff;   /* was #fff7ed */
+  margin-bottom: 18px;
+}
+
+/* Indented Qs */
+.indent-sub {
+  padding-left: 60px !important;
+}
+
+/* ===== Integrated “+” button rows ===== */
+/* Layout: [label..............] [input same width][+ button touching] */
+
+.section-block .checklist-row.integrated-plus,
+.section-block .checklist-row:has(> .add-row) {
+  display: flex;
+  align-items: stretch;
+  gap: 0; /* no gap between input and + button */
+}
+
+/* Label behaves like normal rows */
+.section-block .checklist-row.integrated-plus label,
+.section-block .checklist-row:has(> .add-row) label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* Text box in integrated + rows:
+   reduce width so (input + 34px button) = var(--input-width) total */
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row:has(> .add-row) input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: 12px; /* spacing from label */
+  margin-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Integrated + button – pill on the right, touching the input */
+.section-block .checklist-row.integrated-plus > .add-row,
+.section-block .checklist-row:has(> .add-row) > .add-row {
+  flex: 0 0 34px;
+  position: relative;
+  margin-left: -1px; /* overlap borders so they “touch” */
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: .18s ease-in-out;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.section-block .checklist-row.integrated-plus > .add-row:hover,
+.section-block .checklist-row:has(> .add-row) > .add-row:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
+}
+
+/* =======================================================
+   POST-TRAINING – clearer divide Champions vs Blockers
+   ======================================================= */
+/* Requires: add class `blocker-start` to "Blocker – Advisors" row */
+
+/* Remove colored background from Blockers set */
+#post-training .section-block:first-of-type .checklist-row.blocker-start,
+#post-training .section-block:first-of-type .checklist-row.blocker-start ~ .checklist-row {
+  background: #fff;   /* was #fff7ed */
+}
+
+/* Strong, clear divider above first Blocker row */
+#post-training .section-block .checklist-row.blocker-start {
+  border-top: 2px solid var(--orange);
+  margin-top: 18px;
+  padding-top: 14px;
+}
+
+/* ===== Training TABLES ===== */
+.section { 
+  margin-bottom: 40px; 
+}
+
+/* Table Card – no side padding so orange header touches edges */
+.table-container {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 32px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.scroll-wrapper {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  padding-bottom: 4px;
+}
+
+/* Table */
+.training-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 1000px;
+}
+.training-table th,
+.training-table td {
+  white-space: nowrap;
+  text-align: center;
+  font-size: 13px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 6px;
+}
+
+/* Sticky header — LIGHT ORANGE (edge to edge) */
+.training-table thead th {
+  background: var(--light-orange);
+  color: #fff;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+/* Smaller white text for notes inside header cells */
+.training-table thead th .muted-note {
+  font-size: 0.8em;
+  color: #fff;
+}
+
+/* Sticky first column – for checklists (not Opcodes; overridden later) */
+.training-table th:first-child,
+.training-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  width: 240px;
+  min-width: 240px;
+}
+.training-table thead th:first-child { 
+  text-align: center;
+}
+.training-table td:first-child {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.training-table td:first-child input[type="checkbox"] {
+  flex-shrink: 0;
+  transform: scale(1.05);
+  margin-right: 8px;
+}
+.training-table td:first-child input[type="text"] {
+  width: 95%;
+  padding: 7px 8px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  text-align: left;
+}
+
+/* Column widths (generic) */
+.training-table th:nth-child(2),
+.training-table td:nth-child(2) {
+  width: 185px;
+  min-width: 185px;
+}
+
+/* Inputs/Selects inside table cells */
+.training-table input[type="text"],
+.training-table select {
+  width: 100%;
+  min-width: 130px;
+  box-sizing: border-box;
+  padding: 5px 5px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  text-align: center;
+}
+.training-table input[type="text"]:focus,
+.training-table select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 4px rgba(243,111,33,0.4);
+  outline: none;
+  background: #fff9f5;
+}
+
+/* Alternating rows */
+.training-table tr:nth-child(odd) { 
+  background: #fff; 
+}
+.training-table tr:nth-child(even) { 
+  background: #fafafa; 
+}
+
+/* Table footer + "+" button  */
+.table-footer {
+  width: 100%;
+  background: #f5f5f5;
+  border-top: 1px solid var(--border);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* + button on the LEFT */
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  box-sizing: border-box;
+}
+.table-footer .add-row {
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
+}
+.table-footer .add-row:hover {
+  background: #ff8b42;
+  transform: scale(1.05);
+}
+
+/* ===== Scrollbar (horizontal) ===== */
+.scroll-wrapper::-webkit-scrollbar, 
+.table-container::-webkit-scrollbar { 
+  height: 8px; 
+}
+.scroll-wrapper::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 6px;
+}
+.scroll-wrapper::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover { 
+  background-color: #999; 
+}
+
+/* ===== Floating PDF button (summary page) ===== */
+#training-summary .floating-btn {
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#training-summary .floating-btn:hover {
+  background: #ff8b42;
+}
+
+/* ===== Footer ===== */
+#footer { 
+  padding: 24px; 
+  text-align: center; 
+  color: #666; 
+  font-size: 13px; 
+}
+
+/* ===== Muted note ===== */
+.muted-note {
+  font-size: 0.9em;
+  color: #666;
+  font-style: italic !important;
+}
+
+/* =======================================================
+   SUPPORT TICKET – clearer Ticket groups
+   ======================================================= */
+
+.ticket-group {
+  margin: 16px 0;
+  padding: 14px 18px 18px;
+  border-radius: 16px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* “Ticket” pill (if used) */
+.ticket-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--orange), #ff9f50);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.ticket-group .checklist-row:first-of-type {
+  margin-top: 8px;
+}
+
+.ticket-status-row {
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* =======================================================
+   DMS PAGE – GRID CARDS with DOTS
+   ======================================================= */
+
+.dms-overview-block {
+  margin-bottom: 28px;
+}
+
+.dms-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px 18px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.dms-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+.dms-dot-auto      { background: #22c55e; }
+.dms-dot-ondemand  { background: #f97316; }
+.dms-dot-withro    { background: #0ea5e9; }
+.dms-dot-planned   { background: #eab308; }
+.dms-dot-na        { background: #9ca3af; }
+
+.dms-table-container {
+  margin-top: 16px;
+}
+
+.dms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  padding: 18px;
+}
+
+.dms-card {
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+  padding: 14px 16px 12px;
+}
+
+.dms-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dms-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dms-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+}
+.dms-chip-push {
+  background: #f97316;
+  color: #fff;
+  border-color: #ea580c;
+}
+.dms-chip-pull {
+  background: #0f172a;
+  color: #e5e7eb;
+  border-color: #020617;
+}
+
+.dms-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.dms-list li {
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+.dms-list li:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 2px;
+}
+
+.dms-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.dms-field {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* DOT ONLY tags (no text) */
+.dms-tag {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-size: 0;
+  color: transparent;
+}
+.dms-tag-auto      { background: #22c55e; }
+.dms-tag-ondemand  { background: #f97316; }
+.dms-tag-withro    { background: #0ea5e9; }
+.dms-tag-planned   { background: #eab308; }
+.dms-tag-na        { background: #9ca3af; }
+.dms-tag-limited   { background: #6366f1; }
+.dms-tag-display   { background: #6b7280; }
+
+.dms-list p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4b5563;
+}
+
+/* =======================================================
+   OPCODES PAGE – first column & widths
+   ======================================================= */
+
+/* Turn off sticky/flex first column only for Opcodes section */
+#opcodes-pricing .training-table th:first-child,
+#opcodes-pricing .training-table td:first-child {
+  position: static;
+  left: auto;
+  z-index: 1;
+  width: auto;
+  min-width: auto;
+}
+#opcodes-pricing .training-table td:first-child {
+  display: table-cell;
+  padding: 6px 6px;
+  background: inherit;
+}
+
+/* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
+  width: 60px;
+  min-width: 60px;
+}
+
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
+  width: 70px;   /* Hours */
+  min-width: 70px;
+}
+
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
+  width: 110px;  /* Customer Pay + Warranty Pay */
+  min-width: 110px;
+}
+
+/* Description gets the remainder and is centered */
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
+  min-width: 260px;
+  text-align: center;
+}
+
+/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
+  width: 60px;
+  min-width: 60px;
+}
+
+/* Make List Price / Cost / Markup % as small as possible */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
+  width: 80px;
+  min-width: 80px;
+}
+
+/* Description takes remaining width; center header + cell text */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
+  min-width: 260px;
+  text-align: center;
+}
+
+/* =======================================================
+   RESPONSIVE
+   ======================================================= */
+@media (max-width: 900px) {
+  #sidebar { width: 190px; }
+  main { margin-left: 190px; padding: 20px; }
+}
+@media (max-width: 600px) {
+  #sidebar { display: none; }
+  main { margin-left: 0; padding: 16px; }
+}
