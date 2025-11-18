@@ -106,8 +106,7 @@ window.addEventListener('DOMContentLoaded', () => {
       // 1) Support Ticket page – clone whole ticket-group into Open
       if (btn.closest('#support-ticket')) {
         const group = btn.closest('.ticket-group');
-        if (!group) return;
-        if (!openTicketsContainer) return;
+        if (!group || !openTicketsContainer) return;
 
         const newGroup = group.cloneNode(true);
 
@@ -121,10 +120,16 @@ window.addEventListener('DOMContentLoaded', () => {
           sel.value = 'Open';
         });
 
-        // 🔹 IMPORTANT: Remove the add button from the NEW ticket
+        // Remove the add button from the NEW ticket (only template keeps +)
         const newAddBtn = newGroup.querySelector('.add-row');
         if (newAddBtn) {
           newAddBtn.remove();
+        }
+
+        // Make the Support Ticket Number row in cloned tickets behave as a normal row
+        const firstRow = newGroup.querySelector('.checklist-row.integrated-plus');
+        if (firstRow) {
+          firstRow.classList.remove('integrated-plus');
         }
 
         openTicketsContainer.appendChild(newGroup);
@@ -143,34 +148,41 @@ window.addEventListener('DOMContentLoaded', () => {
           el.value = '';
         });
 
-        // 🔹 IMPORTANT: Remove the add button from the NEW POC card
-        const newPocAdd = newCard.querySelector('.add-row');
-        if (newPocAdd) {
-          newPocAdd.remove();
+        // Remove + from cloned POC card (only original card keeps the add button)
+        const pocAddBtn = newCard.querySelector('.add-row');
+        if (pocAddBtn) {
+          pocAddBtn.remove();
         }
+
+        // Make POC rows normal (full-width rounded textboxes)
+        newCard.querySelectorAll('.checklist-row.integrated-plus').forEach(row => {
+          row.classList.remove('integrated-plus');
+        });
 
         pocContainer.appendChild(newCard);
         return;
       }
 
       // 3) Default behavior for other integrated-plus buttons:
-      //    clone the associated text input in that section-block.
-      const parent = btn.closest('.section-block');
-      if (!parent) return;
+      //    clone the associated text input INSIDE THE SAME ROW and stack under the existing one.
+      const row = btn.closest('.checklist-row');
+      if (!row) return;
 
-      // Prefer the input immediately before the button
       let input = btn.previousElementSibling;
-      if (!input || input.tagName !== 'INPUT') {
-        input = parent.querySelector('input[type="text"]');
+      if (
+        !input ||
+        input.tagName !== 'INPUT'
+      ) {
+        input = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
       }
       if (!input) return;
 
       const clone = input.cloneNode(true);
       clone.value = '';
-      clone.style.marginTop = '6px';
+      clone.classList.add('stacked-input');
 
-      // Insert UNDER the current line (before the button so the + stays at the end)
-      parent.insertBefore(clone, btn);
+      // Insert directly before the button, so it appears UNDER the current box (flex-wrap handles the wrap)
+      row.insertBefore(clone, btn);
     });
   });
 
