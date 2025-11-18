@@ -370,62 +370,53 @@ main {
 }
 
 /* =======================================================
-   CONTACTS — inset orange cards around each contact block
+   DEALERSHIP CONTACTS – individual mini-cards (fixed)
    ======================================================= */
 
-/* Contacts section outer card */
-#dealership-info .section-block:nth-of-type(3) {
-  border-color: var(--border);
-}
-
-/* TOP ROW (Name) — starts each contact card */
+/* Top "Name" row of each contact card */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) {
-  margin-left: 0;
-  margin-right: 0;
   margin-top: 18px;
-
-  padding-left: 40px;  /* same indent as normal rows */
-
-  border-top: 1px solid var(--orange);
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
+  margin-left: 18px;
+  margin-right: 18px;
+  margin-bottom: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-top: 1px solid #fdba74;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
   border-bottom: none;
-
   border-radius: 14px 14px 0 0;
-  background: #fff;
+  background: #fff7ed;
 }
 
-/* MIDDLE ROW (Cell) */
+/* Middle "Cell" row */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) + .checklist-row {
-  margin-left: 0;
-  margin-right: 0;
-
-  padding-left: 40px;
-
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
+  margin-left: 18px;
+  margin-right: 18px;
+  margin-bottom: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
   border-bottom: none;
-
-  background: #fff;
+  background: #fff7ed;
 }
 
-/* BOTTOM ROW (Email) — closes card */
+/* Bottom "Email" row */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) + .checklist-row + .checklist-row {
-  margin-left: 0;
-  margin-right: 0;
-
-  padding-left: 40px;
-
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-  border-bottom: 1px solid var(--orange);
-
-  border-radius: 0 0 14px 14px;
-  background: #fff;
+  margin-left: 18px;
+  margin-right: 18px;
   margin-bottom: 18px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+  border-bottom: 1px solid #fdba74;
+  border-radius: 0 0 14px 14px;
+  background: #fff7ed;
 }
 
 /* Indented Qs */
@@ -491,77 +482,20 @@ main {
 }
 
 /* =======================================================
-   POST-TRAINING – Champions & Blockers as inset orange cards
+   POST-TRAINING – clearer divide Champions vs Blockers
    ======================================================= */
-/* Assumes rows in first section-block have:
-   - .champion-row on all Champion lines
-   - .blocker-row on all Blocker lines
-*/
+/* Requires: add class `blocker-start` to "Blocker – Advisors" row */
 
-/* CHAMPIONS CARD – wrap all .champion-row rows */
-#post-training .section-block:first-of-type .checklist-row.champion-row {
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 40px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+#post-training .section-block:first-of-type .checklist-row.blocker-start,
+#post-training .section-block:first-of-type .checklist-row.blocker-start ~ .checklist-row {
+  background: #fff7ed;
 }
 
-/* top Champion row – start card */
-#post-training .section-block:first-of-type .checklist-row.champion-row:first-of-type {
+/* Strong, clear divider above first Blocker row */
+#post-training .section-block .checklist-row.blocker-start {
+  border-top: 2px solid var(--orange);
   margin-top: 18px;
-  border-top: 1px solid var(--orange);
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-  border-radius: 14px 14px 0 0;
-}
-
-/* middle champions (if more than 2) */
-#post-training .section-block:first-of-type .checklist-row.champion-row:not(:first-of-type):not(:last-of-type) {
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-}
-
-/* last champion row – close card */
-#post-training .section-block:first-of-type .checklist-row.champion-row:last-of-type {
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-  border-bottom: 1px solid var(--orange);
-  border-radius: 0 0 14px 14px;
-  margin-bottom: 14px;
-}
-
-/* BLOCKERS CARD – wrap all .blocker-row rows */
-#post-training .section-block:first-of-type .checklist-row.blocker-row {
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 40px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-/* top blocker row – start second card */
-#post-training .section-block:first-of-type .checklist-row.blocker-row:first-of-type {
-  margin-top: 10px;
-  border-top: 1px solid var(--orange);
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-  border-radius: 14px 14px 0 0;
-}
-
-/* middle blockers */
-#post-training .section-block:first-of-type .checklist-row.blocker-row:not(:first-of-type):not(:last-of-type) {
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-}
-
-/* last blocker row – close card */
-#post-training .section-block:first-of-type .checklist-row.blocker-row:last-of-type {
-  border-left: 1px solid var(--orange);
-  border-right: 1px solid var(--orange);
-  border-bottom: 1px solid var(--orange);
-  border-radius: 0 0 14px 14px;
-  margin-bottom: 18px;
+  padding-top: 14px;
 }
 
 /* ===== Training TABLES ===== */
