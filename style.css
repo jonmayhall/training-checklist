@@ -371,7 +371,6 @@ main {
 
 /* =======================================================
    DEALERSHIP CONTACTS – individual mini-cards
-   (Service / Parts / GM / Additional POC)
    ======================================================= */
 
 /* Top row of each contact block (Name) */
@@ -379,12 +378,12 @@ main {
   .checklist-row:has(input[placeholder="Name"]) {
   margin-top: 18px;
   padding-top: 10px;
-  border-top: 1px solid #fdba74;   /* soft orange */
+  border-top: 1px solid #fdba74;
   border-left: 1px solid #fdba74;
   border-right: 1px solid #fdba74;
   border-bottom: none;
   border-radius: 14px 14px 0 0;
-  background: #fff7ed;             /* tint to match blockers family */
+  background: #fff7ed;
 }
 
 /* Middle row (Cell) */
@@ -419,7 +418,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0;  /* no gap between input and + button; we’ll add left margin to the input */
+  gap: 0; /* no gap between input and + button */
 }
 
 /* Label behaves like normal rows */
@@ -429,16 +428,13 @@ main {
   padding-right: 16px;
 }
 
-/* Text box column:
-   - Same width as other text boxes
-   - 12px spacing from label
-   - Right side squared off so it can touch the + button cleanly
-*/
+/* Text box in integrated + rows:
+   reduce width so (input + 34px button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: 12px;  /* replaces row gap between label and input */
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: 12px; /* spacing from label */
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -449,7 +445,7 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: -1px; /* ensures input & button visually touch (overlaps borders) */
+  margin-left: -1px; /* overlap borders so they “touch” */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -489,7 +485,7 @@ main {
   padding-top: 14px;
 }
 
-/* ===== Training TABLES (page 5 & 6 & 6 Opcodes) ===== */
+/* ===== Training TABLES ===== */
 .section { 
   margin-bottom: 40px; 
 }
@@ -547,7 +543,7 @@ main {
   color: #fff;
 }
 
-/* Sticky first column – for checklists (not Opcodes; Opcodes overridden later) */
+/* Sticky first column – for checklists (not Opcodes; overridden later) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -582,7 +578,7 @@ main {
   text-align: left;
 }
 
-/* Column widths */
+/* Column widths (generic) */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
@@ -741,15 +737,13 @@ main {
 }
 
 /* =======================================================
-   DMS PAGE – GRID CARDS with DOTS (color-blind safe)
+   DMS PAGE – GRID CARDS with DOTS
    ======================================================= */
 
-/* Overview block spacing */
 .dms-overview-block {
   margin-bottom: 28px;
 }
 
-/* Legend */
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -758,7 +752,6 @@ main {
   margin-top: 8px;
 }
 
-/* Small dots for legend */
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -767,14 +760,12 @@ main {
   margin-right: 6px;
 }
 
-/* Color-blind-friendly palette */
-.dms-dot-auto      { background: #22c55e; } /* green */
-.dms-dot-ondemand  { background: #f97316; } /* orange */
-.dms-dot-withro    { background: #0ea5e9; } /* teal/blue */
-.dms-dot-planned   { background: #eab308; } /* gold */
-.dms-dot-na        { background: #9ca3af; } /* gray */
+.dms-dot-auto      { background: #22c55e; }
+.dms-dot-ondemand  { background: #f97316; }
+.dms-dot-withro    { background: #0ea5e9; }
+.dms-dot-planned   { background: #eab308; }
+.dms-dot-na        { background: #9ca3af; }
 
-/* Cards grid */
 .dms-table-container {
   margin-top: 16px;
 }
@@ -786,7 +777,6 @@ main {
   padding: 18px;
 }
 
-/* Each DMS section card */
 .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -795,7 +785,6 @@ main {
   padding: 14px 16px 12px;
 }
 
-/* Header row */
 .dms-card-header {
   display: flex;
   align-items: center;
@@ -809,7 +798,6 @@ main {
   color: #111827;
 }
 
-/* Push / Pull chip */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -830,7 +818,6 @@ main {
   border-color: #020617;
 }
 
-/* List of rows inside card */
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
@@ -847,7 +834,6 @@ main {
   padding-top: 2px;
 }
 
-/* Top row: field + dot tag */
 .dms-row-top {
   display: flex;
   align-items: center;
@@ -859,18 +845,16 @@ main {
   font-size: 13px;
 }
 
-/* Tag – DOT ONLY (hide text visually, keep colored dot) */
+/* DOT ONLY tags (no text) */
 .dms-tag {
   display: inline-block;
   width: 12px;
   height: 12px;
   border-radius: 999px;
   flex-shrink: 0;
-  font-size: 0;      /* hide label text */
+  font-size: 0;
   color: transparent;
 }
-
-/* Same palette as legend */
 .dms-tag-auto      { background: #22c55e; }
 .dms-tag-ondemand  { background: #f97316; }
 .dms-tag-withro    { background: #0ea5e9; }
@@ -887,10 +871,10 @@ main {
 }
 
 /* =======================================================
-   OPCODES PAGE – fix first column & column widths
+   OPCODES PAGE – first column & widths
    ======================================================= */
 
-/* Reset the sticky/flex first column just for Opcodes tables */
+/* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
@@ -899,21 +883,13 @@ main {
   width: auto;
   min-width: auto;
 }
-
 #opcodes-pricing .training-table td:first-child {
   display: table-cell;
   padding: 6px 6px;
   background: inherit;
 }
 
-/* LABOR OPCODES TABLE (first .section inside #opcodes-pricing)
-   Columns: 1 Updated (checkbox)
-            2 Opcode
-            3 Hours
-            4 Customer Pay Rate
-            5 Warranty Pay Rate
-            6 Description (wide, left aligned)
-*/
+/* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
   width: 60px;
@@ -934,52 +910,36 @@ main {
   min-width: 110px;
 }
 
-/* Description gets the remainder and is left-aligned */
+/* Description gets the remainder and is centered */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
   min-width: 260px;
-  text-align: left;
+  text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE (second .section inside #opcodes-pricing)
-   Columns: 1 Updated (checkbox)
-            2 Part Number
-            3 List Price
-            4 Cost
-            5 Markup %
-            6 Description (takes the rest)
-*/
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
+/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
 
-/* Make these numeric columns as small as reasonable */
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
-  width: 80px;     /* List Price, Cost, Markup % */
+/* Make List Price / Cost / Markup % as small as possible */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
+  width: 80px;
   min-width: 80px;
 }
 
-/* Description: wide, takes remaining width.
-   Header centered, cell text left for easier reading. */
-#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6) {
+/* Description takes remaining width; center header + cell text */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: center;
-}
-#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(6) {
-  min-width: 260px;
-  text-align: left;
-}
-
-/* Make ALL Description text inputs (both tables) left-aligned */
-#opcodes-pricing .training-table td:nth-child(6) input[type="text"] {
-  text-align: left;
 }
 
 /* =======================================================
