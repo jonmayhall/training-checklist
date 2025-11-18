@@ -384,12 +384,17 @@ main {
   background: #fff;
   margin: 16px 0;
   padding: 8px 16px 6px;
+  box-shadow: var(--shadow);
 }
 
-/* clean, professional Champions / Blockers (simple, white cards) */
+/* Champions / Blockers cards – orange border like Support Tickets */
 .champions-card,
 .blockers-card {
   border-color: var(--orange);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
   background: #fff;
 }
 
@@ -466,9 +471,8 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* secondary/added lines: full, normal rounded text boxes */
-.section-block .checklist-row.integrated-plus input[type="text"].stacked-input,
-.section-block .checklist-row:has(> .add-row) input[type="text"].stacked-input {
+/* secondary/added lines (possibly in their own new row) */
+.section-block .checklist-row input[type="text"].stacked-input {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   border-radius: var(--radius-sm);
@@ -518,7 +522,7 @@ main {
 .ticket-group {
   margin: 12px 0;
   padding: 8px 12px 10px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid var(--orange);
   background: #fff;
   box-shadow: var(--shadow);
