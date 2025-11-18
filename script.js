@@ -166,22 +166,43 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       // 3) Default behavior for other integrated-plus buttons:
-      //    clone the associated text input INSIDE THE SAME ROW and stack under the existing one.
+      //    create a NEW checklist-row BELOW with a full-width textbox (no extra +).
       const row = btn.closest('.checklist-row');
       if (!row) return;
 
       let input = btn.previousElementSibling;
-      if (!input || input.tagName !== 'INPUT') {
+      if (!input || !(input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
         input = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
       }
       if (!input) return;
 
+      // Clone just the input, not the whole row
       const clone = input.cloneNode(true);
       clone.value = '';
       clone.classList.add('stacked-input');
 
-      // Insert directly before the button, so it appears under the current textbox
-      row.insertBefore(clone, btn);
+      // New row container under the current one
+      const parent = row.parentNode;
+      const newRow = document.createElement('div');
+      newRow.classList.add('checklist-row');
+
+      // Preserve indent if the original row had it
+      if (row.classList.contains('indent-sub')) {
+        newRow.classList.add('indent-sub');
+      }
+
+      // Empty label to keep alignment (label on left, textbox on right)
+      const emptyLabel = document.createElement('label');
+      emptyLabel.textContent = '';
+      newRow.appendChild(emptyLabel);
+      newRow.appendChild(clone);
+
+      // Insert new row right after the current row
+      if (row.nextSibling) {
+        parent.insertBefore(newRow, row.nextSibling);
+      } else {
+        parent.appendChild(newRow);
+      }
     });
   });
 
