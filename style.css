@@ -370,59 +370,70 @@ main {
 }
 
 /* =======================================================
-   DEALERSHIP CONTACTS – individual mini-cards
+   DEALERSHIP CONTACTS – each Manager/POC = its own card
    ======================================================= */
 
-/* Thin orange border around the whole Contacts card */
+/* The whole Contacts card keeps neutral border */
 #dealership-info .section-block:nth-of-type(3) {
-  border-color: var(--orange);
+  border-color: var(--border);
 }
 
-/* Top row of each contact block (Name) – full-width mini-card */
+/* Header row for each contact card:
+   (row followed by a row with a Name input) */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row:has(+ .checklist-row input[placeholder="Name"]) {
+  margin-top: 18px;
+  margin-bottom: 0;
+  margin-left: -22px;
+  margin-right: -22px;
+  padding: 10px 16px;
+  padding-left: 22px;     /* managers & POC not indented */
+  border-radius: 14px 14px 0 0;
+  border: 1px solid var(--orange);
+  border-bottom: none;
+  background: #fff;
+}
+
+/* Name row inside each card */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) {
-  margin-top: 18px;
-  padding-top: 10px;
-  border-top: 1px solid var(--orange);
+  margin-top: 0;
+  margin-left: -22px;
+  margin-right: -22px;
+  padding-left: calc(22px + 40px);  /* indented */
   border-left: 1px solid var(--orange);
   border-right: 1px solid var(--orange);
   border-bottom: none;
-  border-radius: 14px 14px 0 0;
   background: #fff;
-  /* stretch mini-card to the sides of the section-block */
-  margin-left: -22px;
-  margin-right: -22px;
-  /* keep label visually in same place as other rows */
-  padding-left: calc(22px + 40px);
 }
 
-/* Middle row (Cell) – same width, no gaps on sides */
+/* Cell row inside each card */
 #dealership-info .section-block:nth-of-type(3)
   .checklist-row:has(input[placeholder="Name"]) + .checklist-row {
+  margin-left: -22px;
+  margin-right: -22px;
+  padding-left: calc(22px + 40px);
   border-left: 1px solid var(--orange);
   border-right: 1px solid var(--orange);
   border-bottom: none;
   background: #fff;
+}
+
+/* Email row inside each card – bottom of the card */
+#dealership-info .section-block:nth-of-type(3)
+  .checklist-row:has(input[placeholder="Name"]) + .checklist-row + .checklist-row {
   margin-left: -22px;
   margin-right: -22px;
   padding-left: calc(22px + 40px);
-}
-
-/* Bottom row (Email) – close the card fully */
-#dealership-info .section-block:nth-of-type(3)
-  .checklist-row:has(input[placeholder="Name"]) + .checklist-row + .checklist-row {
   border-left: 1px solid var(--orange);
   border-right: 1px solid var(--orange);
   border-bottom: 1px solid var(--orange);
   border-radius: 0 0 14px 14px;
   background: #fff;
-  margin-left: -22px;
-  margin-right: -22px;
-  padding-left: calc(22px + 40px);
   margin-bottom: 18px;
 }
 
-/* Indented Qs */
+/* Indented Qs (other pages) */
 .indent-sub {
   padding-left: 60px !important;
 }
@@ -485,18 +496,15 @@ main {
 }
 
 /* =======================================================
-   POST-TRAINING – Champions & Blockers
+   POST-TRAINING – Champions & Blockers thin border
    ======================================================= */
 
-/* Thin, rounded orange border around the whole Champions & Blockers card */
 #post-training .section-block:first-of-type {
   border-color: var(--orange);
   border-width: 1px;
   border-style: solid;
   border-radius: var(--radius-lg);
 }
-
-/* (no special background or thick divider for .blocker-start anymore) */
 
 /* =======================================================
    Training TABLES
@@ -969,4 +977,3 @@ main {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
 }
-
