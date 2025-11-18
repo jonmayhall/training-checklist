@@ -342,6 +342,7 @@ main {
   margin-right: 0;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
+  border: 1px sealed var(--border);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
@@ -384,6 +385,17 @@ main {
   background: #fff;
   margin: 16px 0;
   padding: 8px 16px 6px; /* side padding for better border connection */
+}
+
+/* light orange title bar inside mini-cards (Champions / Blockers) */
+.mini-card-title {
+  margin: -8px -16px 8px;
+  padding: 6px 16px;
+  border-radius: 13px 13px 0 0;
+  background: var(--light-orange);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 /* rows inside mini-card */
@@ -511,6 +523,14 @@ main {
   border-bottom: 1px dashed #ddd;
   padding-bottom: 10px;
   margin-bottom: 10px;
+}
+
+/* Only show + buttons on Open Support Tickets */
+#support-ticket .ticket-group .add-row {
+  display: none;
+}
+#openTicketsContainer .ticket-group .add-row {
+  display: flex;
 }
 
 /* =======================================================
