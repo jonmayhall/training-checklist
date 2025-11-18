@@ -383,37 +383,41 @@ main {
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
-  padding: 8px 16px 6px;
+  padding: 12px 18px 10px;
   box-shadow: var(--shadow);
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Champions / Blockers cards – orange border like Support Tickets */
+/* Champions / Blockers cards – clean orange frame, no colored header bar */
 .champions-card,
 .blockers-card {
   border-color: var(--orange);
-  border-width: 1px;
-  border-style: solid;
   border-radius: 16px;
   box-shadow: var(--shadow);
   background: #fff;
 }
 
+/* make sure they don’t overflow their parent */
 .section-block .champions-card,
 .section-block .blockers-card {
   display: block;
   width: 100%;
   margin: 10px 0;
+  box-sizing: border-box;
 }
 
-/* title strip inside mini-cards */
+/* Title inside cards – match page header feel (orange text + underline) */
 .mini-card-title {
-  margin: -8px -16px 8px;
-  padding: 6px 16px;
-  border-radius: 13px 13px 0 0;
-  background: var(--light-orange);
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
+  margin: 0 0 10px 2px;
+  padding: 0;
+  background: transparent;         /* remove light-orange bar */
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 0;
+  border-bottom: 2px solid var(--orange);
+  display: inline-block;
 }
 
 /* rows inside mini-card */
@@ -422,7 +426,7 @@ main {
   margin-bottom: 0;
   padding-bottom: 8px;
   padding-left: 24px;
-  padding-right: 16px;  /* extra right padding between inputs & border */
+  padding-right: 20px;  /* extra padding between inputs & border on the right */
 }
 
 /* last row: no double bottom line */
@@ -471,7 +475,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* secondary/added lines (possibly in their own new row) */
+/* secondary/added lines (full-width rows below) */
 .section-block .checklist-row input[type="text"].stacked-input {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
@@ -516,21 +520,41 @@ main {
 }
 
 /* =======================================================
-   SUPPORT TICKET – clearer Ticket groups / unified look
+   SUPPORT TICKETS – lighter layout & separation
    ======================================================= */
 
-.ticket-group {
-  margin: 12px 0;
+/* Open Support Tickets card: keep it as the primary, full-width block */
+#support-ticket .section-block:first-of-type {
+  margin-bottom: 26px;   /* space before the grouped buckets */
+}
+
+/* Default ticket-group – lighter by default */
+#support-ticket .ticket-group {
+  margin: 10px 0;
   padding: 8px 12px 10px;
-  border-radius: 16px;
-  border: 1px solid var(--orange);
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
   background: #fff;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+}
+
+/* Open Tickets get the stronger myKaarma orange frame */
+#openTicketsContainer .ticket-group {
+  border-color: var(--orange);
   box-shadow: var(--shadow);
 }
 
-/* First row in each ticket (Ticket #) uses same alignment rules */
-.ticket-group .checklist-row {
+/* Open ticket rows alignment */
+#support-ticket .ticket-group .checklist-row {
   padding-left: 24px;
+}
+
+/* Only show + buttons on Open Support Tickets section */
+#support-ticket .ticket-group .add-row {
+  display: none;
+}
+#openTicketsContainer .ticket-group .add-row {
+  display: flex;
 }
 
 /* “Ticket” pill (if used) */
@@ -558,26 +582,50 @@ main {
   margin-bottom: 10px;
 }
 
-/* Only show + buttons on Open Support Tickets section */
-#support-ticket .ticket-group .add-row {
-  display: none;
-}
-#openTicketsContainer .ticket-group .add-row {
-  display: flex;
-}
-
-/* Put Tier Two / Closed buckets in a cleaner grid underneath Open */
+/* Lighter, grouped “other” buckets (Tier Two / Closed / Feature Not Supported) */
 .support-buckets-row {
+  margin-top: 4px;
+  background: #f9fafb;
+  padding: 12px 14px 8px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
-  margin-top: 10px;
+  box-sizing: border-box;
 }
 
+/* the inner containers for each bucket */
 #tierTwoTicketsContainer,
 #closedResolvedTicketsContainer,
 #closedUnsupportedTicketsContainer {
-  padding-top: 4px;
+  padding-top: 2px;
+}
+
+/* bucket titles (their h2 inside) a bit smaller so they don’t compete with page header */
+#support-ticket .support-buckets-row .section-block {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+#support-ticket .support-buckets-row .section-block h2 {
+  margin: 0 0 8px;
+  padding: 0;
+  background: transparent;
+  color: #444;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+}
+
+/* ticket groups inside the lower buckets: extra subtle */
+#tierTwoTicketsContainer .ticket-group,
+#closedResolvedTicketsContainer .ticket-group,
+#closedUnsupportedTicketsContainer .ticket-group {
+  border-color: #d8d8d8;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.05);
 }
 
 /* =======================================================
