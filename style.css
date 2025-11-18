@@ -456,7 +456,7 @@ main {
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  transition: .18s ease-in-out;
+  transition: .18s.ease-in-out;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   display: flex;
   align-items: center;
@@ -918,14 +918,14 @@ main {
 }
 
 /* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
-/* Reset widths first so we fully control them here */
+/* Reset all widths so we can fully control them */
 #opcodes-pricing .section:last-of-type .training-table th,
 #opcodes-pricing .section:last-of-type .training-table td {
   width: auto;
   min-width: auto;
 }
 
-/* 1) Updated (checkbox) – very small */
+/* 1) Updated (checkbox) – small */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 55px;
@@ -935,25 +935,22 @@ main {
 /* 2) Part Number – modest width */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(2),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(2) {
-  width: 120px;
-  min-width: 120px;
+  width: 110px;
+  min-width: 110px;
 }
 
-/* 3–5) List Price / Cost / Markup % – small money fields */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+/* Middle money columns (List Price / Cost / Markup / % etc.) – small */
+/* Everything from 3rd column up to the second-to-last column */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(n+3):not(:last-child),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(n+3):not(:last-child) {
+  width: 70px;
+  min-width: 70px;
 }
 
-/* 6) Description – takes remaining width; centered */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
-  min-width: 260px;
+/* Last column (Description) – takes remaining width and is centered */
+#opcodes-pricing .section:last-of-type .training-table th:last-child,
+#opcodes-pricing .section:last-of-type .training-table td:last-child {
+  min-width: 340px;
   text-align: center;
 }
 
