@@ -110,7 +110,7 @@ html, body {
   text-align: left;
   border-radius: 10px;
   cursor: pointer;
-  color: #e5e7eb;
+ 	color: #e5e7eb;
   transition: .18s;
   position: relative;
   overflow: hidden;
@@ -379,7 +379,7 @@ main {
   overflow: hidden;                     /* trims any inner overlaps */
 }
 
-/* Title inside mini-card (e.g., "Service Manager", "Champions", "Blockers") */
+/* Generic mini-card title */
 .mini-card-title {
   font-size: 15px;
   font-weight: 600;
@@ -387,6 +387,21 @@ main {
   background: var(--orange);
   color: #fff;
   margin: 0 0 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Make sure Champions/Blockers headers always look right */
+.champions-card > h3,
+.blockers-card > h3,
+.champions-card > .mini-card-title,
+.blockers-card > .mini-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  background: var(--orange);
+  color: #fff;
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 /* rows inside mini-card */
@@ -498,11 +513,6 @@ main {
   margin-top: 8px;
 }
 
-/* Keep support ticket inputs using the same right-side width rule as section-block:
-   We do NOT override width here so Support Ticket Number in all cards (Open,
-   Tier Two, Closed Resolved, Closed – Feature Not Supported) matches other text boxes. */
-
-/* A little spacing between the four buckets if you grouped them visually */
 .support-buckets {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
