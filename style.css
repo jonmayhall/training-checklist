@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Build C – Refined layout + Champions/Blockers + Support Tickets
+   Build C + Support Ticket Width Fix
    ======================================================= */
 
 :root {
@@ -435,7 +435,7 @@ main {
 }
 
 /* Text box in integrated + rows:
-   reduce width so (input + 34px button) = var(--input-width) total */
+   default = (input + 34px button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -474,8 +474,30 @@ main {
   transform: translateY(-1px);
 }
 
+/* ===== Support Ticket Number width fix for non-Open buckets =====
+   In Tier Two / Closed buckets, the Support Ticket Number input
+   should be full standard width like all other text boxes, and
+   any add buttons there should not show. */
+
+#tierTwoTicketsContainer .checklist-row.integrated-plus input[type="text"],
+#closedResolvedTicketsContainer .checklist-row.integrated-plus input[type="text"],
+#closedUnsupportedTicketsContainer .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 var(--input-width) !important;
+  width: var(--input-width) !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Hide add buttons in non-Open ticket buckets */
+#tierTwoTicketsContainer .checklist-row.integrated-plus > .add-row,
+#closedResolvedTicketsContainer .checklist-row.integrated-plus > .add-row,
+#closedUnsupportedTicketsContainer .checklist-row.integrated-plus > .add-row {
+  display: none !important;
+}
+
 /* =======================================================
-   SUPPORT TICKET – PROFESSIONAL CARD LAYOUT
+   SUPPORT TICKETS – PROFESSIONAL CARD LAYOUT
    ======================================================= */
 
 /* Ensure each support ticket bucket is a standard section-block card */
@@ -529,8 +551,8 @@ main {
   margin-bottom: 10px;
 }
 
-/* Support Ticket Number + add button integrated look */
-#support-ticket .ticket-group .checklist-row.integrated-plus input[type="text"] {
+/* Support Ticket Number + add button integrated look in OPEN only */
+#support-ticket #openTicketsContainer .ticket-group .checklist-row.integrated-plus input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
   margin-left: auto;
@@ -539,7 +561,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-#support-ticket .ticket-group .checklist-row.integrated-plus > .add-row {
+#support-ticket #openTicketsContainer .ticket-group .checklist-row.integrated-plus > .add-row {
   flex: 0 0 34px;
   margin-left: -1px;
   background: var(--orange);
@@ -555,7 +577,7 @@ main {
   justify-content: center;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
 }
-#support-ticket .ticket-group .checklist-row.integrated-plus > .add-row:hover {
+#support-ticket #openTicketsContainer .ticket-group .checklist-row.integrated-plus > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
 }
