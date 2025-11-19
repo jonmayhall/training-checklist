@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Refined Build (cards, darker sidebar, fixed tables)
+   Build C – Refined layout + Champions/Blockers + Support Tickets
    ======================================================= */
 
 :root {
@@ -255,7 +255,7 @@ main {
   color: #555;
 }
 
-/* Section headers */
+/* Section headers for TABLE sections */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -330,7 +330,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (base) – unified width + height */
+/* Inputs on the RIGHT (base) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -346,8 +346,6 @@ main {
   background: #f7f7f7;
   font-size: 13px;
   box-sizing: border-box;
-  height: 34px;             /* fixed height */
-  line-height: 1.2;
 }
 .section-block textarea {
   width: 96%;
@@ -385,41 +383,16 @@ main {
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
-  padding: 12px 18px 10px;
-  box-shadow: var(--shadow);
-  width: 100%;
-  box-sizing: border-box;
+  padding: 6px 0 4px;
 }
 
-/* Champions / Blockers cards – clean orange frame */
-.champions-card,
-.blockers-card {
-  border-color: var(--orange);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  background: #fff;
-}
-
-/* make sure they don’t overflow their parent */
-.section-block .champions-card,
-.section-block .blockers-card {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  box-sizing: border-box;
-}
-
-/* Title inside cards – match page header feel (orange text + underline) */
+/* Title inside mini-card */
 .mini-card-title {
-  margin: 0 0 10px 2px;
-  padding: 0;
-  background: transparent;
+  margin: 0 0 8px;
+  padding: 6px 18px 4px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--orange);
-  font-weight: 700;
-  font-size: 15px;
-  border-radius: 0;
-  border-bottom: 2px solid var(--orange);
-  display: inline-block;
 }
 
 /* rows inside mini-card */
@@ -427,8 +400,6 @@ main {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 24px;
-  padding-right: 20px;  /* extra padding between inputs & border on the right */
 }
 
 /* last row: no double bottom line */
@@ -446,16 +417,14 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* =======================================================
-   Integrated “+” rows (add more lines under same label)
-   ======================================================= */
+/* ===== Integrated “+” button rows ===== */
+/* Layout: [label..............] [input same width][+ button touching] */
 
-/* Layout: [label..............] [input(with trimmed right)] [+ attached pill] */
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
-  align-items: center;
-  gap: 0;
+  align-items: stretch;
+  gap: 0; /* no gap between input and + button */
 }
 
 /* Label behaves like normal rows */
@@ -465,8 +434,8 @@ main {
   padding-right: 16px;
 }
 
-/* Primary text box in integrated rows:
-   (input + button) total = var(--input-width) width. */
+/* Text box in integrated + rows:
+   reduce width so (input + 34px button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -477,15 +446,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* secondary/added lines (full-width rows below) */
-.section-block .checklist-row input[type="text"].stacked-input {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);
-  margin-top: 6px;
-}
-
-/* Integrated + button – SAME HEIGHT as text boxes (seamless) */
+/* Integrated + button – pill on the right, touching the input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -496,7 +457,7 @@ main {
   border: 1px solid var(--orange);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   width: 34px;
-  height: 34px;        /* match input height */
+  height: 34px;
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
@@ -513,30 +474,22 @@ main {
   transform: translateY(-1px);
 }
 
-/* rows that no longer have an add button (cloned mini-cards)
-   keep their inputs looking like normal right-aligned text boxes */
-.section-block .checklist-row.integrated-plus:not(:has(> .add-row)) input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);
-}
-
 /* =======================================================
-   SUPPORT TICKETS – cleaner, lighter layout
+   SUPPORT TICKET – PROFESSIONAL CARD LAYOUT
    ======================================================= */
 
-/* 1) OPEN SUPPORT TICKETS – primary, strong card */
-#support-ticket .section-block:first-of-type {
+/* Ensure each support ticket bucket is a standard section-block card */
+#support-ticket .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--orange);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
   padding: 0 22px 14px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
-/* keep the orange header bar for the first block */
-#support-ticket .section-block:first-of-type h2 {
+/* Orange header bar, same as other section cards */
+#support-ticket .section-block h2 {
   margin: 0 0 16px;
   padding: 10px 16px;
   background: var(--orange);
@@ -549,108 +502,62 @@ main {
   margin-right: -22px;
 }
 
-/* ticket-group base */
+/* Ticket cards themselves – lighter, not too heavy */
 #support-ticket .ticket-group {
   margin: 10px 0;
   padding: 10px 14px 12px;
   border-radius: 14px;
   border: 1px solid #e5e7eb;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+  box-shadow: 0 2px 6px rgba(15,23,42,0.08);
 }
 
-/* Open Ticket groups get myKaarma orange emphasis */
+/* Slight emphasis for Open bucket */
 #openTicketsContainer .ticket-group {
   border-color: var(--orange);
-  box-shadow: var(--shadow);
 }
 
-/* Align rows inside ticket groups */
+/* Checklist rows inside tickets */
 #support-ticket .ticket-group .checklist-row {
-  padding-left: 24px;
+  padding-left: 30px;
 }
 
-/* ALWAYS show + buttons in ticket groups (so Support Ticket Number can add) */
-#support-ticket .ticket-group .add-row {
-  display: flex;
-}
-
-/* “Ticket” pill (if used) */
-.ticket-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--orange), #ff9f50);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 4px;
-}
-
+/* Ticket status row (optional dashed divider) */
 .ticket-status-row {
   border-bottom: 1px dashed #ddd;
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
 
-/* 2) TIER TWO / CLOSED buckets – lighter & grouped visually */
-
-/* any support-ticket section-block AFTER the first one = light, no big card */
-#support-ticket .section-block:not(:first-of-type) {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0 4px 10px;
-  margin-bottom: 14px;
+/* Support Ticket Number + add button integrated look */
+#support-ticket .ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: auto;
+  margin-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-/* headings become small, subtle labels instead of big orange bars */
-#support-ticket .section-block:not(:first-of-type) h2 {
-  margin: 0 0 6px;
-  padding: 0;
-  background: transparent;
-  color: #555;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  border-radius: 0;
+#support-ticket .ticket-group .checklist-row.integrated-plus > .add-row {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
 }
-
-/* ticket-groups in Tier Two / Closed buckets = soft, minimal cards */
-#tierTwoTicketsContainer .ticket-group,
-#closedResolvedTicketsContainer .ticket-group,
-#closedUnsupportedTicketsContainer .ticket-group {
-  border-color: #dcdcdc;
-  box-shadow: 0 1px 2px rgba(15,23,42,0.04);
-  padding: 8px 10px 10px;
-  margin: 6px 0 10px;
-}
-
-/* light background strip behind the three lower buckets */
-#support-ticket .section-block:not(:first-of-type) > div {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 8px 10px 6px;
-  border: 1px solid #e5e7eb;
-  box-sizing: border-box;
-}
-
-/* Ensure checklists inside these buckets don’t feel cramped */
-#support-ticket .section-block:not(:first-of-type) .ticket-group .checklist-row {
-  padding-left: 18px;
-}
-
-/* keep dropdowns & inputs consistent with rest of app */
-#support-ticket select,
-#support-ticket input[type="text"] {
-  border-radius: var(--radius-sm);
+#support-ticket .ticket-group .checklist-row.integrated-plus > .add-row:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
 }
 
 /* =======================================================
@@ -950,6 +857,21 @@ main {
   transform: scale(1.05);
 }
 
+/* ===== Scrollbar (horizontal) ===== */
+.scroll-wrapper::-webkit-scrollbar, 
+.table-container::-webkit-scrollbar { 
+  height: 8px; 
+}
+.scroll-wrapper::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 6px;
+}
+.scroll-wrapper::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover { 
+  background-color: #999; 
+}
+
 /* ===== Floating PDF button (summary page) ===== */
 #training-summary .floating-btn {
   background: var(--orange);
@@ -1071,4 +993,3 @@ main {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
 }
-
