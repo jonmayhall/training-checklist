@@ -1,430 +1,274 @@
-// =======================================================
-// myKaarma Interactive Training Checklist – FULL JS
-// Nav, Training Tables, Support Tickets Buckets, Clear Page, Clear All, PDF
-// =======================================================
-
-window.addEventListener('DOMContentLoaded', () => {
-  /* === SIDEBAR NAVIGATION === */
-  const nav = document.getElementById('sidebar-nav');
-  const sections = document.querySelectorAll('.page-section');
-
-  if (nav) {
-    nav.addEventListener('click', (e) => {
-      const btn = e.target.closest('.nav-btn');
-      if (!btn) return;
-      const target = document.getElementById(btn.dataset.target);
-      if (!target) return;
-
-      // Highlight active nav
-      nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Swap page
-      sections.forEach(sec => sec.classList.remove('active'));
-      target.classList.add('active');
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  /* === ADD ROW HANDLER FOR TRAINING TABLES === */
-  document.querySelectorAll('.table-footer .add-row').forEach(button => {
-    button.addEventListener('click', () => {
-      const section = button.closest('.section');
-      if (!section) return;
-      const table = section.querySelector('table.training-table');
-      if (!table) return;
-
-      const tbody = table.tBodies[0];
-      if (!tbody || !tbody.rows.length) return;
-
-      const rowToClone = tbody.rows[tbody.rows.length - 1];
-      const newRow = rowToClone.cloneNode(true);
-
-      newRow.querySelectorAll('input, select').forEach(el => {
-        if (el.type === 'checkbox') el.checked = false;
-        else el.value = '';
-      });
-
-      tbody.appendChild(newRow);
-    });
-  });
-
-  // =====================================================
-  // SUPPORT TICKETS – MULTI-BUCKET LOGIC
-  // =====================================================
-  const supportSection = document.getElementById('support-ticket');
-  const openTicketsContainer = document.getElementById('openTicketsContainer');
-  const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedUnsupportedTicketsContainer = document.getElementById('closedUnsupportedTicketsContainer');
-
-  let openTicketTemplate = null; // pristine blank open ticket card
-
-  function normalizeStatus(val) {
-    if (!val) return '';
-    return val.toString().trim().toLowerCase();
-  }
-
-  // ---- HEADER COUNTS FOR EACH BUCKET ----
-  function updateTicketCounts() {
-    const containers = [
-      openTicketsContainer,
-      tierTwoTicketsContainer,
-      closedResolvedTicketsContainer,
-      closedUnsupportedTicketsContainer
-    ];
-
-    containers.forEach(container => {
-      if (!container) return;
-      const block = container.closest('.section-block');
-      if (!block) return;
-      const header = block.querySelector('h2');
-      if (!header) return;
-
-      // Store raw title once
-      let base = header.dataset.baseTitle;
-      if (!base) {
-        base = header.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
-        header.dataset.baseTitle = base;
-      }
-
-      const count = container.querySelectorAll('.ticket-group').length;
-      header.textContent = `${base} (${count})`;
-    });
-  }
-
-  // Map status → bucket (by normalized string)
-  function moveTicketToBucket(group, statusVal) {
-    if (!group) return;
-    const v = normalizeStatus(statusVal);
-
-    // Treat empty as Open
-    if (!v || v === 'open') {
-      if (openTicketsContainer) openTicketsContainer.appendChild(group);
-      updateTicketCounts();
-      return;
-    }
-
-    // Tier Two
-    if (v === 'tier two') {
-      if (tierTwoTicketsContainer) tierTwoTicketsContainer.appendChild(group);
-    }
-    // Closed – Feature Not Supported (any variant of closed + feature)
-    else if (
-      v === 'closed – feature not supported' ||
-      v === 'closed - feature not supported' ||
-      (v.includes('closed') && v.includes('feature') && v.includes('supported'))
-    ) {
-      if (closedUnsupportedTicketsContainer) {
-        closedUnsupportedTicketsContainer.appendChild(group);
-      }
-    }
-    // All other "closed" options → Closed – Resolved
-    else if (v.startsWith('closed')) {
-      if (closedResolvedTicketsContainer) {
-        closedResolvedTicketsContainer.appendChild(group);
-      }
-    } else {
-      // Fallback: anything unknown goes back to Open
-      if (openTicketsContainer) openTicketsContainer.appendChild(group);
-    }
-
-    // After moving OUT of Open, make sure there is always at least one blank open card
-    ensureOneBlankOpenTicket();
-    updateTicketCounts();
-  }
-
-  function initOpenTicketTemplate() {
-    if (!openTicketsContainer) return;
-    const first = openTicketsContainer.querySelector('.ticket-group');
-    if (!first) return;
-
-    // Clone a pristine version of an open ticket card
-    openTicketTemplate = first.cloneNode(true);
-
-    // Clear values on the template
-    openTicketTemplate.querySelectorAll('input[type="text"], textarea').forEach(el => {
-      el.value = '';
-    });
-    openTicketTemplate.querySelectorAll('select').forEach(sel => {
-      const hasOpen = Array.from(sel.options).some(
-        o => normalizeStatus(o.value) === 'open'
-      );
-      if (hasOpen) {
-        sel.value = 'Open';
-      } else {
-        sel.selectedIndex = 0;
-      }
-    });
-  }
-
-  function ensureOneBlankOpenTicket() {
-    if (!openTicketsContainer || !openTicketTemplate) return;
-    const groups = openTicketsContainer.querySelectorAll('.ticket-group');
-    if (groups.length === 0) {
-      const newGroup = openTicketTemplate.cloneNode(true);
-      openTicketsContainer.appendChild(newGroup);
-      attachTicketStatusHandlers(newGroup);
-      attachTicketAddButtonHandlers(newGroup);
-    }
-    updateTicketCounts();
-  }
-
-  function attachTicketStatusHandlers(scope) {
-    if (!scope) return;
-
-    // If you add a class "ticket-status-select" later, this will prioritize it.
-    let selects = scope.querySelectorAll('.ticket-group .ticket-status-select');
-
-    // If none found, fall back to ALL selects in ticket-group (current HTML)
-    if (!selects.length) {
-      selects = scope.querySelectorAll('.ticket-group select');
-    }
-
-    selects.forEach(sel => {
-      if (sel.dataset.boundStatus === '1') return;
-      sel.dataset.boundStatus = '1';
-
-      // Default status to Open if empty
-      if (!sel.value) {
-        const hasOpen = Array.from(sel.options).some(
-          o => normalizeStatus(o.value) === 'open'
-        );
-        if (hasOpen) sel.value = 'Open';
-      }
-
-      sel.addEventListener('change', () => {
-        const grp = sel.closest('.ticket-group');
-        moveTicketToBucket(grp, sel.value);
-      });
-    });
-
-    updateTicketCounts();
-  }
-
-  function attachTicketAddButtonHandlers(scope) {
-    if (!scope || !openTicketsContainer) return;
-
-    // Only handle the + on Support Ticket Number rows INSIDE the Open bucket
-    const addBtns = scope.querySelectorAll(
-      '#openTicketsContainer .ticket-group .checklist-row.integrated-plus > .add-row'
-    );
-
-    addBtns.forEach(btn => {
-      if (btn.dataset.boundAdd === '1') return;
-      btn.dataset.boundAdd = '1';
-
-      btn.addEventListener('click', () => {
-        if (!openTicketTemplate) initOpenTicketTemplate();
-        const base = openTicketTemplate || btn.closest('.ticket-group');
-        if (!base) return;
-
-        const newGroup = base.cloneNode(true);
-
-        // Clear values in the new card
-        newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-          el.value = '';
-        });
-        newGroup.querySelectorAll('select').forEach(sel => {
-          const hasOpen = Array.from(sel.options).some(
-            o => normalizeStatus(o.value) === 'open'
-          );
-          if (hasOpen) sel.value = 'Open';
-          else sel.selectedIndex = 0;
-        });
-
-        openTicketsContainer.appendChild(newGroup);
-        attachTicketStatusHandlers(newGroup);
-        attachTicketAddButtonHandlers(newGroup);
-        updateTicketCounts();
-      });
-    });
-  }
-
-  if (supportSection && openTicketsContainer) {
-    initOpenTicketTemplate();
-    attachTicketStatusHandlers(supportSection);
-    attachTicketAddButtonHandlers(supportSection);
-    ensureOneBlankOpenTicket();
-    updateTicketCounts();
-  }
-
-  // =====================================================
-  // GENERIC + BUTTONS FOR OTHER TEXT INPUTS (non-support)
-  // =====================================================
-  document.querySelectorAll('.section-block .add-row').forEach(btn => {
-    // Skip support-ticket section; it's handled above
-    if (btn.closest('#support-ticket')) return;
-
-    btn.addEventListener('click', () => {
-      // Additional POC card behavior (if present)
-      const pocCard = btn.closest('.poc-card');
-      const pocContainer = document.getElementById('additionalPocContainer');
-      if (pocCard && pocContainer && btn.closest('#dealership-info')) {
-        const newCard = pocCard.cloneNode(true);
-        newCard.querySelectorAll('input[type="text"], input[type="email"]').forEach(el => {
-          el.value = '';
-        });
-        pocContainer.appendChild(newCard);
-        return;
-      }
-
-      // Default behavior:
-      // clone the entire checklist-row and insert it AS A NEW ROW under the current line
-      const parentRow = btn.closest('.checklist-row');
-      if (!parentRow) return;
-
-      const input = parentRow.querySelector('input[type="text"], input[type="number"], input[type="email"]');
-      if (!input) return;
-
-      const newRow = parentRow.cloneNode(true);
-
-      // Clear values
-      newRow.querySelectorAll('input[type="text"], input[type="number"], input[type="email"]').forEach(el => {
-        el.value = '';
-      });
-
-      // Remove the add button from the cloned line so only the original has the +
-      const clonedAddBtn = newRow.querySelector('.add-row');
-      if (clonedAddBtn) clonedAddBtn.remove();
-
-      // VERY IMPORTANT:
-      // remove "integrated-plus" from the cloned row so it uses the NORMAL
-      // full-width textbox rules with rounded right side.
-      newRow.classList.remove('integrated-plus');
-
-      // Insert AFTER the current row
-      parentRow.parentNode.insertBefore(newRow, parentRow.nextSibling);
-    });
-  });
-
-  /* === CLEAR PAGE BUTTONS (per-page reset) === */
-  document.querySelectorAll('.clear-page-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const page = btn.closest('.page-section');
-      if (!page) return;
-
-      const confirmReset = window.confirm(
-        'This will clear all fields on this page. This cannot be undone. Continue?'
-      );
-      if (!confirmReset) return;
-
-      // Clear all inputs
-      page.querySelectorAll('input').forEach(input => {
-        if (input.type === 'checkbox') {
-          input.checked = false;
-        } else {
-          input.value = '';
-        }
-      });
-
-      // Clear all selects
-      page.querySelectorAll('select').forEach(select => {
-        select.selectedIndex = 0;
-      });
-
-      // Clear all textareas
-      page.querySelectorAll('textarea').forEach(area => {
-        area.value = '';
-      });
-
-      // Special handling for Support Ticket page:
-      if (page.id === 'support-ticket') {
-        if (openTicketsContainer) {
-          openTicketsContainer.innerHTML = '';
-        }
-        if (tierTwoTicketsContainer) {
-          tierTwoTicketsContainer.innerHTML = '';
-        }
-        if (closedResolvedTicketsContainer) {
-          closedResolvedTicketsContainer.innerHTML = '';
-        }
-        if (closedUnsupportedTicketsContainer) {
-          closedUnsupportedTicketsContainer.innerHTML = '';
-        }
-
-        // Rebuild a fresh default open ticket card
-        initOpenTicketTemplate();
-        ensureOneBlankOpenTicket();
-        updateTicketCounts();
-      }
-    });
-  });
-
-  /* === CLEAR ALL BUTTON (global reset with double confirmation) === */
-  const clearAllBtn = document.getElementById('clearAllBtn');
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener('click', () => {
-      const first = window.confirm(
-        'This will clear ALL fields on ALL pages of this checklist. This cannot be undone. Continue?'
-      );
-      if (!first) return;
-
-      const second = window.confirm(
-        'Last check: Are you sure you want to erase EVERYTHING on all pages?'
-      );
-      if (!second) return;
-
-      // 1) Clear every input
-      document.querySelectorAll('input').forEach(input => {
-        if (input.type === 'checkbox') {
-          input.checked = false;
-        } else {
-          input.value = '';
-        }
-      });
-
-      // 2) Clear every select
-      document.querySelectorAll('select').forEach(select => {
-        select.selectedIndex = 0;
-      });
-
-      // 3) Clear every textarea
-      document.querySelectorAll('textarea').forEach(area => {
-        area.value = '';
-      });
-
-      // 4) Reset Support Tickets buckets
-      if (openTicketsContainer) openTicketsContainer.innerHTML = '';
-      if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
-      if (closedResolvedTicketsContainer) closedResolvedTicketsContainer.innerHTML = '';
-      if (closedUnsupportedTicketsContainer) closedUnsupportedTicketsContainer.innerHTML = '';
-
-      initOpenTicketTemplate();
-      ensureOneBlankOpenTicket();
-      updateTicketCounts();
-    });
-  }
-
-  /* === SAVE AS PDF (Training Summary Page) === */
-  const saveBtn = document.getElementById('savePDF');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', async () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'pt', 'a4');
-      const pages = document.querySelectorAll('.page-section');
-
-      const marginX = 30, marginY = 30, maxWidth = 535;
-      let first = true;
-
-      for (const page of pages) {
-        if (!first) doc.addPage();
-        first = false;
-
-        const title = page.querySelector('h1')?.innerText || 'Section';
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.text(title, marginX, marginY);
-
-        const text = page.innerText.replace(/\s+\n/g, '\n').trim();
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        const lines = doc.splitTextToSize(text, maxWidth);
-        doc.text(lines, marginX, marginY + 24);
-      }
-
-      doc.save('Training_Summary.pdf');
-    });
-  }
-});
+/* =======================================================
+   myKaarma Interactive Training Checklist – FULL CSS
+   CLEAN + COMPLETE BUILD (v3)
+   ======================================================= */
+
+:root {
+  --orange: #f36f21;
+  --light-orange: #f8b17b;
+  --gray-bg: #d7d7d7;
+  --card-bg: #fff;
+  --border: #dcdcdc;
+  --ink: #222;
+
+  --radius-lg: 18px;
+  --radius-sm: 14px;
+
+  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+
+  --input-width: 260px;
+}
+
+/* ===== BASE ===== */
+html, body {
+  margin: 0;
+  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  background: var(--gray-bg);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+*, em, i { font-style: normal !important; }
+
+/* ===== TOP BAR ===== */
+#topbar {
+  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+}
+.topbar-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.top-logo { height: 42px; object-fit: contain; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+#dealershipNameDisplay { color:#fff; font-size:22px; font-weight:600; }
+
+/* ===== SIDEBAR ===== */
+#app { display: flex; min-height: 100vh; margin-top: 70px; }
+
+#sidebar {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
+  border-right: 1px solid rgba(15,23,42,0.8);
+  width: 230px;
+  padding: 20px 12px 60px;
+  box-shadow: 0 0 18px rgba(15,23,42,0.6);
+  position: fixed;
+  top: 70px;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+#sidebar-nav { display: flex; flex-direction: column; gap: 6px; }
+.nav-icon { display: none; }
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 9px 12px;
+  font-size: 12px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #e5e7eb;
+  transition: .18s;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  position: relative;
+}
+.nav-btn::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 16%; bottom: 16%;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, var(--orange), #22c55e);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.nav-btn:hover {
+  background: rgba(15,23,42,0.85);
+  color: #f9fafb;
+  border-color: rgba(148,163,184,0.45);
+}
+.nav-btn.active {
+  background: rgba(15,23,42,0.95);
+  color: #f9fafb;
+  border-color: var(--orange);
+  font-weight: 600;
+}
+.nav-btn.active::before { opacity: 1; }
+
+#clearAllBtn {
+  position: fixed;
+  left: 24px;
+  bottom: 18px;
+  width: calc(230px - 48px);
+  padding: 7px 10px;
+  font-size: 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.9);
+  background: rgba(15,23,42,0.95);
+  color: #f9fafb;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+#clearAllBtn:hover {
+  background: linear-gradient(90deg, var(--orange), #22c55e);
+  border-color: #f97316;
+}
+
+/* ===== MAIN PAGE ===== */
+main {
+  flex: 1;
+  margin-left: 230px;
+  padding: 30px 32px;
+  background: var(--gray-bg);
+}
+
+/* ===== PAGE SECTIONS ===== */
+.page-section {
+  position: relative;
+  display: none;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 22px 32px 28px;
+  margin: 0 auto 40px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: var(--shadow);
+}
+.page-section.active { display: block; }
+
+.page-section h1 {
+  color: var(--orange);
+  margin: 4px 0 8px 4px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.page-section h1::after {
+  content: "";
+  display: block;
+  width: 320px;
+  height: 4px;
+  background: var(--orange);
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+.page-subtitle { margin: 4px 0 20px 4px; font-size: 13px; color: #555; }
+
+/* ===== SECTION BLOCK CARDS ===== */
+.section-block {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 0 22px 14px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.section-block h2 {
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin-left: -22px;
+  margin-right: -22px;
+}
+
+/* ===== CHECKLIST ROWS ===== */
+.checklist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  padding-left: 40px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.checklist-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+  padding-bottom: 0;
+}
+.checklist-row label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+  font-weight: 500;
+}
+
+.section-block .checklist-row input[type="text"],
+.section-block .checklist-row input[type="number"],
+.section-block .checklist-row input[type="email"],
+.section-block .checklist-row input[type="date"],
+.section-block .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+}
+
+.section-block textarea {
+  width: 96%;
+  margin: 10px auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+}
+
+.section-block input:focus,
+.section-block select:focus,
+.section-block textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 4px rgba(243,111,33,0.35);
+  background: #fff9f5;
+}
+
+/* ===== MINI CARDS (Contacts, Champions, Blockers) ===== */
+.mini-card,
+.champions-card,
+.blockers-card {
+  border: 1px solid var(--orange);
+  box-shadow: 0 0 0 1px var(--orange);
+  border-radius: 14px;
+  background: #fff;
+  padding: 6px 0 4px;
+  margin: 16px 0;
+  overflow: hidden; /* prevents border gaps */
+}
+
+.mini-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  background: var(--orange);
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+/* rows inside mini-cards */
+.mini-card .checklist-row,
+.champions-card .checklist-row,
+.blockers-card .checklist-row {
+  background: #fff;
+  margin-bottom: 0;
+}
+.mini-card .checklist-row:last-child,
+.champions-card .checklist-row:last-child,
+.blockers-card .checklist-row:last-child {
+  border-bottom: none;
+}
