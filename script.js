@@ -66,6 +66,75 @@ window.addEventListener('DOMContentLoaded', () => {
     return val.toString().trim().toLowerCase();
   }
 
+  // ---- HEADER COUNTS FOR EACH BUCKET ----
+  function updateTicketCounts() {
+    const containers = [
+      openTicketsContainer,
+      tierTwoTicketsContainer,
+      closedResolvedTicketsContainer,
+      closedUnsupportedTicketsContainer
+    ];
+
+    containers.forEach(container => {
+      if (!container) return;
+      const block = container.closest('.section-block');
+      if (!block) return;
+      const header = block.querySelector('h2');
+      if (!header) return;
+
+      // Store raw title once
+      let base = header.dataset.baseTitle;
+      if (!base) {
+        base = header.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+        header.dataset.baseTitle = base;
+      }
+
+      const count = container.querySelectorAll('.ticket-group').length;
+      header.textContent = `${base} (${count})`;
+    });
+  }
+
+  // Map status → bucket (by normalized string)
+  function moveTicketToBucket(group, statusVal) {
+    if (!group) return;
+    const v = normalizeStatus(statusVal);
+
+    // Treat empty as Open
+    if (!v || v === 'open') {
+      if (openTicketsContainer) openTicketsContainer.appendChild(group);
+      updateTicketCounts();
+      return;
+    }
+
+    // Tier Two
+    if (v === 'tier two') {
+      if (tierTwoTicketsContainer) tierTwoTicketsContainer.appendChild(group);
+    }
+    // Closed – Feature Not Supported (any variant of closed + feature)
+    else if (
+      v === 'closed – feature not supported' ||
+      v === 'closed - feature not supported' ||
+      (v.includes('closed') && v.includes('feature') && v.includes('supported'))
+    ) {
+      if (closedUnsupportedTicketsContainer) {
+        closedUnsupportedTicketsContainer.appendChild(group);
+      }
+    }
+    // All other "closed" options → Closed – Resolved
+    else if (v.startsWith('closed')) {
+      if (closedResolvedTicketsContainer) {
+        closedResolvedTicketsContainer.appendChild(group);
+      }
+    } else {
+      // Fallback: anything unknown goes back to Open
+      if (openTicketsContainer) openTicketsContainer.appendChild(group);
+    }
+
+    // After moving OUT of Open, make sure there is always at least one blank open card
+    ensureOneBlankOpenTicket();
+    updateTicketCounts();
+  }
+
   function initOpenTicketTemplate() {
     if (!openTicketsContainer) return;
     const first = openTicketsContainer.querySelector('.ticket-group');
@@ -99,43 +168,20 @@ window.addEventListener('DOMContentLoaded', () => {
       attachTicketStatusHandlers(newGroup);
       attachTicketAddButtonHandlers(newGroup);
     }
-  }
-
-  function moveTicketToBucket(group, statusVal) {
-    if (!group) return;
-    const v = normalizeStatus(statusVal);
-
-    // If set back to Open, just move it to Open bucket
-    if (v === 'open') {
-      if (openTicketsContainer) openTicketsContainer.appendChild(group);
-      return;
-    }
-
-    // Tier Two
-    if (v.startsWith('tier')) {
-      if (tierTwoTicketsContainer) tierTwoTicketsContainer.appendChild(group);
-    }
-    // Closed – Feature Not Supported (we look for "feature" in the string)
-    else if (v.includes('feature')) {
-      if (closedUnsupportedTicketsContainer) {
-        closedUnsupportedTicketsContainer.appendChild(group);
-      }
-    }
-    // Everything else that's "closed" → Closed – Resolved
-    else {
-      if (closedResolvedTicketsContainer) {
-        closedResolvedTicketsContainer.appendChild(group);
-      }
-    }
-
-    // After moving OUT of Open, make sure there is always at least one blank open card
-    ensureOneBlankOpenTicket();
+    updateTicketCounts();
   }
 
   function attachTicketStatusHandlers(scope) {
     if (!scope) return;
-    // Treat any <select> inside a .ticket-group on this page as a status dropdown
-    const selects = scope.querySelectorAll('.ticket-group select');
+
+    // If you add a class "ticket-status-select" later, this will prioritize it.
+    let selects = scope.querySelectorAll('.ticket-group .ticket-status-select');
+
+    // If none found, fall back to ALL selects in ticket-group (current HTML)
+    if (!selects.length) {
+      selects = scope.querySelectorAll('.ticket-group select');
+    }
+
     selects.forEach(sel => {
       if (sel.dataset.boundStatus === '1') return;
       sel.dataset.boundStatus = '1';
@@ -153,6 +199,8 @@ window.addEventListener('DOMContentLoaded', () => {
         moveTicketToBucket(grp, sel.value);
       });
     });
+
+    updateTicketCounts();
   }
 
   function attachTicketAddButtonHandlers(scope) {
@@ -189,6 +237,7 @@ window.addEventListener('DOMContentLoaded', () => {
         openTicketsContainer.appendChild(newGroup);
         attachTicketStatusHandlers(newGroup);
         attachTicketAddButtonHandlers(newGroup);
+        updateTicketCounts();
       });
     });
   }
@@ -198,6 +247,7 @@ window.addEventListener('DOMContentLoaded', () => {
     attachTicketStatusHandlers(supportSection);
     attachTicketAddButtonHandlers(supportSection);
     ensureOneBlankOpenTicket();
+    updateTicketCounts();
   }
 
   // =====================================================
@@ -220,7 +270,8 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Default behavior: clone the associated text input as a NEW ROW under the current line
+      // Default behavior:
+      // clone the entire checklist-row and insert it AS A NEW ROW under the current line
       const parentRow = btn.closest('.checklist-row');
       if (!parentRow) return;
 
@@ -228,14 +279,22 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!input) return;
 
       const newRow = parentRow.cloneNode(true);
-      // clear values & REMOVE add-btn from the cloned line
+
+      // Clear values
       newRow.querySelectorAll('input[type="text"], input[type="number"], input[type="email"]').forEach(el => {
         el.value = '';
       });
+
+      // Remove the add button from the cloned line so only the original has the +
       const clonedAddBtn = newRow.querySelector('.add-row');
       if (clonedAddBtn) clonedAddBtn.remove();
 
-      // insert AFTER the current row
+      // VERY IMPORTANT:
+      // remove "integrated-plus" from the cloned row so it uses the NORMAL
+      // full-width textbox rules with rounded right side.
+      newRow.classList.remove('integrated-plus');
+
+      // Insert AFTER the current row
       parentRow.parentNode.insertBefore(newRow, parentRow.nextSibling);
     });
   });
@@ -288,6 +347,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // Rebuild a fresh default open ticket card
         initOpenTicketTemplate();
         ensureOneBlankOpenTicket();
+        updateTicketCounts();
       }
     });
   });
@@ -333,6 +393,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       initOpenTicketTemplate();
       ensureOneBlankOpenTicket();
+      updateTicketCounts();
     });
   }
 
