@@ -1,274 +1,445 @@
-/* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
-   CLEAN + COMPLETE BUILD (v3)
-   ======================================================= */
+// =======================================================
+// myKaarma Interactive Training Checklist – FULL JS
+// Nav, Training Tables, Support Tickets, Clear Page, Clear All, PDF
+// =======================================================
 
-:root {
-  --orange: #f36f21;
-  --light-orange: #f8b17b;
-  --gray-bg: #d7d7d7;
-  --card-bg: #fff;
-  --border: #dcdcdc;
-  --ink: #222;
+window.addEventListener('DOMContentLoaded', () => {
+  /* === SIDEBAR NAVIGATION === */
+  const nav = document.getElementById('sidebar-nav');
+  const sections = document.querySelectorAll('.page-section');
 
-  --radius-lg: 18px;
-  --radius-sm: 14px;
+  if (nav) {
+    nav.addEventListener('click', (e) => {
+      const btn = e.target.closest('.nav-btn');
+      if (!btn) return;
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
 
-  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+      nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-  --input-width: 260px;
-}
+      sections.forEach(sec => sec.classList.remove('active'));
+      target.classList.add('active');
 
-/* ===== BASE ===== */
-html, body {
-  margin: 0;
-  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background: var(--gray-bg);
-  color: var(--ink);
-  overflow-x: hidden;
-}
-*, em, i { font-style: normal !important; }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
-/* ===== TOP BAR ===== */
-#topbar {
-  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
-  height: 70px;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 20;
-}
-.topbar-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.top-logo { height: 42px; object-fit: contain; }
-.topbar-right { display: flex; align-items: center; gap: 10px; }
-#dealershipNameDisplay { color:#fff; font-size:22px; font-weight:600; }
+  /* === TRAINING TABLE ADD ROW HANDLER === */
+  document.querySelectorAll('.table-footer .add-row').forEach(button => {
+    button.addEventListener('click', () => {
+      const section = button.closest('.section');
+      if (!section) return;
+      const table = section.querySelector('table.training-table');
+      if (!table) return;
 
-/* ===== SIDEBAR ===== */
-#app { display: flex; min-height: 100vh; margin-top: 70px; }
+      const tbody = table.tBodies[0];
+      if (!tbody || !tbody.rows.length) return;
 
-#sidebar {
-  background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
-  border-right: 1px solid rgba(15,23,42,0.8);
-  width: 230px;
-  padding: 20px 12px 60px;
-  box-shadow: 0 0 18px rgba(15,23,42,0.6);
-  position: fixed;
-  top: 70px;
-  bottom: 0;
-  overflow-y: auto;
-}
+      const rowToClone = tbody.rows[tbody.rows.length - 1];
+      const newRow = rowToClone.cloneNode(true);
 
-#sidebar-nav { display: flex; flex-direction: column; gap: 6px; }
-.nav-icon { display: none; }
+      newRow.querySelectorAll('input, select').forEach(el => {
+        if (el.type === 'checkbox') el.checked = false;
+        else el.value = '';
+      });
 
-.nav-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  padding: 9px 12px;
-  font-size: 12px;
-  text-align: left;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #e5e7eb;
-  transition: .18s;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  position: relative;
-}
-.nav-btn::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 16%; bottom: 16%;
-  width: 3px;
-  border-radius: 999px;
-  background: linear-gradient(to bottom, var(--orange), #22c55e);
-  opacity: 0;
-  transition: opacity .18s;
-}
-.nav-btn:hover {
-  background: rgba(15,23,42,0.85);
-  color: #f9fafb;
-  border-color: rgba(148,163,184,0.45);
-}
-.nav-btn.active {
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
-  border-color: var(--orange);
-  font-weight: 600;
-}
-.nav-btn.active::before { opacity: 1; }
+      tbody.appendChild(newRow);
+    });
+  });
 
-#clearAllBtn {
-  position: fixed;
-  left: 24px;
-  bottom: 18px;
-  width: calc(230px - 48px);
-  padding: 7px 10px;
-  font-size: 11px;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.9);
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-#clearAllBtn:hover {
-  background: linear-gradient(90deg, var(--orange), #22c55e);
-  border-color: #f97316;
-}
+  /* ===================================================
+     SUPPORT TICKETS – containers & header counters
+     =================================================== */
+  const supportSection = document.getElementById('support-ticket');
 
-/* ===== MAIN PAGE ===== */
-main {
-  flex: 1;
-  margin-left: 230px;
-  padding: 30px 32px;
-  background: var(--gray-bg);
-}
+  const openTicketsContainer   = document.getElementById('openTicketsContainer');
+  const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer  = document.getElementById('closedFeatureNotSupportedTicketsContainer');
 
-/* ===== PAGE SECTIONS ===== */
-.page-section {
-  position: relative;
-  display: none;
-  background: #fff;
-  border-radius: var(--radius-lg);
-  padding: 22px 32px 28px;
-  margin: 0 auto 40px;
-  width: 100%;
-  max-width: 1100px;
-  box-shadow: var(--shadow);
-}
-.page-section.active { display: block; }
+  const openTicketsHeader   = document.getElementById('openTicketsHeader');
+  const tierTwoTicketsHeader = document.getElementById('tierTwoTicketsHeader');
+  const closedResolvedHeader = document.getElementById('closedResolvedTicketsHeader');
+  const closedFeatureHeader  = document.getElementById('closedFeatureHeader');
 
-.page-section h1 {
-  color: var(--orange);
-  margin: 4px 0 8px 4px;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: .3px;
-}
-.page-section h1::after {
-  content: "";
-  display: block;
-  width: 320px;
-  height: 4px;
-  background: var(--orange);
-  margin-top: 8px;
-  border-radius: 2px;
-}
+  const ticketBuckets = [
+    { container: openTicketsContainer,   header: openTicketsHeader },
+    { container: tierTwoTicketsContainer, header: tierTwoTicketsHeader },
+    { container: closedResolvedContainer, header: closedResolvedHeader },
+    { container: closedFeatureContainer,  header: closedFeatureHeader }
+  ];
 
-.page-subtitle { margin: 4px 0 20px 4px; font-size: 13px; color: #555; }
+  function initTicketHeaderBaseText() {
+    ticketBuckets.forEach(bucket => {
+      if (!bucket.header) return;
+      if (!bucket.header.dataset.baseText) {
+        const txt = bucket.header.textContent.replace(/\(\d+\)$/, '').trim();
+        bucket.header.dataset.baseText = txt;
+      }
+    });
+  }
 
-/* ===== SECTION BLOCK CARDS ===== */
-.section-block {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  padding: 0 22px 14px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.section-block h2 {
-  margin: 0 0 16px;
-  padding: 10px 16px;
-  background: var(--orange);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left: -22px;
-  margin-right: -22px;
-}
+  function updateTicketCounts() {
+    ticketBuckets.forEach(bucket => {
+      if (!bucket.container || !bucket.header) return;
+      const base = bucket.header.dataset.baseText ||
+        bucket.header.textContent.replace(/\(\d+\)$/, '').trim();
+      bucket.header.dataset.baseText = base;
 
-/* ===== CHECKLIST ROWS ===== */
-.checklist-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  font-size: 14px;
-  padding-left: 40px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
-}
-.checklist-row:last-of-type {
-  border-bottom: none;
-  margin-bottom: 8px;
-  padding-bottom: 0;
-}
-.checklist-row label {
-  flex: 1 1 auto;
-  padding-right: 16px;
-  font-weight: 500;
-}
+      const count = bucket.container.querySelectorAll('.ticket-group').length;
+      bucket.header.textContent = count ? `${base} (${count})` : base;
+    });
+  }
 
-.section-block .checklist-row input[type="text"],
-.section-block .checklist-row input[type="number"],
-.section-block .checklist-row input[type="email"],
-.section-block .checklist-row input[type="date"],
-.section-block .checklist-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
+  /* Normalize status into a key */
+  function getStatusKey(select) {
+    const raw = (select.value || select.options[select.selectedIndex]?.textContent || "")
+      .toLowerCase()
+      .trim();
 
-.section-block textarea {
-  width: 96%;
-  margin: 10px auto;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
+    if (raw.startsWith('open')) return 'open';
+    if (raw.includes('tier')) return 'tier2';
+    if (raw.includes('resolved')) return 'closed_resolved';
+    if (raw.includes('feature')) return 'closed_feature_not_supported';
 
-.section-block input:focus,
-.section-block select:focus,
-.section-block textarea:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.35);
-  background: #fff9f5;
-}
+    return 'open';
+  }
 
-/* ===== MINI CARDS (Contacts, Champions, Blockers) ===== */
-.mini-card,
-.champions-card,
-.blockers-card {
-  border: 1px solid var(--orange);
-  box-shadow: 0 0 0 1px var(--orange);
-  border-radius: 14px;
-  background: #fff;
-  padding: 6px 0 4px;
-  margin: 16px 0;
-  overflow: hidden; /* prevents border gaps */
-}
+  /* Route ticket-group to container based on key */
+  function routeTicketGroup(group, statusKey) {
+    if (!group) return;
 
-.mini-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  padding: 10px 16px;
-  background: var(--orange);
-  color: #fff;
-  margin: 0 0 8px 0;
-}
+    switch (statusKey) {
+      case 'open':
+        if (openTicketsContainer) openTicketsContainer.appendChild(group);
+        break;
+      case 'tier2':
+        if (tierTwoTicketsContainer) tierTwoTicketsContainer.appendChild(group);
+        break;
+      case 'closed_resolved':
+        if (closedResolvedContainer) closedResolvedContainer.appendChild(group);
+        break;
+      case 'closed_feature_not_supported':
+        if (closedFeatureContainer) closedFeatureContainer.appendChild(group);
+        break;
+      default:
+        if (openTicketsContainer) openTicketsContainer.appendChild(group);
+        break;
+    }
 
-/* rows inside mini-cards */
-.mini-card .checklist-row,
-.champions-card .checklist-row,
-.blockers-card .checklist-row {
-  background: #fff;
-  margin-bottom: 0;
-}
-.mini-card .checklist-row:last-child,
-.champions-card .checklist-row:last-child,
-.blockers-card .checklist-row:last-child {
-  border-bottom: none;
-}
+    updateTicketCounts();
+  }
+
+  /* Attach ticket status handlers to selects (existing + newly cloned) */
+  function attachTicketStatusHandlers(scope) {
+    if (!scope) return;
+
+    const selects = scope.querySelectorAll('.ticket-status-select');
+    selects.forEach(select => {
+      if (select.dataset.boundStatus === '1') return;
+      select.dataset.boundStatus = '1';
+
+      // Default to Open if blank
+      if (!select.value) {
+        const openOption = Array.from(select.options).find(opt =>
+          opt.textContent.toLowerCase().startsWith('open')
+        );
+        if (openOption) {
+          select.value = openOption.value || openOption.textContent;
+        }
+      }
+
+      select.addEventListener('change', () => {
+        const group = select.closest('.ticket-group');
+        if (!group) return;
+
+        const statusKey = getStatusKey(select);
+
+        // If this is the primary "template" open card (with + button) and
+        // status changes away from "open", keep a fresh template behind.
+        const isInOpen = openTicketsContainer && openTicketsContainer.contains(group);
+        if (isInOpen && statusKey !== 'open') {
+          const integratedRow = group.querySelector('.checklist-row.integrated-plus');
+          const hasPlus = integratedRow && integratedRow.querySelector('.add-row');
+
+          if (hasPlus) {
+            // 1) Create a new blank template in Open (with + button)
+            const newTemplate = group.cloneNode(true);
+            newTemplate.querySelectorAll('input[type="text"], textarea').forEach(el => {
+              el.value = '';
+            });
+            newTemplate.querySelectorAll('select').forEach(sel => {
+              sel.selectedIndex = 0;
+            });
+
+            // ensure integrated-plus and + remain on template
+            const templateRow = newTemplate.querySelector('.checklist-row.integrated-plus');
+            if (templateRow) {
+              // leave as is; .add-row should be present already
+            }
+
+            if (openTicketsContainer.firstChild) {
+              openTicketsContainer.insertBefore(newTemplate, openTicketsContainer.firstChild);
+            } else {
+              openTicketsContainer.appendChild(newTemplate);
+            }
+            attachTicketStatusHandlers(newTemplate);
+
+            // 2) Remove + and integrated-plus from the moving group
+            if (integratedRow) {
+              integratedRow.classList.remove('integrated-plus');
+              const plusBtn = integratedRow.querySelector('.add-row');
+              if (plusBtn) plusBtn.remove();
+            }
+          }
+        }
+
+        routeTicketGroup(group, statusKey);
+      });
+    });
+  }
+
+  if (supportSection) {
+    initTicketHeaderBaseText();
+    attachTicketStatusHandlers(supportSection);
+    updateTicketCounts();
+  }
+
+  /* ===================================================
+     GENERIC + BUTTON HANDLER (for integrated-plus rows)
+     =================================================== */
+
+  document.querySelectorAll('.section-block .add-row').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // 1) Support Ticket page – CLONE entire ticket-group into Open
+      if (btn.closest('#support-ticket')) {
+        const group = btn.closest('.ticket-group');
+        if (group && openTicketsContainer && openTicketsContainer.contains(group)) {
+          const newGroup = group.cloneNode(true);
+
+          // Clear all text inputs and textareas
+          newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
+            el.value = '';
+          });
+          // Reset selects
+          newGroup.querySelectorAll('select').forEach(sel => {
+            sel.selectedIndex = 0;
+          });
+
+          // On cloned groups, remove integrated-plus + add-row from Support Ticket #
+          const ticketRow = newGroup.querySelector('.checklist-row.integrated-plus');
+          if (ticketRow) {
+            ticketRow.classList.remove('integrated-plus');
+            const plus = ticketRow.querySelector('.add-row');
+            if (plus) plus.remove();
+          }
+
+          openTicketsContainer.appendChild(newGroup);
+          attachTicketStatusHandlers(newGroup);
+          updateTicketCounts();
+          return;
+        }
+      }
+
+      // 2) Additional POC – clone entire contact card (Name/Cell/Email)
+      const pocCard = btn.closest('.poc-card');
+      const pocContainer = document.getElementById('additionalPocContainer');
+      if (pocCard && pocContainer && btn.closest('#dealership-info')) {
+        const newCard = pocCard.cloneNode(true);
+
+        newCard.querySelectorAll('input[type="text"], input[type="email"]').forEach(el => {
+          el.value = '';
+        });
+
+        pocContainer.appendChild(newCard);
+        return;
+      }
+
+      // 3) Default behavior for other integrated-plus buttons:
+      //    Clone the whole checklist-row and insert BELOW the current row,
+      //    remove + button and integrated-plus class so it becomes a
+      //    normal full-width rounded text box.
+      const row = btn.closest('.checklist-row');
+      const block = btn.closest('.section-block');
+      if (!row || !block) return;
+
+      const clone = row.cloneNode(true);
+      clone.classList.remove('integrated-plus');
+
+      // Clear inputs/selects in the clone
+      clone.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="date"]').forEach(el => {
+        el.value = '';
+      });
+      clone.querySelectorAll('select').forEach(sel => {
+        sel.selectedIndex = 0;
+      });
+
+      // Remove inner add-row so clones are just fixed text boxes
+      const innerAdd = clone.querySelector('.add-row');
+      if (innerAdd) innerAdd.remove();
+
+      // Insert the new row directly after the original so it appears under it
+      if (row.nextSibling) {
+        block.insertBefore(clone, row.nextSibling);
+      } else {
+        block.appendChild(clone);
+      }
+    });
+  });
+
+  /* === CLEAR PAGE BUTTONS (per-page reset) === */
+  document.querySelectorAll('.clear-page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.closest('.page-section');
+      if (!page) return;
+
+      const confirmReset = window.confirm(
+        'This will clear all fields on this page. This cannot be undone. Continue?'
+      );
+      if (!confirmReset) return;
+
+      // Clear all inputs
+      page.querySelectorAll('input').forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+
+      // Clear all selects
+      page.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
+      });
+
+      // Clear all textareas
+      page.querySelectorAll('textarea').forEach(area => {
+        area.value = '';
+      });
+
+      // Special handling for Support Ticket page
+      if (page.id === 'support-ticket' && openTicketsContainer) {
+        // Keep only the first ticket-group in Open as the template
+        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+        groups.forEach((group, index) => {
+          if (index === 0) {
+            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
+              el.value = '';
+            });
+            group.querySelectorAll('select').forEach(sel => {
+              sel.selectedIndex = 0;
+            });
+
+            // Ensure template keeps its integrated-plus + add-row
+            const ticketRow = group.querySelector('.checklist-row');
+            if (ticketRow) {
+              ticketRow.classList.add('integrated-plus');
+            }
+          } else {
+            group.remove();
+          }
+        });
+
+        if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
+        if (closedResolvedContainer) closedResolvedContainer.innerHTML = '';
+        if (closedFeatureContainer) closedFeatureContainer.innerHTML = '';
+
+        updateTicketCounts();
+      }
+    });
+  });
+
+  /* === CLEAR ALL BUTTON (global reset with double confirmation) === */
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', () => {
+      const first = window.confirm(
+        'This will clear ALL fields on ALL pages of this checklist. This cannot be undone. Continue?'
+      );
+      if (!first) return;
+
+      const second = window.confirm(
+        'Last check: Are you sure you want to erase EVERYTHING on all pages?'
+      );
+      if (!second) return;
+
+      // 1) Clear every input
+      document.querySelectorAll('input').forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+
+      // 2) Clear every select
+      document.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
+      });
+
+      // 3) Clear every textarea
+      document.querySelectorAll('textarea').forEach(area => {
+        area.value = '';
+      });
+
+      // 4) Support ticket groups – keep only the first template in Open
+      if (openTicketsContainer) {
+        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+        groups.forEach((group, index) => {
+          if (index === 0) {
+            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
+              el.value = '';
+            });
+            group.querySelectorAll('select').forEach(sel => {
+              sel.selectedIndex = 0;
+            });
+
+            const ticketRow = group.querySelector('.checklist-row');
+            if (ticketRow) {
+              ticketRow.classList.add('integrated-plus');
+            }
+          } else {
+            group.remove();
+          }
+        });
+      }
+      if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
+      if (closedResolvedContainer) closedResolvedContainer.innerHTML = '';
+      if (closedFeatureContainer) closedFeatureContainer.innerHTML = '';
+
+      updateTicketCounts();
+    });
+  }
+
+  /* === SAVE AS PDF (Training Summary Page, simple text export) === */
+  const saveBtn = document.getElementById('savePDF');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'pt', 'a4');
+      const pages = document.querySelectorAll('.page-section');
+
+      const marginX = 30, marginY = 30, maxWidth = 535;
+      let first = true;
+
+      for (const page of pages) {
+        if (!first) doc.addPage();
+        first = false;
+
+        const title = page.querySelector('h1')?.innerText || 'Section';
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text(title, marginX, marginY);
+
+        const text = page.innerText.replace(/\s+\n/g, '\n').trim();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        doc.text(lines, marginX, marginY + 24);
+      }
+
+      doc.save('Training_Summary.pdf');
+    });
+  }
+});
