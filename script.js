@@ -52,94 +52,147 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* === SUPPORT TICKET – MOVE TICKETS BETWEEN CARDS === */
+  /* =======================================================
+     SUPPORT TICKETS – ALWAYS KEEP A DEFAULT OPEN CARD
+     Four buckets:
+       - Open
+       - Tier Two
+       - Closed - Resolved
+       - Closed – Feature Not Supported
+     ======================================================= */
   const supportSection = document.getElementById('support-ticket');
   const openTicketsContainer = document.getElementById('openTicketsContainer');
-  const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedUnsupportedTicketsContainer = document.getElementById('closedUnsupportedTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedUnsupportedContainer = document.getElementById('closedUnsupportedTicketsContainer');
 
-  function moveTicketToBucket(select) {
-    if (!select) return;
-    const group = select.closest('.ticket-group');
+  let ticketTemplate = null; // base template for creating new open-ticket cards
+
+  function resetTicketGroup(group) {
     if (!group) return;
 
-    const raw = (select.value || '').toLowerCase().trim();
-    let target = openTicketsContainer;
+    // Clear all text inputs and textareas
+    group.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.value = '';
+    });
 
-    if (raw.startsWith('tier')) {
-      target = tierTwoTicketsContainer || openTicketsContainer;
-    } else if (raw.includes('resolved')) {
-      target = closedResolvedTicketsContainer || openTicketsContainer;
-    } else if (raw.includes('not supported')) {
-      target = closedUnsupportedTicketsContainer || openTicketsContainer;
+    // Reset ALL selects inside ticket card
+    group.querySelectorAll('select').forEach(sel => {
+      // Try to set to "Open" by text, else first option
+      const openOpt = Array.from(sel.options).find(o => /open/i.test(o.text));
+      if (openOpt) {
+        sel.value = openOpt.value;
+      } else {
+        sel.selectedIndex = 0;
+      }
+    });
+
+    // Ensure the status select has our class for event binding
+    let statusSelect = group.querySelector('.ticket-status-select');
+    if (!statusSelect) {
+      statusSelect = group.querySelector('select');
+      if (statusSelect) statusSelect.classList.add('ticket-status-select');
+    }
+  }
+
+  function initTicketTemplate() {
+    if (!openTicketsContainer) return;
+    const firstGroup = openTicketsContainer.querySelector('.ticket-group');
+    if (!firstGroup) return;
+
+    // Make sure the status dropdown has the class
+    let statusSelect = firstGroup.querySelector('.ticket-status-select');
+    if (!statusSelect) {
+      statusSelect = firstGroup.querySelector('select');
+      if (statusSelect) statusSelect.classList.add('ticket-status-select');
     }
 
-    if (target) {
-      target.appendChild(group);
+    ticketTemplate = firstGroup.cloneNode(true);
+    resetTicketGroup(ticketTemplate);
+  }
+
+  function ensureDefaultOpenTicket() {
+    if (!openTicketsContainer || !ticketTemplate) return;
+    const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+    if (groups.length === 0) {
+      const newGroup = ticketTemplate.cloneNode(true);
+      resetTicketGroup(newGroup);
+      openTicketsContainer.appendChild(newGroup);
+      attachTicketStatusHandlers(newGroup);
     }
+  }
+
+  function moveTicketGroup(group, newStatus) {
+    if (!group) return;
+
+    const val = (newStatus || '').toLowerCase();
+    let targetContainer = openTicketsContainer;
+
+    if (/tier/.test(val)) {
+      if (tierTwoContainer) targetContainer = tierTwoContainer;
+    } else if (/resolved/.test(val)) {
+      if (closedResolvedContainer) targetContainer = closedResolvedContainer;
+    } else if (/feature/.test(val) || /not supported/.test(val)) {
+      if (closedUnsupportedContainer) targetContainer = closedUnsupportedContainer;
+    } else {
+      targetContainer = openTicketsContainer;
+    }
+
+    // Hide add button on tickets that are NOT in Open bucket
+    const addBtn = group.querySelector('.add-row');
+    if (addBtn) {
+      if (targetContainer === openTicketsContainer) {
+        addBtn.style.display = 'flex';
+      } else {
+        addBtn.style.display = 'none';
+      }
+    }
+
+    if (targetContainer) {
+      targetContainer.appendChild(group);
+    }
+
+    // After moving, make sure there is at least ONE default open ticket card
+    ensureDefaultOpenTicket();
   }
 
   function attachTicketStatusHandlers(scope) {
     if (!scope) return;
     scope.querySelectorAll('.ticket-status-select').forEach(select => {
-      if (select.dataset.boundStatus === '1') return; // avoid duplicate listeners
+      if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
 
-      // Ensure default is Open when first loaded/created
-      if (!select.value) {
-        select.value = 'Open';
-      }
-
       select.addEventListener('change', () => {
-        moveTicketToBucket(select);
+        const group = select.closest('.ticket-group');
+        moveTicketGroup(group, select.value);
       });
     });
   }
 
-  if (supportSection) {
+  if (supportSection && openTicketsContainer) {
+    initTicketTemplate();
     attachTicketStatusHandlers(supportSection);
+
+    // Make sure a default open ticket exists on load
+    ensureDefaultOpenTicket();
   }
 
   /* === ADDITIONAL TRAINERS / POC / SUPPORT TICKETS / OTHER + BUTTONS === */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-
-      // 1) Support Ticket page – clone whole ticket-group into Open
-      if (btn.closest('#support-ticket')) {
-        const group = btn.closest('.ticket-group');
-        if (!group || !openTicketsContainer) return;
-
-        const newGroup = group.cloneNode(true);
-
-        // Clear all text inputs and textareas
-        newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-          el.value = '';
-        });
-
-        // Reset selects to "Open" (default)
-        newGroup.querySelectorAll('select').forEach(sel => {
-          sel.value = 'Open';
-        });
-
-        // Remove the add button from the NEW ticket
-        const newAddBtn = newGroup.querySelector('.add-row');
-        if (newAddBtn) {
-          newAddBtn.remove();
-        }
-
-        // Make the Support Ticket Number row in cloned tickets behave as a normal row
-        const firstRow = newGroup.querySelector('.checklist-row.integrated-plus');
-        if (firstRow) {
-          firstRow.classList.remove('integrated-plus');
-        }
-
+      // 1) SUPPORT TICKET PAGE – OPEN TICKETS ONLY:
+      //    clicking + makes a NEW ticket card in Open bucket from template
+      if (btn.closest('#support-ticket') && btn.closest('#openTicketsContainer')) {
+        if (!ticketTemplate || !openTicketsContainer) return;
+        const newGroup = ticketTemplate.cloneNode(true);
+        resetTicketGroup(newGroup);
         openTicketsContainer.appendChild(newGroup);
         attachTicketStatusHandlers(newGroup);
         return;
       }
 
       // 2) Additional POC – clone entire contact card (Name/Cell/Email)
+      //    Assumes markup with .poc-card and #additionalPocContainer
       const pocCard = btn.closest('.poc-card');
       const pocContainer = document.getElementById('additionalPocContainer');
       if (pocCard && pocContainer && btn.closest('#dealership-info')) {
@@ -150,59 +203,35 @@ window.addEventListener('DOMContentLoaded', () => {
           el.value = '';
         });
 
-        // Remove + from cloned POC card (only original card keeps the add button)
-        const pocAddBtn = newCard.querySelector('.add-row');
-        if (pocAddBtn) {
-          pocAddBtn.remove();
-        }
-
-        // Make POC rows normal (full-width rounded textboxes)
-        newCard.querySelectorAll('.checklist-row.integrated-plus').forEach(row => {
-          row.classList.remove('integrated-plus');
-        });
-
         pocContainer.appendChild(newCard);
         return;
       }
 
-      // 3) Default behavior for other integrated-plus buttons:
-      //    create a NEW checklist-row BELOW with a full-width textbox (no extra +).
+      // 3) DEFAULT BEHAVIOR FOR OTHER integrated-plus TEXT BOXES:
+      //    Create a NEW ROW beneath current one (label once, multiple lines).
       const row = btn.closest('.checklist-row');
       if (!row) return;
 
-      let input = btn.previousElementSibling;
-      if (!input || !(input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
-        input = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
-      }
+      const parentBlock = row.parentElement;
+      const input = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
       if (!input) return;
 
-      // Clone just the input, not the whole row
-      const clone = input.cloneNode(true);
-      clone.value = '';
-      clone.classList.add('stacked-input');
+      // Clone the row, but remove the add button so only the original row can spawn more
+      const newRow = row.cloneNode(true);
+      const newLabel = newRow.querySelector('label');
+      if (newLabel) newLabel.textContent = ''; // no label on stacked rows
 
-      // New row container under the current one
-      const parent = row.parentNode;
-      const newRow = document.createElement('div');
-      newRow.classList.add('checklist-row');
+      // Remove add button from new row
+      const newBtn = newRow.querySelector('.add-row');
+      if (newBtn) newBtn.remove();
 
-      // Preserve indent if the original row had it
-      if (row.classList.contains('indent-sub')) {
-        newRow.classList.add('indent-sub');
-      }
+      // Clear values in the cloned inputs
+      newRow.querySelectorAll('input[type="text"], input[type="number"], input[type="email"]').forEach(el => {
+        el.value = '';
+      });
 
-      // Empty label to keep alignment (label on left, textbox on right)
-      const emptyLabel = document.createElement('label');
-      emptyLabel.textContent = '';
-      newRow.appendChild(emptyLabel);
-      newRow.appendChild(clone);
-
-      // Insert new row right after the current row
-      if (row.nextSibling) {
-        parent.insertBefore(newRow, row.nextSibling);
-      } else {
-        parent.appendChild(newRow);
-      }
+      // Insert directly after the original row (so it appears BELOW)
+      row.insertAdjacentElement('afterend', newRow);
     });
   });
 
@@ -237,34 +266,19 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       // Special handling for Support Ticket page:
-      // keep only the first ticket-group in Open, empty others
       if (page.id === 'support-ticket') {
-        if (openTicketsContainer) {
-          const groups = openTicketsContainer.querySelectorAll('.ticket-group');
-          groups.forEach((group, index) => {
-            if (index > 0) group.remove();
-          });
+        if (openTicketsContainer && ticketTemplate) {
+          // Remove all ticket groups, then add one default blank card
+          openTicketsContainer.innerHTML = '';
+          const newGroup = ticketTemplate.cloneNode(true);
+          resetTicketGroup(newGroup);
+          openTicketsContainer.appendChild(newGroup);
+          attachTicketStatusHandlers(newGroup);
+        }
 
-          // Reset first group's fields & status
-          const first = openTicketsContainer.querySelector('.ticket-group');
-          if (first) {
-            first.querySelectorAll('input[type="text"], textarea').forEach(el => {
-              el.value = '';
-            });
-            first.querySelectorAll('select').forEach(sel => {
-              sel.value = 'Open';
-            });
-          }
-        }
-        if (tierTwoTicketsContainer) {
-          tierTwoTicketsContainer.innerHTML = '';
-        }
-        if (closedResolvedTicketsContainer) {
-          closedResolvedTicketsContainer.innerHTML = '';
-        }
-        if (closedUnsupportedTicketsContainer) {
-          closedUnsupportedTicketsContainer.innerHTML = '';
-        }
+        if (tierTwoContainer) tierTwoContainer.innerHTML = '';
+        if (closedResolvedContainer) closedResolvedContainer.innerHTML = '';
+        if (closedUnsupportedContainer) closedUnsupportedContainer.innerHTML = '';
       }
     });
   });
@@ -302,35 +316,17 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      // 4) Support ticket groups – keep only first ticket-group in Open, none elsewhere
-      if (openTicketsContainer) {
-        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
-        groups.forEach((group, index) => {
-          if (index > 0) group.remove();
-        });
-
-        const firstGroup = openTicketsContainer.querySelector('.ticket-group');
-        if (firstGroup) {
-          firstGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-            el.value = '';
-          });
-          firstGroup.querySelectorAll('select').forEach(sel => {
-            sel.value = 'Open';
-          });
-        }
+      // 4) Support ticket buckets – reset to one default open ticket
+      if (openTicketsContainer && ticketTemplate) {
+        openTicketsContainer.innerHTML = '';
+        const newGroup = ticketTemplate.cloneNode(true);
+        resetTicketGroup(newGroup);
+        openTicketsContainer.appendChild(newGroup);
+        attachTicketStatusHandlers(newGroup);
       }
-      if (tierTwoTicketsContainer) {
-        tierTwoTicketsContainer.innerHTML = '';
-      }
-      if (closedResolvedTicketsContainer) {
-        closedResolvedTicketsContainer.innerHTML = '';
-      }
-      if (closedUnsupportedTicketsContainer) {
-        closedUnsupportedTicketsContainer.innerHTML = '';
-      }
-
-      // NOTE: We are NOT removing extra rows in training tables –
-      // we only clear their content to avoid breaking structure.
+      if (tierTwoContainer) tierTwoContainer.innerHTML = '';
+      if (closedResolvedContainer) closedResolvedContainer.innerHTML = '';
+      if (closedUnsupportedContainer) closedUnsupportedContainer.innerHTML = '';
     });
   }
 
