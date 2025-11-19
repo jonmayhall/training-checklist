@@ -54,17 +54,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const supportSection = document.getElementById('support-ticket');
 
-  const openTicketsContainer   = document.getElementById('openTicketsContainer');
+  const openTicketsContainer    = document.getElementById('openTicketsContainer');
   const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+
+  // Be flexible for Closed - Resolved container ID
+  const closedResolvedContainer =
+    document.getElementById('closedResolvedTicketsContainer') ||
+    document.getElementById('closedTicketsContainer');
+
+  // Be flexible for Closed – Feature Not Supported container ID
   const closedFeatureContainer  =
     document.getElementById('closedFeatureNotSupportedTicketsContainer') ||
     document.getElementById('closedFeatureTicketsContainer');
 
-  const openTicketsHeader   = document.getElementById('openTicketsHeader');
+  const openTicketsHeader    = document.getElementById('openTicketsHeader');
   const tierTwoTicketsHeader = document.getElementById('tierTwoTicketsHeader');
-  const closedResolvedHeader = document.getElementById('closedResolvedTicketsHeader');
-  const closedFeatureHeader  = document.getElementById('closedFeatureHeader');
+  const closedResolvedHeader =
+    document.getElementById('closedResolvedTicketsHeader') ||
+    document.getElementById('closedTicketsHeader');
+  const closedFeatureHeader  =
+    document.getElementById('closedFeatureHeader') ||
+    document.getElementById('closedFeatureNotSupportedHeader');
 
   const ticketBuckets = [
     { key: 'open',   container: openTicketsContainer,   header: openTicketsHeader },
@@ -95,21 +105,29 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Normalize dropdown value/text into status key
+  // Normalize dropdown value/text into a status key
   function getStatusKey(select) {
     const raw = (select.value || select.options[select.selectedIndex]?.textContent || "")
       .toLowerCase()
       .trim();
 
+    // Open
     if (raw.startsWith('open')) return 'open';
+
+    // Tier Two
     if (raw.includes('tier')) return 'tier2';
+
+    // Closed - Resolved
     if (raw.includes('resolved')) return 'closed_resolved';
+
+    // Closed – Feature Not Supported (dash/en dash doesn’t matter, we just look for "feature")
     if (raw.includes('feature')) return 'closed_feature_not_supported';
 
+    // Fallback
     return 'open';
   }
 
-  // Move a ticket-group DOM node to the right bucket
+  // Move a ticket-group DOM node to the correct container
   function routeTicketGroup(group, statusKey) {
     if (!group) return;
 
@@ -125,19 +143,15 @@ window.addEventListener('DOMContentLoaded', () => {
       targetContainer = closedFeatureContainer;
     }
 
-    if (!targetContainer) {
-      // Fallback to Open if something's missing
-      targetContainer = openTicketsContainer;
-    }
+    // If something is missing, default to Open so the ticket never disappears
+    if (!targetContainer) targetContainer = openTicketsContainer;
+    if (!targetContainer) return;
 
     targetContainer.appendChild(group);
     updateTicketCounts();
   }
 
-  /**
-   * Attach change handlers to all .ticket-status-select
-   * in the given scope (page or newly cloned group).
-   */
+  // Attach change listeners to all ticket status dropdowns in a scope
   function attachTicketStatusHandlers(scope) {
     if (!scope) return;
 
@@ -146,7 +160,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
 
-      // Default to "Open" if not set
+      // Ensure default is Open
       if (!select.value) {
         const openOption = Array.from(select.options).find(opt =>
           opt.textContent.toLowerCase().startsWith('open')
@@ -162,23 +176,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const statusKey = getStatusKey(select);
 
-        // If this card is in Open AND has an integrated-plus row with a +
-        // it is acting as the template. When status changes away from "open",
-        // we leave a fresh blank template in Open and convert this one to a
-        // normal card with no +.
+        // If this is the template card in Open and status is changing away from "Open":
         const inOpen = openTicketsContainer && openTicketsContainer.contains(group);
         if (inOpen && statusKey !== 'open') {
           const integratedRow = group.querySelector('.checklist-row.integrated-plus');
           const hasPlus = integratedRow && integratedRow.querySelector('.add-row');
+
           if (hasPlus) {
-            // 1) create a new blank template
+            // 1) Create a fresh blank template in Open
             const newTemplate = group.cloneNode(true);
 
             newTemplate.querySelectorAll('input[type="text"], textarea').forEach(el => {
               el.value = '';
             });
             newTemplate.querySelectorAll('select').forEach(sel => {
-              // Set status dropdown back to Open
               if (sel.classList.contains('ticket-status-select')) {
                 const openOption = Array.from(sel.options).find(opt =>
                   opt.textContent.toLowerCase().startsWith('open')
@@ -193,12 +204,6 @@ window.addEventListener('DOMContentLoaded', () => {
               }
             });
 
-            // ensure new template stays integrated-plus with + button
-            const tmplRow = newTemplate.querySelector('.checklist-row.integrated-plus');
-            if (tmplRow && !tmplRow.querySelector('.add-row')) {
-              // if + was somehow missing, we don't rebuild it here to avoid HTML assumptions
-            }
-
             if (openTicketsContainer.firstChild) {
               openTicketsContainer.insertBefore(newTemplate, openTicketsContainer.firstChild);
             } else {
@@ -206,7 +211,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             attachTicketStatusHandlers(newTemplate);
 
-            // 2) convert this moving card into a normal card: no integrated-plus, no +
+            // 2) Convert the current card to a normal one (no plus)
             if (integratedRow) {
               integratedRow.classList.remove('integrated-plus');
               const plusBtn = integratedRow.querySelector('.add-row');
@@ -215,7 +220,7 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // Finally, move to the correct section (works for ALL four sections)
+        // Move card to correct section (Open / Tier Two / Closed - Resolved / Closed – Feature Not Supported)
         routeTicketGroup(group, statusKey);
       });
     });
@@ -233,7 +238,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // Support Ticket + is handled differently ABOVE (in Open section)
+      // Support tickets: only handle "+" in the Open template card here
       if (btn.closest('#support-ticket')) {
         const group = btn.closest('.ticket-group');
         if (group && openTicketsContainer && openTicketsContainer.contains(group)) {
@@ -243,7 +248,6 @@ window.addEventListener('DOMContentLoaded', () => {
             el.value = '';
           });
           newGroup.querySelectorAll('select').forEach(sel => {
-            // Reset status dropdown to Open, others to blank
             if (sel.classList.contains('ticket-status-select')) {
               const openOption = Array.from(sel.options).find(opt =>
                 opt.textContent.toLowerCase().startsWith('open')
@@ -258,7 +262,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // For cloned groups we remove the + from Support Ticket # row
           const integratedRow = newGroup.querySelector('.checklist-row.integrated-plus');
           if (integratedRow) {
             integratedRow.classList.remove('integrated-plus');
@@ -273,7 +276,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Non-support: default integrated-plus behavior
+      // Non-support integrated-plus behavior
       const row = btn.closest('.checklist-row');
       const block = btn.closest('.section-block');
       if (!row || !block) return;
@@ -326,12 +329,10 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      // Special handling for Support Ticket page
       if (page.id === 'support-ticket' && openTicketsContainer) {
         const groups = openTicketsContainer.querySelectorAll('.ticket-group');
         groups.forEach((group, index) => {
           if (index === 0) {
-            // reset template
             group.querySelectorAll('input[type="text"], textarea').forEach(el => {
               el.value = '';
             });
@@ -393,7 +394,6 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      // Reset support tickets
       if (openTicketsContainer) {
         const groups = openTicketsContainer.querySelectorAll('.ticket-group');
         groups.forEach((group, index) => {
