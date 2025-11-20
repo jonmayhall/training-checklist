@@ -49,37 +49,51 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ===================================================
-     SUPPORT TICKETS – INDEX-BASED ROUTING
+     SUPPORT TICKETS – LABEL-BASED ROUTING
      =================================================== */
 
   const supportSection = document.getElementById('support-ticket');
 
-  // Containers – MUST match your HTML IDs
   const openTicketsContainer = document.getElementById('openTicketsContainer');
   const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureNotSupportedTicketsContainer =
     document.getElementById('closedFeatureTicketsContainer');
 
-  // Always treat option[0] as "Open"
+  // Force dropdown to "Open" (first option)
   function setStatusToOpen(select) {
+    if (!select) return;
     select.selectedIndex = 0;
   }
 
-  // Map dropdown index → logical status key
-  // 0 = Open
-  // 1 = Tier Two
-  // 2 = Closed - Resolved
-  // 3 = Closed – Feature Not Supported
+  // Read visible option text and normalize it to decide where to route
   function getStatusKey(select) {
-    const idx = select.selectedIndex;
-    if (idx === 1) return 'tier2';
-    if (idx === 2) return 'closed_resolved';
-    if (idx === 3) return 'closed_feature_not_supported';
+    if (!select) return 'open';
+    const opt = select.options[select.selectedIndex];
+    if (!opt) return 'open';
+
+    let label = opt.textContent || opt.innerText || '';
+    label = label.toLowerCase();
+
+    // Normalize en dash / em dash to plain hyphen
+    label = label.replace(/[\u2013\u2014]/g, '-');
+    // Normalize multiple spaces
+    label = label.replace(/\s+/g, ' ').trim();
+
+    // Decide status by text content
+    if (label.startsWith('tier two')) {
+      return 'tier2';
+    }
+    if (label.includes('feature') && label.includes('not supported')) {
+      return 'closed_feature_not_supported';
+    }
+    if (label.includes('closed') && label.includes('resolved')) {
+      return 'closed_resolved';
+    }
+    // Everything else is treated as Open
     return 'open';
   }
 
-  // Move ticket group DOM into correct container
   function routeTicketGroup(group, statusKey) {
     let target = null;
 
@@ -93,7 +107,6 @@ window.addEventListener('DOMContentLoaded', () => {
       target = closedFeatureNotSupportedTicketsContainer;
     }
 
-    // Fallback: never lose the card – go back to Open
     if (!target) target = openTicketsContainer;
     if (!target) return;
 
@@ -110,7 +123,9 @@ window.addEventListener('DOMContentLoaded', () => {
       select.dataset.boundStatus = '1';
 
       // Default to Open on first load
-      if (select.selectedIndex < 0) setStatusToOpen(select);
+      if (select.selectedIndex < 0) {
+        setStatusToOpen(select);
+      }
 
       select.addEventListener('change', () => {
         const group = select.closest('.ticket-group');
@@ -167,8 +182,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===================================================
-     GENERIC + BUTTON HANDLER (non-support sections +
-     support template clone in Open)
+     GENERIC + BUTTON HANDLER (all integrated-plus rows)
      =================================================== */
 
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
