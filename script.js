@@ -49,55 +49,31 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ===================================================
-     SUPPORT TICKETS – header-based mapping, routing, counts
+     SUPPORT TICKETS – SIMPLE, ID-BASED ROUTING
      =================================================== */
 
   const supportSection = document.getElementById('support-ticket');
 
-  // ticketSections[key] = { block: .section-block, header: <h2>, baseTitle: string }
-  let ticketSections = {};
+  // Containers – these IDs match exactly what you pasted
+  const openTicketsContainer = document.getElementById('openTicketsContainer');
+  const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureNotSupportedTicketsContainer =
+    document.getElementById('closedFeatureTicketsContainer'); // <-- matches your HTML
 
-  function initTicketSections() {
-    ticketSections = {};
-    if (!supportSection) return;
-
-    supportSection.querySelectorAll('.section-block').forEach(block => {
-      const header = block.querySelector('h2');
-      if (!header) return;
-      const txt = header.textContent.toLowerCase();
-
-      let key = null;
-      if (txt.includes('open support tickets')) {
-        key = 'open';
-      } else if (txt.includes('tier two support tickets')) {
-        key = 'tier2';
-      } else if (
-        txt.includes('closed - resolved support tickets') ||
-        txt.includes('closed – resolved support tickets')
-      ) {
-        key = 'closed_resolved';
-      } else if (txt.includes('feature not supported')) {
-        key = 'closed_feature_not_supported';
-      }
-
-      if (!key) return;
-
-      ticketSections[key] = {
-        block,
-        header,
-        baseTitle: header.textContent.replace(/\(\d+\)$/, '').trim()
-      };
-    });
+  // Helpers
+  function setStatusToOpen(select) {
+    const openOption = Array.from(select.options).find(opt =>
+      opt.textContent.toLowerCase().startsWith('open')
+    );
+    if (openOption) {
+      select.value = openOption.value || openOption.textContent;
+    } else {
+      select.selectedIndex = 0;
+    }
   }
 
-  function updateTicketCounts() {
-    Object.values(ticketSections).forEach(sec => {
-      const count = sec.block.querySelectorAll('.ticket-group').length;
-      sec.header.textContent = count ? `${sec.baseTitle} (${count})` : sec.baseTitle;
-    });
-  }
-
-  // Normalize dropdown value/text into key
+  // Turn dropdown text into a logical status key
   function getStatusKey(select) {
     const raw = (select.value || select.options[select.selectedIndex]?.textContent || '')
       .toLowerCase()
@@ -111,26 +87,28 @@ window.addEventListener('DOMContentLoaded', () => {
     return 'open';
   }
 
-  // Move ticket-group into correct section block
+  // Move ticket group DOM into correct container
   function routeTicketGroup(group, statusKey) {
-    const target = ticketSections[statusKey] || ticketSections['open'];
-    if (!target) return;
-    target.block.appendChild(group);
-    updateTicketCounts();
-  }
+    let target = null;
 
-  function setStatusToOpen(select) {
-    const openOption = Array.from(select.options).find(opt =>
-      opt.textContent.toLowerCase().startsWith('open')
-    );
-    if (openOption) {
-      select.value = openOption.value || openOption.textContent;
-    } else {
-      select.selectedIndex = 0;
+    if (statusKey === 'open') {
+      target = openTicketsContainer;
+    } else if (statusKey === 'tier2') {
+      target = tierTwoTicketsContainer;
+    } else if (statusKey === 'closed_resolved') {
+      target = closedResolvedTicketsContainer;
+    } else if (statusKey === 'closed_feature_not_supported') {
+      target = closedFeatureNotSupportedTicketsContainer;
     }
+
+    // Fallback: never lose the card – go to Open
+    if (!target) target = openTicketsContainer;
+    if (!target) return;
+
+    target.appendChild(group);
   }
 
-  // Attach change listeners to all ticket status dropdowns in a scope
+  // Attach change handlers for all ticket status dropdowns in a scope
   function attachTicketStatusHandlers(scope) {
     if (!scope) return;
 
@@ -139,26 +117,23 @@ window.addEventListener('DOMContentLoaded', () => {
       if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
 
-      // make sure default is Open
-      if (!select.value) {
-        setStatusToOpen(select);
-      }
+      // Default to Open if nothing is selected
+      if (!select.value) setStatusToOpen(select);
 
       select.addEventListener('change', () => {
         const group = select.closest('.ticket-group');
         if (!group) return;
 
         const statusKey = getStatusKey(select);
-        const openSec = ticketSections['open'];
-        const inOpen = openSec && openSec.block.contains(group);
 
-        // If this is the template open card and the user changes away from Open:
-        if (inOpen && statusKey !== 'open' && openSec) {
+        // Is this the template card in Open (has integrated-plus + button)?
+        const inOpen = openTicketsContainer && openTicketsContainer.contains(group);
+        if (inOpen && statusKey !== 'open') {
           const integratedRow = group.querySelector('.checklist-row.integrated-plus');
           const hasPlus = integratedRow && integratedRow.querySelector('.add-row');
 
-          if (hasPlus) {
-            // 1) create a fresh blank template at the top of Open
+          if (hasPlus && openTicketsContainer) {
+            // 1) Clone a fresh template and keep it in Open
             const newTemplate = group.cloneNode(true);
 
             newTemplate.querySelectorAll('input[type="text"], textarea').forEach(el => {
@@ -172,34 +147,31 @@ window.addEventListener('DOMContentLoaded', () => {
               }
             });
 
-            const firstTicket = openSec.block.querySelector('.ticket-group');
-            if (firstTicket) {
-              openSec.block.insertBefore(newTemplate, firstTicket);
+            // Insert template at top of Open container
+            if (openTicketsContainer.firstChild) {
+              openTicketsContainer.insertBefore(newTemplate, openTicketsContainer.firstChild);
             } else {
-              openSec.block.appendChild(newTemplate);
+              openTicketsContainer.appendChild(newTemplate);
             }
 
+            // Template keeps integrated-plus and + button
             attachTicketStatusHandlers(newTemplate);
 
-            // 2) convert this moving card to normal (no integrated-plus, no + button)
-            if (integratedRow) {
-              integratedRow.classList.remove('integrated-plus');
-              const plusBtn = integratedRow.querySelector('.add-row');
-              if (plusBtn) plusBtn.remove();
-            }
+            // 2) Convert this moving card into a normal card: no integrated-plus, no +
+            integratedRow.classList.remove('integrated-plus');
+            const plusBtn = integratedRow.querySelector('.add-row');
+            if (plusBtn) plusBtn.remove();
           }
         }
 
-        // Move card to correct section (Open / Tier Two / Closed-Resolved / Closed–Feature Not Supported)
+        // Finally, move card based on status
         routeTicketGroup(group, statusKey);
       });
     });
   }
 
   if (supportSection) {
-    initTicketSections();
     attachTicketStatusHandlers(supportSection);
-    updateTicketCounts();
   }
 
   /* ===================================================
@@ -209,12 +181,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // SUPPORT TICKET "+" – only for template in Open
+      // SUPPORT TICKETS: "+" only meaningful for template card in Open
       if (btn.closest('#support-ticket')) {
         const group = btn.closest('.ticket-group');
-        const openSec = ticketSections['open'];
-
-        if (group && openSec && openSec.block.contains(group)) {
+        if (group && openTicketsContainer && openTicketsContainer.contains(group)) {
           const newGroup = group.cloneNode(true);
 
           newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
@@ -228,7 +198,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // cloned groups: no integrated-plus or +
+          // New tickets: no integrated-plus, no +
           const integratedRow = newGroup.querySelector('.checklist-row.integrated-plus');
           if (integratedRow) {
             integratedRow.classList.remove('integrated-plus');
@@ -236,14 +206,13 @@ window.addEventListener('DOMContentLoaded', () => {
             if (plus) plus.remove();
           }
 
-          openSec.block.appendChild(newGroup);
+          openTicketsContainer.appendChild(newGroup);
           attachTicketStatusHandlers(newGroup);
-          updateTicketCounts();
           return;
         }
       }
 
-      // NON-SUPPORT: default integrated-plus behavior
+      // NON-SUPPORT: default behavior for integrated-plus rows
       const row = btn.closest('.checklist-row');
       const block = btn.closest('.section-block');
       if (!row || !block) return;
@@ -298,48 +267,35 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      // Special handling for Support Ticket page
-      if (page.id === 'support-ticket') {
-        initTicketSections();
+      // Reset support ticket structure on this page
+      if (page.id === 'support-ticket' && openTicketsContainer) {
+        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+        groups.forEach((group, index) => {
+          if (index === 0) {
+            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
+              el.value = '';
+            });
+            group.querySelectorAll('select').forEach(sel => {
+              if (sel.classList.contains('ticket-status-select')) {
+                setStatusToOpen(sel);
+              } else {
+                sel.selectedIndex = 0;
+              }
+            });
+          } else {
+            group.remove();
+          }
+        });
 
-        const openSec = ticketSections['open'];
-        const tier2Sec = ticketSections['tier2'];
-        const closedResSec = ticketSections['closed_resolved'];
-        const closedFeatSec = ticketSections['closed_feature_not_supported'];
-
-        if (openSec) {
-          const groups = openSec.block.querySelectorAll('.ticket-group');
-          groups.forEach((group, index) => {
-            if (index === 0) {
-              group.querySelectorAll('input[type="text"], textarea').forEach(el => {
-                el.value = '';
-              });
-              group.querySelectorAll('select').forEach(sel => {
-                if (sel.classList.contains('ticket-status-select')) {
-                  setStatusToOpen(sel);
-                } else {
-                  sel.selectedIndex = 0;
-                }
-              });
-
-              // ensure template has integrated-plus row & + button untouched
-            } else {
-              group.remove();
-            }
-          });
+        if (tierTwoTicketsContainer) {
+          tierTwoTicketsContainer.innerHTML = '';
         }
-
-        if (tier2Sec) {
-          tier2Sec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
+        if (closedResolvedTicketsContainer) {
+          closedResolvedTicketsContainer.innerHTML = '';
         }
-        if (closedResSec) {
-          closedResSec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
+        if (closedFeatureNotSupportedTicketsContainer) {
+          closedFeatureNotSupportedTicketsContainer.innerHTML = '';
         }
-        if (closedFeatSec) {
-          closedFeatSec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
-        }
-
-        updateTicketCounts();
       }
     });
   });
@@ -374,44 +330,34 @@ window.addEventListener('DOMContentLoaded', () => {
         area.value = '';
       });
 
-      if (supportSection) {
-        initTicketSections();
-
-        const openSec = ticketSections['open'];
-        const tier2Sec = ticketSections['tier2'];
-        const closedResSec = ticketSections['closed_resolved'];
-        const closedFeatSec = ticketSections['closed_feature_not_supported'];
-
-        if (openSec) {
-          const groups = openSec.block.querySelectorAll('.ticket-group');
-          groups.forEach((group, index) => {
-            if (index === 0) {
-              group.querySelectorAll('input[type="text"], textarea').forEach(el => {
-                el.value = '';
-              });
-              group.querySelectorAll('select').forEach(sel => {
-                if (sel.classList.contains('ticket-status-select')) {
-                  setStatusToOpen(sel);
-                } else {
-                  sel.selectedIndex = 0;
-                }
-              });
-            } else {
-              group.remove();
-            }
-          });
-        }
-        if (tier2Sec) {
-          tier2Sec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
-        }
-        if (closedResSec) {
-          closedResSec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
-        }
-        if (closedFeatSec) {
-          closedFeatSec.block.querySelectorAll('.ticket-group').forEach(g => g.remove());
-        }
-
-        updateTicketCounts();
+      // Reset support tickets globally
+      if (openTicketsContainer) {
+        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
+        groups.forEach((group, index) => {
+          if (index === 0) {
+            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
+              el.value = '';
+            });
+            group.querySelectorAll('select').forEach(sel => {
+              if (sel.classList.contains('ticket-status-select')) {
+                setStatusToOpen(sel);
+              } else {
+                sel.selectedIndex = 0;
+              }
+            });
+          } else {
+            group.remove();
+          }
+        });
+      }
+      if (tierTwoTicketsContainer) {
+        tierTwoTicketsContainer.innerHTML = '';
+      }
+      if (closedResolvedTicketsContainer) {
+        closedResolvedTicketsContainer.innerHTML = '';
+      }
+      if (closedFeatureNotSupportedTicketsContainer) {
+        closedFeatureNotSupportedTicketsContainer.innerHTML = '';
       }
     });
   }
