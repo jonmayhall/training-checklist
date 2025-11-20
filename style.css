@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable + Visual Polish + Contact Cards + Spacing Fix
+   Stable + Visual Polish + Contact Cards + Spacing Fix 2
    ======================================================= */
 
 :root {
@@ -35,7 +35,6 @@ html, body {
 
 /* ===== TOP BAR ===== */
 #topbar {
-  /* black → orange gradient */
   background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
   height: 70px;
   display: flex;
@@ -311,6 +310,11 @@ main {
   margin-bottom: 30px;
 }
 
+/* Training Summary page – loosen top a bit */
+#training-summary .section-block:first-of-type {
+  margin-top: 8px;
+}
+
 /* ===== NON-TABLE ROWS (Q&A lines) ===== */
 .checklist-row {
   display: flex;
@@ -335,7 +339,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (base) */
+/* Inputs on the RIGHT (base) + shared height with dropdowns */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -351,7 +355,16 @@ main {
   background: #f7f7f7;
   font-size: 13px;
   box-sizing: border-box;
+  height: 36px;             /* enforce consistent height */
 }
+
+/* also equal heights inside training tables */
+.training-table input[type="text"],
+.training-table select {
+  height: 32px;
+  box-sizing: border-box;
+}
+
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -383,7 +396,7 @@ main {
    MINI-CARDS for Contacts + Champions / Blockers
    ======================================================= */
 
-/* Make contact cards visually match Champions/Blockers style */
+/* Contact + Additional POC cards should match Champions/Blockers look */
 .mini-card,
 .contact-card,
 .poc-card {
@@ -410,7 +423,8 @@ main {
   border-bottom: none;
 }
 
-/* give inputs inside these cards a bit of right breathing room */
+/* give inputs inside these cards a bit of right breathing room,
+   BUT keep integrated-plus inputs aligned */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="number"],
@@ -421,6 +435,13 @@ main {
 .poc-card .checklist-row input[type="email"],
 .poc-card .checklist-row input[type="number"] {
   margin-right: 10px;
+}
+
+/* override margin-right for integrated-plus rows so
+   textbox + button align with other right-side fields */
+.contact-card .checklist-row.integrated-plus input[type="text"],
+.poc-card .checklist-row.integrated-plus input[type="text"] {
+  margin-right: 0;
 }
 
 /* semantic aliases */
@@ -482,7 +503,7 @@ main {
 }
 
 /* Text box in integrated + rows:
-   reduce width so (input + 34px button) = var(--input-width) total */
+   (input + 34px button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -493,7 +514,8 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – pill on the right, touching the input */
+/* Integrated + button – pill on the right, touching the input.
+   Same size everywhere (Additional Trainers, POC, Champions, Support Ticket #) */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -582,13 +604,9 @@ main {
   font-size: 14px;
 }
 
-/* Support ticket number textbox alignment (same width as others) */
-#support-ticket .checklist-row.integrated-plus input[type="text"],
-#support-ticket .ticket-group .checklist-row input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);
-}
+/* Support Ticket Number textbox + button use integrated-plus, so
+   we do NOT override width or radius here – they follow the global
+   integrated-plus rules and match Additional Trainers. */
 
 /* =======================================================
    DMS PAGE – GRID CARDS with DOTS
@@ -620,8 +638,18 @@ main {
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
 
+/* DMS Integration Matrix – give the whole section a card border */
+#dms-integration .section {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding-bottom: 4px;
+  margin-bottom: 26px;
+}
+
 .dms-table-container {
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .dms-grid {
@@ -987,28 +1015,28 @@ main {
   text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
-/* Match widths to Labor Opcodes table for consistent look */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
+/* PARTS PRICING VERIFICATION TABLE = second .section inside #opcodes-pricing.
+   Match widths to Labor Opcodes table for consistent look. */
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
 
-/* Make List Price / Cost / Markup % match opcode money width (110px) */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
+/* List Price / Cost / Markup % match opcode money widths */
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
   width: 110px;
   min-width: 110px;
 }
 
 /* Description takes remaining width; center header + cell text */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: center;
 }
