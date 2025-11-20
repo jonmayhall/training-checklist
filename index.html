@@ -5,14 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-  <!-- CSS (you can keep or change the version string as needed) -->
-  <link rel="stylesheet" href="style.css?v=20251117A">
+  <!-- Auto Cache-Busting Loader -->
+  <script>
+    const ts = Date.now();  // unique timestamp for each page load
+
+    // Load CSS
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = `style.css?v=${ts}`;
+    document.head.appendChild(css);
+
+    // Load JS
+    const js = document.createElement('script');
+    js.src = `script.js?v=${ts}`;
+    js.defer = true;
+    document.head.appendChild(js);
+  </script>
 
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <!-- Main JS (keep your existing version tag or adjust) -->
-  <script src="script.js?v=20251117A" defer></script>
 </head>
 
 <body>
