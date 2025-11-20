@@ -1,6 +1,6 @@
 // =======================================================
 // myKaarma Interactive Training Checklist – FULL JS
-// Stable reset + clear-all + nav + support tickets
+// Stable nav + add buttons + support tickets + proper reset
 // =======================================================
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -20,8 +20,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (nav) {
       nav.querySelectorAll('.nav-btn').forEach(b => {
-        if (b.dataset.target === sectionId) b.classList.add('active');
-        else b.classList.remove('active');
+        if (b.dataset.target === sectionId) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
       });
     }
 
@@ -36,6 +39,16 @@ window.addEventListener('DOMContentLoaded', () => {
       goToSection(targetId);
     });
   }
+
+  /* =========================================
+     TRAINING TABLES – store original row counts
+  ========================================= */
+  document.querySelectorAll('table.training-table').forEach(table => {
+    const tbody = table.tBodies[0];
+    if (tbody) {
+      table.dataset.initialRowCount = String(tbody.rows.length);
+    }
+  });
 
   /* =========================================
      TRAINING TABLE "+" BUTTONS
@@ -131,9 +144,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   /* =========================================
      SUPPORT TICKETS
-     - Move cards between four sections based on dropdown
-     - Always keep at least one Open ticket (with +)
-     - Cloned tickets from + have no + and normal textbox
   ========================================= */
   const supportSection = document.getElementById('support-ticket');
   const openTicketsContainer = document.getElementById('openTicketsContainer');
@@ -143,7 +153,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   let baseTicketTemplate = null;
 
-  // Helpers are defined here so other parts (clear buttons) can call them
   function normalizeStatusValue(str) {
     if (!str) return '';
     let s = String(str).trim();
@@ -255,7 +264,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!page) return;
 
       const confirmReset = window.confirm(
-        'This will clear all fields on this page. This cannot be undone. Continue?'
+        'This will clear all fields on this page and restore the layout to default. This cannot be undone. Continue?'
       );
       if (!confirmReset) return;
 
@@ -269,7 +278,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       page.querySelectorAll('textarea').forEach(area => { area.value = ''; });
 
-      // 2) SUPPORT TICKET PAGE SPECIAL HANDLING
+      // 2) SUPPORT TICKET PAGE – reset to default layout
       if (page.id === 'support-ticket' && openTicketsContainer) {
         openTicketsContainer.innerHTML = '';
         if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
@@ -299,6 +308,16 @@ window.addEventListener('DOMContentLoaded', () => {
           if (index > 0) card.remove();
         });
       }
+
+      // 5) Reset training tables on this page to their original row count
+      page.querySelectorAll('table.training-table').forEach(table => {
+        const tbody = table.tBodies[0];
+        if (!tbody) return;
+        const initial = parseInt(table.dataset.initialRowCount || tbody.rows.length, 10);
+        while (tbody.rows.length > initial) {
+          tbody.deleteRow(tbody.rows.length - 1);
+        }
+      });
     });
   });
 
@@ -311,7 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     clearAllBtn.addEventListener('click', () => {
       const first = window.confirm(
-        'This will clear ALL fields on ALL pages of this checklist. This cannot be undone. Continue?'
+        'This will clear ALL fields on ALL pages and restore layouts to default. This cannot be undone. Continue?'
       );
       if (!first) return;
 
@@ -358,7 +377,17 @@ window.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // 5) Go back to first page (Onsite Trainers & CEM)
+      // 5) Reset ALL training tables globally to their original row count
+      document.querySelectorAll('table.training-table').forEach(table => {
+        const tbody = table.tBodies[0];
+        if (!tbody) return;
+        const initial = parseInt(table.dataset.initialRowCount || tbody.rows.length, 10);
+        while (tbody.rows.length > initial) {
+          tbody.deleteRow(tbody.rows.length - 1);
+        }
+      });
+
+      // 6) Go back to first page (Onsite Trainers & CEM)
       goToSection('onsite-trainers');
     });
   }
