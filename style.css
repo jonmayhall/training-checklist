@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable + Layout / Card / Table / Support / DMS / Champions Fixes
+   Stable build with aligned cards, add-buttons, and tables
    ======================================================= */
 
 :root {
@@ -28,8 +28,8 @@ html, body {
   overflow-x: hidden;
 }
 
-/* no italics anywhere by default – use .muted-note to re-enable */
-*, em, i {
+/* no italics anywhere by default */
+*, em, i { 
   font-style: normal !important;
 }
 
@@ -47,15 +47,15 @@ html, body {
   z-index: 20;
   border-radius: 0;
 }
-.topbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+.topbar-content { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  width: 100%; 
 }
-.top-logo {
-  height: 42px;
-  object-fit: contain;
+.top-logo { 
+  height: 42px; 
+  object-fit: contain; 
 }
 
 .topbar-right {
@@ -64,19 +64,19 @@ html, body {
   gap: 10px;
 }
 
-#dealershipNameDisplay {
-  color:#fff;
+#dealershipNameDisplay { 
+  color:#fff; 
   font-size:22px;
-  font-weight:600;
-  letter-spacing:.5px;
+  font-weight:600; 
+  letter-spacing:.5px; 
 }
 
 /* ===== LAYOUT ===== */
-#app {
-  display: flex;
-  min-height: 100vh;
-  margin-top: 70px;
-  overflow-x: hidden;
+#app { 
+  display: flex; 
+  min-height: 100vh; 
+  margin-top: 70px; 
+  overflow-x: hidden; 
 }
 
 /* Darker, more modern sidebar */
@@ -91,10 +91,10 @@ html, body {
   bottom: 0;
   overflow-y: auto;
 }
-#sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+#sidebar-nav { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
 }
 
 /* hide icon span but keep label – "no icons" */
@@ -224,8 +224,8 @@ main {
   max-width: 1100px;
   box-sizing: border-box;
 }
-.page-section.active {
-  display: block;
+.page-section.active { 
+  display: block; 
 }
 
 /* Page titles */
@@ -255,7 +255,7 @@ main {
   color: #555;
 }
 
-/* Section headers */
+/* Section headers for table sections */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -269,26 +269,15 @@ main {
   align-items: center;
   gap: 8px;
 }
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.8);
-  font-size: 12px;
-  font-weight: 600;
-}
 
-/* Section blocks (non-table cards) */
+/* Section blocks (non-table cards, plus big cards like Contacts, Champions) */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   padding: 0 22px 14px;
-  margin-bottom: 28px;
+  margin-bottom: 26px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
@@ -306,15 +295,9 @@ main {
   margin-right: -22px;
 }
 
-/* Extra breathing room after notes cards (those with "Additional Comments") */
-.section-block h2 span,
-.section-block h2 {
-  /* nothing special here, but if you later wrap text in spans we’re ready */
-}
-
-/* spacing between generic .section and .section-block a bit larger for visual break */
-.section {
-  margin-bottom: 36px;
+/* Notes card spacing: slightly more breathing room before next block */
+.section-block + .section-block {
+  margin-top: 4px;
 }
 
 /* ===== NON-TABLE ROWS (Q&A lines) ===== */
@@ -352,6 +335,7 @@ main {
   margin-left: auto;
   margin-right: 0;
   padding: 7px 10px;
+  height: 34px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
@@ -385,23 +369,24 @@ main {
   padding-left: 60px !important;
 }
 
-/* iOS negative number fix – plain number field only */
-.section-block .checklist-row input[type="number"] {
-  min-width: var(--input-width);
-}
-
 /* =======================================================
    MINI-CARDS for Contacts + Champions / Blockers
    ======================================================= */
 
 .mini-card {
-  border: 2px solid var(--orange);
+  border: 1px solid var(--orange);
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
+  padding: 4px 0 6px;
+}
+
+/* mini-card header */
+.mini-card-title {
+  font-size: 14px;
+  font-weight: 600;
   padding: 6px 18px 4px;
-  box-sizing: border-box;
-  overflow: hidden;
+  color: var(--orange);
 }
 
 /* rows inside mini-card */
@@ -409,13 +394,13 @@ main {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 26px; /* bring content in from orange edge */
+  padding-left: 32px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* ensure no background tint sneaks in */
+/* keep backgrounds clean in mini-cards */
 .mini-card .checklist-row {
   background: #fff !important;
 }
@@ -425,56 +410,24 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* Champions & Blockers inner cards */
-.champions-card,
-.blockers-card {
-  border: 2px solid var(--orange);
-  border-radius: 14px;
-  padding: 10px 18px 6px;
-  margin: 14px 0;
-  background: #fff;
-  box-sizing: border-box;
-}
-
-/* sub-title in champions/blockers cards (e.g. "Champions", "Blockers") */
-.champions-card-title,
-.blockers-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--orange);
-}
-
-/* champion/blocker rows a little tighter left */
-.champions-card .checklist-row,
-.blockers-card .checklist-row {
-  padding-left: 24px;
-}
-
-/* POC card container */
-.poc-card {
-  border: 2px solid var(--orange);
-  border-radius: 14px;
-  padding: 8px 18px 6px;
-  margin: 14px 0;
-  background: #fff;
-}
-
-/* checklist rows inside POC card */
-.poc-card .checklist-row {
-  padding-left: 26px;
+/* Make inputs in mini-cards align with global width */
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="number"],
+.mini-card .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
 }
 
 /* =======================================================
    Integrated “+” button rows
    ======================================================= */
-/* Layout: [label..............] [input same width][+ button touching] */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0; /* no gap between input and + button */
+  gap: 0;
 }
 
 /* Label behaves like normal rows */
@@ -484,28 +437,30 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated + rows:
-   (input + 40px button) ~= var(--input-width) total */
+/* Text box: shrink so (input + button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 40px);
-  width: calc(var(--input-width) - 40px);
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
   margin-left: auto;
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  height: 34px;
 }
 
-/* Integrated + button – same height as input, flush on right */
+/* Integrated + button – same height as text boxes, flush */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
-  flex: 0 0 40px;
+  flex: 0 0 34px;
+  position: relative;
   margin-left: -1px; /* overlap borders so they “touch” */
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 40px;
+  width: 34px;
+  height: 34px;
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
@@ -515,7 +470,6 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;         /* let height match input */
 }
 .section-block .checklist-row.integrated-plus > .add-row:hover,
 .section-block .checklist-row:has(> .add-row) > .add-row:hover {
@@ -523,15 +477,14 @@ main {
   transform: translateY(-1px);
 }
 
-/* Cloned extra text boxes (without + button) – full rounded on right */
-.section-block .checklist-row.extra-input-row input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);
+/* ensure mini-card integrated-plus also respects same layout */
+.mini-card .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
 }
 
 /* =======================================================
-   SUPPORT TICKET – clearer Ticket groups
+   SUPPORT TICKET – Ticket groups
    ======================================================= */
 
 .ticket-group {
@@ -543,7 +496,12 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* “Ticket” pill (if used) */
+/* Slightly tighter rows for tickets */
+.ticket-group .checklist-row {
+  padding-left: 24px;
+}
+
+/* “Ticket” pill (optional, if used) */
 .ticket-pill {
   display: inline-flex;
   align-items: center;
@@ -560,29 +518,6 @@ main {
 
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
-}
-
-.ticket-status-row {
-  border-bottom: 1px dashed #ddd;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-}
-
-/* Align Support Ticket Number textbox + button with others */
-#support-ticket .section-block .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 40px);
-  width: calc(var(--input-width) - 40px);
-}
-#support-ticket .section-block .checklist-row.integrated-plus > .add-row {
-  flex-basis: 40px;
-}
-
-/* support ticket header counts if added dynamically */
-.ticket-count-badge {
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 6px;
-  color: #111827;
 }
 
 /* =======================================================
@@ -615,14 +550,12 @@ main {
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
 
-/* Give DMS matrix a proper card border + background */
 .dms-table-container {
   margin-top: 16px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  background: #fff;
   box-shadow: var(--shadow);
-  padding-bottom: 8px;
+  background: #fff;
 }
 
 .dms-grid {
@@ -729,8 +662,8 @@ main {
    Training TABLES
    ======================================================= */
 
-.section {
-  margin-bottom: 36px;
+.section { 
+  margin-bottom: 40px; 
 }
 
 /* Table Card – no side padding so orange header touches edges */
@@ -795,7 +728,7 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child {
+.training-table thead th:first-child { 
   text-align: center;
 }
 .training-table td:first-child {
@@ -850,11 +783,11 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) {
-  background: #fff;
+.training-table tr:nth-child(odd) { 
+  background: #fff; 
 }
-.training-table tr:nth-child(even) {
-  background: #fafafa;
+.training-table tr:nth-child(even) { 
+  background: #fafafa; 
 }
 
 /* Table footer + "+" button  */
@@ -889,9 +822,9 @@ main {
 }
 
 /* ===== Scrollbar (horizontal) ===== */
-.scroll-wrapper::-webkit-scrollbar,
-.table-container::-webkit-scrollbar {
-  height: 8px;
+.scroll-wrapper::-webkit-scrollbar, 
+.table-container::-webkit-scrollbar { 
+  height: 8px; 
 }
 .scroll-wrapper::-webkit-scrollbar-thumb,
 .table-container::-webkit-scrollbar-thumb {
@@ -899,8 +832,8 @@ main {
   border-radius: 6px;
 }
 .scroll-wrapper::-webkit-scrollbar-thumb:hover,
-.table-container::-webkit-scrollbar-thumb:hover {
-  background-color: #999;
+.table-container::-webkit-scrollbar-thumb:hover { 
+  background-color: #999; 
 }
 
 /* ===== Floating PDF button (summary page) ===== */
@@ -926,17 +859,12 @@ main {
   background: #ff8b42;
 }
 
-/* Extra spacing on Training Summary page so first textarea isn’t crowded */
-#training-summary .section-block:first-of-type {
-  margin-top: 8px;
-}
-
 /* ===== Footer ===== */
-#footer {
-  padding: 24px;
-  text-align: center;
-  color: #666;
-  font-size: 13px;
+#footer { 
+  padding: 24px; 
+  text-align: center; 
+  color: #666; 
+  font-size: 13px; 
 }
 
 /* ===== Muted note ===== */
@@ -966,18 +894,19 @@ main {
 }
 
 /* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
+#opcodes-pricing .section:first-of-type .training-table {
+  table-layout: fixed;
+}
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
-
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
   width: 70px;   /* Hours */
   min-width: 70px;
 }
-
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
@@ -985,53 +914,37 @@ main {
   width: 110px;  /* Customer Pay + Warranty Pay */
   min-width: 110px;
 }
-
-/* Description gets the remainder and is centered */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing
-   Make middle columns small and last column wide (similar feel to Labor Opcodes) */
+/* PARTS PRICING VERIFICATION TABLE – MATCH LABOR OPCODES LAYOUT */
 #opcodes-pricing .section:last-of-type .training-table {
-  table-layout: fixed;  /* ensures width rules are respected */
+  table-layout: fixed;
 }
-
-/* Column 1 – Updated checkbox */
+/* Col 1 – Updated (checkbox) – same as labor */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
-
-/* Column 2 – Part Number (moderate) */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(2),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(2) {
-  width: 130px;
-  min-width: 130px;
-}
-
-/* Columns 3/4/5 – List Price / Cost / Markup % – small */
+/* Col 3 – List Price – same narrow profile as Hours */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(3) {
+  width: 70px;
+  min-width: 70px;
+}
+/* Col 4 & 5 – Cost + Markup % – same as Customer/Warranty Pay style */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+  width: 110px;
+  min-width: 110px;
 }
-
-/* Let the inputs in these three narrow cells actually shrink */
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3) input[type="text"],
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(4) input[type="text"],
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) input[type="text"] {
-  min-width: 0;
-}
-
-/* Column 6 – Description gets the remaining width */
+/* Col 6 – Description – wide */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
