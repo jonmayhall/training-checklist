@@ -49,41 +49,33 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ===================================================
-     SUPPORT TICKETS – SIMPLE, ID-BASED ROUTING
+     SUPPORT TICKETS – INDEX-BASED ROUTING
      =================================================== */
 
   const supportSection = document.getElementById('support-ticket');
 
-  // Containers – these IDs match exactly what you pasted
+  // Containers – MUST match your HTML IDs
   const openTicketsContainer = document.getElementById('openTicketsContainer');
   const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureNotSupportedTicketsContainer =
-    document.getElementById('closedFeatureTicketsContainer'); // <-- matches your HTML
+    document.getElementById('closedFeatureTicketsContainer');
 
-  // Helpers
+  // Always treat option[0] as "Open"
   function setStatusToOpen(select) {
-    const openOption = Array.from(select.options).find(opt =>
-      opt.textContent.toLowerCase().startsWith('open')
-    );
-    if (openOption) {
-      select.value = openOption.value || openOption.textContent;
-    } else {
-      select.selectedIndex = 0;
-    }
+    select.selectedIndex = 0;
   }
 
-  // Turn dropdown text into a logical status key
+  // Map dropdown index → logical status key
+  // 0 = Open
+  // 1 = Tier Two
+  // 2 = Closed - Resolved
+  // 3 = Closed – Feature Not Supported
   function getStatusKey(select) {
-    const raw = (select.value || select.options[select.selectedIndex]?.textContent || '')
-      .toLowerCase()
-      .trim();
-
-    if (raw.startsWith('open')) return 'open';
-    if (raw.includes('tier')) return 'tier2';
-    if (raw.includes('resolved')) return 'closed_resolved';
-    if (raw.includes('feature')) return 'closed_feature_not_supported';
-
+    const idx = select.selectedIndex;
+    if (idx === 1) return 'tier2';
+    if (idx === 2) return 'closed_resolved';
+    if (idx === 3) return 'closed_feature_not_supported';
     return 'open';
   }
 
@@ -101,7 +93,7 @@ window.addEventListener('DOMContentLoaded', () => {
       target = closedFeatureNotSupportedTicketsContainer;
     }
 
-    // Fallback: never lose the card – go to Open
+    // Fallback: never lose the card – go back to Open
     if (!target) target = openTicketsContainer;
     if (!target) return;
 
@@ -117,8 +109,8 @@ window.addEventListener('DOMContentLoaded', () => {
       if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
 
-      // Default to Open if nothing is selected
-      if (!select.value) setStatusToOpen(select);
+      // Default to Open on first load
+      if (select.selectedIndex < 0) setStatusToOpen(select);
 
       select.addEventListener('change', () => {
         const group = select.closest('.ticket-group');
