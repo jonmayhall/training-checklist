@@ -4,7 +4,9 @@
 // =======================================================
 
 window.addEventListener('DOMContentLoaded', () => {
-  /* === SIDEBAR NAVIGATION === */
+  /* =====================================================
+     SIDEBAR NAVIGATION
+     ===================================================== */
   const nav = document.getElementById('sidebar-nav');
   const sections = document.querySelectorAll('.page-section');
 
@@ -15,9 +17,11 @@ window.addEventListener('DOMContentLoaded', () => {
       const target = document.getElementById(btn.dataset.target);
       if (!target) return;
 
+      // Highlight active nav
       nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
+      // Swap page
       sections.forEach(sec => sec.classList.remove('active'));
       target.classList.add('active');
 
@@ -25,7 +29,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* === TRAINING TABLE ADD ROW HANDLER === */
+  /* =====================================================
+     TRAINING TABLE – ADD ROW BUTTONS
+     ===================================================== */
   document.querySelectorAll('.table-footer .add-row').forEach(button => {
     button.addEventListener('click', () => {
       const section = button.closest('.section');
@@ -48,205 +54,245 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* ===================================================
-     SUPPORT TICKETS – LABEL-BASED ROUTING
-     =================================================== */
+  /* =====================================================
+     SUPPORT TICKETS – SETUP
+     ===================================================== */
 
   const supportSection = document.getElementById('support-ticket');
-
   const openTicketsContainer = document.getElementById('openTicketsContainer');
   const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureNotSupportedTicketsContainer =
-    document.getElementById('closedFeatureTicketsContainer');
+  const closedFeatureTicketsContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  // Force dropdown to "Open" (first option)
-  function setStatusToOpen(select) {
-    if (!select) return;
-    select.selectedIndex = 0;
+  // Headers for counts
+  let openHeader, tierHeader, closedResolvedHeader, closedFeatureHeader;
+  let ticketTemplate = null; // base template for new tickets
+
+  if (supportSection) {
+    const headers = supportSection.querySelectorAll('h2');
+    if (headers.length >= 4) {
+      [openHeader, tierHeader, closedResolvedHeader, closedFeatureHeader] = headers;
+      [openHeader, tierHeader, closedResolvedHeader, closedFeatureHeader].forEach(h => {
+        if (h && !h.dataset.baseTitle) {
+          h.dataset.baseTitle = h.textContent.replace(/\s*\(\d+\)\s*$/, '');
+        }
+      });
+    }
   }
 
-  // Read visible option text and normalize it to decide where to route
-  function getStatusKey(select) {
-    if (!select) return 'open';
-    const opt = select.options[select.selectedIndex];
-    if (!opt) return 'open';
-
-    let label = opt.textContent || opt.innerText || '';
-    label = label.toLowerCase();
-
-    // Normalize en dash / em dash to plain hyphen
-    label = label.replace(/[\u2013\u2014]/g, '-');
-    // Normalize multiple spaces
-    label = label.replace(/\s+/g, ' ').trim();
-
-    // Decide status by text content
-    if (label.startsWith('tier two')) {
-      return 'tier2';
-    }
-    if (label.includes('feature') && label.includes('not supported')) {
-      return 'closed_feature_not_supported';
-    }
-    if (label.includes('closed') && label.includes('resolved')) {
-      return 'closed_resolved';
-    }
-    // Everything else is treated as Open
+  function normalizeTicketStatus(text) {
+    if (!text) return 'open';
+    let t = text.toLowerCase().trim();
+    t = t.replace(/\s+/g, ' ');
+    // Robust mapping: just look for keywords
+    if (t.includes('tier two')) return 'tierTwo';
+    if (t.includes('feature')) return 'closedFeature';
+    if (t.includes('resolved')) return 'closedResolved';
     return 'open';
   }
 
-  function routeTicketGroup(group, statusKey) {
-    let target = null;
+  function resetTicketGroup(group, isDefaultOpen) {
+    if (!group) return;
+    group.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], textarea')
+      .forEach(el => { el.value = ''; });
 
-    if (statusKey === 'open') {
-      target = openTicketsContainer;
-    } else if (statusKey === 'tier2') {
-      target = tierTwoTicketsContainer;
-    } else if (statusKey === 'closed_resolved') {
-      target = closedResolvedTicketsContainer;
-    } else if (statusKey === 'closed_feature_not_supported') {
-      target = closedFeatureNotSupportedTicketsContainer;
+    const statusSelect = group.querySelector('.ticket-status-select');
+    if (statusSelect) {
+      statusSelect.value = 'Open';
     }
 
-    if (!target) target = openTicketsContainer;
-    if (!target) return;
-
-    target.appendChild(group);
+    // Add-button visibility: only the main default Open ticket shows the +
+    const addBtn = group.querySelector('.checklist-row.integrated-plus .add-row');
+    if (addBtn) {
+      addBtn.style.display = isDefaultOpen ? 'inline-flex' : 'none';
+    }
   }
 
-  // Attach change handlers for all ticket status dropdowns in a scope
+  function updateTicketCounts() {
+    if (!supportSection) return;
+
+    const openCount = openTicketsContainer
+      ? openTicketsContainer.querySelectorAll('.ticket-group').length
+      : 0;
+    const tierCount = tierTwoTicketsContainer
+      ? tierTwoTicketsContainer.querySelectorAll('.ticket-group').length
+      : 0;
+    const closedResCount = closedResolvedTicketsContainer
+      ? closedResolvedTicketsContainer.querySelectorAll('.ticket-group').length
+      : 0;
+    const closedFeatCount = closedFeatureTicketsContainer
+      ? closedFeatureTicketsContainer.querySelectorAll('.ticket-group').length
+      : 0;
+
+    if (openHeader && openHeader.dataset.baseTitle) {
+      openHeader.textContent = `${openHeader.dataset.baseTitle} (${openCount})`;
+    }
+    if (tierHeader && tierHeader.dataset.baseTitle) {
+      tierHeader.textContent = `${tierHeader.dataset.baseTitle} (${tierCount})`;
+    }
+    if (closedResolvedHeader && closedResolvedHeader.dataset.baseTitle) {
+      closedResolvedHeader.textContent = `${closedResolvedHeader.dataset.baseTitle} (${closedResCount})`;
+    }
+    if (closedFeatureHeader && closedFeatureHeader.dataset.baseTitle) {
+      closedFeatureHeader.textContent = `${closedFeatureHeader.dataset.baseTitle} (${closedFeatCount})`;
+    }
+  }
+
   function attachTicketStatusHandlers(scope) {
     if (!scope) return;
-
     const selects = scope.querySelectorAll('.ticket-status-select');
     selects.forEach(select => {
       if (select.dataset.boundStatus === '1') return;
       select.dataset.boundStatus = '1';
 
-      // Default to Open on first load
-      if (select.selectedIndex < 0) {
-        setStatusToOpen(select);
-      }
-
       select.addEventListener('change', () => {
         const group = select.closest('.ticket-group');
         if (!group) return;
 
-        const statusKey = getStatusKey(select);
+        const statusKey = normalizeTicketStatus(select.value);
+        const hasAddButton = !!group.querySelector('.checklist-row.integrated-plus .add-row');
 
-        // Is this the template card in Open (has integrated-plus + button)?
-        const inOpen = openTicketsContainer && openTicketsContainer.contains(group);
-        if (inOpen && statusKey !== 'open') {
-          const integratedRow = group.querySelector('.checklist-row.integrated-plus');
-          const hasPlus = integratedRow && integratedRow.querySelector('.add-row');
-
-          if (hasPlus && openTicketsContainer) {
-            // 1) Clone a fresh template and keep it in Open
-            const newTemplate = group.cloneNode(true);
-
-            newTemplate.querySelectorAll('input[type="text"], textarea').forEach(el => {
-              el.value = '';
-            });
-            newTemplate.querySelectorAll('select').forEach(sel => {
-              if (sel.classList.contains('ticket-status-select')) {
-                setStatusToOpen(sel);
-              } else {
-                sel.selectedIndex = 0;
-              }
-            });
-
-            // Insert template at top of Open container
-            if (openTicketsContainer.firstChild) {
-              openTicketsContainer.insertBefore(newTemplate, openTicketsContainer.firstChild);
-            } else {
-              openTicketsContainer.appendChild(newTemplate);
-            }
-
-            // Template keeps integrated-plus and + button
-            attachTicketStatusHandlers(newTemplate);
-
-            // 2) Convert this moving card into a normal card: no integrated-plus, no +
-            integratedRow.classList.remove('integrated-plus');
-            const plusBtn = integratedRow.querySelector('.add-row');
-            if (plusBtn) plusBtn.remove();
-          }
+        let targetContainer = openTicketsContainer;
+        if (statusKey === 'tierTwo') {
+          targetContainer = tierTwoTicketsContainer;
+        } else if (statusKey === 'closedResolved') {
+          targetContainer = closedResolvedTicketsContainer;
+        } else if (statusKey === 'closedFeature') {
+          targetContainer = closedFeatureTicketsContainer;
         }
 
-        // Finally, move card based on status
-        routeTicketGroup(group, statusKey);
+        // If moving the main Open card that has the + button, create a fresh default in Open
+        if (hasAddButton && statusKey !== 'open') {
+          if (openTicketsContainer) {
+            const replacement = group.cloneNode(true);
+            resetTicketGroup(replacement, true); // new default Open with +
+            openTicketsContainer.insertBefore(replacement, openTicketsContainer.firstChild);
+            attachTicketStatusHandlers(replacement);
+          }
+
+          // Hide + on the moved card
+          const btn = group.querySelector('.checklist-row.integrated-plus .add-row');
+          if (btn) btn.style.display = 'none';
+        }
+
+        if (targetContainer && targetContainer !== group.parentElement) {
+          targetContainer.appendChild(group);
+        }
+
+        updateTicketCounts();
       });
     });
   }
 
-  if (supportSection) {
-    attachTicketStatusHandlers(supportSection);
+  function initSupportTickets() {
+    if (!supportSection || !openTicketsContainer) return;
+
+    let first = openTicketsContainer.querySelector('.ticket-group');
+    if (!ticketTemplate && first) {
+      ticketTemplate = first.cloneNode(true);
+    }
+
+    if (!first && ticketTemplate) {
+      first = ticketTemplate.cloneNode(true);
+      openTicketsContainer.appendChild(first);
+    }
+
+    if (first) {
+      resetTicketGroup(first, true); // default Open card with +
+      attachTicketStatusHandlers(first);
+    }
+
+    // Attach handlers to any existing groups in other containers (just in case)
+    if (tierTwoTicketsContainer) attachTicketStatusHandlers(tierTwoTicketsContainer);
+    if (closedResolvedTicketsContainer) attachTicketStatusHandlers(closedResolvedTicketsContainer);
+    if (closedFeatureTicketsContainer) attachTicketStatusHandlers(closedFeatureTicketsContainer);
+
+    updateTicketCounts();
   }
 
-  /* ===================================================
-     GENERIC + BUTTON HANDLER (all integrated-plus rows)
-     =================================================== */
+  function supportAddNewTicket() {
+    if (!openTicketsContainer) return;
 
+    // Ensure we have a template
+    if (!ticketTemplate) {
+      const base = openTicketsContainer.querySelector('.ticket-group')
+        || supportSection?.querySelector('.ticket-group');
+      if (!base) return;
+      ticketTemplate = base.cloneNode(true);
+    }
+
+    const newGroup = ticketTemplate.cloneNode(true);
+    // New tickets created by + are regular tickets (no + button visible)
+    resetTicketGroup(newGroup, false);
+    openTicketsContainer.appendChild(newGroup);
+    attachTicketStatusHandlers(newGroup);
+    updateTicketCounts();
+  }
+
+  function resetSupportTicketsPage() {
+    if (!supportSection) return;
+
+    // Clear containers
+    [openTicketsContainer, tierTwoTicketsContainer,
+     closedResolvedTicketsContainer, closedFeatureTicketsContainer]
+      .forEach(container => {
+        if (container) container.innerHTML = '';
+      });
+
+    // Re-init a single fresh Open card
+    initSupportTickets();
+  }
+
+  if (supportSection) {
+    initSupportTickets();
+  }
+
+  /* =====================================================
+     GENERIC ADD BUTTONS (integrated-plus rows)
+     - Special case for OPEN SUPPORT TICKETS
+     ===================================================== */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     btn.addEventListener('click', () => {
-      // SUPPORT TICKETS: "+" only meaningful for template card in Open
-      if (btn.closest('#support-ticket')) {
-        const group = btn.closest('.ticket-group');
-        if (group && openTicketsContainer && openTicketsContainer.contains(group)) {
-          const newGroup = group.cloneNode(true);
-
-          newGroup.querySelectorAll('input[type="text"], textarea').forEach(el => {
-            el.value = '';
-          });
-          newGroup.querySelectorAll('select').forEach(sel => {
-            if (sel.classList.contains('ticket-status-select')) {
-              setStatusToOpen(sel);
-            } else {
-              sel.selectedIndex = 0;
-            }
-          });
-
-          // New tickets: no integrated-plus, no +
-          const integratedRow = newGroup.querySelector('.checklist-row.integrated-plus');
-          if (integratedRow) {
-            integratedRow.classList.remove('integrated-plus');
-            const plus = integratedRow.querySelector('.add-row');
-            if (plus) plus.remove();
-          }
-
-          openTicketsContainer.appendChild(newGroup);
-          attachTicketStatusHandlers(newGroup);
-          return;
-        }
+      // 1) SUPPORT TICKETS – only Open Support Tickets card has + behavior
+      if (btn.closest('#support-ticket') && btn.closest('#openTicketsContainer')) {
+        supportAddNewTicket();
+        return;
       }
 
-      // NON-SUPPORT: default behavior for integrated-plus rows
+      // 2) All other integrated-plus text boxes:
+      //    clone the row, remove + on the clone, insert BELOW as full-width rounded field
       const row = btn.closest('.checklist-row');
       const block = btn.closest('.section-block');
       if (!row || !block) return;
 
-      const clone = row.cloneNode(true);
-      clone.classList.remove('integrated-plus');
+      const originalInput = row.querySelector('input[type="text"], input[type="number"], input[type="email"]');
+      if (!originalInput) return;
 
-      clone.querySelectorAll(
-        'input[type="text"], input[type="number"], input[type="email"], input[type="date"]'
-      ).forEach(el => {
+      const newRow = row.cloneNode(true);
+
+      // Remove add button from the new row
+      const newBtn = newRow.querySelector('.add-row');
+      if (newBtn) newBtn.remove();
+
+      // Remove integrated-plus class so CSS treats it as a normal row
+      newRow.classList.remove('integrated-plus');
+
+      // Clear and restore input style (full rounded right side)
+      newRow.querySelectorAll('input[type="text"], input[type="number"], input[type="email"]').forEach(el => {
         el.value = '';
-      });
-      clone.querySelectorAll('select').forEach(sel => {
-        sel.selectedIndex = 0;
+        el.style.marginTop = '6px';
+        el.style.borderTopRightRadius = '14px';
+        el.style.borderBottomRightRadius = '14px';
       });
 
-      const innerAdd = clone.querySelector('.add-row');
-      if (innerAdd) innerAdd.remove();
-
-      if (row.nextSibling) {
-        block.insertBefore(clone, row.nextSibling);
-      } else {
-        block.appendChild(clone);
-      }
+      // Insert new row directly after current row
+      row.insertAdjacentElement('afterend', newRow);
     });
   });
 
-  /* === CLEAR PAGE BUTTONS (per-page reset) === */
+  /* =====================================================
+     CLEAR PAGE BUTTONS (per-page reset)
+     ===================================================== */
   document.querySelectorAll('.clear-page-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const page = btn.closest('.page-section');
@@ -257,6 +303,7 @@ window.addEventListener('DOMContentLoaded', () => {
       );
       if (!confirmReset) return;
 
+      // Clear all inputs
       page.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') {
           input.checked = false;
@@ -265,48 +312,26 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      // Clear all selects
       page.querySelectorAll('select').forEach(select => {
         select.selectedIndex = 0;
       });
 
+      // Clear all textareas
       page.querySelectorAll('textarea').forEach(area => {
         area.value = '';
       });
 
-      // Reset support ticket structure on this page
-      if (page.id === 'support-ticket' && openTicketsContainer) {
-        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
-        groups.forEach((group, index) => {
-          if (index === 0) {
-            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
-              el.value = '';
-            });
-            group.querySelectorAll('select').forEach(sel => {
-              if (sel.classList.contains('ticket-status-select')) {
-                setStatusToOpen(sel);
-              } else {
-                sel.selectedIndex = 0;
-              }
-            });
-          } else {
-            group.remove();
-          }
-        });
-
-        if (tierTwoTicketsContainer) {
-          tierTwoTicketsContainer.innerHTML = '';
-        }
-        if (closedResolvedTicketsContainer) {
-          closedResolvedTicketsContainer.innerHTML = '';
-        }
-        if (closedFeatureNotSupportedTicketsContainer) {
-          closedFeatureNotSupportedTicketsContainer.innerHTML = '';
-        }
+      // Special handling for Support Ticket page:
+      if (page.id === 'support-ticket') {
+        resetSupportTicketsPage();
       }
     });
   });
 
-  /* === CLEAR ALL BUTTON (global) === */
+  /* =====================================================
+     CLEAR ALL BUTTON (global reset with double confirmation)
+     ===================================================== */
   const clearAllBtn = document.getElementById('clearAllBtn');
   if (clearAllBtn) {
     clearAllBtn.addEventListener('click', () => {
@@ -320,6 +345,7 @@ window.addEventListener('DOMContentLoaded', () => {
       );
       if (!second) return;
 
+      // 1) Clear every input
       document.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') {
           input.checked = false;
@@ -328,47 +354,29 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      // 2) Clear every select
       document.querySelectorAll('select').forEach(select => {
         select.selectedIndex = 0;
       });
 
+      // 3) Clear every textarea
       document.querySelectorAll('textarea').forEach(area => {
         area.value = '';
       });
 
-      // Reset support tickets globally
-      if (openTicketsContainer) {
-        const groups = openTicketsContainer.querySelectorAll('.ticket-group');
-        groups.forEach((group, index) => {
-          if (index === 0) {
-            group.querySelectorAll('input[type="text"], textarea').forEach(el => {
-              el.value = '';
-            });
-            group.querySelectorAll('select').forEach(sel => {
-              if (sel.classList.contains('ticket-status-select')) {
-                setStatusToOpen(sel);
-              } else {
-                sel.selectedIndex = 0;
-              }
-            });
-          } else {
-            group.remove();
-          }
-        });
+      // 4) Reset Support Tickets separately
+      if (supportSection) {
+        resetSupportTicketsPage();
       }
-      if (tierTwoTicketsContainer) {
-        tierTwoTicketsContainer.innerHTML = '';
-      }
-      if (closedResolvedTicketsContainer) {
-        closedResolvedTicketsContainer.innerHTML = '';
-      }
-      if (closedFeatureNotSupportedTicketsContainer) {
-        closedFeatureNotSupportedTicketsContainer.innerHTML = '';
-      }
+
+      // NOTE: we do NOT remove extra rows from training tables;
+      // we only clear their contents to avoid breaking structure.
     });
   }
 
-  /* === SAVE AS PDF (Training Summary Page) === */
+  /* =====================================================
+     SAVE AS PDF (Training Summary Page)
+     ===================================================== */
   const saveBtn = document.getElementById('savePDF');
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
