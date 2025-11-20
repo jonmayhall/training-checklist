@@ -1,6 +1,7 @@
 // =======================================================
 // myKaarma Interactive Training Checklist – FULL JS
 // Nav, Training Tables, Add Buttons, Support Tickets, Clear Page, Clear All, PDF
+// STABLE BUILD – 2025-11-20
 // =======================================================
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -85,9 +86,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
     // skip support-ticket page (custom logic)
     if (btn.closest('#support-ticket')) return;
-    // skip Additional POC cards (custom logic)
+    // skip Additional POC cards (handled above)
     if (btn.closest('.poc-card')) return;
-    // skip table footers (handled above)
+    // skip table footers (handled earlier)
     if (btn.closest('.table-footer')) return;
 
     if (btn.dataset.boundGenericPlus) return;
@@ -258,6 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
       );
       if (!confirmReset) return;
 
+      // 1) Clear values
       page.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') input.checked = false;
         else input.value = '';
@@ -267,14 +269,40 @@ window.addEventListener('DOMContentLoaded', () => {
 
       page.querySelectorAll('textarea').forEach(area => { area.value = ''; });
 
+      // 2) SUPPORT TICKET PAGE SPECIAL HANDLING
       if (page.id === 'support-ticket' && openTicketsContainer) {
         openTicketsContainer.innerHTML = '';
         if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
         if (closedResolvedTicketsContainer) closedResolvedTicketsContainer.innerHTML = '';
         if (closedFeatureTicketsContainer) closedFeatureTicketsContainer.innerHTML = '';
 
-        const fresh = createTicketGroupWithPlus && createTicketGroupWithPlus();
+        const fresh = typeof createTicketGroupWithPlus === 'function'
+          ? createTicketGroupWithPlus()
+          : null;
         if (fresh) openTicketsContainer.appendChild(fresh);
+      }
+
+      // 3) Remove dynamically-added extra checklist rows (those we cloned)
+      //    We identify them as rows that:
+      //    - have a <label> whose text is now empty
+      //    - are NOT integrated-plus rows (we keep original rows with +)
+      page.querySelectorAll('.section-block').forEach(block => {
+        const rows = block.querySelectorAll('.checklist-row');
+        rows.forEach(row => {
+          const label = row.querySelector('label');
+          if (label && label.textContent.trim() === '' && !row.classList.contains('integrated-plus')) {
+            row.remove();
+          }
+        });
+      });
+
+      // 4) Reset Additional POC cards on this page to just the first
+      const pocContainerInPage = page.querySelector('#additionalPocContainer');
+      if (pocContainerInPage) {
+        const cards = pocContainerInPage.querySelectorAll('.poc-card');
+        cards.forEach((card, index) => {
+          if (index > 0) card.remove();
+        });
       }
     });
   });
@@ -297,6 +325,7 @@ window.addEventListener('DOMContentLoaded', () => {
       );
       if (!second) return;
 
+      // 1) Clear all values everywhere
       document.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') input.checked = false;
         else input.value = '';
@@ -306,13 +335,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
       document.querySelectorAll('textarea').forEach(area => { area.value = ''; });
 
+      // 2) Reset support ticket containers
       if (openTicketsContainer) openTicketsContainer.innerHTML = '';
       if (tierTwoTicketsContainer) tierTwoTicketsContainer.innerHTML = '';
       if (closedResolvedTicketsContainer) closedResolvedTicketsContainer.innerHTML = '';
       if (closedFeatureTicketsContainer) closedFeatureTicketsContainer.innerHTML = '';
 
-      const fresh = createTicketGroupWithPlus && createTicketGroupWithPlus();
+      const fresh = typeof createTicketGroupWithPlus === 'function'
+        ? createTicketGroupWithPlus()
+        : null;
       if (fresh && openTicketsContainer) openTicketsContainer.appendChild(fresh);
+
+      // 3) Remove dynamically-added extra checklist rows globally
+      document.querySelectorAll('.section-block').forEach(block => {
+        const rows = block.querySelectorAll('.checklist-row');
+        rows.forEach(row => {
+          const label = row.querySelector('label');
+          if (label && label.textContent.trim() === '' && !row.classList.contains('integrated-plus')) {
+            row.remove();
+          }
+        });
+      });
+
+      // 4) Reset Additional POC cards globally to just the first
+      const globalPocContainer = document.getElementById('additionalPocContainer');
+      if (globalPocContainer) {
+        const cards = globalPocContainer.querySelectorAll('.poc-card');
+        cards.forEach((card, index) => {
+          if (index > 0) card.remove();
+        });
+      }
     });
   }
 
