@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable + Visual Polish + Contact Cards + Spacing Fix 2
+   Stable + Visual Polish + Contact Cards + Spacing Fix 3
    ======================================================= */
 
 :root {
@@ -423,8 +423,8 @@ main {
   border-bottom: none;
 }
 
-/* give inputs inside these cards a bit of right breathing room,
-   BUT keep integrated-plus inputs aligned */
+/* inputs inside these cards:
+   keep alignment with all right-edge fields (no extra margin-right) */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="number"],
@@ -434,14 +434,7 @@ main {
 .poc-card .checklist-row input[type="text"],
 .poc-card .checklist-row input[type="email"],
 .poc-card .checklist-row input[type="number"] {
-  margin-right: 10px;
-}
-
-/* override margin-right for integrated-plus rows so
-   textbox + button align with other right-side fields */
-.contact-card .checklist-row.integrated-plus input[type="text"],
-.poc-card .checklist-row.integrated-plus input[type="text"] {
-  margin-right: 0;
+  margin-right: 0;  /* <— fix misalignment for Additional POC boxes */
 }
 
 /* semantic aliases */
@@ -515,7 +508,7 @@ main {
 }
 
 /* Integrated + button – pill on the right, touching the input.
-   Same size everywhere (Additional Trainers, POC, Champions, Support Ticket #) */
+   Same height as textboxes (flush). */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -526,7 +519,7 @@ main {
   border: 1px solid var(--orange);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   width: 34px;
-  height: 34px;
+  height: 36px;              /* <— match 36px input height */
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
@@ -603,10 +596,6 @@ main {
 #support-ticket .section-block h2 {
   font-size: 14px;
 }
-
-/* Support Ticket Number textbox + button use integrated-plus, so
-   we do NOT override width or radius here – they follow the global
-   integrated-plus rules and match Additional Trainers. */
 
 /* =======================================================
    DMS PAGE – GRID CARDS with DOTS
@@ -1016,22 +1005,36 @@ main {
 }
 
 /* PARTS PRICING VERIFICATION TABLE = second .section inside #opcodes-pricing.
-   Match widths to Labor Opcodes table for consistent look. */
+   Make middle columns small, last wide – and override input min-width so it obeys. */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
 
-/* List Price / Cost / Markup % match opcode money widths */
+/* Part Number a bit wider, like Opcode */
+#opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(2),
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(2) {
+  width: 130px;
+  min-width: 130px;
+}
+
+/* List Price / Cost / Markup % – SMALL columns */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(5),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) {
-  width: 110px;
-  min-width: 110px;
+  width: 80px;
+  min-width: 80px;
+}
+
+/* Override min-width of inputs in these small cells so they don't force 130px */
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3) input[type="text"],
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4) input[type="text"],
+#opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) input[type="text"] {
+  min-width: 0;
 }
 
 /* Description takes remaining width; center header + cell text */
