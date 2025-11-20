@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable + Visual Polish (cards, sidebar, tables, tickets)
+   Stable + Visual Polish + Contact Cards + Spacing Fix
    ======================================================= */
 
 :root {
@@ -219,7 +219,7 @@ main {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 22px 32px 28px;
-  margin: 0 auto 40px;
+  margin: 0 auto 36px;
   width: 100%;
   max-width: 1100px;
   box-sizing: border-box;
@@ -306,6 +306,11 @@ main {
   margin-right: -22px;
 }
 
+/* Extra spacing after any “notes” / textarea card to create a visual break */
+.section-block:has(textarea) {
+  margin-bottom: 30px;
+}
+
 /* ===== NON-TABLE ROWS (Q&A lines) ===== */
 .checklist-row {
   display: flex;
@@ -378,50 +383,50 @@ main {
    MINI-CARDS for Contacts + Champions / Blockers
    ======================================================= */
 
-.mini-card {
+/* Make contact cards visually match Champions/Blockers style */
+.mini-card,
+.contact-card,
+.poc-card {
   border: 1px solid var(--orange);
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
   margin: 16px 0;
-  padding: 6px 0 4px;
+  padding: 10px 0 8px;
+  box-shadow: 0 1px 4px rgba(15,23,42,0.08);
 }
 
-/* rows inside mini-card */
-.mini-card .checklist-row {
+/* rows inside orange cards – no extra bottom border on last row */
+.mini-card .checklist-row,
+.contact-card .checklist-row,
+.poc-card .checklist-row {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
   border-bottom: 1px solid #e5e5e5;
-  margin-bottom: 0;
-  padding-bottom: 8px;
+  padding-left: 32px;
 }
-
-/* last row: no double bottom line */
-.mini-card .checklist-row:last-child {
+.mini-card .checklist-row:last-child,
+.contact-card .checklist-row:last-child,
+.poc-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* ensure no background tint sneaks in */
-.mini-card .checklist-row {
-  background: #fff !important;
+/* give inputs inside these cards a bit of right breathing room */
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="number"],
+.contact-card .checklist-row input[type="text"],
+.contact-card .checklist-row input[type="email"],
+.contact-card .checklist-row input[type="number"],
+.poc-card .checklist-row input[type="text"],
+.poc-card .checklist-row input[type="email"],
+.poc-card .checklist-row input[type="number"] {
+  margin-right: 10px;
 }
 
 /* semantic aliases */
 .contact-card { }
 .champions-card { }
 .blockers-card { }
-
-/* Additional POC container to keep borders continuous */
-.poc-card {
-  border: 1px solid var(--orange);
-  border-radius: 14px;
-  background: #fff;
-  margin: 12px 0;
-  padding: 6px 0 4px;
-}
-
-/* Slightly tighter rows inside mini-cards */
-.mini-card .checklist-row,
-.poc-card .checklist-row {
-  padding-left: 32px;
-}
 
 /* =======================================================
    Champions & Blockers inner layout
@@ -577,6 +582,14 @@ main {
   font-size: 14px;
 }
 
+/* Support ticket number textbox alignment (same width as others) */
+#support-ticket .checklist-row.integrated-plus input[type="text"],
+#support-ticket .ticket-group .checklist-row input[type="text"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
+}
+
 /* =======================================================
    DMS PAGE – GRID CARDS with DOTS
    ======================================================= */
@@ -716,7 +729,7 @@ main {
    ======================================================= */
 
 .section {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 /* Table Card – no side padding so orange header touches edges */
@@ -727,7 +740,7 @@ main {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow);
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   padding: 0;
   box-sizing: border-box;
 }
@@ -975,21 +988,22 @@ main {
 }
 
 /* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
+/* Match widths to Labor Opcodes table for consistent look */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
 
-/* Make List Price / Cost / Markup % as small as possible */
+/* Make List Price / Cost / Markup % match opcode money width (110px) */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+  width: 110px;
+  min-width: 110px;
 }
 
 /* Description takes remaining width; center header + cell text */
