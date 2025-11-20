@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable + Visual Polish + Contact Cards + Spacing Fix 3
+   Stable + Contact Cards + Parts Pricing Fix
    ======================================================= */
 
 :root {
@@ -396,7 +396,7 @@ main {
    MINI-CARDS for Contacts + Champions / Blockers
    ======================================================= */
 
-/* Contact + Additional POC cards should match Champions/Blockers look */
+/* Contact + Additional POC cards – orange border, pulled-in content */
 .mini-card,
 .contact-card,
 .poc-card {
@@ -404,18 +404,18 @@ main {
   border-radius: 16px;
   background: #fff;
   margin: 16px 0;
-  padding: 10px 0 8px;
+  padding: 10px 14px 8px;          /* <— left/right padding brings text boxes in */
   box-shadow: 0 1px 4px rgba(15,23,42,0.08);
 }
 
-/* rows inside orange cards – no extra bottom border on last row */
+/* rows inside orange cards – slightly less left padding than main rows */
 .mini-card .checklist-row,
 .contact-card .checklist-row,
 .poc-card .checklist-row {
   margin-bottom: 6px;
   padding-bottom: 6px;
   border-bottom: 1px solid #e5e5e5;
-  padding-left: 32px;
+  padding-left: 28px;
 }
 .mini-card .checklist-row:last-child,
 .contact-card .checklist-row:last-child,
@@ -423,8 +423,8 @@ main {
   border-bottom: none;
 }
 
-/* inputs inside these cards:
-   keep alignment with all right-edge fields (no extra margin-right) */
+/* Inputs inside these cards:
+   align to right edge, but with card's internal padding so they don't hit orange border */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="number"],
@@ -434,7 +434,16 @@ main {
 .poc-card .checklist-row input[type="text"],
 .poc-card .checklist-row input[type="email"],
 .poc-card .checklist-row input[type="number"] {
-  margin-right: 0;  /* <— fix misalignment for Additional POC boxes */
+  margin-right: 0;
+}
+
+/* Make sure Additional POC integrated row (with +) aligns right */
+.poc-card .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+}
+.poc-card .checklist-row.integrated-plus > .add-row {
+  height: 36px;
 }
 
 /* semantic aliases */
@@ -1006,20 +1015,25 @@ main {
 
 /* PARTS PRICING VERIFICATION TABLE = second .section inside #opcodes-pricing.
    Make middle columns small, last wide – and override input min-width so it obeys. */
+#opcodes-pricing .section:nth-of-type(2) .training-table {
+  table-layout: fixed;     /* ensure our widths are respected */
+}
+
+/* Column 1 – Updated checkbox */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(1),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
 
-/* Part Number a bit wider, like Opcode */
+/* Column 2 – Part Number (moderate) */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(2),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(2) {
   width: 130px;
   min-width: 130px;
 }
 
-/* List Price / Cost / Markup % – SMALL columns */
+/* Columns 3/4/5 – List Price / Cost / Markup % – SMALL */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(3),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3),
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(4),
@@ -1030,14 +1044,14 @@ main {
   min-width: 80px;
 }
 
-/* Override min-width of inputs in these small cells so they don't force 130px */
+/* Force inputs in these small cells to shrink (instead of pushing column wide) */
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(3) input[type="text"],
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(4) input[type="text"],
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(5) input[type="text"] {
   min-width: 0;
 }
 
-/* Description takes remaining width; center header + cell text */
+/* Column 6 – Description takes remaining width */
 #opcodes-pricing .section:nth-of-type(2) .training-table th:nth-child(6),
 #opcodes-pricing .section:nth-of-type(2) .training-table td:nth-child(6) {
   min-width: 260px;
