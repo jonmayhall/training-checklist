@@ -80,13 +80,14 @@ window.addEventListener('DOMContentLoaded', () => {
   /* =========================================
      GENERIC INTEGRATED "+" BUTTONS
      (NOT Support Tickets, NOT Additional POC, NOT tables)
+     - Adds one new row directly under the clicked row
   ========================================= */
   document.querySelectorAll('.section-block .add-row').forEach(btn => {
-    // skip support-ticket page (custom logic)
+    // skip support-ticket page (custom logic below)
     if (btn.closest('#support-ticket')) return;
-    // skip Additional POC cards (custom logic)
+    // skip Additional POC cards (handled above)
     if (btn.closest('.poc-card')) return;
-    // skip table footers (handled above)
+    // skip table footers (handled earlier)
     if (btn.closest('.table-footer')) return;
 
     if (btn.dataset.boundGenericPlus) return;
@@ -96,13 +97,10 @@ window.addEventListener('DOMContentLoaded', () => {
       const sourceRow = btn.closest('.checklist-row');
       if (!sourceRow) return;
 
-      const parent = sourceRow.parentElement;
-      if (!parent) return;
-
       const srcInput = sourceRow.querySelector('input[type="text"], input[type="number"], input[type="email"]');
       if (!srcInput) return;
 
-      // Clone the row, remove the +, and treat it as a plain text row
+      // Clone the row, remove the +, and treat it as a plain extra line
       const newRow = sourceRow.cloneNode(true);
       newRow.classList.remove('integrated-plus');
 
@@ -114,10 +112,12 @@ window.addEventListener('DOMContentLoaded', () => {
         else el.value = '';
       });
 
+      // no label text on extra lines
       const label = newRow.querySelector('label');
       if (label) label.textContent = '';
 
-      parent.appendChild(newRow);
+      // insert directly under the row where + was clicked
+      sourceRow.insertAdjacentElement('afterend', newRow);
     });
   });
 
@@ -125,6 +125,7 @@ window.addEventListener('DOMContentLoaded', () => {
      SUPPORT TICKETS
      - Move cards between four sections based on dropdown
      - Always keep at least one Open ticket
+     - Cloned tickets have NO plus button
   ========================================= */
   const supportSection = document.getElementById('support-ticket');
   const openTicketsContainer = document.getElementById('openTicketsContainer');
@@ -143,14 +144,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (statusSelect) statusSelect.value = 'Open';
     }
 
-    // Normalize value (deal with different dash types etc.)
+    // normalize dropdown values to be robust to dash types / spacing
     function normalizeStatusValue(str) {
       if (!str) return '';
       let s = String(str).trim();
-
-      // Replace en dash / em dash with hyphen
-      s = s.replace(/\u2013|\u2014/g, '-');
-      // Collapse multiple spaces around hyphens
+      s = s.replace(/\u2013|\u2014/g, '-');  // en/em dash → hyphen
       s = s.replace(/\s*-\s*/g, ' - ');
       return s;
     }
@@ -208,7 +206,8 @@ window.addEventListener('DOMContentLoaded', () => {
     attachTicketStatusHandlers(supportSection);
     ensureDefaultOpenTicket();
 
-    // "+" inside Open Support Tickets → add ONE new ticket in Open
+    // "+" inside Open Support Tickets → add ONE new ticket in Open,
+    // but cloned tickets lose the plus & integrated-plus styling
     openTicketsContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('.add-row');
       if (!btn) return;
@@ -217,6 +216,18 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!group) return;
 
       const newGroup = group.cloneNode(true);
+
+      // Make Support Ticket Number row look like a normal row:
+      //  - remove integrated-plus
+      //  - remove the plus button from the cloned group
+      const ticketNumberRow = newGroup.querySelector('.checklist-row.integrated-plus');
+      if (ticketNumberRow) {
+        ticketNumberRow.classList.remove('integrated-plus');
+        const clonedBtn = ticketNumberRow.querySelector('.add-row');
+        if (clonedBtn) clonedBtn.remove();
+      }
+
+      // clear values
       newGroup.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
       const statusSelect = newGroup.querySelector('.ticket-status-select');
       if (statusSelect) statusSelect.value = 'Open';
