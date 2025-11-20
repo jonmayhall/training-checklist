@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Refined Build (cards, sidebar, tables, support tickets)
+   Refined Build (cards, darker sidebar, fixed tables)
    ======================================================= */
 
 :root {
@@ -16,7 +16,7 @@
 
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
-  --input-width: 260px;    /* single source of truth for right-side text-box width */
+  --input-width: 260px;    /* single source of truth for text-box width */
 }
 
 /* ===== BASE ===== */
@@ -45,6 +45,7 @@ html, body {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
+  border-radius: 0;
 }
 .topbar-content { 
   display: flex; 
@@ -110,7 +111,7 @@ html, body {
   text-align: left;
   border-radius: 10px;
   cursor: pointer;
- 	color: #e5e7eb;
+  color: #e5e7eb;
   transition: .18s;
   position: relative;
   overflow: hidden;
@@ -254,7 +255,7 @@ main {
   color: #555;
 }
 
-/* Section headers (for table sections) */
+/* Section headers */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -267,6 +268,17 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* Section blocks (non-table cards) */
@@ -364,71 +376,40 @@ main {
 
 /* =======================================================
    MINI-CARDS for Contacts + Champions / Blockers
-   (Continuous orange border, no gaps)
    ======================================================= */
 
-.mini-card,
-.champions-card,
-.blockers-card {
+.mini-card {
   border: 1px solid var(--orange);
-  box-shadow: 0 0 0 1px var(--orange);  /* helps ensure no tiny breaks */
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
   padding: 6px 0 4px;
-  overflow: hidden;                     /* trims any inner overlaps */
-}
-
-/* Generic mini-card title */
-.mini-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  padding: 10px 16px;
-  background: var(--orange);
-  color: #fff;
-  margin: 0 0 8px 0;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-/* Make sure Champions/Blockers headers always look right */
-.champions-card > h3,
-.blockers-card > h3,
-.champions-card > .mini-card-title,
-.blockers-card > .mini-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  padding: 10px 16px;
-  background: var(--orange);
-  color: #fff;
-  margin: 0 0 8px 0;
-  border-bottom: 1px solid #e5e5e5;
+  box-sizing: border-box;
 }
 
 /* rows inside mini-card */
-.mini-card .checklist-row,
-.champions-card .checklist-row,
-.blockers-card .checklist-row {
+.mini-card .checklist-row {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
-  background: #fff !important;
 }
-.mini-card .checklist-row:last-child,
-.champions-card .checklist-row:last-child,
-.blockers-card .checklist-row:last-child {
+.mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* semantic aliases (for clarity) */
+/* ensure no background tint sneaks in */
+.mini-card .checklist-row {
+  background: #fff !important;
+}
+
+/* semantic aliases */
 .contact-card { }
 .champions-card { }
 .blockers-card { }
 
-/* =======================================================
-   Integrated “+” buttons (text box + pill)
-   ======================================================= */
+/* ===== Integrated “+” button rows ===== */
+/* Layout: [label..............] [input same width][+ button touching] */
 
-/* Layout: [label..............] [input narrower][+ button touching] */
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
@@ -436,6 +417,7 @@ main {
   gap: 0; /* no gap between input and + button */
 }
 
+/* Label behaves like normal rows */
 .section-block .checklist-row.integrated-plus label,
 .section-block .checklist-row:has(> .add-row) label {
   flex: 1 1 auto;
@@ -443,7 +425,7 @@ main {
 }
 
 /* Text box in integrated + rows:
-   reduce width so (input + 34px button) = var(--input-width) total */
+   (input + 34px button) = var(--input-width) total */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -454,7 +436,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as input, seamless on the right */
+/* Integrated + button – pill on the right, touching the input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -483,7 +465,7 @@ main {
 }
 
 /* =======================================================
-   SUPPORT TICKET – cards + layout
+   SUPPORT TICKET – clearer Ticket groups
    ======================================================= */
 
 .ticket-group {
@@ -495,6 +477,7 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
+/* “Ticket” pill (if used) */
 .ticket-pill {
   display: inline-flex;
   align-items: center;
@@ -513,10 +496,10 @@ main {
   margin-top: 8px;
 }
 
-.support-buckets {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
-  gap: 16px;
+.ticket-status-row {
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 /* =======================================================
@@ -854,6 +837,14 @@ main {
   background: #ff8b42;
 }
 
+/* ===== Footer ===== */
+#footer { 
+  padding: 24px; 
+  text-align: center; 
+  color: #666; 
+  font-size: 13px; 
+}
+
 /* ===== Muted note ===== */
 .muted-note {
   font-size: 0.9em;
@@ -931,6 +922,54 @@ main {
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
   text-align: center;
+}
+
+/* =======================================================
+   CHAMPIONS & BLOCKERS – inner cards
+   ======================================================= */
+
+.cb-wrapper {
+  display: flex;
+  gap: 18px;
+  margin: 12px 0 4px;
+}
+
+.champions-card,
+.blockers-card {
+  flex: 1 1 0;
+  border: 1px solid var(--orange);
+  border-radius: 14px;
+  padding: 10px 16px 8px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+/* Inner titles (h2 or h3) inside Champions / Blockers cards */
+.champions-card > h2,
+.champions-card > h3,
+.blockers-card > h2,
+.blockers-card > h3 {
+  margin: 0 0 10px;
+  padding: 0 0 4px;
+  background: none;
+  color: var(--orange);
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid var(--orange);
+}
+
+/* Rows inside these inner cards */
+.champions-card .checklist-row,
+.blockers-card .checklist-row {
+  padding-left: 24px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.champions-card .checklist-row:last-of-type,
+.blockers-card .checklist-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 4px;
 }
 
 /* =======================================================
