@@ -894,8 +894,9 @@ main {
 }
 
 /* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
+/* Use natural auto layout */
 #opcodes-pricing .section:first-of-type .training-table {
-  table-layout: fixed;
+  table-layout: auto;
 }
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
@@ -920,9 +921,9 @@ main {
   text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE – MATCH LABOR OPCODES LAYOUT */
+/* PARTS PRICING VERIFICATION TABLE – ALSO auto layout, matching widths */
 #opcodes-pricing .section:last-of-type .training-table {
-  table-layout: fixed;
+  table-layout: auto;
 }
 /* Col 1 – Updated (checkbox) – same as labor */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
