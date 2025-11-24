@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable build with aligned cards, add-buttons, and tables
+   Refined build with cards, darker sidebar, fixed tables
    ======================================================= */
 
 :root {
@@ -11,12 +11,12 @@
   --border: #dcdcdc;
   --ink: #222;
 
-  --radius-lg: 18px;       /* cards */
-  --radius-sm: 14px;       /* inputs / buttons */
+  --radius-lg: 18px;
+  --radius-sm: 14px;
 
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
-  --input-width: 260px;    /* single source of truth for text-box width */
+  --input-width: 260px;
 }
 
 /* ===== BASE ===== */
@@ -29,13 +29,12 @@ html, body {
 }
 
 /* no italics anywhere by default */
-*, em, i { 
+*, em, i {
   font-style: normal !important;
 }
 
 /* ===== TOP BAR ===== */
 #topbar {
-  /* black → orange gradient */
   background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
   height: 70px;
   display: flex;
@@ -45,17 +44,16 @@ html, body {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
-  border-radius: 0;
 }
-.topbar-content { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  width: 100%; 
+.topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
-.top-logo { 
-  height: 42px; 
-  object-fit: contain; 
+.top-logo {
+  height: 42px;
+  object-fit: contain;
 }
 
 .topbar-right {
@@ -64,22 +62,22 @@ html, body {
   gap: 10px;
 }
 
-#dealershipNameDisplay { 
-  color:#fff; 
+#dealershipNameDisplay {
+  color:#fff;
   font-size:22px;
-  font-weight:600; 
-  letter-spacing:.5px; 
+  font-weight:600;
+  letter-spacing:.5px;
 }
 
 /* ===== LAYOUT ===== */
-#app { 
-  display: flex; 
-  min-height: 100vh; 
-  margin-top: 70px; 
-  overflow-x: hidden; 
+#app {
+  display: flex;
+  min-height: 100vh;
+  margin-top: 70px;
+  overflow-x: hidden;
 }
 
-/* Darker, more modern sidebar */
+/* Darker sidebar */
 #sidebar {
   background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
   border-right: 1px solid rgba(15,23,42,0.8);
@@ -91,18 +89,16 @@ html, body {
   bottom: 0;
   overflow-y: auto;
 }
-#sidebar-nav { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
+#sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* hide icon span but keep label – "no icons" */
-.nav-icon {
-  display: none;
-}
+.nav-icon { display: none; }
 
-/* MENU BUTTONS – darker, modern, no icons */
+/* MENU BUTTONS */
 .nav-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -147,7 +143,7 @@ html, body {
   opacity: 1;
 }
 
-/* Clear All: at bottom of sidebar (menu bar) */
+/* Clear All button at bottom of sidebar */
 #clearAllBtn {
   position: fixed;
   left: 24px;
@@ -178,7 +174,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.75);
 }
 
-/* per-page clear button – top-right of each card */
+/* per-page clear button – top-right of each page card */
 .clear-page-btn {
   position: absolute;
   top: 16px;
@@ -224,8 +220,8 @@ main {
   max-width: 1100px;
   box-sizing: border-box;
 }
-.page-section.active { 
-  display: block; 
+.page-section.active {
+  display: block;
 }
 
 /* Page titles */
@@ -255,7 +251,7 @@ main {
   color: #555;
 }
 
-/* Section headers for table sections */
+/* Section headers (table/card headers in orange) */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -269,15 +265,26 @@ main {
   align-items: center;
   gap: 8px;
 }
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 600;
+}
 
-/* Section blocks (non-table cards, plus big cards like Contacts, Champions) */
+/* Section blocks (white cards) */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   padding: 0 22px 14px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
@@ -295,9 +302,9 @@ main {
   margin-right: -22px;
 }
 
-/* Notes card spacing: slightly more breathing room before next block */
+/* Slightly extra spacing under note cards to create a visual break */
 .section-block + .section-block {
-  margin-top: 4px;
+  margin-top: 12px;
 }
 
 /* ===== NON-TABLE ROWS (Q&A lines) ===== */
@@ -314,7 +321,7 @@ main {
 .section-block .checklist-row:last-of-type {
   border-bottom: none;
   margin-bottom: 8px;
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 .checklist-row label {
   flex: 1 1 auto;
@@ -324,7 +331,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (base) */
+/* Inputs on the RIGHT */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -335,12 +342,12 @@ main {
   margin-left: auto;
   margin-right: 0;
   padding: 7px 10px;
-  height: 34px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
   box-sizing: border-box;
+  height: 34px;
 }
 .section-block textarea {
   width: 96%;
@@ -378,14 +385,14 @@ main {
   border-radius: 14px;
   background: #fff;
   margin: 16px 0;
-  padding: 4px 0 6px;
+  padding: 6px 0 4px;
 }
 
-/* mini-card header */
-.mini-card-title {
-  font-size: 14px;
+/* headings inside mini-cards */
+.mini-card h3 {
+  margin: 4px 16px 8px;
+  font-size: 15px;
   font-weight: 600;
-  padding: 6px 18px 4px;
   color: var(--orange);
 }
 
@@ -394,67 +401,74 @@ main {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 32px;
+  padding-left: 28px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* keep backgrounds clean in mini-cards */
+/* keep mini-cards clean white inside */
 .mini-card .checklist-row {
   background: #fff !important;
 }
 
-/* semantic aliases */
-.contact-card { }
-.champions-card { }
-.blockers-card { }
+.contact-card {}
+.champions-card {}
+.blockers-card {}
 
-/* Make inputs in mini-cards align with global width */
-.mini-card .checklist-row input[type="text"],
-.mini-card .checklist-row input[type="email"],
-.mini-card .checklist-row input[type="number"],
-.mini-card .checklist-row select {
+/* Champions & Blockers wrapper – two mini-cards side-by-side when room */
+.champions-blockers-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  padding-bottom: 18px;
+}
+
+/* Bring orange-strip cards (contacts, champions, blockers) textboxes inward */
+.mini-card .checklist-row label {
+  padding-right: 12px;
+}
+.mini-card .checklist-row input[type="text"] {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
 }
 
-/* =======================================================
-   Integrated “+” button rows
-   ======================================================= */
+/* POC-specific alignment container (assuming you have #additionalPocContainer) */
+#additionalPocContainer .mini-card .checklist-row {
+  padding-left: 30px;
+}
 
-.section-block .checklist-row.integrated-plus,
-.section-block .checklist-row:has(> .add-row) {
+/* ===== Integrated “+” button rows ===== */
+/* Layout: [label..............] [input][+ button touching] */
+
+.section-block .checklist-row.integrated-plus {
   display: flex;
   align-items: stretch;
   gap: 0;
 }
 
 /* Label behaves like normal rows */
-.section-block .checklist-row.integrated-plus label,
-.section-block .checklist-row:has(> .add-row) label {
+.section-block .checklist-row.integrated-plus label {
   flex: 1 1 auto;
   padding-right: 16px;
 }
 
-/* Text box: shrink so (input + button) = var(--input-width) total */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row:has(> .add-row) input[type="text"] {
+/* Text box in integrated + rows:
+   (input + 34px button) == var(--input-width) */
+.section-block .checklist-row.integrated-plus input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
   margin-left: auto;
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  height: 34px;
 }
 
-/* Integrated + button – same height as text boxes, flush */
-.section-block .checklist-row.integrated-plus > .add-row,
-.section-block .checklist-row:has(> .add-row) > .add-row {
+/* Integrated + button – same height as text box */
+.section-block .checklist-row.integrated-plus > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: -1px; /* overlap borders so they “touch” */
+  margin-left: -1px;
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -471,17 +485,12 @@ main {
   align-items: center;
   justify-content: center;
 }
-.section-block .checklist-row.integrated-plus > .add-row:hover,
-.section-block .checklist-row:has(> .add-row) > .add-row:hover {
+.section-block .checklist-row.integrated-plus > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
 }
 
-/* ensure mini-card integrated-plus also respects same layout */
-.mini-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-}
+/* Any cloned rows that become "normal" will rely on the base .checklist-row styles */
 
 /* =======================================================
    SUPPORT TICKET – Ticket groups
@@ -496,12 +505,7 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* Slightly tighter rows for tickets */
-.ticket-group .checklist-row {
-  padding-left: 24px;
-}
-
-/* “Ticket” pill (optional, if used) */
+/* Optional pill */
 .ticket-pill {
   display: inline-flex;
   align-items: center;
@@ -518,6 +522,19 @@ main {
 
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
+}
+
+.ticket-status-row {
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* Ensure support ticket fields aligned like others */
+#support-ticket .checklist-row input[type="text"],
+#support-ticket .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
 }
 
 /* =======================================================
@@ -662,11 +679,11 @@ main {
    Training TABLES
    ======================================================= */
 
-.section { 
-  margin-bottom: 40px; 
+.section {
+  margin-bottom: 40px;
 }
 
-/* Table Card – no side padding so orange header touches edges */
+/* Table Card */
 .table-container {
   width: 100%;
   background: #fff;
@@ -703,7 +720,7 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header — LIGHT ORANGE (edge to edge) */
+/* Sticky header */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -713,13 +730,13 @@ main {
   z-index: 3;
 }
 
-/* Smaller white text for notes inside header cells */
+/* Header small note text */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
 }
 
-/* Sticky first column – for checklists (not Opcodes; overridden later) */
+/* Sticky first column – for general training tables */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -728,7 +745,7 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child { 
+.training-table thead th:first-child {
   text-align: center;
 }
 .training-table td:first-child {
@@ -754,7 +771,7 @@ main {
   text-align: left;
 }
 
-/* Column widths (generic second col) */
+/* Generic second column */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
@@ -783,14 +800,14 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) { 
-  background: #fff; 
+.training-table tr:nth-child(odd) {
+  background: #fff;
 }
-.training-table tr:nth-child(even) { 
-  background: #fafafa; 
+.training-table tr:nth-child(even) {
+  background: #fafafa;
 }
 
-/* Table footer + "+" button  */
+/* Table footer + "+" button */
 .table-footer {
   width: 100%;
   background: #f5f5f5;
@@ -798,7 +815,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
+  justify-content: flex-start;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -821,10 +838,10 @@ main {
   transform: scale(1.05);
 }
 
-/* ===== Scrollbar (horizontal) ===== */
-.scroll-wrapper::-webkit-scrollbar, 
-.table-container::-webkit-scrollbar { 
-  height: 8px; 
+/* Scrollbar (horizontal) */
+.scroll-wrapper::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+  height: 8px;
 }
 .scroll-wrapper::-webkit-scrollbar-thumb,
 .table-container::-webkit-scrollbar-thumb {
@@ -832,8 +849,8 @@ main {
   border-radius: 6px;
 }
 .scroll-wrapper::-webkit-scrollbar-thumb:hover,
-.table-container::-webkit-scrollbar-thumb:hover { 
-  background-color: #999; 
+.table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
 }
 
 /* ===== Floating PDF button (summary page) ===== */
@@ -860,11 +877,11 @@ main {
 }
 
 /* ===== Footer ===== */
-#footer { 
-  padding: 24px; 
-  text-align: center; 
-  color: #666; 
-  font-size: 13px; 
+#footer {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 13px;
 }
 
 /* ===== Muted note ===== */
@@ -894,25 +911,26 @@ main {
 }
 
 /* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
-/* Use natural auto layout */
-#opcodes-pricing .section:first-of-type .training-table {
-  table-layout: auto;
-}
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
+#opcodes-pricing .section:first-of-type .training-table th:nth-child(2),
+#opcodes-pricing .section:first-of-type .training-table td:nth-child(2) {
+  width: 110px;
+  min-width: 110px;
+}
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
-  width: 70px;   /* Hours */
-  min-width: 70px;
+  width: 80px;
+  min-width: 80px;
 }
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
-  width: 110px;  /* Customer Pay + Warranty Pay */
+  width: 110px;
   min-width: 110px;
 }
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
@@ -921,31 +939,26 @@ main {
   text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE – ALSO auto layout, matching widths */
-#opcodes-pricing .section:last-of-type .training-table {
-  table-layout: auto;
-}
-/* Col 1 – Updated (checkbox) – same as labor */
+/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
-/* Col 3 – List Price – same narrow profile as Hours */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3) {
-  width: 70px;
-  min-width: 70px;
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(2),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(2) {
+  width: 110px;
+  min-width: 110px;
 }
-/* Col 4 & 5 – Cost + Markup % – same as Customer/Warranty Pay style */
+#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
+#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 110px;
-  min-width: 110px;
+  width: 80px;
+  min-width: 80px;
 }
-/* Col 6 – Description – wide */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
