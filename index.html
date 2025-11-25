@@ -69,288 +69,97 @@
     <!-- MAIN CONTENT -->
     <main>
 
-      <!-- ========================================================= -->
-<!-- PAGE 1: TRAINERS                                          -->
+     <!-- ========================================================= -->
+<!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
-<section id="trainers" class="page-section active">
-  <h1>Trainers, Deployment Manager, & CEM</h1>
+<section id="dealership-info" class="page-section">
+  <h1>Dealership Info</h1>
   <p class="page-subtitle">
-    Enter trainer details, lead trainer assignment, and CEM information.
+    Capture core dealership details, structure, and contract information.
   </p>
-
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Trainers Section -->
+  <!-- Dealership Basics -->
   <div class="section-block">
-    <h2>Trainers</h2>
+    <h2>Dealership Basics</h2>
 
     <div class="checklist-row">
-      <label>Lead Trainer</label>
-    <select id="leadTrainer">
-  <option value=""></option>
+      <label>Dealer Group</label>
+      <input type="text" id="dealerGroup" placeholder="Dealer group name">
+    </div>
 
-  <!-- ===== GROUP 1 ===== -->
-  <option>Brian Button</option>
-  <option>Christopher Eskew</option>
-  <option>Dana Berry</option>
+    <div class="checklist-row">
+      <label>Dealership Name</label>
+      <input type="text" id="dealershipNameInput" placeholder="Dealership legal name">
+    </div>
 
-  <!-- Spacer -->
-  <option disabled>──────────</option>
+    <div class="checklist-row">
+      <label>DMS</label>
+      <input type="text" id="dmsName" placeholder="CDK, Reynolds, Tekion, etc.">
+    </div>
 
-  <!-- ===== GROUP 2 ===== -->
-  <option>Adam Jeffords</option>
-  <option>Alec Parker</option>
-  <option>Joel Zavaleta</option>
-  <option>Kyle Leavitt</option>
-  <option>Lauren Ramos</option>
-  <option>Miles Krasic</option>
-
-  <!-- Spacer -->
-  <option disabled>──────────</option>
-
-  <!-- ===== GROUP 3 ===== -->
-  <option>Anthony Carbone</option>
-  <option>Brett Smith</option>
-  <option>Clyde Chapman</option>
-  <option>Dennitza Fernandez</option>
-  <option>Eliud Garcia</option>
-  <option>Jackson Geraghty</option>
-  <option>Kevin Mullinax</option>
-  <option>Sharon Rusta</option>
-  <option>Terry Hart</option>
-</select>
-
-        </optgroup>
+    <div class="checklist-row">
+      <label>Time Zone</label>
+      <select id="timeZone">
+        <option></option>
+        <option>Eastern</option>
+        <option>Central</option>
+        <option>Mountain</option>
+        <option>Pacific</option>
+        <option>Other</option>
       </select>
     </div>
 
-    <!-- INDENTED Additional Trainers -->
-    <div class="checklist-row indented">
-      <label>Additional Trainers</label>
-      <input type="text" placeholder="Trainer Name">
-      <button class="add-row" type="button">+</button>
+    <div class="checklist-row">
+      <label>Multiple brands?</label>
+      <select id="multipleBrands">
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
     </div>
-
-    <div id="additionalTrainerContainer" class="indented"></div>
-  </div>
-
-  <!-- Deployment Manager Section -->
-  <div class="section-block">
-    <h2>Deployment Manager</h2>
 
     <div class="checklist-row">
-      <label>Deployment Manager Name</label>
-      <input type="text" placeholder="Full Name">
+      <label>Shared drive or separate drives?</label>
+      <select id="driveStructure">
+        <option></option>
+        <option>Shared Drives</option>
+        <option>Separate Drives, one building</option>
+        <option>Separate Drives, Seperate Buildings</option>
+      </select>
     </div>
-  </div>
-
-  <!-- CEM Section -->
-  <div class="section-block">
-    <h2>CEM</h2>
 
     <div class="checklist-row">
-      <label>CEM Name</label>
-      <input type="text" placeholder="Full Name">
+      <label>Total Buildings</label>
+      <select id="totalBuildings">
+        <option></option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Do the handoff notes mention additional buildings off-site? If so, how many?</label>
+      <select id="offsiteBuildings">
+        <option></option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
     </div>
   </div>
 
+  <!-- Dealership Contract / Salesforce Products -->
+  <div class="section-block">
+    <h2>Dealership Contract / Listed Salesforce Products</h2>
+    <textarea placeholder="List contracted products and confirm they match Salesforce."></textarea>
+  </div>
 </section>
-
-      <!-- ========================================================= -->
-      <!-- PAGE 2: DEALERSHIP INFORMATION                            -->
-      <!-- ========================================================= -->
-      <section id="dealership-info" class="page-section">
-        <h1>Dealership Information</h1>
-        <p class="page-subtitle">
-          Confirm core dealership details, key contacts, and layout before training.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
-
-        <!-- General Info -->
-        <div class="section-block">
-          <h2>General Info</h2>
-
-          <div class="checklist-row">
-            <label>Dealer Group</label>
-            <input type="text" placeholder="Dealer Group (if applicable)">
-          </div>
-
-          <div class="checklist-row">
-            <label>Dealership Name</label>
-            <input type="text" placeholder="Dealership Name">
-          </div>
-
-          <div class="checklist-row">
-            <label>Training Type</label>
-            <select>
-              <option></option>
-              <option>New Dealership</option>
-              <option>Upgrade</option>
-              <option>Retraining</option>
-              <option>Paid Additional Training</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Service Department Address</label>
-            <input type="text" placeholder="Service department street address">
-          </div>
-
-          <div class="checklist-row">
-            <label>Service Department Map</label>
-            <div style="flex:0 0 var(--input-width); width:var(--input-width); margin-left:auto;">
-              <div id="serviceDeptMap" style="width:100%; height:180px; background:#f3f3f3; border-radius:14px; border:1px solid #dcdcdc; display:flex; align-items:center; justify-content:center; font-size:12px; color:#777;">
-                Map will display here after address is configured.
-              </div>
-            </div>
-          </div>
-
-          <div class="checklist-row">
-            <label>DMS</label>
-            <input type="text" placeholder="DMS Provider">
-          </div>
-
-          <div class="checklist-row">
-            <label>Time Zone</label>
-            <input type="text" placeholder="Time Zone">
-          </div>
-
-          <div class="checklist-row">
-            <label>Multiple brands?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Shared drive or separate drives?</label>
-            <select>
-              <option></option>
-              <option>Shared Drives</option>
-              <option>Separate Drives, one building</option>
-              <option>Separate Drives, separate buildings</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Total Buildings</label>
-            <select>
-              <option></option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Do the handoff notes mention additional buildings off-site? If so, how many?</label>
-            <select>
-              <option></option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Are all buildings on one campus?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-block">
-          <h2>Additional Comments — General Info</h2>
-          <textarea placeholder="Notes specific to General Info …"></textarea>
-        </div>
-
-        <!-- Dealership Contacts (your existing card structure stays here) -->
-        <div class="section-block">
-          <h2>Dealership Contacts</h2>
-
-          <!-- Example: Service Manager card -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>Service Manager</label>
-              <input type="text" placeholder="Name">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text" placeholder="Cell">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email" placeholder="Email">
-            </div>
-          </div>
-
-          <!-- Parts Manager -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>Parts Manager</label>
-              <input type="text" placeholder="Name">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text" placeholder="Cell">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email" placeholder="Email">
-            </div>
-          </div>
-
-          <!-- Service Director / Second Service Manager -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>Service Director / Second Service Manager</label>
-              <input type="text" placeholder="Name">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text" placeholder="Cell">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email" placeholder="Email">
-            </div>
-          </div>
-
-          <!-- Additional POCs container -->
-          <div id="additionalPocContainer">
-            <div class="mini-card poc-card">
-              <div class="checklist-row integrated-plus">
-                <label>Additional POC</label>
-                <input type="text" placeholder="Name">
-                <button class="add-row" type="button">+</button>
-              </div>
-              <div class="checklist-row indent-sub">
-                <label>Cell</label>
-                <input type="text" placeholder="Cell">
-              </div>
-              <div class="checklist-row indent-sub">
-                <label>Email</label>
-                <input type="email" placeholder="Email">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Comments — Dealership Contacts -->
-        <div class="section-block">
-          <h2>Additional Comments — Dealership Contacts</h2>
-          <textarea placeholder="Notes regarding dealership contacts …"></textarea>
-        </div>
-      </section>
 
       <!-- ========================================================= -->
       <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
@@ -2871,8 +2680,8 @@
       </div>
     </section>
 
- <!-- ========================================================= -->
-<!-- PAGE 10: TRAINING SUMMARY (CLEANED & CORRECTED)          -->
+      <!-- ========================================================= -->
+<!-- PAGE 10: TRAINING SUMMARY                                 -->
 <!-- ========================================================= -->
 <section id="training-summary" class="page-section">
   <h1>Training Summary</h1>
@@ -2880,14 +2689,12 @@
     Capture a final summary of the onsite visit, key wins, risks, and follow-up items.
   </p>
 
-  <!-- Save PDF -->
+  <!-- Save as PDF button (floating within this page) -->
   <button id="savePDF" class="floating-btn" type="button">
     Save All Pages as PDF
   </button>
 
-  <!-- ========================== -->
-  <!-- MAIN SUMMARY CARD (ONLY 4 QUESTIONS) -->
-  <!-- ========================== -->
+  <!-- Main Training Summary card (ONLY the 4 lines go inside here) -->
   <div class="section-block">
     <h2>Training Summary</h2>
 
@@ -2918,12 +2725,9 @@
     </div>
   </div>
 
-  <!-- ========================== -->
-  <!-- COMMENT CARDS (RESTORED STABLE VERSION) -->
-  <!-- ========================== -->
-
+  <!-- Additional comment cards (separate cards, like before) -->
   <div class="section-block">
-    <h2>Training Summary Comments</h2>
+    <h2>Training Summary – Additional Notes</h2>
     <textarea></textarea>
   </div>
 
@@ -2956,7 +2760,6 @@
     <h2>Opcode, Pricing &amp; Integration Notes</h2>
     <textarea></textarea>
   </div>
-
 </section>
 
 </body>
