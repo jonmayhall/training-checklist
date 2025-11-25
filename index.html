@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-  <!-- CSS with simple manual cache-buster -->
+  <!-- CSS (manual cache-buster) -->
   <link rel="stylesheet" href="style.css?v=20251124B">
 
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- Main JS with simple manual cache-buster -->
+  <!-- Main JS (manual cache-buster) -->
   <script src="script.js?v=20251124B" defer></script>
 </head>
 
@@ -77,7 +77,7 @@
   <main id="content">
 
     <!-- ========================================================= -->
-    <!-- PAGE 1: TRAINERS, DEPLOYMENT MANAGER & CEM                -->
+    <!-- PAGE 1: TRAINERS, DEPLOYMENT MANAGER, & CEM               -->
     <!-- ========================================================= -->
     <section id="onsite-trainers" class="page-section active">
       <h1>Trainers, Deployment Manager, &amp; CEM</h1>
@@ -87,7 +87,7 @@
       <button class="clear-page-btn" type="button">Reset This Page</button>
 
       <div class="section-block">
-        <h2>Trainers</h2>
+        <h2>Trainer Information</h2>
 
         <div class="checklist-row">
           <label>Lead Trainer</label>
@@ -119,7 +119,7 @@
 
       <div class="section-block">
         <h2>Additional Comments — Trainers, Deployment Manager, &amp; CEM</h2>
-        <textarea placeholder="Notes regarding trainers, Deployment Manager, and CEM …"></textarea>
+        <textarea placeholder="Notes regarding trainers, deployment manager, and CEM …"></textarea>
       </div>
     </section>
 
@@ -133,7 +133,7 @@
       </p>
       <button class="clear-page-btn" type="button">Reset This Page</button>
 
-      <!-- General Info (old info up top) -->
+      <!-- General Info -->
       <div class="section-block">
         <h2>General Info</h2>
 
@@ -144,7 +144,6 @@
 
         <div class="checklist-row">
           <label>Dealership Name</label>
-          <!-- keep this id so it updates the header name -->
           <input type="text" id="dealershipNameInput" placeholder="Dealership Name">
         </div>
 
@@ -522,7 +521,7 @@
       <p class="page-subtitle">
         Track adoption by role and ensure every user can work confidently in myKaarma.
       </p>
-      <button class="clear-page-btn">Reset This Page</button>
+      <button class="clear-page-btn" type="button">Reset This Page</button>
 
       <!-- Technicians – Checklist -->
       <div class="section">
@@ -1165,7 +1164,7 @@
       </div>
     </section>
 
-    <!-- ========================================================= -->
+        <!-- ========================================================= -->
     <!-- PAGE 7: SUPPORT TICKETS                                   -->
     <!-- ========================================================= -->
     <section id="support-ticket" class="page-section">
@@ -1234,580 +1233,252 @@
       </div>
     </section>
 
-        <!-- ========================================================= -->
+    <!-- ========================================================= -->
     <!-- PAGE 8: DMS INTEGRATION                                   -->
     <!-- ========================================================= -->
     <section id="dms-integration" class="page-section">
       <h1>DMS Integration</h1>
       <p class="page-subtitle">
-        How customers, vehicles, appointments, ROs, invoices, pricing, and history flow between myKaarma and each DMS.
+        Confirm DMS workflows, RO history, and integration behavior for accurate MPIs and communication.
       </p>
       <button class="clear-page-btn" type="button">Reset This Page</button>
 
-      <!-- OVERVIEW -->
       <div class="section-block dms-overview-block">
-        <h2>Integration Overview</h2>
-        <div class="dms-legend">
-          <div><span class="dms-dot dms-dot-auto"></span><strong>Auto</strong></div>
-          <div><span class="dms-dot dms-dot-ondemand"></span><strong>On-Demand</strong></div>
-          <div><span class="dms-dot dms-dot-withro"></span><strong>With RO</strong></div>
-          <div><span class="dms-dot dms-dot-planned"></span><strong>Planned</strong></div>
-          <div><span class="dms-dot dms-dot-na"></span><strong>N/A</strong></div>
-        </div>
-      </div>
+        <h2>DMS Integration Matrix</h2>
 
-      <!-- DMS CARDS -->
-      <div class="section">
-        <div class="section-header">
-          <span>DMS Integration Matrix</span>
+        <div class="dms-legend">
+          <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
+          <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
+          <div><span class="dms-dot dms-dot-withro"></span>With RO Only</div>
+          <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+          <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
         </div>
+
         <div class="dms-table-container">
           <div class="dms-grid">
-
-            <!-- REYNOLDS -->
+            <!-- RO History -->
             <div class="dms-card">
               <div class="dms-card-header">
-                <span class="dms-name">Reynolds</span>
-                <span class="dms-chip dms-chip-push">Push-Based</span>
+                <span class="dms-name">RO History</span>
+                <span class="dms-chip dms-chip-push">Push</span>
               </div>
               <ul class="dms-list">
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-auto"></span>
+                    <span class="dms-field">RO Updates</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
                   </div>
-                  <p>Customer updates push automatically as part of standard workflows.</p>
+                  <p>RO changes appear automatically from the DMS.</p>
                 </li>
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
+                    <span class="dms-field">Closed ROs</span>
+                    <span class="dms-tag dms-tag-ondemand">On Demand</span>
                   </div>
-                  <p>Vehicle information is included with RO and customer pushes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-ondemand"></span>
-                  </div>
-                  <p>Pushes from myKaarma when generated or updated <span class="muted-note">(if any appointments are scheduled)</span>.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-ondemand"></span>
-                  </div>
-                  <p>ROs push from ServiceCart, Check-In, or configured workflow triggers.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts / Invoices</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Can push automatically when workflows support parts invoice generation.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-withro"></span>
-                  </div>
-                  <p>History syncs via RO traffic and labor codes.</p>
+                  <p>RO closure events are updated with a manual refresh or overnight job.</p>
                 </li>
               </ul>
             </div>
 
-            <!-- AUTOMATE -->
+            <!-- Customer / Vehicle -->
             <div class="dms-card">
               <div class="dms-card-header">
-                <span class="dms-name">Automate</span>
-                <span class="dms-chip dms-chip-push">Push-Based</span>
+                <span class="dms-name">Customer &amp; Vehicle</span>
+                <span class="dms-chip dms-chip-pull">Pull</span>
               </div>
               <ul class="dms-list">
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-auto"></span>
+                    <span class="dms-field">Customer Lookup</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
                   </div>
-                  <p>Customers push automatically into Automate.</p>
+                  <p>Customer information appears on search and when creating ROs.</p>
                 </li>
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
+                    <span class="dms-field">Vehicle History</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
                   </div>
-                  <p>Vehicle updates flow with RO traffic.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-ondemand"></span>
-                  </div>
-                  <p>Limited appointment update support; details may vary by store.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-na"></span>
-                  </div>
-                  <p>No RO write-back path from myKaarma.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts</span>
-                    <span class="dms-tag dms-tag-na"></span>
-                  </div>
-                  <p>No parts invoice push supported.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-display"></span>
-                  </div>
-                  <p>Primarily presentation only with limited push traffic.</p>
+                  <p>Service history displays when an RO is opened or attached.</p>
                 </li>
               </ul>
             </div>
 
-            <!-- CDK -->
+            <!-- Parts -->
             <div class="dms-card">
               <div class="dms-card-header">
-                <span class="dms-name">CDK</span>
-                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                <span class="dms-name">Parts &amp; Pricing</span>
+                <span class="dms-chip dms-chip-pull">Pull</span>
               </div>
               <ul class="dms-list">
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-auto"></span>
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-limited">Limited</span>
                   </div>
-                  <p>Pull every 15 minutes; historical lookup available on-demand.</p>
+                  <p>Pricing is pulled from DMS fields and can be impacted by price levels.</p>
                 </li>
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
+                    <span class="dms-field">Parts Availability</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
                   </div>
-                  <p>Vehicle info comes with RO records.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 15 minutes; myKaarma can request additional refreshes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes; write-back is on-demand.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts &amp; Pricing</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Invoices pull every 15 minutes; on-demand pricing available in ServiceCart.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Nightly sync of RO and F&amp;I history <span class="muted-note">(≈2 years)</span>.</p>
+                  <p>Real-time stocking may require a separate integration or catalog.</p>
                 </li>
               </ul>
             </div>
 
-            <!-- Dealertrack / Arkona -->
+            <!-- Other -->
             <div class="dms-card">
               <div class="dms-card-header">
-                <span class="dms-name">Dealertrack / Arkona</span>
-                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                <span class="dms-name">Other Integrations</span>
+                <span class="dms-chip dms-chip-push">Push</span>
               </div>
               <ul class="dms-list">
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-auto"></span>
+                    <span class="dms-field">Appointment Export</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
                   </div>
-                  <p>Pull every 5 minutes; historical requests supported.</p>
+                  <p>Confirm if appointments sync from scheduler into DMS or vice versa.</p>
                 </li>
                 <li>
                   <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-ondemand"></span>
+                    <span class="dms-field">Display-Only Fields</span>
+                    <span class="dms-tag dms-tag-display">Display</span>
                   </div>
-                  <p>Vehicle lookup on-demand; also comes with RO data.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 15 minutes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 2 minutes; write-back is on-demand.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts &amp; Pricing</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Parts invoices pull every 15 minutes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Nightly sync for RO and customer history.</p>
+                  <p>Fields shown in myKaarma but not written back to the DMS.</p>
                 </li>
               </ul>
             </div>
-
-            <!-- Lightyear / Dealerbuilt -->
-            <div class="dms-card">
-              <div class="dms-card-header">
-                <span class="dms-name">Lightyear / Dealerbuilt</span>
-                <span class="dms-chip dms-chip-pull">Pull-Based</span>
-              </div>
-              <ul class="dms-list">
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
-                  </div>
-                  <p>Loaded with RO activity.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 2 minutes; on-demand write-back.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Parts invoices pull every 5 minutes <span class="muted-note">(varies by store)</span>.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Nightly RO history sync; on-demand refresh supported.</p>
-                </li>
-              </ul>
-            </div>
-
-            <!-- PBS -->
-            <div class="dms-card">
-              <div class="dms-card-header">
-                <span class="dms-name">PBS</span>
-                <span class="dms-chip dms-chip-pull">Pull-Based</span>
-              </div>
-              <ul class="dms-list">
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-limited"></span>
-                  </div>
-                  <p>Customer pulls limited; relies heavily on RO activity.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
-                  </div>
-                  <p>Vehicle sync primarily RO-related.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes; some push varies by workflow.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 2 minutes; write-back is on-demand.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts</span>
-                    <span class="dms-tag dms-tag-limited"></span>
-                  </div>
-                  <p>Parts invoice pulling is not universal.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Nightly RO history sync.</p>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Tekion -->
-            <div class="dms-card">
-              <div class="dms-card-header">
-                <span class="dms-name">Tekion</span>
-                <span class="dms-chip dms-chip-pull">Pull-Based</span>
-              </div>
-              <ul class="dms-list">
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Customers</span>
-                    <span class="dms-tag dms-tag-withro"></span>
-                  </div>
-                  <p>Customers arrive with the RO; no independent customer pull.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Vehicles</span>
-                    <span class="dms-tag dms-tag-withro"></span>
-                  </div>
-                  <p>Vehicle flow attached to RO updates.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Appointments</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes; some write-back planned.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">ROs</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Pull every 5 minutes; write-back enabled per store.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">Parts &amp; Pricing</span>
-                    <span class="dms-tag dms-tag-planned"></span>
-                  </div>
-                  <p>Planned and supported in roadmap.</p>
-                </li>
-                <li>
-                  <div class="dms-row-top">
-                    <span class="dms-field">History</span>
-                    <span class="dms-tag dms-tag-auto"></span>
-                  </div>
-                  <p>Historical RO load available during deployment.</p>
-                </li>
-              </ul>
-            </div>
-
           </div>
         </div>
       </div>
 
-      <!-- NOTES -->
       <div class="section-block">
-        <h2>Integration Notes</h2>
-        <textarea placeholder="Type integration notes here …"></textarea>
+        <h2>Additional Comments — DMS Integration</h2>
+        <textarea placeholder="Notes about DMS behavior, delays, or unique workflows …"></textarea>
       </div>
     </section>
 
     <!-- ========================================================= -->
-    <!-- PAGE 9: POST TRAINING VERIFICATION                         -->
+    <!-- PAGE 9: POST TRAINING VERIFICATION                        -->
     <!-- ========================================================= -->
     <section id="post-training" class="page-section">
       <h1>Post Training Verification</h1>
       <p class="page-subtitle">
-        Confirm adoption, automation, and leadership approval before closing out the training.
+        Confirm ownership, champions, blockers, and action items after onsite training.
       </p>
       <button class="clear-page-btn" type="button">Reset This Page</button>
 
-      <!-- Champions & Blockers -->
+      <div class="section-block">
+        <h2>Management &amp; Ownership</h2>
+        <div class="checklist-row">
+          <label>Who owns myKaarma performance and usage after training?</label>
+          <input type="text" placeholder="Name / role responsible">
+        </div>
+        <div class="checklist-row">
+          <label>Have clear expectations been set for daily usage and reporting?</label>
+          <select><option></option><option>Yes</option><option>No</option><option>In Progress</option></select>
+        </div>
+        <div class="checklist-row">
+          <label>Is there a follow-up call scheduled post training?</label>
+          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Additional Comments — Management &amp; Ownership</h2>
+        <textarea placeholder="Notes related to management expectations and ownership …"></textarea>
+      </div>
+
+      <!-- Champions & Blockers MAIN CARD -->
       <div class="section-block">
         <h2>Champions &amp; Blockers</h2>
 
-        <div class="checklist-row integrated-plus">
-          <label>Champion – Advisors</label>
-          <input type="text" placeholder="Advisor Champion">
-          <button class="add-row" type="button">+</button>
-        </div>
-        <div class="checklist-row integrated-plus">
-          <label>Champion – Techs</label>
-          <input type="text" placeholder="Tech Champion">
-          <button class="add-row" type="button">+</button>
-        </div>
-        <div class="checklist-row integrated-plus">
-          <label>Champion – Parts Reps</label>
-          <input type="text" placeholder="Parts Champion">
-          <button class="add-row" type="button">+</button>
+        <!-- Champions Card -->
+        <div class="mini-card champions-card">
+          <div class="checklist-row">
+            <label>Champions — Advisors</label>
+            <input type="text" placeholder="Advisors who champion myKaarma">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Advisor champions</label>
+            <input type="text" placeholder="Additional Advisor champion">
+            <button class="add-row" type="button">+</button>
+          </div>
+
+          <div class="checklist-row">
+            <label>Champions — Techs</label>
+            <input type="text" placeholder="Technicians who champion myKaarma">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Tech champions</label>
+            <input type="text" placeholder="Additional Tech champion">
+            <button class="add-row" type="button">+</button>
+          </div>
+
+          <div class="checklist-row">
+            <label>Champions — Parts Reps</label>
+            <input type="text" placeholder="Parts reps who champion myKaarma">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Parts champions</label>
+            <input type="text" placeholder="Additional Parts champion">
+            <button class="add-row" type="button">+</button>
+          </div>
         </div>
 
-        <div class="checklist-row integrated-plus blocker-start">
-          <label>Blocker – Advisors</label>
-          <input type="text" placeholder="Advisor Blocker">
-          <button class="add-row" type="button">+</button>
-        </div>
-        <div class="checklist-row integrated-plus">
-          <label>Blocker – Techs</label>
-          <input type="text" placeholder="Tech Blocker">
-          <button class="add-row" type="button">+</button>
-        </div>
-        <div class="checklist-row integrated-plus">
-          <label>Blocker – Parts Reps</label>
-          <input type="text" placeholder="Parts Blocker">
-          <button class="add-row" type="button">+</button>
+        <!-- Blockers Card -->
+        <div class="mini-card blockers-card">
+          <div class="checklist-row">
+            <label>Blockers — Advisors</label>
+            <input type="text" placeholder="Advisors who are blockers">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Advisor blockers</label>
+            <input type="text" placeholder="Additional Advisor blocker">
+            <button class="add-row" type="button">+</button>
+          </div>
+
+          <div class="checklist-row">
+            <label>Blockers — Techs</label>
+            <input type="text" placeholder="Technicians who are blockers">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Tech blockers</label>
+            <input type="text" placeholder="Additional Tech blocker">
+            <button class="add-row" type="button">+</button>
+          </div>
+
+          <div class="checklist-row">
+            <label>Blockers — Parts Reps</label>
+            <input type="text" placeholder="Parts reps who are blockers">
+          </div>
+          <div class="checklist-row integrated-plus">
+            <label>Add more Parts blockers</label>
+            <input type="text" placeholder="Additional Parts blocker">
+            <button class="add-row" type="button">+</button>
+          </div>
         </div>
       </div>
 
       <div class="section-block">
-        <h2>Additional Comments — Champions &amp; Blockers</h2>
-        <textarea placeholder="Comments related to champions and blockers …"></textarea>
-      </div>
-
-      <!-- Post Training Verification Questions -->
-      <div class="section-block">
-        <h2>Post Training Verification</h2>
-
-        <div class="checklist-row">
-          <label>Are advisors fully using myKaarma for communication?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
+        <h2>Next Steps &amp; Action Items</h2>
+        <div class="checklist-row integrated-plus">
+          <label>Top follow-up action items</label>
+          <input type="text" placeholder="Action item #1">
+          <button class="add-row" type="button">+</button>
         </div>
-
         <div class="checklist-row">
-          <label>Are techs completing MPIs end-to-end inside myKaarma?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Is the scheduler functioning correctly <span class="muted-note">(capacity, teams, routing, opcodes)</span>?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are parts pricing and labor opcodes showing correct values during MPI approval?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are all communications (texts, calls, video messages) working without errors?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Do managers understand how to monitor usage and performance in myKaarma?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Are all known issues documented and submitted as support tickets?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
+          <label>Target date to review progress</label>
+          <input type="date">
         </div>
       </div>
 
       <div class="section-block">
         <h2>Additional Comments — Post Training Verification</h2>
-        <textarea placeholder="Comments related to overall post training verification …"></textarea>
-      </div>
-
-      <!-- Manager Approval -->
-      <div class="section-block">
-        <h2>Manager Approval</h2>
-
-        <div class="checklist-row">
-          <label>Did the Service Manager walk the shop and service drive with you on the final day?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Did you receive approval for a successful training from the Service Manager?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Did you receive approval for a successful training from the Parts Manager?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Manager Approval</h2>
-        <textarea placeholder="Comments related to manager approval …"></textarea>
-      </div>
-
-      <!-- Automated Messages -->
-      <div class="section-block">
-        <h2>Automated Messages</h2>
-
-        <div class="checklist-row">
-          <label>Are automated customer messages active and configured correctly?</label>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Welcome text?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Appointment reminder?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>MPI?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Tech video?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Payment request?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Follow-up text?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>ServiceConnect?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Automated Messages</h2>
-        <textarea placeholder="Comments related to automated messages and notifications …"></textarea>
+        <textarea placeholder="Any final notes, risks, or follow-ups from post training verification …"></textarea>
       </div>
     </section>
 
@@ -1816,46 +1487,53 @@
     <!-- ========================================================= -->
     <section id="training-summary" class="page-section">
       <h1>Training Summary</h1>
-      <button id="savePDF" class="floating-btn" type="button">Save as PDF</button>
+      <p class="page-subtitle">
+        Capture a final summary of the onsite visit, key wins, risks, and follow-up items.
+      </p>
+
+      <!-- Save as PDF button (floating within this page) -->
+      <button id="savePDF" class="floating-btn" type="button">
+        Save All Pages as PDF
+      </button>
 
       <div class="section-block">
         <h2>Training Summary</h2>
-        <textarea placeholder="Summary of overall training progress …"></textarea>
+        <div class="checklist-row">
+          <label>Overall training outcome</label>
+          <select>
+            <option></option>
+            <option>Exceeded Expectations</option>
+            <option>Met Expectations</option>
+            <option>Partially Met Expectations</option>
+            <option>Did Not Meet Expectations</option>
+          </select>
+        </div>
+        <div class="checklist-row">
+          <label>Key wins</label>
+          <input type="text" placeholder="High-level wins or successes">
+        </div>
+        <div class="checklist-row">
+          <label>Key risks or concerns</label>
+          <input type="text" placeholder="Top risks, concerns, or blockers">
+        </div>
+        <div class="checklist-row">
+          <label>Recommended next steps</label>
+          <input type="text" placeholder="Recommended actions for continued success">
+        </div>
       </div>
 
       <div class="section-block">
-        <h2>Information for CEM</h2>
-        <textarea placeholder="Information to share with CEM …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Champions &amp; Blockers</h2>
-        <textarea placeholder="Champions and blockers info …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Pre-Training &amp; Monday Visit Notes</h2>
-        <textarea placeholder="Pre-Training and Monday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>End-of-Day Summary – Tuesday</h2>
-        <textarea placeholder="Tuesday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>End-of-Day Summary – Wednesday</h2>
-        <textarea placeholder="Wednesday notes …"></textarea>
-      </div>
-
-      <div class="section-block">
-        <h2>Opcode, Pricing &amp; Integration Notes</h2>
-        <textarea placeholder="Autofill from Opcodes and DMS Integration notes …"></textarea>
+        <h2>Additional Comments — Training Summary</h2>
+        <textarea placeholder="Final notes for internal and customer-facing summaries …"></textarea>
       </div>
     </section>
-
   </main>
-</div> <!-- #app -->
 
+  <!-- ========================================================= -->
+  <!-- FOOTER                                                    -->
+  <!-- ========================================================= -->
+  <footer id="footer">
+    myKaarma Interactive Training Checklist &bull; Internal Use Only
+  </footer>
 </body>
 </html>
