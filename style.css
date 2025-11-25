@@ -1,56 +1,61 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
-   Refined build with cards, darker sidebar, fixed tables
+   myKaarma Interactive Training Checklist – CLEAN BASE CSS
+   Option C – Fresh build, original layout style
    ======================================================= */
 
 :root {
   --orange: #f36f21;
   --light-orange: #f8b17b;
   --gray-bg: #d7d7d7;
-  --card-bg: #fff;
+  --card-bg: #ffffff;
   --border: #dcdcdc;
-  --ink: #222;
+  --ink: #222222;
 
   --radius-lg: 18px;
   --radius-sm: 14px;
 
-  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 
   --input-width: 260px;
 }
 
 /* ===== BASE ===== */
-html, body {
+html,
+body {
   margin: 0;
-  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  padding: 0;
+  font-family: "Roboto", "Inter", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   background: var(--gray-bg);
   color: var(--ink);
   overflow-x: hidden;
 }
 
-/* no italics anywhere by default */
+/* turn off random italics globally (except where forced) */
 *, em, i {
-  font-style: normal !important;
+  font-style: normal;
+  box-sizing: border-box;
 }
 
 /* ===== TOP BAR ===== */
 #topbar {
-  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
+  background: linear-gradient(90deg, #000000 0%, var(--orange) 100%);
   height: 70px;
   display: flex;
   align-items: center;
   padding: 0 40px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
 }
+
 .topbar-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 }
+
 .top-logo {
   height: 42px;
   object-fit: contain;
@@ -63,42 +68,60 @@ html, body {
 }
 
 #dealershipNameDisplay {
-  color:#fff;
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:.5px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-/* ===== LAYOUT ===== */
+/* clear all button (topbar right in older layout) – you may move via HTML if needed */
+#clearAllBtn {
+  padding: 6px 12px;
+  font-size: 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(15, 23, 42, 0.96);
+  color: #ffffff;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: background 0.16s, transform 0.16s, box-shadow 0.16s, border-color 0.16s;
+}
+
+#clearAllBtn:hover {
+  background: linear-gradient(90deg, var(--orange), #22c55e);
+  border-color: #f97316;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+}
+
+/* ===== LAYOUT (SIDEBAR + MAIN) ===== */
 #app {
   display: flex;
   min-height: 100vh;
   margin-top: 70px;
-  overflow-x: hidden;
 }
 
-/* Darker sidebar */
+/* sidebar – original dark style */
 #sidebar {
   background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
-  border-right: 1px solid rgba(15,23,42,0.8);
+  border-right: 1px solid rgba(15, 23, 42, 0.8);
   width: 230px;
-  padding: 20px 12px 60px;
-  box-shadow: 0 0 18px rgba(15,23,42,0.6);
+  padding: 20px 12px 20px;
+  box-shadow: 0 0 18px rgba(15, 23, 42, 0.65);
   position: fixed;
   top: 70px;
   bottom: 0;
   overflow-y: auto;
 }
+
 #sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-/* hide icon span but keep label – "no icons" */
-.nav-icon { display: none; }
-
-/* MENU BUTTONS */
 .nav-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -108,106 +131,52 @@ html, body {
   border-radius: 10px;
   cursor: pointer;
   color: #e5e7eb;
-  transition: .18s;
+  transition: 0.18s;
   position: relative;
-  overflow: hidden;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+
 .nav-btn::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 16%;
-  bottom: 16%;
+  top: 18%;
+  bottom: 18%;
   width: 3px;
   border-radius: 999px;
   background: linear-gradient(to bottom, var(--orange), #22c55e);
   opacity: 0;
-  transition: opacity .18s;
+  transition: opacity 0.18s;
 }
+
 .nav-btn:hover {
-  background: rgba(15,23,42,0.85);
+  background: rgba(15, 23, 42, 0.86);
   color: #f9fafb;
-  border-color: rgba(148,163,184,0.45);
-  box-shadow: 0 2px 8px rgba(15,23,42,0.7);
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.8);
 }
+
 .nav-btn.active {
-  background: rgba(15,23,42,0.95);
+  background: rgba(15, 23, 42, 0.96);
   color: #f9fafb;
   font-weight: 600;
   border-color: var(--orange);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.65);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
 }
+
 .nav-btn.active::before {
   opacity: 1;
-}
-
-/* Clear All button at bottom of sidebar */
-#clearAllBtn {
-  position: fixed;
-  left: 24px;
-  bottom: 18px;
-  width: calc(230px - 48px);
-  padding: 7px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.9);
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
-  opacity: 0.95;
-  transition: background .16s, transform .16s, opacity .16s, border-color .16s, box-shadow .16s;
-}
-#clearAllBtn:hover {
-  background: linear-gradient(90deg, var(--orange), #22c55e);
-  border-color: #f97316;
-  transform: translateY(-1px);
-  opacity: 1;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.75);
-}
-
-/* per-page clear button – top-right of each page card */
-.clear-page-btn {
-  position: absolute;
-  top: 16px;
-  right: 24px;
-  padding: 4px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid #bbb;
-  background: #f7f7f7;
-  color: #555;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
-}
-.clear-page-btn:hover {
-  background: #fff;
-  border-color: var(--orange);
-  color: var(--orange);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
 main {
   flex: 1;
   margin-left: 230px;
-  padding: 30px 32px;
+  padding: 30px 32px 40px;
   background: var(--gray-bg);
-  box-sizing: border-box;
 }
 
-/* ===== PAGE SECTIONS / CARDS ===== */
+/* ===== PAGE SECTIONS ===== */
 .page-section {
   position: relative;
   display: none;
@@ -216,24 +185,22 @@ main {
   box-shadow: var(--shadow);
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
-  width: 100%;
   max-width: 1100px;
-  box-sizing: border-box;
 }
+
 .page-section.active {
   display: block;
 }
 
-/* Page titles */
+/* page titles */
 .page-section h1 {
   color: var(--orange);
   margin: 4px 0 8px 4px;
   font-size: 26px;
   font-weight: 700;
-  text-align: left;
-  letter-spacing: .3px;
-  position: relative;
+  letter-spacing: 0.3px;
 }
+
 .page-section h1::after {
   content: "";
   display: block;
@@ -244,70 +211,62 @@ main {
   border-radius: 2px;
 }
 
-/* Optional page subtitle under h1 */
 .page-subtitle {
   margin: 4px 0 20px 4px;
   font-size: 13px;
-  color: #555;
+  color: #555555;
 }
 
-/* Section headers (table/card headers in orange) */
-.section-header {
-  background: var(--orange);
-  color: #fff;
-  font-weight: 600;
-  padding: 10px 16px;
-  font-size: 16px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  border: 1px solid var(--orange);
-  border-bottom: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
+/* per-page reset button – top-right inside page card */
+.clear-page-btn {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  padding: 4px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.8);
-  font-size: 12px;
-  font-weight: 600;
+  border: 1px solid #bbbbbb;
+  background: #f7f7f7;
+  color: #555555;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s, border-color 0.18s, color 0.18s;
 }
 
-/* Section blocks (white cards) */
+.clear-page-btn:hover {
+  background: #ffffff;
+  border-color: var(--orange);
+  color: var(--orange);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+}
+
+/* ===== SECTION BLOCKS (non-table cards) ===== */
 .section-block {
-  background: #fff;
+  background: #ffffff;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  padding: 0 22px 14px;
+  padding: 0 22px 16px;
   margin-bottom: 24px;
-  box-sizing: border-box;
   overflow: hidden;
-  position: relative;
 }
+
 .section-block h2 {
   margin: 0 0 16px;
   padding: 10px 16px;
   background: var(--orange);
-  color: #fff;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 600;
   border-bottom: 1px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   margin-left: -22px;
   margin-right: -22px;
 }
 
-/* Slightly extra spacing under note cards to create a visual break */
-.section-block + .section-block {
-  margin-top: 12px;
-}
-
-/* ===== NON-TABLE ROWS (Q&A lines) ===== */
+/* ===== CHECKLIST ROWS ===== */
 .checklist-row {
   display: flex;
   align-items: center;
@@ -318,11 +277,13 @@ main {
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
 }
+
 .section-block .checklist-row:last-of-type {
   border-bottom: none;
   margin-bottom: 8px;
-  padding-bottom: 4px;
+  padding-bottom: 0;
 }
+
 .checklist-row label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -331,7 +292,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT */
+/* base input / select style (right aligned) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -340,15 +301,14 @@ main {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   margin-left: auto;
-  margin-right: 0;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
-  box-sizing: border-box;
-  height: 34px;
 }
+
+/* textarea in section-block */
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -361,85 +321,59 @@ main {
   resize: vertical;
 }
 
-/* Focus */
+/* focus styles */
 .section-block input:focus,
 .section-block select:focus,
 .section-block textarea:focus {
   border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.35);
+  box-shadow: 0 0 4px rgba(243, 111, 33, 0.35);
   outline: none;
   background: #fff9f5;
 }
 
-/* Indented Qs */
+/* indented children */
 .indent-sub {
   padding-left: 60px !important;
 }
 
-/* =======================================================
-   MINI-CARDS for Contacts + Champions / Blockers
-   ======================================================= */
+/* ===== ORANGE BORDER MINI-CARDS (Contacts, Champions, Blockers) ===== */
 
-.mini-card {
+.orange-card {
   border: 1px solid var(--orange);
   border-radius: 14px;
-  background: #fff;
+  background: #ffffff;
   margin: 16px 0;
-  padding: 6px 0 4px;
+  padding: 6px 0 8px;
 }
 
-/* headings inside mini-cards */
-.mini-card h3 {
-  margin: 4px 16px 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--orange);
-}
-
-/* rows inside mini-card */
-.mini-card .checklist-row {
-  border-bottom: 1px solid #e5e5e5;
+/* keep rows inside card continuous, no gaps */
+.orange-card .checklist-row {
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 28px;
+  border-bottom: 1px solid #e5e5e5;
+  padding-left: 32px;
 }
-.mini-card .checklist-row:last-child {
+
+.orange-card .checklist-row:last-child {
   border-bottom: none;
+  padding-bottom: 4px;
 }
 
-/* keep mini-cards clean white inside */
-.mini-card .checklist-row {
-  background: #fff !important;
+/* ensure inputs in orange cards keep same layout */
+.orange-card .checklist-row input[type="text"],
+.orange-card .checklist-row input[type="number"],
+.orange-card .checklist-row input[type="email"],
+.orange-card .checklist-row select {
+  flex: 0 0 var(--input-width);
 }
 
-.contact-card {}
+/* champions / blockers specific cards reuse orange-card */
 .champions-card {}
 .blockers-card {}
+.contact-card {}
 
-/* Champions & Blockers wrapper – two mini-cards side-by-side when room */
-.champions-blockers-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  padding-bottom: 18px;
-}
-
-/* Bring orange-strip cards (contacts, champions, blockers) textboxes inward */
-.mini-card .checklist-row label {
-  padding-right: 12px;
-}
-.mini-card .checklist-row input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-}
-
-/* POC-specific alignment container (assuming you have #additionalPocContainer) */
-#additionalPocContainer .mini-card .checklist-row {
-  padding-left: 30px;
-}
-
-/* ===== Integrated “+” button rows ===== */
-/* Layout: [label..............] [input][+ button touching] */
+/* ===== INTEGRATED “+” BUTTON ROWS ===== */
+/* [label] [input][+ button] inline, seamless with rounded pill look */
 
 .section-block .checklist-row.integrated-plus {
   display: flex;
@@ -447,99 +381,81 @@ main {
   gap: 0;
 }
 
-/* Label behaves like normal rows */
+/* label as normal */
 .section-block .checklist-row.integrated-plus label {
   flex: 1 1 auto;
   padding-right: 16px;
 }
 
-/* Text box in integrated + rows:
-   (input + 34px button) == var(--input-width) */
+/* text box narrower so + button + input ≈ normal input width */
 .section-block .checklist-row.integrated-plus input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
   margin-left: auto;
-  margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as text box */
+/* the integrated + button */
 .section-block .checklist-row.integrated-plus > .add-row {
   flex: 0 0 34px;
-  position: relative;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   width: 34px;
   height: 34px;
+  margin-left: -1px; /* overlaps border so they touch */
+  background: var(--orange);
+  color: #ffffff;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: 1px solid var(--orange);
   font-size: 18px;
   font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: .18s ease-in-out;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(243, 111, 33, 0.25);
+  transition: background 0.18s, transform 0.18s;
 }
+
 .section-block .checklist-row.integrated-plus > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
 }
 
-/* Any cloned rows that become "normal" will rely on the base .checklist-row styles */
+/* when cloned rows are plain text boxes (no button), ensure normal rounded right side */
+.section-block .checklist-row input.cloned-text-input {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
+}
 
-/* =======================================================
-   SUPPORT TICKET – Ticket groups
-   ======================================================= */
+/* ===== SUPPORT TICKETS ===== */
 
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
   border-radius: 16px;
   border: 1px solid #e1e1e1;
-  background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
-/* Optional pill */
-.ticket-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--orange), #ff9f50);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
+/* keep first checklist-row comfy */
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
 
-.ticket-status-row {
-  border-bottom: 1px dashed #ddd;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+/* in support tickets, ensure Support Ticket Number integrated row uses same layout */
+.ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
 }
 
-/* Ensure support ticket fields aligned like others */
-#support-ticket .checklist-row input[type="text"],
-#support-ticket .checklist-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
+.ticket-group .checklist-row.integrated-plus > .add-row {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
 }
 
-/* =======================================================
-   DMS PAGE – GRID CARDS with DOTS
-   ======================================================= */
+/* ===== DMS INTEGRATION PAGE ===== */
 
 .dms-overview-block {
   margin-bottom: 28px;
@@ -547,7 +463,7 @@ main {
 
 .dms-legend {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 6px 18px;
   font-size: 13px;
   margin-top: 8px;
@@ -561,20 +477,33 @@ main {
   margin-right: 6px;
 }
 
-.dms-dot-auto      { background: #22c55e; }
-.dms-dot-ondemand  { background: #f97316; }
-.dms-dot-withro    { background: #0ea5e9; }
-.dms-dot-planned   { background: #eab308; }
-.dms-dot-na        { background: #9ca3af; }
+.dms-dot-auto { background: #22c55e; }
+.dms-dot-ondemand { background: #f97316; }
+.dms-dot-withro { background: #0ea5e9; }
+.dms-dot-planned { background: #eab308; }
+.dms-dot-na { background: #9ca3af; }
 
-.dms-table-container {
-  margin-top: 16px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  background: #fff;
+.section .section-header {
+  background: var(--orange);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 1px solid var(--orange);
+  border-bottom: none;
 }
 
+/* container under DMS header */
+.dms-table-container {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border: 1px solid var(--border);
+  border-top: none;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+/* grid of DMS cards */
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -586,7 +515,7 @@ main {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
   background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
   padding: 14px 16px 12px;
 }
 
@@ -612,11 +541,13 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
+
 .dms-chip-push {
   background: #f97316;
-  color: #fff;
+  color: #ffffff;
   border-color: #ea580c;
 }
+
 .dms-chip-pull {
   background: #0f172a;
   color: #e5e7eb;
@@ -628,11 +559,13 @@ main {
   margin: 8px 0 0;
   padding: 0;
 }
+
 .dms-list li {
   padding-top: 8px;
   margin-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
+
 .dms-list li:first-child {
   border-top: none;
   margin-top: 0;
@@ -645,12 +578,12 @@ main {
   justify-content: space-between;
   margin-bottom: 2px;
 }
+
 .dms-field {
   font-weight: 600;
   font-size: 13px;
 }
 
-/* DOT ONLY tags (no text) */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -658,15 +591,15 @@ main {
   border-radius: 999px;
   flex-shrink: 0;
   font-size: 0;
-  color: transparent;
 }
-.dms-tag-auto      { background: #22c55e; }
-.dms-tag-ondemand  { background: #f97316; }
-.dms-tag-withro    { background: #0ea5e9; }
-.dms-tag-planned   { background: #eab308; }
-.dms-tag-na        { background: #9ca3af; }
-.dms-tag-limited   { background: #6366f1; }
-.dms-tag-display   { background: #6b7280; }
+
+.dms-tag-auto { background: #22c55e; }
+.dms-tag-ondemand { background: #f97316; }
+.dms-tag-withro { background: #0ea5e9; }
+.dms-tag-planned { background: #eab308; }
+.dms-tag-na { background: #9ca3af; }
+.dms-tag-limited { background: #6366f1; }
+.dms-tag-display { background: #6b7280; }
 
 .dms-list p {
   margin: 0;
@@ -675,41 +608,36 @@ main {
   color: #4b5563;
 }
 
-/* =======================================================
-   Training TABLES
-   ======================================================= */
+/* ===== TRAINING TABLES ===== */
 
 .section {
   margin-bottom: 40px;
 }
 
-/* Table Card */
+/* table container card, header already from .section-header */
 .table-container {
   width: 100%;
-  background: #fff;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow);
   margin-bottom: 32px;
-  padding: 0;
-  box-sizing: border-box;
 }
 
+/* scroll wrapper */
 .scroll-wrapper {
-  display: block;
   width: 100%;
   overflow-x: auto;
-  background: #fff;
-  padding-bottom: 4px;
 }
 
-/* Table */
+/* base table style */
 .training-table {
   border-collapse: collapse;
   width: 100%;
   min-width: 1000px;
 }
+
 .training-table th,
 .training-table td {
   white-space: nowrap;
@@ -720,23 +648,17 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header */
+/* header row background */
 .training-table thead th {
   background: var(--light-orange);
-  color: #fff;
+  color: #ffffff;
   font-weight: 600;
   position: sticky;
   top: 0;
   z-index: 3;
 }
 
-/* Header small note text */
-.training-table thead th .muted-note {
-  font-size: 0.8em;
-  color: #fff;
-}
-
-/* Sticky first column – for general training tables */
+/* sticky first column for people tables */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -745,22 +667,21 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child {
-  text-align: center;
-}
+
 .training-table td:first-child {
-  background: #fff;
+  background: #ffffff;
   display: flex;
   align-items: center;
   gap: 8px;
   padding-left: 8px;
   padding-right: 8px;
 }
+
 .training-table td:first-child input[type="checkbox"] {
   flex-shrink: 0;
   transform: scale(1.05);
-  margin-right: 8px;
 }
+
 .training-table td:first-child input[type="text"] {
   width: 95%;
   padding: 7px 8px;
@@ -771,18 +692,17 @@ main {
   text-align: left;
 }
 
-/* Generic second column */
+/* generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
   min-width: 185px;
 }
 
-/* Inputs/Selects inside table cells */
+/* inputs & selects inside tables */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
-  min-width: 130px;
   box-sizing: border-box;
   padding: 5px 5px;
   border-radius: var(--radius-sm);
@@ -791,23 +711,25 @@ main {
   font-size: 13px;
   text-align: center;
 }
+
 .training-table input[type="text"]:focus,
 .training-table select:focus {
   border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
+  box-shadow: 0 0 4px rgba(243, 111, 33, 0.4);
   outline: none;
   background: #fff9f5;
 }
 
-/* Alternating rows */
-.training-table tr:nth-child(odd) {
-  background: #fff;
+/* zebra rows */
+.training-table tbody tr:nth-child(odd) {
+  background: #ffffff;
 }
-.training-table tr:nth-child(even) {
+
+.training-table tbody tr:nth-child(even) {
   background: #fafafa;
 }
 
-/* Table footer + "+" button */
+/* table footer + add-row button */
 .table-footer {
   width: 100%;
   background: #f5f5f5;
@@ -816,13 +738,12 @@ main {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-  box-sizing: border-box;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
+
 .table-footer .add-row {
   background: var(--orange);
-  color: #fff;
+  color: #ffffff;
   border: none;
   border-radius: 50%;
   width: 22px;
@@ -830,102 +751,37 @@ main {
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  transition: .2s;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 1px 3px rgba(243, 111, 33, 0.25);
 }
+
 .table-footer .add-row:hover {
   background: #ff8b42;
   transform: scale(1.05);
 }
 
-/* Scrollbar (horizontal) */
-.scroll-wrapper::-webkit-scrollbar,
-.table-container::-webkit-scrollbar {
-  height: 8px;
-}
-.scroll-wrapper::-webkit-scrollbar-thumb,
-.table-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 6px;
-}
-.scroll-wrapper::-webkit-scrollbar-thumb:hover,
-.table-container::-webkit-scrollbar-thumb:hover {
-  background-color: #999;
-}
-
-/* ===== Floating PDF button (summary page) ===== */
-#training-summary .floating-btn {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  position: absolute;
-  top: 18px;
-  right: 24px;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-#training-summary .floating-btn:hover {
-  background: #ff8b42;
-}
-
-/* ===== Footer ===== */
-#footer {
-  padding: 24px;
-  text-align: center;
-  color: #666;
-  font-size: 13px;
-}
-
-/* ===== Muted note ===== */
-.muted-note {
-  font-size: 0.9em;
-  color: #666;
-  font-style: italic !important;
-}
-
-/* =======================================================
-   OPCODES PAGE – first column & widths
-   ======================================================= */
-
-/* Turn off sticky/flex first column only for Opcodes section */
+/* OPCODES PAGE – disable sticky first column so checkboxes don’t stick */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
   left: auto;
   z-index: 1;
-  width: auto;
-  min-width: auto;
-}
-#opcodes-pricing .training-table td:first-child {
-  display: table-cell;
-  padding: 6px 6px;
-  background: inherit;
 }
 
-/* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
+/* Labor Opcodes (first section) column widths */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(2),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(2) {
-  width: 110px;
-  min-width: 110px;
-}
+
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
-  width: 80px;
-  min-width: 80px;
+  width: 90px;
+  min-width: 90px;
 }
+
+/* middle columns narrower */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
@@ -933,46 +789,95 @@ main {
   width: 110px;
   min-width: 110px;
 }
+
+/* description wide */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
   min-width: 260px;
-  text-align: center;
 }
 
-/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
+/* Parts Pricing Verification (second section) to visually match above spacing:
+   small numeric columns, wider description */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
   width: 60px;
   min-width: 60px;
 }
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(2),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(2) {
-  width: 110px;
-  min-width: 110px;
-}
+
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+  width: 90px;
+  min-width: 90px;
 }
+
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
   min-width: 260px;
-  text-align: center;
 }
 
-/* =======================================================
-   RESPONSIVE
-   ======================================================= */
-@media (max-width: 900px) {
-  #sidebar { width: 190px; }
-  main { margin-left: 190px; padding: 20px; }
+/* ===== SUMMARY PAGE PDF BUTTON ===== */
+#training-summary .floating-btn {
+  background: var(--orange);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+
+#training-summary .floating-btn:hover {
+  background: #ff8b42;
+}
+
+/* ===== MUTED NOTE ===== */
+.muted-note {
+  font-size: 0.9em;
+  color: #666666;
+  font-style: italic;
+}
+
+/* ===== SCROLLBARS (for tables) ===== */
+.scroll-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: #cccccc;
+  border-radius: 6px;
+}
+.scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #999999;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  #sidebar {
+    width: 190px;
+  }
+  main {
+    margin-left: 190px;
+    padding: 20px;
+  }
+}
+
 @media (max-width: 600px) {
-  #sidebar { display: none; }
-  main { margin-left: 0; padding: 16px; }
+  #sidebar {
+    display: none;
+  }
+  main {
+    margin-left: 0;
+    padding: 16px;
+  }
 }
