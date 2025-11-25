@@ -690,7 +690,7 @@
         </div>
       </section>
 
- <!-- ========================================================= -->
+<!-- ========================================================= -->
 <!-- PAGE 5 : TRAINING CHECKLIST                               -->
 <!-- ========================================================= -->
 <section id="training-checklist" class="page-section">
@@ -717,10 +717,9 @@
               <th>Workflow Order</th>
               <th>OCR</th>
               <th>MPI</th>
-              <th>Left MPI Panel</th>
               <th>Self Assign/Take</th>
-              <th>DMS History</th>
               <th>Dispatch</th>
+              <th>Left MPI Panel</th>
               <th>Prev. Declines</th>
               <th>ShopChat</th>
               <th>Media</th>
@@ -796,16 +795,6 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
               <!-- Self Assign/Take -->
               <td>
                 <select>
@@ -816,7 +805,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- DMS History -->
+              <!-- Dispatch (now after Self Assign/Take) -->
               <td>
                 <select>
                   <option></option>
@@ -826,7 +815,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Dispatch -->
+              <!-- Left MPI Panel (now after Dispatch) -->
               <td>
                 <select>
                   <option></option>
@@ -991,16 +980,6 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
               <!-- Self Assign/Take -->
               <td>
                 <select>
@@ -1011,7 +990,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- DMS History -->
+              <!-- Dispatch -->
               <td>
                 <select>
                   <option></option>
@@ -1021,7 +1000,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Dispatch -->
+              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
@@ -1186,16 +1165,6 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
               <!-- Self Assign/Take -->
               <td>
                 <select>
@@ -1206,7 +1175,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- DMS History -->
+              <!-- Dispatch -->
               <td>
                 <select>
                   <option></option>
@@ -1216,7 +1185,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Dispatch -->
+              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
@@ -1346,13 +1315,13 @@
               <th>DMS ID</th>
               <th>Logged In</th>
               <th>MCI</th>
-              <th>Left MPI Panel</th>
               <th>Prev. Declines</th>
               <th>Workflow Order</th>
               <th>Status Change</th>
               <th>OCR</th>
               <th>Custom Recs</th>
               <th>ShopChat</th>
+              <th>Left MPI Panel</th>
               <th>Sending MPI</th>
               <th>Sending Video</th>
               <th>Notifications</th>
@@ -1395,17 +1364,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MCI after Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
+              <!-- MCI -->
               <td>
                 <select>
                   <option></option>
@@ -1466,6 +1425,16 @@
                 </select>
               </td>
               <!-- ShopChat -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- Left MPI Panel (now directly to the right of ShopChat) -->
               <td>
                 <select>
                   <option></option>
@@ -1579,17 +1548,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MCI after Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
+              <!-- MCI -->
               <td>
                 <select>
                   <option></option>
@@ -1650,6 +1609,16 @@
                 </select>
               </td>
               <!-- ShopChat -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
@@ -1763,17 +1732,7 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MCI after Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
+              <!-- MCI -->
               <td>
                 <select>
                   <option></option>
@@ -1834,6 +1793,16 @@
                 </select>
               </td>
               <!-- ShopChat -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
