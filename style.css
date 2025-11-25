@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   (Card width tightened / more side spacing)
+   Stable layout + half-inch wider cards + top-right Reset
    ======================================================= */
 
 :root {
@@ -28,13 +28,14 @@ html, body {
   overflow-x: hidden;
 }
 
-/* no italics anywhere by default (except where explicitly forced) */
+/* no italics anywhere by default */
 *, em, i { 
   font-style: normal !important;
 }
 
 /* ===== TOP BAR ===== */
 #topbar {
+  /* black → orange gradient */
   background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
   height: 70px;
   display: flex;
@@ -44,6 +45,7 @@ html, body {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
+  border-radius: 0;
 }
 .topbar-content { 
   display: flex; 
@@ -77,7 +79,7 @@ html, body {
   overflow-x: hidden; 
 }
 
-/* Dark sidebar */
+/* Darker, more modern sidebar */
 #sidebar {
   background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
   border-right: 1px solid rgba(15,23,42,0.8);
@@ -100,7 +102,7 @@ html, body {
   display: none;
 }
 
-/* MENU BUTTONS */
+/* MENU BUTTONS – darker, modern, no icons */
 .nav-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -145,7 +147,7 @@ html, body {
   opacity: 1;
 }
 
-/* Clear All: at bottom of sidebar */
+/* Clear All: at bottom of sidebar (menu bar) */
 #clearAllBtn {
   position: fixed;
   left: 24px;
@@ -194,7 +196,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 880px;   /* TIGHTER CARD WIDTH FOR MORE SIDE SPACE */
+  max-width: 940px;   /* widened by ~1/2 inch from previous 880px */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -226,6 +228,32 @@ main {
   margin: 4px 0 20px 4px;
   font-size: 13px;
   color: #555;
+}
+
+/* per-page clear button – top-right of each card */
+.clear-page-btn {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  padding: 4px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid #bbb;
+  background: #f7f7f7;
+  color: #555;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
+  z-index: 10;
+}
+.clear-page-btn:hover {
+  background: #fff;
+  border-color: var(--orange);
+  color: var(--orange);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
 /* Section headers */
@@ -261,7 +289,7 @@ main {
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   padding: 0 22px 14px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
@@ -277,11 +305,6 @@ main {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   margin-left: -22px;
   margin-right: -22px;
-}
-
-/* A bit more space after notes sections for visual break */
-.section-block + .section-block {
-  margin-top: 0;
 }
 
 /* ===== NON-TABLE ROWS (Q&A lines) ===== */
@@ -393,7 +416,7 @@ main {
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0;
+  gap: 0; /* no gap between input and + button */
 }
 
 /* Label behaves like normal rows */
@@ -415,7 +438,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – flush height with textbox */
+/* Integrated + button – pill on the right, touching the input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -456,6 +479,21 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
+/* “Ticket” pill (if used) */
+.ticket-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--orange), #ff9f50);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
@@ -464,6 +502,21 @@ main {
   border-bottom: 1px dashed #ddd;
   padding-bottom: 10px;
   margin-bottom: 10px;
+}
+
+/* Support Ticket header counts */
+.support-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.support-count-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
 }
 
 /* =======================================================
@@ -608,7 +661,7 @@ main {
   margin-bottom: 40px; 
 }
 
-/* Table Card */
+/* Table Card – no side padding so orange header touches edges */
 .table-container {
   width: 100%;
   background: #fff;
@@ -740,7 +793,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-start;   /* + button on the LEFT */
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -801,6 +854,14 @@ main {
   background: #ff8b42;
 }
 
+/* ===== Footer (HTML may not include this; harmless) ===== */
+#footer { 
+  padding: 24px; 
+  text-align: center; 
+  color: #666; 
+  font-size: 13px; 
+}
+
 /* ===== Muted note ===== */
 .muted-note {
   font-size: 0.9em;
@@ -836,19 +897,19 @@ main {
 
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
-  width: 90px;   /* Opcode Duration */
-  min-width: 90px;
+  width: 70px;   /* Hours */
+  min-width: 70px;
 }
 
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
-  width: 110px;
+  width: 110px;  /* Customer Pay + Warranty Pay (or Labor/other) */
   min-width: 110px;
 }
 
-/* Description gets the remainder */
+/* Description gets the remainder and is centered */
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
   min-width: 260px;
@@ -862,15 +923,15 @@ main {
   min-width: 60px;
 }
 
-/* Make List Price / Cost / Markup % match the compact look of Labor table */
+/* Make List Price / Cost / Markup % as small as possible */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 90px;
-  min-width: 90px;
+  width: 80px;
+  min-width: 80px;
 }
 
 /* Description takes remaining width; center header + cell text */
@@ -886,10 +947,8 @@ main {
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
-  .page-section { max-width: 100%; }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
-  .page-section { max-width: 100%; }
 }
