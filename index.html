@@ -5,29 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-  <!-- Base CSS link; cache-busted via JS below -->
-  <link id="main-css" rel="stylesheet" href="style.css">
-
-  <!-- Auto cache-buster for CSS & JS -->
   <script>
+    /* ===========================================================
+       AUTO CACHE-BUSTER FOR CSS + JS
+       - Generates a timestamp version string
+       - Appends ?v=timestamp to each stylesheet and script
+       - Ensures browser always loads the newest file
+      =========================================================== */
     (function() {
-      var ts = Date.now();
+      const version = Date.now();
 
-      // Bust cache for CSS
-      var css = document.getElementById('main-css');
-      if (css) {
-        var href = css.getAttribute('href').split('?')[0];
-        css.setAttribute('href', href + '?v=' + ts);
-      }
+      // --- Load CSS ---
+      const css = document.createElement("link");
+      css.rel = "stylesheet";
+      css.href = "style.css?v=" + version;
+      document.head.appendChild(css);
 
-      // Bust cache for JS
-      var script = document.createElement('script');
-      script.src = 'script.js?v=' + ts;
-      script.defer = true;
-      document.head.appendChild(script);
+      // --- Load jsPDF (3rd party) ---
+      const pdf = document.createElement("script");
+      pdf.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      pdf.defer = true;
+      document.head.appendChild(pdf);
+
+      // --- Load Main App JS ---
+      const js = document.createElement("script");
+      js.src = "script.js?v=" + version;
+      js.defer = true;
+      document.head.appendChild(js);
     })();
   </script>
 </head>
+
 <body>
   <!-- TOP BAR -->
   <header id="topbar">
