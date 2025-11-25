@@ -1,8 +1,9 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable layout + half-inch wider cards + top-right Reset
+   Stable Layout + Contacts/Champions Cards + Support Tickets + Opcodes
    ======================================================= */
 
+/* --------------- CSS VARIABLES --------------- */
 :root {
   --orange: #f36f21;
   --light-orange: #f8b17b;
@@ -12,6 +13,7 @@
   --ink: #222;
 
   --radius-lg: 18px;       /* cards */
+  --radius-md: 16px;
   --radius-sm: 14px;       /* inputs / buttons */
 
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
@@ -19,7 +21,7 @@
   --input-width: 260px;    /* single source of truth for text-box width */
 }
 
-/* ===== BASE ===== */
+/* --------------- BASE --------------- */
 html, body {
   margin: 0;
   font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -33,9 +35,8 @@ html, body {
   font-style: normal !important;
 }
 
-/* ===== TOP BAR ===== */
+/* --------------- TOP BAR --------------- */
 #topbar {
-  /* black → orange gradient */
   background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
   height: 70px;
   display: flex;
@@ -45,7 +46,6 @@ html, body {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
-  border-radius: 0;
 }
 .topbar-content { 
   display: flex; 
@@ -56,6 +56,7 @@ html, body {
 .top-logo { 
   height: 42px; 
   object-fit: contain; 
+  display: block;
 }
 
 .topbar-right {
@@ -71,7 +72,7 @@ html, body {
   letter-spacing:.5px; 
 }
 
-/* ===== LAYOUT ===== */
+/* --------------- LAYOUT --------------- */
 #app { 
   display: flex; 
   min-height: 100vh; 
@@ -79,7 +80,7 @@ html, body {
   overflow-x: hidden; 
 }
 
-/* Darker, more modern sidebar */
+/* Darker, modern sidebar */
 #sidebar {
   background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
   border-right: 1px solid rgba(15,23,42,0.8);
@@ -97,12 +98,12 @@ html, body {
   gap: 6px; 
 }
 
-/* hide icon span but keep label – "no icons" */
+/* hide icon span but keep label if it exists */
 .nav-icon {
   display: none;
 }
 
-/* MENU BUTTONS – darker, modern, no icons */
+/* MENU BUTTONS */
 .nav-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -147,7 +148,7 @@ html, body {
   opacity: 1;
 }
 
-/* Clear All: at bottom of sidebar (menu bar) */
+/* Clear All at bottom of sidebar */
 #clearAllBtn {
   position: fixed;
   left: 24px;
@@ -186,7 +187,7 @@ main {
   box-sizing: border-box;
 }
 
-/* ===== PAGE SECTIONS / CARDS ===== */
+/* --------------- PAGE SECTIONS / CARDS --------------- */
 .page-section {
   position: relative;
   display: none;
@@ -196,7 +197,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 940px;   /* widened by ~1/2 inch from previous 880px */
+  max-width: 960px; /* adjusted width */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -223,19 +224,19 @@ main {
   border-radius: 2px;
 }
 
-/* Optional page subtitle under h1 */
+/* Page subtitle */
 .page-subtitle {
   margin: 4px 0 20px 4px;
   font-size: 13px;
   color: #555;
 }
 
-/* per-page clear button – top-right of each card */
+/* Reset button – top-right of each page card */
 .clear-page-btn {
   position: absolute;
-  top: 20px;
+  top: 16px;
   right: 24px;
-  padding: 4px 12px;
+  padding: 4px 10px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -246,7 +247,6 @@ main {
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
-  z-index: 10;
 }
 .clear-page-btn:hover {
   background: #fff;
@@ -256,33 +256,7 @@ main {
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
-/* Section headers */
-.section-header {
-  background: var(--orange);
-  color: #fff;
-  font-weight: 600;
-  padding: 10px 16px;
-  font-size: 16px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  border: 1px solid var(--orange);
-  border-bottom: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.8);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* Section blocks (non-table cards) */
+/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -307,7 +281,16 @@ main {
   margin-right: -22px;
 }
 
-/* ===== NON-TABLE ROWS (Q&A lines) ===== */
+/* Extra spacing when a notes card is followed by another card */
+.notes-block {
+  margin-bottom: 32px;
+}
+.notes-block + .section-block,
+.notes-block + .section {
+  margin-top: 10px;
+}
+
+/* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
 .checklist-row {
   display: flex;
   align-items: center;
@@ -331,7 +314,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (base) */
+/* Inputs on the RIGHT */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -370,21 +353,19 @@ main {
   background: #fff9f5;
 }
 
-/* Indented Qs */
+/* Indented sub-rows */
 .indent-sub {
   padding-left: 60px !important;
 }
 
-/* =======================================================
-   MINI-CARDS for Contacts + Champions / Blockers
-   ======================================================= */
+/* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
 
 .mini-card {
-  border: 1px solid var(--orange);
-  border-radius: 14px;
+  border: 2px solid var(--orange);
+  border-radius: var(--radius-md);
   background: #fff;
-  margin: 16px 0;
-  padding: 6px 0 4px;
+  margin: 18px 0;
+  padding: 4px 0 6px;
 }
 
 /* rows inside mini-card */
@@ -393,13 +374,11 @@ main {
   margin-bottom: 0;
   padding-bottom: 8px;
 }
-
-/* last row: no double bottom line */
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* ensure no background tint sneaks in */
+/* ensure no tint */
 .mini-card .checklist-row {
   background: #fff !important;
 }
@@ -409,25 +388,23 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* ===== Integrated “+” button rows ===== */
-/* Layout: [label..............] [input same width][+ button touching] */
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
-  gap: 0; /* no gap between input and + button */
+  gap: 0;
 }
 
-/* Label behaves like normal rows */
 .section-block .checklist-row.integrated-plus label,
 .section-block .checklist-row:has(> .add-row) label {
   flex: 1 1 auto;
   padding-right: 16px;
 }
 
-/* Text box in integrated + rows:
-   reduce width so (input + 34px button) = var(--input-width) total */
+/* Text box in integrated rows */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -438,12 +415,12 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – pill on the right, touching the input */
+/* Integrated + button – same height as input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
   position: relative;
-  margin-left: -1px; /* overlap borders so they “touch” */
+  margin-left: -1px;
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
@@ -466,9 +443,7 @@ main {
   transform: translateY(-1px);
 }
 
-/* =======================================================
-   SUPPORT TICKET – clearer Ticket groups
-   ======================================================= */
+/* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
   margin: 16px 0;
@@ -479,49 +454,22 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* “Ticket” pill (if used) */
-.ticket-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--orange), #ff9f50);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
 
-.ticket-status-row {
-  border-bottom: 1px dashed #ddd;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-}
-
-/* Support Ticket header counts */
-.support-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.support-count-pill {
-  font-size: 11px;
-  padding: 2px 8px;
+/* A simple subtle count style if you add counts in headers later */
+.ticket-count-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
   border-radius: 999px;
-  background: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
-/* =======================================================
-   DMS PAGE – GRID CARDS with DOTS
-   ======================================================= */
+/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block {
   margin-bottom: 28px;
@@ -551,6 +499,10 @@ main {
 
 .dms-table-container {
   margin-top: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: #fff;
 }
 
 .dms-grid {
@@ -628,7 +580,7 @@ main {
   font-size: 13px;
 }
 
-/* DOT ONLY tags (no text) */
+/* DOT ONLY tags */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -653,15 +605,13 @@ main {
   color: #4b5563;
 }
 
-/* =======================================================
-   Training TABLES
-   ======================================================= */
+/* --------------- Training TABLES --------------- */
 
 .section { 
   margin-bottom: 40px; 
 }
 
-/* Table Card – no side padding so orange header touches edges */
+/* Table Card – no side padding so header touches edges */
 .table-container {
   width: 100%;
   background: #fff;
@@ -698,7 +648,7 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header — LIGHT ORANGE (edge to edge) */
+/* Sticky header — LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -816,22 +766,85 @@ main {
   transform: scale(1.05);
 }
 
-/* ===== Scrollbar (horizontal) ===== */
-.scroll-wrapper::-webkit-scrollbar, 
-.table-container::-webkit-scrollbar { 
-  height: 8px; 
+/* --------------- OPCODES PAGE --------------- */
+
+/* Turn off sticky/flex first column only for Opcodes section */
+#opcodes-pricing .training-table th:first-child,
+#opcodes-pricing .training-table td:first-child {
+  position: static;
+  left: auto;
+  z-index: 1;
+  width: 60px;
+  min-width: 60px;
 }
-.scroll-wrapper::-webkit-scrollbar-thumb,
-.table-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 6px;
-}
-.scroll-wrapper::-webkit-scrollbar-thumb:hover,
-.table-container::-webkit-scrollbar-thumb:hover { 
-  background-color: #999; 
+#opcodes-pricing .training-table td:first-child {
+  display: table-cell;
+  padding: 6px 6px;
+  background: inherit;
 }
 
-/* ===== Floating PDF button (summary page) ===== */
+/* Column sizing based on new headers:
+   1 Updated
+   2 Opcode
+   3 Opcode Duration
+   4 Labor Price
+   5 Flat Rate Hours
+   6 Parts Price
+   7 Pay Type
+   8 Order #
+   9 Add to Online Scheduler
+   10 Add to Dealer App Scheduler
+   11 Add to Mobile Service
+   12 Add to ServiceCart
+*/
+
+/* Tight first column (checkbox) already above */
+
+/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+#opcodes-pricing .training-table th:nth-child(2),
+#opcodes-pricing .training-table td:nth-child(2),
+#opcodes-pricing .training-table th:nth-child(3),
+#opcodes-pricing .training-table td:nth-child(3),
+#opcodes-pricing .training-table th:nth-child(4),
+#opcodes-pricing .training-table td:nth-child(4),
+#opcodes-pricing .training-table th:nth-child(5),
+#opcodes-pricing .training-table td:nth-child(5),
+#opcodes-pricing .training-table th:nth-child(7),
+#opcodes-pricing .training-table td:nth-child(7),
+#opcodes-pricing .training-table th:nth-child(8),
+#opcodes-pricing .training-table td:nth-child(8) {
+  width: 110px;
+  min-width: 100px;
+}
+
+/* Parts Price column – much smaller */
+#opcodes-pricing .training-table th:nth-child(6),
+#opcodes-pricing .training-table td:nth-child(6) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 60px;
+}
+
+/* Checkboxes for last 4–5 columns */
+#opcodes-pricing .training-table th:nth-child(9),
+#opcodes-pricing .training-table td:nth-child(9),
+#opcodes-pricing .training-table th:nth-child(10),
+#opcodes-pricing .training-table td:nth-child(10),
+#opcodes-pricing .training-table th:nth-child(11),
+#opcodes-pricing .training-table td:nth-child(11),
+#opcodes-pricing .training-table th:nth-child(12),
+#opcodes-pricing .training-table td:nth-child(12) {
+  width: 90px;
+  min-width: 80px;
+}
+#opcodes-pricing .training-table td:nth-child(9) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(10) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
+  transform: scale(1.1);
+}
+
+/* --------------- FLOATING PDF BUTTON (summary page) --------------- */
 #training-summary .floating-btn {
   background: var(--orange);
   color: #fff;
@@ -854,96 +867,14 @@ main {
   background: #ff8b42;
 }
 
-/* ===== Footer (HTML may not include this; harmless) ===== */
-#footer { 
-  padding: 24px; 
-  text-align: center; 
-  color: #666; 
-  font-size: 13px; 
-}
-
-/* ===== Muted note ===== */
+/* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
   color: #666;
   font-style: italic !important;
 }
 
-/* =======================================================
-   OPCODES PAGE – first column & widths
-   ======================================================= */
-
-/* Turn off sticky/flex first column only for Opcodes section */
-#opcodes-pricing .training-table th:first-child,
-#opcodes-pricing .training-table td:first-child {
-  position: static;
-  left: auto;
-  z-index: 1;
-  width: auto;
-  min-width: auto;
-}
-#opcodes-pricing .training-table td:first-child {
-  display: table-cell;
-  padding: 6px 6px;
-  background: inherit;
-}
-
-/* LABOR OPCODES TABLE = first .section inside #opcodes-pricing */
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(1),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(1) {
-  width: 60px;
-  min-width: 60px;
-}
-
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
-  width: 70px;   /* Hours */
-  min-width: 70px;
-}
-
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
-  width: 110px;  /* Customer Pay + Warranty Pay (or Labor/other) */
-  min-width: 110px;
-}
-
-/* Description gets the remainder and is centered */
-#opcodes-pricing .section:first-of-type .training-table th:nth-child(6),
-#opcodes-pricing .section:first-of-type .training-table td:nth-child(6) {
-  min-width: 260px;
-  text-align: center;
-}
-
-/* PARTS PRICING VERIFICATION TABLE = last .section inside #opcodes-pricing */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(1),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(1) {
-  width: 60px;
-  min-width: 60px;
-}
-
-/* Make List Price / Cost / Markup % as small as possible */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
-}
-
-/* Description takes remaining width; center header + cell text */
-#opcodes-pricing .section:last-of-type .training-table th:nth-child(6),
-#opcodes-pricing .section:last-of-type .training-table td:nth-child(6) {
-  min-width: 260px;
-  text-align: center;
-}
-
-/* =======================================================
-   RESPONSIVE
-   ======================================================= */
+/* --------------- RESPONSIVE --------------- */
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
