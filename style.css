@@ -1,6 +1,6 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (C)
-   Original layout, dark sidebar, card layout, integrated + buttons
+   myKaarma Interactive Training Checklist – FULL CSS
+   Stable Layout + 1220px Cards
    ======================================================= */
 
 :root {
@@ -28,7 +28,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* no italics anywhere by default */
+/* no italics anywhere by default (except where forced) */
 *, em, i { 
   font-style: normal !important;
 }
@@ -53,10 +53,14 @@ html, body {
   justify-content: space-between; 
   width: 100%; 
 }
+
+/* LOGO */
 .top-logo { 
-  height: 42px; 
-  object-fit: contain; 
+  height: 42px;
+  max-height: 42px;
+  width: auto;
   display: block;
+  object-fit: contain;
 }
 
 .topbar-right {
@@ -70,7 +74,6 @@ html, body {
   font-size:22px;
   font-weight:600; 
   letter-spacing:.5px; 
-  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
 /* ===== LAYOUT ===== */
@@ -81,7 +84,7 @@ html, body {
   overflow-x: hidden; 
 }
 
-/* Darker, more modern sidebar */
+/* Dark sidebar */
 #sidebar {
   background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
   border-right: 1px solid rgba(15,23,42,0.8);
@@ -180,7 +183,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.75);
 }
 
-/* per-page clear button – top-right of each card */
+/* per-page clear button – top-right of each page card */
 .clear-page-btn {
   position: absolute;
   top: 16px;
@@ -223,7 +226,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 1100px;
+  max-width: 1220px;  /* <-- width choice: Option B */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -257,7 +260,7 @@ main {
   color: #555;
 }
 
-/* Section headers */
+/* Section headers (orange strip) */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -343,6 +346,7 @@ main {
   margin-left: auto;
   margin-right: 0;
   padding: 7px 10px;
+  height: 34px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
@@ -437,6 +441,7 @@ main {
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  height: 34px;
 }
 
 /* Integrated + button – pill on the right, touching the input */
@@ -450,7 +455,7 @@ main {
   border: 1px solid var(--orange);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   width: 34px;
-  height: 34px;
+  height: 34px;            /* same height as text box */
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
@@ -537,6 +542,10 @@ main {
 
 .dms-table-container {
   margin-top: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: #fff;
 }
 
 .dms-grid {
@@ -840,7 +849,7 @@ main {
   background: #ff8b42;
 }
 
-/* ===== Footer ===== */
+/* ===== Footer (if you add one) ===== */
 #footer { 
   padding: 24px; 
   text-align: center; 
@@ -883,16 +892,16 @@ main {
 
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(3) {
-  width: 70px;   /* Hours / Duration */
-  min-width: 70px;
+  width: 90px;   /* Hours / Duration column */
+  min-width: 90px;
 }
 
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:first-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:first-of-type .training-table td:nth-child(5) {
-  width: 110px;  /* Price columns */
-  min-width: 110px;
+  width: 120px;  /* Labor price / flat rate etc. */
+  min-width: 120px;
 }
 
 /* Description gets the remainder and is centered */
@@ -909,15 +918,15 @@ main {
   min-width: 60px;
 }
 
-/* Make List Price / Cost / Markup % narrow */
+/* Make List Price / Cost / Markup % smaller (match style of labor table) */
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(3),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(4),
 #opcodes-pricing .section:last-of-type .training-table th:nth-child(5),
 #opcodes-pricing .section:last-of-type .training-table td:nth-child(5) {
-  width: 80px;
-  min-width: 80px;
+  width: 90px;
+  min-width: 90px;
 }
 
 /* Description takes remaining width; center header + cell text */
