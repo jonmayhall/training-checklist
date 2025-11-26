@@ -549,24 +549,27 @@
         </div>
       </section>
 
-     <!-- ========================================================= -->
+ <!-- ========================================================= -->
 <!-- PAGE 4: MONDAY VISIT                                      -->
 <!-- ========================================================= -->
 <section id="monday-visit" class="page-section">
   <h1>Monday Visit</h1>
   <p class="page-subtitle">
-    Confirm expectations, device readiness, and onsite workflow with the Service Manager.
+    Confirm expectations, MCI usage, and device readiness with the Service Manager.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Dealership Expectations -->
+  <!-- =============================== -->
+  <!-- SERVICE MANAGER ALIGNMENT       -->
+  <!-- =============================== -->
   <div class="section-block">
-    <h2>Dealership Expectations</h2>
+    <h2>Service Manager Alignment</h2>
 
-    <!-- MINI-CARD 1: Did you review the following with the Service Manager? -->
+    <!-- REVIEW TOGETHER (ORANGE CARD) -->
     <div class="mini-card">
       <div class="checklist-row">
-        <label>Did you review the following with the Service Manager?</label>
+        <label><strong>Did you review the following with the Service Manager?</strong></label>
+        <span></span>
       </div>
 
       <div class="checklist-row indent-sub">
@@ -625,21 +628,25 @@
         </select>
       </div>
 
-      <!-- Parts and labor pricing WITH TEXT BOX (separate input) -->
       <div class="checklist-row indent-sub">
-        <label>Parts and labor pricing</label>
-        <input type="text" placeholder="Notes about parts & labor pricing">
+        <label>Parts and labor pricing discussed and confirmed?</label>
+        <select>
+          <option></option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
       </div>
     </div>
 
-    <!-- MINI-CARD 2: Did you and the Service Manager agree to the following? -->
+    <!-- AGREEMENTS (ORANGE CARD) -->
     <div class="mini-card">
       <div class="checklist-row">
-        <label>Did you and the Service Manager agree to the following?</label>
+        <label><strong>Did you and the Service Manager agree to the following?</strong></label>
+        <span></span>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>myKaarma arrival time at 7:00 am or 8:00 am each day</label>
+        <label>myKaarma arrival time each day</label>
         <select>
           <option></option>
           <option>Yes, 7:00 am</option>
@@ -659,8 +666,7 @@
 
       <div class="checklist-row indent-sub">
         <label>
-          Did you and the Service Manager create a plan for morning meetings with techs and advisors each day,
-          and stopping by the parts department on Tuesday to introduce yourselves?
+          Plan for daily morning meetings with techs and advisors, plus stopping by Parts on Tuesday.
         </label>
         <select>
           <option></option>
@@ -669,92 +675,104 @@
         </select>
       </div>
     </div>
+
+    <textarea placeholder="Additional comments about expectations and agreements …"></textarea>
   </div>
 
+  <!-- =============================== -->
+  <!-- DEVICE READINESS                -->
+  <!-- =============================== -->
   <div class="section-block">
-    <h2>Additional Comments — Dealership Expectations</h2>
-    <textarea placeholder="Comments for Dealership Expectations …"></textarea>
-  </div>
+    <h2>Device Readiness</h2>
 
-  <!-- iOS Devices -->
-  <div class="section-block">
-    <h2>iOS Devices</h2>
+    <!-- TECH DEVICES -->
+    <div class="mini-card">
+      <div class="checklist-row">
+        <label><strong>Technician Devices</strong></label>
+        <span></span>
+      </div>
 
-    <div class="checklist-row">
-      <label>Do all technicians have iOS devices?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
+      <div class="checklist-row indent-sub">
+        <label>Do all technicians have iOS devices?</label>
+        <select>
+          <option></option>
+          <option>Yes</option>
+          <option>No</option>
+          <option>N/A</option>
+        </select>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>How many iOS devices are they short?</label>
+        <select>
+          <option></option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+          <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+          <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+          <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
+          <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
+          <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
+          <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
+          <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
+        </select>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>How many techs are using an Android device?</label>
+        <select>
+          <option></option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+          <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+          <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+          <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
+          <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
+          <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
+          <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
+          <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
+        </select>
+      </div>
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>How many iOS devices are they short?</label>
-      <select>
-        <option></option>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
-        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
-        <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
-        <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
-        <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
-        <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
-        <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
-        <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
-      </select>
+    <!-- ADVISOR DEVICES -->
+    <div class="mini-card">
+      <div class="checklist-row">
+        <label><strong>Advisor Devices</strong></label>
+        <span></span>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Do all advisors have iOS devices?</label>
+        <select>
+          <option></option>
+          <option>Yes</option>
+          <option>No</option>
+          <option>N/A</option>
+        </select>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>How many iOS devices are they short?</label>
+        <select>
+          <option></option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+          <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+          <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+          <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
+          <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
+          <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
+          <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
+          <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
+        </select>
+      </div>
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>How many techs are using an Android device?</label>
-      <select>
-        <option></option>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
-        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
-        <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
-        <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
-        <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
-        <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
-        <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
-        <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Do all of the advisors have iOS devices?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>How many iOS devices are they short?</label>
-      <select>
-        <option></option>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
-        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
-        <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
-        <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
-        <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
-        <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
-        <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
-        <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — iOS Devices</h2>
-    <textarea placeholder="Comments for iOS/Android devices …"></textarea>
+    <textarea placeholder="Additional comments about device readiness …"></textarea>
   </div>
 </section>
 
