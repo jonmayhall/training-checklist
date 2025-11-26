@@ -5,6 +5,7 @@
 // - Clear page / Clear all
 // - Add row for all tables
 // - Support Tickets logic (permanent template card + moves)
+// - Additional Point of Contact logic
 // - Simple PDF export for all pages
 // =======================================================
 
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initClearAllButton();
   initTableAddRowButtons();
   initSupportTickets();
+  initAdditionalPOC();   // <--- NEW
   initPDFExport();
 });
 
@@ -321,6 +323,69 @@ function initSupportTickets() {
       });
     });
   }
+}
+
+// ---------------- ADDITIONAL POINT OF CONTACT ----------------
+// Expects:
+// <div id="additionalPocContainer">
+//   <div class="additional-poc-card">  <-- template card
+//     (has a name row with .add-row button integrated into the input row)
+//   </div>
+// </div>
+function initAdditionalPOC() {
+  const container =
+    document.getElementById("additionalPocContainer") ||
+    document.getElementById("additionalContactsContainer");
+
+  if (!container) return;
+
+  // Template card: the one that has the + button
+  const templateCard =
+    container.querySelector(".additional-poc-card[data-template='true']") ||
+    container.querySelector(".additional-poc-card") ||
+    container.querySelector(".contact-card.additional-poc");
+
+  if (!templateCard) return;
+
+  const addBtn =
+    templateCard.querySelector(".add-row") ||
+    templateCard.querySelector(".add-contact-btn");
+
+  if (!addBtn) return;
+
+  addBtn.addEventListener("click", () => {
+    // Clone the card
+    const newCard = templateCard.cloneNode(true);
+
+    // New card should not be treated as template
+    newCard.removeAttribute("data-template");
+
+    // Remove the add button from the cloned card
+    const newAddBtn =
+      newCard.querySelector(".add-row") ||
+      newCard.querySelector(".add-contact-btn");
+    if (newAddBtn) {
+      newAddBtn.remove();
+    }
+
+    // If the name row used integrated-plus layout, remove that so the input is fully rounded
+    const integratedRow = newCard.querySelector(".checklist-row.integrated-plus");
+    if (integratedRow) {
+      integratedRow.classList.remove("integrated-plus");
+    }
+
+    // Clear inputs (name, cell, email, etc.) in the new card
+    const inputs = newCard.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
+    const selects = newCard.querySelectorAll("select");
+    const textareas = newCard.querySelectorAll("textarea");
+
+    inputs.forEach((inp) => (inp.value = ""));
+    selects.forEach((sel) => (sel.selectedIndex = 0));
+    textareas.forEach((ta) => (ta.value = ""));
+
+    // Append cloned card after the template
+    container.appendChild(newCard);
+  });
 }
 
 // ---------------- PDF EXPORT ----------------
