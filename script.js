@@ -1,20 +1,34 @@
-// script.js – myKaarma Interactive Training Checklist
-// Works with the CSS you pasted and the HTML structure you sent
+// =======================================================
+// myKaarma Interactive Training Checklist – Script
+// Navigation + Clear Buttons + Table Row Add + Support Tickets
+// =======================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ============================
-  // NAVIGATION BETWEEN PAGES
-  // ============================
+  initNavigation();
+  initDealershipName();
+  initClearPageButtons();
+  initClearAllButton();
+  initTableRowAdd();
+  initSupportTickets();
+  initPdfButton();
+});
+
+// ---------------- NAVIGATION ----------------
+
+function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
 
-  function showSectionById(id) {
+  if (!navButtons.length || !sections.length) return;
+
+  const specialMap = {
+    'onsite-trainers': 'trainers-page'
+  };
+
+  function showSection(targetKey) {
+    const mappedId = specialMap[targetKey] || targetKey;
     sections.forEach(sec => {
-      if (sec.id === id) {
-        sec.classList.add('active');
-      } else {
-        sec.classList.remove('active');
-      }
+      sec.classList.toggle('active', sec.id === mappedId);
     });
   }
 
@@ -22,245 +36,219 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       navButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
-      const target = btn.dataset.target;
-      // First button uses data-target="onsite-trainers" but section id="trainers-page"
-      const targetId = target === 'onsite-trainers' ? 'trainers-page' : target;
-      showSectionById(targetId);
+      const target = btn.getAttribute('data-target');
+      if (target) showSection(target);
     });
   });
 
-  // Default: ensure the first section is visible if nothing is active
-  if (!document.querySelector('.page-section.active')) {
-    showSectionById('trainers-page');
-    const firstNav = document.querySelector('.nav-btn[data-target="onsite-trainers"]');
-    if (firstNav) firstNav.classList.add('active');
+  // Ensure one section is visible on load
+  const active = document.querySelector('.page-section.active');
+  if (!active) {
+    const first = sections[0];
+    if (first) first.classList.add('active');
   }
+}
 
-  // ============================
-  // CLEAR HELPERS
-  // ============================
+// ---------------- DEALERSHIP NAME DISPLAY ----------------
 
-  function clearElements(root) {
-    const inputs = root.querySelectorAll('input');
-    const selects = root.querySelectorAll('select');
-    const textareas = root.querySelectorAll('textarea');
+function initDealershipName() {
+  const input = document.getElementById('dealershipNameInput');
+  const display = document.getElementById('dealershipNameDisplay');
 
-    inputs.forEach(input => {
-      if (input.type === 'checkbox' || input.type === 'radio') {
-        input.checked = false;
-      } else {
-        input.value = '';
-      }
-    });
+  if (!input || !display) return;
 
-    selects.forEach(sel => {
-      sel.value = '';
-    });
+  const update = () => {
+    const val = input.value.trim();
+    display.textContent = val || 'Dealership Name';
+  };
 
-    textareas.forEach(t => {
-      t.value = '';
-    });
-  }
+  input.addEventListener('input', update);
+  update();
+}
 
-  // ---------- Clear All (bottom of sidebar) ----------
-  const clearAllBtn = document.getElementById('clearAllBtn');
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener('click', () => {
-      clearElements(document);
-      // Reset the dealership name display text
-      const dealershipNameDisplay = document.getElementById('dealershipNameDisplay');
-      if (dealershipNameDisplay) {
-        dealershipNameDisplay.textContent = 'Dealership Name';
-      }
-    });
-  }
+// ---------------- CLEAR PAGE ----------------
 
-  // ---------- Clear Page buttons (top-right of each page card) ----------
-  document.querySelectorAll('.clear-page-btn').forEach(btn => {
+function clearElementsInside(root) {
+  if (!root) return;
+
+  const inputs = root.querySelectorAll('input');
+  const selects = root.querySelectorAll('select');
+  const textareas = root.querySelectorAll('textarea');
+
+  inputs.forEach(inp => {
+    if (inp.type === 'checkbox' || inp.type === 'radio') {
+      inp.checked = false;
+    } else {
+      inp.value = '';
+    }
+  });
+
+  selects.forEach(sel => {
+    sel.selectedIndex = 0;
+  });
+
+  textareas.forEach(ta => {
+    ta.value = '';
+  });
+}
+
+function initClearPageButtons() {
+  const buttons = document.querySelectorAll('.clear-page-btn');
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
-      if (section) {
-        clearElements(section);
-      }
+      if (!section) return;
+
+      const confirmed = window.confirm('Reset all fields on this page?');
+      if (!confirmed) return;
+
+      clearElementsInside(section);
     });
   });
+}
 
-  // ============================
-  // DEALERSHIP NAME LIVE SYNC
-  // ============================
+function initClearAllButton() {
+  const btn = document.getElementById('clearAllBtn');
+  if (!btn) return;
 
-  const dealershipNameInput = document.getElementById('dealershipNameInput');
-  const dealershipNameDisplay = document.getElementById('dealershipNameDisplay');
-  if (dealershipNameInput && dealershipNameDisplay) {
-    const syncName = () => {
-      const val = dealershipNameInput.value.trim();
-      dealershipNameDisplay.textContent = val || 'Dealership Name';
-    };
-    dealershipNameInput.addEventListener('input', syncName);
-    // Initialize once on load
-    syncName();
-  }
+  btn.addEventListener('click', () => {
+    const confirmed = window.confirm('Clear all pages in this checklist?');
+    if (!confirmed) return;
 
-  // ============================
-  // TABLE FOOTER "+" ADD-ROW
-  // (for all the training tables, opcodes table, etc.)
-  // ============================
+    const app = document.getElementById('app');
+    if (!app) return;
 
-  document.querySelectorAll('.table-footer .add-row').forEach(btn => {
+    clearElementsInside(app);
+  });
+}
+
+// ---------------- TABLE ROW ADD (+) ----------------
+
+function initTableRowAdd() {
+  const addButtons = document.querySelectorAll('.table-footer .add-row');
+  if (!addButtons.length) return;
+
+  addButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Find nearest table
-      const tableContainer = btn.closest('.table-container');
-      if (!tableContainer) return;
+      // Only work within this table container
+      const container = btn.closest('.table-container');
+      if (!container) return;
 
-      const table = tableContainer.querySelector('table');
+      const table = container.querySelector('table');
       if (!table || !table.tBodies.length) return;
 
       const tbody = table.tBodies[0];
-      const lastRow = tbody.rows[tbody.rows.length - 1];
+      const lastRow = tbody.lastElementChild;
       if (!lastRow) return;
 
-      // Clone the last row
       const newRow = lastRow.cloneNode(true);
 
-      // Clear inputs/selects in cloned row
-      newRow.querySelectorAll('input').forEach(input => {
-        if (input.type === 'checkbox' || input.type === 'radio') {
-          input.checked = false;
+      // Clear contents in cloned row
+      const fields = newRow.querySelectorAll('input, select, textarea');
+      fields.forEach(el => {
+        if (el.tagName === 'SELECT') {
+          el.selectedIndex = 0;
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
         } else {
-          input.value = '';
+          el.value = '';
         }
-      });
-
-      newRow.querySelectorAll('select').forEach(sel => {
-        sel.value = '';
       });
 
       tbody.appendChild(newRow);
     });
   });
+}
 
-  // ============================
-  // SUPPORT TICKETS BEHAVIOR
-  // ============================
+// ---------------- SUPPORT TICKETS ----------------
 
-  const openTicketsContainer = document.getElementById('openTicketsContainer');
-  const tierTwoTicketsContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedTicketsContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureTicketsContainer = document.getElementById('closedFeatureTicketsContainer');
+function initSupportTickets() {
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  if (openTicketsContainer) {
-    // Clear out text fields + reset status in a new ticket card
-    function clearTicketCard(card) {
-      // Clear all text inputs in the cloned card
-      card.querySelectorAll('input[type="text"]').forEach(input => {
-        input.value = '';
-      });
+  if (!openContainer || !tierTwoContainer || !closedResolvedContainer || !closedFeatureContainer) {
+    return;
+  }
 
-      // Reset the status dropdown to "Open" (if it exists)
-      const statusSelect = card.querySelector('.ticket-status-select');
-      if (statusSelect) {
-        statusSelect.value = 'Open';
-      }
+  const templateGroup = openContainer.querySelector('.ticket-group');
+  if (!templateGroup) return;
+
+  const addBtn = templateGroup.querySelector('.add-row');
+  if (!addBtn) return;
+
+  // Wire up existing status selects (template + any existing)
+  wireStatusListeners(templateGroup);
+
+  addBtn.addEventListener('click', () => {
+    const newGroup = templateGroup.cloneNode(true);
+
+    // Remove the + button from the cloned card
+    const newAddBtn = newGroup.querySelector('.add-row');
+    if (newAddBtn) {
+      newAddBtn.remove();
     }
 
-    // Only the LAST open ticket card should display the "+" button
-    function refreshAddButtons() {
-      const cards = openTicketsContainer.querySelectorAll('.ticket-group');
-      cards.forEach((card, index) => {
-        const addBtn = card.querySelector('.add-row');
-        if (!addBtn) return;
+    // Clear all text inputs + selects in the new card
+    clearTicketGroupFields(newGroup);
 
-        if (index === cards.length - 1) {
-          addBtn.style.display = 'inline-flex';
-        } else {
-          addBtn.style.display = 'none';
+    // Append directly under the template
+    openContainer.appendChild(newGroup);
+
+    // Wire up status change for the new card
+    wireStatusListeners(newGroup);
+  });
+
+  // --- helpers ---
+
+  function clearTicketGroupFields(group) {
+    const inputs = group.querySelectorAll('input[type="text"], input[type="date"], textarea');
+    const selects = group.querySelectorAll('select');
+
+    inputs.forEach(inp => {
+      inp.value = '';
+    });
+
+    selects.forEach(sel => {
+      sel.selectedIndex = 0;
+    });
+  }
+
+  function wireStatusListeners(group) {
+    const statusSelects = group.querySelectorAll('.ticket-status-select');
+    statusSelects.forEach(select => {
+      select.addEventListener('change', () => {
+        const value = select.value;
+        const card = select.closest('.ticket-group');
+        if (!card) return;
+
+        // Move card based on status
+        if (value === 'Open') {
+          openContainer.appendChild(card);
+        } else if (value === 'Tier Two') {
+          tierTwoContainer.appendChild(card);
+        } else if (value === 'Closed - Resolved') {
+          closedResolvedContainer.appendChild(card);
+        } else if (
+          value === 'Closed – Feature Not Supported' ||
+          value === 'Closed - Feature Not Supported'
+        ) {
+          closedFeatureContainer.appendChild(card);
         }
       });
-    }
-
-    // "+" button inside Open Support Tickets card (integrated row)
-    openTicketsContainer.addEventListener('click', (event) => {
-      const addBtn = event.target.closest('.add-row');
-      if (!addBtn) return;
-
-      const currentCard = addBtn.closest('.ticket-group');
-      if (!currentCard) return;
-
-      // Clone the whole card (ticket-group)
-      const newCard = currentCard.cloneNode(true);
-      clearTicketCard(newCard);
-
-      // Append the new card directly under the existing ones
-      openTicketsContainer.appendChild(newCard);
-
-      // Update which card shows the +
-      refreshAddButtons();
-    });
-
-    // When Ticket Status changes, move the card to the appropriate section
-    document.addEventListener('change', (event) => {
-      const select = event.target.closest('.ticket-status-select');
-      if (!select) return;
-
-      const card = select.closest('.ticket-group');
-      if (!card) return;
-
-      let targetContainerRef = openTicketsContainer;
-
-      switch (select.value) {
-        case 'Open':
-          targetContainerRef = openTicketsContainer;
-          break;
-        case 'Tier Two':
-          targetContainerRef = tierTwoTicketsContainer || openTicketsContainer;
-          break;
-        case 'Closed - Resolved':
-          targetContainerRef = closedResolvedTicketsContainer || openTicketsContainer;
-          break;
-        case 'Closed – Feature Not Supported':
-        case 'Closed - Feature Not Supported':
-          targetContainerRef = closedFeatureTicketsContainer || openTicketsContainer;
-          break;
-        default:
-          targetContainerRef = openTicketsContainer;
-      }
-
-      if (targetContainerRef) {
-        targetContainerRef.appendChild(card);
-      }
-
-      // After moving, fix which open card has the "+"
-      refreshAddButtons();
-    });
-
-    // Initial state on load
-    refreshAddButtons();
-  }
-
-  // ============================
-  // SAVE ALL PAGES AS PDF (simple)
-  // ============================
-
-  const savePdfBtn = document.getElementById('savePDF');
-  if (savePdfBtn && window.jspdf) {
-    savePdfBtn.addEventListener('click', () => {
-      try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'pt', 'a4');
-
-        // Simple full-page export – not pixel-perfect, but gets everything into a PDF.
-        doc.html(document.body, {
-          callback: function (doc) {
-            doc.save('myKaarma-Training-Checklist.pdf');
-          },
-          margin: [20, 20, 20, 20],
-          autoPaging: 'text'
-        });
-      } catch (e) {
-        console.error('PDF generation error:', e);
-        alert('There was an issue generating the PDF. Please try again.');
-      }
     });
   }
-});
+}
+
+// ---------------- PDF (simple: use browser print) ----------------
+
+function initPdfButton() {
+  const btn = document.getElementById('savePDF');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    // Simple, reliable: user can "Save as PDF" from print dialog
+    window.print();
+  });
+}
