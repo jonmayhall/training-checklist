@@ -2693,7 +2693,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>Are all Technicians trained and able to complete MPIs and media?</label>
+      <label>Are all Technicians trained and using myKaarma from start to finish?</label>
       <select>
         <option></option>
         <option>Yes — Fully Trained</option>
@@ -2704,7 +2704,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>Are all Parts Representatives trained and using myKaarma with techs/advisors?</label>
+      <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
       <select>
         <option></option>
         <option>Yes — Fully Trained</option>
@@ -2713,98 +2713,10 @@
         <option>N/A</option>
       </select>
     </div>
-
-    <div class="checklist-row">
-      <label>Are all BDC / Scheduler users trained and booking correctly?</label>
-      <select>
-        <option></option>
-        <option>Yes — Fully Trained</option>
-        <option>Partially Trained</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Are all Drivers / Dispatchers trained on Pickup &amp; Delivery workflows?</label>
-      <select>
-        <option></option>
-        <option>Yes — Fully Trained</option>
-        <option>Partially Trained</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-  </div>
 
   <div class="section-block">
     <h2>Additional Comments — Training Completion</h2>
     <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps …"></textarea>
-  </div>
-
-  <!-- Workflow & Process Validation -->
-  <div class="section-block">
-    <h2>Workflow &amp; Process Validation</h2>
-
-    <div class="checklist-row">
-      <label>Service drive workflow is functioning end-to-end (arrival → MPI → approval → RO close).</label>
-      <select>
-        <option></option>
-        <option>Confirmed — Works as Designed</option>
-        <option>Works with Minor Gaps</option>
-        <option>Major Issues</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Technician MPI workflow validated with at least 3–5 real ROs.</label>
-      <select>
-        <option></option>
-        <option>Yes — Validated with Live ROs</option>
-        <option>Partially Validated</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Advisor workflow validated for MPI review, sending estimates, and approvals.</label>
-      <select>
-        <option></option>
-        <option>Yes — Validated</option>
-        <option>Partially Validated</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Parts workflow validated for pricing, parts requests, and communication with techs/advisors.</label>
-      <select>
-        <option></option>
-        <option>Yes — Validated</option>
-        <option>Partially Validated</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Pickup &amp; Delivery workflow validated (if purchased).</label>
-      <select>
-        <option></option>
-        <option>Yes — Validated</option>
-        <option>Partially Validated</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — Workflow &amp; Process</h2>
-    <textarea placeholder="Notes about where workflows are strong vs. where they break down …"></textarea>
   </div>
 
   <!-- DMS & Data Validation -->
@@ -2823,18 +2735,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>RO History and Inspection History match the DMS for test vehicles.</label>
-      <select>
-        <option></option>
-        <option>Yes — Matches</option>
-        <option>Partial / Delayed</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Opcodes and pricing align between myKaarma and the DMS configuration.</label>
+      <label>Opcodes and pricing align between myKaarma and the DMS.</label>
       <select>
         <option></option>
         <option>Yes — Correct</option>
@@ -2844,100 +2745,9 @@
       </select>
     </div>
 
-    <div class="checklist-row">
-      <label>Payments (if live) are posting correctly and amounts match DMS / receipts.</label>
-      <select>
-        <option></option>
-        <option>Yes — Confirmed</option>
-        <option>Minor Issues</option>
-        <option>Major Issues</option>
-        <option>N/A</option>
-      </select>
-    </div>
-  </div>
-
   <div class="section-block">
     <h2>Additional Comments — DMS &amp; Data</h2>
     <textarea placeholder="Specific findings, examples of mismatches, or items that require follow-up …"></textarea>
-  </div>
-
-  <!-- Open Items & Action Plan -->
-  <div class="section-block">
-    <h2>Open Items &amp; Action Plan</h2>
-    <p class="muted-note">
-      Use this section to capture anything that still needs work after the onsite (tickets, configuration, retraining, etc.).
-    </p>
-
-    <div class="table-container">
-      <div class="scroll-wrapper">
-        <table class="training-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Area</th>
-              <th>Owner</th>
-              <th>Target Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="text" placeholder="e.g., Retrain techs on media upload"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Training</option>
-                  <option>Workflow</option>
-                  <option>DMS / Integration</option>
-                  <option>Support Ticket</option>
-                  <option>Other</option>
-                </select>
-              </td>
-              <td><input type="text" placeholder="Owner name / role"></td>
-              <td><input type="date"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Open</option>
-                  <option>In Progress</option>
-                  <option>Waiting on Dealer</option>
-                  <option>Waiting on myKaarma</option>
-                  <option>Closed</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td><input type="text" placeholder="Additional open item"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Training</option>
-                  <option>Workflow</option>
-                  <option>DMS / Integration</option>
-                  <option>Support Ticket</option>
-                  <option>Other</option>
-                </select>
-              </td>
-              <td><input type="text" placeholder="Owner name / role"></td>
-              <td><input type="date"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Open</option>
-                  <option>In Progress</option>
-                  <option>Waiting on Dealer</option>
-                  <option>Waiting on myKaarma</option>
-                  <option>Closed</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <button class="add-row" type="button">+</button>
-      </div>
-    </div>
   </div>
 
   <!-- Final Sign-Off -->
@@ -2945,18 +2755,11 @@
     <h2>Final Sign-Off</h2>
 
     <div class="checklist-row">
-      <label>Overall readiness for go-forward usage after onsite training</label>
+      <label> Did you conduct a tech and advisors walkthrough with the Service Manager? </label>
       <select>
         <option></option>
-        <option>Ready — Full Production</option>
-        <option>Ready — With Risks</option>
-        <option>Not Ready — Needs Work</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Service Manager / Primary Contact</label>
-      <input type="text" placeholder="Name of Service Manager or main contact">
+        <option>Yes</option>
+        <option>No</option>
     </div>
 
     <div class="checklist-row">
@@ -2965,23 +2768,21 @@
     </div>
 
     <div class="checklist-row">
-      <label>Post-training follow-up call scheduled?</label>
+      <label> Did you conduct a parts rep walkthrough with the Parts Manager? </label>
       <select>
         <option></option>
-        <option>Yes — Date Set</option>
-        <option>Planned — Date TBD</option>
+        <option>Yes</option>
         <option>No</option>
-      </select>
     </div>
 
     <div class="checklist-row">
-      <label>Target follow-up date</label>
+      <label>Post-training CEM follow-up call.</label>
       <input type="date">
     </div>
   </div>
 
   <div class="section-block">
-    <h2>Additional Comments — Post-Training Checklist</h2>
+    <h2>Additional Comments — Final Sign-Off</h2>
     <textarea placeholder="Any final thoughts, risks, or context you want CEM / Deployment / Support to know …"></textarea>
   </div>
 </section>
