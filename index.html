@@ -177,96 +177,165 @@
 
 </section>
 
-     <!-- ========================================================= -->
+    <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
-  <h1>Dealership Info</h1>
-  <p class="page-subtitle">
-    Capture core dealership details, structure, and contract information.
-  </p>
+  <h1>Dealership Information</h1>
+  <p class="page-subtitle">Record dealership details and primary contacts.</p>
+
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Dealership Basics -->
+  <!-- ======================= -->
+  <!-- DEALERSHIP DETAILS CARD -->
+  <!-- ======================= -->
   <div class="section-block">
-    <h2>Dealership Basics</h2>
-
-    <div class="checklist-row">
-      <label>Dealer Group</label>
-      <input type="text" id="dealerGroup" placeholder="Dealer group name">
-    </div>
+    <h2>Dealership Details</h2>
 
     <div class="checklist-row">
       <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Dealership legal name">
+      <input type="text" id="dealershipNameInput" placeholder="Enter dealership name">
     </div>
 
     <div class="checklist-row">
-      <label>DMS</label>
-      <input type="text" id="dmsName" placeholder="CDK, Reynolds, Tekion, etc.">
+      <label>Address</label>
+      <input type="text" placeholder="Street, City, State">
     </div>
 
     <div class="checklist-row">
-      <label>Time Zone</label>
-      <select id="timeZone">
+      <label>Phone Number</label>
+      <input type="text" placeholder="(555) 555-5555">
+    </div>
+
+    <div class="checklist-row">
+      <label>DMS Provider</label>
+      <select>
         <option></option>
-        <option>Eastern</option>
-        <option>Central</option>
-        <option>Mountain</option>
-        <option>Pacific</option>
+        <option>CDK</option>
+        <option>Reynolds & Reynolds</option>
+        <option>Tekion</option>
+        <option>Dealertrack</option>
+        <option>Dominion</option>
+        <option>Automate</option>
+        <option>Other</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- DEALERSHIP CONTACTS     -->
+  <!-- ======================= -->
+  <div class="section-block">
+    <h2>Dealership Contacts</h2>
+
+    <!-- ORANGE BORDER CARD -->
+    <div class="mini-card contact-card">
+
+      <div class="checklist-row">
+        <label>General Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>General Manager Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+      <div class="checklist-row">
+        <label>Fixed Ops Director</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Fixed Ops Director Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+      <div class="checklist-row">
+        <label>Service Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Service Manager Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+      <div class="checklist-row">
+        <label>Parts Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Parts Manager Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+      <div class="checklist-row">
+        <label>IT Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>IT Manager Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+      <div class="checklist-row">
+        <label>Accounting Contact</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Accounting Contact Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+
+    </div>
+
+    <textarea placeholder="Notes about dealership contacts …"></textarea>
+  </div>
+
+  <!-- ======================= -->
+  <!-- TRAINING CONTACTS       -->
+  <!-- ======================= -->
+  <div class="section-block">
+    <h2>Training Contacts</h2>
+
+    <div class="checklist-row">
+      <label>Lead Trainer</label>
+      <select>
+        <option></option>
+        <option>Trainer 1</option>
+        <option>Trainer 2</option>
+        <option>Trainer 3</option>
         <option>Other</option>
       </select>
     </div>
 
     <div class="checklist-row">
-      <label>Multiple brands?</label>
-      <select id="multipleBrands">
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
+      <label>Deployment Manager</label>
+      <input type="text" placeholder="Name">
     </div>
 
     <div class="checklist-row">
-      <label>Shared drive or separate drives?</label>
-      <select id="driveStructure">
-        <option></option>
-        <option>Shared Drives</option>
-        <option>Separate Drives, one building</option>
-        <option>Separate Drives, Seperate Buildings</option>
-      </select>
+      <label>Deployment Manager Email</label>
+      <input type="email" placeholder="Email">
     </div>
 
     <div class="checklist-row">
-      <label>Total Buildings</label>
-      <select id="totalBuildings">
-        <option></option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
+      <label>CEM</label>
+      <input type="text" placeholder="Name">
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Do the handoff notes mention additional buildings off-site? If so, how many?</label>
-      <select id="offsiteBuildings">
-        <option></option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
+    <div class="checklist-row">
+      <label>CEM Email</label>
+      <input type="email" placeholder="Email">
     </div>
+
+    <textarea placeholder="Notes about trainers, deployment managers, or CEM contacts …"></textarea>
   </div>
 
-  <!-- Dealership Contract / Salesforce Products -->
-  <div class="section-block">
-    <h2>Dealership Contract / Listed Salesforce Products</h2>
-    <textarea placeholder="List contracted products and confirm they match Salesforce."></textarea>
-  </div>
 </section>
 
       <!-- ========================================================= -->
