@@ -1,158 +1,164 @@
 // =======================================================
-// myKaarma Interactive Training Checklist – Script
-// Navigation + Clear Buttons + Table Row Add + Support Tickets
+// myKaarma Interactive Training Checklist – FULL JS
+// - Sidebar nav
+// - Dealership name mirror
+// - Clear page / Clear all
+// - Add row for all tables
+// - Support Tickets logic (permanent template card + moves)
+// - Simple PDF export for all pages
 // =======================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNavigation();
-  initDealershipName();
+document.addEventListener("DOMContentLoaded", () => {
+  initNav();
+  initDealershipNameBinding();
   initClearPageButtons();
   initClearAllButton();
-  initTableRowAdd();
+  initTableAddRowButtons();
   initSupportTickets();
-  initPdfButton();
+  initPDFExport();
 });
 
 // ---------------- NAVIGATION ----------------
-
-function initNavigation() {
-  const navButtons = document.querySelectorAll('.nav-btn');
-  const sections = document.querySelectorAll('.page-section');
+function initNav() {
+  const navButtons = document.querySelectorAll("#sidebar-nav .nav-btn");
+  const sections = document.querySelectorAll(".page-section");
 
   if (!navButtons.length || !sections.length) return;
 
-  const specialMap = {
-    'onsite-trainers': 'trainers-page'
-  };
+  navButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.target;
+      let targetSection = document.getElementById(target);
 
-  function showSection(targetKey) {
-    const mappedId = specialMap[targetKey] || targetKey;
-    sections.forEach(sec => {
-      sec.classList.toggle('active', sec.id === mappedId);
-    });
-  }
+      // Fallback for the first page if ID is trainers-page
+      if (!targetSection && target === "onsite-trainers") {
+        targetSection = document.getElementById("trainers-page");
+      }
 
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      navButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const target = btn.getAttribute('data-target');
-      if (target) showSection(target);
+      if (!targetSection) return;
+
+      // Active button
+      navButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Active section
+      sections.forEach((sec) => sec.classList.remove("active"));
+      targetSection.classList.add("active");
     });
   });
-
-  // Ensure one section is visible on load
-  const active = document.querySelector('.page-section.active');
-  if (!active) {
-    const first = sections[0];
-    if (first) first.classList.add('active');
-  }
 }
 
-// ---------------- DEALERSHIP NAME DISPLAY ----------------
-
-function initDealershipName() {
-  const input = document.getElementById('dealershipNameInput');
-  const display = document.getElementById('dealershipNameDisplay');
+// ---------------- DEALERSHIP NAME MIRROR ----------------
+function initDealershipNameBinding() {
+  const input = document.getElementById("dealershipNameInput");
+  const display = document.getElementById("dealershipNameDisplay");
 
   if (!input || !display) return;
 
-  const update = () => {
+  const updateDisplay = () => {
     const val = input.value.trim();
-    display.textContent = val || 'Dealership Name';
+    display.textContent = val || "Dealership Name";
   };
 
-  input.addEventListener('input', update);
-  update();
+  input.addEventListener("input", updateDisplay);
+  updateDisplay();
 }
 
-// ---------------- CLEAR PAGE ----------------
-
-function clearElementsInside(root) {
-  if (!root) return;
-
-  const inputs = root.querySelectorAll('input');
-  const selects = root.querySelectorAll('select');
-  const textareas = root.querySelectorAll('textarea');
-
-  inputs.forEach(inp => {
-    if (inp.type === 'checkbox' || inp.type === 'radio') {
-      inp.checked = false;
-    } else {
-      inp.value = '';
-    }
-  });
-
-  selects.forEach(sel => {
-    sel.selectedIndex = 0;
-  });
-
-  textareas.forEach(ta => {
-    ta.value = '';
-  });
-}
-
+// ---------------- CLEAR PAGE BUTTONS ----------------
 function initClearPageButtons() {
-  const buttons = document.querySelectorAll('.clear-page-btn');
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const section = btn.closest('.page-section');
+  const clearButtons = document.querySelectorAll(".clear-page-btn");
+
+  clearButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const section = btn.closest(".page-section");
       if (!section) return;
-
-      const confirmed = window.confirm('Reset all fields on this page?');
-      if (!confirmed) return;
-
-      clearElementsInside(section);
+      clearFieldsInElement(section);
     });
   });
 }
 
-function initClearAllButton() {
-  const btn = document.getElementById('clearAllBtn');
-  if (!btn) return;
+function clearFieldsInElement(root) {
+  if (!root) return;
 
-  btn.addEventListener('click', () => {
-    const confirmed = window.confirm('Clear all pages in this checklist?');
-    if (!confirmed) return;
+  const inputs = root.querySelectorAll("input");
+  const textareas = root.querySelectorAll("textarea");
+  const selects = root.querySelectorAll("select");
 
-    const app = document.getElementById('app');
-    if (!app) return;
+  inputs.forEach((input) => {
+    const type = input.type;
+    if (type === "checkbox" || type === "radio") {
+      input.checked = false;
+    } else {
+      input.value = "";
+    }
+  });
 
-    clearElementsInside(app);
+  textareas.forEach((ta) => {
+    ta.value = "";
+  });
+
+  selects.forEach((sel) => {
+    sel.selectedIndex = 0;
   });
 }
 
-// ---------------- TABLE ROW ADD (+) ----------------
+// ---------------- CLEAR ALL (SIDEBAR BUTTON) ----------------
+function initClearAllButton() {
+  const btn = document.getElementById("clearAllBtn");
+  if (!btn) return;
 
-function initTableRowAdd() {
-  const addButtons = document.querySelectorAll('.table-footer .add-row');
-  if (!addButtons.length) return;
+  btn.addEventListener("click", () => {
+    const app = document.getElementById("app");
+    if (!app) return;
+    clearFieldsInElement(app);
 
-  addButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Only work within this table container
-      const container = btn.closest('.table-container');
-      if (!container) return;
+    // Reset dealership display text after clearing
+    const display = document.getElementById("dealershipNameDisplay");
+    if (display) {
+      display.textContent = "Dealership Name";
+    }
+  });
+}
 
-      const table = container.querySelector('table');
-      if (!table || !table.tBodies.length) return;
+// ---------------- TABLE ADD-ROW BUTTONS ----------------
+function initTableAddRowButtons() {
+  const addButtons = document.querySelectorAll(".table-footer .add-row");
 
-      const tbody = table.tBodies[0];
-      const lastRow = tbody.lastElementChild;
+  addButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tableContainer = btn.closest(".table-container");
+      if (!tableContainer) return;
+
+      const table = tableContainer.querySelector("table");
+      if (!table) return;
+
+      const tbody = table.querySelector("tbody");
+      if (!tbody) return;
+
+      const lastRow = tbody.querySelector("tr:last-child");
       if (!lastRow) return;
 
       const newRow = lastRow.cloneNode(true);
 
-      // Clear contents in cloned row
-      const fields = newRow.querySelectorAll('input, select, textarea');
-      fields.forEach(el => {
-        if (el.tagName === 'SELECT') {
-          el.selectedIndex = 0;
-        } else if (el.type === 'checkbox' || el.type === 'radio') {
-          el.checked = false;
+      // Clear values in new row
+      const inputs = newRow.querySelectorAll("input");
+      const selects = newRow.querySelectorAll("select");
+      const textareas = newRow.querySelectorAll("textarea");
+
+      inputs.forEach((input) => {
+        if (input.type === "checkbox" || input.type === "radio") {
+          input.checked = false;
         } else {
-          el.value = '';
+          input.value = "";
         }
+      });
+
+      selects.forEach((sel) => {
+        sel.selectedIndex = 0;
+      });
+
+      textareas.forEach((ta) => {
+        ta.value = "";
       });
 
       tbody.appendChild(newRow);
@@ -161,78 +167,109 @@ function initTableRowAdd() {
 }
 
 // ---------------- SUPPORT TICKETS ----------------
-
 function initSupportTickets() {
-  const openContainer = document.getElementById('openTicketsContainer');
-  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+  const openContainer = document.getElementById("openTicketsContainer");
+  const tierTwoContainer = document.getElementById("tierTwoTicketsContainer");
+  const closedResolvedContainer = document.getElementById("closedResolvedTicketsContainer");
+  const closedFeatureContainer = document.getElementById("closedFeatureTicketsContainer");
 
   if (!openContainer || !tierTwoContainer || !closedResolvedContainer || !closedFeatureContainer) {
     return;
   }
 
-  const templateGroup = openContainer.querySelector('.ticket-group');
+  const templateGroup = openContainer.querySelector(".ticket-group");
   if (!templateGroup) return;
 
-  const addBtn = templateGroup.querySelector('.add-row');
+  // Mark this as the permanent template card
+  templateGroup.dataset.permanent = "true";
+
+  const addBtn = templateGroup.querySelector(".add-row");
   if (!addBtn) return;
 
-  // Wire up existing status selects (template + any existing)
-  wireStatusListeners(templateGroup);
+  // Wire up status select for the permanent template (but don't let it move)
+  wireStatusListeners(templateGroup, true);
 
-  addBtn.addEventListener('click', () => {
+  addBtn.addEventListener("click", () => {
+    // Clone template
     const newGroup = templateGroup.cloneNode(true);
+    newGroup.dataset.permanent = "false";
 
     // Remove the + button from the cloned card
-    const newAddBtn = newGroup.querySelector('.add-row');
+    const newAddBtn = newGroup.querySelector(".add-row");
     if (newAddBtn) {
       newAddBtn.remove();
     }
 
-    // Clear all text inputs + selects in the new card
+    // Remove integrated-plus layout so ticket number field is a normal full-width text box
+    const integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
+    if (integratedRow) {
+      integratedRow.classList.remove("integrated-plus");
+    }
+
+    // Clear all inputs/selects in the new card
     clearTicketGroupFields(newGroup);
 
-    // Append directly under the template
+    // Ensure status starts as Open
+    const statusSelect = newGroup.querySelector(".ticket-status-select");
+    if (statusSelect) {
+      statusSelect.value = "Open";
+    }
+
+    // Append directly under the template in Open Tickets
     openContainer.appendChild(newGroup);
 
-    // Wire up status change for the new card
-    wireStatusListeners(newGroup);
+    // Wire up status change for the new (movable) card
+    wireStatusListeners(newGroup, false);
   });
 
   // --- helpers ---
 
   function clearTicketGroupFields(group) {
     const inputs = group.querySelectorAll('input[type="text"], input[type="date"], textarea');
-    const selects = group.querySelectorAll('select');
+    const selects = group.querySelectorAll("select");
 
-    inputs.forEach(inp => {
-      inp.value = '';
+    inputs.forEach((inp) => {
+      inp.value = "";
     });
 
-    selects.forEach(sel => {
+    selects.forEach((sel) => {
+      // leave Ticket Status as-is if it's explicitly set to Open above
+      if (sel.classList.contains("ticket-status-select")) return;
       sel.selectedIndex = 0;
     });
   }
 
-  function wireStatusListeners(group) {
-    const statusSelects = group.querySelectorAll('.ticket-status-select');
-    statusSelects.forEach(select => {
-      select.addEventListener('change', () => {
+  /**
+   * wireStatusListeners
+   * @param {HTMLElement} group - the .ticket-group card
+   * @param {boolean} isPermanent - true for the master template that should never move
+   */
+  function wireStatusListeners(group, isPermanent) {
+    const statusSelects = group.querySelectorAll(".ticket-status-select");
+    statusSelects.forEach((select) => {
+      select.addEventListener("change", () => {
         const value = select.value;
-        const card = select.closest('.ticket-group');
+        const card = select.closest(".ticket-group");
         if (!card) return;
 
-        // Move card based on status
-        if (value === 'Open') {
+        // Permanent template never moves; force it to stay Open
+        if (isPermanent) {
+          if (value !== "Open") {
+            select.value = "Open";
+          }
+          return;
+        }
+
+        // Movable cards go to containers based on status
+        if (value === "Open") {
           openContainer.appendChild(card);
-        } else if (value === 'Tier Two') {
+        } else if (value === "Tier Two") {
           tierTwoContainer.appendChild(card);
-        } else if (value === 'Closed - Resolved') {
+        } else if (value === "Closed - Resolved") {
           closedResolvedContainer.appendChild(card);
         } else if (
-          value === 'Closed – Feature Not Supported' ||
-          value === 'Closed - Feature Not Supported'
+          value === "Closed – Feature Not Supported" ||
+          value === "Closed - Feature Not Supported"
         ) {
           closedFeatureContainer.appendChild(card);
         }
@@ -241,14 +278,30 @@ function initSupportTickets() {
   }
 }
 
-// ---------------- PDF (simple: use browser print) ----------------
-
-function initPdfButton() {
-  const btn = document.getElementById('savePDF');
+// ---------------- PDF EXPORT ----------------
+function initPDFExport() {
+  const btn = document.getElementById("savePDF");
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
-    // Simple, reliable: user can "Save as PDF" from print dialog
-    window.print();
+  btn.addEventListener("click", () => {
+    if (!window.jspdf) {
+      alert("PDF library not loaded.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "pt", "a4");
+
+    // Simple approach: render the main content (all pages) into the PDF.
+    // This won't be pixel perfect but will capture all sections for now.
+    doc.html(document.body, {
+      callback: function (doc) {
+        doc.save("myKaarma_Training_Checklist.pdf");
+      },
+      x: 10,
+      y: 10,
+      margin: [10, 10, 10, 10],
+      autoPaging: "text"
+    });
   });
 }
