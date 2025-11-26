@@ -17,8 +17,12 @@ function initNav() {
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetId = btn.getAttribute('data-target');
-      const targetSection = document.getElementById(targetId);
+      let targetSection = document.getElementById(targetId);
 
+      // Fallback for first button: data-target="onsite-trainers" → id="trainers-page"
+      if (!targetSection && targetId === 'onsite-trainers') {
+        targetSection = document.getElementById('trainers-page');
+      }
       if (!targetSection) return;
 
       navButtons.forEach((b) => b.classList.remove('active'));
@@ -30,7 +34,7 @@ function initNav() {
     });
   });
 
-  // Ensure first visible section has .active if nothing is set
+  // Ensure at least one section is active
   const anyActive = document.querySelector('.page-section.active');
   if (!anyActive && sections[0]) {
     sections[0].classList.add('active');
@@ -78,7 +82,7 @@ function initClearAllButton() {
 
 /**
  * Reset a single page-section: inputs, textareas, selects,
- * and special handling for Support Tickets.
+ * plus special handling for Support Tickets.
  */
 function resetSection(section) {
   // Special case: support tickets
@@ -93,7 +97,7 @@ function resetSection(section) {
     if (closedFeature) closedFeature.innerHTML = '';
 
     if (openContainer) {
-      // Keep only the template
+      // Keep only the template card
       openContainer
         .querySelectorAll('.ticket-group:not(.ticket-group-template)')
         .forEach((card) => card.remove());
@@ -128,7 +132,7 @@ function resetSection(section) {
   textareas.forEach((ta) => (ta.value = ''));
 
   selects.forEach((sel) => {
-    // For support ticket template status
+    // For support ticket status in template, use Open
     if (sel.classList.contains('ticket-status-select') && section.id === 'support-ticket') {
       sel.value = 'Open';
     } else {
@@ -149,12 +153,10 @@ function resetSection(section) {
 /* DYNAMIC TABLE ROWS (ALL TABLES WITH .add-row, EXCEPT SUPPORT TICKET TEMPLATE) */
 
 function initDynamicTables() {
+  // Only buttons inside .table-container are for rows
   const addRowButtons = document.querySelectorAll('.table-container .add-row');
 
   addRowButtons.forEach((btn) => {
-    // Skip support tickets template add button; handled separately
-    if (btn.classList.contains('add-ticket-btn')) return;
-
     btn.addEventListener('click', () => {
       const table = btn.closest('.table-container')?.querySelector('table');
       if (!table) return;
@@ -193,10 +195,15 @@ function initSupportTickets() {
 
   if (!openContainer) return;
 
-  const templateCard = openContainer.querySelector('.ticket-group-template[data-template="true"]');
+  // Use the FIRST .ticket-group as the permanent template
+  const templateCard = openContainer.querySelector('.ticket-group');
   if (!templateCard) return;
 
-  // Wire template card status behavior
+  // Mark it so resetSection can keep it
+  templateCard.classList.add('ticket-group-template');
+  templateCard.dataset.template = 'true';
+
+  // Wire status behavior for the template (but it never moves)
   wireTicketCard(templateCard, {
     isTemplate: true,
     openContainer,
@@ -205,9 +212,11 @@ function initSupportTickets() {
     closedFeatureContainer,
   });
 
-  // Add button on template card
-  const addBtn = templateCard.querySelector('.add-ticket-btn');
+  // The "+" button on the template (inside the integrated-plus row)
+  const addBtn = templateCard.querySelector('.integrated-plus .add-row');
   if (addBtn) {
+    addBtn.classList.add('add-ticket-btn'); // purely semantic, not used by table logic
+
     addBtn.addEventListener('click', () => {
       const newCard = templateCard.cloneNode(true);
 
@@ -226,7 +235,7 @@ function initSupportTickets() {
         input.value = '';
       });
 
-      // Reset selects
+      // Reset selects (status goes to Open by default)
       newCard.querySelectorAll('select').forEach((sel) => {
         if (sel.classList.contains('ticket-status-select')) {
           sel.value = 'Open';
@@ -235,7 +244,7 @@ function initSupportTickets() {
         }
       });
 
-      // Insert directly under template card
+      // Insert directly under the template card
       const nextSibling = templateCard.nextElementSibling;
       if (nextSibling) {
         openContainer.insertBefore(newCard, nextSibling);
@@ -296,7 +305,7 @@ function wireTicketCard(card, containers) {
   });
 }
 
-/* PDF EXPORT (BASIC OUTLINE VERSION) */
+/* PDF EXPORT (OUTLINE VERSION) */
 
 function initPDFExport() {
   const btn = document.getElementById('savePDF');
