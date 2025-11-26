@@ -68,6 +68,109 @@
 
     <!-- MAIN CONTENT -->
     <main>
+      
+<!-- ========================================================= -->
+<!-- PAGE 1: TRAINERS, DEPLOYMENT MANAGER, & CEM               -->
+<!-- ========================================================= -->
+<section id="trainers-page" class="page-section active">
+
+  <h1>Trainers, Deployment Manager, &amp; CEM</h1>
+  <p class="page-subtitle">
+    Capture trainer assignments, deployment ownership, and key contacts for this onsite.
+  </p>
+
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <!-- TRAINERS CARD -->
+  <div class="section-block">
+    <h2>Trainers</h2>
+
+    <!-- Lead Trainer -->
+    <div class="checklist-row">
+      <label>Lead Trainer</label>
+      <select id="leadTrainer">
+        <option></option>
+
+        <!-- Group 1 (alphabetized) -->
+        <option>Adam Jeffords</option>
+        <option>Alec Parker</option>
+        <option>Brian Button</option>
+        <option>Christopher Eskew</option>
+        <option>Dana Berry</option>
+        <option>Joel Zavaleta</option>
+        <option>Kyle Leavitt</option>
+        <option>Lauren Ramos</option>
+        <option>Miles Krasic</option>
+
+        <!-- spacer -->
+        <option disabled>──────────</option>
+
+        <!-- Group 2 (alphabetized) -->
+        <option>Anthony Carbone</option>
+        <option>Brett Smith</option>
+        <option>Clyde Chapman</option>
+        <option>Dennitza Fernandez</option>
+        <option>Eliud Garcia</option>
+        <option>Jackson Geraghty</option>
+        <option>Kevin Mullinax</option>
+        <option>Lauren Ramos</option>
+        <option>Sharon Rusta</option>
+        <option>Terry Hart</option>
+      </select>
+    </div>
+
+    <!-- Additional Trainers -->
+    <div class="checklist-row indent-sub">
+      <label>Additional Trainers</label>
+      <input type="text" placeholder="Add additional trainers">
+    </div>
+
+    <!-- Training Type -->
+    <div class="checklist-row">
+      <label>Training Type</label>
+      <select id="trainingType">
+        <option></option>
+        <option>Onsite</option>
+        <option>Retraining</option>
+        <option>Paid Additional Training</option>
+      </select>
+    </div>
+
+    <!-- Training Start Date -->
+    <div class="checklist-row">
+      <label>Training Start Date</label>
+      <input id="trainingStartDate" type="date">
+    </div>
+
+    <!-- Training End Date -->
+    <div class="checklist-row">
+      <label>Training End Date</label>
+      <input id="trainingEndDate" type="date">
+    </div>
+
+  </div>
+
+  <!-- DEPLOYMENT MANAGER -->
+  <div class="section-block">
+    <h2>Deployment Manager</h2>
+
+    <div class="checklist-row">
+      <label>Deployment Manager</label>
+      <input type="text" placeholder="Full name of Deployment Manager">
+    </div>
+  </div>
+
+  <!-- CEM -->
+  <div class="section-block">
+    <h2>CEM</h2>
+
+    <div class="checklist-row">
+      <label>CEM / Customer Owner</label>
+      <input type="text" placeholder="CEM or Customer Success Manager">
+    </div>
+  </div>
+
+</section>
 
      <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
