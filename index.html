@@ -2505,74 +2505,76 @@
   </div>
 </section>
 
-        <!-- ========================================================= -->
-    <!-- PAGE 7: SUPPORT TICKETS                                   -->
-    <!-- ========================================================= -->
-    <section id="support-ticket" class="page-section">
-      <h1>Support Tickets</h1>
-      <p class="page-subtitle">
-        Track open and closed support tickets related to this dealership and training rollout.
-      </p>
-      <button class="clear-page-btn" type="button">Reset This Page</button>
+      <!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKETS                                   -->
+<!-- ========================================================= -->
+<section id="support-ticket" class="page-section">
+  <h1>Support Tickets</h1>
+  <p class="page-subtitle">
+    Track open and closed support tickets related to this dealership and training rollout.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-      <!-- Open Support Tickets -->
-      <div class="section-block">
-        <h2>Open Support Tickets</h2>
-        <div id="openTicketsContainer">
-          <div class="ticket-group">
-            <div class="checklist-row integrated-plus">
-              <label>Support Ticket Number</label>
-              <input type="text" placeholder="Ticket #">
-              <button class="add-row" type="button">+</button>
-            </div>
+  <!-- Open Support Tickets -->
+  <div class="section-block">
+    <h2>Open Support Tickets</h2>
+    <div id="openTicketsContainer">
+      <!-- TEMPLATE CARD (permanent, with + button) -->
+      <div class="ticket-group ticket-group-template" data-template="true">
+        <div class="checklist-row integrated-plus">
+          <label>Support Ticket Number</label>
+          <input type="text" placeholder="Ticket #">
+          <!-- Keep .add-row for styling, add .add-ticket-btn for JS targeting -->
+          <button class="add-row add-ticket-btn" type="button">+</button>
+        </div>
 
-            <div class="checklist-row">
-              <label>Issue Summary</label>
-              <input type="text" placeholder="Short summary of the issue">
-            </div>
+        <div class="checklist-row">
+          <label>Issue Summary</label>
+          <input type="text" placeholder="Short summary of the issue">
+        </div>
 
-            <div class="checklist-row">
-              <label>Ticket Status</label>
-              <select class="ticket-status-select">
-                <option>Open</option>
-                <option>Tier Two</option>
-                <option>Closed - Resolved</option>
-                <option>Closed – Feature Not Supported</option>
-              </select>
-            </div>
+        <div class="checklist-row">
+          <label>Ticket Status</label>
+          <select class="ticket-status-select">
+            <option value="Open" selected>Open</option>
+            <option value="Tier Two">Tier Two</option>
+            <option value="Closed - Resolved">Closed - Resolved</option>
+            <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
+          </select>
+        </div>
 
-            <div class="checklist-row">
-              <label>Zendesk link</label>
-              <input type="text" placeholder="Paste Zendesk link">
-            </div>
-          </div>
+        <div class="checklist-row">
+          <label>Zendesk link</label>
+          <input type="text" placeholder="Paste Zendesk link">
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Tier Two Support Tickets -->
-      <div class="section-block">
-        <h2>Tier Two Support Tickets</h2>
-        <div id="tierTwoTicketsContainer">
-          <!-- Tickets moved here when status = Tier Two -->
-        </div>
-      </div>
+  <!-- Tier Two Support Tickets -->
+  <div class="section-block">
+    <h2>Tier Two Support Tickets</h2>
+    <div id="tierTwoTicketsContainer">
+      <!-- Tickets moved here when status = Tier Two -->
+    </div>
+  </div>
 
-      <!-- Closed - Resolved Support Tickets -->
-      <div class="section-block">
-        <h2>Closed - Resolved Support Tickets</h2>
-        <div id="closedResolvedTicketsContainer">
-          <!-- Tickets moved here when status = Closed - Resolved -->
-        </div>
-      </div>
+  <!-- Closed - Resolved Support Tickets -->
+  <div class="section-block">
+    <h2>Closed - Resolved Support Tickets</h2>
+    <div id="closedResolvedTicketsContainer">
+      <!-- Tickets moved here when status = Closed - Resolved -->
+    </div>
+  </div>
 
-      <!-- Closed – Feature Not Supported Support Tickets -->
-      <div class="section-block">
-        <h2>Closed – Feature Not Supported Support Tickets</h2>
-        <div id="closedFeatureTicketsContainer">
-          <!-- Tickets moved here when status = Closed – Feature Not Supported -->
-        </div>
-      </div>
-    </section>
+  <!-- Closed – Feature Not Supported Support Tickets -->
+  <div class="section-block">
+    <h2>Closed – Feature Not Supported Support Tickets</h2>
+    <div id="closedFeatureTicketsContainer">
+      <!-- Tickets moved here when status = Closed – Feature Not Supported -->
+    </div>
+  </div>
+</section>
 
     <!-- ========================================================= -->
     <!-- PAGE 8: DMS INTEGRATION                                   -->
