@@ -57,7 +57,7 @@
           DMS Integration
         </button>
         <button class="nav-btn" data-target="post-training">
-          Post Training Verification
+          Post-Training Verification
         </button>
         <button class="nav-btn" data-target="training-summary">
           Training Summary
@@ -2666,127 +2666,325 @@
         <textarea placeholder="Notes about DMS behavior, delays, or unique workflows …"></textarea>
       </div>
     </section>
+      
+<!-- ========================================================= -->
+<!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
+<!-- ========================================================= -->
+<section id="post-training" class="page-section">
+  <h1>Post-Training Verification</h1>
+  <p class="page-subtitle">
+    Validate training completion by role, confirm workflows, and document any remaining action items.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-    <!-- ========================================================= -->
-    <!-- PAGE 9: POST TRAINING VERIFICATION                        -->
-    <!-- ========================================================= -->
-    <section id="post-training" class="page-section">
-      <h1>Post Training Verification</h1>
-      <p class="page-subtitle">
-        Confirm ownership, champions, blockers, and action items after onsite training.
-      </p>
-      <button class="clear-page-btn" type="button">Reset This Page</button>
+  <!-- Training Completion by Role -->
+  <div class="section-block">
+    <h2>Training Completion by Role</h2>
 
-      <div class="section-block">
-        <h2>Management &amp; Ownership</h2>
-        <div class="checklist-row">
-          <label>Who owns myKaarma performance and usage after training?</label>
-          <input type="text" placeholder="Name / role responsible">
-        </div>
-        <div class="checklist-row">
-          <label>Have clear expectations been set for daily usage and reporting?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>In Progress</option></select>
-        </div>
-        <div class="checklist-row">
-          <label>Is there a follow-up call scheduled post training?</label>
-          <select><option></option><option>Yes</option><option>No</option><option>N/A</option></select>
-        </div>
+    <div class="checklist-row">
+      <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
+      <select>
+        <option></option>
+        <option>Yes — Fully Trained</option>
+        <option>Partially Trained</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Are all Technicians trained and able to complete MPIs and media?</label>
+      <select>
+        <option></option>
+        <option>Yes — Fully Trained</option>
+        <option>Partially Trained</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Are all Parts Representatives trained and using myKaarma with techs/advisors?</label>
+      <select>
+        <option></option>
+        <option>Yes — Fully Trained</option>
+        <option>Partially Trained</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Are all BDC / Scheduler users trained and booking correctly?</label>
+      <select>
+        <option></option>
+        <option>Yes — Fully Trained</option>
+        <option>Partially Trained</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Are all Drivers / Dispatchers trained on Pickup &amp; Delivery workflows?</label>
+      <select>
+        <option></option>
+        <option>Yes — Fully Trained</option>
+        <option>Partially Trained</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h2>Additional Comments — Training Completion</h2>
+    <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps …"></textarea>
+  </div>
+
+  <!-- Workflow & Process Validation -->
+  <div class="section-block">
+    <h2>Workflow &amp; Process Validation</h2>
+
+    <div class="checklist-row">
+      <label>Service drive workflow is functioning end-to-end (arrival → MPI → approval → RO close).</label>
+      <select>
+        <option></option>
+        <option>Confirmed — Works as Designed</option>
+        <option>Works with Minor Gaps</option>
+        <option>Major Issues</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Technician MPI workflow validated with at least 3–5 real ROs.</label>
+      <select>
+        <option></option>
+        <option>Yes — Validated with Live ROs</option>
+        <option>Partially Validated</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Advisor workflow validated for MPI review, sending estimates, and approvals.</label>
+      <select>
+        <option></option>
+        <option>Yes — Validated</option>
+        <option>Partially Validated</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Parts workflow validated for pricing, parts requests, and communication with techs/advisors.</label>
+      <select>
+        <option></option>
+        <option>Yes — Validated</option>
+        <option>Partially Validated</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Pickup &amp; Delivery workflow validated (if purchased).</label>
+      <select>
+        <option></option>
+        <option>Yes — Validated</option>
+        <option>Partially Validated</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h2>Additional Comments — Workflow &amp; Process</h2>
+    <textarea placeholder="Notes about where workflows are strong vs. where they break down …"></textarea>
+  </div>
+
+  <!-- DMS & Data Validation -->
+  <div class="section-block">
+    <h2>DMS &amp; Data Validation</h2>
+
+    <div class="checklist-row">
+      <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>Inconsistent</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>RO History and Inspection History match the DMS for test vehicles.</label>
+      <select>
+        <option></option>
+        <option>Yes — Matches</option>
+        <option>Partial / Delayed</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Opcodes and pricing align between myKaarma and the DMS configuration.</label>
+      <select>
+        <option></option>
+        <option>Yes — Correct</option>
+        <option>Some Issues</option>
+        <option>Major Issues</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Payments (if live) are posting correctly and amounts match DMS / receipts.</label>
+      <select>
+        <option></option>
+        <option>Yes — Confirmed</option>
+        <option>Minor Issues</option>
+        <option>Major Issues</option>
+        <option>N/A</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h2>Additional Comments — DMS &amp; Data</h2>
+    <textarea placeholder="Specific findings, examples of mismatches, or items that require follow-up …"></textarea>
+  </div>
+
+  <!-- Open Items & Action Plan -->
+  <div class="section-block">
+    <h2>Open Items &amp; Action Plan</h2>
+    <p class="muted-note">
+      Use this section to capture anything that still needs work after the onsite (tickets, configuration, retraining, etc.).
+    </p>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Area</th>
+              <th>Owner</th>
+              <th>Target Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" placeholder="e.g., Retrain techs on media upload"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Training</option>
+                  <option>Workflow</option>
+                  <option>DMS / Integration</option>
+                  <option>Support Ticket</option>
+                  <option>Other</option>
+                </select>
+              </td>
+              <td><input type="text" placeholder="Owner name / role"></td>
+              <td><input type="date"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Open</option>
+                  <option>In Progress</option>
+                  <option>Waiting on Dealer</option>
+                  <option>Waiting on myKaarma</option>
+                  <option>Closed</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="text" placeholder="Additional open item"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Training</option>
+                  <option>Workflow</option>
+                  <option>DMS / Integration</option>
+                  <option>Support Ticket</option>
+                  <option>Other</option>
+                </select>
+              </td>
+              <td><input type="text" placeholder="Owner name / role"></td>
+              <td><input type="date"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Open</option>
+                  <option>In Progress</option>
+                  <option>Waiting on Dealer</option>
+                  <option>Waiting on myKaarma</option>
+                  <option>Closed</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Management &amp; Ownership</h2>
-        <textarea placeholder="Notes related to management expectations and ownership …"></textarea>
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
       </div>
+    </div>
+  </div>
 
-      <!-- Champions & Blockers MAIN CARD -->
-      <div class="section-block">
-        <h2>Champions &amp; Blockers</h2>
+  <!-- Final Sign-Off -->
+  <div class="section-block">
+    <h2>Final Sign-Off</h2>
 
-        <!-- Champions Card -->
-        <div class="mini-card champions-card">
-          <div class="checklist-row">
-            <label>Champions — Advisors</label>
-            <input type="text" placeholder="Advisors who champion myKaarma">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Advisor champions</label>
-            <input type="text" placeholder="Additional Advisor champion">
-            <button class="add-row" type="button">+</button>
-          </div>
+    <div class="checklist-row">
+      <label>Overall readiness for go-forward usage after onsite training</label>
+      <select>
+        <option></option>
+        <option>Ready — Full Production</option>
+        <option>Ready — With Risks</option>
+        <option>Not Ready — Needs Work</option>
+      </select>
+    </div>
 
-          <div class="checklist-row">
-            <label>Champions — Techs</label>
-            <input type="text" placeholder="Technicians who champion myKaarma">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Tech champions</label>
-            <input type="text" placeholder="Additional Tech champion">
-            <button class="add-row" type="button">+</button>
-          </div>
+    <div class="checklist-row">
+      <label>Service Manager / Primary Contact</label>
+      <input type="text" placeholder="Name of Service Manager or main contact">
+    </div>
 
-          <div class="checklist-row">
-            <label>Champions — Parts Reps</label>
-            <input type="text" placeholder="Parts reps who champion myKaarma">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Parts champions</label>
-            <input type="text" placeholder="Additional Parts champion">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
+    <div class="checklist-row">
+      <label>Sign-off / confirmation notes</label>
+      <input type="text" placeholder="Any verbal sign-off notes or agreements">
+    </div>
 
-        <!-- Blockers Card -->
-        <div class="mini-card blockers-card">
-          <div class="checklist-row">
-            <label>Blockers — Advisors</label>
-            <input type="text" placeholder="Advisors who are blockers">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Advisor blockers</label>
-            <input type="text" placeholder="Additional Advisor blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
+    <div class="checklist-row">
+      <label>Post-training follow-up call scheduled?</label>
+      <select>
+        <option></option>
+        <option>Yes — Date Set</option>
+        <option>Planned — Date TBD</option>
+        <option>No</option>
+      </select>
+    </div>
 
-          <div class="checklist-row">
-            <label>Blockers — Techs</label>
-            <input type="text" placeholder="Technicians who are blockers">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Tech blockers</label>
-            <input type="text" placeholder="Additional Tech blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
+    <div class="checklist-row">
+      <label>Target follow-up date</label>
+      <input type="date">
+    </div>
+  </div>
 
-          <div class="checklist-row">
-            <label>Blockers — Parts Reps</label>
-            <input type="text" placeholder="Parts reps who are blockers">
-          </div>
-          <div class="checklist-row integrated-plus">
-            <label>Add more Parts blockers</label>
-            <input type="text" placeholder="Additional Parts blocker">
-            <button class="add-row" type="button">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Next Steps &amp; Action Items</h2>
-        <div class="checklist-row integrated-plus">
-          <label>Top follow-up action items</label>
-          <input type="text" placeholder="Action item #1">
-          <button class="add-row" type="button">+</button>
-        </div>
-        <div class="checklist-row">
-          <label>Target date to review progress</label>
-          <input type="date">
-        </div>
-      </div>
-
-      <div class="section-block">
-        <h2>Additional Comments — Post Training Verification</h2>
-        <textarea placeholder="Any final notes, risks, or follow-ups from post training verification …"></textarea>
-      </div>
-    </section>
+  <div class="section-block">
+    <h2>Additional Comments — Post-Training Checklist</h2>
+    <textarea placeholder="Any final thoughts, risks, or context you want CEM / Deployment / Support to know …"></textarea>
+  </div>
+</section>
 
       <!-- ========================================================= -->
 <!-- PAGE 10: TRAINING SUMMARY                                 -->
