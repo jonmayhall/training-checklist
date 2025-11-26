@@ -1,24 +1,41 @@
+/* style.css
+   myKaarma – Interactive Training Checklist
+   Dark sidebar, gradient top bar, card layout, thin orange borders
+*/
+
+/* -----------------------------
+   ROOT & RESETS
+----------------------------- */
 :root {
-  --bg-main: #0c0f16;
-  --bg-elevated: #141821;
-  --bg-sidebar: #0b0d13;
-  --bg-topbar: #141821;
-  --accent-orange: #ff8a3c;
-  --accent-orange-soft: rgba(255, 138, 60, 0.25);
-  --accent-blue: #4ca1ff;
-  --border-subtle: #262b38;
-  --text-main: #f5f7ff;
-  --text-muted: #a2a7b8;
+  --bg-main: #0f172a;          /* overall background */
+  --bg-elevated: #020617;      /* cards / sections */
+  --bg-elevated-soft: #020715;
+  --sidebar-bg: #020617;
+  --sidebar-border: #1e293b;
+  --topbar-gradient-start: #f97316;
+  --topbar-gradient-end: #fb923c;
+  --accent: #fb923c;
+  --accent-soft: rgba(251, 146, 60, 0.18);
+  --accent-strong: #ea580c;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --border-subtle: #1f2937;
+  --border-strong: #4b5563;
   --card-radius: 14px;
-  --input-radius: 8px;
-  --shadow-soft: 0 14px 30px rgba(0, 0, 0, 0.45);
-  --transition-fast: 0.18s ease-out;
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
+  --card-radius-large: 18px;
+  --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.55);
+  --shadow-subtle: 0 10px 25px rgba(15, 23, 42, 0.8);
+  --input-bg: #020617;
+  --input-border: #111827;
+  --input-border-focus: #f97316;
+  --input-radius: 10px;
+  --transition-fast: 0.15s ease-out;
+  --transition-med: 0.2s ease;
+  --scrollbar-track: #020617;
+  --scrollbar-thumb: #475569;
 }
 
-/* RESET / GLOBAL */
-
+/* Reset-ish */
 *,
 *::before,
 *::after {
@@ -30,147 +47,174 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: radial-gradient(circle at top, #141a26 0, #05060a 55%, #020308 100%);
-  color: var(--text-main);
-  font-family: var(--font-sans);
 }
 
 body {
-  display: flex;
-  flex-direction: column;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #111827 0, #020617 40%, #020617 100%);
+  color: var(--text-main);
 }
 
-/* TOP BAR */
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
 
+/* -----------------------------
+   LAYOUT
+----------------------------- */
 #topbar {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: linear-gradient(90deg, #0f172a 0%, #111827 55%, #171923 100%);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
+  background: linear-gradient(
+    to right,
+    var(--topbar-gradient-start),
+    var(--topbar-gradient-end)
+  );
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 }
 
 .topbar-content {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0.75rem 1.75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0.4rem 1.75rem;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .top-logo {
-  height: 32px;
+  height: 36px;
   width: auto;
   display: block;
 }
 
-.topbar-right {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+#dealershipNameDisplay {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: #fefce8;
 }
 
-/* APP LAYOUT */
-
+/* App layout */
 #app {
-  flex: 1;
   display: flex;
-  max-width: 1440px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 1.5rem 1.75rem 2rem;
-  gap: 1.5rem;
+  height: calc(100vh - 56px);
+  background: radial-gradient(circle at top, #020617 0, #020617 60%, #020617 100%);
 }
 
-/* SIDEBAR */
-
+/* Sidebar */
 #sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background: var(--bg-sidebar);
-  border-radius: 18px;
-  padding: 1.25rem 1rem 1.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: var(--shadow-soft);
+  width: 290px;
+  min-width: 260px;
+  background: radial-gradient(circle at top, #020617, #020617 40%, #020617 100%);
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  padding: 1.25rem 1rem 1.5rem;
+  gap: 1rem;
 }
 
 #sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
 }
 
 .nav-btn {
   width: 100%;
   text-align: left;
-  padding: 0.55rem 0.7rem;
-  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.83rem;
+  border-radius: 10px;
   border: 1px solid transparent;
-  font-size: 0.85rem;
-  background: transparent;
+  background: rgba(15, 23, 42, 0.9);
   color: var(--text-muted);
   cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast),
-    border var(--transition-fast),
-    transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), transform 0.12s ease-out;
 }
 
 .nav-btn:hover {
-  background: rgba(148, 163, 184, 0.12);
-  color: #e5e7f5;
-  transform: translateX(2px);
-}
-
-.nav-btn.active {
-  background: radial-gradient(circle at top left, #ff8a3c 0%, #ec4899 27%, #4f46e5 100%);
-  color: #0b0d13;
-  font-weight: 600;
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.55);
-}
-
-#clearAllBtn {
-  margin-top: 0.5rem;
-  width: 100%;
-  border-radius: 999px;
-  border: 1px solid rgba(248, 113, 113, 0.7);
-  background: transparent;
-  color: #fecaca;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-#clearAllBtn:hover {
-  background: rgba(248, 113, 113, 0.14);
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  background: #020617;
+  border-color: rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
   transform: translateY(-1px);
 }
 
-/* MAIN CONTENT */
-
-main {
-  flex: 1;
-  min-width: 0;
+.nav-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.14),
+    rgba(251, 146, 60, 0.22)
+  );
+  border-color: rgba(249, 115, 22, 0.9);
+  color: #fefce8;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.85);
 }
 
-/* PAGES */
+/* Clear All button in sidebar */
+#clearAllBtn {
+  margin-top: auto;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  background: rgba(15, 23, 42, 0.9);
+  color: #fed7aa;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-med), transform 0.12s ease-out,
+    box-shadow 0.12s ease-out;
+}
 
+#clearAllBtn:hover {
+  background: rgba(249, 115, 22, 0.18);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+}
+
+/* Main content */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.2rem 1.6rem 1.8rem;
+}
+
+/* -----------------------------
+   PAGE SECTIONS & HEADINGS
+----------------------------- */
 .page-section {
   display: none;
-  background: var(--bg-elevated);
-  border-radius: 20px;
-  padding: 1.5rem 1.65rem 2rem;
-  border: 1px solid rgba(148, 163, 184, 0.27);
-  box-shadow: var(--shadow-soft);
+  max-width: 1250px;
+  margin: 0 auto;
 }
 
 .page-section.active {
@@ -178,299 +222,362 @@ main {
 }
 
 .page-section h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.45rem;
-  letter-spacing: 0.02em;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
 }
 
 .page-subtitle {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-size: 0.9rem;
   color: var(--text-muted);
+  max-width: 900px;
 }
 
-/* CLEAR PAGE BUTTON */
-
+/* Reset This Page button */
 .clear-page-btn {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
+  padding: 0.35rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.8);
   background: transparent;
-  color: var(--text-muted);
-  padding: 0.4rem 0.9rem;
-  font-size: 0.8rem;
+  color: #e5e7eb;
+  font-size: 0.82rem;
   cursor: pointer;
-  float: right;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    transform 0.12s ease-out;
 }
 
 .clear-page-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e5e7f5;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.35);
-  transform: translateY(-1px);
+  background: rgba(148, 163, 184, 0.15);
+  border-color: #e5e7eb;
+  transform: translateY(-0.5px);
 }
 
-/* SECTION BLOCKS & SECTIONS */
-
+/* -----------------------------
+   CARDS / SECTION BLOCKS
+----------------------------- */
 .section-block {
-  background: rgba(15, 23, 42, 0.95);
-  border-radius: var(--card-radius);
-  padding: 1rem 1.25rem 1.05rem;
-  border: 1px solid rgba(148, 163, 184, 0.27);
+  background: radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
+  border-radius: var(--card-radius-large);
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 1rem 1.15rem 1.05rem;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-subtle);
 }
 
 .section-block h2 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.7rem;
   font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e5e7eb;
 }
 
+/* Sections used for larger groups (training tables, etc.) */
 .section {
-  background: rgba(15, 23, 42, 0.96);
-  border-radius: var(--card-radius);
-  padding: 1rem 1.25rem 1.05rem;
-  border: 1px solid rgba(148, 163, 184, 0.27);
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: var(--card-radius-large);
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.75rem 0.95rem 0.85rem;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-subtle);
 }
 
 .section-header {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px dashed rgba(148, 163, 184, 0.4);
-  color: var(--accent-blue);
-}
-
-/* CHECKLIST ROWS */
-
-.checklist-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.55rem;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.65rem;
+  color: #e5e7eb;
 }
 
-.checklist-row label {
-  flex: 0 0 280px;
-  font-size: 0.86rem;
-  color: var(--text-muted);
+/* Thin orange border utility (for grouped questions) */
+.thin-orange-border {
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin-top: 0.75rem;
+  background: radial-gradient(circle at top, #020617 0, #020617 55%, #020617 100%);
 }
 
-.checklist-row input[type="text"],
-.checklist-row input[type="date"],
-.checklist-row input[type="number"],
-.checklist-row select,
-.section-block textarea,
-.section textarea {
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  color: var(--text-main);
-  background: rgba(15, 23, 42, 0.95);
-  border-radius: var(--input-radius);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 0.4rem 0.55rem;
-  outline: none;
-  width: 100%;
-  min-height: 32px;
-  transition: border var(--transition-fast), box-shadow var(--transition-fast),
-    background var(--transition-fast), transform var(--transition-fast);
-}
-
-.checklist-row input[type="text"]:focus,
-.checklist-row input[type="date"]:focus,
-.checklist-row input[type="number"]:focus,
-.checklist-row select:focus,
-.section-block textarea:focus,
-.section textarea:focus {
-  border-color: var(--accent-orange);
-  box-shadow: 0 0 0 1px rgba(255, 138, 60, 0.4);
-  background: #020617;
-}
-
-.section-block textarea,
-.section textarea {
-  resize: vertical;
-  min-height: 80px;
-  line-height: 1.45;
-}
-
-/* MUTED NOTE */
-
+/* Muted note text */
 .muted-note {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
 
-/* INDENTED ROWS */
+/* -----------------------------
+   FORM ROWS
+----------------------------- */
+.checklist-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.4fr);
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
 
+.checklist-row label {
+  font-size: 0.86rem;
+  color: #e5e7eb;
+}
+
+.checklist-row select,
+.checklist-row input[type="text"],
+.checklist-row input[type="date"],
+.checklist-row input[type="number"] {
+  width: 100%;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--input-radius);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.checklist-row select:focus,
+.checklist-row input[type="text"]:focus,
+.checklist-row input[type="date"]:focus,
+.checklist-row input[type="number"]:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.55);
+  background: #020618;
+}
+
+/* Indented sub-rows */
 .indent-sub {
-  margin-left: 1.5rem;
+  padding-left: 1.25rem;
 }
 
-/* ORANGE BORDER CARDS (for grouped questions) */
-
-.orange-border-card {
-  border: 1px solid var(--accent-orange);
-  border-radius: var(--card-radius);
-  padding: 0.8rem 1rem 0.7rem;
-  margin-top: 0.75rem;
-  background: rgba(15, 23, 42, 0.96);
+/* Textareas */
+textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: 0.86rem;
+  line-height: 1.35;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
-/* TABLES */
+textarea:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.55);
+  background: #020618;
+}
 
+/* -----------------------------
+   TABLES (Training / Opcodes)
+----------------------------- */
 .table-container {
-  margin-top: 0.3rem;
+  background: #020617;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 41, 55, 0.95);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
 }
 
 .scroll-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
+  max-height: 330px;
+  overflow: auto;
 }
 
+/* Generic training table */
 .training-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.training-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #020617;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
 }
 
 .training-table th,
 .training-table td {
-  border: 1px solid rgba(55, 65, 81, 0.9);
-  padding: 0.25rem 0.4rem;
+  border-bottom: 1px solid #111827;
+  padding: 0.35rem 0.4rem;
   text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .training-table th {
-  background: #020617;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
+}
+
+.training-table tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.training-table tbody tr:nth-child(odd) {
+  background: rgba(15, 23, 42, 0.3);
 }
 
 .training-table input[type="text"],
-.training-table input[type="number"],
-.training-table input[type="date"],
 .training-table select {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.35rem;
-  min-height: 26px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.2rem 0.35rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  border: 1px solid #111827;
+  background: #020617;
+  color: #e5e7eb;
 }
 
-/* ADD ROW BUTTON (TABLE FOOTER) */
+.training-table input[type="checkbox"] {
+  margin-right: 0.2rem;
+}
 
+/* Table footer (for + buttons) */
 .table-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  background: #020617;
+  border-top: 1px solid #111827;
 }
 
-.add-row {
+/* Plus button */
+button.add-row {
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  background: transparent;
-  color: var(--text-main);
-  width: 26px;
-  height: 26px;
+  border: 1px solid rgba(148, 163, 184, 0.9);
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background var(--transition-fast), transform 0.12s ease-out,
+    box-shadow 0.12s ease-out, border-color var(--transition-fast);
 }
 
-.add-row:hover {
-  background: rgba(148, 163, 184, 0.13);
+button.add-row:hover {
+  background: rgba(148, 163, 184, 0.25);
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.6);
+  border-color: #e5e7eb;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.9);
 }
 
-/* SUPPORT TICKETS */
-
+/* -----------------------------
+   SUPPORT TICKETS
+----------------------------- */
 .ticket-group {
-  background: rgba(15, 23, 42, 0.98);
-  border-radius: var(--card-radius);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 0.85rem 1rem 0.75rem;
+  background: radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.75rem 0.9rem 0.8rem;
   margin-bottom: 0.75rem;
+  box-shadow: var(--shadow-subtle);
 }
 
-/* Make the template look identical, just logically different in JS */
-.ticket-group-template {
-  /* no visual difference needed */
+.ticket-group .checklist-row {
+  margin-bottom: 0.4rem;
 }
 
-.integrated-plus {
+.ticket-group .checklist-row.integrated-plus {
+  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.4fr) auto;
   align-items: center;
 }
 
-.integrated-plus label {
-  flex: 0 0 220px;
+.ticket-group .integrated-plus button.add-row {
+  margin-left: 0.25rem;
 }
 
-.integrated-plus input[type="text"] {
-  flex: 1;
-}
-
-.integrated-plus .add-ticket-btn {
-  margin-left: 0.35rem;
-}
-
-/* Re-use .add-row styling for ticket add button; it's already circular */
-
-/* DMS INTEGRATION CARDS */
-
-.dms-overview-block {
+/* Containers themselves just stack cards */
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+}
+
+/* Ensure selects in tickets have class for JS lookup */
+.ticket-group select.ticket-status-select {
+  width: 100%;
+}
+
+/* -----------------------------
+   DMS INTEGRATION CARDS
+----------------------------- */
+.dms-overview-block {
+  background: radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
 }
 
 .dms-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
+  gap: 0.7rem;
   font-size: 0.78rem;
   color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+
+.dms-legend div {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .dms-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  margin-right: 0.35rem;
+  display: inline-block;
 }
 
 .dms-dot-auto {
   background: #22c55e;
 }
-
 .dms-dot-ondemand {
-  background: #facc15;
-}
-
-.dms-dot-withro {
   background: #38bdf8;
 }
-
-.dms-dot-planned {
+.dms-dot-withro {
   background: #a855f7;
 }
-
+.dms-dot-planned {
+  background: #fbbf24;
+}
 .dms-dot-na {
   background: #6b7280;
 }
 
 .dms-table-container {
-  margin-top: 0.4rem;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.75rem;
+  background: #020617;
 }
 
 .dms-grid {
@@ -480,147 +587,160 @@ main {
 }
 
 .dms-card {
-  background: #020617;
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 0.7rem 0.8rem 0.75rem;
+  background: radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.65rem 0.7rem 0.7rem;
+  box-shadow: var(--shadow-subtle);
 }
 
 .dms-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.45rem;
 }
 
 .dms-name {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.83rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .dms-chip {
   font-size: 0.7rem;
-  padding: 0.15rem 0.4rem;
+  padding: 0.14rem 0.38rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.8);
+}
+
+.dms-chip-push {
+  border-color: rgba(94, 234, 212, 0.8);
+  color: #a5f3fc;
+}
+.dms-chip-pull {
+  border-color: rgba(96, 165, 250, 0.9);
+  color: #bfdbfe;
 }
 
 .dms-list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .dms-list li + li {
-  margin-top: 0.45rem;
-  padding-top: 0.4rem;
-  border-top: 1px dashed rgba(55, 65, 81, 0.8);
+  margin-top: 0.55rem;
 }
 
 .dms-row-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
 }
 
 .dms-field {
-  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .dms-tag {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   padding: 0.1rem 0.35rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.5);
 }
 
 .dms-tag-auto {
-  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
 }
-
 .dms-tag-ondemand {
-  border-color: #facc15;
+  background: rgba(56, 189, 248, 0.12);
+  color: #bae6fd;
 }
-
 .dms-tag-withro {
-  border-color: #38bdf8;
+  background: rgba(168, 85, 247, 0.12);
+  color: #e9d5ff;
 }
-
 .dms-tag-planned {
-  border-color: #a855f7;
+  background: rgba(250, 204, 21, 0.12);
+  color: #facc15;
 }
-
 .dms-tag-na {
-  border-color: #6b7280;
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
 }
-
+.dms-tag-limited {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+}
 .dms-tag-display {
-  border-color: #e5e7eb;
+  background: rgba(129, 140, 248, 0.12);
+  color: #c7d2fe;
 }
 
-.dms-card p {
-  margin: 0.15rem 0 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-/* FLOATING PDF BUTTON (TRAINING SUMMARY) */
-
-.floating-btn {
+/* -----------------------------
+   TRAINING SUMMARY
+----------------------------- */
+#savePDF.floating-btn {
+  margin-bottom: 1rem;
+  padding: 0.4rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background: linear-gradient(135deg, #1d283a 0%, #020617 100%);
-  color: #e5e7f5;
-  padding: 0.5rem 1.1rem;
-  font-size: 0.8rem;
+  border: 1px solid rgba(249, 115, 22, 0.9);
+  background: radial-gradient(circle at top left, #020617, #020617 45%, #020617 100%);
+  color: #fed7aa;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  float: right;
-  margin-bottom: 0.85rem;
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.7);
-  transition: background var(--transition-fast), transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.9);
+  transition: background var(--transition-fast), transform 0.12s ease-out,
+    box-shadow 0.12s ease-out;
 }
 
-.floating-btn:hover {
-  background: linear-gradient(135deg, #111827 0%, #020617 100%);
+#savePDF.floating-btn:hover {
+  background: rgba(249, 115, 22, 0.22);
   transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.85);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.95);
 }
 
-/* SMALL SCREEN ADJUSTMENTS */
-
-@media (max-width: 1100px) {
+/* -----------------------------
+   RESPONSIVE
+----------------------------- */
+@media (max-width: 960px) {
   #app {
     flex-direction: column;
+    height: auto;
   }
 
   #sidebar {
     width: 100%;
+    min-width: 0;
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    align-items: flex-start;
+    gap: 1rem;
+    overflow-x: auto;
   }
 
   #sidebar-nav {
-    flex: 1 1 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
   }
 
   main {
-    width: 100%;
+    padding: 1rem;
   }
+}
 
+@media (max-width: 768px) {
   .checklist-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .checklist-row label {
-    flex: none;
+    grid-template-columns: 1fr;
   }
 
   .indent-sub {
-    margin-left: 0.5rem;
+    padding-left: 0.5rem;
   }
 }
