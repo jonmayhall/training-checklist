@@ -186,11 +186,11 @@ function initSupportTickets() {
   const addBtn = templateGroup.querySelector(".add-row");
   if (!addBtn) return;
 
-  // Wire up status select for the permanent template (but don't let it move)
+  // Wire up status select for the permanent template (special behavior)
   wireStatusListeners(templateGroup, true);
 
+  // "+" button: create a brand new Open card under the template
   addBtn.addEventListener("click", () => {
-    // Clone template
     const newGroup = templateGroup.cloneNode(true);
     newGroup.dataset.permanent = "false";
 
@@ -206,10 +206,10 @@ function initSupportTickets() {
       integratedRow.classList.remove("integrated-plus");
     }
 
-    // Clear all inputs/selects in the new card
+    // Clear all fields in the new card
     clearTicketGroupFields(newGroup);
 
-    // Ensure status starts as Open
+    // Ensure status is Open
     const statusSelect = newGroup.querySelector(".ticket-status-select");
     if (statusSelect) {
       statusSelect.value = "Open";
@@ -233,10 +233,16 @@ function initSupportTickets() {
     });
 
     selects.forEach((sel) => {
-      // leave Ticket Status as-is if it's explicitly set to Open above
-      if (sel.classList.contains("ticket-status-select")) return;
       sel.selectedIndex = 0;
     });
+  }
+
+  function resetTemplateGroup(group) {
+    clearTicketGroupFields(group);
+    const statusSelect = group.querySelector(".ticket-status-select");
+    if (statusSelect) {
+      statusSelect.value = "Open";
+    }
   }
 
   /**
@@ -252,15 +258,54 @@ function initSupportTickets() {
         const card = select.closest(".ticket-group");
         if (!card) return;
 
-        // Permanent template never moves; force it to stay Open
+        // Permanent template:
+        // When status changes away from Open:
+        //  - clone current values into a new movable card
+        //  - send that card to the right container
+        //  - reset the template back to blank + Open
         if (isPermanent) {
-          if (value !== "Open") {
-            select.value = "Open";
+          if (value === "Open") return;
+
+          // Clone the filled-out template
+          const newGroup = card.cloneNode(true);
+          newGroup.dataset.permanent = "false";
+
+          // Remove + button & integrated-plus layout from the new card
+          const newAddBtn = newGroup.querySelector(".add-row");
+          if (newAddBtn) {
+            newAddBtn.remove();
           }
+          const integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
+          if (integratedRow) {
+            integratedRow.classList.remove("integrated-plus");
+          }
+
+          // This new card keeps all field values, including the chosen status
+          wireStatusListeners(newGroup, false);
+
+          // Place new card into the appropriate container
+          if (value === "Open") {
+            openContainer.appendChild(newGroup);
+          } else if (value === "Tier Two") {
+            tierTwoContainer.appendChild(newGroup);
+          } else if (value === "Closed - Resolved") {
+            closedResolvedContainer.appendChild(newGroup);
+          } else if (
+            value === "Closed – Feature Not Supported" ||
+            value === "Closed - Feature Not Supported"
+          ) {
+            closedFeatureContainer.appendChild(newGroup);
+          } else {
+            // Fallback: keep it under Open if some new value shows up
+            openContainer.appendChild(newGroup);
+          }
+
+          // Reset the permanent template to blank + Open
+          resetTemplateGroup(card);
           return;
         }
 
-        // Movable cards go to containers based on status
+        // Movable cards: just move them between sections based on status
         if (value === "Open") {
           openContainer.appendChild(card);
         } else if (value === "Tier Two") {
