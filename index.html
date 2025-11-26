@@ -174,6 +174,7 @@
 </section>
 
     <!-- ========================================================= -->
+<!<!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
@@ -183,9 +184,7 @@
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ======================= -->
-  <!-- Dealership Basics       -->
-  <!-- ======================= -->
+  <!-- Dealership Basics -->
   <div class="section-block">
     <h2>Dealership Basics</h2>
 
@@ -248,7 +247,9 @@
     </div>
 
     <div class="checklist-row indent-sub">
-      <label>Do the handoff notes mention additional buildings off-site? If so, how many?</label>
+      <label>
+        Do the handoff notes mention additional buildings off-site? If so, how many?
+      </label>
       <select id="offsiteBuildings">
         <option></option>
         <option>1</option>
@@ -260,57 +261,83 @@
     </div>
   </div>
 
-  <!-- ======================= -->
-  <!-- Dealership Contacts     -->
-  <!-- ======================= -->
-  <div class="section-block" id="dealershipContactsSection">
+  <!-- Dealership Contacts -->
+  <div class="section-block">
     <h2>Dealership Contacts</h2>
 
-    <!-- General Manager (fixed card) -->
+    <!-- Service Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Service Manager</label>
+        <input type="text" placeholder="Full name">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text" placeholder="Cell number">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email address">
+      </div>
+    </div>
+
+    <!-- Parts Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Parts Manager</label>
+        <input type="text" placeholder="Full name">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text" placeholder="Cell number">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email address">
+      </div>
+    </div>
+
+    <!-- General Manager (formerly BDC) -->
     <div class="mini-card contact-card">
       <div class="checklist-row">
         <label>General Manager</label>
-        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Full name">
       </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Email">
-      </div>
-
       <div class="checklist-row indent-sub">
         <label>Cell</label>
-        <input type="text" placeholder="(555) 555-5555">
+        <input type="text" placeholder="Cell number">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email address">
       </div>
     </div>
 
-    <!-- Additional Point of Contact – template with + button -->
-    <div class="mini-card contact-card additional-poc-card" id="additionalPOCTemplate">
-
-      <div class="checklist-row integrated-plus">
-        <label>Additional Point of Contact</label>
-
-        <input type="text" class="poc-name-input" placeholder="Name">
-
-        <!-- + button (adds a new card) -->
-        <button class="add-row poc-add-btn" type="button">+</button>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Email">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="(555) 555-5555">
+    <!-- Additional Point of Contact (with + button) -->
+    <div id="pocCardsContainer">
+      <div class="mini-card contact-card poc-card">
+        <div class="checklist-row integrated-plus">
+          <label>Additional Point of Contact – Name</label>
+          <input type="text" placeholder="Full name">
+          <button class="add-row poc-add-btn" type="button">+</button>
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Cell number">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Email address">
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- New Additional POC cards get appended here -->
-    <div id="additionalPOCContainer"></div>
-
-    <textarea placeholder="Notes about dealership contacts …"></textarea>
+  <!-- Dealership Contract / Salesforce Products -->
+  <div class="section-block">
+    <h2>Dealership Contract / Listed Salesforce Products</h2>
+    <textarea placeholder="List contracted products and confirm they match Salesforce."></textarea>
+  </div>
 </section>
 
       <!-- ========================================================= -->
