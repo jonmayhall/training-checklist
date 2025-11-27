@@ -1,279 +1,374 @@
-/* --------------- Training TABLES --------------- */
+// =======================================================
+// myKaarma Interactive Training Checklist – FULL JS (Safe)
+// =======================================================
 
-.section { 
-  margin-bottom: 40px; 
-}
+document.addEventListener("DOMContentLoaded", function () {
+  try {
+    initNav();
+    initDealershipNameBinding();
+    initClearPageButtons();
+    initClearAllButton();
+    initTableAddRowButtons();
+    initSupportTickets();
+    initAdditionalTrainersDynamicRow();
+    initPDFExport();
+  } catch (e) {
+    console.error("Initialization error:", e);
+  }
+});
 
-/* Table Card – no side padding so header touches edges */
-.table-container {
-  width: 100%;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  box-shadow: var(--shadow);
-  margin-bottom: 32px;
-  padding: 0;
-  box-sizing: border-box;
-}
+// ---------------- NAVIGATION ----------------
+function initNav() {
+  var navButtons = document.querySelectorAll("#sidebar-nav .nav-btn");
+  var sections = document.querySelectorAll(".page-section");
 
-.scroll-wrapper {
-  display: block;
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  padding-bottom: 4px;
-}
+  if (!navButtons.length || !sections.length) return;
 
-/* Table */
-.training-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 1000px;
-}
-.training-table th,
-.training-table td {
-  white-space: nowrap;
-  text-align: center;
-  font-size: 13px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 6px;
-}
+  function showSection(targetId) {
+    var targetSection = document.getElementById(targetId);
 
-/* Sticky header — LIGHT ORANGE */
-.training-table thead th {
-  background: var(--light-orange);
-  color: #fff;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
+    // Fallback for first page naming difference
+    if (!targetSection && targetId === "onsite-trainers") {
+      targetSection = document.getElementById("trainers-page");
+    }
+    if (!targetSection) return;
 
-/* Smaller white text for notes inside header cells */
-.training-table thead th .muted-note {
-  font-size: 0.8em;
-  color: #fff;
+    for (var i = 0; i < navButtons.length; i++) {
+      navButtons[i].classList.remove("active");
+    }
+    for (var j = 0; j < sections.length; j++) {
+      sections[j].classList.remove("active");
+    }
+    targetSection.classList.add("active");
+  }
+
+  for (var i = 0; i < navButtons.length; i++) {
+    (function (btn) {
+      btn.addEventListener("click", function () {
+        var target = btn.getAttribute("data-target");
+        showSection(target);
+        btn.classList.add("active");
+      });
+    })(navButtons[i]);
+  }
 }
 
-/* Sticky first column – for checklists (not Opcodes; overridden later) */
-.training-table th:first-child,
-.training-table td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 4;
-  width: 240px;
-  min-width: 240px;
-}
-.training-table thead th:first-child { 
-  text-align: center;
-}
-.training-table td:first-child {
-  background: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-.training-table td:first-child input[type="checkbox"] {
-  flex-shrink: 0;
-  transform: scale(1.05);
-  margin-right: 8px;
-}
-.training-table td:first-child input[type="text"] {
-  width: 95%;
-  padding: 7px 8px;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  text-align: left;
+// ---------------- DEALERSHIP NAME MIRROR ----------------
+function initDealershipNameBinding() {
+  var input = document.getElementById("dealershipNameInput");
+  var display = document.getElementById("dealershipNameDisplay");
+
+  if (!input || !display) return;
+
+  function updateDisplay() {
+    var val = (input.value || "").trim();
+    display.textContent = val || "Dealership Name";
+  }
+
+  input.addEventListener("input", updateDisplay);
+  updateDisplay();
 }
 
-/* Column widths (generic second col) */
-.training-table th:nth-child(2),
-.training-table td:nth-child(2) {
-  width: 185px;
-  min-width: 185px;
+// ---------------- CLEAR PAGE BUTTONS ----------------
+function initClearPageButtons() {
+  var clearButtons = document.querySelectorAll(".clear-page-btn");
+
+  for (var i = 0; i < clearButtons.length; i++) {
+    clearButtons[i].addEventListener("click", function () {
+      var section = this.closest(".page-section");
+      if (!section) return;
+      clearFieldsInElement(section);
+    });
+  }
 }
 
-/* Inputs/Selects inside table cells */
-.training-table input[type="text"],
-.training-table select {
-  width: 100%;
-  min-width: 130px;
-  box-sizing: border-box;
-  padding: 5px 5px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  text-align: center;
-}
-.training-table input[type="text"]:focus,
-.training-table select:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
-  outline: none;
-  background: #fff9f5;
+function clearFieldsInElement(root) {
+  if (!root) return;
+
+  var inputs = root.querySelectorAll("input");
+  var textareas = root.querySelectorAll("textarea");
+  var selects = root.querySelectorAll("select");
+
+  for (var i = 0; i < inputs.length; i++) {
+    var input = inputs[i];
+    if (input.type === "checkbox" || input.type === "radio") {
+      input.checked = false;
+    } else {
+      input.value = "";
+    }
+  }
+
+  for (var j = 0; j < textareas.length; j++) {
+    textareas[j].value = "";
+  }
+
+  for (var k = 0; k < selects.length; k++) {
+    selects[k].selectedIndex = 0;
+  }
 }
 
-/* Alternating rows */
-.training-table tr:nth-child(odd) { 
-  background: #fff; 
-}
-.training-table tr:nth-child(even) { 
-  background: #fafafa; 
+// ---------------- CLEAR ALL (SIDEBAR BUTTON) ----------------
+function initClearAllButton() {
+  var btn = document.getElementById("clearAllBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", function () {
+    var app = document.getElementById("app");
+    if (!app) return;
+
+    clearFieldsInElement(app);
+
+    var display = document.getElementById("dealershipNameDisplay");
+    if (display) display.textContent = "Dealership Name";
+  });
 }
 
-/* Table footer + "+" button  */
-.table-footer {
-  width: 100%;
-  background: #f5f5f5;
-  border-top: 1px solid var(--border);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-  box-sizing: border-box;
-}
-.table-footer .add-row {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: .2s;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
-}
-.table-footer .add-row:hover {
-  background: #ff8b42;
-  transform: scale(1.05);
+// ---------------- TABLE ADD-ROW BUTTONS ----------------
+function initTableAddRowButtons() {
+  var addButtons = document.querySelectorAll(".table-footer .add-row");
+
+  for (var i = 0; i < addButtons.length; i++) {
+    addButtons[i].addEventListener("click", function () {
+      var tableContainer = this.closest(".table-container");
+      if (!tableContainer) return;
+
+      var table = tableContainer.querySelector("table");
+      if (!table) return;
+
+      var tbody = table.querySelector("tbody");
+      if (!tbody) return;
+
+      var lastRow = tbody.querySelector("tr:last-child");
+      if (!lastRow) return;
+
+      var newRow = lastRow.cloneNode(true);
+
+      var inputs = newRow.querySelectorAll("input");
+      var selects = newRow.querySelectorAll("select");
+      var textareas = newRow.querySelectorAll("textarea");
+
+      for (var a = 0; a < inputs.length; a++) {
+        if (inputs[a].type === "checkbox" || inputs[a].type === "radio") {
+          inputs[a].checked = false;
+        } else {
+          inputs[a].value = "";
+        }
+      }
+
+      for (var b = 0; b < selects.length; b++) {
+        selects[b].selectedIndex = 0;
+      }
+
+      for (var c = 0; c < textareas.length; c++) {
+        textareas[c].value = "";
+      }
+
+      tbody.appendChild(newRow);
+    });
+  }
 }
 
-/* --------------- OPCODES PAGE --------------- */
+// ---------------- SUPPORT TICKETS ----------------
+function initSupportTickets() {
+  var openContainer = document.getElementById("openTicketsContainer");
+  var tierTwoContainer = document.getElementById("tierTwoTicketsContainer");
+  var closedResolvedContainer = document.getElementById("closedResolvedTicketsContainer");
+  var closedFeatureContainer = document.getElementById("closedFeatureTicketsContainer");
 
-/* Turn off sticky/flex first column only for Opcodes section */
-#opcodes-pricing .training-table th:first-child,
-#opcodes-pricing .training-table td:first-child {
-  position: static;
-  left: auto;
-  z-index: 1;
-  width: 60px;
-  min-width: 60px;
-}
-#opcodes-pricing .training-table td:first-child {
-  display: table-cell;
-  padding: 6px 6px;
-  background: inherit;
+  if (!openContainer || !tierTwoContainer || !closedResolvedContainer || !closedFeatureContainer) {
+    return;
+  }
+
+  var templateGroup = openContainer.querySelector(".ticket-group");
+  if (!templateGroup) return;
+
+  templateGroup.setAttribute("data-permanent", "true");
+
+  var addBtn = templateGroup.querySelector(".add-row");
+
+  wireStatusListeners(templateGroup, true);
+
+  if (addBtn) {
+    addBtn.addEventListener("click", function () {
+      var newGroup = templateGroup.cloneNode(true);
+      newGroup.setAttribute("data-permanent", "false");
+
+      var newAddBtn = newGroup.querySelector(".add-row");
+      if (newAddBtn) {
+        newAddBtn.parentNode.removeChild(newAddBtn);
+      }
+
+      var integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
+      if (integratedRow) {
+        integratedRow.classList.remove("integrated-plus");
+      }
+
+      clearTicketGroupFields(newGroup);
+
+      var statusSelect = newGroup.querySelector(".ticket-status-select");
+      if (statusSelect) {
+        statusSelect.value = "Open";
+      }
+
+      openContainer.appendChild(newGroup);
+
+      wireStatusListeners(newGroup, false);
+    });
+  }
+
+  function clearTicketGroupFields(group) {
+    var inputs = group.querySelectorAll('input[type="text"], input[type="date"], textarea');
+    var selects = group.querySelectorAll("select");
+
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].value = "";
+    }
+    for (var j = 0; j < selects.length; j++) {
+      selects[j].selectedIndex = 0;
+    }
+  }
+
+  function resetTemplateGroup(group) {
+    clearTicketGroupFields(group);
+    var statusSelect = group.querySelector(".ticket-status-select");
+    if (statusSelect) {
+      statusSelect.value = "Open";
+    }
+  }
+
+  function wireStatusListeners(group, isPermanent) {
+    var statusSelects = group.querySelectorAll(".ticket-status-select");
+
+    for (var i = 0; i < statusSelects.length; i++) {
+      (function (select) {
+        select.addEventListener("change", function () {
+          var value = select.value;
+          var card = select.closest(".ticket-group");
+          if (!card) return;
+
+          if (isPermanent) {
+            if (value === "Open") return;
+
+            var newGroup = card.cloneNode(true);
+            newGroup.setAttribute("data-permanent", "false");
+
+            var newAddBtn = newGroup.querySelector(".add-row");
+            if (newAddBtn) {
+              newAddBtn.parentNode.removeChild(newAddBtn);
+            }
+
+            var integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
+            if (integratedRow) {
+              integratedRow.classList.remove("integrated-plus");
+            }
+
+            wireStatusListeners(newGroup, false);
+
+            if (value === "Open") {
+              openContainer.appendChild(newGroup);
+            } else if (value === "Tier Two") {
+              tierTwoContainer.appendChild(newGroup);
+            } else if (value === "Closed - Resolved") {
+              closedResolvedContainer.appendChild(newGroup);
+            } else if (
+              value === "Closed – Feature Not Supported" ||
+              value === "Closed - Feature Not Supported"
+            ) {
+              closedFeatureContainer.appendChild(newGroup);
+            } else {
+              openContainer.appendChild(newGroup);
+            }
+
+            resetTemplateGroup(card);
+          } else {
+            if (value === "Open") {
+              openContainer.appendChild(card);
+            } else if (value === "Tier Two") {
+              tierTwoContainer.appendChild(card);
+            } else if (value === "Closed - Resolved") {
+              closedResolvedContainer.appendChild(card);
+            } else if (
+              value === "Closed – Feature Not Supported" ||
+              value === "Closed - Feature Not Supported"
+            ) {
+              closedFeatureContainer.appendChild(card);
+            }
+          }
+        });
+      })(statusSelects[i]);
+    }
+  }
 }
 
-/* Column sizing based on new headers:
-   1 Updated
-   2 Opcode
-   3 Opcode Duration
-   4 Labor Price
-   5 Flat Rate Hours
-   6 Parts Price
-   7 Pay Type
-   8 Order #
-   9 Add to Online Scheduler
-   10 Add to Dealer App Scheduler
-   11 Add to Mobile Service
-   12 Add to ServiceCart
-*/
+// ---------------- ADDITIONAL TRAINERS DYNAMIC ROW ----------------
+function initAdditionalTrainersDynamicRow() {
+  // First try explicit class, otherwise fall back to label text search.
+  var row = document.querySelector(".additional-trainers-row");
 
-/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
-#opcodes-pricing .training-table th:nth-child(2),
-#opcodes-pricing .training-table td:nth-child(2),
-#opcodes-pricing .training-table th:nth-child(3),
-#opcodes-pricing .training-table td:nth-child(3),
-#opcodes-pricing .training-table th:nth-child(4),
-#opcodes-pricing .training-table td:nth-child(4),
-#opcodes-pricing .training-table th:nth-child(5),
-#opcodes-pricing .training-table td:nth-child(5),
-#opcodes-pricing .training-table th:nth-child(7),
-#opcodes-pricing .training-table td:nth-child(7),
-#opcodes-pricing .training-table th:nth-child(8),
-#opcodes-pricing .training-table td:nth-child(8) {
-  width: 110px;
-  min-width: 100px;
-}
+  if (!row) {
+    var allRows = document.querySelectorAll("#trainers-page .checklist-row");
+    for (var i = 0; i < allRows.length; i++) {
+      var label = allRows[i].querySelector("label");
+      if (label && label.textContent.trim().indexOf("Additional Trainers") === 0) {
+        row = allRows[i];
+        break;
+      }
+    }
+  }
 
-/* Parts Price column – smaller so fields fully fit */
-#opcodes-pricing .training-table th:nth-child(6),
-#opcodes-pricing .training-table td:nth-child(6) {
-  width: 80px;
-  max-width: 80px;
-  min-width: 60px;
-}
-#opcodes-pricing .training-table td:nth-child(6) input[type="text"] {
-  min-width: 0;
-}
+  if (!row) return;
 
-/* Checkboxes for last 4 columns */
-#opcodes-pricing .training-table th:nth-child(9),
-#opcodes-pricing .training-table td:nth-child(9),
-#opcodes-pricing .training-table th:nth-child(10),
-#opcodes-pricing .training-table td:nth-child(10),
-#opcodes-pricing .training-table th:nth-child(11),
-#opcodes-pricing .training-table td:nth-child(11),
-#opcodes-pricing .training-table th:nth-child(12),
-#opcodes-pricing .training-table td:nth-child(12) {
-  width: 90px;
-  min-width: 80px;
-}
-#opcodes-pricing .training-table td:nth-child(9) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(10) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
-  transform: scale(1.1);
+  var addBtn = row.querySelector(".add-row");
+  if (!addBtn) return;
+
+  addBtn.addEventListener("click", function () {
+    var section = row.closest(".section-block");
+    if (!section) return;
+
+    var newRow = row.cloneNode(true);
+
+    var clonedBtn = newRow.querySelector(".add-row");
+    if (clonedBtn) {
+      clonedBtn.parentNode.removeChild(clonedBtn);
+    }
+
+    newRow.classList.remove("integrated-plus");
+
+    var input = newRow.querySelector("input[type='text']");
+    if (input) {
+      input.value = "";
+      input.id = "";
+      input.name = "";
+    }
+
+    newRow.id = "";
+
+    section.insertBefore(newRow, row.nextSibling);
+  });
 }
 
-/* --------------- FLOATING PDF BUTTON (summary page) --------------- */
-#training-summary .floating-btn {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  position: absolute;
-  top: 18px;
-  right: 24px;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-#training-summary .floating-btn:hover {
-  background: #ff8b42;
-}
+// ---------------- PDF EXPORT ----------------
+function initPDFExport() {
+  var btn = document.getElementById("savePDF");
+  if (!btn) return;
 
-/* --------------- Muted note --------------- */
-.muted-note {
-  font-size: 0.9em;
-  color: #666;
-  font-style: italic !important;
-}
+  btn.addEventListener("click", function () {
+    if (!window.jspdf) {
+      alert("PDF library not loaded.");
+      return;
+    }
 
-/* --------------- RESPONSIVE --------------- */
-@media (max-width: 900px) {
-  #sidebar { width: 190px; }
-  main { margin-left: 190px; padding: 20px; }
-}
-@media (max-width: 600px) {
-  #sidebar { display: none; }
-  main { margin-left: 0; padding: 16px; }
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF("p", "pt", "a4");
+
+    doc.html(document.body, {
+      callback: function (docInst) {
+        docInst.save("myKaarma_Training_Checklist.pdf");
+      },
+      x: 10,
+      y: 10,
+      margin: [10, 10, 10, 10],
+      autoPaging: "text"
+    });
+  });
 }
