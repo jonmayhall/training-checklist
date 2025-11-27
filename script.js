@@ -5,7 +5,8 @@
 // - Clear page / Clear all
 // - Add row for all tables
 // - Support Tickets logic (permanent template card + moves)
-// - Additional Contacts (Additional POC cards)
+// - Additional Trainers (+ button clone rows)
+// - Additional POC cards (+ button creates new card)
 // - Simple PDF export for all pages
 // =======================================================
 
@@ -16,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initClearAllButton();
   initTableAddRowButtons();
   initSupportTickets();
-  initAdditionalContacts();   // handles Additional Point of Contact cards
+  initAdditionalTrainers();
+  initAdditionalPOC();
   initPDFExport();
 });
 
@@ -39,9 +41,11 @@ function initNav() {
 
       if (!targetSection) return;
 
+      // Active button
       navButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
+      // Active section
       sections.forEach((sec) => sec.classList.remove("active"));
       targetSection.classList.add("active");
     });
@@ -112,6 +116,7 @@ function initClearAllButton() {
     if (!app) return;
     clearFieldsInElement(app);
 
+    // Reset dealership display text after clearing
     const display = document.getElementById("dealershipNameDisplay");
     if (display) {
       display.textContent = "Dealership Name";
@@ -139,6 +144,7 @@ function initTableAddRowButtons() {
 
       const newRow = lastRow.cloneNode(true);
 
+      // Clear values in new row
       const inputs = newRow.querySelectorAll("input");
       const selects = newRow.querySelectorAll("select");
       const textareas = newRow.querySelectorAll("textarea");
@@ -178,37 +184,49 @@ function initSupportTickets() {
   const templateGroup = openContainer.querySelector(".ticket-group");
   if (!templateGroup) return;
 
+  // Mark this as the permanent template card
   templateGroup.dataset.permanent = "true";
 
   const addBtn = templateGroup.querySelector(".add-row");
   if (!addBtn) return;
 
+  // Wire up status select for the permanent template (special behavior)
   wireStatusListeners(templateGroup, true);
 
+  // "+" button: create a brand new Open card under the template
   addBtn.addEventListener("click", () => {
     const newGroup = templateGroup.cloneNode(true);
     newGroup.dataset.permanent = "false";
 
+    // Remove the + button from the cloned card
     const newAddBtn = newGroup.querySelector(".add-row");
     if (newAddBtn) {
       newAddBtn.remove();
     }
 
+    // Remove integrated-plus layout so ticket number field is a normal full-width text box
     const integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
     if (integratedRow) {
       integratedRow.classList.remove("integrated-plus");
     }
 
+    // Clear all fields in the new card
     clearTicketGroupFields(newGroup);
 
+    // Ensure status is Open
     const statusSelect = newGroup.querySelector(".ticket-status-select");
     if (statusSelect) {
       statusSelect.value = "Open";
     }
 
+    // Append directly under the template in Open Tickets
     openContainer.appendChild(newGroup);
+
+    // Wire up status change for the new (movable) card
     wireStatusListeners(newGroup, false);
   });
+
+  // --- helpers ---
 
   function clearTicketGroupFields(group) {
     const inputs = group.querySelectorAll('input[type="text"], input[type="date"], textarea');
@@ -231,6 +249,11 @@ function initSupportTickets() {
     }
   }
 
+  /**
+   * wireStatusListeners
+   * @param {HTMLElement} group - the .ticket-group card
+   * @param {boolean} isPermanent - true for the master template that should never move
+   */
   function wireStatusListeners(group, isPermanent) {
     const statusSelects = group.querySelectorAll(".ticket-status-select");
     statusSelects.forEach((select) => {
@@ -239,12 +262,19 @@ function initSupportTickets() {
         const card = select.closest(".ticket-group");
         if (!card) return;
 
+        // Permanent template:
+        // When status changes away from Open:
+        //  - clone current values into a new movable card
+        //  - send that card to the right container
+        //  - reset the template back to blank + Open
         if (isPermanent) {
           if (value === "Open") return;
 
+          // Clone the filled-out template
           const newGroup = card.cloneNode(true);
           newGroup.dataset.permanent = "false";
 
+          // Remove + button & integrated-plus layout from the new card
           const newAddBtn = newGroup.querySelector(".add-row");
           if (newAddBtn) {
             newAddBtn.remove();
@@ -254,8 +284,10 @@ function initSupportTickets() {
             integratedRow.classList.remove("integrated-plus");
           }
 
+          // This new card keeps all field values, including the chosen status
           wireStatusListeners(newGroup, false);
 
+          // Place new card into the appropriate container
           if (value === "Open") {
             openContainer.appendChild(newGroup);
           } else if (value === "Tier Two") {
@@ -268,13 +300,16 @@ function initSupportTickets() {
           ) {
             closedFeatureContainer.appendChild(newGroup);
           } else {
+            // Fallback: keep it under Open if some new value shows up
             openContainer.appendChild(newGroup);
           }
 
+          // Reset the permanent template to blank + Open
           resetTemplateGroup(card);
           return;
         }
 
+        // Movable cards: just move them between sections based on status
         if (value === "Open") {
           openContainer.appendChild(card);
         } else if (value === "Tier Two") {
@@ -292,39 +327,85 @@ function initSupportTickets() {
   }
 }
 
-// ---------------- ADDITIONAL CONTACTS (Additional POC) ----------------
-function initAdditionalContacts() {
-  const container = document.getElementById("additionalPocCardsContainer");
-  if (!container) return;
+// ---------------- ADDITIONAL TRAINERS (+) ----------------
+function initAdditionalTrainers() {
+  const row = document.getElementById("additionalTrainersRow");
+  const input = document.getElementById("additionalTrainersInput");
+  const btn = document.getElementById("addAdditionalTrainerBtn");
+  const container = document.getElementById("additionalTrainersContainer");
 
-  const template = container.querySelector(".additional-poc-template");
-  if (!template) return;
+  if (!row || !input || !btn || !container) return;
 
-  const addBtn = template.querySelector(".add-additional-poc");
+  btn.addEventListener("click", () => {
+    const value = input.value.trim();
+    if (!value) return;
+
+    // Create a new simple checklist-row under the Trainers card
+    const newRow = document.createElement("div");
+    newRow.className = "checklist-row indent-sub";
+    const label = document.createElement("label");
+    label.textContent = "Additional Trainer";
+    const txt = document.createElement("input");
+    txt.type = "text";
+    txt.value = value;
+
+    newRow.appendChild(label);
+    newRow.appendChild(txt);
+    container.appendChild(newRow);
+
+    // Clear original input
+    input.value = "";
+  });
+}
+
+// ---------------- ADDITIONAL POC CARDS (+) ----------------
+function initAdditionalPOC() {
+  const template = document.getElementById("additionalPOCTemplate");
+  const container = document.getElementById("additionalPOCContainer");
+  if (!template || !container) return;
+
+  const addBtn = template.querySelector(".poc-add-btn");
   if (!addBtn) return;
 
   addBtn.addEventListener("click", () => {
+    const nameInput = template.querySelector(".poc-name-input");
+    const emailInput = template.querySelector(".poc-email-input");
+    const cellInput = template.querySelector(".poc-cell-input");
+
+    const nameVal = nameInput ? nameInput.value.trim() : "";
+    const emailVal = emailInput ? emailInput.value.trim() : "";
+    const cellVal = cellInput ? cellInput.value.trim() : "";
+
+    if (!nameVal && !emailVal && !cellVal) {
+      // no data – don't add an empty card
+      return;
+    }
+
+    // Clone the whole mini-card
     const newCard = template.cloneNode(true);
+    newCard.removeAttribute("id");
 
-    const cloneAddBtn = newCard.querySelector(".add-additional-poc");
-    if (cloneAddBtn) {
-      cloneAddBtn.remove();
+    // Remove the + button from cloned card (no nested add buttons)
+    const newAddBtn = newCard.querySelector(".poc-add-btn");
+    if (newAddBtn) {
+      newAddBtn.remove();
     }
 
-    const firstRow = newCard.querySelector(".checklist-row.integrated-plus");
-    if (firstRow) {
-      firstRow.classList.remove("integrated-plus");
-    }
+    // Fill the cloned card with current values
+    const newName = newCard.querySelector(".poc-name-input");
+    const newEmail = newCard.querySelector(".poc-email-input");
+    const newCell = newCard.querySelector(".poc-cell-input");
 
-    newCard.querySelectorAll("input, textarea, select").forEach((el) => {
-      if (el.type === "checkbox" || el.type === "radio") {
-        el.checked = false;
-      } else {
-        el.value = "";
-      }
-    });
+    if (newName) newName.value = nameVal;
+    if (newEmail) newEmail.value = emailVal;
+    if (newCell) newCell.value = cellVal;
 
     container.appendChild(newCard);
+
+    // Clear template fields for the next POC
+    if (nameInput) nameInput.value = "";
+    if (emailInput) emailInput.value = "";
+    if (cellInput) cellInput.value = "";
   });
 }
 
