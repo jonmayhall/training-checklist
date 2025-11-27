@@ -24,21 +24,65 @@ function initNav() {
 
   if (!navButtons.length || !sections.length) return;
 
-  function showSection(targetId) {
-    var targetSection = document.getElementById(targetId);
+  function findSectionForTarget(targetId) {
+    if (!targetId) return null;
 
-    // Fallback for first page naming difference
-    if (!targetSection && targetId === "onsite-trainers") {
-      targetSection = document.getElementById("trainers-page");
+    // 1) Direct match
+    var sec = document.getElementById(targetId);
+    if (sec) return sec;
+
+    // 2) Known aliases / fallbacks
+    if (targetId === "onsite-trainers") {
+      sec = document.getElementById("trainers-page");
+      if (sec) return sec;
     }
+
+    // Page 2 common mismatch: dealership-info vs dealership-info-page
+    if (targetId === "dealership-info") {
+      sec = document.getElementById("dealership-info-page");
+      if (sec) return sec;
+    }
+    if (targetId === "dealership-info-page") {
+      sec = document.getElementById("dealership-info");
+      if (sec) return sec;
+    }
+
+    // Page 3: pretraining vs pretraining-page (in case we ever mismatched)
+    if (targetId === "pretraining") {
+      sec = document.getElementById("pretraining-page");
+      if (sec) return sec;
+    }
+    if (targetId === "pretraining-page") {
+      sec = document.getElementById("pretraining");
+      if (sec) return sec;
+    }
+
+    // Page 4: monday-visit vs monday-visit-page (future proof)
+    if (targetId === "monday-visit") {
+      sec = document.getElementById("monday-visit-page");
+      if (sec) return sec;
+    }
+    if (targetId === "monday-visit-page") {
+      sec = document.getElementById("monday-visit");
+      if (sec) return sec;
+    }
+
+    return null;
+  }
+
+  function showSection(targetId) {
+    var targetSection = findSectionForTarget(targetId);
     if (!targetSection) return;
 
+    // Deactivate everything
     for (var i = 0; i < navButtons.length; i++) {
       navButtons[i].classList.remove("active");
     }
     for (var j = 0; j < sections.length; j++) {
       sections[j].classList.remove("active");
     }
+
+    // Activate the target section
     targetSection.classList.add("active");
   }
 
@@ -302,7 +346,6 @@ function initSupportTickets() {
 
 // ---------------- ADDITIONAL TRAINERS DYNAMIC ROW ----------------
 function initAdditionalTrainersDynamicRow() {
-  // First try explicit class, otherwise fall back to label text search.
   var row = document.querySelector(".additional-trainers-row");
 
   if (!row) {
