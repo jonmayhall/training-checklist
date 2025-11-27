@@ -4,6 +4,7 @@
 // - Dealership name mirror
 // - Clear page / Clear all
 // - Add row for all tables
+// - Additional Trainers row add
 // - Additional POC mini-card add
 // - Support Tickets logic (permanent template card + moves)
 // - Simple PDF export for all pages
@@ -15,7 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initClearPageButtons();
   initClearAllButton();
   initTableAddRowButtons();
-  initAdditionalPocCardAdd();     // NEW
+  initAdditionalTrainersAdd();    // NEW
+  initAdditionalPocCardAdd();
   initSupportTickets();
   initPDFExport();
 });
@@ -168,6 +170,34 @@ function initTableAddRowButtons() {
   });
 }
 
+// ---------------- ADDITIONAL TRAINERS ADD ----------------
+function initAdditionalTrainersAdd() {
+  const baseRow = document.querySelector(".additional-trainers-row");
+  const container = document.getElementById("additionalTrainersContainer");
+
+  if (!baseRow || !container) return;
+
+  const addBtn = baseRow.querySelector(".add-row");
+  if (!addBtn) return;
+
+  addBtn.addEventListener("click", () => {
+    const newRow = baseRow.cloneNode(true);
+
+    // Remove the + button on cloned rows
+    const clonedBtn = newRow.querySelector(".add-row");
+    if (clonedBtn) clonedBtn.remove();
+
+    // Remove integrated-plus so the textbox has rounded right side like the others
+    newRow.classList.remove("integrated-plus");
+
+    // Clear the text input
+    const input = newRow.querySelector("input[type='text']");
+    if (input) input.value = "";
+
+    container.appendChild(newRow);
+  });
+}
+
 // ---------------- ADDITIONAL POC MINI-CARD ADD ----------------
 function initAdditionalPocCardAdd() {
   const container = document.getElementById("additionalPocContainer");
@@ -301,11 +331,7 @@ function initSupportTickets() {
         const card = select.closest(".ticket-group");
         if (!card) return;
 
-        // Permanent template:
-        // When status changes away from Open:
-        //  - clone current values into a new movable card
-        //  - send that card to the right container
-        //  - reset the template back to blank + Open
+        // Permanent template behavior
         if (isPermanent) {
           if (value === "Open") return;
 
@@ -381,7 +407,6 @@ function initPDFExport() {
     const doc = new jsPDF("p", "pt", "a4");
 
     // Simple approach: render the main content (all pages) into the PDF.
-    // This won't be pixel perfect but will capture all sections for now.
     doc.html(document.body, {
       callback: function (doc) {
         doc.save("myKaarma_Training_Checklist.pdf");
@@ -389,7 +414,7 @@ function initPDFExport() {
       x: 10,
       y: 10,
       margin: [10, 10, 10, 10],
-      autoPaging: "text"
+      autoPaging: "text",
     });
   });
 }
