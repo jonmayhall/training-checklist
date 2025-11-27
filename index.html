@@ -72,313 +72,315 @@
     <!-- MAIN CONTENT -->
     <main>
 
-      <!-- ========================================================= -->
-      <!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
-      <!-- ========================================================= -->
-      <section id="trainers-page" class="page-section active">
-        <h1>Training Leads &amp; Contacts</h1>
-        <p class="page-subtitle">
-          Capture trainer assignments and core dealership contacts for this onsite.
-        </p>
+     <!-- ========================================================= -->
+<!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
+<!-- ========================================================= -->
+<section id="onsite-trainers" class="page-section active">
+  <h1>Training Leads &amp; Contacts</h1>
+  <p class="page-subtitle">
+    Capture trainer assignments and core dealership contacts for this onsite.
+  </p>
 
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- TRAINERS CARD -->
-        <div class="section-block">
-          <h2>Trainers</h2>
+  <!-- TRAINERS CARD -->
+  <div class="section-block">
+    <h2>Trainers</h2>
 
-          <!-- Lead Trainer -->
-          <div class="checklist-row">
-            <label>Lead Trainer</label>
-            <select id="leadTrainer">
-              <option></option>
+    <!-- Lead Trainer -->
+    <div class="checklist-row">
+      <label>Lead Trainer</label>
+      <select id="leadTrainer">
+        <option></option>
 
-              <!-- Group 1 -->
-              <option disabled>──────────</option>
-              <option>Brian Button</option>
-              <option>Christopher Eskew</option>
-              <option>Dana Barry</option>
+        <!-- Group 1 -->
+        <option disabled>──────────</option>
+        <option>Brian Button</option>
+        <option>Christopher Eskew</option>
+        <option>Dana Barry</option>
 
-              <!-- Group 2 -->
-              <option disabled>──────────</option>
-              <option>Adam Jeffords</option>
-              <option>Alec Parker</option>
-              <option>Eliud Garcia</option>
-              <option>Jackson Geraghty</option>
-              <option>Joel Zavaleta</option>
-              <option>Kyle Leavitt</option>
-              <option>Lauren Ramos</option>
-              <option>Miles Krasic</option>
-              <option>Terry Hart</option>
+        <!-- Group 2 -->
+        <option disabled>──────────</option>
+        <option>Adam Jeffords</option>
+        <option>Alec Parker</option>
+        <option>Eliud Garcia</option>
+        <option>Jackson Geraghty</option>
+        <option>Joel Zavaleta</option>
+        <option>Kyle Leavitt</option>
+        <option>Lauren Ramos</option>
+        <option>Miles Krasic</option>
+        <option>Terry Hart</option>
 
-              <!-- Group 3 -->
-              <option disabled>──────────</option>
-              <option>Anthony Carbone</option>
-              <option>Brett Smith</option>
-              <option>Clyde Chapman</option>
-              <option>Dennitza Fernandez</option>
-              <option>Kevin Mullinax</option>
-              <option>Sharon Rusta</option>
-            </select>
-          </div>
+        <!-- Group 3 -->
+        <option disabled>──────────</option>
+        <option>Anthony Carbone</option>
+        <option>Brett Smith</option>
+        <option>Clyde Chapman</option>
+        <option>Dennitza Fernandez</option>
+        <option>Kevin Mullinax</option>
+        <option>Sharon Rusta</option>
+      </select>
+    </div>
 
-          <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
-            <label for="additionalTrainers">Additional trainers</label>
-            <input type="text" id="additionalTrainers" name="additionalTrainers">
-            <button type="button" class="add-row">+</button>
-          </div>
+    <!-- Additional trainers (integrated +) -->
+    <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
+      <label for="additionalTrainers">Additional trainers</label>
+      <input type="text" id="additionalTrainers" name="additionalTrainers">
+      <button type="button" class="add-row">+</button>
+    </div>
 
-          <!-- Container for extra trainer rows -->
-          <div id="additionalTrainersContainer"></div>
+    <!-- Container for extra trainer rows -->
+    <div id="additionalTrainersContainer"></div>
 
-          <!-- Training Type -->
-          <div class="checklist-row">
-            <label>Training Type</label>
-            <select id="trainingType">
-              <option></option>
-              <option>Onsite</option>
-              <option>Retraining</option>
-              <option>Paid Additional Training</option>
-            </select>
-          </div>
+    <!-- Training Type -->
+    <div class="checklist-row">
+      <label>Training Type</label>
+      <select id="trainingType">
+        <option></option>
+        <option>Onsite</option>
+        <option>Retraining</option>
+        <option>Paid Additional Training</option>
+      </select>
+    </div>
 
-          <!-- Training Start Date -->
-          <div class="checklist-row">
-            <label>Training Start Date</label>
-            <input id="trainingStartDate" type="date">
-          </div>
+    <!-- Training Start Date -->
+    <div class="checklist-row">
+      <label>Training Start Date</label>
+      <input id="trainingStartDate" type="date">
+    </div>
 
-          <!-- Training End Date -->
-          <div class="checklist-row">
-            <label>Training End Date</label>
-            <input id="trainingEndDate" type="date">
-          </div>
+    <!-- Training End Date -->
+    <div class="checklist-row">
+      <label>Training End Date</label>
+      <input id="trainingEndDate" type="date">
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- PAGE 2: DEALERSHIP CONTACTS                               -->
+<!-- ========================================================= -->
+<section id="dealership-info" class="page-section">
+  <button type="button" class="clear-page-btn">Reset This Page</button>
+
+  <h1>Dealership Contacts</h1>
+  <p class="page-subtitle">
+    Capture primary dealership contacts for coordination before, during, and after training.
+  </p>
+
+  <div class="section-block">
+    <h2>Primary Contacts</h2>
+
+    <!-- Service Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Service Manager – Name</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
+    </div>
+
+    <!-- Parts Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Parts Manager – Name</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
+    </div>
+
+    <!-- General Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>General Manager – Name</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
+    </div>
+
+    <!-- Additional Points of Contact -->
+    <div id="additionalPocContainer">
+      <div class="mini-card contact-card additional-poc-card">
+        <div class="checklist-row integrated-plus">
+          <label>Additional Point of Contact</label>
+          <input type="text">
+          <button type="button" class="add-row additional-poc-add">+</button>
         </div>
-      </section>
-
-      <!-- ========================================================= -->
-      <!-- PAGE 2: DEALERSHIP CONTACTS (Dealership Info)             -->
-      <!-- ========================================================= -->
-      <section id="dealership-info" class="page-section">
-        <button type="button" class="clear-page-btn">Reset This Page</button>
-
-        <h1>Dealership Contacts</h1>
-        <p class="page-subtitle">
-          Capture primary dealership contacts for coordination before, during, and after training.
-        </p>
-
-        <div class="section-block">
-          <h2>Primary Contacts</h2>
-
-          <!-- Service Manager -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>Service Manager – Name</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email">
-            </div>
-          </div>
-
-          <!-- Parts Manager -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>Parts Manager – Name</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email">
-            </div>
-          </div>
-
-          <!-- General Manager -->
-          <div class="mini-card contact-card">
-            <div class="checklist-row">
-              <label>General Manager – Name</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Cell</label>
-              <input type="text">
-            </div>
-            <div class="checklist-row indent-sub">
-              <label>Email</label>
-              <input type="email">
-            </div>
-          </div>
-
-          <!-- Additional Points of Contact -->
-          <div id="additionalPocContainer">
-            <div class="mini-card contact-card additional-poc-card">
-              <div class="checklist-row integrated-plus">
-                <label>Additional Point of Contact</label>
-                <input type="text">
-                <button type="button" class="add-row additional-poc-add">+</button>
-              </div>
-              <div class="checklist-row indent-sub">
-                <label>Cell</label>
-                <input type="text">
-              </div>
-              <div class="checklist-row indent-sub">
-                <label>Email</label>
-                <input type="email">
-              </div>
-            </div>
-          </div>
-
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
         </div>
-      </section>
-
-      <!-- ========================================================= -->
-      <!-- PAGE 3: PRE-TRAINING                                     -->
-      <!-- ========================================================= -->
-      <section id="pretraining" class="page-section">
-        <h1>Pre-Training</h1>
-        <p class="page-subtitle">Verify dealership readiness prior to onsite visit.</p>
-
-        <button class="clear-page-btn" type="button">Reset This Page</button>
-
-        <!-- SETTINGS & WORKFLOW CARD -->
-        <div class="section-block">
-          <h2>Settings & Workflow</h2>
-
-          <div class="checklist-row">
-            <label>Has the dealership reviewed the Settings tab?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Have workflows been updated and verified?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Is the MPI configured correctly?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
         </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <!-- MCI CARD -->
-        <div class="section-block">
-          <h2>MCI</h2>
+<!-- ========================================================= -->
+<!-- PAGE 3: PRE-TRAINING                                      -->
+<!-- ========================================================= -->
+<section id="pretraining" class="page-section">
+  <h1>Pre-Training</h1>
+  <p class="page-subtitle">Verify dealership readiness prior to onsite visit.</p>
 
-          <div class="checklist-row">
-            <label>If purchased, does the dealership plan on using MCI?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-          <div class="checklist-row">
-            <label>Who is involved in the MCI process?</label>
-            <input type="text" placeholder="Enter names / roles">
-          </div>
-        </div>
+  <!-- SETTINGS & WORKFLOW CARD -->
+  <div class="section-block">
+    <h2>Settings &amp; Workflow</h2>
 
-        <!-- SERVICECART CARD -->
-        <div class="section-block">
-          <h2>ServiceCart</h2>
+    <div class="checklist-row">
+      <label>Has the dealership reviewed the Settings tab?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
 
-          <div class="checklist-row">
-            <label>Are the correct opcodes added to the MPI to correspond with the inspection?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+    <div class="checklist-row">
+      <label>Have workflows been updated and verified?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
 
-          <div class="checklist-row">
-            <label>How many workflows is the dealership using?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+    <div class="checklist-row">
+      <label>Is the MPI configured correctly?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+  </div>
 
-          <div class="checklist-row indent-sub">
-            <label>Have you reviewed them?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+  <!-- MCI CARD -->
+  <div class="section-block">
+    <h2>MCI</h2>
 
-          <div class="checklist-row">
-            <label>How many MPIs is the dealership using?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+    <div class="checklist-row">
+      <label>If purchased, does the dealership plan on using MCI?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
 
-          <div class="checklist-row indent-sub">
-            <label>Have you reviewed them?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+    <div class="checklist-row">
+      <label>Who is involved in the MCI process?</label>
+      <input type="text">
+    </div>
+  </div>
 
-          <div class="checklist-row">
-            <label>Do all users have the appropriate access?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
+  <!-- ServiceCart CARD -->
+  <div class="section-block">
+    <h2>ServiceCart</h2>
 
-          <div class="checklist-row">
-            <label>Is ShopChat working correctly?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-        </div>
-      </section>
+    <div class="checklist-row">
+      <label>Are the correct opcodes added to the MPI to correspond with the inspection?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>How many workflows is the dealership using?</label>
+      <select>
+        <option></option>
+        <option>1</option>
+        <option>2</option>
+        <option>3+</option>
+        <option>Unsure</option>
+      </select>
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Have you reviewed them?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>How many MPIs is the dealership using?</label>
+      <select>
+        <option></option>
+        <option>1</option>
+        <option>2</option>
+        <option>3+</option>
+        <option>Unsure</option>
+      </select>
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Have you reviewed them?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Do all users have the appropriate access?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Is ShopChat working correctly?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+  </div>
+</section>
 
             <!-- ========================================================= -->
       <!-- PAGE 4: MONDAY VISIT                                      -->
