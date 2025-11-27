@@ -358,39 +358,44 @@ main {
   padding-left: 60px !important;
 }
 
-/* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
-/* Thin, continuous orange outline + softer internal spacing */
+/* --------------- MINI-CARDS (Contacts & Champions/Blockers & Thin Orange Sections) --------------- */
 
 .mini-card {
-  border: 1px solid var(--orange);          /* thinner border */
+  border: 1px solid var(--orange);        /* thinner, continuous border */
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 16px 0;
-  padding: 6px 10px 8px;                    /* a bit of breathing room all around */
-  box-sizing: border-box;
+  margin: 14px 0;
+  padding: 4px 0 8px;
 }
 
 /* rows inside mini-card */
 .mini-card .checklist-row {
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
-  padding-left: 40px;                        /* keep alignment with main layout */
-  background: #fff !important;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 0;
+  padding-bottom: 8px;
+  padding-left: 40px;                      /* align with other rows */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 
-/* Soften the right side for text boxes & dropdowns inside orange cards */
+/* ensure no tint */
+.mini-card .checklist-row {
+  background: #fff !important;
+}
+
+/* inputs / selects inside thin orange borders – give them a little breathing room on the right */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="date"],
 .mini-card .checklist-row select {
-  margin-right: 8px;                         /* slight gap so they don't hug the edge */
+  margin-right: 8px;                       /* avoid feeling crowded on the right edge */
+}
+
+/* indented rows inside mini-cards should line up with other indented rows */
+.mini-card .checklist-row.indent-sub {
+  padding-left: 60px !important;
 }
 
 /* semantic aliases */
@@ -621,6 +626,25 @@ main {
   margin-bottom: 40px; 
 }
 
+/* Table section headers (above training tables) */
+.section-header {
+  background: var(--orange);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  margin-bottom: 0;
+}
+
+/* keep table-container attached cleanly under the header */
+.section + .table-container,
+.section-header + .table-container {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 /* Table Card – no side padding so header touches edges */
 .table-container {
   width: 100%;
@@ -793,22 +817,7 @@ main {
   background: inherit;
 }
 
-/* Column sizing based on new headers:
-   1 Updated
-   2 Opcode
-   3 Opcode Duration
-   4 Labor Price
-   5 Flat Rate Hours
-   6 Parts Price
-   7 Pay Type
-   8 Order #
-   9 Add to Online Scheduler
-   10 Add to Dealer App Scheduler
-   11 Add to Mobile Service
-   12 Add to ServiceCart
-*/
-
-/* Tight first column (checkbox) already above */
+/* Column sizing based on headers in Opcodes table */
 
 /* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
 #opcodes-pricing .training-table th:nth-child(2),
@@ -827,7 +836,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – much smaller */
+/* Parts Price column – smaller */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -835,7 +844,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last 4–5 columns */
+/* Checkboxes for last columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
