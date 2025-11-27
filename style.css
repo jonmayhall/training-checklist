@@ -361,21 +361,22 @@ main {
 /* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
 /* thin, continuous orange border around entire card */
 .mini-card {
-  border: 1px solid var(--orange);          /* THIN & continuous */
+  border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
   margin: 18px 0;
-  padding: 4px 0 6px;
+  padding: 6px 0 4px;
   box-sizing: border-box;
+  overflow: hidden;               /* keep content inside the border */
 }
 
-/* rows inside mini-card – centered between lines */
+/* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
+  margin: 0;                      /* no top/bottom gaps */
   border-bottom: 1px solid #e5e5e5;
-  margin-bottom: 0;
-  padding-top: 8px;                          /* balanced vertical padding */
+  padding-top: 8px;
   padding-bottom: 8px;
-  padding-right: 24px;                       /* pull fields away from right edge */
+  padding-right: 24px;            /* pull fields away from right edge */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
@@ -399,7 +400,7 @@ main {
   flex: 0 0 calc(var(--input-width) - 30px);
   width: calc(var(--input-width) - 30px);
   margin-left: auto;
-  margin-right: 16px;                        /* softer gap vs right border */
+  margin-right: 16px;
 }
 
 /* ensure no weird tint */
