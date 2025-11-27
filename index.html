@@ -157,170 +157,84 @@
 
 </section>
 
-   <!-- ========================================================= -->
-<!-- PAGE 2: DEALERSHIP INFO                                   -->
-<!-- ========================================================= -->
-<section id="dealership-info" class="page-section">
-  <h1>Dealership Info</h1>
+   <section id="dealership-contacts" class="page-section">
+  <button type="button" class="clear-page-btn">Reset This Page</button>
+
+  <h1>Dealership Contacts</h1>
   <p class="page-subtitle">
-    Capture core dealership details, structure, and contract information.
+    Capture primary dealership contacts for coordination before, during, and after training.
   </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Dealership Basics -->
   <div class="section-block">
-    <h2>Dealership Basics</h2>
-
-    <div class="checklist-row">
-      <label>Dealer Group</label>
-      <input type="text" id="dealerGroup" placeholder="Dealer group name">
-    </div>
-
-    <div class="checklist-row">
-      <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Dealership legal name">
-    </div>
-
-    <div class="checklist-row">
-      <label>DMS</label>
-      <input type="text" id="dmsName" placeholder="CDK, Reynolds, Tekion, etc.">
-    </div>
-
-    <div class="checklist-row">
-      <label>Time Zone</label>
-      <select id="timeZone">
-        <option></option>
-        <option>Eastern</option>
-        <option>Central</option>
-        <option>Mountain</option>
-        <option>Pacific</option>
-        <option>Other</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Multiple brands?</label>
-      <select id="multipleBrands">
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Shared drive or separate drives?</label>
-      <select id="driveStructure">
-        <option></option>
-        <option>Shared Drives</option>
-        <option>Separate Drives, one building</option>
-        <option>Separate Drives, Seperate Buildings</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Total Buildings</label>
-      <select id="totalBuildings">
-        <option></option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Do the handoff notes mention additional buildings off-site? If so, how many?</label>
-      <select id="offsiteBuildings">
-        <option></option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Dealership Contacts -->
-  <div class="section-block">
-    <h2>Dealership Contacts</h2>
+    <h2>Primary Contacts</h2>
 
     <!-- Service Manager -->
     <div class="mini-card contact-card">
       <div class="checklist-row">
-        <label>Service Manager</label>
-        <input type="text" placeholder="Name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Email">
+        <label>Service Manager – Name</label>
+        <input type="text">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
-        <input type="text" placeholder="Cell">
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
       </div>
     </div>
 
     <!-- Parts Manager -->
     <div class="mini-card contact-card">
       <div class="checklist-row">
-        <label>Parts Manager</label>
-        <input type="text" placeholder="Name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Email">
+        <label>Parts Manager – Name</label>
+        <input type="text">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
-        <input type="text" placeholder="Cell">
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
       </div>
     </div>
 
-    <!-- General Manager (was BDC contact before) -->
+    <!-- General Manager (was BDC Contact) -->
     <div class="mini-card contact-card">
       <div class="checklist-row">
-        <label>General Manager</label>
-        <input type="text" placeholder="Name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Email">
+        <label>General Manager – Name</label>
+        <input type="text">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
-        <input type="text" placeholder="Cell">
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
       </div>
     </div>
 
-    <!-- Additional Points of Contact (template + clones) -->
-    <div id="additionalPocCardsContainer">
-      <!-- TEMPLATE CARD (has the + button) -->
-      <div class="mini-card contact-card additional-poc-card additional-poc-template">
+    <!-- Additional Points of Contact -->
+    <div id="additionalPocContainer">
+      <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional Point of Contact</label>
-          <input type="text" placeholder="Name">
-          <button type="button" class="add-row add-additional-poc">+</button>
+          <input type="text">
+          <button type="button" class="add-row additional-poc-add">+</button>
         </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Email">
-        </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Cell">
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Dealership Contract / Salesforce Products -->
-  <div class="section-block">
-    <h2>Dealership Contract / Listed Salesforce Products</h2>
-    <textarea placeholder="List contracted products and confirm they match Salesforce."></textarea>
   </div>
 </section>
 
