@@ -72,13 +72,13 @@
     <!-- MAIN CONTENT -->
     <main>
 
-      <!-- ========================================================= -->
-<!-- PAGE 1: DEPLOYMENT & TRAINING TEAM                        -->
+     <!-- ========================================================= -->
+<!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
 <!-- ========================================================= -->
 <section id="trainers-page" class="page-section active">
-  <h1>Deployment &amp; Training Team</h1>
+  <h1>Training Leads &amp; Contacts</h1>
   <p class="page-subtitle">
-    Capture trainer assignments, deployment ownership, and key contacts for this onsite.
+    Capture trainer assignments and core dealership contacts for this onsite.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
@@ -122,11 +122,15 @@
       </select>
     </div>
 
-    <!-- Additional Trainers -->
-    <div class="checklist-row indent-sub">
+    <!-- Additional Trainers (with + button) -->
+    <div class="checklist-row integrated-plus" id="additionalTrainersRow">
       <label>Additional Trainers</label>
-      <input type="text" placeholder="Add additional trainers">
+      <input type="text" id="additionalTrainersInput" placeholder="Add additional trainer">
+      <button class="add-row" type="button" id="addAdditionalTrainerBtn">+</button>
     </div>
+
+    <!-- Container for extra trainer rows -->
+    <div id="additionalTrainersContainer"></div>
 
     <!-- Training Type -->
     <div class="checklist-row">
@@ -152,24 +156,77 @@
     </div>
   </div>
 
-  <!-- DEPLOYMENT MANAGER -->
+  <!-- DEALERSHIP CONTACTS CARD -->
   <div class="section-block">
-    <h2>Deployment Manager</h2>
+    <h2>Dealership Contacts</h2>
 
-    <div class="checklist-row">
-      <label>Deployment Manager</label>
-      <input type="text" placeholder="Full name of Deployment Manager">
+    <!-- Service Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Service Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="tel" placeholder="Cell">
+      </div>
     </div>
-  </div>
 
-  <!-- CEM -->
-  <div class="section-block">
-    <h2>CEM / Customer Owner</h2>
-
-    <div class="checklist-row">
-      <label>CEM / Customer Owner</label>
-      <input type="text" placeholder="CEM or Customer Success Manager">
+    <!-- Parts Manager -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>Parts Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="tel" placeholder="Cell">
+      </div>
     </div>
+
+    <!-- General Manager (formerly BDC) -->
+    <div class="mini-card contact-card">
+      <div class="checklist-row">
+        <label>General Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Email">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="tel" placeholder="Cell">
+      </div>
+    </div>
+
+    <!-- Additional Point of Contact – template card with + button -->
+    <div class="mini-card contact-card" id="additionalPOCTemplate">
+      <div class="checklist-row integrated-plus poc-name-row">
+        <label>Additional Point of Contact</label>
+        <input type="text" class="poc-name-input" placeholder="">
+        <button type="button" class="add-row poc-add-btn">+</button>
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" class="poc-email-input" placeholder="Email">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="tel" class="poc-cell-input" placeholder="Cell">
+      </div>
+    </div>
+
+    <!-- Container where new POC cards will be added -->
+    <div id="additionalPOCContainer"></div>
   </div>
 </section>
 
@@ -340,26 +397,21 @@
   </div>
 </section>
 
-      <!-- ========================================================= -->
-<!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
 <!-- ========================================================= -->
-<section id="pretraining" class="page-section">
-  <h1>Pre-Training Checklist</h1>
-  <p class="page-subtitle">
-    Validate products, integrations, Salesforce notes, and readiness two weeks before onsite training.
-  </p>
+<!-- PAGE 3: PRE-TRAINING (or your page name)                  -->
+<!-- ========================================================= -->
+<section id="page-3" class="page-section">
+  <h1>Pre-Training</h1>
+  <p class="page-subtitle">Verify dealership readiness prior to onsite visit.</p>
+
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Salesforce Notes -->
+  <!-- SETTINGS & WORKFLOW CARD -->
   <div class="section-block">
-    <h2>Salesforce Notes</h2>
+    <h2>Settings & Workflow</h2>
 
     <div class="checklist-row">
-      <label>Have you reviewed the following Salesforce notes?</label>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>ServiceCart Notes</label>
+      <label>Has the dealership reviewed the Settings tab?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -368,8 +420,8 @@
       </select>
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Scheduler Notes</label>
+    <div class="checklist-row">
+      <label>Have workflows been updated and verified?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -378,38 +430,8 @@
       </select>
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Deployment Notes</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Remote Training Note</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Sales Notes</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Dealership contract / listed Salesforce products</label>
+    <div class="checklist-row">
+      <label>Is the MPI configured correctly?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -419,82 +441,13 @@
     </div>
   </div>
 
+
+  <!-- MCI CARD -->
   <div class="section-block">
-    <h2>Additional Comments — Salesforce Notes</h2>
-    <textarea placeholder="Comments for Salesforce Notes …"></textarea>
-  </div>
-
-  <!-- Communications -->
-  <div class="section-block">
-    <h2>Communications</h2>
+    <h2>MCI</h2>
 
     <div class="checklist-row">
-      <label>Is customer information appearing? <span class="muted-note">(historical pull)</span></label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Are texts, email, and calls reaching the end user?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Are text and email signatures turned on?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Does the area code match the local area?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — Communications</h2>
-    <textarea placeholder="Comments for Communications …"></textarea>
-  </div>
-
-  <!-- Payments -->
-  <div class="section-block">
-    <h2>Payments</h2>
-
-    <div class="checklist-row">
-      <label>If purchased, is payments set up and activated?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Are they using online payment, retail, or both?</label>
-      <select>
-        <option></option>
-        <option>Online</option>
-        <option>Retail</option>
-        <option>Both</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Do customer invoices appear correctly?</label>
+      <label>If purchased, does the dealership plan on using MCI?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -502,59 +455,19 @@
         <option>N/A</option>
       </select>
     </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — Payments</h2>
-    <textarea placeholder="Comments for Payments …"></textarea>
-  </div>
-
-  <!-- Opcodes — Pre-Training Review -->
-  <div class="section-block">
-    <h2>Opcodes — Pre-Training Review</h2>
 
     <div class="checklist-row">
-      <label>Review opcodes that are flagged for Mobile Check-in and ServiceCart.</label>
-      <select>
-        <option></option>
-        <option>Completed</option>
-        <option>Not Completed</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Are they using parts/labor pricing? If so, is pricing showing in opcodes?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Manufacturer parts catalog link (resource)</label>
-      <input type="text" placeholder="Paste link to the manufacturer parts catalog">
+      <label>Who is involved in the MCI process?</label>
+      <input type="text" placeholder="Enter names / roles">
     </div>
   </div>
 
-  <div class="section-block">
-    <h2>Additional Comments — Opcodes Pre-Training</h2>
-    <textarea placeholder="Notes about opcode setup, pricing, and catalog links …"></textarea>
-  </div>
 
-  <!-- Scheduler -->
+  <!-- ========================================================= -->
+  <!-- NEW SERVICECART CARD (Inserted Immediately After MCI)      -->
+  <!-- ========================================================= -->
   <div class="section-block">
-    <h2>Scheduler</h2>
-
-    <div class="checklist-row">
-      <label>Are appointments pulling over correctly?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>N/A</option>
-      </select>
-    </div>
+    <h2>ServiceCart</h2>
 
     <div class="checklist-row">
       <label>Are the correct opcodes added to the MPI to correspond with the inspection?</label>
@@ -567,7 +480,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>Is the shop divided by teams?</label>
+      <label>How many workflows is the dealership using?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -577,7 +490,7 @@
     </div>
 
     <div class="checklist-row indent-sub">
-      <label>Are assignment rules in place for each team?</label>
+      <label>Have you reviewed them?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -587,7 +500,17 @@
     </div>
 
     <div class="checklist-row">
-      <label>Are assignment rules in place?</label>
+      <label>How many MPIs is the dealership using?</label>
+      <select>
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>N/A</option>
+      </select>
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Have you reviewed them?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -597,10 +520,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>
-        Does the scheduler setup look correct?
-        <span class="muted-note">(time slots, hours, capacity, opcodes, labor codes, etc.)</span>
-      </label>
+      <label>Do all users have the appropriate access?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -610,7 +530,7 @@
     </div>
 
     <div class="checklist-row">
-      <label>Are transportation options set up?</label>
+      <label>Is ShopChat working correctly?</label>
       <select>
         <option></option>
         <option>Yes</option>
@@ -620,59 +540,10 @@
     </div>
   </div>
 
-  <div class="section-block">
-    <h2>Additional Comments — Scheduler</h2>
-    <textarea placeholder="Comments for Scheduler …"></textarea>
-  </div>
 
-  <!-- Mobile Check-in (MCI) -->
-  <div class="section-block">
-    <h2>Mobile Check-in (MCI)</h2>
+  <!-- ADD ANY REMAINING PAGE 3 SECTIONS BELOW THIS COMMENT -->
+  <!-- (No changes made to anything else) -->
 
-    <div class="checklist-row">
-      <label>Is Mobile Check-in (MCI) configured and enabled?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>In Progress</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Are the correct MPI forms and opcodes tied to MCI workflows?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-        <option>Partial</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — Mobile Check-in (MCI)</h2>
-    <textarea placeholder="Notes specific to MCI setup and workflow …"></textarea>
-  </div>
-
-  <!-- Pickup & Delivery -->
-  <div class="section-block">
-    <h2>Pickup &amp; Delivery</h2>
-
-    <div class="checklist-row">
-      <label>Is the DSO for scheduler integration with Pickup &amp; Delivery (PU&amp;D) activated?</label>
-      <select>
-        <option></option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Additional Comments — Pickup &amp; Delivery</h2>
-    <textarea placeholder="Notes for Pickup &amp; Delivery configuration …"></textarea>
-  </div>
 </section>
 
      <!-- ========================================================= -->
