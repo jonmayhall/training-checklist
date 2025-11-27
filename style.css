@@ -197,7 +197,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px; /* adjusted width */
+  max-width: 960px;
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -281,6 +281,11 @@ main {
   margin-right: -22px;
 }
 
+/* Thin orange outline variant (Automations card) */
+.section-block.orange-outline-card {
+  border-color: var(--orange);
+}
+
 /* Extra spacing when a notes card is followed by another card */
 .notes-block {
   margin-bottom: 32px;
@@ -359,7 +364,6 @@ main {
 }
 
 /* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
-/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -367,16 +371,16 @@ main {
   margin: 18px 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
-  overflow: hidden;               /* keep content inside the border */
+  overflow: hidden;
 }
 
 /* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
-  margin: 0;                      /* no top/bottom gaps */
+  margin: 0;
   border-bottom: 1px solid #e5e5e5;
   padding-top: 8px;
   padding-bottom: 8px;
-  padding-right: 24px;            /* pull fields away from right edge */
+  padding-right: 24px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
@@ -390,8 +394,7 @@ main {
   padding-left: 60px !important;
 }
 
-/* inputs/dropdowns inside thin orange borders –
-   slightly narrower + brought inward from right edge */
+/* inputs/dropdowns inside thin orange borders */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -768,7 +771,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
+  justify-content: flex-start;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -808,24 +811,7 @@ main {
   background: inherit;
 }
 
-/* Column sizing based on new headers:
-   1 Updated
-   2 Opcode
-   3 Opcode Duration
-   4 Labor Price
-   5 Flat Rate Hours
-   6 Parts Price
-   7 Pay Type
-   8 Order #
-   9 Add to Online Scheduler
-   10 Add to Dealer App Scheduler
-   11 Add to Mobile Service
-   12 Add to ServiceCart
-*/
-
-/* Tight first column (checkbox) already above */
-
-/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+/* Column sizing */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -842,7 +828,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller so inputs fit */
+/* Parts Price column – smaller */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -850,7 +836,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last 4–5 columns */
+/* Checkboxes for last columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
