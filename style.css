@@ -58,11 +58,13 @@ html, body {
   object-fit: contain; 
   display: block;
 }
+
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 #dealershipNameDisplay { 
   color:#fff; 
   font-size:22px;
@@ -195,7 +197,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px;
+  max-width: 960px; /* adjusted width */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -356,46 +358,53 @@ main {
   padding-left: 60px !important;
 }
 
-/* --------------- MINI-CARDS (thin orange border cards) --------------- */
-
+/* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
+/* thin, continuous orange border around entire card */
 .mini-card {
-  border: 1px solid var(--orange);
+  border: 1px solid var(--orange);          /* THIN & continuous */
   border-radius: var(--radius-md);
   background: #fff;
   margin: 18px 0;
   padding: 4px 0 6px;
+  box-sizing: border-box;
 }
 
-/* rows inside mini-card */
+/* rows inside mini-card – centered between lines */
 .mini-card .checklist-row {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
+  padding-top: 8px;                          /* balanced vertical padding */
   padding-bottom: 8px;
+  padding-right: 24px;                       /* pull fields away from right edge */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* ensure no tint */
+/* keep standard left indent the same as everywhere else */
 .mini-card .checklist-row {
-  background: #fff !important;
+  padding-left: 40px;
+}
+.mini-card .checklist-row.indent-sub {
+  padding-left: 60px !important;
 }
 
-/* ✅ Pull inputs & dropdowns inward inside thin orange borders */
+/* inputs/dropdowns inside thin orange borders –
+   slightly narrower + brought inward from right edge */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="date"],
 .mini-card .checklist-row select {
-  margin-right: 16px;      /* adds breathing room from right edge */
+  flex: 0 0 calc(var(--input-width) - 30px);
+  width: calc(var(--input-width) - 30px);
+  margin-left: auto;
+  margin-right: 16px;                        /* softer gap vs right border */
 }
 
-/* ✅ Align integrated + rows inside mini-cards with other fields */
-.mini-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-}
-.mini-card .checklist-row.integrated-plus > .add-row {
-  margin-right: 16px;      /* so + button ends where other inputs end */
+/* ensure no weird tint */
+.mini-card .checklist-row {
+  background: #fff !important;
 }
 
 /* semantic aliases */
@@ -403,7 +412,7 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* --------------- Integrated “+” rows (global) --------------- */
+/* --------------- Integrated “+” rows --------------- */
 /* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
 
 .section-block .checklist-row.integrated-plus,
@@ -473,7 +482,7 @@ main {
   margin-top: 8px;
 }
 
-/* Optional pill style for counts */
+/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -798,7 +807,24 @@ main {
   background: inherit;
 }
 
-/* Opcode-related column sizing */
+/* Column sizing based on new headers:
+   1 Updated
+   2 Opcode
+   3 Opcode Duration
+   4 Labor Price
+   5 Flat Rate Hours
+   6 Parts Price
+   7 Pay Type
+   8 Order #
+   9 Add to Online Scheduler
+   10 Add to Dealer App Scheduler
+   11 Add to Mobile Service
+   12 Add to ServiceCart
+*/
+
+/* Tight first column (checkbox) already above */
+
+/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -815,7 +841,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – tighter */
+/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -823,7 +849,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last 4 columns */
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
