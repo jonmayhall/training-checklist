@@ -5,7 +5,7 @@
 // - Clear page / Clear all
 // - Add row for all tables
 // - Support Tickets logic (permanent template card + moves)
-// - Additional Point of Contact logic
+// - Additional Contacts (General Manager & Additional POC cards)
 // - Simple PDF export for all pages
 // =======================================================
 
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initClearAllButton();
   initTableAddRowButtons();
   initSupportTickets();
-  initAdditionalPOC();   // <--- NEW
+  initAdditionalContacts();   // <-- NEW
   initPDFExport();
 });
 
@@ -325,65 +325,43 @@ function initSupportTickets() {
   }
 }
 
-// ---------------- ADDITIONAL POINT OF CONTACT ----------------
-// Expects:
-// <div id="additionalPocContainer">
-//   <div class="additional-poc-card">  <-- template card
-//     (has a name row with .add-row button integrated into the input row)
-//   </div>
-// </div>
-function initAdditionalPOC() {
-  const container =
-    document.getElementById("additionalPocContainer") ||
-    document.getElementById("additionalContactsContainer");
-
+// ---------------- ADDITIONAL CONTACTS (GM + Additional POC) ----------------
+function initAdditionalContacts() {
+  const container = document.getElementById("additionalPocCardsContainer");
   if (!container) return;
 
-  // Template card: the one that has the + button
-  const templateCard =
-    container.querySelector(".additional-poc-card[data-template='true']") ||
-    container.querySelector(".additional-poc-card") ||
-    container.querySelector(".contact-card.additional-poc");
+  const template = container.querySelector(".additional-poc-template");
+  if (!template) return;
 
-  if (!templateCard) return;
-
-  const addBtn =
-    templateCard.querySelector(".add-row") ||
-    templateCard.querySelector(".add-contact-btn");
-
+  const addBtn = template.querySelector(".add-additional-poc");
   if (!addBtn) return;
 
+  // click on "+" in the template card
   addBtn.addEventListener("click", () => {
-    // Clone the card
-    const newCard = templateCard.cloneNode(true);
+    const newCard = template.cloneNode(true);
 
-    // New card should not be treated as template
-    newCard.removeAttribute("data-template");
-
-    // Remove the add button from the cloned card
-    const newAddBtn =
-      newCard.querySelector(".add-row") ||
-      newCard.querySelector(".add-contact-btn");
-    if (newAddBtn) {
-      newAddBtn.remove();
+    // cloned cards should NOT have the add button
+    const cloneAddBtn = newCard.querySelector(".add-additional-poc");
+    if (cloneAddBtn) {
+      cloneAddBtn.remove();
     }
 
-    // If the name row used integrated-plus layout, remove that so the input is fully rounded
-    const integratedRow = newCard.querySelector(".checklist-row.integrated-plus");
-    if (integratedRow) {
-      integratedRow.classList.remove("integrated-plus");
+    // remove integrated-plus class from cloned first row so it behaves like a normal row
+    const firstRow = newCard.querySelector(".checklist-row.integrated-plus");
+    if (firstRow) {
+      firstRow.classList.remove("integrated-plus");
     }
 
-    // Clear inputs (name, cell, email, etc.) in the new card
-    const inputs = newCard.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]');
-    const selects = newCard.querySelectorAll("select");
-    const textareas = newCard.querySelectorAll("textarea");
+    // clear fields in the cloned card
+    newCard.querySelectorAll("input, textarea, select").forEach((el) => {
+      if (el.type === "checkbox" || el.type === "radio") {
+        el.checked = false;
+      } else {
+        el.value = "";
+      }
+    });
 
-    inputs.forEach((inp) => (inp.value = ""));
-    selects.forEach((sel) => (sel.selectedIndex = 0));
-    textareas.forEach((ta) => (ta.value = ""));
-
-    // Append cloned card after the template
+    // append cloned card under the original
     container.appendChild(newCard);
   });
 }
@@ -403,7 +381,6 @@ function initPDFExport() {
     const doc = new jsPDF("p", "pt", "a4");
 
     // Simple approach: render the main content (all pages) into the PDF.
-    // This won't be pixel perfect but will capture all sections for now.
     doc.html(document.body, {
       callback: function (doc) {
         doc.save("myKaarma_Training_Checklist.pdf");
