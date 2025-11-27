@@ -1,7 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
    Stable Layout + Contacts/Champions Cards + Support Tickets + Opcodes
-   (Integrated "+" rows unified)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -198,7 +197,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px;
+  max-width: 960px; /* adjusted width */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -282,11 +281,6 @@ main {
   margin-right: -22px;
 }
 
-/* Thin orange outline variant (Automations card) */
-.section-block.orange-outline-card {
-  border-color: var(--orange);
-}
-
 /* Extra spacing when a notes card is followed by another card */
 .notes-block {
   margin-bottom: 32px;
@@ -365,6 +359,7 @@ main {
 }
 
 /* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
+/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -372,16 +367,16 @@ main {
   margin: 18px 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: hidden;               /* keep content inside the border */
 }
 
 /* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
-  margin: 0;
+  margin: 0;                      /* no top/bottom gaps */
   border-bottom: 1px solid #e5e5e5;
   padding-top: 8px;
   padding-bottom: 8px;
-  padding-right: 24px;
+  padding-right: 24px;            /* pull fields away from right edge */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
@@ -395,7 +390,8 @@ main {
   padding-left: 60px !important;
 }
 
-/* inputs/dropdowns inside thin orange borders */
+/* inputs/dropdowns inside thin orange borders –
+   slightly narrower + brought inward from right edge */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -417,15 +413,24 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* --------------- Integrated “+” rows (all pages unified) --------------- */
-/* Layout: label | input (var(--input-width) - 34px) | + button (34px)
-   so combined width ≈ normal text box width. */
+/* --------------- CONTACT GRID (Page 2 primary contacts) --------------- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+.contact-grid .mini-card {
+  margin: 0;
+}
+
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input (same width as other inputs) | + button */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
-  align-items: stretch;
-  gap: 0;
+  align-items: center;
+  gap: 6px;
 }
 
 .section-block .checklist-row.integrated-plus label,
@@ -434,28 +439,26 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows (Additional Trainers, Ticket #, etc.) */
+/* Text box in integrated rows – SAME SIZE as standard inputs */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
   margin-left: auto;
   margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  height: 34px;
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
 }
 
-/* Integrated + button – same height as input */
+/* Integrated + button – sits to the right, no width stealing */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
-  position: relative;
-  margin-left: -1px;
+  margin-left: 4px;
   background: var(--orange);
   color: #fff;
   border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: var(--radius-sm);
   width: 34px;
   height: 34px;
   font-size: 18px;
@@ -472,38 +475,6 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
-}
-
-/* --- Integrated "+" inside mini-cards (Additional POC etc.) --- */
-/* Make textbox + + button together visually match other mini-card fields
-   and keep them centered between the thin gray lines. */
-
-.mini-card .checklist-row.integrated-plus {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 40px;
-  padding-right: 24px;
-  align-items: center;
-}
-
-.mini-card .checklist-row.integrated-plus label {
-  flex: 1 1 auto;
-  padding-right: 16px;
-}
-
-/* Override mini-card width rule for this row so group width matches others */
-.mini-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  margin-left: auto;
-  margin-right: 0;
-  height: 34px;
-}
-
-.mini-card .checklist-row.integrated-plus > .add-row {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
@@ -806,7 +777,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-start;   /* + button on the LEFT */
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -846,7 +817,22 @@ main {
   background: inherit;
 }
 
-/* Column sizing */
+/* Column sizing based on new headers:
+   1 Updated
+   2 Opcode
+   3 Opcode Duration
+   4 Labor Price
+   5 Flat Rate Hours
+   6 Parts Price
+   7 Pay Type
+   8 Order #
+   9 Add to Online Scheduler
+   10 Add to Dealer App Scheduler
+   11 Add to Mobile Service
+   12 Add to ServiceCart
+*/
+
+/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -863,7 +849,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller */
+/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -871,7 +857,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last columns */
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
