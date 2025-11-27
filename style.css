@@ -19,6 +19,9 @@
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
   --input-width: 260px;    /* single source of truth for text-box width */
+
+  /* UPDATED: how far to pull inputs inwards inside thin orange cards */
+  --mini-input-offset: 36px;
 }
 
 /* --------------- BASE --------------- */
@@ -197,7 +200,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px; /* adjusted width */
+  max-width: 960px;
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -358,42 +361,48 @@ main {
   padding-left: 60px !important;
 }
 
-/* --------------- MINI-CARDS (Contacts & Champions/Blockers & Thin Orange Sections) --------------- */
+/* --------------- MINI-CARDS (Contacts & Thin Orange Sections) --------------- */
 
+/* UPDATED: thin orange border, continuous, with overflow hidden */
 .mini-card {
-  border: 1px solid var(--orange);        /* thinner, continuous border */
-  border-radius: var(--radius-md);
+  border: 1px solid var(--orange);         /* thin orange line */
+  border-radius: 12px;
   background: #fff;
   margin: 14px 0;
-  padding: 4px 0 8px;
+  padding: 4px 0 6px;
+  overflow: hidden;                        /* keeps the orange line continuous */
 }
 
 /* rows inside mini-card */
 .mini-card .checklist-row {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #f1f1f1;
   margin-bottom: 0;
   padding-bottom: 8px;
-  padding-left: 40px;                      /* align with other rows */
+  padding-left: 40px;                      /* same label alignment as rest */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-/* ensure no tint */
+/* NO different background inside */
 .mini-card .checklist-row {
   background: #fff !important;
 }
 
-/* inputs / selects inside thin orange borders – give them a little breathing room on the right */
+/* UPDATED: inputs/dropdowns inside thin orange borders
+   pulled inward so they don't crowd the right side, but labels stay put */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="date"],
 .mini-card .checklist-row select {
-  margin-right: 8px;                       /* avoid feeling crowded on the right edge */
+  flex: 0 0 calc(var(--input-width) - var(--mini-input-offset));
+  width: calc(var(--input-width) - var(--mini-input-offset));
+  margin-left: auto;
+  margin-right: 18px;                      /* breathing room from orange border */
 }
 
-/* indented rows inside mini-cards should line up with other indented rows */
+/* UPDATED: indented rows inside mini-cards still align with other indented lines */
 .mini-card .checklist-row.indent-sub {
   padding-left: 60px !important;
 }
@@ -404,7 +413,6 @@ main {
 .blockers-card { }
 
 /* --------------- Integrated “+” rows --------------- */
-/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -419,7 +427,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows */
+/* base integrated text box */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -430,7 +438,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as input */
+/* base + button */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -458,6 +466,19 @@ main {
   transform: translateY(-1px);
 }
 
+/* UPDATED: integrated + row INSIDE mini-card
+   so Additional Point of Contact aligns with other inputs/dropdowns in that card */
+.mini-card .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - var(--mini-input-offset) - 34px);
+  width: calc(var(--input-width) - var(--mini-input-offset) - 34px);
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.mini-card .checklist-row.integrated-plus > .add-row {
+  margin-right: 18px;   /* same right margin as normal mini-card fields */
+}
+
 /* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
@@ -473,7 +494,6 @@ main {
   margin-top: 8px;
 }
 
-/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -595,7 +615,6 @@ main {
   font-size: 13px;
 }
 
-/* DOT ONLY tags */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -638,14 +657,13 @@ main {
   margin-bottom: 0;
 }
 
-/* keep table-container attached cleanly under the header */
 .section + .table-container,
 .section-header + .table-container {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
-/* Table Card – no side padding so header touches edges */
+/* Table Card */
 .table-container {
   width: 100%;
   background: #fff;
@@ -666,7 +684,6 @@ main {
   padding-bottom: 4px;
 }
 
-/* Table */
 .training-table {
   border-collapse: collapse;
   width: 100%;
@@ -682,7 +699,7 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header — LIGHT ORANGE */
+/* Sticky header */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -692,13 +709,12 @@ main {
   z-index: 3;
 }
 
-/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
 }
 
-/* Sticky first column – for checklists (not Opcodes; overridden later) */
+/* Sticky first column (except opcodes) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -733,14 +749,14 @@ main {
   text-align: left;
 }
 
-/* Column widths (generic second col) */
+/* Column widths */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
   min-width: 185px;
 }
 
-/* Inputs/Selects inside table cells */
+/* Inputs/Selects in table cells */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
@@ -769,7 +785,7 @@ main {
   background: #fafafa; 
 }
 
-/* Table footer + "+" button  */
+/* Table footer */
 .table-footer {
   width: 100%;
   background: #f5f5f5;
@@ -777,7 +793,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
+  justify-content: flex-start;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -802,7 +818,6 @@ main {
 
 /* --------------- OPCODES PAGE --------------- */
 
-/* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
@@ -817,9 +832,7 @@ main {
   background: inherit;
 }
 
-/* Column sizing based on headers in Opcodes table */
-
-/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+/* moderate width columns */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -836,7 +849,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller */
+/* parts price smaller */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -844,7 +857,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last columns */
+/* checkbox columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
