@@ -1,5 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
+   Stable Layout + Contacts/Champions Cards + Support Tickets + Opcodes
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -31,7 +32,7 @@ html, body {
 
 /* no italics anywhere by default */
 *, em, i { 
-  font-style: normal !Important;
+  font-style: normal !important;
 }
 
 /* --------------- TOP BAR --------------- */
@@ -97,6 +98,7 @@ html, body {
   gap: 6px; 
 }
 
+/* hide icon span but keep label if it exists */
 .nav-icon {
   display: none;
 }
@@ -195,7 +197,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px;
+  max-width: 960px; /* adjusted width */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -254,7 +256,7 @@ main {
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
-/* --------------- SECTION BLOCKS --------------- */
+/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -279,7 +281,16 @@ main {
   margin-right: -22px;
 }
 
-/* --------------- NON-TABLE ROWS --------------- */
+/* Extra spacing when a notes card is followed by another card */
+.notes-block {
+  margin-bottom: 32px;
+}
+.notes-block + .section-block,
+.notes-block + .section {
+  margin-top: 10px;
+}
+
+/* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
 .checklist-row {
   display: flex;
   align-items: center;
@@ -300,7 +311,7 @@ main {
   font-weight: 500;
   text-align: left;
   padding-right: 16px;
-  white-space: nowrap; /* keep single line as much as possible */
+  white-space: normal;
 }
 
 /* Inputs on the RIGHT */
@@ -347,42 +358,40 @@ main {
   padding-left: 60px !important;
 }
 
-/* --------------- MINI-CARDS (thin orange contacts) --------------- */
+/* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
+/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 6px 0;
+  margin: 18px 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: hidden;               /* keep content inside the border */
 }
 
-/* rows inside mini-card – tight & clean */
+/* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
-  margin: 0;
+  margin: 0;                      /* no top/bottom gaps */
   border-bottom: 1px solid #e5e5e5;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  padding-right: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-right: 24px;            /* pull fields away from right edge */
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
+/* keep standard left indent the same as everywhere else */
 .mini-card .checklist-row {
-  padding-left: 20px;
+  padding-left: 40px;
 }
 .mini-card .checklist-row.indent-sub {
-  padding-left: 34px !important;
+  padding-left: 60px !important;
 }
 
-/* labels small & mostly single line */
-.mini-card .checklist-row label {
-  font-size: 12px;
-}
-
-/* inputs/dropdowns inside thin orange borders */
+/* inputs/dropdowns inside thin orange borders –
+   slightly narrower + brought inward from right edge */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -391,68 +400,12 @@ main {
   flex: 0 0 calc(var(--input-width) - 30px);
   width: calc(var(--input-width) - 30px);
   margin-left: auto;
-  margin-right: 8px;
-  padding: 5px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 12px;
+  margin-right: 16px;
 }
 
-/* ensure no tint */
+/* ensure no weird tint */
 .mini-card .checklist-row {
   background: #fff !important;
-}
-
-/* Primary Contacts grid – 2 x N layout */
-.primary-contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 14px;
-  margin-top: 10px;
-}
-
-/* ---------- ADDITIONAL POC: integrated Name + smaller aligned + button ---------- */
-
-.additional-poc-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 30px);
-  width: calc(var(--input-width) - 30px);
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  height: 30px;
-  padding: 6px 10px;
-  font-size: 12px;
-}
-
-.additional-poc-card .checklist-row.integrated-plus > .add-row {
-  flex: 0 0 30px;
-  width: 30px;
-  height: 30px;               /* slightly smaller so it lines up perfectly */
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: none;           /* remove extra shadow so it hugs the border */
-  margin-left: -1px;
-  padding: 0;
-}
-
-/* Cloned Additional POC cards: no + button, normal rounded Name field */
-.additional-poc-card.cloned .checklist-row.integrated-plus input[type="text"],
-.additional-poc-card.cloned .checklist-row input[type="text"] {
-  border-radius: var(--radius-sm);
-}
-
-.additional-poc-card.cloned .add-row {
-  display: none !important;
 }
 
 /* semantic aliases */
@@ -460,7 +413,9 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* --------------- Integrated “+” rows (generic) --------------- */
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
+
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
@@ -474,7 +429,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows (non mini-card) */
+/* Text box in integrated rows */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -485,7 +440,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as input (non mini-card) */
+/* Integrated + button – same height as input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -513,7 +468,51 @@ main {
   transform: translateY(-1px);
 }
 
+/* Make Additional POC + button slightly smaller but aligned */
+.additional-poc-add {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 34px; /* aligns with input height */
+  font-size: 16px;
+  padding: 0;
+}
+
+/* integrated plus input inside mini-cards */
+.mini-card .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 40px);
+  width: calc(var(--input-width) - 40px);
+  margin-left: auto;
+  margin-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* --------------- PRIMARY CONTACTS GRID --------------- */
+
+#primaryContactsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin: 16px 0 6px;
+}
+
+#primaryContactsGrid .mini-card {
+  margin: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#primaryContactsGrid .checklist-row {
+  padding-left: 26px;
+}
+
+#primaryContactsGrid .checklist-row label {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
 /* --------------- SUPPORT TICKETS --------------- */
+
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
@@ -527,6 +526,7 @@ main {
   margin-top: 8px;
 }
 
+/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -680,16 +680,15 @@ main {
 }
 
 .section-header {
-  margin: 0;
-  padding: 10px 16px;
   background: var(--orange);
   color: #fff;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 10px 14px;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-weight: 600;
+  margin: 0;
 }
 
-/* Table Card */
+/* Table Card – no side padding so header touches edges */
 .table-container {
   width: 100%;
   background: #fff;
@@ -726,7 +725,7 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header */
+/* Sticky header — LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -736,13 +735,13 @@ main {
   z-index: 3;
 }
 
-/* Smaller note in header */
+/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
 }
 
-/* Sticky first column (default) */
+/* Sticky first column – for checklists (not Opcodes; overridden later) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -777,7 +776,7 @@ main {
   text-align: left;
 }
 
-/* Generic second column width */
+/* Column widths (generic second col) */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
@@ -821,7 +820,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-start;   /* + button on the LEFT */
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -844,7 +843,9 @@ main {
   transform: scale(1.05);
 }
 
-/* --------------- OPCODES PAGE OVERRIDES --------------- */
+/* --------------- OPCODES PAGE --------------- */
+
+/* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
@@ -857,6 +858,65 @@ main {
   display: table-cell;
   padding: 6px 6px;
   background: inherit;
+}
+
+/* Column sizing based on new headers:
+   1 Updated
+   2 Opcode
+   3 Opcode Duration
+   4 Labor Price
+   5 Flat Rate Hours
+   6 Parts Price
+   7 Pay Type
+   8 Order #
+   9 Add to Online Scheduler
+   10 Add to Dealer App Scheduler
+   11 Add to Mobile Service
+   12 Add to ServiceCart
+*/
+
+/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+#opcodes-pricing .training-table th:nth-child(2),
+#opcodes-pricing .training-table td:nth-child(2),
+#opcodes-pricing .training-table th:nth-child(3),
+#opcodes-pricing .training-table td:nth-child(3),
+#opcodes-pricing .training-table th:nth-child(4),
+#opcodes-pricing .training-table td:nth-child(4),
+#opcodes-pricing .training-table th:nth-child(5),
+#opcodes-pricing .training-table td:nth-child(5),
+#opcodes-pricing .training-table th:nth-child(7),
+#opcodes-pricing .training-table td:nth-child(7),
+#opcodes-pricing .training-table th:nth-child(8),
+#opcodes-pricing .training-table td:nth-child(8) {
+  width: 110px;
+  min-width: 100px;
+}
+
+/* Parts Price column – smaller so inputs fit */
+#opcodes-pricing .training-table th:nth-child(6),
+#opcodes-pricing .training-table td:nth-child(6) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 60px;
+}
+
+/* Checkboxes for last 4 columns */
+#opcodes-pricing .training-table th:nth-child(9),
+#opcodes-pricing .training-table td:nth-child(9),
+#opcodes-pricing .training-table th:nth-child(10),
+#opcodes-pricing .training-table td:nth-child(10),
+#opcodes-pricing .training-table th:nth-child(11),
+#opcodes-pricing .training-table td:nth-child(11),
+#opcodes-pricing .training-table th:nth-child(12),
+#opcodes-pricing .training-table td:nth-child(12) {
+  width: 90px;
+  min-width: 80px;
+}
+#opcodes-pricing .training-table td:nth-child(9) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(10) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
+  transform: scale(1.1);
 }
 
 /* --------------- FLOATING PDF BUTTON (summary page) --------------- */
@@ -894,7 +954,7 @@ main {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
 
-  .primary-contacts-grid {
+  #primaryContactsGrid {
     grid-template-columns: 1fr;
   }
 }
