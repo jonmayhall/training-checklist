@@ -1,168 +1,124 @@
 // =======================================================
 // myKaarma Interactive Training Checklist – FULL JS
-// - Sidebar nav
-// - Dealership name mirror
-// - Clear page / Clear all
-// - Add row for all tables
-// - Additional Trainers row add
-// - Additional POC mini-card add
-// - Support Tickets logic (permanent template card + moves)
-// - Simple PDF export for all pages
+// Nav, Clear, Dynamic Rows, Support Tickets, PDF
 // =======================================================
 
-document.addEventListener("DOMContentLoaded", () => {
-  initNav();
-  initDealershipNameBinding();
-  initClearPageButtons();
-  initClearAllButton();
-  initTableAddRowButtons();
-  initAdditionalTrainersAdd();    // NEW
-  initAdditionalPocCardAdd();
-  initSupportTickets();
-  initPDFExport();
+document.addEventListener('DOMContentLoaded', () => {
+  setupSidebarNav();
+  setupClearButtons();
+  setupTableAddRow();
+  setupAdditionalTrainers();
+  setupAdditionalPocCloning();
+  setupSupportTickets();
+  setupPdfExport();
+  setupDealershipNameBinding();
 });
 
-// ---------------- NAVIGATION ----------------
-function initNav() {
-  const navButtons = document.querySelectorAll("#sidebar-nav .nav-btn");
-  const sections = document.querySelectorAll(".page-section");
+// --------------- SIDEBAR NAVIGATION ---------------
+function setupSidebarNav() {
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const sections = document.querySelectorAll('.page-section');
 
   if (!navButtons.length || !sections.length) return;
 
-  navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      let targetSection = document.getElementById(target);
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      if (!targetId) return;
 
-      // Fallback for the first page if ID is trainers-page
-      if (!targetSection && target === "onsite-trainers") {
-        targetSection = document.getElementById("trainers-page");
+      sections.forEach(sec => {
+        sec.classList.toggle('active', sec.id === targetId);
+      });
+
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Jump to top of page content
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    });
+  });
+}
+
+// --------------- CLEAR BUTTONS (PAGE + ALL) ---------------
+function setupClearButtons() {
+  const clearPageButtons = document.querySelectorAll('.clear-page-btn');
+  clearPageButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.closest('.page-section');
+      if (section) {
+        clearInputsInRoot(section);
       }
-
-      if (!targetSection) return;
-
-      // Active button
-      navButtons.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      // Active section
-      sections.forEach((sec) => sec.classList.remove("active"));
-      targetSection.classList.add("active");
     });
   });
-}
 
-// ---------------- DEALERSHIP NAME MIRROR ----------------
-function initDealershipNameBinding() {
-  const input = document.getElementById("dealershipNameInput");
-  const display = document.getElementById("dealershipNameDisplay");
-
-  if (!input || !display) return;
-
-  const updateDisplay = () => {
-    const val = input.value.trim();
-    display.textContent = val || "Dealership Name";
-  };
-
-  input.addEventListener("input", updateDisplay);
-  updateDisplay();
-}
-
-// ---------------- CLEAR PAGE BUTTONS ----------------
-function initClearPageButtons() {
-  const clearButtons = document.querySelectorAll(".clear-page-btn");
-
-  clearButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const section = btn.closest(".page-section");
-      if (!section) return;
-      clearFieldsInElement(section);
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', () => {
+      const app = document.getElementById('app');
+      if (app) {
+        clearInputsInRoot(app);
+      }
     });
-  });
+  }
 }
 
-function clearFieldsInElement(root) {
+function clearInputsInRoot(root) {
   if (!root) return;
 
-  const inputs = root.querySelectorAll("input");
-  const textareas = root.querySelectorAll("textarea");
-  const selects = root.querySelectorAll("select");
-
-  inputs.forEach((input) => {
-    const type = input.type;
-    if (type === "checkbox" || type === "radio") {
-      input.checked = false;
-    } else {
-      input.value = "";
-    }
+  // Text-like inputs
+  const inputs = root.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="date"], input[type="search"], input[type="tel"]');
+  inputs.forEach(input => {
+    input.value = '';
   });
 
-  textareas.forEach((ta) => {
-    ta.value = "";
+  // Checkboxes
+  const checkboxes = root.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(cb => {
+    cb.checked = false;
   });
 
-  selects.forEach((sel) => {
+  // Textareas
+  const textareas = root.querySelectorAll('textarea');
+  textareas.forEach(ta => {
+    ta.value = '';
+  });
+
+  // Selects
+  const selects = root.querySelectorAll('select');
+  selects.forEach(sel => {
     sel.selectedIndex = 0;
   });
 }
 
-// ---------------- CLEAR ALL (SIDEBAR BUTTON) ----------------
-function initClearAllButton() {
-  const btn = document.getElementById("clearAllBtn");
-  if (!btn) return;
+// --------------- TABLE "+ ROW" HANDLER ---------------
+function setupTableAddRow() {
+  const addButtons = document.querySelectorAll('.table-footer .add-row');
+  if (!addButtons.length) return;
 
-  btn.addEventListener("click", () => {
-    const app = document.getElementById("app");
-    if (!app) return;
-    clearFieldsInElement(app);
-
-    // Reset dealership display text after clearing
-    const display = document.getElementById("dealershipNameDisplay");
-    if (display) {
-      display.textContent = "Dealership Name";
-    }
-  });
-}
-
-// ---------------- TABLE ADD-ROW BUTTONS ----------------
-function initTableAddRowButtons() {
-  const addButtons = document.querySelectorAll(".table-footer .add-row");
-
-  addButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tableContainer = btn.closest(".table-container");
+  addButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tableContainer = btn.closest('.table-container');
       if (!tableContainer) return;
 
-      const table = tableContainer.querySelector("table");
+      const table = tableContainer.querySelector('table.training-table');
       if (!table) return;
 
-      const tbody = table.querySelector("tbody");
-      if (!tbody) return;
+      const tbody = table.querySelector('tbody');
+      if (!tbody || !tbody.rows.length) return;
 
-      const lastRow = tbody.querySelector("tr:last-child");
-      if (!lastRow) return;
-
+      const lastRow = tbody.rows[tbody.rows.length - 1];
       const newRow = lastRow.cloneNode(true);
 
-      // Clear values in new row
-      const inputs = newRow.querySelectorAll("input");
-      const selects = newRow.querySelectorAll("select");
-      const textareas = newRow.querySelectorAll("textarea");
-
-      inputs.forEach((input) => {
-        if (input.type === "checkbox" || input.type === "radio") {
+      // Clear values in cloned row
+      newRow.querySelectorAll('input').forEach(input => {
+        if (input.type === 'checkbox') {
           input.checked = false;
         } else {
-          input.value = "";
+          input.value = '';
         }
       });
-
-      selects.forEach((sel) => {
-        sel.selectedIndex = 0;
-      });
-
-      textareas.forEach((ta) => {
-        ta.value = "";
+      newRow.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
       });
 
       tbody.appendChild(newRow);
@@ -170,251 +126,188 @@ function initTableAddRowButtons() {
   });
 }
 
-// ---------------- ADDITIONAL TRAINERS ADD ----------------
-function initAdditionalTrainersAdd() {
-  const baseRow = document.querySelector(".additional-trainers-row");
-  const container = document.getElementById("additionalTrainersContainer");
+// --------------- ADDITIONAL TRAINERS (PAGE 1) ---------------
+function setupAdditionalTrainers() {
+  const row = document.querySelector('.additional-trainers-row');
+  if (!row) return;
 
-  if (!baseRow || !container) return;
+  const addBtn = row.querySelector('.add-row');
+  const container = document.getElementById('additionalTrainersContainer');
 
-  const addBtn = baseRow.querySelector(".add-row");
-  if (!addBtn) return;
+  if (!addBtn || !container) return;
 
-  addBtn.addEventListener("click", () => {
-    const newRow = baseRow.cloneNode(true);
+  addBtn.addEventListener('click', () => {
+    const newRow = document.createElement('div');
+    newRow.className = 'checklist-row indent-sub';
 
-    // Remove the + button on cloned rows
-    const clonedBtn = newRow.querySelector(".add-row");
-    if (clonedBtn) clonedBtn.remove();
+    const label = document.createElement('label');
+    label.textContent = 'Additional trainer';
 
-    // Remove integrated-plus so the textbox has rounded right side like the others
-    newRow.classList.remove("integrated-plus");
+    const input = document.createElement('input');
+    input.type = 'text';
 
-    // Clear the text input
-    const input = newRow.querySelector("input[type='text']");
-    if (input) input.value = "";
-
+    newRow.appendChild(label);
+    newRow.appendChild(input);
     container.appendChild(newRow);
   });
 }
 
-// ---------------- ADDITIONAL POC MINI-CARD ADD ----------------
-function initAdditionalPocCardAdd() {
-  const container = document.getElementById("additionalPocContainer");
-  if (!container) return;
+// --------------- ADDITIONAL POC CARDS (PAGE 2) ---------------
+function setupAdditionalPocCloning() {
+  document.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('additional-poc-add')) return;
 
-  const templateCard = container.querySelector(".additional-poc-card");
-  if (!templateCard) return;
+    const templateCard = e.target.closest('.additional-poc-card');
+    const container = document.getElementById('additionalPocContainer');
+    if (!templateCard || !container) return;
 
-  const addBtn = templateCard.querySelector(".additional-poc-add");
-  if (!addBtn) return;
-
-  addBtn.addEventListener("click", () => {
     const newCard = templateCard.cloneNode(true);
 
-    // Remove the + button on cloned cards
-    const clonedAddBtn = newCard.querySelector(".additional-poc-add");
-    if (clonedAddBtn) clonedAddBtn.remove();
-
-    // Remove integrated-plus on cloned card so the first input has rounded right side
-    const firstRow = newCard.querySelector(".checklist-row.integrated-plus");
-    if (firstRow) {
-      firstRow.classList.remove("integrated-plus");
-    }
-
-    // Clear all fields in the new card
-    const fields = newCard.querySelectorAll("input, select, textarea");
-    fields.forEach((el) => {
-      if (el.type === "checkbox" || el.type === "radio") {
-        el.checked = false;
-      } else {
-        el.value = "";
-      }
-      if (el.tagName === "SELECT") {
-        el.selectedIndex = 0;
-      }
+    // Clear values
+    newCard.querySelectorAll('input').forEach(input => {
+      input.value = '';
     });
 
+    // First row: drop integrated-plus class & remove + button
+    const firstRow = newCard.querySelector('.checklist-row');
+    if (firstRow) {
+      firstRow.classList.remove('integrated-plus');
+
+      const addBtn = firstRow.querySelector('.additional-poc-add');
+      if (addBtn) {
+        addBtn.remove();
+      }
+    }
+
+    // Append clone
     container.appendChild(newCard);
   });
 }
 
-// ---------------- SUPPORT TICKETS ----------------
-function initSupportTickets() {
-  const openContainer = document.getElementById("openTicketsContainer");
-  const tierTwoContainer = document.getElementById("tierTwoTicketsContainer");
-  const closedResolvedContainer = document.getElementById("closedResolvedTicketsContainer");
-  const closedFeatureContainer = document.getElementById("closedFeatureTicketsContainer");
+// --------------- SUPPORT TICKETS (PAGE 7) ---------------
+function setupSupportTickets() {
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  if (!openContainer || !tierTwoContainer || !closedResolvedContainer || !closedFeatureContainer) {
-    return;
-  }
+  if (!openContainer) return;
 
-  const templateGroup = openContainer.querySelector(".ticket-group");
-  if (!templateGroup) return;
+  // Add new ticket from template
+  document.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('add-ticket-btn')) return;
 
-  // Mark this as the permanent template card
-  templateGroup.dataset.permanent = "true";
+    const templateGroup = e.target.closest('.ticket-group');
+    if (!templateGroup) return;
 
-  const addBtn = templateGroup.querySelector(".add-row");
-  if (!addBtn) return;
-
-  // Wire up status select for the permanent template (special behavior)
-  wireStatusListeners(templateGroup, true);
-
-  // "+" button: create a brand new Open card under the template
-  addBtn.addEventListener("click", () => {
     const newGroup = templateGroup.cloneNode(true);
-    newGroup.dataset.permanent = "false";
 
-    // Remove the + button from the cloned card
-    const newAddBtn = newGroup.querySelector(".add-row");
-    if (newAddBtn) {
-      newAddBtn.remove();
+    // Remove template-specific attributes/classes
+    if (newGroup.dataset) {
+      delete newGroup.dataset.template;
     }
+    newGroup.classList.remove('ticket-group-template');
 
-    // Remove integrated-plus layout so ticket number field is a normal full-width text box
-    const integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
-    if (integratedRow) {
-      integratedRow.classList.remove("integrated-plus");
-    }
+    // Clear inputs
+    newGroup.querySelectorAll('input[type="text"]').forEach(input => {
+      input.value = '';
+    });
 
-    // Clear all fields in the new card
-    clearTicketGroupFields(newGroup);
-
-    // Ensure status is Open
-    const statusSelect = newGroup.querySelector(".ticket-status-select");
+    // Set status back to "Open"
+    const statusSelect = newGroup.querySelector('.ticket-status-select');
     if (statusSelect) {
-      statusSelect.value = "Open";
+      statusSelect.value = 'Open';
     }
 
-    // Append directly under the template in Open Tickets
-    openContainer.appendChild(newGroup);
+    // On clones: remove the + button and integrated-plus layout
+    const firstRow = newGroup.querySelector('.checklist-row');
+    if (firstRow) {
+      firstRow.classList.remove('integrated-plus');
+      const addBtn = firstRow.querySelector('.add-ticket-btn');
+      if (addBtn) addBtn.remove();
+    }
 
-    // Wire up status change for the new (movable) card
-    wireStatusListeners(newGroup, false);
+    openContainer.appendChild(newGroup);
   });
 
-  // --- helpers ---
+  // Move tickets between sections based on status
+  document.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('ticket-status-select')) return;
 
-  function clearTicketGroupFields(group) {
-    const inputs = group.querySelectorAll('input[type="text"], input[type="date"], textarea');
-    const selects = group.querySelectorAll("select");
+    const card = e.target.closest('.ticket-group');
+    if (!card) return;
 
-    inputs.forEach((inp) => {
-      inp.value = "";
-    });
+    const status = e.target.value;
+    let destination = null;
 
-    selects.forEach((sel) => {
-      sel.selectedIndex = 0;
-    });
-  }
-
-  function resetTemplateGroup(group) {
-    clearTicketGroupFields(group);
-    const statusSelect = group.querySelector(".ticket-status-select");
-    if (statusSelect) {
-      statusSelect.value = "Open";
+    switch (status) {
+      case 'Open':
+        destination = openContainer;
+        break;
+      case 'Tier Two':
+        destination = tierTwoContainer;
+        break;
+      case 'Closed - Resolved':
+        destination = closedResolvedContainer;
+        break;
+      case 'Closed – Feature Not Supported':
+      case 'Closed - Feature Not Supported':
+        destination = closedFeatureContainer;
+        break;
+      default:
+        destination = openContainer;
+        break;
     }
-  }
 
-  /**
-   * wireStatusListeners
-   * @param {HTMLElement} group - the .ticket-group card
-   * @param {boolean} isPermanent - true for the master template that should never move
-   */
-  function wireStatusListeners(group, isPermanent) {
-    const statusSelects = group.querySelectorAll(".ticket-status-select");
-    statusSelects.forEach((select) => {
-      select.addEventListener("change", () => {
-        const value = select.value;
-        const card = select.closest(".ticket-group");
-        if (!card) return;
-
-        // Permanent template behavior
-        if (isPermanent) {
-          if (value === "Open") return;
-
-          // Clone the filled-out template
-          const newGroup = card.cloneNode(true);
-          newGroup.dataset.permanent = "false";
-
-          // Remove + button & integrated-plus layout from the new card
-          const newAddBtn = newGroup.querySelector(".add-row");
-          if (newAddBtn) {
-            newAddBtn.remove();
-          }
-          const integratedRow = newGroup.querySelector(".checklist-row.integrated-plus");
-          if (integratedRow) {
-            integratedRow.classList.remove("integrated-plus");
-          }
-
-          // This new card keeps all field values, including the chosen status
-          wireStatusListeners(newGroup, false);
-
-          // Place new card into the appropriate container
-          if (value === "Open") {
-            openContainer.appendChild(newGroup);
-          } else if (value === "Tier Two") {
-            tierTwoContainer.appendChild(newGroup);
-          } else if (value === "Closed - Resolved") {
-            closedResolvedContainer.appendChild(newGroup);
-          } else if (
-            value === "Closed – Feature Not Supported" ||
-            value === "Closed - Feature Not Supported"
-          ) {
-            closedFeatureContainer.appendChild(newGroup);
-          } else {
-            // Fallback: keep it under Open if some new value shows up
-            openContainer.appendChild(newGroup);
-          }
-
-          // Reset the permanent template to blank + Open
-          resetTemplateGroup(card);
-          return;
-        }
-
-        // Movable cards: just move them between sections based on status
-        if (value === "Open") {
-          openContainer.appendChild(card);
-        } else if (value === "Tier Two") {
-          tierTwoContainer.appendChild(card);
-        } else if (value === "Closed - Resolved") {
-          closedResolvedContainer.appendChild(card);
-        } else if (
-          value === "Closed – Feature Not Supported" ||
-          value === "Closed - Feature Not Supported"
-        ) {
-          closedFeatureContainer.appendChild(card);
-        }
-      });
-    });
-  }
+    if (destination && destination !== card.parentElement) {
+      destination.appendChild(card);
+    }
+  });
 }
 
-// ---------------- PDF EXPORT ----------------
-function initPDFExport() {
-  const btn = document.getElementById("savePDF");
+// --------------- PDF EXPORT (PAGE 10) ---------------
+function setupPdfExport() {
+  const btn = document.getElementById('savePDF');
   if (!btn) return;
 
-  btn.addEventListener("click", () => {
-    if (!window.jspdf) {
-      alert("PDF library not loaded.");
+  btn.addEventListener('click', () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('PDF library not loaded.');
       return;
     }
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF("p", "pt", "a4");
+    const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Simple approach: render the main content (all pages) into the PDF.
-    doc.html(document.body, {
-      callback: function (doc) {
-        doc.save("myKaarma_Training_Checklist.pdf");
+    // Capture the main content (topbar + app)
+    const root = document.body;
+
+    doc.html(root, {
+      callback: function (pdf) {
+        pdf.save('myKaarma_Training_Checklist.pdf');
       },
-      x: 10,
-      y: 10,
-      margin: [10, 10, 10, 10],
-      autoPaging: "text",
+      margin: [20, 20, 20, 20],
+      autoPaging: 'text',
+      html2canvas: {
+        scale: 0.6,
+        useCORS: true
+      }
     });
   });
+}
+
+// --------------- DEALERSHIP NAME DISPLAY ---------------
+function setupDealershipNameBinding() {
+  const display = document.getElementById('dealershipNameDisplay');
+  const input = document.getElementById('dealershipNameInput');
+
+  if (!display || !input) return;
+
+  const sync = () => {
+    const value = input.value.trim();
+    display.textContent = value || 'Dealership Name';
+  };
+
+  input.addEventListener('input', sync);
+  sync();
 }
