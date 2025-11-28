@@ -188,9 +188,7 @@
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <!-- Contact grid: 2 x N -->
-    <div class="contact-grid">
-
+    <div class="primary-contacts-grid">
       <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -255,31 +253,27 @@
         </div>
       </div>
 
-      <!-- Additional POC cards live in same grid -->
-      <div id="additionalPocContainer">
-        <!-- TEMPLATE Additional POC card (has + in Name row) -->
-        <div class="mini-card contact-card additional-poc-card">
-          <div class="checklist-row integrated-plus">
-            <label>Additional Point of Contact</label>
-            <input type="text" placeholder="Name">
-            <button type="button" class="add-row additional-poc-add">+</button>
-          </div>
-          <div class="checklist-row indent-sub">
-            <label>Role</label>
-            <input type="text">
-          </div>
-          <div class="checklist-row indent-sub">
-            <label>Cell</label>
-            <input type="text">
-          </div>
-          <div class="checklist-row indent-sub">
-            <label>Email</label>
-            <input type="email">
-          </div>
+      <!-- Additional POC (template with + in Name) -->
+      <div class="mini-card contact-card additional-poc-card">
+        <div class="checklist-row integrated-plus">
+          <label>Additional POC</label>
+          <input type="text" placeholder="Name">
+          <button type="button" class="add-row additional-poc-add">+</button>
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Role</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
         </div>
       </div>
-
-    </div> <!-- /contact-grid -->
+    </div>
   </div>
 
   <!-- SCHEDULER / COMMUNICATION / OTHER CONTACTS -->
@@ -335,7 +329,7 @@
     <div class="mini-card">
       <div class="checklist-row">
         <label>Other Key Contact</label>
-        <input type="text" placeholder="Name">
+        <input type="text">
       </div>
       <div class="checklist-row indent-sub">
         <label>Role / Title</label>
@@ -350,7 +344,6 @@
         <input type="email">
       </div>
     </div>
-
   </div>
 </section>
 
