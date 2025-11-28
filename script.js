@@ -127,13 +127,28 @@ function initAdditionalTrainers() {
 }
 
 /* --------------- ADDITIONAL POC (PAGE 2) --------------- */
-/* This assumes:
-   - A template card with class "additional-poc-template" inside #primaryContactsGrid
-   - The template has:
-       .checklist-row.integrated-plus
-          input[type="text"] (name)
-          button.additional-poc-add
-     and following rows for Role / Cell / Email
+/*
+  HTML assumptions (inside #primaryContactsGrid):
+
+  <div class="mini-card contact-card additional-poc-card additional-poc-template">
+    <div class="checklist-row integrated-plus">
+      <label>Additional POC</label>
+      <input type="text">
+      <button type="button" class="add-row additional-poc-add">+</button>
+    </div>
+    <div class="checklist-row">
+      <label>Role</label>
+      <input type="text">
+    </div>
+    <div class="checklist-row">
+      <label>Cell</label>
+      <input type="text">
+    </div>
+    <div class="checklist-row">
+      <label>Email</label>
+      <input type="email">
+    </div>
+  </div>
 */
 
 function initAdditionalPoc() {
@@ -164,7 +179,7 @@ function initAdditionalPoc() {
       input.value = '';
     });
 
-    // insert clone right after the last POC card
+    // append clone to grid – 2×N layout will fill horizontally then wrap
     grid.appendChild(clone);
   });
 }
