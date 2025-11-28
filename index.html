@@ -72,13 +72,13 @@
     <!-- MAIN CONTENT -->
     <main>
 
-   <!-- ========================================================= -->
-<!-- PAGE 1: DEPLOYMENT & TRAINING TEAM                        -->
+  <!-- ========================================================= -->
+<!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
 <!-- ========================================================= -->
-<section id="trainers-page" class="page-section active">
-  <h1>Deployment &amp; Training Team</h1>
+<section id="onsite-trainers" class="page-section active">
+  <h1>Training Leads &amp; Contacts</h1>
   <p class="page-subtitle">
-    Capture trainer assignments, deployment ownership, and key contacts for this onsite.
+    Capture trainer assignments and core dealership contacts for this onsite.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
@@ -122,11 +122,15 @@
       </select>
     </div>
 
-    <!-- Additional Trainers -->
-    <div class="checklist-row indent-sub">
-      <label>Additional Trainers</label>
-      <input type="text" placeholder="Add additional trainers">
+    <!-- Additional trainers (integrated +) -->
+    <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
+      <label for="additionalTrainers">Additional Trainers</label>
+      <input type="text" id="additionalTrainers" name="additionalTrainers">
+      <button type="button" class="add-row add-trainer-btn">+</button>
     </div>
+
+    <!-- Container for extra trainer rows -->
+    <div id="additionalTrainersContainer"></div>
 
     <!-- Training Type -->
     <div class="checklist-row">
@@ -152,23 +156,46 @@
     </div>
   </div>
 
-  <!-- DEPLOYMENT MANAGER -->
+  <!-- CEM & DEPLOYMENT CONTACTS CARD -->
   <div class="section-block">
-    <h2>Deployment Manager</h2>
+    <h2>CEM &amp; Deployment</h2>
 
-    <div class="checklist-row">
-      <label>Deployment Manager</label>
-      <input type="text" placeholder="Full name of Deployment Manager">
+    <!-- CEM -->
+    <div class="mini-card">
+      <div class="checklist-row">
+        <label>CEM</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
     </div>
-  </div>
 
-  <!-- CEM -->
-  <div class="section-block">
-    <h2>CEM / Customer Owner</h2>
+    <!-- Deployment Manager -->
+    <div class="mini-card">
+      <div class="checklist-row">
+        <label>Deployment Manager</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
+    </div>
 
+    <!-- Additional notes about training ownership -->
     <div class="checklist-row">
-      <label>CEM / Customer Owner</label>
-      <input type="text" placeholder="CEM or Customer Success Manager">
+      <label>Notes about who owns success / communication for this onsite</label>
+      <input type="text">
     </div>
   </div>
 </section>
