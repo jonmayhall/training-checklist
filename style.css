@@ -1,5 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
+   Stable Layout + Contacts/Champions Cards + Support Tickets + Opcodes
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -30,7 +31,7 @@ html, body {
 }
 
 /* no italics anywhere by default */
-*, em, i {
+*, em, i { 
   font-style: normal !important;
 }
 
@@ -46,35 +47,37 @@ html, body {
   inset: 0 0 auto 0;
   z-index: 20;
 }
-.topbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+.topbar-content { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  width: 100%; 
 }
-.top-logo {
-  height: 42px;
-  object-fit: contain;
+.top-logo { 
+  height: 42px; 
+  object-fit: contain; 
   display: block;
 }
+
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-#dealershipNameDisplay {
-  color:#fff;
+
+#dealershipNameDisplay { 
+  color:#fff; 
   font-size:22px;
-  font-weight:600;
-  letter-spacing:.5px;
+  font-weight:600; 
+  letter-spacing:.5px; 
 }
 
 /* --------------- LAYOUT --------------- */
-#app {
-  display: flex;
-  min-height: 100vh;
-  margin-top: 70px;
-  overflow-x: hidden;
+#app { 
+  display: flex; 
+  min-height: 100vh; 
+  margin-top: 70px; 
+  overflow-x: hidden; 
 }
 
 /* Darker, modern sidebar */
@@ -89,10 +92,10 @@ html, body {
   bottom: 0;
   overflow-y: auto;
 }
-#sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+#sidebar-nav { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
 }
 
 /* hide icon span but keep label if it exists */
@@ -197,8 +200,8 @@ main {
   max-width: 960px;
   box-sizing: border-box;
 }
-.page-section.active {
-  display: block;
+.page-section.active { 
+  display: block; 
 }
 
 /* Page titles */
@@ -316,6 +319,7 @@ main {
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
 .section-block .checklist-row input[type="date"],
+.section-block .checklist-row input[type="tel"],
 .section-block .checklist-row select {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
@@ -361,13 +365,13 @@ main {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 4px 0;
-  padding: 4px 0 2px;
+  margin: 10px 0;
+  padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/* rows inside mini-card – centered between lines, no weird gaps */
+/* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
   margin: 0;
   border-bottom: 1px solid #e5e5e5;
@@ -387,18 +391,6 @@ main {
   padding-left: 60px !important;
 }
 
-/* Inputs/dropdowns inside mini-card – align with global input width */
-.mini-card .checklist-row input[type="text"],
-.mini-card .checklist-row input[type="number"],
-.mini-card .checklist-row input[type="email"],
-.mini-card .checklist-row input[type="date"],
-.mini-card .checklist-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-}
-
 /* ensure no weird tint */
 .mini-card .checklist-row {
   background: #fff !important;
@@ -409,11 +401,30 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* Primary contacts – grid 2 per row */
+/* --------------- PRIMARY CONTACTS GRID (2 x N) --------------- */
 .primary-contacts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 18px;
+  column-gap: 18px;
+  row-gap: 12px;
+}
+
+/* smaller font + keep on one line inside contact cards */
+.contact-card .checklist-row label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* align contact inputs with the global textbox width */
+.contact-card .checklist-row input[type="text"],
+.contact-card .checklist-row input[type="number"],
+.contact-card .checklist-row input[type="email"],
+.contact-card .checklist-row input[type="tel"],
+.contact-card .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* --------------- Integrated “+” rows --------------- */
@@ -432,7 +443,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows */
+/* base integrated-plus text box */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -471,7 +482,7 @@ main {
   transform: translateY(-1px);
 }
 
-/* Additional POC integrated row – tweak so + lines up perfectly */
+/* Additional POC integrated row – ensure perfect alignment */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -480,6 +491,7 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 34px;
   width: 34px;
@@ -488,70 +500,6 @@ main {
   line-height: 1;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   padding: 0;
-}
-
-/* --------------- Dealership Basics – Address + Map --------------- */
-
-/* Wrap the address input and button so they sit on one line */
-.address-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-
-/* Wider address box for readability */
-#dealerAddress {
-  flex: 0 0 360px;
-  width: 360px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  box-sizing: border-box;
-}
-
-/* Small button for "Show on Map" */
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--orange);
-  background: var(--orange);
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
-  white-space: nowrap;
-  transition: background .16s, transform .16s, box-shadow .16s;
-}
-.small-map-btn:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
-}
-
-/* Map container */
-.map-wrapper {
-  margin: 16px 0 4px;
-  padding-left: 40px;
-}
-.map-frame {
-  width: 100%;
-  max-width: 600px;
-  height: 260px;
-  border: 0;
-  border-radius: 14px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
-}
-.map-helper-text {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: #555;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
@@ -564,9 +512,12 @@ main {
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
+
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
+
+/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -582,6 +533,7 @@ main {
 .dms-overview-block {
   margin-bottom: 28px;
 }
+
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -589,6 +541,7 @@ main {
   font-size: 13px;
   margin-top: 8px;
 }
+
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -596,6 +549,7 @@ main {
   border-radius: 999px;
   margin-right: 6px;
 }
+
 .dms-dot-auto      { background: #22c55e; }
 .dms-dot-ondemand  { background: #f97316; }
 .dms-dot-withro    { background: #0ea5e9; }
@@ -609,12 +563,14 @@ main {
   box-shadow: var(--shadow);
   background: #fff;
 }
+
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   padding: 18px;
 }
+
 .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -622,17 +578,20 @@ main {
   box-shadow: 0 4px 10px rgba(15,23,42,0.06);
   padding: 14px 16px 12px;
 }
+
 .dms-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
 }
+
 .dms-name {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
+
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -652,6 +611,7 @@ main {
   color: #e5e7eb;
   border-color: #020617;
 }
+
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
@@ -667,6 +627,7 @@ main {
   margin-top: 0;
   padding-top: 2px;
 }
+
 .dms-row-top {
   display: flex;
   align-items: center;
@@ -677,6 +638,8 @@ main {
   font-weight: 600;
   font-size: 13px;
 }
+
+/* DOT ONLY tags */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -693,6 +656,7 @@ main {
 .dms-tag-na        { background: #9ca3af; }
 .dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
+
 .dms-list p {
   margin: 0;
   font-size: 12px;
@@ -702,19 +666,8 @@ main {
 
 /* --------------- Training TABLES --------------- */
 
-.section {
-  margin-bottom: 40px;
-}
-
-/* Header bar above each table */
-.section-header {
-  background: var(--orange);
-  color: #fff;
-  font-weight: 600;
-  padding: 10px 16px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  margin: 0 -22px 0;
-  font-size: 15px;
+.section { 
+  margin-bottom: 40px; 
 }
 
 /* Table Card – no side padding so header touches edges */
@@ -729,6 +682,7 @@ main {
   padding: 0;
   box-sizing: border-box;
 }
+
 .scroll-wrapper {
   display: block;
   width: 100%;
@@ -762,6 +716,8 @@ main {
   top: 0;
   z-index: 3;
 }
+
+/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
@@ -776,7 +732,7 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child {
+.training-table thead th:first-child { 
   text-align: center;
 }
 .training-table td:first-child {
@@ -831,11 +787,11 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) {
-  background: #fff;
+.training-table tr:nth-child(odd) { 
+  background: #fff; 
 }
-.training-table tr:nth-child(even) {
-  background: #fafafa;
+.training-table tr:nth-child(even) { 
+  background: #fafafa; 
 }
 
 /* Table footer + "+" button  */
@@ -846,7 +802,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-start;   /* + button on the LEFT */
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -886,20 +842,7 @@ main {
   background: inherit;
 }
 
-/* Column sizing based on headers:
-   1 Updated
-   2 Opcode
-   3 Opcode Duration
-   4 Labor Price
-   5 Flat Rate Hours
-   6 Parts Price
-   7 Pay Type
-   8 Order #
-   9 Add to Online Scheduler
-   10 Add to Dealer App Scheduler
-   11 Add to Mobile Service
-   12 Add to ServiceCart
-*/
+/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -915,14 +858,16 @@ main {
   width: 110px;
   min-width: 100px;
 }
-/* Parts Price column – smaller */
+
+/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
   max-width: 80px;
   min-width: 60px;
 }
-/* Checkboxes columns */
+
+/* Checkboxes for last columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -964,11 +909,12 @@ main {
   background: #ff8b42;
 }
 
-/* --------------- Misc --------------- */
+/* Orange outline card for Automations on Post-Training page */
 .orange-outline-card {
   border: 1px solid var(--orange);
 }
 
+/* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
   color: #666;
