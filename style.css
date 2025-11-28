@@ -30,7 +30,7 @@ html, body {
 }
 
 /* no italics anywhere by default */
-*, em, i { 
+*, em, i {
   font-style: normal !important;
 }
 
@@ -46,37 +46,35 @@ html, body {
   inset: 0 0 auto 0;
   z-index: 20;
 }
-.topbar-content { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  width: 100%; 
+.topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
-.top-logo { 
-  height: 42px; 
-  object-fit: contain; 
+.top-logo {
+  height: 42px;
+  object-fit: contain;
   display: block;
 }
-
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
-#dealershipNameDisplay { 
-  color:#fff; 
+#dealershipNameDisplay {
+  color:#fff;
   font-size:22px;
-  font-weight:600; 
-  letter-spacing:.5px; 
+  font-weight:600;
+  letter-spacing:.5px;
 }
 
 /* --------------- LAYOUT --------------- */
-#app { 
-  display: flex; 
-  min-height: 100vh; 
-  margin-top: 70px; 
-  overflow-x: hidden; 
+#app {
+  display: flex;
+  min-height: 100vh;
+  margin-top: 70px;
+  overflow-x: hidden;
 }
 
 /* Darker, modern sidebar */
@@ -91,10 +89,10 @@ html, body {
   bottom: 0;
   overflow-y: auto;
 }
-#sidebar-nav { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
+#sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* hide icon span but keep label if it exists */
@@ -199,8 +197,8 @@ main {
   max-width: 960px;
   box-sizing: border-box;
 }
-.page-section.active { 
-  display: block; 
+.page-section.active {
+  display: block;
 }
 
 /* Page titles */
@@ -280,17 +278,6 @@ main {
   margin-right: -22px;
 }
 
-/* Used for Training Checklist section headers */
-.section-header {
-  background: var(--orange);
-  color: #fff;
-  padding: 10px 16px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  margin-bottom: 0;
-}
-
 /* Extra spacing when a notes card is followed by another card */
 .notes-block {
   margin-bottom: 32px;
@@ -311,15 +298,11 @@ main {
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
 }
-
-/* only remove the border on the last TOP-LEVEL row inside a section-block
-   so nested rows (mini-cards, additional trainers, etc.) KEEP their dividers */
-.section-block > .checklist-row:last-of-type {
+.section-block .checklist-row:last-of-type {
   border-bottom: none;
   margin-bottom: 8px;
   padding-bottom: 0;
 }
-
 .checklist-row label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -378,19 +361,19 @@ main {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 18px 0;
-  padding: 6px 0 4px;
+  margin: 4px 0;
+  padding: 4px 0 2px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/* rows inside mini-card – centered between lines, no extra margin */
+/* rows inside mini-card – centered between lines, no weird gaps */
 .mini-card .checklist-row {
   margin: 0;
   border-bottom: 1px solid #e5e5e5;
   padding-top: 8px;
   padding-bottom: 8px;
-  padding-right: 16px;
+  padding-right: 24px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
@@ -398,21 +381,21 @@ main {
 
 /* keep standard left indent the same as everywhere else */
 .mini-card .checklist-row {
-  padding-left: 28px; /* slightly tighter inside mini-cards */
+  padding-left: 40px;
 }
 .mini-card .checklist-row.indent-sub {
-  padding-left: 40px !important;
+  padding-left: 60px !important;
 }
 
-/* inputs/dropdowns inside mini-cards – flex to fit the smaller card */
+/* Inputs/dropdowns inside mini-card – align with global input width */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="date"],
 .mini-card .checklist-row select {
-  flex: 1 1 auto;
-  max-width: var(--input-width);
-  margin-left: 0;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
   margin-right: 0;
 }
 
@@ -426,73 +409,15 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* --------------- PRIMARY CONTACTS GRID (PAGE 2) --------------- */
-
-#primaryContactsGrid {
+/* Primary contacts – grid 2 per row */
+.primary-contacts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
-  margin: 16px 0 6px;
+  gap: 12px 18px;
 }
 
-#primaryContactsGrid .mini-card {
-  margin: 0;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-/* Make these mini-cards a bit tighter */
-#primaryContactsGrid .checklist-row {
-  padding-left: 18px;
-  padding-right: 12px;
-  font-size: 13px;
-}
-
-/* FORCE all labels to same width so textboxes align across cards */
-#primaryContactsGrid .checklist-row label {
-  white-space: nowrap;
-  font-size: 12px;
-  flex: 0 0 115px;
-}
-
-/* Text inputs aligned to same visual width in every card */
-#primaryContactsGrid .checklist-row input[type="text"],
-#primaryContactsGrid .checklist-row input[type="email"] {
-  flex: 1 1 auto;
-  max-width: 220px;
-}
-
-/* Additional POC: name + + button equal a normal textbox */
-#primaryContactsGrid .additional-poc-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(220px - 30px);
-  max-width: calc(220px - 30px);
-  margin-left: 0;
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* small, aligned + button in the name field */
-#primaryContactsGrid .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
-  flex: 0 0 30px;
-  width: 30px;
-  height: 30px;
-  margin: 0;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
-  cursor: pointer;
-}
-
-/* --------------- Integrated “+” rows (generic) --------------- */
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -546,6 +471,89 @@ main {
   transform: translateY(-1px);
 }
 
+/* Additional POC integrated row – tweak so + lines up perfectly */
+.additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: auto;
+  margin-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0;
+}
+
+/* --------------- Dealership Basics – Address + Map --------------- */
+
+/* Wrap the address input and button so they sit on one line */
+.address-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* Wider address box for readability */
+#dealerAddress {
+  flex: 0 0 360px;
+  width: 360px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* Small button for "Show on Map" */
+.small-map-btn {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
+  white-space: nowrap;
+  transition: background .16s, transform .16s, box-shadow .16s;
+}
+.small-map-btn:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+}
+
+/* Map container */
+.map-wrapper {
+  margin: 16px 0 4px;
+  padding-left: 40px;
+}
+.map-frame {
+  width: 100%;
+  max-width: 600px;
+  height: 260px;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+}
+.map-helper-text {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #555;
+}
+
 /* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
@@ -556,9 +564,17 @@ main {
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
-
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
+}
+.ticket-count-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
@@ -566,7 +582,6 @@ main {
 .dms-overview-block {
   margin-bottom: 28px;
 }
-
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -574,7 +589,6 @@ main {
   font-size: 13px;
   margin-top: 8px;
 }
-
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -582,7 +596,6 @@ main {
   border-radius: 999px;
   margin-right: 6px;
 }
-
 .dms-dot-auto      { background: #22c55e; }
 .dms-dot-ondemand  { background: #f97316; }
 .dms-dot-withro    { background: #0ea5e9; }
@@ -596,14 +609,12 @@ main {
   box-shadow: var(--shadow);
   background: #fff;
 }
-
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   padding: 18px;
 }
-
 .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -611,20 +622,17 @@ main {
   box-shadow: 0 4px 10px rgba(15,23,42,0.06);
   padding: 14px 16px 12px;
 }
-
 .dms-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
 }
-
 .dms-name {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
-
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -644,7 +652,6 @@ main {
   color: #e5e7eb;
   border-color: #020617;
 }
-
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
@@ -660,7 +667,6 @@ main {
   margin-top: 0;
   padding-top: 2px;
 }
-
 .dms-row-top {
   display: flex;
   align-items: center;
@@ -671,8 +677,6 @@ main {
   font-weight: 600;
   font-size: 13px;
 }
-
-/* DOT ONLY tags */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -689,7 +693,6 @@ main {
 .dms-tag-na        { background: #9ca3af; }
 .dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
-
 .dms-list p {
   margin: 0;
   font-size: 12px;
@@ -699,8 +702,19 @@ main {
 
 /* --------------- Training TABLES --------------- */
 
-.section { 
-  margin-bottom: 40px; 
+.section {
+  margin-bottom: 40px;
+}
+
+/* Header bar above each table */
+.section-header {
+  background: var(--orange);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin: 0 -22px 0;
+  font-size: 15px;
 }
 
 /* Table Card – no side padding so header touches edges */
@@ -715,7 +729,6 @@ main {
   padding: 0;
   box-sizing: border-box;
 }
-
 .scroll-wrapper {
   display: block;
   width: 100%;
@@ -749,8 +762,6 @@ main {
   top: 0;
   z-index: 3;
 }
-
-/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
@@ -765,7 +776,7 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child { 
+.training-table thead th:first-child {
   text-align: center;
 }
 .training-table td:first-child {
@@ -820,11 +831,11 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) { 
-  background: #fff; 
+.training-table tr:nth-child(odd) {
+  background: #fff;
 }
-.training-table tr:nth-child(even) { 
-  background: #fafafa; 
+.training-table tr:nth-child(even) {
+  background: #fafafa;
 }
 
 /* Table footer + "+" button  */
@@ -875,7 +886,20 @@ main {
   background: inherit;
 }
 
-/* Column sizing for Opcodes */
+/* Column sizing based on headers:
+   1 Updated
+   2 Opcode
+   3 Opcode Duration
+   4 Labor Price
+   5 Flat Rate Hours
+   6 Parts Price
+   7 Pay Type
+   8 Order #
+   9 Add to Online Scheduler
+   10 Add to Dealer App Scheduler
+   11 Add to Mobile Service
+   12 Add to ServiceCart
+*/
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -891,7 +915,6 @@ main {
   width: 110px;
   min-width: 100px;
 }
-
 /* Parts Price column – smaller */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
@@ -899,8 +922,7 @@ main {
   max-width: 80px;
   min-width: 60px;
 }
-
-/* Checkboxes for last columns */
+/* Checkboxes columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -942,12 +964,11 @@ main {
   background: #ff8b42;
 }
 
-/* Small orange outline card (used for Automations etc.) */
+/* --------------- Misc --------------- */
 .orange-outline-card {
   border: 1px solid var(--orange);
 }
 
-/* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
   color: #666;
