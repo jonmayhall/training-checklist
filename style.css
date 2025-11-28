@@ -417,14 +417,44 @@ main {
 .contact-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 18px;
+  gap: 12px 14px;
 }
+
 .contact-grid .mini-card {
   margin: 0;
 }
 
+/* Compact contact cards + single-line labels */
+.contact-card .checklist-row {
+  font-size: 13px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.contact-card .checklist-row:last-child {
+  margin-bottom: 4px;
+}
+
+.contact-card .checklist-row label {
+  font-size: 13px;
+  white-space: nowrap; /* keep verbiage on one line */
+}
+
+.contact-card .checklist-row input[type="text"],
+.contact-card .checklist-row input[type="email"],
+.contact-card .checklist-row select {
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+.contact-card.mini-card {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 /* --------------- Integrated “+” rows --------------- */
-/* Layout: label | input (same width as other inputs) | + button */
+/* Layout: label | full-width input | small + button */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -446,11 +476,10 @@ main {
   width: var(--input-width);
   margin-left: auto;
   margin-right: 0;
-  border-top-right-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
+  border-radius: var(--radius-sm); /* full rounded; button is separate */
 }
 
-/* Integrated + button – sits to the right, no width stealing */
+/* Integrated + button – small pill, does not steal width */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -643,6 +672,16 @@ main {
 
 .section { 
   margin-bottom: 40px; 
+}
+
+/* simple header style used above tables */
+.section-header {
+  background: var(--orange);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 /* Table Card – no side padding so header touches edges */
@@ -904,6 +943,11 @@ main {
   font-size: 0.9em;
   color: #666;
   font-style: italic !important;
+}
+
+/* --------------- Orange outline card (Post-Training Automations) --------------- */
+.orange-outline-card {
+  border-color: var(--orange) !important;
 }
 
 /* --------------- RESPONSIVE --------------- */
