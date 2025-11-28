@@ -201,174 +201,210 @@
 </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 2: DEALERSHIP CONTACTS                               -->
+<!-- PAGE 2: DEALERSHIP INFO & PRIMARY CONTACTS                -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
   <button type="button" class="clear-page-btn">Reset This Page</button>
 
-  <h1>Dealership Contacts</h1>
+  <h1>Dealership Info &amp; Contacts</h1>
   <p class="page-subtitle">
-    Capture primary dealership contacts for coordination before, during, and after training.
+    Capture dealership basics, building layout, and primary contacts for this onsite.
   </p>
 
-  <!-- PRIMARY CONTACTS -->
+  <!-- ======================= -->
+  <!-- Dealership Basics       -->
+  <!-- ======================= -->
+  <div class="section-block">
+    <h2>Dealership Basics</h2>
+
+    <div class="checklist-row">
+      <label>Dealer Group</label>
+      <input type="text" id="dealerGroup" placeholder="Dealer group name">
+    </div>
+
+    <div class="checklist-row">
+      <label>Dealership Name</label>
+      <input type="text" id="dealershipNameInput" placeholder="Dealership legal name">
+    </div>
+
+    <div class="checklist-row">
+      <label>DMS</label>
+      <input type="text" id="dmsName" placeholder="CDK, Reynolds, Tekion, etc.">
+    </div>
+
+    <div class="checklist-row">
+      <label>Time Zone</label>
+      <select id="timeZone">
+        <option></option>
+        <option>Eastern</option>
+        <option>Central</option>
+        <option>Mountain</option>
+        <option>Pacific</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <!-- Address line (larger text box + button to update map) -->
+    <div class="checklist-row">
+      <label>Address</label>
+      <div class="address-input-wrap">
+        <input
+          type="text"
+          id="dealerAddress"
+          placeholder="Street, City, State Zip"
+        >
+        <button type="button" id="updateMapBtn" class="small-map-btn">
+          Show on Map
+        </button>
+      </div>
+    </div>
+
+    <div class="checklist-row">
+      <label>Multiple OEMs?</label>
+      <select id="multipleBrands">
+        <option></option>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Service Drives?</label>
+      <select id="driveStructure">
+        <option></option>
+        <option>Shared Drives</option>
+        <option>Separate Drives, one building</option>
+        <option>Separate Drives, Seperate Buildings</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Total Buildings</label>
+      <select id="totalBuildings">
+        <option></option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Do the deployment notes state any off-site buildings?</label>
+      <select id="offsiteBuildings">
+        <option></option>
+        <option>No</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+      </select>
+    </div>
+
+    <!-- Google Maps embed -->
+    <div class="map-wrapper">
+      <iframe
+        id="dealershipMap"
+        class="map-frame"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src=""
+      ></iframe>
+      <p class="map-helper-text">
+        Enter the address and click “Show on Map” to view the surrounding area.
+        You can pan and zoom just like normal Google Maps.
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- Primary Contacts        -->
+  <!-- ======================= -->
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div id="primaryContactsGrid">
-      <!-- Service Director -->
+    <div id="primaryContactsGrid" class="primary-contacts-grid">
+      <!-- Row 1 -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Service Director</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- Service Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Service Manager</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- General Manager -->
+      <!-- Row 2 -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>General Manager</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- Parts Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Parts Manager</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- Additional POC – TEMPLATE CARD with + button -->
-      <div class="mini-card contact-card additional-poc-card additional-poc-template">
+      <!-- Row 3+: Additional POC – template with + button -->
+      <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
-          <input type="text">
+          <input type="text" class="additional-poc-name">
           <button type="button" class="add-row additional-poc-add">+</button>
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Role</label>
-          <input type="text">
+          <input type="text" class="additional-poc-role">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text">
+          <input type="text" class="additional-poc-cell">
         </div>
-        <div class="checklist-row">
+        <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email">
+          <input type="email" class="additional-poc-email">
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCHEDULER / COMMUNICATION / OTHER CONTACTS (unchanged layout) -->
-  <div class="section-block">
-    <h2>Schedulers, Communication &amp; Other Contacts</h2>
-
-    <!-- Scheduler / BDC -->
-    <div class="mini-card">
-      <div class="checklist-row">
-        <label>Scheduler / BDC Lead</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Cell</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Email</label>
-        <input type="email">
-      </div>
-      <div class="checklist-row">
-        <label>Scheduling responsibility (service, quick lane, recall, etc.)</label>
-        <input type="text">
-      </div>
-    </div>
-
-    <!-- Communication / Marketing -->
-    <div class="mini-card">
-      <div class="checklist-row">
-        <label>Communication / Marketing</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Cell</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Email</label>
-        <input type="email">
-      </div>
-      <div class="checklist-row">
-        <label>Responsible for messaging customers about myKaarma?</label>
-        <select>
-          <option></option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Shared</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Other Key Contact -->
-    <div class="mini-card">
-      <div class="checklist-row">
-        <label>Other Key Contact</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Role / Title</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Cell</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row">
-        <label>Email</label>
-        <input type="email">
       </div>
     </div>
   </div>
