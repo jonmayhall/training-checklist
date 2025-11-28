@@ -188,8 +188,7 @@
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div class="primary-contacts-grid" id="primaryContactsGrid">
-      <!-- Row 1 -->
+    <div id="primaryContactsGrid">
       <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -222,7 +221,6 @@
         </div>
       </div>
 
-      <!-- Row 2 -->
       <!-- General Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -255,8 +253,7 @@
         </div>
       </div>
 
-      <!-- Row 3+ : Additional POCs -->
-      <!-- TEMPLATE Additional POC card (always last in grid, has + in Name row) -->
+      <!-- Additional POC (template – has + button) -->
       <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
@@ -276,6 +273,8 @@
           <input type="email">
         </div>
       </div>
+      <!-- Cloned Additional POC cards will be appended here by JS
+           and will NOT have the + button -->
     </div>
   </div>
 
