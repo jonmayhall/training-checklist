@@ -4,20 +4,22 @@
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupNavigation();
-  setupClearAll();
-  setupPageClearButtons();
-  setupAdditionalTrainers();
-  setupAdditionalPocCloning();
-  setupSupportTickets();
-  setupTableAddRowButtons();
-  setupPdfExport();
+  try { setupNavigation(); } catch (e) { console.error("Nav error", e); }
+  try { setupClearAll(); } catch (e) { console.error("ClearAll error", e); }
+  try { setupPageClearButtons(); } catch (e) { console.error("Page clear error", e); }
+  try { setupAdditionalTrainers(); } catch (e) { console.error("AdditionalTrainers error", e); }
+  try { setupAdditionalPocCloning(); } catch (e) { console.error("AdditionalPOC error", e); }
+  try { setupSupportTickets(); } catch (e) { console.error("SupportTickets error", e); }
+  try { setupTableAddRowButtons(); } catch (e) { console.error("TableAddRow error", e); }
+  try { setupPdfExport(); } catch (e) { console.error("PDF error", e); }
 });
 
 /* ---------------- NAVIGATION ---------------- */
 function setupNavigation() {
   const navButtons = document.querySelectorAll(".nav-btn");
   const sections = document.querySelectorAll(".page-section");
+
+  if (!navButtons.length || !sections.length) return;
 
   navButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -90,7 +92,7 @@ function setupPageClearButtons() {
    - Integrated "+" row: "Additional trainers" with text box + plus
    - On first click:
      • remove the + button
-     • keep the first textbox normal
+     • keep the first textbox normal (rounded)
      • add one extra textbox row directly below
 */
 function setupAdditionalTrainers() {
@@ -103,31 +105,36 @@ function setupAdditionalTrainers() {
 
   if (!addBtn || !container || !input) return;
 
-  addBtn.addEventListener(
-    "click",
-    () => {
-      // Remove the "+" and integrated style from the original row
-      addBtn.remove();
-      row.classList.remove("integrated-plus");
-      input.style.flex = "0 0 var(--input-width)";
-      input.style.width = "var(--input-width)";
+  let alreadyAdded = false;
 
-      // Create a new row immediately below
-      const extraRow = document.createElement("div");
-      extraRow.className = "checklist-row indent-sub";
+  addBtn.addEventListener("click", () => {
+    if (alreadyAdded) return;
+    alreadyAdded = true;
 
-      const extraLabel = document.createElement("label");
-      extraLabel.textContent = "Additional trainer";
+    // Remove the "+" and integrated style from the original row
+    addBtn.remove();
+    row.classList.remove("integrated-plus");
 
-      const extraInput = document.createElement("input");
-      extraInput.type = "text";
+    // Make the original input a normal full-width rounded box
+    input.style.flex = "0 0 var(--input-width)";
+    input.style.width = "var(--input-width)";
+    input.style.borderTopRightRadius = "var(--radius-sm)";
+    input.style.borderBottomRightRadius = "var(--radius-sm)";
 
-      extraRow.appendChild(extraLabel);
-      extraRow.appendChild(extraInput);
-      container.appendChild(extraRow);
-    },
-    { once: true }
-  );
+    // Create a new row immediately below
+    const extraRow = document.createElement("div");
+    extraRow.className = "checklist-row indent-sub";
+
+    const extraLabel = document.createElement("label");
+    extraLabel.textContent = "Additional trainer";
+
+    const extraInput = document.createElement("input");
+    extraInput.type = "text";
+
+    extraRow.appendChild(extraLabel);
+    extraRow.appendChild(extraInput);
+    container.appendChild(extraRow);
+  });
 }
 
 /* ---------------- ADDITIONAL POC CLONING (Page 2) ---------------- */
@@ -174,8 +181,7 @@ function setupAdditionalPocCloning() {
       cloneAdd.remove();
     }
 
-    // Insert clone AFTER template in the grid.
-    // With 2 columns: template is row3 col1, first clone is row3 col2.
+    // Append clone after the template — CSS grid will keep them in 2 columns.
     grid.appendChild(clone);
   });
 }
@@ -199,7 +205,7 @@ function setupSupportTickets() {
         if (tierTwoContainer) tierTwoContainer.appendChild(group);
         break;
       case "Closed - Resolved":
-        if (closedResolvedContainer) closedResolvedContainer.appendChild(group);
+        if (closedResolvedContainer) closedResolvedTicketsContainer.appendChild(group);
         break;
       case "Closed – Feature Not Supported":
         if (closedFeatureContainer) closedFeatureContainer.appendChild(group);
@@ -300,14 +306,21 @@ function setupPdfExport() {
     const textLines = [];
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach(el => {
-      const labelEl = el.closest(".checklist-row")?.querySelector("label");
-      const labelText = labelEl ? labelEl.textContent.trim() : "";
-      const value =
-        el.tagName.toLowerCase() === "select"
-          ? el.value
-          : el.type === "checkbox"
-          ? (el.checked ? "Yes" : "No")
-          : el.value;
+      let labelText = "";
+      const row = el.closest(".checklist-row");
+      if (row) {
+        const labelEl = row.querySelector("label");
+        if (labelEl) labelText = labelEl.textContent.trim();
+      }
+
+      let value;
+      if (el.tagName.toLowerCase() === "select") {
+        value = el.value;
+      } else if (el.type === "checkbox") {
+        value = el.checked ? "Yes" : "No";
+      } else {
+        value = el.value;
+      }
 
       if (labelText || value) {
         textLines.push(`${labelText}: ${value}`);
