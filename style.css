@@ -17,7 +17,7 @@
 
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
-  --input-width: 260px;    /* single source of truth for text-box width */
+  --input-width: 260px;    /* default text-box width */
 }
 
 /* --------------- BASE --------------- */
@@ -196,7 +196,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px; /* adjusted width */
+  max-width: 960px;
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -358,7 +358,7 @@ main {
   padding-left: 60px !important;
 }
 
-/* ensure additional trainers divider line */
+/* --------------- ADDITIONAL TRAINERS DIVIDER --------------- */
 .checklist-row.additional-trainers-row,
 .additional-trainer-row {
   border-bottom: 1px solid #e0e0e0 !important;
@@ -366,49 +366,56 @@ main {
   padding-bottom: 10px;
 }
 
-/* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
+/* --------------- MINI-CARDS (Contacts etc.) --------------- */
 /* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 18px 0;
+  margin: 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/* rows inside mini-card – centered between lines, no gaps */
+/* rows inside mini-card – shared layout */
 .mini-card .checklist-row {
   margin: 0;
   border-bottom: 1px solid #e5e5e5;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-right: 24px;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
 
-.mini-card .checklist-row {
-  padding-left: 40px;
-}
-.mini-card .checklist-row.indent-sub {
-  padding-left: 60px !important;
+/* move verbiage left + fixed label width */
+.mini-card .checklist-row label {
+  flex: 0 0 36%;
+  font-weight: 500;
+  text-align: left;
+  padding-right: 12px;
+  white-space: nowrap;
 }
 
-/* inputs/dropdowns inside thin orange borders –
-   slightly narrower + brought inward from right edge */
+/* aligned text boxes */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
 .mini-card .checklist-row input[type="tel"],
 .mini-card .checklist-row input[type="date"],
 .mini-card .checklist-row select {
-  flex: 0 0 calc(var(--input-width) - 30px);
-  width: calc(var(--input-width) - 30px);
-  margin-left: auto;
-  margin-right: 16px;
+  flex: 1 1 auto;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
 }
 
 /* ensure no weird tint */
@@ -435,25 +442,8 @@ main {
   width: 100%;
 }
 
-.primary-contacts-grid .mini-card .checklist-row label {
-  font-size: 13px;
-  white-space: nowrap;
-  align-items: center;
-}
-
-.primary-contacts-grid .mini-card .checklist-row input[type="text"],
-.primary-contacts-grid .mini-card .checklist-row input[type="number"],
-.primary-contacts-grid .mini-card .checklist-row input[type="email"],
-.primary-contacts-grid .mini-card .checklist-row input[type="tel"],
-.primary-contacts-grid .mini-card .checklist-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-}
-
 /* --------------- Integrated “+” rows --------------- */
-/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
+/* Layout: label | input | + button */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -468,7 +458,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows */
+/* Text box in integrated rows (default) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
@@ -480,7 +470,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as input */
+/* Integrated + button – default */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -512,25 +502,34 @@ main {
 .additional-poc-card .checklist-row.integrated-plus label {
   white-space: nowrap;
   font-size: 13px;
+  flex: 0 0 36%;
+  padding-right: 12px;
 }
 
+/* inside mini-card we want full-width + button at end */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  margin-left: auto;
+  flex: 1 1 auto;
+  width: 100%;
+  margin-left: 0;
   margin-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
-  flex: 0 0 34px;
-  width: 34px;
+  flex: 0 0 32px;
+  width: 32px;
   height: 34px;
   font-size: 16px;
-  line-height: 1;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-left: -1px;
   padding: 0;
+}
+
+/* override generic integrated-plus rule inside mini-card so fields line up */
+.mini-card .checklist-row.integrated-plus input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
@@ -718,7 +717,7 @@ main {
   margin-top: 0;
 }
 
-/* Table Card – no side padding so header touches edges */
+/* Table Card */
 .table-container {
   width: 100%;
   background: #fff;
@@ -743,7 +742,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 1000px;
+  min-width: 900px; /* slightly tighter so headers feel less blown out */
 }
 .training-table th,
 .training-table td {
@@ -777,8 +776,8 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 240px;
-  min-width: 240px;
+  width: 200px;        /* a bit narrower */
+  min-width: 200px;
 }
 .training-table thead th:first-child { 
   text-align: center;
@@ -850,7 +849,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
+  justify-content: flex-start;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
