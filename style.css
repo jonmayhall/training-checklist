@@ -1,6 +1,5 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   Stable Layout + Contacts/Champions Cards + Support Tickets + Opcodes
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -197,7 +196,7 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px;
+  max-width: 960px; /* adjusted width */
   box-sizing: border-box;
 }
 .page-section.active { 
@@ -299,9 +298,13 @@ main {
   font-size: 14px;
   padding-left: 40px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;   /* always keep divider */
+  border-bottom: 1px solid #e0e0e0;
 }
-
+.section-block .checklist-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+  padding-bottom: 0;
+}
 .checklist-row label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -314,8 +317,8 @@ main {
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
-.section-block .checklist-row input[type="date"],
 .section-block .checklist-row input[type="tel"],
+.section-block .checklist-row input[type="date"],
 .section-block .checklist-row select {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
@@ -355,13 +358,21 @@ main {
   padding-left: 60px !important;
 }
 
+/* ensure additional trainers divider line */
+.checklist-row.additional-trainers-row,
+.additional-trainer-row {
+  border-bottom: 1px solid #e0e0e0 !important;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+}
+
 /* --------------- MINI-CARDS (Contacts & Champions/Blockers) --------------- */
 /* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
   background: #fff;
-  margin: 10px 0;
+  margin: 18px 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
@@ -379,12 +390,25 @@ main {
   border-bottom: none;
 }
 
-/* keep standard left indent the same as everywhere else */
 .mini-card .checklist-row {
   padding-left: 40px;
 }
 .mini-card .checklist-row.indent-sub {
   padding-left: 60px !important;
+}
+
+/* inputs/dropdowns inside thin orange borders –
+   slightly narrower + brought inward from right edge */
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="number"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="tel"],
+.mini-card .checklist-row input[type="date"],
+.mini-card .checklist-row select {
+  flex: 0 0 calc(var(--input-width) - 30px);
+  width: calc(var(--input-width) - 30px);
+  margin-left: auto;
+  margin-right: 16px;
 }
 
 /* ensure no weird tint */
@@ -402,17 +426,21 @@ main {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 18px;
-  row-gap: 12px;
+  row-gap: 18px;
+  align-items: stretch;
 }
 
-/* uniform label style so all verbiage lines up */
+.primary-contacts-grid .mini-card {
+  margin: 0;
+  width: 100%;
+}
+
 .primary-contacts-grid .mini-card .checklist-row label {
   font-size: 13px;
   white-space: nowrap;
   align-items: center;
 }
 
-/* align contact inputs with the global textbox width */
 .primary-contacts-grid .mini-card .checklist-row input[type="text"],
 .primary-contacts-grid .mini-card .checklist-row input[type="number"],
 .primary-contacts-grid .mini-card .checklist-row input[type="email"],
@@ -440,8 +468,9 @@ main {
   padding-right: 16px;
 }
 
-/* base integrated-plus text box */
+/* Text box in integrated rows */
 .section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -479,11 +508,12 @@ main {
   transform: translateY(-1px);
 }
 
-/* Additional POC integrated row – ensure perfect alignment */
+/* --------------- Additional POC integrated row tweaks --------------- */
 .additional-poc-card .checklist-row.integrated-plus label {
   white-space: nowrap;
   font-size: 13px;
 }
+
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -492,6 +522,7 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 34px;
   width: 34px;
@@ -670,6 +701,23 @@ main {
   margin-bottom: 40px; 
 }
 
+/* Section header bar above tables */
+.section-header {
+  background: var(--orange);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 18px;
+  margin: 18px -22px 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom: 1px solid var(--border);
+}
+.section-header + .table-container {
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  margin-top: 0;
+}
+
 /* Table Card – no side padding so header touches edges */
 .table-container {
   width: 100%;
@@ -842,7 +890,7 @@ main {
   background: inherit;
 }
 
-/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+/* Opcode-related column sizing */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -867,7 +915,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last columns */
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -909,11 +957,6 @@ main {
   background: #ff8b42;
 }
 
-/* Orange outline card for Automations on Post-Training page */
-.orange-outline-card {
-  border: 1px solid var(--orange);
-}
-
 /* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
@@ -925,8 +968,16 @@ main {
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
+
+  .primary-contacts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
+
+  .primary-contacts-grid {
+    grid-template-columns: 1fr;
+  }
 }
