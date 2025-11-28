@@ -31,7 +31,7 @@ html, body {
 }
 
 /* no italics anywhere by default */
-*, em, i { 
+*, em, i {
   font-style: normal !important;
 }
 
@@ -47,15 +47,15 @@ html, body {
   inset: 0 0 auto 0;
   z-index: 20;
 }
-.topbar-content { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  width: 100%; 
+.topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
-.top-logo { 
-  height: 42px; 
-  object-fit: contain; 
+.top-logo {
+  height: 42px;
+  object-fit: contain;
   display: block;
 }
 
@@ -65,19 +65,19 @@ html, body {
   gap: 10px;
 }
 
-#dealershipNameDisplay { 
-  color:#fff; 
+#dealershipNameDisplay {
+  color:#fff;
   font-size:22px;
-  font-weight:600; 
-  letter-spacing:.5px; 
+  font-weight:600;
+  letter-spacing:.5px;
 }
 
 /* --------------- LAYOUT --------------- */
-#app { 
-  display: flex; 
-  min-height: 100vh; 
-  margin-top: 70px; 
-  overflow-x: hidden; 
+#app {
+  display: flex;
+  min-height: 100vh;
+  margin-top: 70px;
+  overflow-x: hidden;
 }
 
 /* Darker, modern sidebar */
@@ -92,13 +92,12 @@ html, body {
   bottom: 0;
   overflow-y: auto;
 }
-#sidebar-nav { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
+#sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-/* hide icon span but keep label if it exists */
 .nav-icon {
   display: none;
 }
@@ -197,11 +196,11 @@ main {
   padding: 22px 32px 28px;
   margin: 0 auto 40px;
   width: 100%;
-  max-width: 960px; /* adjusted width */
+  max-width: 960px;
   box-sizing: border-box;
 }
-.page-section.active { 
-  display: block; 
+.page-section.active {
+  display: block;
 }
 
 /* Page titles */
@@ -256,7 +255,7 @@ main {
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
-/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
+/* --------------- SECTION BLOCKS --------------- */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -367,16 +366,16 @@ main {
   margin: 18px 0;
   padding: 6px 0 4px;
   box-sizing: border-box;
-  overflow: hidden;               /* keep content inside the border */
+  overflow: hidden;
 }
 
 /* rows inside mini-card – centered between lines, no gaps */
 .mini-card .checklist-row {
-  margin: 0;                      /* no top/bottom gaps */
+  margin: 0;
   border-bottom: 1px solid #e5e5e5;
   padding-top: 8px;
   padding-bottom: 8px;
-  padding-right: 24px;            /* pull fields away from right edge */
+  padding-right: 24px;
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
@@ -408,58 +407,32 @@ main {
   background: #fff !important;
 }
 
+/* CONTACTS: single-line labels + smaller font to keep cards tight */
+.contact-card .checklist-row label {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
 /* semantic aliases */
 .contact-card { }
 .champions-card { }
 .blockers-card { }
 
-/* --------------- CONTACT GRID (Page 2 primary + POC cards) --------------- */
-.contact-grid {
+/* --------------- CONTACTS GRID (Primary Contacts) --------------- */
+.contacts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 14px;
+  gap: 14px 18px;
+  margin: 12px 0 6px;
+}
+@media (max-width: 800px) {
+  .contacts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.contact-grid .mini-card {
-  margin: 0;
-}
-
-/* let Additional POC cards fill same grid slots */
-#additionalPocContainer {
-  display: contents;
-}
-
-/* Compact contact cards + single-line labels */
-.contact-card .checklist-row {
-  font-size: 13px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  margin-bottom: 8px;
-}
-
-.contact-card .checklist-row:last-child {
-  margin-bottom: 4px;
-}
-
-.contact-card .checklist-row label {
-  font-size: 13px;
-  white-space: nowrap; /* keep verbiage on one line */
-}
-
-.contact-card .checklist-row input[type="text"],
-.contact-card .checklist-row input[type="email"],
-.contact-card .checklist-row select {
-  font-size: 12px;
-  padding: 5px 8px;
-}
-
-.contact-card.mini-card {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-/* --------------- Integrated “+” rows (inline button on textbox) --------------- */
-/* Layout: label | (input+button fused) */
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input (var(--input-width) - 34px) | + button (34px) */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -474,7 +447,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows – narrower, shares width with + button */
+/* Text box in integrated rows */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
   flex: 0 0 calc(var(--input-width) - 34px);
@@ -485,7 +458,7 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* Integrated + button – same height as input, attached to right edge */
+/* Integrated + button – same height as input */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -511,6 +484,12 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
+}
+
+/* Additional POC integrated row should match sizing exactly */
+.additional-poc-card .checklist-row.integrated-plus input[type="text"] {
+  height: 34px;
+  padding: 7px 10px;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
@@ -677,17 +656,19 @@ main {
 
 /* --------------- Training TABLES --------------- */
 
-.section { 
-  margin-bottom: 40px; 
+.section {
+  margin-bottom: 40px;
 }
 
-/* simple header style used above tables */
+/* Header bar above tables (Technicians, Advisors, etc.) */
 .section-header {
+  margin: 0;
+  margin-top: 10px;
   background: var(--orange);
   color: #fff;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -728,11 +709,14 @@ main {
   padding: 6px 6px;
 }
 
-/* Column headers (non-sticky now so they always show) */
+/* Sticky header — LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 
 /* Smaller white text for notes inside header cells */
@@ -750,7 +734,7 @@ main {
   width: 240px;
   min-width: 240px;
 }
-.training-table thead th:first-child { 
+.training-table thead th:first-child {
   text-align: center;
 }
 .training-table td:first-child {
@@ -805,11 +789,11 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) { 
-  background: #fff; 
+.training-table tr:nth-child(odd) {
+  background: #fff;
 }
-.training-table tr:nth-child(even) { 
-  background: #fafafa; 
+.training-table tr:nth-child(even) {
+  background: #fafafa;
 }
 
 /* Table footer + "+" button  */
@@ -820,7 +804,7 @@ main {
   padding: 6px 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* + button on the LEFT */
+  justify-content: flex-start;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   box-sizing: border-box;
@@ -860,7 +844,7 @@ main {
   background: inherit;
 }
 
-/* Opcode, Duration, Labor, Flat Rate, Pay Type, Order # moderate width */
+/* Column sizing based on new headers */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -885,7 +869,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last 4–5 columns */
+/* Checkboxes for last 4 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -932,11 +916,6 @@ main {
   font-size: 0.9em;
   color: #666;
   font-style: italic !important;
-}
-
-/* --------------- Orange outline card (Post-Training Automations) --------------- */
-.orange-outline-card {
-  border-color: var(--orange) !important;
 }
 
 /* --------------- RESPONSIVE --------------- */
