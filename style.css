@@ -299,13 +299,9 @@ main {
   font-size: 14px;
   padding-left: 40px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;   /* always keep divider */
 }
-.section-block .checklist-row:last-of-type {
-  border-bottom: none;
-  margin-bottom: 8px;
-  padding-bottom: 0;
-}
+
 .checklist-row label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -409,18 +405,19 @@ main {
   row-gap: 12px;
 }
 
-/* smaller font + keep on one line inside contact cards */
-.contact-card .checklist-row label {
+/* uniform label style so all verbiage lines up */
+.primary-contacts-grid .mini-card .checklist-row label {
   font-size: 13px;
   white-space: nowrap;
+  align-items: center;
 }
 
 /* align contact inputs with the global textbox width */
-.contact-card .checklist-row input[type="text"],
-.contact-card .checklist-row input[type="number"],
-.contact-card .checklist-row input[type="email"],
-.contact-card .checklist-row input[type="tel"],
-.contact-card .checklist-row select {
+.primary-contacts-grid .mini-card .checklist-row input[type="text"],
+.primary-contacts-grid .mini-card .checklist-row input[type="number"],
+.primary-contacts-grid .mini-card .checklist-row input[type="email"],
+.primary-contacts-grid .mini-card .checklist-row input[type="tel"],
+.primary-contacts-grid .mini-card .checklist-row select {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   margin-left: auto;
@@ -483,6 +480,10 @@ main {
 }
 
 /* Additional POC integrated row – ensure perfect alignment */
+.additional-poc-card .checklist-row.integrated-plus label {
+  white-space: nowrap;
+  font-size: 13px;
+}
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -491,7 +492,6 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 34px;
   width: 34px;
