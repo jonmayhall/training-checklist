@@ -188,7 +188,8 @@
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div class="primary-contacts-grid">
+    <div class="primary-contacts-grid" id="primaryContactsGrid">
+      <!-- Row 1 -->
       <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -221,22 +222,7 @@
         </div>
       </div>
 
-      <!-- Parts Manager -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Parts Manager</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
+      <!-- Row 2 -->
       <!-- General Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -253,7 +239,24 @@
         </div>
       </div>
 
-      <!-- Additional POC (template with + in Name) -->
+      <!-- Parts Manager -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Parts Manager</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
+        </div>
+      </div>
+
+      <!-- Row 3+ : Additional POCs -->
+      <!-- TEMPLATE Additional POC card (always last in grid, has + in Name row) -->
       <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
