@@ -33,7 +33,6 @@ function setupSidebarNav() {
       navButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Jump to top of page content
       window.scrollTo({ top: 0, behavior: 'auto' });
     });
   });
@@ -65,25 +64,23 @@ function setupClearButtons() {
 function clearInputsInRoot(root) {
   if (!root) return;
 
-  // Text-like inputs
-  const inputs = root.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="date"], input[type="search"], input[type="tel"]');
+  const inputs = root.querySelectorAll(
+    'input[type="text"], input[type="number"], input[type="email"], input[type="date"], input[type="search"], input[type="tel"]'
+  );
   inputs.forEach(input => {
     input.value = '';
   });
 
-  // Checkboxes
   const checkboxes = root.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach(cb => {
     cb.checked = false;
   });
 
-  // Textareas
   const textareas = root.querySelectorAll('textarea');
   textareas.forEach(ta => {
     ta.value = '';
   });
 
-  // Selects
   const selects = root.querySelectorAll('select');
   selects.forEach(sel => {
     sel.selectedIndex = 0;
@@ -137,6 +134,11 @@ function setupAdditionalTrainers() {
   if (!addBtn || !container) return;
 
   addBtn.addEventListener('click', () => {
+    // Convert the original row to a normal row (no +)
+    row.classList.remove('integrated-plus');
+    addBtn.remove();
+
+    // Create new textbox directly below
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub';
 
@@ -148,8 +150,9 @@ function setupAdditionalTrainers() {
 
     newRow.appendChild(label);
     newRow.appendChild(input);
+
     container.appendChild(newRow);
-  });
+  }, { once: true });
 }
 
 // --------------- ADDITIONAL POC CARDS (PAGE 2) ---------------
@@ -168,7 +171,7 @@ function setupAdditionalPocCloning() {
       input.value = '';
     });
 
-    // First row: drop integrated-plus class & remove + button
+    // First row: drop integrated-plus class & remove + button on clones
     const firstRow = newCard.querySelector('.checklist-row');
     if (firstRow) {
       firstRow.classList.remove('integrated-plus');
@@ -179,7 +182,6 @@ function setupAdditionalPocCloning() {
       }
     }
 
-    // Append clone
     container.appendChild(newCard);
   });
 }
@@ -279,7 +281,6 @@ function setupPdfExport() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Capture the main content (topbar + app)
     const root = document.body;
 
     doc.html(root, {
