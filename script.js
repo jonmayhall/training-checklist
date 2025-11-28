@@ -38,7 +38,7 @@ function setupNavigation() {
   });
 }
 
-/* ---------------- CLEAR ALL ---------------- */
+/* ---------------- CLEAR HELPERS ---------------- */
 function clearFields(root) {
   const inputs = root.querySelectorAll("input");
   const selects = root.querySelectorAll("select");
@@ -61,6 +61,7 @@ function clearFields(root) {
   });
 }
 
+/* Clear All (entire app) */
 function setupClearAll() {
   const clearAllBtn = document.getElementById("clearAllBtn");
   if (!clearAllBtn) return;
@@ -70,7 +71,7 @@ function setupClearAll() {
   });
 }
 
-/* ---------------- PER-PAGE RESET ---------------- */
+/* Per-page Reset */
 function setupPageClearButtons() {
   const buttons = document.querySelectorAll(".clear-page-btn");
 
@@ -85,9 +86,8 @@ function setupPageClearButtons() {
 }
 
 /* ---------------- ADDITIONAL TRAINERS (Page 1) ---------------- */
-/* 
-   Behavior:
-   - Integrated "+" row: label + textbox + plus
+/*
+   - Integrated "+" row: "Additional trainers" with text box + plus
    - On first click:
      • remove the + button
      • keep the first textbox normal
@@ -133,11 +133,15 @@ function setupAdditionalTrainers() {
 /* ---------------- ADDITIONAL POC CLONING (Page 2) ---------------- */
 /*
    - Template Additional POC card lives in Primary Contacts grid.
-   - Clicking "+":
-     • Clones the template card
+   - Layout:
+       Row 1: Service Director | Service Manager
+       Row 2: General Manager  | Parts Manager
+       Row 3+: Additional POC cards in 2xN.
+   - Clicking "+" on the template:
+     • Clones the card
      • Clears its inputs
      • Removes the "+" button in the clone
-     • Leaves template as the last card, so 2xN grid pattern is preserved
+     • Template keeps the + and stays in the grid so you can keep adding more POCs.
 */
 function setupAdditionalPocCloning() {
   const grid = document.getElementById("primaryContactsGrid");
@@ -157,10 +161,10 @@ function setupAdditionalPocCloning() {
       input.value = "";
     });
 
-    // Mark as cloned (for CSS if needed)
+    // Mark as cloned (for CSS)
     clone.classList.add("cloned");
 
-    // Remove the "+" button & integrated-plus styling
+    // Remove integrated-plus behavior and + button from clone
     const nameRow = clone.querySelector(".checklist-row.integrated-plus");
     if (nameRow) {
       nameRow.classList.remove("integrated-plus");
@@ -170,18 +174,13 @@ function setupAdditionalPocCloning() {
       cloneAdd.remove();
     }
 
-    // Insert clone BEFORE template so template stays last in the grid
-    grid.insertBefore(clone, template);
+    // Insert clone AFTER template in the grid.
+    // With 2 columns: template is row3 col1, first clone is row3 col2.
+    grid.appendChild(clone);
   });
 }
 
 /* ---------------- SUPPORT TICKETS (Page 7) ---------------- */
-/*
-  - One template ticket in "Open Support Tickets" with + in Ticket # row.
-  - Clicking +:
-    • Create a new ticket card in Open section (no + button)
-    • Status dropdown moves card between Open / Tier Two / Closed groups
-*/
 function setupSupportTickets() {
   const openContainer = document.getElementById("openTicketsContainer");
   if (!openContainer) return;
@@ -254,11 +253,6 @@ function setupSupportTickets() {
 }
 
 /* ---------------- TABLE "+" BUTTONS (Training tables) ---------------- */
-/*
-  Generic handler:
-  - Any .table-footer .add-row duplicates the last row in that table body
-  - Clears inputs/selects in the new row
-*/
 function setupTableAddRowButtons() {
   const addButtons = document.querySelectorAll(".table-footer .add-row");
 
@@ -303,12 +297,9 @@ function setupPdfExport() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF("p", "pt", "a4");
 
-    // Simple export: capture visible text as a basic record.
-    // (You can customize layout later as needed.)
     const textLines = [];
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach(el => {
-      const id = el.id || "";
       const labelEl = el.closest(".checklist-row")?.querySelector("label");
       const labelText = labelEl ? labelEl.textContent.trim() : "";
       const value =
