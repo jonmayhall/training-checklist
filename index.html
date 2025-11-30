@@ -87,133 +87,108 @@
     <!-- MAIN CONTENT -->
     <main>
 
-     <!-- =========================================
-     PAGE 1 — Onsite Trainers & CEM
-     ========================================= -->
-<section id="onsite-trainers-cem" class="page-section active">
-  <h1>Onsite Trainers & CEM</h1>
-  <button class="clear-page-btn">Clear Page</button>
+   <!-- ========================================================= -->
+<!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
+<!-- ========================================================= -->
+<section id="onsite-trainers" class="page-section active">
+  <h1>Training Leads &amp; Contacts</h1>
+  <p class="page-subtitle">
+    Capture trainer assignments and core dealership contacts for this onsite.
+  </p>
 
-  <!-- ===============================
-       PRIMARY TRAINER
-       =============================== -->
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <!-- TRAINERS CARD -->
   <div class="section-block">
-    <h2>Primary Trainer</h2>
+    <h2>Trainers</h2>
+
+    <!-- Lead Trainer -->
+    <div class="checklist-row">
+      <label>Lead Trainer</label>
+      <select id="leadTrainer">
+        <option></option>
+        <option disabled>──────────</option>
+        <option>Brian Button</option>
+        <option>Christopher Eskew</option>
+        <option>Dana Barry</option>
+
+        <option disabled>──────────</option>
+        <option>Adam Jeffords</option>
+        <option>Alec Parker</option>
+        <option>Eliud Garcia</option>
+        <option>Jackson Geraghty</option>
+        <option>Joel Zavaleta</option>
+        <option>Kyle Leavitt</option>
+        <option>Lauren Ramos</option>
+        <option>Miles Krasic</option>
+        <option>Terry Hart</option>
+
+        <option disabled>──────────</option>
+        <option>Anthony Carbone</option>
+        <option>Brett Smith</option>
+        <option>Clyde Chapman</option>
+        <option>Dennitza Fernandez</option>
+        <option>Kevin Mullinax</option>
+        <option>Sharon Rusta</option>
+      </select>
+    </div>
+
+    <!-- Additional Trainers -->
+    <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
+      <label for="additionalTrainers">Additional Trainers</label>
+      <input type="text" id="additionalTrainers" name="additionalTrainers">
+      <button type="button" class="add-row add-trainer-btn">+</button>
+    </div>
+
+    <!-- Dynamic rows container -->
+    <div id="additionalTrainersContainer"></div>
 
     <div class="checklist-row">
-      <label>Primary Trainer Name</label>
-      <input type="text">
+      <label>Training Type</label>
+      <select id="trainingType">
+        <option></option>
+        <option>Onsite</option>
+        <option>Retraining</option>
+        <option>Paid Additional Training</option>
+      </select>
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Notes – Primary Trainer</label>
-      <input type="text">
+    <div class="checklist-row">
+      <label>Training Start Date</label>
+      <input id="trainingStartDate" type="date">
+    </div>
+
+    <div class="checklist-row">
+      <label>Training End Date</label>
+      <input id="trainingEndDate" type="date">
     </div>
   </div>
 
-  <!-- ===============================
-       ADDITIONAL TRAINERS (with +)
-       =============================== -->
+  <!-- DEPLOYMENT & CUSTOM ENGAGEMENT MANAGER -->
   <div class="section-block">
-    <h2>Additional Trainers</h2>
-
-    <!-- Integrated + row -->
-    <div class="checklist-row additional-trainers-row integrated-plus">
-      <label>Add Additional Trainer</label>
-      <input type="text">
-      <button class="add-row">+</button>
-    </div>
-
-    <!-- New rows append here -->
-    <div id="additionalTrainersContainer"></div>
-  </div>
-
-  <!-- ===============================
-       DEPLOYMENT + CEM COMBINED CARD
-       =============================== -->
-  <div class="section-block">
-    <h2>Deployment & Custom Engagement Manager</h2>
+    <h2>Deployment &amp; Custom Engagement Manager</h2>
 
     <!-- Deployment Manager -->
-    <div class="checklist-row">
-      <label>Deployment Manager Name</label>
-      <input type="text">
+    <div class="mini-card no-orange">
+      <div class="checklist-row">
+        <label>Deployment Manager</label>
+        <input type="text">
+      </div>
     </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Notes – Deployment Manager</label>
-      <input type="text">
-    </div>
-
-    <!-- Divider -->
-    <div style="border-top: 1px solid #e0e0e0; margin: 12px 0;"></div>
 
     <!-- CEM -->
-    <div class="checklist-row">
-      <label>CEM Name</label>
-      <input type="text">
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Notes – CEM</label>
-      <input type="text">
-    </div>
-  </div>
-
-  <!-- ===============================
-       CHAMPIONS
-       =============================== -->
-  <div class="section-block">
-    <h2>Champions</h2>
-
-    <div class="mini-card champions-card">
+    <div class="mini-card no-orange">
       <div class="checklist-row">
-        <label>Champion Name</label>
-        <input type="text">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Role</label>
-        <input type="text">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Notes – Champion</label>
+        <label>CEM</label>
         <input type="text">
       </div>
     </div>
-  </div>
 
-  <!-- ===============================
-       BLOCKERS
-       =============================== -->
-  <div class="section-block">
-    <h2>Blockers</h2>
-
-    <div class="mini-card blockers-card">
-      <div class="checklist-row">
-        <label>Blocker Name</label>
-        <input type="text">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Role</label>
-        <input type="text">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Notes – Blocker</label>
-        <input type="text">
-      </div>
+    <!-- NOTES -->
+    <div class="section-block">
+      <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
+      <textarea placeholder="Notes for Trainers, Deployment, & CEM …"></textarea>
     </div>
-  </div>
-
-  <!-- ===============================
-       NEW — NOTES (TRAINERS, DEPLOYMENT, CEM)
-       =============================== -->
-  <div class="section-block notes-block">
-    <h2>Notes – Trainers, Deployment, & CEM</h2>
-    <textarea rows="6" placeholder="Enter notes here..."></textarea>
   </div>
 </section>
 
