@@ -87,117 +87,135 @@
     <!-- MAIN CONTENT -->
     <main>
 
-      <!-- ========================================================= -->
-      <!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
-      <!-- ========================================================= -->
-      <section id="onsite-trainers" class="page-section active">
-        <h1>Training Leads &amp; Contacts</h1>
-        <p class="page-subtitle">
-          Capture trainer assignments and core dealership contacts for this onsite.
-        </p>
+     <!-- =========================================
+     PAGE 1 — Onsite Trainers & CEM
+     ========================================= -->
+<section id="onsite-trainers-cem" class="page-section active">
+  <h1>Onsite Trainers & CEM</h1>
+  <button class="clear-page-btn">Clear Page</button>
 
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+  <!-- ===============================
+       PRIMARY TRAINER
+       =============================== -->
+  <div class="section-block">
+    <h2>Primary Trainer</h2>
 
-        <!-- TRAINERS CARD -->
-        <div class="section-block">
-          <h2>Trainers</h2>
+    <div class="checklist-row">
+      <label>Primary Trainer Name</label>
+      <input type="text">
+    </div>
 
-          <!-- Lead Trainer -->
-          <div class="checklist-row">
-            <label>Lead Trainer</label>
-            <select id="leadTrainer">
-              <option></option>
+    <div class="checklist-row indent-sub">
+      <label>Notes – Primary Trainer</label>
+      <input type="text">
+    </div>
+  </div>
 
-              <!-- Group 1 -->
-              <option disabled>──────────</option>
-              <option>Brian Button</option>
-              <option>Christopher Eskew</option>
-              <option>Dana Barry</option>
+  <!-- ===============================
+       ADDITIONAL TRAINERS (with +)
+       =============================== -->
+  <div class="section-block">
+    <h2>Additional Trainers</h2>
 
-              <!-- Group 2 -->
-              <option disabled>──────────</option>
-              <option>Adam Jeffords</option>
-              <option>Alec Parker</option>
-              <option>Eliud Garcia</option>
-              <option>Jackson Geraghty</option>
-              <option>Joel Zavaleta</option>
-              <option>Kyle Leavitt</option>
-              <option>Lauren Ramos</option>
-              <option>Miles Krasic</option>
-              <option>Terry Hart</option>
+    <!-- Integrated + row -->
+    <div class="checklist-row additional-trainers-row integrated-plus">
+      <label>Add Additional Trainer</label>
+      <input type="text">
+      <button class="add-row">+</button>
+    </div>
 
-              <!-- Group 3 -->
-              <option disabled>──────────</option>
-              <option>Anthony Carbone</option>
-              <option>Brett Smith</option>
-              <option>Clyde Chapman</option>
-              <option>Dennitza Fernandez</option>
-              <option>Kevin Mullinax</option>
-              <option>Sharon Rusta</option>
-            </select>
-          </div>
+    <!-- New rows append here -->
+    <div id="additionalTrainersContainer"></div>
+  </div>
 
-          <!-- Additional trainers (integrated +) -->
-          <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
-            <label for="additionalTrainers">Additional Trainers</label>
-            <input type="text" id="additionalTrainers" name="additionalTrainers">
-            <button type="button" class="add-row add-trainer-btn">+</button>
-          </div>
+  <!-- ===============================
+       DEPLOYMENT + CEM COMBINED CARD
+       =============================== -->
+  <div class="section-block">
+    <h2>Deployment & Custom Engagement Manager</h2>
 
-          <!-- Container for extra trainer rows -->
-          <div id="additionalTrainersContainer"></div>
+    <!-- Deployment Manager -->
+    <div class="checklist-row">
+      <label>Deployment Manager Name</label>
+      <input type="text">
+    </div>
 
-          <!-- Training Type -->
-          <div class="checklist-row">
-            <label>Training Type</label>
-            <select id="trainingType">
-              <option></option>
-              <option>Onsite</option>
-              <option>Retraining</option>
-              <option>Paid Additional Training</option>
-            </select>
-          </div>
+    <div class="checklist-row indent-sub">
+      <label>Notes – Deployment Manager</label>
+      <input type="text">
+    </div>
 
-          <!-- Training Start Date -->
-          <div class="checklist-row">
-            <label>Training Start Date</label>
-            <input id="trainingStartDate" type="date">
-          </div>
+    <!-- Divider -->
+    <div style="border-top: 1px solid #e0e0e0; margin: 12px 0;"></div>
 
-          <!-- Training End Date -->
-          <div class="checklist-row">
-            <label>Training End Date</label>
-            <input id="trainingEndDate" type="date">
-          </div>
-        </div>
+    <!-- CEM -->
+    <div class="checklist-row">
+      <label>CEM Name</label>
+      <input type="text">
+    </div>
 
-        <!-- DEPLOYMENT & CEM CONTACTS CARD -->
-        <div class="section-block">
-          <h2>Deployment &amp; Custom Engagement Manager</h2>
+    <div class="checklist-row indent-sub">
+      <label>Notes – CEM</label>
+      <input type="text">
+    </div>
+  </div>
 
-          <!-- Deployment Manager (now first, mini-card, neutral border) -->
-          <div class="mini-card" style="border: 1px solid var(--border);">
-            <div class="checklist-row">
-              <label>Deployment Manager</label>
-              <input type="text">
-            </div>
-          </div>
+  <!-- ===============================
+       CHAMPIONS
+       =============================== -->
+  <div class="section-block">
+    <h2>Champions</h2>
 
-          <!-- CEM (second, mini-card, neutral border) -->
-          <div class="mini-card" style="border: 1px solid var(--border);">
-            <div class="checklist-row">
-              <label>CEM</label>
-              <input type="text">
-            </div>
-          </div>
-        </div>
+    <div class="mini-card champions-card">
+      <div class="checklist-row">
+        <label>Champion Name</label>
+        <input type="text">
+      </div>
 
-        <!-- NEW NOTES CARD FOR TRAINERS / DEPLOYMENT / CEM -->
-        <div class="section-block">
-          <h2>Notes — Trainers, Deployment, &amp; CEM</h2>
-          <textarea placeholder="Notes related to trainers, deployment manager, and CEM …"></textarea>
-        </div>
-      </section>
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Notes – Champion</label>
+        <input type="text">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===============================
+       BLOCKERS
+       =============================== -->
+  <div class="section-block">
+    <h2>Blockers</h2>
+
+    <div class="mini-card blockers-card">
+      <div class="checklist-row">
+        <label>Blocker Name</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Notes – Blocker</label>
+        <input type="text">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===============================
+       NEW — NOTES (TRAINERS, DEPLOYMENT, CEM)
+       =============================== -->
+  <div class="section-block notes-block">
+    <h2>Notes – Trainers, Deployment, & CEM</h2>
+    <textarea rows="6" placeholder="Enter notes here..."></textarea>
+  </div>
+</section>
 
       <!-- ========================================================= -->
       <!-- PAGE 2: DEALERSHIP INFO & PRIMARY CONTACTS                -->
