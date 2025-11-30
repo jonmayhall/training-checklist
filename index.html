@@ -5,14 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-  <!-- CSS with manual cache-buster -->
-  <link rel="stylesheet" href="style.css?v=20251128A" />
+  <!-- Dynamic CSS (cache-buster applied below) -->
+  <link id="dynamicCSS" rel="stylesheet" href="style.css">
 
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- Main JS with manual cache-buster -->
-  <script src="script.js?v=20251128A" defer></script>
+  <!-- Dynamic JS (cache-buster applied below) -->
+  <script defer id="dynamicJS" src="script.js"></script>
+
+  <!-- Auto Cache-Buster -->
+  <script>
+    (function () {
+      const ts = Date.now();
+
+      // Bust CSS cache
+      const css = document.getElementById("dynamicCSS");
+      if (css) css.href = `style.css?v=${ts}`;
+
+      // Bust JS cache
+      const js = document.getElementById("dynamicJS");
+      if (js) js.src = `script.js?v=${ts}`;
+    })();
+  </script>
 </head>
 
 <body>
