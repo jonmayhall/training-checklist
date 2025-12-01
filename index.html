@@ -2820,7 +2820,7 @@
         </div>
       </section>
 
-      <!-- ========================================================= -->
+            <!-- ========================================================= -->
       <!-- PAGE 8: DMS INTEGRATION                                   -->
       <!-- ========================================================= -->
       <section id="dms-integration" class="page-section">
@@ -2833,109 +2833,197 @@
         <div class="section-block dms-overview-block">
           <h2>DMS Integration Matrix</h2>
 
+          <!-- Legend still helpful to interpret cadence terms -->
           <div class="dms-legend">
-            <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
+            <div><span class="dms-dot dms-dot-auto"></span>Happens Automatically / Real-time</div>
             <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
-            <div><span class="dms-dot dms-dot-withro"></span>With RO Only</div>
-            <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+            <div><span class="dms-dot dms-dot-withro"></span>Comes with RO / With RO Only</div>
+            <div><span class="dms-dot dms-dot-planned"></span>Planned / Future / Nightly Sync</div>
             <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
           </div>
 
           <div class="dms-table-container">
             <div class="dms-grid">
-              <!-- RO History -->
+
+              <!-- =================== REYNOLDS =================== -->
               <div class="dms-card">
                 <div class="dms-card-header">
-                  <span class="dms-name">RO History</span>
+                  <span class="dms-name">Reynolds</span>
                   <span class="dms-chip dms-chip-push">Push</span>
                 </div>
                 <ul class="dms-list">
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">RO Updates</span>
-                      <span class="dms-tag dms-tag-auto">Auto</span>
-                    </div>
-                    <p>RO changes appear automatically from the DMS.</p>
-                  </li>
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Closed ROs</span>
-                      <span class="dms-tag dms-tag-ondemand">On Demand</span>
-                    </div>
-                    <p>RO closure events are updated with a manual refresh or overnight job.</p>
-                  </li>
+                  <li><span class="dms-field">DMS Customer Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">RO Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> N/A</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> N/A</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, Happens Automatically</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
                 </ul>
               </div>
 
-              <!-- Customer / Vehicle -->
+              <!-- =================== AUTOMATE =================== -->
               <div class="dms-card">
                 <div class="dms-card-header">
-                  <span class="dms-name">Customer &amp; Vehicle</span>
-                  <span class="dms-chip dms-chip-pull">Pull</span>
-                </div>
-                <ul class="dms-list">
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Customer Lookup</span>
-                      <span class="dms-tag dms-tag-auto">Auto</span>
-                    </div>
-                    <p>Customer information appears on search and when creating ROs.</p>
-                  </li>
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Vehicle History</span>
-                      <span class="dms-tag dms-tag-withro">With RO</span>
-                    </div>
-                    <p>Service history displays when an RO is opened or attached.</p>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Parts -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Parts &amp; Pricing</span>
-                  <span class="dms-chip dms-chip-pull">Pull</span>
-                </div>
-                <ul class="dms-list">
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Parts Pricing</span>
-                      <span class="dms-tag dms-tag-limited">Limited</span>
-                    </div>
-                    <p>Pricing is pulled from DMS fields and can be impacted by price levels.</p>
-                  </li>
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Parts Availability</span>
-                      <span class="dms-tag dms-tag-na">N/A</span>
-                    </div>
-                    <p>Real-time stocking may require a separate integration or catalog.</p>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Other -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Other Integrations</span>
+                  <span class="dms-name">Automate</span>
                   <span class="dms-chip dms-chip-push">Push</span>
                 </div>
                 <ul class="dms-list">
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Appointment Export</span>
-                      <span class="dms-tag dms-tag-planned">Planned</span>
-                    </div>
-                    <p>Confirm if appointments sync from scheduler into DMS or vice versa.</p>
-                  </li>
-                  <li>
-                    <div class="dms-row-top">
-                      <span class="dms-field">Display-Only Fields</span>
-                      <span class="dms-tag dms-tag-display">Display</span>
-                    </div>
-                    <p>Fields shown in myKaarma but not written back to the DMS.</p>
-                  </li>
+                  <li><span class="dms-field">DMS Customer Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Customer Push:</span> N/A</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Vehicle Push:</span> N/A</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">Appointment Push:</span> N/A</li>
+                  <li><span class="dms-field">RO Pull:</span> Happens Automatically</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> N/A</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> N/A</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> N/A</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> N/A</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> N/A</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> N/A</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
+                </ul>
+              </div>
+
+              <!-- =================== CDK =================== -->
+              <div class="dms-card">
+                <div class="dms-card-header">
+                  <span class="dms-name">CDK</span>
+                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                </div>
+                <ul class="dms-list">
+                  <li><span class="dms-field">DMS Customer Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
+                  <li><span class="dms-field">RO Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">Special Order Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> Nightly sync and historical (2 years)</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
+                </ul>
+              </div>
+
+              <!-- =================== DEALERTRACK / ARKONA =================== -->
+              <div class="dms-card">
+                <div class="dms-card-header">
+                  <span class="dms-name">Dealertrack / Arkona</span>
+                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                </div>
+                <ul class="dms-list">
+                  <li><span class="dms-field">DMS Customer Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
+                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 15 minutes</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> Yes, On-Demand</li>
+                </ul>
+              </div>
+
+              <!-- =================== LIGHTYEAR / DEALERBUILT =================== -->
+              <div class="dms-card">
+                <div class="dms-card-header">
+                  <span class="dms-name">Lightyear / Dealerbuilt</span>
+                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                </div>
+                <ul class="dms-list">
+                  <li><span class="dms-field">DMS Customer Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
+                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> N/A</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> Yes, On-Demand</li>
+                </ul>
+              </div>
+
+              <!-- =================== PBS =================== -->
+              <div class="dms-card">
+                <div class="dms-card-header">
+                  <span class="dms-name">PBS</span>
+                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                </div>
+                <ul class="dms-list">
+                  <li><span class="dms-field">DMS Customer Pull:</span> N/A</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> N/A</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
+                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> N/A</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
+                </ul>
+              </div>
+
+              <!-- =================== TEKION =================== -->
+              <div class="dms-card">
+                <div class="dms-card-header">
+                  <span class="dms-name">Tekion</span>
+                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
+                </div>
+                <ul class="dms-list">
+                  <li><span class="dms-field">DMS Customer Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
+                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
+                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
+                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
+                  <li><span class="dms-field">RO Pull:</span> Every 5 minutes</li>
+                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> Planned</li>
+                  <li><span class="dms-field">RO Creation (Check-in):</span> Planned</li>
+                  <li><span class="dms-field">Parts Invoices Pull:</span> Planned</li>
+                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> Planned</li>
+                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
+                  <li><span class="dms-field">F &amp; I Sales History:</span> Planned</li>
+                  <li><span class="dms-field">Opcodes Pull:</span> Planned</li>
+                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, once during deployment</li>
+                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
                 </ul>
               </div>
 
