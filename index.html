@@ -2820,173 +2820,245 @@
         </div>
       </section>
 
-  <section id="dms-integration" class="page-section">
+ <section id="dms-integration" class="page-section">
   <h1>DMS Integration</h1>
   <p class="page-subtitle">
-    Resource page — use this as a quick reference when explaining how myKaarma typically interacts with the DMS. 
-    This is not dealership-specific and does not need to be filled out.
+    Resource page – reference for how myKaarma typically exchanges data with each DMS. 
+    This is read-only and not dealership-specific.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- LEGEND / KEY -->
+  <!-- LEGEND -->
   <div class="section-block dms-overview-block">
     <h2>DMS Integration Legend</h2>
 
     <div class="dms-legend">
-      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
-      <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
+      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled</div>
+      <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button-Driven</div>
       <div><span class="dms-dot dms-dot-withro"></span>With RO Only</div>
-      <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+      <div><span class="dms-dot dms-dot-planned"></span>Planned / One-Time</div>
       <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
     </div>
 
     <p class="page-subtitle" style="margin-top: 10px;">
-      Colored dots in the cards below reference how the data typically flows between myKaarma and most DMS systems.
+      Use this matrix to explain <strong>what moves automatically</strong>, what requires a 
+      <strong>manual refresh</strong>, and which items are <strong>not available</strong> per DMS.
     </p>
   </div>
 
-  <!-- REFERENCE CARDS (NO INPUTS) -->
+  <!-- PUSH-BASED DMS -->
   <div class="section-block">
-    <h2>DMS Integration – Quick Reference</h2>
+    <h2>Push-Based DMS</h2>
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table dms-matrix">
+          <thead>
+            <tr>
+              <th>DMS</th>
+              <th>Customer Pull</th>
+              <th>Customer Push</th>
+              <th>Vehicle Pull</th>
+              <th>Vehicle Push</th>
+              <th>Appointment Pull</th>
+              <th>Appointment Push</th>
+              <th>RO Pull</th>
+              <th>RO Writeback<br>(ServiceCart)</th>
+              <th>RO Creation<br>(Check-in)</th>
+              <th>Parts Invoices Pull</th>
+              <th>Parts Availability &amp; Pricing<br>(ServiceCart)</th>
+              <th>Special Order Pull</th>
+              <th>F &amp; I Sales History</th>
+              <th>Opcodes Pull</th>
+              <th>Historical RO Pull</th>
+              <th>Historical Customer Pull</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Reynolds -->
+            <tr>
+              <td>Reynolds</td>
+              <td>Happens automatically</td>
+              <td>On-demand when appointments exist</td>
+              <td>Comes with RO</td>
+              <td>On-demand when appointments exist</td>
+              <td>Happens automatically</td>
+              <td>On-demand when appointments exist</td>
+              <td>Happens automatically</td>
+              <td>N/A</td>
+              <td>On-demand</td>
+              <td>Happens automatically</td>
+              <td>On-demand</td>
+              <td>N/A</td>
+              <td>Happens automatically</td>
+              <td>N/A</td>
+              <td>Yes – automatic</td>
+              <td>N/A</td>
+            </tr>
 
-    <div class="dms-table-container">
-      <div class="dms-grid">
-        <!-- RO History -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">RO History</span>
-            <span class="dms-chip dms-chip-push">RO Data</span>
-          </div>
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Updates</span>
-                <span class="dms-tag dms-tag-auto"></span>
-              </div>
-              <p>
-                RO status, opcodes, and advisor info usually update from the DMS to myKaarma automatically 
-                (near real-time or on a short polling interval).
-              </p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Closed ROs</span>
-                <span class="dms-tag dms-tag-ondemand"></span>
-              </div>
-              <p>
-                Many DMS send closed RO information on a nightly or batch process. If something looks off, 
-                try a manual refresh or confirm the batch schedule.
-              </p>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Customer & Vehicle -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">Customer &amp; Vehicle</span>
-            <span class="dms-chip dms-chip-pull">Lookup</span>
-          </div>
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Lookup</span>
-                <span class="dms-tag dms-tag-auto"></span>
-              </div>
-              <p>
-                Customer contact details typically pull directly from the DMS when searching by name, phone, 
-                email, or RO number in myKaarma.
-              </p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle History</span>
-                <span class="dms-tag dms-tag-withro"></span>
-              </div>
-              <p>
-                Service history often shows when an RO is opened or when a vehicle is attached to the RO in the DMS.
-              </p>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Parts & Pricing -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">Parts &amp; Pricing</span>
-            <span class="dms-chip dms-chip-pull">Pricing</span>
-          </div>
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Pricing</span>
-                <span class="dms-tag dms-tag-limited"></span>
-              </div>
-              <p>
-                myKaarma usually reads parts pricing from specific DMS price levels.  
-                Mismatched or zero prices are often caused by incorrect price level mappings.
-              </p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Inventory / Availability</span>
-                <span class="dms-tag dms-tag-na"></span>
-              </div>
-              <p>
-                Live stock quantities and bin locations are typically not provided via standard DMS integrations 
-                and may require separate catalog tools.
-              </p>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Appointments & Other -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">Appointments &amp; Other</span>
-            <span class="dms-chip dms-chip-push">Scheduler</span>
-          </div>
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointments</span>
-                <span class="dms-tag dms-tag-planned"></span>
-              </div>
-              <p>
-                Depending on the DMS, appointments may push from myKaarma to the DMS, pull from the DMS into 
-                myKaarma, or stay separate and only display in one system.
-              </p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Display-Only Fields</span>
-                <span class="dms-tag dms-tag-display"></span>
-              </div>
-              <p>
-                Some fields in myKaarma are display-only (read from the DMS but never written back).  
-                Use this when explaining why a change must still be made in the DMS directly.
-              </p>
-            </li>
-          </ul>
-        </div>
-
+            <!-- Automate -->
+            <tr>
+              <td>Automate</td>
+              <td>Happens automatically</td>
+              <td>N/A</td>
+              <td>Comes with RO</td>
+              <td>N/A</td>
+              <td>Happens automatically</td>
+              <td>N/A</td>
+              <td>Happens automatically</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
+  <!-- PULL-BASED DMS -->
   <div class="section-block">
-    <h2>Talking Points for DMS Conversations</h2>
-    <p style="margin-bottom: 8px;">
-      Use these bullets when summarizing DMS behavior to Service Managers, Parts Managers, or CEM:
-    </p>
-    <ul style="margin-top: 0; padding-left: 20px; font-size: 13px; line-height: 1.5;">
-      <li>Clarify what updates automatically vs. what requires a manual refresh.</li>
-      <li>Explain where pricing comes from (DMS price levels, matrices, or catalogs).</li>
-      <li>Set expectations on timing: real-time vs. nightly batches.</li>
-      <li>Call out any display-only fields that will never write back to the DMS.</li>
-      <li>Confirm which system “owns” appointment creation and changes.</li>
-    </ul>
+    <h2>Pull-Based DMS (myKaarma pulls from DMS)</h2>
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table dms-matrix">
+          <thead>
+            <tr>
+              <th>DMS</th>
+              <th>Customer Pull</th>
+              <th>Customer Push</th>
+              <th>Vehicle Pull</th>
+              <th>Vehicle Push</th>
+              <th>Appointment Pull</th>
+              <th>Appointment Push</th>
+              <th>RO Pull</th>
+              <th>RO Writeback<br>(ServiceCart)</th>
+              <th>RO Creation<br>(Check-in)</th>
+              <th>Parts Invoices Pull</th>
+              <th>Parts Availability &amp; Pricing<br>(ServiceCart)</th>
+              <th>Special Order Pull</th>
+              <th>F &amp; I Sales History</th>
+              <th>Opcodes Pull</th>
+              <th>Historical RO Pull</th>
+              <th>Historical Customer Pull</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- CDK -->
+            <tr>
+              <td>CDK</td>
+              <td>Every 15 minutes</td>
+              <td>On-demand</td>
+              <td>Comes with RO</td>
+              <td>On-demand when appointments exist</td>
+              <td>Every 15 minutes</td>
+              <td>On-demand</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>On-demand</td>
+              <td>Every 15 minutes</td>
+              <td>On-demand</td>
+              <td>Every 15 minutes</td>
+              <td>Nightly + ~2 years history</td>
+              <td>Nightly sync</td>
+              <td>Yes – on-demand</td>
+              <td>N/A</td>
+            </tr>
+
+            <!-- Dealertrack / Arkona -->
+            <tr>
+              <td>Dealertrack / Arkona</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>On-demand</td>
+              <td>On-demand when appointments exist</td>
+              <td>Every 15 minutes</td>
+              <td>On-demand</td>
+              <td>Every 2 minutes</td>
+              <td>On-demand</td>
+              <td>On-demand</td>
+              <td>Every 15 minutes</td>
+              <td>On-demand</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>Nightly sync</td>
+              <td>Yes – on-demand</td>
+              <td>Yes – on-demand</td>
+            </tr>
+
+            <!-- Lightyear / Dealerbuilt -->
+            <tr>
+              <td>Lightyear / Dealerbuilt</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>Comes with RO</td>
+              <td>On-demand when appointments exist</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>Every 2 minutes</td>
+              <td>On-demand</td>
+              <td>On-demand</td>
+              <td>Every 5 minutes</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>Nightly sync</td>
+              <td>Yes – on-demand</td>
+              <td>Yes – on-demand</td>
+            </tr>
+
+            <!-- PBS -->
+            <tr>
+              <td>PBS</td>
+              <td>N/A</td>
+              <td>On-demand</td>
+              <td>N/A</td>
+              <td>On-demand when appointments exist</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>Every 2 minutes</td>
+              <td>On-demand</td>
+              <td>On-demand</td>
+              <td>N/A</td>
+              <td>On-demand</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>Nightly sync</td>
+              <td>Yes – on-demand</td>
+              <td>N/A</td>
+            </tr>
+
+            <!-- Tekion -->
+            <tr>
+              <td>Tekion</td>
+              <td>Comes with RO</td>
+              <td>On-demand</td>
+              <td>Comes with RO</td>
+              <td>On-demand when appointments exist</td>
+              <td>Every 5 minutes</td>
+              <td>On-demand</td>
+              <td>Every 5 minutes</td>
+              <td>Planned</td>
+              <td>Planned</td>
+              <td>Planned</td>
+              <td>Planned</td>
+              <td>N/A</td>
+              <td>Planned</td>
+              <td>Planned</td>
+              <td>Yes – one-time during deployment</td>
+              <td>N/A</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+
 </section>
 
       <!-- ========================================================= -->
