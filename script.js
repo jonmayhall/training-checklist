@@ -31,11 +31,22 @@ function initNavigation() {
       navButtons.forEach((b) => b.classList.toggle('active', b === btn));
     });
   });
+
+  // If nothing is active yet, activate the first section & first nav button
+  const anyActive = Array.from(sections).some(sec => sec.classList.contains('active'));
+  if (!anyActive) {
+    sections[0].classList.add('active');
+    if (navButtons[0]) {
+      navButtons[0].classList.add('active');
+    }
+  }
 }
 
 /* --------------- CLEAR PAGE / CLEAR ALL --------------- */
 function clearSection(section) {
   if (!section) return;
+
+  // 1) Clear all inputs/selects/textareas
   const inputs = section.querySelectorAll('input, select, textarea');
 
   inputs.forEach((el) => {
@@ -45,6 +56,41 @@ function clearSection(section) {
       el.checked = false;
     } else {
       el.value = '';
+    }
+  });
+
+  // 2) Remove dynamically-added Additional Trainer rows
+  const extraTrainerRows = section.querySelectorAll('.additional-trainer-row');
+  extraTrainerRows.forEach(row => row.remove());
+
+  // 3) Remove dynamically-added Additional POC cards
+  const extraPocCards = section.querySelectorAll('.additional-poc-instance');
+  extraPocCards.forEach(card => card.remove());
+
+  // 4) Remove cloned ticket cards (keep the template)
+  const extraTickets = section.querySelectorAll('.ticket-group-instance');
+  extraTickets.forEach(card => card.remove());
+
+  // 5) Reset the ticket template back to "Open" and move it to Open container
+  const ticketTemplate = section.querySelector('.ticket-group-template');
+  if (ticketTemplate) {
+    const statusSelect = ticketTemplate.querySelector('.ticket-status-select');
+    if (statusSelect) statusSelect.value = 'Open';
+
+    const openContainer = document.getElementById('openTicketsContainer');
+    if (openContainer && ticketTemplate.parentElement !== openContainer) {
+      openContainer.appendChild(ticketTemplate);
+    }
+  }
+
+  // 6) Reset table bodies to only one row
+  const tables = section.querySelectorAll('.training-table');
+  tables.forEach((table) => {
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.children);
+    if (rows.length > 1) {
+      rows.slice(1).forEach(r => r.remove());
     }
   });
 }
@@ -105,7 +151,7 @@ function initAdditionalTrainers() {
   addBtn.addEventListener('click', () => {
     // Create a normal row directly below the integrated row.
     const newRow = document.createElement('div');
-    newRow.className = 'checklist-row indent-sub';
+    newRow.className = 'checklist-row indent-sub additional-trainer-row';
 
     const label = document.createElement('label');
     label.textContent = 'Additional Trainer';
@@ -144,7 +190,7 @@ function initAdditionalPoc() {
 
   function createNormalPocCard() {
     const card = document.createElement('div');
-    card.className = 'mini-card contact-card';
+    card.className = 'mini-card contact-card additional-poc-instance';
 
     card.innerHTML = `
       <div class="checklist-row">
@@ -216,6 +262,7 @@ function createTicketFromTemplate(template) {
 
   // It's no longer the template
   clone.classList.remove('ticket-group-template');
+  clone.classList.add('ticket-group-instance');
   clone.removeAttribute('data-template');
 
   // Remove the add button on clones
@@ -224,7 +271,7 @@ function createTicketFromTemplate(template) {
     addBtn.remove();
   }
 
-  // Clear all inputs/selects inside the clone
+  // Clear all inputs/selects/textarea in the clone
   const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (el.tagName === 'SELECT') {
