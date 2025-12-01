@@ -313,7 +313,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (global standard width – non-table, non-mini-card) */
+/* Inputs on the RIGHT – global (non-table, non-mini-card) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -400,7 +400,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes (mini-card specific) */
+/* aligned text boxes */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -496,6 +496,15 @@ main {
 .section-block .checklist-row:has(> .add-row) > .add-row:hover {
   background: #ff8b42;
   transform: translateY(-1px);
+}
+
+/* Make the Support Ticket number box look like a normal full-width input */
+.ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 
 /* --------------- Additional POC integrated row tweaks --------------- */
@@ -648,8 +657,8 @@ main {
   padding: 0;
 }
 .dms-list li {
-  padding-top: 8px;
-  margin-top: 8px;
+  padding-top: 6px;
+  margin-top: 4px;
   border-top: 1px solid #e5e7eb;
 }
 .dms-list li:first-child {
@@ -667,6 +676,18 @@ main {
 .dms-field {
   font-weight: 600;
   font-size: 13px;
+}
+
+/* Group labels (Customers / Vehicles / Appointments / etc.) */
+.dms-group-title {
+  border-top: none;
+  margin-top: 10px;
+  padding-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
 }
 
 /* DOT ONLY tags */
@@ -701,14 +722,13 @@ main {
 }
 
 /* Section header bar above tables */
-/* UPDATED: margins so orange bar lines up exactly with the table width */
 .section-header {
   background: var(--orange);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px 0 0; /* previously 18px -22px 0; now aligns with table */
+  margin: 18px -22px 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
@@ -743,7 +763,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* slightly tighter so headers feel less blown out */
+  min-width: 900px;
 }
 .training-table th,
 .training-table td {
@@ -777,7 +797,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;        /* a bit narrower */
+  width: 200px;
   min-width: 200px;
 }
 .training-table thead th:first-child { 
