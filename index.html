@@ -2820,550 +2820,135 @@
         </div>
       </section>
 
-             <!-- ========================================================= -->
-      <!-- PAGE 8: DMS INTEGRATION (GROUPED BY CATEGORY)             -->
-      <!-- ========================================================= -->
-      <section id="dms-integration" class="page-section">
-        <h1>DMS Integration</h1>
-        <p class="page-subtitle">
-          Confirm DMS workflows, RO history, and integration behavior for accurate MPIs and communication.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+       <!-- ========================================================= -->
+<!-- PAGE 8: DMS INTEGRATION                                   -->
+<!-- ========================================================= -->
+<section id="dms-integration" class="page-section">
+  <h1>DMS Integration</h1>
+  <p class="page-subtitle">
+    Confirm DMS workflows, RO history, and integration behavior for accurate MPIs and communication.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <div class="section-block dms-overview-block">
-          <h2>DMS Integration Matrix</h2>
+  <div class="section-block dms-overview-block">
+    <h2>DMS Integration Overview</h2>
 
-          <!-- Legend -->
-          <div class="dms-legend">
-            <div><span class="dms-dot dms-dot-auto"></span>Happens Automatically / Real-time</div>
-            <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
-            <div><span class="dms-dot dms-dot-withro"></span>Comes with RO / With RO Only</div>
-            <div><span class="dms-dot dms-dot-planned"></span>Planned / Future / Nightly Sync</div>
-            <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
+    <!-- Simple Legend -->
+    <div class="dms-legend">
+      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
+      <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
+      <div><span class="dms-dot dms-dot-withro"></span>With RO Only</div>
+      <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+      <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
+    </div>
+
+    <!-- Simple Cards -->
+    <div class="dms-table-container">
+      <div class="dms-grid">
+        <!-- RO History -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">RO History</span>
+            <span class="dms-chip dms-chip-push">Push</span>
           </div>
-
-          <div class="dms-table-container">
-            <div class="dms-grid">
-
-              <!-- =================== REYNOLDS =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Reynolds</span>
-                  <span class="dms-chip dms-chip-push">Push</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> N/A</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> Happens Automatically</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> N/A</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, Happens Automatically</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
-                </ul>
+          <ul class="dms-list">
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">RO Updates</span>
+                <span class="dms-tag dms-tag-auto"></span>
               </div>
-
-              <!-- =================== AUTOMATE =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Automate</span>
-                  <span class="dms-chip dms-chip-push">Push</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">Customer Push:</span> N/A</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Vehicle Push:</span> N/A</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">Appointment Push:</span> N/A</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Happens Automatically</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> N/A</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> N/A</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> N/A</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> N/A</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> N/A</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> N/A</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
-                </ul>
+              <p>Changes to open ROs flow automatically from the DMS.</p>
+            </li>
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Closed ROs</span>
+                <span class="dms-tag dms-tag-ondemand"></span>
               </div>
+              <p>Closed RO status is updated by refresh or nightly jobs.</p>
+            </li>
+          </ul>
+        </div>
 
-              <!-- =================== CDK =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">CDK</span>
-                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Every 15 minutes</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Every 15 minutes</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 15 minutes</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> Nightly sync and historical (2 years)</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
-                </ul>
+        <!-- Customer & Vehicle -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">Customer &amp; Vehicle</span>
+            <span class="dms-chip dms-chip-pull">Pull</span>
+          </div>
+          <ul class="dms-list">
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Customer Lookup</span>
+                <span class="dms-tag dms-tag-auto"></span>
               </div>
-
-              <!-- =================== DEALERTRACK / ARKONA =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Dealertrack / Arkona</span>
-                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> On-Demand</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Every 15 minutes</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 15 minutes</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> Yes, On-Demand</li>
-                </ul>
+              <p>Customer info appears automatically when searching or opening ROs.</p>
+            </li>
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Vehicle History</span>
+                <span class="dms-tag dms-tag-withro"></span>
               </div>
+              <p>Service history shows when an RO is attached or opened.</p>
+            </li>
+          </ul>
+        </div>
 
-              <!-- =================== LIGHTYEAR / DEALERBUILT =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Lightyear / Dealerbuilt</span>
-                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> N/A</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> Yes, On-Demand</li>
-                </ul>
+        <!-- Parts & Pricing -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">Parts &amp; Pricing</span>
+            <span class="dms-chip dms-chip-pull">Pull</span>
+          </div>
+          <ul class="dms-list">
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Parts Pricing</span>
+                <span class="dms-tag dms-tag-limited"></span>
               </div>
-
-              <!-- =================== PBS =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">PBS</span>
-                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> N/A</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> N/A</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Every 2 minutes</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> On-Demand</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> On-Demand</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> N/A</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> On-Demand</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> N/A</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> Nightly sync</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, On-Demand</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
-                </ul>
+              <p>Prices are pulled from DMS price levels / matrices.</p>
+            </li>
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Parts Availability</span>
+                <span class="dms-tag dms-tag-na"></span>
               </div>
+              <p>Real-time stocking requires a separate catalog or integration.</p>
+            </li>
+          </ul>
+        </div>
 
-              <!-- =================== TEKION =================== -->
-              <div class="dms-card">
-                <div class="dms-card-header">
-                  <span class="dms-name">Tekion</span>
-                  <span class="dms-chip dms-chip-pull">Pull-Based</span>
-                </div>
-                <ul class="dms-list">
-                  <!-- Customers -->
-                  <li class="dms-group-title">Customers</li>
-                  <li><span class="dms-field">DMS Customer Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Customer Push:</span> On-Demand</li>
-
-                  <!-- Vehicles -->
-                  <li class="dms-group-title">Vehicles</li>
-                  <li><span class="dms-field">Vehicle Pull:</span> Comes with RO</li>
-                  <li><span class="dms-field">Vehicle Push:</span> On-Demand if any appointments are scheduled</li>
-
-                  <!-- Appointments -->
-                  <li class="dms-group-title">Appointments</li>
-                  <li><span class="dms-field">Appointment Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">Appointment Push:</span> On-Demand</li>
-
-                  <!-- Repair Orders -->
-                  <li class="dms-group-title">Repair Orders (RO)</li>
-                  <li><span class="dms-field">RO Pull:</span> Every 5 minutes</li>
-                  <li><span class="dms-field">RO Writeback (ServiceCart):</span> Planned</li>
-                  <li><span class="dms-field">RO Creation (Check-in):</span> Planned</li>
-
-                  <!-- Parts -->
-                  <li class="dms-group-title">Parts</li>
-                  <li><span class="dms-field">Parts Invoices Pull:</span> Planned</li>
-                  <li><span class="dms-field">Parts Availability &amp; Pricing (ServiceCart):</span> Planned</li>
-
-                  <!-- Special Orders & F&I -->
-                  <li class="dms-group-title">Special Orders &amp; F&amp;I</li>
-                  <li><span class="dms-field">Special Order Pull:</span> N/A</li>
-                  <li><span class="dms-field">F &amp; I Sales History:</span> Planned</li>
-
-                  <!-- Opcodes & History -->
-                  <li class="dms-group-title">Opcodes &amp; History</li>
-                  <li><span class="dms-field">Opcodes Pull:</span> Planned</li>
-                  <li><span class="dms-field">Historical RO Pull Capability:</span> Yes, once during deployment</li>
-                  <li><span class="dms-field">Historical Customer Pull Capability:</span> N/A</li>
-                </ul>
+        <!-- Other Integrations -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">Other Integrations</span>
+            <span class="dms-chip dms-chip-push">Push</span>
+          </div>
+          <ul class="dms-list">
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Appointment Export</span>
+                <span class="dms-tag dms-tag-planned"></span>
               </div>
-
-            </div>
-          </div>
+              <p>Confirm if scheduler appointments sync into the DMS or vice versa.</p>
+            </li>
+            <li>
+              <div class="dms-row-top">
+                <span class="dms-field">Display-Only Fields</span>
+                <span class="dms-tag dms-tag-display"></span>
+              </div>
+              <p>Values that show in myKaarma but are not written back to the DMS.</p>
+            </li>
+          </ul>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="section-block">
-          <h2>Notes — DMS Integration</h2>
-          <textarea placeholder="Notes about DMS behavior, delays, or unique workflows …"></textarea>
-        </div>
-      </section>
-
-      <!-- ========================================================= -->
-      <!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
-      <!-- ========================================================= -->
-      <section id="post-training" class="page-section">
-        <h1>Post-Training Verification</h1>
-        <p class="page-subtitle">
-          Validate training completion by role, confirm workflows, and document any remaining action items.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
-
-        <!-- Training Completion by Role -->
-        <div class="section-block">
-          <h2>Training Completion by Role</h2>
-
-          <div class="checklist-row">
-            <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
-            <select>
-              <option></option>
-              <option>Yes — Fully Trained</option>
-              <option>Partially Trained</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Are all Technicians trained and using myKaarma from start to finish?</label>
-            <select>
-              <option></option>
-              <option>Yes — Fully Trained</option>
-              <option>Partially Trained</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
-            <select>
-              <option></option>
-              <option>Yes — Fully Trained</option>
-              <option>Partially Trained</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-block">
-          <h2>Notes — Training Completion</h2>
-          <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps …"></textarea>
-        </div>
-
-        <!-- Final Sign-Off -->
-        <div class="section-block">
-          <h2>Final Sign-Off</h2>
-
-          <div class="checklist-row">
-            <label>Did you conduct a tech and advisors walkthrough with the Service Manager?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Did you conduct a parts rep walkthrough with the Parts Manager?</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Post-training CEM follow-up call.</label>
-            <input type="date">
-          </div>
-        </div>
-
-        <div class="section-block">
-          <h2>Notes — Final Sign-Off</h2>
-          <textarea placeholder="Any final thoughts, risks, or context you want CEM / Deployment / Support to know …"></textarea>
-        </div>
-
-        <!-- DMS & Data Validation -->
-        <div class="section-block">
-          <h2>DMS &amp; Data Validation</h2>
-
-          <div class="checklist-row">
-            <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>Inconsistent</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Opcodes and pricing align between myKaarma and the DMS.</label>
-            <select>
-              <option></option>
-              <option>Yes — Correct</option>
-              <option>Some Issues</option>
-              <option>Major Issues</option>
-              <option>N/A</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Automations -->
-        <div class="section-block orange-outline-card">
-          <h2>Automations</h2>
-
-          <div class="checklist-row">
-            <label>Are the following automations active?</label>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>Appointment Reminders</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>Welcome Texts</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>MPIs</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>Videos</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>Payment Requests</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-
-          <div class="checklist-row indent-sub">
-            <label>Follow-up</label>
-            <select>
-              <option></option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>N/A</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-block">
-          <h2>Notes — DMS &amp; Automations</h2>
-          <textarea placeholder="Specific findings, examples of mismatches, or items that require follow-up …"></textarea>
-        </div>
-      </section>
+  <div class="section-block">
+    <h2>Notes — DMS Integration</h2>
+    <textarea placeholder="Notes about DMS behavior, delays, or unique workflows …"></textarea>
+  </div>
+</section>
 
       <!-- ========================================================= -->
       <!-- PAGE 10: TRAINING SUMMARY                                 -->
