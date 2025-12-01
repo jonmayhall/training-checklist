@@ -108,7 +108,10 @@ function initAdditionalTrainers() {
     newRow.className = 'checklist-row indent-sub';
 
     const label = document.createElement('label');
-    label.textContent = 'Additional trainer';
+    label.textContent = 'Additional Trainer';
+    // Match the indented label width/spacing
+    label.style.flex = '0 0 36%';
+    label.style.paddingRight = '12px';
 
     const input = document.createElement('input');
     input.type = 'text';
