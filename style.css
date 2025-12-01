@@ -947,3 +947,166 @@ main {
   flex: 0 0 36%;
   padding-right: 12px;
 }
+
+/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
+
+.dms-overview-block {
+  margin-bottom: 28px;
+}
+
+.dms-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px 18px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.dms-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+/* Legend dot colors */
+.dms-dot-auto      { background: #22c55e; }  /* Auto / scheduled */
+.dms-dot-ondemand  { background: #f97316; }  /* On-demand / button */
+.dms-dot-withro    { background: #0ea5e9; }  /* With RO only */
+.dms-dot-planned   { background: #eab308; }  /* Planned / limited */
+.dms-dot-na        { background: #9ca3af; }  /* N/A */
+
+/* Container for all DMS cards */
+.dms-table-container {
+  margin-top: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: #fff;
+  padding: 18px 18px 12px;
+}
+
+/* Vertical stack of mini-cards to reduce horizontal scroll */
+.dms-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* Individual DMS mini-card */
+.dms-card {
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(15,23,42,0.05);
+  padding: 12px 14px 10px;
+}
+
+/* Thin border color matches push/pull chip */
+.dms-card-push {
+  border-color: var(--orange);
+}
+.dms-card-pull {
+  border-color: #22c55e;
+}
+
+.dms-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dms-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Push / Pull badges */
+.dms-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.dms-chip-push {
+  background: var(--orange);
+  color: #fff;
+  border-color: #ea580c;
+}
+
+.dms-chip-pull {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+/* List of capabilities inside each card */
+.dms-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.dms-list li {
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dms-list li:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 2px;
+}
+
+/* Title row (bold line) */
+.dms-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.dms-field {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Dot tags on each capability line */
+.dms-tag {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-size: 0;
+  color: transparent;
+}
+
+.dms-tag-auto      { background: #22c55e; }
+.dms-tag-ondemand  { background: #f97316; }
+.dms-tag-withro    { background: #0ea5e9; }
+.dms-tag-planned   { background: #eab308; }
+.dms-tag-na        { background: #9ca3af; }
+
+/* Description text smaller + lighter */
+.dms-list p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4b5563;
+}
+
+/* Responsive: allow 2 columns on larger screens if desired */
+@media (min-width: 1100px) {
+  .dms-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
