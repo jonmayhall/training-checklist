@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   (Version B – includes updated DMS styling)
+   (includes updated DMS styling)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -370,7 +370,6 @@ main {
 }
 
 /* --------------- MINI-CARDS (Contacts etc.) --------------- */
-/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -380,8 +379,6 @@ main {
   box-sizing: border-box;
   overflow: hidden;
 }
-
-/* rows inside mini-card – shared layout */
 .mini-card .checklist-row {
   margin: 0;
   border-bottom: 1px solid #e5e5e5;
@@ -392,6 +389,9 @@ main {
 }
 .mini-card .checklist-row:last-child {
   border-bottom: none;
+}
+.mini-card .checklist-row.label-only {
+  justify-content: flex-start;
 }
 
 /* move verbiage left + fixed label width */
@@ -439,29 +439,23 @@ main {
   row-gap: 18px;
   align-items: stretch;
 }
-
 .primary-contacts-grid .mini-card {
   margin: 0;
   width: 100%;
 }
 
 /* --------------- Integrated “+” rows --------------- */
-/* Layout: label | input | + button */
-
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
   gap: 0;
 }
-
 .section-block .checklist-row.integrated-plus label,
 .section-block .checklist-row:has(> .add-row) label {
   flex: 1 1 auto;
   padding-right: 16px;
 }
-
-/* Text box in integrated rows (default) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
@@ -472,8 +466,6 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-
-/* Integrated + button – default */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -508,8 +500,6 @@ main {
   flex: 0 0 36%;
   padding-right: 12px;
 }
-
-/* inside mini-card we want full-width + button at end */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 1 1 auto;
   width: 100%;
@@ -518,7 +508,6 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 32px;
   width: 32px;
@@ -528,15 +517,12 @@ main {
   margin-left: -1px;
   padding: 0;
 }
-
-/* override generic integrated-plus rule inside mini-card so fields line up */
 .mini-card .checklist-row.integrated-plus input[type="text"] {
   flex: 1 1 auto;
   width: 100%;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
-
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
@@ -545,12 +531,9 @@ main {
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
-
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
-
-/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -562,11 +545,9 @@ main {
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
-
 .dms-overview-block {
   margin-bottom: 28px;
 }
-
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -574,7 +555,6 @@ main {
   font-size: 13px;
   margin-top: 8px;
 }
-
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -582,7 +562,6 @@ main {
   border-radius: 999px;
   margin-right: 6px;
 }
-
 .dms-dot-auto      { background: #22c55e; }
 .dms-dot-ondemand  { background: #f97316; }
 .dms-dot-withro    { background: #0ea5e9; }
@@ -596,7 +575,6 @@ main {
   box-shadow: var(--shadow);
   background: #fff;
 }
-
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -604,6 +582,7 @@ main {
   padding: 18px;
 }
 
+/* base card */
 .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -612,19 +591,27 @@ main {
   padding: 14px 16px 12px;
 }
 
+/* border color matches primary behavior */
+.dms-card-push {
+  border-color: var(--orange);
+}
+.dms-card-pull {
+  border-color: var(--mykaarma-green);
+}
+
 .dms-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
 }
-
 .dms-name {
   font-size: 16px;
   font-weight: 700;
   color: #111827;
 }
 
+/* chip = push/pull icon */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -634,14 +621,12 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
-
 /* PUSH = myKaarma orange */
 .dms-chip-push {
   background: var(--orange);
   color: #fff;
   border-color: var(--orange);
 }
-
 /* PULL = myKaarma green */
 .dms-chip-pull {
   background: var(--mykaarma-green);
@@ -677,7 +662,7 @@ main {
   color: #111827;
 }
 
-/* DOT ONLY tags */
+/* colored dots on each bullet */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -703,12 +688,9 @@ main {
 }
 
 /* --------------- Training TABLES --------------- */
-
 .section { 
   margin-bottom: 40px; 
 }
-
-/* Section header bar above tables */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -724,8 +706,6 @@ main {
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   margin-top: 0;
 }
-
-/* Table Card */
 .table-container {
   width: 100%;
   background: #fff;
@@ -737,7 +717,6 @@ main {
   padding: 0;
   box-sizing: border-box;
 }
-
 .scroll-wrapper {
   display: block;
   width: 100%;
@@ -745,8 +724,6 @@ main {
   background: #fff;
   padding-bottom: 4px;
 }
-
-/* Table */
 .training-table {
   border-collapse: collapse;
   width: 100%;
@@ -761,8 +738,6 @@ main {
   border-bottom: 1px solid var(--border);
   padding: 6px 6px;
 }
-
-/* Sticky header — LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -771,14 +746,10 @@ main {
   top: 0;
   z-index: 3;
 }
-
-/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
 }
-
-/* Sticky first column – for checklists (not Opcodes; overridden later) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -812,15 +783,11 @@ main {
   background: #f7f7f7;
   text-align: left;
 }
-
-/* Column widths (generic second col) */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
   min-width: 185px;
 }
-
-/* Inputs/Selects inside table cells */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
@@ -840,16 +807,12 @@ main {
   outline: none;
   background: #fff9f5;
 }
-
-/* Alternating rows */
 .training-table tr:nth-child(odd) { 
   background: #fff; 
 }
 .training-table tr:nth-child(even) { 
   background: #fafafa; 
 }
-
-/* Table footer + "+" button  */
 .table-footer {
   width: 100%;
   background: #f5f5f5;
@@ -881,8 +844,6 @@ main {
 }
 
 /* --------------- OPCODES PAGE --------------- */
-
-/* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
@@ -896,8 +857,6 @@ main {
   padding: 6px 6px;
   background: inherit;
 }
-
-/* Opcode-related column sizing */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -913,16 +872,12 @@ main {
   width: 110px;
   min-width: 100px;
 }
-
-/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
   max-width: 80px;
   min-width: 60px;
 }
-
-/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -975,7 +930,6 @@ main {
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
-
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
@@ -983,7 +937,6 @@ main {
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
-
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
