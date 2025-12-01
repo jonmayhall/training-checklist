@@ -366,6 +366,11 @@ main {
   padding-bottom: 10px;
 }
 
+/* center Add Additional Trainer label */
+.additional-trainers-row label {
+  text-align: center;
+}
+
 /* --------------- MINI-CARDS (Contacts etc.) --------------- */
 /* thin, continuous orange border around entire card */
 .mini-card {
@@ -376,11 +381,6 @@ main {
   padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
-}
-
-/* Modifier: gray border mini-card (used for Deployment Manager & CEM) */
-.mini-card.no-orange-border {
-  border-color: var(--border);
 }
 
 /* rows inside mini-card – shared layout */
