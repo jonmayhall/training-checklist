@@ -86,122 +86,104 @@
 
     <!-- MAIN CONTENT -->
     <main>
-    
-<!-- ========================================================= -->
-<!-- PAGE 1: ONSITE TRAINERS & CEM                            -->
-<!-- ========================================================= -->
-<section id="onsite-trainers" class="page-section active">
-  <h1>Onsite Trainers &amp; CEM</h1>
+
+      <!-- =========================================
+     PAGE 1 — Trainers, Deployment Manager, & CEM
+     ========================================= -->
+<section id="onsite-trainers-cem" class="page-section active">
+  <h1>Trainers, Deployment Manager, &amp; CEM</h1>
   <p class="page-subtitle">
-    Enter your information and add additional trainers or CEM contacts.
+    Capture onsite trainer details and deployment/CEM context.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Trainer Info -->
+  <!-- =====================================================
+       LEAD TRAINER + ADDITIONAL TRAINER (SAME CARD)
+       ===================================================== -->
   <div class="section-block">
-    <h2>Trainer Information</h2>
+    <h2>Lead &amp; Additional Trainers</h2>
 
-    <!-- Trainer Name -->
     <div class="checklist-row">
-      <label>Trainer Name</label>
-      <input type="text" id="trainerNameInput" placeholder="Your name">
+      <label>Lead Trainer</label>
+      <select>
+        <option value="">Select lead trainer</option>
+
+        <!-- ================= GROUP 1 ================= -->
+        <optgroup label="1">
+          <option>Christopher Eskew</option>
+          <option>Brian Button</option>
+          <option>Dana Barry</option>
+        </optgroup>
+
+        <!-- spacer line -->
+        <option disabled>──────────</option>
+
+        <!-- ================= GROUP 2 ================= -->
+        <optgroup label="2">
+          <option>Adam Jeffords</option>
+          <option>Alec Parker</option>
+          <option>Eliud Garcia</option>
+          <option>Joel Zavaleta</option>
+          <option>Kyle Leavitt</option>
+          <option>Lauren Ramos</option>
+          <option>Miles Krasic</option>
+        </optgroup>
+
+        <!-- spacer line -->
+        <option disabled>──────────</option>
+
+        <!-- ================= GROUP 3 ================= -->
+        <optgroup label="3">
+          <option>Anthony Carbone</option>
+          <option>Clyde Chapman</option>
+          <option>Dennitza Fernandez</option>
+          <option>Jackson Geraghty</option>
+          <option>Kevin Mullinax</option>
+          <option>Sharon Rusta</option>
+          <option>Terry Hart</option>
+        </optgroup>
+
+      </select>
     </div>
 
-    <!-- Trainer Phone -->
-    <div class="checklist-row">
-      <label>Trainer Phone</label>
-      <input type="text" placeholder="(555) 123-4567">
-    </div>
-
-    <!-- Trainer Email -->
-    <div class="checklist-row">
-      <label>Trainer Email</label>
-      <input type="email" placeholder="trainer@mykaarma.com">
-    </div>
-
-    <!-- Additional Trainers (integrated + button) -->
-    <div class="checklist-row additional-trainers-row indent-sub integrated-plus">
-      <label>Additional Trainer</label>
-      <input type="text" placeholder="Trainer name">
+    <!-- Additional Trainer (indented with + Button) -->
+    <div class="checklist-row additional-trainers-row integrated-plus indent-sub">
+      <label style="flex: 0 0 36%;">Additional Trainer</label>
+      <input type="text">
       <button class="add-row" type="button">+</button>
     </div>
 
-    <!-- Container where JS inserts new additional trainer rows -->
+    <!-- JS-Appended Additional Trainers -->
     <div id="additionalTrainersContainer"></div>
   </div>
 
-  <!-- Primary Contacts -->
+  <!-- Notes – Trainers -->
+  <div class="section-block notes-block">
+    <h2>Notes – Trainers</h2>
+    <textarea rows="4" placeholder="Notes about trainers..."></textarea>
+  </div>
+
+  <!-- =====================================================
+       DEPLOYMENT MANAGER + CEM
+       ===================================================== -->
   <div class="section-block">
-    <h2>Primary Contacts</h2>
+    <h2>Deployment &amp; Custom Engagement Manager</h2>
 
-    <div id="primaryContactsGrid" class="primary-contacts-grid">
+    <div class="checklist-row">
+      <label>Deployment Manager</label>
+      <input type="text">
+    </div>
 
-      <!-- CEM Contact -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>CEM Name</label>
-          <input type="text" placeholder="Name">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- Onsite Lead -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Onsite Lead</label>
-          <input type="text" placeholder="Name">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- Additional POC (integrated + button) -->
-      <div class="mini-card additional-poc-card">
-        <div class="checklist-row integrated-plus">
-          <label>Additional POC</label>
-          <input type="text" class="additional-poc-name" placeholder="Name">
-          <button class="add-row additional-poc-add" type="button">+</button>
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Role</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
+    <div class="checklist-row">
+      <label>CEM</label>
+      <input type="text">
     </div>
   </div>
 
-  <!-- Notes — Trainers -->
+  <!-- Notes – Trainers, Deployment, & CEM -->
   <div class="section-block notes-block">
-    <h2>Notes — Trainers</h2>
-    <textarea placeholder="Notes about trainers..."></textarea>
-  </div>
-
-  <!-- Notes — Trainers, Deployment, & CEM -->
-  <div class="section-block notes-block">
-    <h2>Notes — Trainers, Deployment, &amp; CEM</h2>
-    <textarea placeholder="Additional notes for trainers, deployment, or CEM..."></textarea>
+    <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
+    <textarea rows="6" placeholder="High-level notes..."></textarea>
   </div>
 
 </section>
