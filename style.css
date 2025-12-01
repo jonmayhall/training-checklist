@@ -1,6 +1,5 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
-   (includes updated DMS styling)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -11,8 +10,6 @@
   --card-bg: #fff;
   --border: #dcdcdc;
   --ink: #222;
-
-  --mykaarma-green: #c8dd3d; /* lime green from logo */
 
   --radius-lg: 18px;       /* cards */
   --radius-md: 16px;
@@ -316,7 +313,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (global width) */
+/* Inputs on the RIGHT — UNIFIED WIDTH (non-table, non-mini-card) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -369,7 +366,8 @@ main {
   padding-bottom: 10px;
 }
 
-/* --------------- MINI-CARDS (Contacts etc.) --------------- */
+/* --------------- MINI-CARDS (Contacts, DMS, etc.) --------------- */
+/* thin, continuous orange border around entire card (base) */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -379,6 +377,8 @@ main {
   box-sizing: border-box;
   overflow: hidden;
 }
+
+/* rows inside mini-card – shared layout */
 .mini-card .checklist-row {
   margin: 0;
   border-bottom: 1px solid #e5e5e5;
@@ -390,9 +390,6 @@ main {
 .mini-card .checklist-row:last-child {
   border-bottom: none;
 }
-.mini-card .checklist-row.label-only {
-  justify-content: flex-start;
-}
 
 /* move verbiage left + fixed label width */
 .mini-card .checklist-row label {
@@ -403,7 +400,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes – mini cards */
+/* aligned text boxes, full width INSIDE mini-cards */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -439,23 +436,29 @@ main {
   row-gap: 18px;
   align-items: stretch;
 }
+
 .primary-contacts-grid .mini-card {
   margin: 0;
   width: 100%;
 }
 
 /* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input | + button */
+
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
   display: flex;
   align-items: stretch;
   gap: 0;
 }
+
 .section-block .checklist-row.integrated-plus label,
 .section-block .checklist-row:has(> .add-row) label {
   flex: 1 1 auto;
   padding-right: 16px;
 }
+
+/* Text box in integrated rows (default) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
@@ -466,6 +469,8 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+
+/* Integrated + button – default */
 .section-block .checklist-row.integrated-plus > .add-row,
 .section-block .checklist-row:has(> .add-row) > .add-row {
   flex: 0 0 34px;
@@ -500,6 +505,8 @@ main {
   flex: 0 0 36%;
   padding-right: 12px;
 }
+
+/* inside mini-card we want full-width + button at end */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 1 1 auto;
   width: 100%;
@@ -508,6 +515,7 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 32px;
   width: 32px;
@@ -517,12 +525,15 @@ main {
   margin-left: -1px;
   padding: 0;
 }
+
+/* override generic integrated-plus rule inside mini-card so fields line up */
 .mini-card .checklist-row.integrated-plus input[type="text"] {
   flex: 1 1 auto;
   width: 100%;
 }
 
 /* --------------- SUPPORT TICKETS --------------- */
+
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
@@ -531,9 +542,12 @@ main {
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
+
 .ticket-group .checklist-row:first-of-type {
   margin-top: 8px;
 }
+
+/* A simple subtle count style if you add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -545,9 +559,11 @@ main {
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
+
 .dms-overview-block {
   margin-bottom: 28px;
 }
+
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -555,6 +571,7 @@ main {
   font-size: 13px;
   margin-top: 8px;
 }
+
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -562,11 +579,13 @@ main {
   border-radius: 999px;
   margin-right: 6px;
 }
-.dms-dot-auto      { background: #22c55e; }
-.dms-dot-ondemand  { background: #f97316; }
-.dms-dot-withro    { background: #0ea5e9; }
-.dms-dot-planned   { background: #eab308; }
-.dms-dot-na        { background: #9ca3af; }
+
+/* legend colors */
+.dms-dot-auto      { background: #22c55e; }  /* Automatic / real-time */
+.dms-dot-ondemand  { background: #f97316; }  /* On-demand / button */
+.dms-dot-withro    { background: #0ea5e9; }  /* With RO only */
+.dms-dot-planned   { background: #eab308; }  /* Planned / future */
+.dms-dot-na        { background: #9ca3af; }  /* N/A */
 
 .dms-table-container {
   margin-top: 16px;
@@ -575,6 +594,7 @@ main {
   box-shadow: var(--shadow);
   background: #fff;
 }
+
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -591,12 +611,13 @@ main {
   padding: 14px 16px 12px;
 }
 
-/* border color matches primary behavior */
+/* thin border that matches push/pull chip color */
 .dms-card-push {
-  border-color: var(--orange);
+  border-color: #f97316; /* myKaarma orange */
 }
+
 .dms-card-pull {
-  border-color: var(--mykaarma-green);
+  border-color: #22c55e; /* myKaarma green */
 }
 
 .dms-card-header {
@@ -605,13 +626,14 @@ main {
   justify-content: space-between;
   margin-bottom: 8px;
 }
+
 .dms-name {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #111827;
 }
 
-/* chip = push/pull icon */
+/* push / pull badges */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -621,29 +643,32 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
-/* PUSH = myKaarma orange */
+
 .dms-chip-push {
-  background: var(--orange);
+  background: #f97316;       /* myKaarma orange */
   color: #fff;
-  border-color: var(--orange);
-}
-/* PULL = myKaarma green */
-.dms-chip-pull {
-  background: var(--mykaarma-green);
-  color: #111827;
-  border-color: var(--mykaarma-green);
+  border-color: #ea580c;
 }
 
+.dms-chip-pull {
+  background: #22c55e;       /* myKaarma green */
+  color: #fff;
+  border-color: #16a34a;
+}
+
+/* bullet list inside cards */
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
   padding: 0;
 }
+
 .dms-list li {
-  padding-top: 6px;
-  margin-top: 6px;
+  padding-top: 8px;
+  margin-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
+
 .dms-list li:first-child {
   border-top: none;
   margin-top: 0;
@@ -656,13 +681,13 @@ main {
   justify-content: space-between;
   margin-bottom: 2px;
 }
+
 .dms-field {
-  font-weight: 700;
+  font-weight: 600;    /* bold bullet title so it stands out */
   font-size: 13px;
-  color: #111827;
 }
 
-/* colored dots on each bullet */
+/* DOT ONLY tags used inside cards */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -672,6 +697,7 @@ main {
   font-size: 0;
   color: transparent;
 }
+
 .dms-tag-auto      { background: #22c55e; }
 .dms-tag-ondemand  { background: #f97316; }
 .dms-tag-withro    { background: #0ea5e9; }
@@ -680,17 +706,21 @@ main {
 .dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
 
+/* make descriptions a little smaller so they don't blend with titles */
 .dms-list p {
-  margin: 2px 0 0;
-  font-size: 11px;
-  line-height: 1.4;
-  color: #6b7280;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4b5563;
 }
 
 /* --------------- Training TABLES --------------- */
+
 .section { 
   margin-bottom: 40px; 
 }
+
+/* Section header bar above tables */
 .section-header {
   background: var(--orange);
   color: #fff;
@@ -706,6 +736,8 @@ main {
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   margin-top: 0;
 }
+
+/* Table Card */
 .table-container {
   width: 100%;
   background: #fff;
@@ -717,6 +749,7 @@ main {
   padding: 0;
   box-sizing: border-box;
 }
+
 .scroll-wrapper {
   display: block;
   width: 100%;
@@ -724,10 +757,12 @@ main {
   background: #fff;
   padding-bottom: 4px;
 }
+
+/* Table */
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px;
+  min-width: 900px; /* keep narrower so headers feel less blown out */
 }
 .training-table th,
 .training-table td {
@@ -738,6 +773,8 @@ main {
   border-bottom: 1px solid var(--border);
   padding: 6px 6px;
 }
+
+/* Sticky header — LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -746,10 +783,14 @@ main {
   top: 0;
   z-index: 3;
 }
+
+/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
 }
+
+/* Sticky first column – for checklists (not Opcodes; overridden later) */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
@@ -783,11 +824,15 @@ main {
   background: #f7f7f7;
   text-align: left;
 }
+
+/* Column widths (generic second col) */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
   width: 185px;
   min-width: 185px;
 }
+
+/* Inputs/Selects inside table cells */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
@@ -807,12 +852,16 @@ main {
   outline: none;
   background: #fff9f5;
 }
+
+/* Alternating rows */
 .training-table tr:nth-child(odd) { 
   background: #fff; 
 }
 .training-table tr:nth-child(even) { 
   background: #fafafa; 
 }
+
+/* Table footer + "+" button  */
 .table-footer {
   width: 100%;
   background: #f5f5f5;
@@ -844,6 +893,8 @@ main {
 }
 
 /* --------------- OPCODES PAGE --------------- */
+
+/* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child {
   position: static;
@@ -857,6 +908,8 @@ main {
   padding: 6px 6px;
   background: inherit;
 }
+
+/* Opcode-related column sizing */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -872,12 +925,16 @@ main {
   width: 110px;
   min-width: 100px;
 }
+
+/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
   max-width: 80px;
   min-width: 60px;
 }
+
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -919,6 +976,56 @@ main {
   background: #ff8b42;
 }
 
+/* --------------- MAP / ADDRESS (Dealership Info) --------------- */
+
+.address-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+}
+
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.small-map-btn {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--orange);
+  background: #fff7f2;
+  color: var(--orange);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.small-map-btn:hover {
+  background: #ffefe3;
+}
+
+.map-wrapper {
+  margin: 12px 40px 6px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f9fafb;
+}
+.map-frame {
+  width: 100%;
+  height: 220px;
+  border: none;
+}
+.map-helper-text {
+  margin: 4px 10px 8px;
+  font-size: 11px;
+  color: #4b5563;
+}
+
 /* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
@@ -930,15 +1037,27 @@ main {
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
+
   .primary-contacts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .map-wrapper {
+    margin-left: 20px;
+    margin-right: 20px;
   }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }
+
   .primary-contacts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .map-wrapper {
+    margin-left: 10px;
+    margin-right: 10px;
   }
 }
 
@@ -946,167 +1065,4 @@ main {
 .additional-trainers-row.integrated-plus.indent-sub label {
   flex: 0 0 36%;
   padding-right: 12px;
-}
-
-/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
-
-.dms-overview-block {
-  margin-bottom: 28px;
-}
-
-.dms-legend {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 6px 18px;
-  font-size: 13px;
-  margin-top: 8px;
-}
-
-.dms-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  margin-right: 6px;
-}
-
-/* Legend dot colors */
-.dms-dot-auto      { background: #22c55e; }  /* Auto / scheduled */
-.dms-dot-ondemand  { background: #f97316; }  /* On-demand / button */
-.dms-dot-withro    { background: #0ea5e9; }  /* With RO only */
-.dms-dot-planned   { background: #eab308; }  /* Planned / limited */
-.dms-dot-na        { background: #9ca3af; }  /* N/A */
-
-/* Container for all DMS cards */
-.dms-table-container {
-  margin-top: 12px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  background: #fff;
-  padding: 18px 18px 12px;
-}
-
-/* Vertical stack of mini-cards to reduce horizontal scroll */
-.dms-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-/* Individual DMS mini-card */
-.dms-card {
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  box-shadow: 0 3px 8px rgba(15,23,42,0.05);
-  padding: 12px 14px 10px;
-}
-
-/* Thin border color matches push/pull chip */
-.dms-card-push {
-  border-color: var(--orange);
-}
-.dms-card-pull {
-  border-color: #22c55e;
-}
-
-.dms-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.dms-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Push / Pull badges */
-.dms-chip {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 10px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-}
-
-.dms-chip-push {
-  background: var(--orange);
-  color: #fff;
-  border-color: #ea580c;
-}
-
-.dms-chip-pull {
-  background: #22c55e;
-  color: #ffffff;
-  border-color: #16a34a;
-}
-
-/* List of capabilities inside each card */
-.dms-list {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-}
-
-.dms-list li {
-  padding-top: 8px;
-  margin-top: 8px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.dms-list li:first-child {
-  border-top: none;
-  margin-top: 0;
-  padding-top: 2px;
-}
-
-/* Title row (bold line) */
-.dms-row-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2px;
-}
-
-.dms-field {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-/* Dot tags on each capability line */
-.dms-tag {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  flex-shrink: 0;
-  font-size: 0;
-  color: transparent;
-}
-
-.dms-tag-auto      { background: #22c55e; }
-.dms-tag-ondemand  { background: #f97316; }
-.dms-tag-withro    { background: #0ea5e9; }
-.dms-tag-planned   { background: #eab308; }
-.dms-tag-na        { background: #9ca3af; }
-
-/* Description text smaller + lighter */
-.dms-list p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: #4b5563;
-}
-
-/* Responsive: allow 2 columns on larger screens if desired */
-@media (min-width: 1100px) {
-  .dms-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
