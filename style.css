@@ -313,7 +313,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT — UNIFIED WIDTH (non-table, non-mini-card) */
+/* Inputs on the RIGHT */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -366,8 +366,8 @@ main {
   padding-bottom: 10px;
 }
 
-/* --------------- MINI-CARDS (Contacts, DMS, etc.) --------------- */
-/* thin, continuous orange border around entire card (base) */
+/* --------------- MINI-CARDS (Contacts etc.) --------------- */
+/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -400,7 +400,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes, full width INSIDE mini-cards */
+/* aligned text boxes */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -580,12 +580,11 @@ main {
   margin-right: 6px;
 }
 
-/* legend colors */
-.dms-dot-auto      { background: #22c55e; }  /* Automatic / real-time */
-.dms-dot-ondemand  { background: #f97316; }  /* On-demand / button */
-.dms-dot-withro    { background: #0ea5e9; }  /* With RO only */
-.dms-dot-planned   { background: #eab308; }  /* Planned / future */
-.dms-dot-na        { background: #9ca3af; }  /* N/A */
+.dms-dot-auto      { background: #22c55e; }
+.dms-dot-ondemand  { background: #3b82f6; }
+.dms-dot-withro    { background: #f97316; }
+.dms-dot-planned   { background: #eab308; }
+.dms-dot-na        { background: #9ca3af; }
 
 .dms-table-container {
   margin-top: 16px;
@@ -602,7 +601,6 @@ main {
   padding: 18px;
 }
 
-/* base card */
 .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -611,13 +609,12 @@ main {
   padding: 14px 16px 12px;
 }
 
-/* thin border that matches push/pull chip color */
+/* optional helpers if you use them in HTML */
 .dms-card-push {
-  border-color: #f97316; /* myKaarma orange */
+  border-color: var(--orange);
 }
-
 .dms-card-pull {
-  border-color: #22c55e; /* myKaarma green */
+  border-color: #22c55e;
 }
 
 .dms-card-header {
@@ -633,7 +630,7 @@ main {
   color: #111827;
 }
 
-/* push / pull badges */
+/* push/pull chips – myKaarma orange & green */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -643,32 +640,27 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
-
 .dms-chip-push {
-  background: #f97316;       /* myKaarma orange */
+  background: var(--orange);
   color: #fff;
   border-color: #ea580c;
 }
-
 .dms-chip-pull {
-  background: #22c55e;       /* myKaarma green */
+  background: #22c55e;
   color: #fff;
   border-color: #16a34a;
 }
 
-/* bullet list inside cards */
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
   padding: 0;
 }
-
 .dms-list li {
   padding-top: 8px;
   margin-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
-
 .dms-list li:first-child {
   border-top: none;
   margin-top: 0;
@@ -682,12 +674,13 @@ main {
   margin-bottom: 2px;
 }
 
+/* bullet titles – stronger */
 .dms-field {
-  font-weight: 600;    /* bold bullet title so it stands out */
+  font-weight: 600;
   font-size: 13px;
 }
 
-/* DOT ONLY tags used inside cards */
+/* DOT ONLY tags */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -697,19 +690,17 @@ main {
   font-size: 0;
   color: transparent;
 }
-
-.dms-tag-auto      { background: #22c55e; }
-.dms-tag-ondemand  { background: #f97316; }
-.dms-tag-withro    { background: #0ea5e9; }
-.dms-tag-planned   { background: #eab308; }
-.dms-tag-na        { background: #9ca3af; }
-.dms-tag-limited   { background: #6366f1; }
+.dms-tag-auto      { background: #22c55e; }   /* automatic */
+.dms-tag-ondemand  { background: #3b82f6; }   /* on demand */
+.dms-tag-withro    { background: #f97316; }   /* with RO only */
+.dms-tag-planned   { background: #eab308; }   /* planned */
+.dms-tag-na        { background: #9ca3af; }   /* not available */
+.dms-tag-limited   { background: #6366f1; }   /* limited/partial */
 .dms-tag-display   { background: #6b7280; }
 
-/* make descriptions a little smaller so they don't blend with titles */
 .dms-list p {
   margin: 0;
-  font-size: 12px;
+  font-size: 12px;       /* smaller description text so it doesn’t blend */
   line-height: 1.45;
   color: #4b5563;
 }
@@ -762,7 +753,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* keep narrower so headers feel less blown out */
+  min-width: 900px; /* slightly tighter so headers feel less blown out */
 }
 .training-table th,
 .training-table td {
@@ -796,7 +787,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;
+  width: 200px;        /* a bit narrower */
   min-width: 200px;
 }
 .training-table thead th:first-child { 
@@ -976,56 +967,6 @@ main {
   background: #ff8b42;
 }
 
-/* --------------- MAP / ADDRESS (Dealership Info) --------------- */
-
-.address-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-}
-
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: 100%;
-}
-
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  font-size: 11px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--orange);
-  background: #fff7f2;
-  color: var(--orange);
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.small-map-btn:hover {
-  background: #ffefe3;
-}
-
-.map-wrapper {
-  margin: 12px 40px 6px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #f9fafb;
-}
-.map-frame {
-  width: 100%;
-  height: 220px;
-  border: none;
-}
-.map-helper-text {
-  margin: 4px 10px 8px;
-  font-size: 11px;
-  color: #4b5563;
-}
-
 /* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
@@ -1041,11 +982,6 @@ main {
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
-
-  .map-wrapper {
-    margin-left: 20px;
-    margin-right: 20px;
-  }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
@@ -1053,11 +989,6 @@ main {
 
   .primary-contacts-grid {
     grid-template-columns: 1fr;
-  }
-
-  .map-wrapper {
-    margin-left: 10px;
-    margin-right: 10px;
   }
 }
 
