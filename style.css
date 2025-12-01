@@ -290,21 +290,22 @@ main {
 }
 
 /* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
+/* Center content vertically with equal padding between horizontal lines */
 .checklist-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin: 0;
   font-size: 14px;
-  padding-left: 40px;
-  padding-bottom: 10px;
+  padding: 10px 40px;
   border-bottom: 1px solid #e0e0e0;
 }
+
+/* Last row in a card: no bottom line */
 .section-block .checklist-row:last-of-type {
   border-bottom: none;
-  margin-bottom: 8px;
-  padding-bottom: 0;
 }
+
 .checklist-row label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -331,11 +332,28 @@ main {
   font-size: 13px;
   box-sizing: border-box;
 }
+
+/* Notes-style textareas (full-width cards, NOT inside rows) */
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
   display: block;
   padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  resize: vertical;
+}
+
+/* Inline textareas inside checklist-row (e.g., “Additional comments”) 
+   – same width as other text boxes/dropdowns */
+.section-block .checklist-row textarea {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
+  padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
@@ -362,8 +380,6 @@ main {
 .checklist-row.additional-trainers-row,
 .additional-trainer-row {
   border-bottom: 1px solid #e0e0e0 !important;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
 }
 
 /* --------------- MINI-CARDS (Contacts etc.) --------------- */
@@ -400,7 +416,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes */
+/* aligned text boxes (mini-cards have their own sizing) */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -544,7 +560,7 @@ main {
 }
 
 .ticket-group .checklist-row:first-of-type {
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 /* A simple subtle count style if you add counts in headers later */
@@ -742,7 +758,6 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* slightly tighter so headers feel less blown out */
 }
 .training-table th,
 .training-table td {
@@ -776,7 +791,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;        /* a bit narrower */
+  width: 200px;
   min-width: 200px;
 }
 .training-table thead th:first-child { 
