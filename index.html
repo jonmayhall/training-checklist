@@ -87,110 +87,107 @@
     <!-- MAIN CONTENT -->
     <main>
 
-<!-- ========================================================= -->
-<!-- PAGE 1: TRAINING LEADS & CONTACTS                         -->
-<!-- ========================================================= -->
-<section id="onsite-trainers" class="page-section active">
-  <h1>Training Leads &amp; Contacts</h1>
+ <!-- =========================================
+     PAGE 1 — Onsite Trainers & CEM
+     ========================================= -->
+<section id="onsite-trainers-cem" class="page-section active">
+  <h1>Onsite Trainers & CEM</h1>
   <p class="page-subtitle">
-    Capture trainer assignments and core dealership contacts for this onsite.
+    Capture onsite trainer details, key champions/blockers, and deployment/CEM context.
   </p>
+  <button class="clear-page-btn">Clear Page</button>
 
-  <button class="clear-page-btn" type="button">Reset This Page</button>
-
-  <!-- TRAINERS CARD -->
+  <!-- ===============================
+       ONSITE TRAINER – MAIN
+       =============================== -->
   <div class="section-block">
-    <h2>Trainers</h2>
-
-    <!-- Lead Trainer -->
-    <div class="checklist-row">
-      <label>Lead Trainer</label>
-      <select id="leadTrainer">
-        <option></option>
-        <option disabled>──────────</option>
-        <option>Brian Button</option>
-        <option>Christopher Eskew</option>
-        <option>Dana Barry</option>
-
-        <option disabled>──────────</option>
-        <option>Adam Jeffords</option>
-        <option>Alec Parker</option>
-        <option>Eliud Garcia</option>
-        <option>Jackson Geraghty</option>
-        <option>Joel Zavaleta</option>
-        <option>Kyle Leavitt</option>
-        <option>Lauren Ramos</option>
-        <option>Miles Krasic</option>
-        <option>Terry Hart</option>
-
-        <option disabled>──────────</option>
-        <option>Anthony Carbone</option>
-        <option>Brett Smith</option>
-        <option>Clyde Chapman</option>
-        <option>Dennitza Fernandez</option>
-        <option>Kevin Mullinax</option>
-        <option>Sharon Rusta</option>
-      </select>
-    </div>
-
-    <!-- Additional Trainers -->
-    <div class="checklist-row indent-sub integrated-plus additional-trainers-row">
-      <label for="additionalTrainers">Additional Trainers</label>
-      <input type="text" id="additionalTrainers" name="additionalTrainers">
-      <button type="button" class="add-row add-trainer-btn">+</button>
-    </div>
-
-    <!-- Dynamic rows container -->
-    <div id="additionalTrainersContainer"></div>
+    <h2>Onsite Trainer</h2>
 
     <div class="checklist-row">
-      <label>Training Type</label>
-      <select id="trainingType">
-        <option></option>
-        <option>Onsite</option>
-        <option>Retraining</option>
-        <option>Paid Additional Training</option>
-      </select>
+      <label>Onsite Trainer Name</label>
+      <input type="text">
     </div>
 
-    <div class="checklist-row">
-      <label>Training Start Date</label>
-      <input id="trainingStartDate" type="date">
-    </div>
-
-    <div class="checklist-row">
-      <label>Training End Date</label>
-      <input id="trainingEndDate" type="date">
+    <div class="checklist-row indent-sub">
+      <label>Notes – Onsite Trainer</label>
+      <input type="text">
     </div>
   </div>
 
-  <!-- DEPLOYMENT & CUSTOM ENGAGEMENT MANAGER -->
+  <!-- ===============================
+       ADDITIONAL TRAINERS (+)
+       =============================== -->
   <div class="section-block">
-    <h2>Deployment &amp; Custom Engagement Manager</h2>
+    <h2>Additional Trainers</h2>
+
+    <!-- Integrated + row that JS hooks to -->
+    <div class="checklist-row additional-trainers-row integrated-plus">
+      <label>Add Additional Trainer</label>
+      <input type="text">
+      <button class="add-row">+</button>
+    </div>
+
+    <!-- New additional trainer rows append here -->
+    <div id="additionalTrainersContainer"></div>
+  </div>
+
+  <!-- ===============================
+       DEPLOYMENT MANAGER + CEM
+       (Combined large card, no mini borders)
+       =============================== -->
+  <div class="section-block">
+    <h2>Deployment & Custom Engagement Manager</h2>
 
     <!-- Deployment Manager -->
-    <div class="mini-card no-orange">
-      <div class="checklist-row">
-        <label>Deployment Manager</label>
-        <input type="text">
-      </div>
+    <div class="checklist-row">
+      <label>Deployment Manager Name</label>
+      <input type="text">
     </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Notes – Deployment Manager</label>
+      <input type="text">
+    </div>
+
+    <!-- Divider line between roles -->
+    <div style="border-top: 1px solid #e0e0e0; margin: 12px 0;"></div>
 
     <!-- CEM -->
-    <div class="mini-card no-orange">
+    <div class="checklist-row">
+      <label>CEM Name</label>
+      <input type="text">
+    </div>
+
+    <div class="checklist-row indent-sub">
+      <label>Notes – CEM</label>
+      <input type="text">
+    </div>
+  </div>
+
+  <!-- ===============================
+       CHAMPIONS
+       (keeps mini-card layout you had)
+       =============================== -->
+  <div class="section-block">
+    <h2>Champions</h2>
+
+    <div class="mini-card champions-card">
       <div class="checklist-row">
-        <label>CEM</label>
+        <label>Champion Name</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Notes – Champion</label>
         <input type="text">
       </div>
     </div>
-
-    <!-- NOTES -->
-    <div class="section-block">
-      <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
-      <textarea placeholder="Notes for Trainers, Deployment, & CEM …"></textarea>
-    </div>
   </div>
-</section>
 
       <!-- ========================================================= -->
       <!-- PAGE 2: DEALERSHIP INFO & PRIMARY CONTACTS                -->
