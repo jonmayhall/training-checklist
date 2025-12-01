@@ -2820,11 +2820,10 @@
         </div>
       </section>
 
- <section id="dms-integration" class="page-section">
+<section id="dms-integration" class="page-section">
   <h1>DMS Integration</h1>
   <p class="page-subtitle">
-    Resource page – reference for how myKaarma typically exchanges data with each DMS. 
-    This is read-only and not dealership-specific.
+    Clean reference for how each DMS exchanges data with myKaarma. No entry required – this is a read-only guide.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
@@ -2833,229 +2832,153 @@
     <h2>DMS Integration Legend</h2>
 
     <div class="dms-legend">
-      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled</div>
-      <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button-Driven</div>
+      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
+      <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button Driven</div>
       <div><span class="dms-dot dms-dot-withro"></span>With RO Only</div>
-      <div><span class="dms-dot dms-dot-planned"></span>Planned / One-Time</div>
+      <div><span class="dms-dot dms-dot-planned"></span>Planned / One-time</div>
       <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
     </div>
-
-    <p class="page-subtitle" style="margin-top: 10px;">
-      Use this matrix to explain <strong>what moves automatically</strong>, what requires a 
-      <strong>manual refresh</strong>, and which items are <strong>not available</strong> per DMS.
-    </p>
   </div>
 
-  <!-- PUSH-BASED DMS -->
+  <!-- =========================== -->
+  <!-- VERTICAL DMS CARDS (NO FORMS) -->
+  <!-- =========================== -->
+
   <div class="section-block">
-    <h2>Push-Based DMS</h2>
-    <div class="table-container">
-      <div class="scroll-wrapper">
-        <table class="training-table dms-matrix">
-          <thead>
-            <tr>
-              <th>DMS</th>
-              <th>Customer Pull</th>
-              <th>Customer Push</th>
-              <th>Vehicle Pull</th>
-              <th>Vehicle Push</th>
-              <th>Appointment Pull</th>
-              <th>Appointment Push</th>
-              <th>RO Pull</th>
-              <th>RO Writeback<br>(ServiceCart)</th>
-              <th>RO Creation<br>(Check-in)</th>
-              <th>Parts Invoices Pull</th>
-              <th>Parts Availability &amp; Pricing<br>(ServiceCart)</th>
-              <th>Special Order Pull</th>
-              <th>F &amp; I Sales History</th>
-              <th>Opcodes Pull</th>
-              <th>Historical RO Pull</th>
-              <th>Historical Customer Pull</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Reynolds -->
-            <tr>
-              <td>Reynolds</td>
-              <td>Happens automatically</td>
-              <td>On-demand when appointments exist</td>
-              <td>Comes with RO</td>
-              <td>On-demand when appointments exist</td>
-              <td>Happens automatically</td>
-              <td>On-demand when appointments exist</td>
-              <td>Happens automatically</td>
-              <td>N/A</td>
-              <td>On-demand</td>
-              <td>Happens automatically</td>
-              <td>On-demand</td>
-              <td>N/A</td>
-              <td>Happens automatically</td>
-              <td>N/A</td>
-              <td>Yes – automatic</td>
-              <td>N/A</td>
-            </tr>
+    <h2>DMS Behavior by System</h2>
 
-            <!-- Automate -->
-            <tr>
-              <td>Automate</td>
-              <td>Happens automatically</td>
-              <td>N/A</td>
-              <td>Comes with RO</td>
-              <td>N/A</td>
-              <td>Happens automatically</td>
-              <td>N/A</td>
-              <td>Happens automatically</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="dms-vertical-list">
+
+      <!-- ================== -->
+      <!-- CDK                 -->
+      <!-- ================== -->
+      <div class="dms-v-card">
+        <h3 class="dms-v-title">CDK</h3>
+
+        <ul class="dms-v-lines">
+          <li><span class="label">Customer Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">Customer Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Vehicle Pull</span><span class="value withro">Comes with RO</span></li>
+          <li><span class="label">Vehicle Push</span><span class="value ondemand">On-Demand (with appt)</span></li>
+          <li><span class="label">Appointment Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">Appointment Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Pull</span><span class="value auto">Every 5 minutes</span></li>
+          <li><span class="label">RO Writeback</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Creation</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Parts Invoices Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">Parts Availability / Pricing</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Special Order Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">F&I Sales History</span><span class="value auto">Nightly (2 years)</span></li>
+          <li><span class="label">Opcodes Pull</span><span class="value auto">Nightly</span></li>
+          <li><span class="label">Historical RO Pull</span><span class="value ondemand">Yes</span></li>
+          <li><span class="label">Historical Customer Pull</span><span class="value na">N/A</span></li>
+        </ul>
       </div>
-    </div>
-  </div>
 
-  <!-- PULL-BASED DMS -->
-  <div class="section-block">
-    <h2>Pull-Based DMS (myKaarma pulls from DMS)</h2>
-    <div class="table-container">
-      <div class="scroll-wrapper">
-        <table class="training-table dms-matrix">
-          <thead>
-            <tr>
-              <th>DMS</th>
-              <th>Customer Pull</th>
-              <th>Customer Push</th>
-              <th>Vehicle Pull</th>
-              <th>Vehicle Push</th>
-              <th>Appointment Pull</th>
-              <th>Appointment Push</th>
-              <th>RO Pull</th>
-              <th>RO Writeback<br>(ServiceCart)</th>
-              <th>RO Creation<br>(Check-in)</th>
-              <th>Parts Invoices Pull</th>
-              <th>Parts Availability &amp; Pricing<br>(ServiceCart)</th>
-              <th>Special Order Pull</th>
-              <th>F &amp; I Sales History</th>
-              <th>Opcodes Pull</th>
-              <th>Historical RO Pull</th>
-              <th>Historical Customer Pull</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- CDK -->
-            <tr>
-              <td>CDK</td>
-              <td>Every 15 minutes</td>
-              <td>On-demand</td>
-              <td>Comes with RO</td>
-              <td>On-demand when appointments exist</td>
-              <td>Every 15 minutes</td>
-              <td>On-demand</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>On-demand</td>
-              <td>Every 15 minutes</td>
-              <td>On-demand</td>
-              <td>Every 15 minutes</td>
-              <td>Nightly + ~2 years history</td>
-              <td>Nightly sync</td>
-              <td>Yes – on-demand</td>
-              <td>N/A</td>
-            </tr>
+      <!-- ================== -->
+      <!-- REYNOLDS           -->
+      <!-- ================== -->
+      <div class="dms-v-card">
+        <h3 class="dms-v-title">Reynolds</h3>
 
-            <!-- Dealertrack / Arkona -->
-            <tr>
-              <td>Dealertrack / Arkona</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>On-demand</td>
-              <td>On-demand when appointments exist</td>
-              <td>Every 15 minutes</td>
-              <td>On-demand</td>
-              <td>Every 2 minutes</td>
-              <td>On-demand</td>
-              <td>On-demand</td>
-              <td>Every 15 minutes</td>
-              <td>On-demand</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>Nightly sync</td>
-              <td>Yes – on-demand</td>
-              <td>Yes – on-demand</td>
-            </tr>
-
-            <!-- Lightyear / Dealerbuilt -->
-            <tr>
-              <td>Lightyear / Dealerbuilt</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>Comes with RO</td>
-              <td>On-demand when appointments exist</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>Every 2 minutes</td>
-              <td>On-demand</td>
-              <td>On-demand</td>
-              <td>Every 5 minutes</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>Nightly sync</td>
-              <td>Yes – on-demand</td>
-              <td>Yes – on-demand</td>
-            </tr>
-
-            <!-- PBS -->
-            <tr>
-              <td>PBS</td>
-              <td>N/A</td>
-              <td>On-demand</td>
-              <td>N/A</td>
-              <td>On-demand when appointments exist</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>Every 2 minutes</td>
-              <td>On-demand</td>
-              <td>On-demand</td>
-              <td>N/A</td>
-              <td>On-demand</td>
-              <td>N/A</td>
-              <td>N/A</td>
-              <td>Nightly sync</td>
-              <td>Yes – on-demand</td>
-              <td>N/A</td>
-            </tr>
-
-            <!-- Tekion -->
-            <tr>
-              <td>Tekion</td>
-              <td>Comes with RO</td>
-              <td>On-demand</td>
-              <td>Comes with RO</td>
-              <td>On-demand when appointments exist</td>
-              <td>Every 5 minutes</td>
-              <td>On-demand</td>
-              <td>Every 5 minutes</td>
-              <td>Planned</td>
-              <td>Planned</td>
-              <td>Planned</td>
-              <td>Planned</td>
-              <td>N/A</td>
-              <td>Planned</td>
-              <td>Planned</td>
-              <td>Yes – one-time during deployment</td>
-              <td>N/A</td>
-            </tr>
-          </tbody>
-        </table>
+        <ul class="dms-v-lines">
+          <li><span class="label">Customer Pull</span><span class="value auto">Automatic</span></li>
+          <li><span class="label">Customer Push</span><span class="value ondemand">On-Demand (when appts exist)</span></li>
+          <li><span class="label">Vehicle Pull</span><span class="value withro">Comes with RO</span></li>
+          <li><span class="label">Vehicle Push</span><span class="value ondemand">On-Demand (when appts exist)</span></li>
+          <li><span class="label">Appointment Pull</span><span class="value auto">Automatic</span></li>
+          <li><span class="label">Appointment Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Pull</span><span class="value auto">Automatic</span></li>
+          <li><span class="label">RO Writeback</span><span class="value na">N/A</span></li>
+          <li><span class="label">RO Creation</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Parts Invoices Pull</span><span class="value auto">Automatic</span></li>
+          <li><span class="label">Parts Availability / Pricing</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Special Order Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">F&I Sales History</span><span class="value auto">Automatic</span></li>
+          <li><span class="label">Opcodes Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">Historical RO Pull</span><span class="value auto">Yes</span></li>
+          <li><span class="label">Historical Customer Pull</span><span class="value na">N/A</span></li>
+        </ul>
       </div>
+
+      <!-- ==================== -->
+      <!-- DEALERTRACK / ARKONA -->
+      <!-- ==================== -->
+      <div class="dms-v-card">
+        <h3 class="dms-v-title">Dealertrack / Arkona</h3>
+
+        <ul class="dms-v-lines">
+          <li><span class="label">Customer Pull</span><span class="value auto">Every 5 minutes</span></li>
+          <li><span class="label">Customer Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Vehicle Pull</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Vehicle Push</span><span class="value ondemand">On-Demand (with appt)</span></li>
+          <li><span class="label">Appointment Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">Appointment Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Pull</span><span class="value auto">Every 2 minutes</span></li>
+          <li><span class="label">RO Writeback</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Creation</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Parts Invoices Pull</span><span class="value auto">Every 15 minutes</span></li>
+          <li><span class="label">Parts Availability / Pricing</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Special Order Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">F&I Sales History</span><span class="value na">N/A</span></li>
+          <li><span class="label">Opcodes Pull</span><span class="value auto">Nightly</span></li>
+          <li><span class="label">Historical RO Pull</span><span class="value auto">Yes</span></li>
+          <li><span class="label">Historical Customer Pull</span><span class="value auto">Yes</span></li>
+        </ul>
+      </div>
+
+      <!-- ================== -->
+      <!-- TEKION             -->
+      <!-- ================== -->
+      <div class="dms-v-card">
+        <h3 class="dms-v-title">Tekion</h3>
+
+        <ul class="dms-v-lines">
+          <li><span class="label">Customer Pull</span><span class="value withro">Comes with RO</span></li>
+          <li><span class="label">Customer Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Vehicle Pull</span><span class="value withro">Comes with RO</span></li>
+          <li><span class="label">Vehicle Push</span><span class="value ondemand">On-Demand (with appt)</span></li>
+          <li><span class="label">Appointment Pull</span><span class="value auto">Every 5 minutes</span></li>
+          <li><span class="label">Appointment Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Pull</span><span class="value auto">Every 5 minutes</span></li>
+          <li><span class="label">RO Writeback</span><span class="value planned">Planned</span></li>
+          <li><span class="label">RO Creation</span><span class="value planned">Planned</span></li>
+          <li><span class="label">Parts Invoices Pull</span><span class="value planned">Planned</span></li>
+          <li><span class="label">Parts Availability / Pricing</span><span class="value planned">Planned</span></li>
+          <li><span class="label">Special Order Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">F&I Sales History</span><span class="value planned">Planned</span></li>
+          <li><span class="label">Opcodes Pull</span><span class="value planned">Planned</span></li>
+          <li><span class="label">Historical RO Pull</span><span class="value planned">One-Time</span></li>
+          <li><span class="label">Historical Customer Pull</span><span class="value na">N/A</span></li>
+        </ul>
+      </div>
+
+      <!-- ================== -->
+      <!-- PBS                -->
+      <!-- ================== -->
+      <div class="dms-v-card">
+        <h3 class="dms-v-title">PBS</h3>
+
+        <ul class="dms-v-lines">
+          <li><span class="label">Customer Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">Customer Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Vehicle Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">Vehicle Push</span><span class="value ondemand">On-Demand (with appt)</span></li>
+          <li><span class="label">Appointment Pull</span><span class="value auto">Every 5 minutes</span></li>
+          <li><span class="label">Appointment Push</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Pull</span><span class="value auto">Every 2 minutes</span></li>
+          <li><span class="label">RO Writeback</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">RO Creation</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Parts Invoices Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">Parts Availability / Pricing</span><span class="value ondemand">On-Demand</span></li>
+          <li><span class="label">Special Order Pull</span><span class="value na">N/A</span></li>
+          <li><span class="label">F&I Sales History</span><span class="value na">N/A</span></li>
+          <li><span class="label">Opcodes Pull</span><span class="value auto">Nightly</span></li>
+          <li><span class="label">Historical RO Pull</span><span class="value ondemand">Yes</span></li>
+          <li><span class="label">Historical Customer Pull</span><span class="value na">N/A</span></li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
