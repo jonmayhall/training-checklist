@@ -87,7 +87,7 @@
     <!-- MAIN CONTENT -->
     <main>
 
- <!-- =========================================
+<!-- =========================================
      PAGE 1 — Onsite Trainers & CEM
      ========================================= -->
 <section id="onsite-trainers-cem" class="page-section active">
@@ -98,7 +98,7 @@
   <button class="clear-page-btn">Clear Page</button>
 
   <!-- ===============================
-       ONSITE TRAINER – MAIN
+       ONSITE TRAINER
        =============================== -->
   <div class="section-block">
     <h2>Onsite Trainer</h2>
@@ -107,11 +107,12 @@
       <label>Onsite Trainer Name</label>
       <input type="text">
     </div>
+  </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Notes – Onsite Trainer</label>
-      <input type="text">
-    </div>
+  <!-- NOTES – ONSITE TRAINER -->
+  <div class="section-block notes-block">
+    <h2>Notes – Onsite Trainer</h2>
+    <textarea rows="4" placeholder="Enter notes here..."></textarea>
   </div>
 
   <!-- ===============================
@@ -131,6 +132,12 @@
     <div id="additionalTrainersContainer"></div>
   </div>
 
+  <!-- NOTES – ADDITIONAL TRAINERS -->
+  <div class="section-block notes-block">
+    <h2>Notes – Additional Trainers</h2>
+    <textarea rows="4" placeholder="Enter notes here..."></textarea>
+  </div>
+
   <!-- ===============================
        DEPLOYMENT MANAGER + CEM
        (Combined large card, no mini borders)
@@ -144,29 +151,21 @@
       <input type="text">
     </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Notes – Deployment Manager</label>
-      <input type="text">
-    </div>
-
-    <!-- Divider line between roles -->
-    <div style="border-top: 1px solid #e0e0e0; margin: 12px 0;"></div>
-
     <!-- CEM -->
     <div class="checklist-row">
       <label>CEM Name</label>
       <input type="text">
     </div>
+  </div>
 
-    <div class="checklist-row indent-sub">
-      <label>Notes – CEM</label>
-      <input type="text">
-    </div>
+  <!-- NOTES – DEPLOYMENT & CEM -->
+  <div class="section-block notes-block">
+    <h2>Notes – Deployment & CEM</h2>
+    <textarea rows="4" placeholder="Enter notes here..."></textarea>
   </div>
 
   <!-- ===============================
        CHAMPIONS
-       (keeps mini-card layout you had)
        =============================== -->
   <div class="section-block">
     <h2>Champions</h2>
@@ -183,11 +182,66 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Notes – Champion</label>
+        <label>Cell</label>
         <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
       </div>
     </div>
   </div>
+
+  <!-- NOTES – CHAMPIONS -->
+  <div class="section-block notes-block">
+    <h2>Notes – Champions</h2>
+    <textarea rows="4" placeholder="Enter notes here..."></textarea>
+  </div>
+
+  <!-- ===============================
+       BLOCKERS
+       =============================== -->
+  <div class="section-block">
+    <h2>Blockers</h2>
+
+    <div class="mini-card blockers-card">
+      <div class="checklist-row">
+        <label>Blocker Name</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES – BLOCKERS -->
+  <div class="section-block notes-block">
+    <h2>Notes – Blockers</h2>
+    <textarea rows="4" placeholder="Enter notes here..."></textarea>
+  </div>
+
+  <!-- ===============================
+       BOTTOM ROLL-UP NOTES
+       =============================== -->
+  <div class="section-block notes-block">
+    <h2>Notes – Trainers, Deployment, & CEM</h2>
+    <textarea rows="6" placeholder="High-level notes across all trainers, deployment, and CEM..."></textarea>
+  </div>
+</section>
 
       <!-- ========================================================= -->
       <!-- PAGE 2: DEALERSHIP INFO & PRIMARY CONTACTS                -->
