@@ -1,5 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist – FULL CSS
+   (Version B – includes updated DMS styling)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -10,6 +11,8 @@
   --card-bg: #fff;
   --border: #dcdcdc;
   --ink: #222;
+
+  --mykaarma-green: #c8dd3d; /* lime green from logo */
 
   --radius-lg: 18px;       /* cards */
   --radius-md: 16px;
@@ -313,7 +316,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (global width outside tables + mini-cards) */
+/* Inputs on the RIGHT (global width) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -400,7 +403,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes inside mini-cards (do NOT enforce global width here) */
+/* aligned text boxes – mini cards */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -558,11 +561,6 @@ main {
   color: #b91c1c;
 }
 
-/* Make the Support Ticket Number textbox rounded & same size as other text boxes */
-.ticket-group .checklist-row.integrated-plus input[type="text"] {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-}
-
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block {
@@ -623,7 +621,7 @@ main {
 
 .dms-name {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -636,15 +634,47 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
+
+/* PUSH = myKaarma orange */
 .dms-chip-push {
-  background: #f97316;
+  background: var(--orange);
   color: #fff;
-  border-color: #ea580c;
+  border-color: var(--orange);
 }
+
+/* PULL = myKaarma green */
 .dms-chip-pull {
-  background: #0f172a;
-  color: #e5e7eb;
-  border-color: #020617;
+  background: var(--mykaarma-green);
+  color: #111827;
+  border-color: var(--mykaarma-green);
+}
+
+.dms-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.dms-list li {
+  padding-top: 6px;
+  margin-top: 6px;
+  border-top: 1px solid #e5e7eb;
+}
+.dms-list li:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 2px;
+}
+
+.dms-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.dms-field {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
 }
 
 /* DOT ONLY tags */
@@ -665,144 +695,11 @@ main {
 .dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
 
-/* ===== New: full per-DMS card layout ===== */
-
-/* Make DMS grid better suited for full DMS cards */
-.dms-grid-dms {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* On big screens, allow 2 DMS cards per row if you ever add more */
-@media (min-width: 1100px) {
-  .dms-grid-dms {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* DMS card as a full template for a single DMS */
-.dms-card-full {
-  padding: 14px 18px 16px;
-}
-
-/* Meta row across top of card */
-.dms-meta-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px 16px;
-  margin: 8px 0 14px;
-}
-
-.dms-meta-item label {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 3px;
-  color: #4b5563;
-}
-
-.dms-meta-item input[type="text"],
-.dms-meta-item input[type="date"] {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
-
-.dms-meta-item input:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
-  outline: none;
-  background: #fff9f5;
-}
-
-/* Main block of integration rows */
-.dms-rows-wrap {
-  margin-top: 6px;
-}
-
-/* One line per integration (Customer Pull, RO Pull, etc.) */
-.dms-row-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-/* Small colored dot + label on left */
-.dms-row-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  flex: 0 0 190px;
-}
-
-/* Dot in the row label reuses existing .dms-tag styles */
-.dms-row-label .dms-tag {
-  width: 10px;
-  height: 10px;
-}
-
-/* Method select + notes input – aligned and same width */
-.dms-row-line select,
-.dms-row-line input[type="text"] {
-  box-sizing: border-box;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
-
-.dms-row-line select {
-  flex: 0 0 var(--input-width);
-  max-width: var(--input-width);
-}
-
-.dms-row-line input[type="text"] {
-  flex: 1 1 auto;
-}
-
-.dms-row-line select:focus,
-.dms-row-line input[type="text"]:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
-  outline: none;
-  background: #fff9f5;
-}
-
-/* Notes just for this DMS card */
-.dms-row-notes {
-  margin-top: 14px;
-}
-
-.dms-row-notes label {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 4px;
-  color: #4b5563;
-}
-
-.dms-row-notes textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  resize: vertical;
-}
-
-.dms-row-notes textarea:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
-  outline: none;
-  background: #fff9f5;
+.dms-list p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6b7280;
 }
 
 /* --------------- Training TABLES --------------- */
@@ -811,17 +708,16 @@ main {
   margin-bottom: 40px; 
 }
 
-/* Section header bar above tables – aligned with table card now */
+/* Section header bar above tables */
 .section-header {
   background: var(--orange);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px 0 0;
+  margin: 18px -22px 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
-  text-align: center;
 }
 .section-header + .table-container {
   border-top: none;
@@ -854,7 +750,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* slightly tighter so headers feel less blown out */
+  min-width: 900px;
 }
 .training-table th,
 .training-table td {
@@ -888,7 +784,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;        /* a bit narrower */
+  width: 200px;
   min-width: 200px;
 }
 .training-table thead th:first-child { 
@@ -1073,11 +969,6 @@ main {
   font-size: 0.9em;
   color: #666;
   font-style: italic !important;
-}
-
-/* --------------- Orange Outline Card (Automations on Page 9) --------------- */
-.orange-outline-card {
-  border-color: var(--orange);
 }
 
 /* --------------- RESPONSIVE --------------- */
