@@ -1,9 +1,3 @@
-/* =======================================================
-   myKaarma Interactive Training Checklist – Main JS
-   Nav + Clear + Additional Trainers + Additional POC
-   + Tickets (with persistent + card) + Tables + PDF
-   ======================================================= */
-
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initClearPageButtons();
@@ -14,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
+  initDmsCards();
 });
 
 /* --------------- NAVIGATION --------------- */
@@ -178,16 +173,13 @@ function initAdditionalPoc() {
 /* --------------- SUPPORT TICKETS (PAGE 7) --------------- */
 /*
   Requirements:
-  - There is ONE special "template" open ticket card in #openTicketsContainer
-    with class .ticket-group-template and a + button (.add-ticket-btn).
-  - That template card:
-      * ALWAYS stays in the Open container as the first card.
-      * ALWAYS is the ONLY card with a "+" button.
-  - When user changes the status on the template card (Open -> Tier Two / Closed etc.):
-      * The filled info should "move" into the chosen status section.
-      * The template card should be cleared and remain in Open, ready for the next ticket.
-  - Clicking the + button creates a normal open ticket card (without + button).
-  - Non-template cards move between sections when their status changes.
+  - The template card in "Open Support Tickets" (ticket-group-template) always stays first
+    and is the ONLY card with the + button.
+  - When the template's status is changed away from "Open", its data is copied into
+    a new ticket card which moves to the correct status container,
+    and the template is reset to blank Open.
+  - Clicking the + button creates a NEW empty Open ticket card (no + button).
+  - Non-template cards can change status and will simply move between containers.
 */
 
 function initSupportTickets() {
@@ -201,82 +193,98 @@ function initSupportTickets() {
   const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
-  const addBtn = template.querySelector('.add-ticket-btn');
-  if (addBtn) {
-    addBtn.addEventListener('click', () => {
-      // Create a NEW Open ticket card based on the template, but without + button
-      const newCard = cloneTicketFromTemplate(false);
-      clearTicketCard(newCard, { resetStatusToOpen: true });
-      wireTicketStatus(
-        newCard,
-        {
-          openContainer,
-          tierTwoContainer,
-          closedResolvedContainer,
-          closedFeatureContainer
-        },
-        { isTemplate: false }
-      );
-      openContainer.appendChild(newCard);
-    });
-  }
-
-  // Ensure template status is "Open"
+  // Ensure template status default is Open
   const templateStatus = template.querySelector('.ticket-status-select');
   if (templateStatus) {
     templateStatus.value = 'Open';
   }
 
-  // Wire up template itself for special status changes
-  wireTicketStatus(
-    template,
-    {
-      openContainer,
-      tierTwoContainer,
-      closedResolvedContainer,
-      closedFeatureContainer
-    },
-    { isTemplate: true }
-  );
+  const addBtn = template.querySelector('.add-ticket-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const newCard = createTicketCard(template, {
+        copyValues: false
+      });
+      openContainer.appendChild(newCard);
+    });
+  }
+
+  // Wire up template itself for status changes (special behavior)
+  wireTicketStatus(template, {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isTemplate: true
+  });
 }
 
 /**
- * Clone the template card.
- * @param {boolean} includeAddButton - if true, keep the + button (for template scenarios).
+ * Creates a new ticket card cloned from the template.
+ * @param {HTMLElement} sourceCard - the card to clone (usually the template)
+ * @param {Object} options
+ *   - copyValues: if true, keep existing input/select values. If false, clear them.
  */
-function cloneTicketFromTemplate(includeAddButton) {
-  const template = document.querySelector('#openTicketsContainer .ticket-group-template');
-  if (!template) return null;
+function createTicketCard(sourceCard, options = {}) {
+  const { copyValues = false } = options;
 
-  const clone = template.cloneNode(true);
+  const clone = sourceCard.cloneNode(true);
 
-  // It's no longer the template
+  // No longer the template
   clone.classList.remove('ticket-group-template');
   clone.removeAttribute('data-template');
 
-  // Remove the add button for normal cards
-  if (!includeAddButton) {
-    const addBtn = clone.querySelector('.add-ticket-btn');
-    if (addBtn) {
-      addBtn.remove();
-    }
+  // Remove the add button from clones
+  const addBtn = clone.querySelector('.add-ticket-btn');
+  if (addBtn) {
+    addBtn.remove();
   }
+
+  const fields = clone.querySelectorAll('input, select, textarea');
+  fields.forEach((el) => {
+    if (!copyValues) {
+      if (el.tagName === 'SELECT') {
+        if (el.classList.contains('ticket-status-select')) {
+          el.value = 'Open';
+        } else {
+          el.selectedIndex = 0;
+        }
+      } else if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else {
+        el.value = '';
+      }
+    }
+    // if copyValues === true we keep existing values as-is
+  });
+
+  // Wire up status logic for this new card
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+
+  wireTicketStatus(clone, {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isTemplate: false
+  });
 
   return clone;
 }
 
 /**
- * Clear all fields in a ticket card.
- * @param {HTMLElement} card
- * @param {{resetStatusToOpen:boolean}} options
+ * Clears all fields in the template and resets status to Open.
  */
-function clearTicketCard(card, { resetStatusToOpen } = { resetStatusToOpen: false }) {
-  const fields = card.querySelectorAll('input, select, textarea');
+function resetTicketTemplate(template) {
+  const fields = template.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (el.tagName === 'SELECT') {
-      if (el.classList.contains('ticket-status-select') && resetStatusToOpen) {
+      if (el.classList.contains('ticket-status-select')) {
         el.value = 'Open';
-      } else if (!el.classList.contains('ticket-status-select')) {
+      } else {
         el.selectedIndex = 0;
       }
     } else if (el.type === 'checkbox' || el.type === 'radio') {
@@ -288,90 +296,65 @@ function clearTicketCard(card, { resetStatusToOpen } = { resetStatusToOpen: fals
 }
 
 /**
- * Copy values from one ticket card into another
+ * Wires status change for a ticket card.
+ * If isTemplate is true, changing status away from "Open" creates a new card with
+ * the template's data and moves that card into the correct container, then resets
+ * the template.
+ * If isTemplate is false, the card itself moves between containers.
  */
-function copyTicketValues(sourceCard, targetCard) {
-  const srcFields = sourceCard.querySelectorAll('input, select, textarea');
-  const tgtFields = targetCard.querySelectorAll('input, select, textarea');
+function wireTicketStatus(card, containers) {
+  const {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isTemplate = false
+  } = containers;
 
-  const len = Math.min(srcFields.length, tgtFields.length);
-  for (let i = 0; i < len; i++) {
-    const s = srcFields[i];
-    const t = tgtFields[i];
-
-    if (s.tagName === 'SELECT') {
-      t.value = s.value;
-    } else if (s.type === 'checkbox' || s.type === 'radio') {
-      t.checked = s.checked;
-    } else {
-      t.value = s.value;
-    }
-  }
-}
-
-/**
- * Wire up status logic for a ticket card.
- * @param {HTMLElement} card
- * @param {*} containers
- * @param {{isTemplate:boolean}} options
- */
-function wireTicketStatus(card, containers, options = { isTemplate: false }) {
-  const { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = containers;
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
   select.addEventListener('change', () => {
     const value = select.value;
-    let targetContainer = openContainer;
 
+    let targetContainer = openContainer;
     if (value === 'Tier Two') {
       targetContainer = tierTwoContainer;
     } else if (value === 'Closed - Resolved') {
       targetContainer = closedResolvedContainer;
     } else if (value === 'Closed – Feature Not Supported') {
+      // Note: EN DASH in "Closed – Feature Not Supported"
       targetContainer = closedFeatureContainer;
     } else if (value === 'Open') {
       targetContainer = openContainer;
     }
 
-    // Special handling for the template card
-    if (options.isTemplate) {
-      if (value !== 'Open' && targetContainer) {
-        // 1) Clone the template (without + button)
-        const movedCard = cloneTicketFromTemplate(false);
-        if (!movedCard) return;
-
-        // 2) Copy current values into the cloned card
-        copyTicketValues(card, movedCard);
-
-        // 3) Wire up the cloned card like a normal card
-        wireTicketStatus(
-          movedCard,
-          {
-            openContainer,
-            tierTwoContainer,
-            closedResolvedContainer,
-            closedFeatureContainer
-          },
-          { isTemplate: false }
-        );
-
-        // 4) Append cloned card to the target container
-        targetContainer.appendChild(movedCard);
-
-        // 5) Clear the template and reset its status to Open
-        clearTicketCard(card, { resetStatusToOpen: true });
-      } else if (value === 'Open') {
-        // If they flip it back to Open, just keep it in Open container and do nothing else
-        clearTicketCard(card, { resetStatusToOpen: true });
+    if (isTemplate) {
+      // Template should never actually leave the Open container.
+      if (value === 'Open' || !targetContainer) {
+        return;
       }
+
+      // Create a new card WITH the template's data and status.
+      const newCard = createTicketCard(card, { copyValues: true });
+      const newStatus = newCard.querySelector('.ticket-status-select');
+      if (newStatus) {
+        newStatus.value = value;
+      }
+
+      targetContainer.appendChild(newCard);
+
+      // Reset the template back to a blank Open card.
+      resetTicketTemplate(card);
       return;
     }
 
-    // Normal (non-template) cards: move the card between containers.
-    if (targetContainer && targetContainer !== card.parentElement) {
-      targetContainer.appendChild(card);
+    // Normal (non-template) cards just move between containers.
+    if (!targetContainer || targetContainer === card.parentElement) {
+      return;
     }
+
+    targetContainer.appendChild(card);
   });
 }
 
@@ -427,7 +410,7 @@ function initPdfExport() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Simple whole-page capture.
+    // This is a simple whole-page capture; styling may not be perfect but it works.
     doc.html(document.body, {
       callback: (docInstance) => {
         docInstance.save('myKaarma_Training_Checklist.pdf');
@@ -439,4 +422,13 @@ function initPdfExport() {
       }
     });
   });
+}
+
+/* --------------- DMS CARDS (optional extension hook) --------------- */
+/*
+  Currently a no-op placeholder. If you later add dynamic behavior
+  for DMS cards (add/remove/collapse), wire it up here.
+*/
+function initDmsCards() {
+  // No dynamic DMS behavior required yet.
 }
