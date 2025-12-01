@@ -313,7 +313,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT */
+/* Inputs on the RIGHT (global width) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -331,6 +331,14 @@ main {
   font-size: 13px;
   box-sizing: border-box;
 }
+
+/* Make support ticket “Support Ticket Number” field rounded & same size */
+.ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -547,18 +555,7 @@ main {
   margin-top: 8px;
 }
 
-/* A simple subtle count style if you add counts in headers later */
-.ticket-count-pill {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
+/* --------------- DMS PAGE – CARDS with DOTS --------------- */
 
 .dms-overview-block {
   margin-bottom: 28px;
@@ -581,8 +578,8 @@ main {
 }
 
 .dms-dot-auto      { background: #22c55e; }
-.dms-dot-ondemand  { background: #3b82f6; }
-.dms-dot-withro    { background: #f97316; }
+.dms-dot-ondemand  { background: #f97316; }
+.dms-dot-withro    { background: #0ea5e9; }
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
 
@@ -609,12 +606,12 @@ main {
   padding: 14px 16px 12px;
 }
 
-/* optional helpers if you use them in HTML */
+/* card border matches push/pull type */
 .dms-card-push {
   border-color: var(--orange);
 }
 .dms-card-pull {
-  border-color: #22c55e;
+  border-color: #16a34a;
 }
 
 .dms-card-header {
@@ -630,7 +627,6 @@ main {
   color: #111827;
 }
 
-/* push/pull chips – myKaarma orange & green */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -640,15 +636,17 @@ main {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
 }
+
+/* Push/Pull badges – myKaarma orange & green */
 .dms-chip-push {
   background: var(--orange);
   color: #fff;
   border-color: #ea580c;
 }
 .dms-chip-pull {
-  background: #22c55e;
+  background: #16a34a;
   color: #fff;
-  border-color: #16a34a;
+  border-color: #15803d;
 }
 
 .dms-list {
@@ -673,8 +671,6 @@ main {
   justify-content: space-between;
   margin-bottom: 2px;
 }
-
-/* bullet titles – stronger */
 .dms-field {
   font-weight: 600;
   font-size: 13px;
@@ -690,17 +686,18 @@ main {
   font-size: 0;
   color: transparent;
 }
-.dms-tag-auto      { background: #22c55e; }   /* automatic */
-.dms-tag-ondemand  { background: #3b82f6; }   /* on demand */
-.dms-tag-withro    { background: #f97316; }   /* with RO only */
-.dms-tag-planned   { background: #eab308; }   /* planned */
-.dms-tag-na        { background: #9ca3af; }   /* not available */
-.dms-tag-limited   { background: #6366f1; }   /* limited/partial */
+.dms-tag-auto      { background: #22c55e; }
+.dms-tag-ondemand  { background: #f97316; }
+.dms-tag-withro    { background: #0ea5e9; }
+.dms-tag-planned   { background: #eab308; }
+.dms-tag-na        { background: #9ca3af; }
+.dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
 
+/* Short, smaller descriptions under each bullet */
 .dms-list p {
-  margin: 0;
-  font-size: 12px;       /* smaller description text so it doesn’t blend */
+  margin: 2px 0 0;
+  font-size: 12px;
   line-height: 1.45;
   color: #4b5563;
 }
@@ -753,7 +750,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* slightly tighter so headers feel less blown out */
+  min-width: 900px;
 }
 .training-table th,
 .training-table td {
@@ -787,7 +784,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;        /* a bit narrower */
+  width: 200px;
   min-width: 200px;
 }
 .training-table thead th:first-child { 
