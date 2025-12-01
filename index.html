@@ -2826,15 +2826,14 @@
 <section id="dms-integration" class="page-section">
   <h1>DMS Integration</h1>
   <p class="page-subtitle">
-    Confirm DMS workflows, RO history, and integration behavior for accurate MPIs and communication.
+    Confirm how your DMS shares data with myKaarma so RO history, pricing, and messaging stay in sync.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- High-level legend + explanation -->
+  <!-- LEGEND / KEY -->
   <div class="section-block dms-overview-block">
-    <h2>DMS Integration Overview</h2>
+    <h2>DMS Integration Legend</h2>
 
-    <!-- Legend -->
     <div class="dms-legend">
       <div><span class="dms-dot dms-dot-auto"></span>Automatic / Real-time</div>
       <div><span class="dms-dot dms-dot-ondemand"></span>On Demand / Button Driven</div>
@@ -2843,226 +2842,256 @@
       <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
     </div>
 
-    <!-- DMS Detail Cards (one card per DMS) -->
+    <p class="page-subtitle" style="margin-top: 12px;">
+      Use the cards below to document how each DMS behaves. One row = one type of data.
+    </p>
+  </div>
+
+  <!-- DMS CARDS -->
+  <div class="section-block">
+    <h2>DMS Systems</h2>
+
     <div class="dms-table-container">
       <div class="dms-grid dms-grid-dms">
-
-        <!-- DMS CARD #1 (template – duplicate for more DMS) -->
+        <!-- ========================= -->
+        <!-- PRIMARY DMS (Template 1) -->
+        <!-- ========================= -->
         <div class="dms-card dms-card-full">
           <div class="dms-card-header">
-            <span class="dms-name">DMS 1</span>
-            <span class="dms-chip dms-chip-pull">DMS</span>
+            <span class="dms-name">Primary DMS</span>
+            <span class="dms-chip dms-chip-pull">DMS #1</span>
           </div>
 
-          <!-- Meta row: Dealership Name - DID / Date / DMS -->
+          <!-- Meta fields for this DMS -->
           <div class="dms-meta-row">
             <div class="dms-meta-item">
-              <label>Dealership Name - DID</label>
-              <input type="text" placeholder="Example: Harrison Ford of Mankato - 12345">
+              <label>DMS Name</label>
+              <input type="text" placeholder="CDK, Reynolds, Tekion, etc.">
             </div>
             <div class="dms-meta-item">
-              <label>Date</label>
+              <label>Go-Live Date</label>
               <input type="date">
             </div>
             <div class="dms-meta-item">
-              <label>DMS</label>
-              <input type="text" placeholder="CDK, Reynolds, Tekion, etc.">
+              <label>General Notes</label>
+              <input type="text" placeholder="Any high-level notes about this DMS">
             </div>
           </div>
 
-          <!-- Integration details from your PDF, per DMS -->
+          <!-- Integration rows for this DMS -->
           <div class="dms-rows-wrap">
 
-            <!-- Customer Pull -->
+            <!-- Customer & Vehicle -->
             <div class="dms-row-line">
-              <span class="dms-row-label">
+              <div class="dms-row-label">
                 <span class="dms-tag dms-tag-auto"></span>
-                Customer Pull
-              </span>
+                <span>Customer &amp; Vehicle</span>
+              </div>
               <select>
                 <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
+                <option>Automatic (always visible)</option>
+                <option>On demand (search / button)</option>
+                <option>With RO only</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
               </select>
-              <input type="text" placeholder="Frequency / notes (e.g., every 5 minutes)">
+              <input type="text" placeholder="e.g., Appears when RO is opened, search pulls full history">
             </div>
 
-            <!-- Customer Push -->
+            <!-- RO History -->
             <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-ondemand"></span>
-                Customer Push
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="How/when data is pushed back to DMS">
-            </div>
-
-            <!-- Vehicle Pull -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-withro"></span>
-                Vehicle Pull
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="Service history / vehicle details behavior">
-            </div>
-
-            <!-- Vehicle Push -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-planned"></span>
-                Vehicle Push
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="What updates/writebacks occur to vehicle records">
-            </div>
-
-            <!-- Appointment Pull -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
+              <div class="dms-row-label">
                 <span class="dms-tag dms-tag-auto"></span>
-                Appointment Pull
-              </span>
+                <span>RO History</span>
+              </div>
               <select>
                 <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
+                <option>Automatic updates from DMS</option>
+                <option>On demand refresh</option>
+                <option>With closed ROs only</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
               </select>
-              <input type="text" placeholder="e.g., every 5 minutes, when appointments are scheduled">
+              <input type="text" placeholder="e.g., Closed ROs update nightly; open ROs update every 5 minutes">
             </div>
 
-            <!-- Appointment Push -->
+            <!-- Parts & Pricing -->
             <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-ondemand"></span>
-                Appointment Push
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="How appointments get back to the DMS">
-            </div>
-
-            <!-- RO Pull -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-auto"></span>
-                RO Pull
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="Open RO behavior, status refresh, etc.">
-            </div>
-
-            <!-- RO Writeback (ServiceCart) -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-ondemand"></span>
-                RO Writeback (ServiceCart)
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="When approved work / lines are written back">
-            </div>
-
-            <!-- RO Creation -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
-                <span class="dms-tag dms-tag-withro"></span>
-                RO Creation
-              </span>
-              <select>
-                <option></option>
-                <option>Automatic / Real-time</option>
-                <option>On Demand / Button</option>
-                <option>With RO Only</option>
-                <option>Planned</option>
-                <option>N/A</option>
-              </select>
-              <input type="text" placeholder="Does myKaarma create ROs or only update existing?">
-            </div>
-
-            <!-- Historical Pull -->
-            <div class="dms-row-line">
-              <span class="dms-row-label">
+              <div class="dms-row-label">
                 <span class="dms-tag dms-tag-limited"></span>
-                Historical Pull
-              </span>
+                <span>Parts &amp; Pricing</span>
+              </div>
               <select>
                 <option></option>
-                <option>Yes, once during deployment</option>
-                <option>Yes, recurring job</option>
-                <option>No</option>
-                <option>N/A</option>
+                <option>Automatic from DMS price levels</option>
+                <option>On demand (button / refresh)</option>
+                <option>Display-only (read only)</option>
+                <option>Planned / future</option>
+                <option>Not available / N/A</option>
               </select>
-              <input type="text" placeholder="e.g., 'Yes, once during deployment' or 'N/A'">
+              <input type="text" placeholder="e.g., Uses price level 6; no real-time inventory">
             </div>
 
-            <!-- Free-form notes just for this DMS -->
-            <div class="dms-row-notes">
-              <label>Additional Integration Notes for this DMS</label>
-              <textarea rows="3" placeholder="Anything unique about this DMS (e.g., delayed writebacks, special DSOs, edge cases)…"></textarea>
+            <!-- Appointments / Scheduler -->
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-planned"></span>
+                <span>Appointments / Scheduler</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Push from myKaarma to DMS</option>
+                <option>Pull from DMS into myKaarma</option>
+                <option>Bi-directional</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="e.g., Appointments created in myKaarma; DMS shows them as notes only">
             </div>
 
+            <!-- Other / Special -->
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-display"></span>
+                <span>Other / Special Fields</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Display-only (not written back)</option>
+                <option>Written back to DMS</option>
+                <option>Planned / future</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="e.g., Custom flags, advisor notes, internal fields">
+            </div>
+
+          </div>
+
+          <!-- Notes just for this DMS -->
+          <div class="dms-row-notes">
+            <label>Notes specific to this DMS</label>
+            <textarea rows="3" placeholder="Edge cases, delays, or known limitations for this DMS …"></textarea>
           </div>
         </div>
 
-        <!-- If you ever want a second DMS, duplicate the card above
-             and change the header to DMS 2, DMS 3, etc. -->
+        <!-- ========================== -->
+        <!-- SECONDARY DMS (Template 2) -->
+        <!-- ========================== -->
+        <div class="dms-card dms-card-full">
+          <div class="dms-card-header">
+            <span class="dms-name">Secondary / Other DMS</span>
+            <span class="dms-chip dms-chip-push">DMS #2</span>
+          </div>
+
+          <div class="dms-meta-row">
+            <div class="dms-meta-item">
+              <label>DMS Name</label>
+              <input type="text" placeholder="Secondary DMS, body shop, etc.">
+            </div>
+            <div class="dms-meta-item">
+              <label>Go-Live Date</label>
+              <input type="date">
+            </div>
+            <div class="dms-meta-item">
+              <label>General Notes</label>
+              <input type="text" placeholder="Example: standalone body shop DMS">
+            </div>
+          </div>
+
+          <div class="dms-rows-wrap">
+
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-auto"></span>
+                <span>Customer &amp; Vehicle</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Automatic (always visible)</option>
+                <option>On demand (search / button)</option>
+                <option>With RO only</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="Notes for this DMS only">
+            </div>
+
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-auto"></span>
+                <span>RO History</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Automatic updates from DMS</option>
+                <option>On demand refresh</option>
+                <option>With closed ROs only</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="Notes for this DMS only">
+            </div>
+
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-limited"></span>
+                <span>Parts &amp; Pricing</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Automatic from DMS price levels</option>
+                <option>On demand (button / refresh)</option>
+                <option>Display-only (read only)</option>
+                <option>Planned / future</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="Notes for this DMS only">
+            </div>
+
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-planned"></span>
+                <span>Appointments / Scheduler</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Push from myKaarma to DMS</option>
+                <option>Pull from DMS into myKaarma</option>
+                <option>Bi-directional</option>
+                <option>Display-only</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="Notes for this DMS only">
+            </div>
+
+            <div class="dms-row-line">
+              <div class="dms-row-label">
+                <span class="dms-tag dms-tag-display"></span>
+                <span>Other / Special Fields</span>
+              </div>
+              <select>
+                <option></option>
+                <option>Display-only (not written back)</option>
+                <option>Written back to DMS</option>
+                <option>Planned / future</option>
+                <option>Not available / N/A</option>
+              </select>
+              <input type="text" placeholder="Notes for this DMS only">
+            </div>
+
+          </div>
+
+          <div class="dms-row-notes">
+            <label>Notes specific to this DMS</label>
+            <textarea rows="3" placeholder="Any quirks or one-off behaviors for this DMS …"></textarea>
+          </div>
+        </div>
 
       </div>
     </div>
   </div>
-
-  <div class="section-block">
-    <h2>Notes — DMS Integration (Global)</h2>
-    <textarea placeholder="Global notes about DMS behavior, delays, or unique workflows across the group …"></textarea>
-  </div>
 </section>
+
 
       <!-- ========================================================= -->
 <!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
