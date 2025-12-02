@@ -105,7 +105,7 @@ function initAddressAutocomplete() {
   function loadGoogleMaps() {
     const script = document.createElement('script');
     script.src =
-      "https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocompleteInternal";
+     " https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocompleteInternal";
     script.async = true;
     document.head.appendChild(script);
   }
