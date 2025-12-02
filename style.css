@@ -344,6 +344,8 @@ main {
   gap: 6px;
   width: var(--input-width);
   margin-left: auto;
+  /* put button visually on left, text box on right */
+  flex-direction: row-reverse;
 }
 .address-input-wrap input[type="text"] {
   flex: 1 1 auto;
@@ -625,6 +627,8 @@ main {
 .dms-dot-withro    { background: #0ea5e9; }
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
+.dms-dot-limited   { background: #6366f1; }
+.dms-dot-display   { background: #6b7280; }
 
 .dms-table-container {
   margin-top: 16px;
@@ -799,6 +803,7 @@ main {
   overflow-x: auto;
   background: #fff;
   padding-bottom: 4px;
+  position: relative; /* helps sticky headers/columns behave consistently */
 }
 
 /* Table */
@@ -825,6 +830,14 @@ main {
   position: sticky;
   top: 0;
   z-index: 3;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Make first header align visually with Name column contents */
+.training-table thead th:first-child {
+  text-align: left;
+  padding-left: 32px;
 }
 
 /* Smaller white text for notes inside header cells */
