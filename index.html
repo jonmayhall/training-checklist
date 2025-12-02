@@ -188,7 +188,7 @@
 
 </section>
 
-     <!-- ========================================================= -->
+   <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
@@ -209,6 +209,34 @@
     </div>
 
     <div class="checklist-row">
+      <label>Dealer Group / Parent Company</label>
+      <input type="text" placeholder="e.g., ABC Auto Group">
+    </div>
+
+    <div class="checklist-row">
+      <label>DMS</label>
+      <input type="text" placeholder="CDK, Reynolds, Dealertrack, etc.">
+    </div>
+
+    <div class="checklist-row">
+      <label>DMS Store / Dealer Code</label>
+      <input type="text" placeholder="Store # / BAC / Dealer code">
+    </div>
+
+    <div class="checklist-row">
+      <label>Time Zone</label>
+      <select>
+        <option></option>
+        <option>Eastern</option>
+        <option>Central</option>
+        <option>Mountain</option>
+        <option>Pacific</option>
+        <option>Alaska</option>
+        <option>Hawaii</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
       <label>Main Phone Number</label>
       <input type="tel" placeholder="555-555-5555">
     </div>
@@ -216,11 +244,11 @@
     <div class="checklist-row">
       <label>Dealership Address</label>
 
+      <!-- Map button on LEFT, text box on RIGHT -->
       <div class="address-input-wrap">
         <button type="button" id="openAddressInMapsBtn" class="small-map-btn">
           Map
         </button>
-
         <input
           type="text"
           id="dealershipAddressInput"
@@ -239,8 +267,7 @@
         referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
       <p class="map-helper-text">
-        Select an address above to update this map.  
-        Click “Map” to open directions in Google Maps.
+        Select an address above to update this map. Click “Map” to open directions in Google Maps.
       </p>
     </div>
   </div>
@@ -257,12 +284,10 @@
           <label>Service Manager</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -275,12 +300,10 @@
           <label>Parts Manager</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -293,12 +316,10 @@
           <label>Warranty Admin</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -311,12 +332,10 @@
           <label>Shop Foreman</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -329,12 +348,10 @@
           <label>Deployment Manager</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -347,36 +364,31 @@
           <label>CEM</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- ADDITIONAL POC TEMPLATE (ALWAYS FIRST IN JS) -->
-      <div class="mini-card contact-card additional-poc-card ticket-group-template">
+      <!-- ADDITIONAL POC TEMPLATE (with +) -->
+      <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
           <input type="text" class="additional-poc-name">
-          <button class="add-row additional-poc-add">+</button>
+          <button class="add-row additional-poc-add" type="button">+</button>
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Role</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
