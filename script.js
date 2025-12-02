@@ -113,23 +113,26 @@ function updateDealershipNameDisplay() {
   dealershipNameDisplay.textContent = val || 'Dealership Name';
 }
 
-/* --------------- MAP EMBED (PAGE 2) --------------- */
+/* --------------- MAP EMBED ALTERNATIVE (PAGE 2) --------------- */
 function initMapUpdate() {
-  const mapBtn = document.getElementById('updateMapBtn');
-  if (!mapBtn) return;
+    const mapBtn = document.getElementById('updateMapBtn');
+    if (!mapBtn) return;
 
-  mapBtn.addEventListener('click', () => {
-    const addressInput = document.getElementById('dealerAddress');
-    const mapFrame = document.getElementById('dealershipMap');
-    if (!addressInput || !mapFrame || !addressInput.value) return;
+    mapBtn.addEventListener('click', () => {
+        const addressInput = document.getElementById('dealerAddress');
+        
+        if (!addressInput || !addressInput.value.trim()) {
+            alert('Please enter a Dealership Address first.');
+            return;
+        }
 
-    const address = encodeURIComponent(addressInput.value);
-    
-    // FINAL FIX: Using the most robust public Google Maps embed URL format
-    const mapSrc = `https://maps.google.com/maps?q=${address}&z=14&output=embed`;
-    
-    mapFrame.src = mapSrc;
-  });
+        const address = encodeURIComponent(addressInput.value.trim());
+        
+        // This opens a new tab/window to Google Maps with the address query,
+        // bypassing the difficult iframe embed issues on static hosts.
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}`;
+        window.open(mapUrl, '_blank');
+    });
 }
 
 
