@@ -666,12 +666,14 @@ main {
   margin-bottom: 6px;
 }
 
-/* DMS name – orange with underline similar to page titles */
+/* DMS name – orange with longer underline */
 .dms-name {
   font-size: 16px;
   font-weight: 600;
   color: var(--mk-orange);
+  display: inline-block;
   padding-bottom: 2px;
+  padding-right: 46px;              /* makes the underline extend past the text */
   border-bottom: 2px solid var(--mk-orange);
 }
 
@@ -687,17 +689,17 @@ main {
   white-space: nowrap;
 }
 
-/* Push-Based = orange */
+/* Push-Based = orange, white text */
 .dms-chip-push {
   background: var(--mk-orange);
-  color: #111827;
+  color: #ffffff;
   border-color: var(--mk-orange);
 }
 
-/* Pull-Based = green */
+/* Pull-Based = green, white text */
 .dms-chip-pull {
   background: var(--mk-green);
-  color: #022c17;
+  color: #ffffff;
   border-color: var(--mk-green);
 }
 
@@ -803,7 +805,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px; /* keep slightly tighter so headers feel aligned with table */
+  min-width: 900px;
 }
 .training-table th,
 .training-table td {
