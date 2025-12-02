@@ -14,12 +14,17 @@
   <script>
     (function () {
       const ts = Date.now();
+      
+      // *** FINAL PATCH ***: This forces the full path into the cache buster string.
+      const repoPath = "/training-checklist/";
+      
       const css = document.getElementById("dynamicCSS");
-      // Simple file name in the script logic
-      if (css) css.href = `style.css?v=${ts}`; 
+      // Append the repo name to ensure the path is fully correct
+      if (css) css.href = `${repoPath}style.css?v=${ts}`; 
+      
       const js = document.getElementById("dynamicJS");
-      // Simple file name in the script logic
-      if (js) js.src = `script.js?v=${ts}`;
+      // Append the repo name to ensure the path is fully correct
+      if (js) js.src = `${repoPath}script.js?v=${ts}`;
     })();
   </script>
 </head>
