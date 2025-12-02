@@ -1,24 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>myKaarma – Interactive Training Checklist</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myKaarma – Interactive Training Checklist</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link id="dynamicCSS" rel="stylesheet" href="/public/style.css">
 
-    <script src="http://googleusercontent.com/maps.google.com/7"></script>
+    <script src="http://googleusercontent.com/maps.google.com/7"></script>
 
-    <script defer src="script.js"></script>
-    
-    </head>
+    <script defer id="dynamicJS" src="/public/script.js"></script>
+
+    <script>
+    (function () {
+      const ts = Date.now();
+
+      // Bust CSS cache
+      const css = document.getElementById("dynamicCSS");
+      // FIX: Using the correct path in the script logic too
+      if (css) css.href = `/public/style.css?v=${ts}`; 
+
+      // Bust JS cache
+      const js = document.getElementById("dynamicJS");
+      // FIX: Using the correct path in the script logic too
+      if (js) js.src = `/public/script.js?v=${ts}`;
+    })();
+  </script>
+</head>
         
 <body>
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-        <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
-      </div>
+      <img class="top-logo" src="/public/mykaarma_logo.png" alt="myKaarma Logo">
+      </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
       </div>
