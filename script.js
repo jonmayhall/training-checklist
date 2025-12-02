@@ -1,6 +1,6 @@
 /* ==========================================================
    myKaarma Interactive Training Checklist – FULL JS
-   With Google Maps Autocomplete + Map Button
+   WITHOUT Google API Key (simple address → map embed)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressAutocomplete();        // ⭐ NEW
+  initAddressAutocomplete();     // ⭐ simplified version — NO API KEY
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
@@ -90,49 +90,51 @@ function updateDealershipNameDisplay() {
 }
 
 /* -------------------------------------
-   ⭐ GOOGLE MAPS AUTOCOMPLETE / MAP BUTTON
+   ⭐ SIMPLE ADDRESS → MAP (NO API KEY)
 ------------------------------------- */
-let googleAutocomplete;
-
 function initAddressAutocomplete() {
   const addressInput = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
   const openBtn = document.getElementById('openAddressInMapsBtn');
 
-  if (!addressInput) return;
+  if (!addressInput || !mapFrame) return;
 
-  // Load Google Places Autocomplete
-  function loadGoogleMaps() {
-    const script = document.createElement('script');
-    script.src =
-     " https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocompleteInternal";
-    script.async = true;
-    document.head.appendChild(script);
+  // Update the embedded map using a simple text query
+  function updateMap() {
+    const text = addressInput.value.trim();
+    if (!text) return;
+
+    const encoded = encodeURIComponent(text);
+    mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
   }
 
-  window.initAutocompleteInternal = () => {
-    googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
-      types: ['geocode']
-    });
+  // Update map on blur
+  addressInput.addEventListener('blur', updateMap);
 
-    googleAutocomplete.addListener('place_changed', () => {
-      const place = googleAutocomplete.getPlace();
-      if (!place?.formatted_address) return;
+  // Update map on Enter key
+  addressInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      updateMap();
+    }
+  });
 
-      const encoded = encodeURIComponent(place.formatted_address);
-      mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
-    });
-  };
-
-  loadGoogleMaps();
-
-  // Open Google Maps in new tab
+  // Button: open Google Maps & update preview
   if (openBtn) {
     openBtn.addEventListener('click', () => {
       const text = addressInput.value.trim();
       if (!text) return;
+
       const encoded = encodeURIComponent(text);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+
+      // Open full Google Maps search
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+        '_blank'
+      );
+
+      // Update embedded map
+      mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
     });
   }
 }
@@ -215,7 +217,7 @@ function initSupportTickets() {
   const template = openContainer?.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Template always stays Open
+  // Template should always show "Open"
   const statusSelect = template.querySelector('.ticket-status-select');
   if (statusSelect) statusSelect.value = 'Open';
 
@@ -263,7 +265,7 @@ function createTicketCard(source, opts = {}) {
 
 function resetTicketTemplate(card) {
   card.querySelectorAll('input, select, textarea').forEach((el) => {
-    if (el.tagName === 'SELECT') el.value = (el.classList.contains('ticket-status-select') ? 'Open' : '');
+    if (el.tagName === 'SELECT') el.value = 'Open';
     else el.value = '';
   });
 }
@@ -281,6 +283,7 @@ function wireTicketStatus(card, ctx) {
       status === 'Closed – Feature Not Supported' ? ctx.closedFeatureContainer :
       ctx.openContainer;
 
+    // Template logic
     if (ctx.isTemplate) {
       if (status === 'Open') return;
 
@@ -292,6 +295,7 @@ function wireTicketStatus(card, ctx) {
       return;
     }
 
+    // Normal card movement
     if (card.parentElement !== target) target.appendChild(card);
   });
 }
@@ -331,6 +335,11 @@ function initPdfExport() {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
+    if (!window.jspdf) {
+      console.warn("jsPDF missing.");
+      return;
+    }
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
@@ -346,5 +355,5 @@ function initPdfExport() {
    DMS CARDS (placeholder)
 ------------------------------------- */
 function initDmsCards() {
-  // Future dynamic actions go here
+  // For future expansion
 }
