@@ -2833,15 +2833,13 @@
   <div class="section-block dms-overview-block">
     <h2>DMS Integration Matrix</h2>
 
-    <!-- ========================= -->
-    <!-- LEGEND                    -->
-    <!-- ========================= -->
+    <!-- Legend -->
     <div class="dms-legend">
       <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled pull</div>
       <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button driven</div>
       <div><span class="dms-dot dms-dot-withro"></span>With RO only</div>
       <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
-      <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
+      <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</span></div>
       <div><span class="dms-dot dms-dot-limited"></span>Limited / Partial</div>
       <div><span class="dms-dot dms-dot-display"></span>Display only (no writeback)</div>
     </div>
@@ -2849,165 +2847,44 @@
     <div class="dms-table-container">
       <div class="dms-grid">
 
-        <!-- ======================================= -->
-        <!-- DMS: CDK (Pull-Based)                   -->
-        <!-- ======================================= -->
+        <!-- =========================
+             1. CDK (Pull-Based)
+             ========================= -->
         <div class="dms-card">
           <div class="dms-card-header">
             <span class="dms-name">CDK</span>
             <span class="dms-chip dms-chip-pull">Pull-Based</span>
           </div>
-
+          
           <ul class="dms-list">
-            <!-- Customer Pull -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 minutes</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <!-- Customer Push -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>With appointment</p></li>
 
-            <!-- Vehicle Pull -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 minutes</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <!-- Vehicle Push -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 minutes</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>From ServiceCart</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Check-in workflow</p></li>
 
-            <!-- Appointment Pull -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 minutes</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>When adding</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 minutes</p></li>
 
-            <!-- Appointment Push -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Nightly sync</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Nightly sync</p></li>
 
-            <!-- RO Pull -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-
-            <!-- RO Writeback -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When ServiceCart posts</p>
-            </li>
-
-            <!-- RO Creation -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>From Check-in</p>
-            </li>
-
-            <!-- Parts Invoices -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
-
-            <!-- Parts Availability -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>Add parts workflow</p>
-            </li>
-
-            <!-- Special Orders -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
-
-            <!-- F&I -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Nightly sync</p>
-            </li>
-
-            <!-- Opcodes -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Nightly sync</p>
-            </li>
-
-            <!-- Historical RO -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-
-            <!-- Historical Customer -->
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
           </ul>
         </div>
 
-        <!-- ======================================= -->
-        <!-- DMS: REYNOLDS (Push-Based)              -->
-        <!-- ======================================= -->
+        <!-- =========================
+             2. Reynolds (Push-Based)
+             ========================= -->
         <div class="dms-card">
           <div class="dms-card-header">
             <span class="dms-name">Reynolds</span>
@@ -3015,131 +2892,34 @@
           </div>
 
           <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Scheduled work</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>With appointment</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>From Check-in</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>From myKaarma</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not integrated</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not integrated</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not integrated</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
           </ul>
         </div>
 
-        <!-- ======================================= -->
-        <!-- DMS: DEALERTRACK / ARKONA (Pull-Based)  -->
-        <!-- ======================================= -->
+        <!-- =========================
+             3. Dealertrack / Arkona
+             ========================= -->
         <div class="dms-card">
           <div class="dms-card-header">
             <span class="dms-name">Dealertrack / Arkona</span>
@@ -3147,534 +2927,69 @@
           </div>
 
           <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When RO opened</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>RO opened</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>With appointments</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 2 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When ServiceCart posts</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>From Check-in</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 2 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>ServiceCart</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Check-in</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 15 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>No integration</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoice</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 15 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>No integration</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Nightly</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Nightly sync</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
           </ul>
         </div>
 
-        <!-- ======================================= -->
-        <!-- DMS: DEALERBUILT (LIGHTYEAR)           -->
-        <!-- ======================================= -->
+        <!-- =========================
+             4. Dealerbuilt (Lightyear)
+             ========================= -->
         <div class="dms-card">
           <div class="dms-card-header">
-            <span class="dms-name">Dealerbuilt (Lightyear)</span>
+            <span class="dms-name">Dealerbuilt / Lightyear</span>
             <span class="dms-chip dms-chip-pull">Pull-Based</span>
           </div>
 
           <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Appointments only</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 2 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Check-in</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not available</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not available</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>Requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not available</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Nightly sync</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 2 min</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When posted</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>From Check-in</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not available</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not available</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>No integration</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Nightly sync</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>Pulled as needed</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>Pulled when requested</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
           </ul>
         </div>
 
-        <!-- ======================================= -->
-        <!-- DMS: PBS (Pull-Based)                   -->
-        <!-- ======================================= -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">PBS</span>
-            <span class="dms-chip dms-chip-pull">Pull-Based</span>
-          </div>
-
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 2 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When ServiceCart posts</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>From Check-in</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>No integration</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>Add parts</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>No integration</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Nightly sync</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes Pull</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>Not supported</p>
-            </li>
-          </ul>
-        </div>
-
-        <!-- ======================================= -->
-        <!-- DMS: TEKION (Pull-Based)                -->
-        <!-- ======================================= -->
-        <div class="dms-card">
-          <div class="dms-card-header">
-            <span class="dms-name">Tekion</span>
-            <span class="dms-chip dms-chip-pull">Pull-Based</span>
-          </div>
-
-          <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>If appointment exists</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-ondemand">On-Demand</span>
-              </div>
-              <p>When requested</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Every 5 min</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes Pull</span>
-                <span class="dms-tag dms-tag-planned">Planned</span>
-              </div>
-              <p>Future</p>
-            </li>
-
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>During deployment</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-          </ul>
-        </div>
-
-        <!-- ======================================= -->
-        <!-- DMS: AUTOMATE (Push-Based)              -->
-        <!-- ======================================= -->
+        <!-- =========================
+             5. Automate (Push-Based)
+             ========================= -->
         <div class="dms-card">
           <div class="dms-card-header">
             <span class="dms-name">Automate</span>
@@ -3682,125 +2997,98 @@
           </div>
 
           <ul class="dms-list">
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Customer Push</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not used</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Pull</span>
-                <span class="dms-tag dms-tag-withro">With RO</span>
-              </div>
-              <p>Arrives with RO</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Vehicle Push</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not used</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Appointment Push</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not used</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Pull</span>
-                <span class="dms-tag dms-tag-auto">Auto</span>
-              </div>
-              <p>Automatic</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Automatic</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Writeback</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">RO Creation</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Invoices</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Parts Price / Availability</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Special Orders</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+          </ul>
+        </div>
 
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">F &amp; I History</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Opcodes</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical RO</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
-            <li>
-              <div class="dms-row-top">
-                <span class="dms-field">Historical Customer</span>
-                <span class="dms-tag dms-tag-na">N/A</span>
-              </div>
-              <p>N/A</p>
-            </li>
+        <!-- =========================
+             6. PBS (Pull-Based)
+             ========================= -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">PBS</span>
+            <span class="dms-chip dms-chip-pull">Pull-Based</span>
+          </div>
+
+          <ul class="dms-list">
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>With appointment</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 2 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>ServiceCart</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Check-in</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not integrated</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Nightly</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
+          </ul>
+        </div>
+
+        <!-- =========================
+             7. Tekion (Pull-Based)
+             ========================= -->
+        <div class="dms-card">
+          <div class="dms-card-header">
+            <span class="dms-name">Tekion</span>
+            <span class="dms-chip dms-chip-pull">Pull-Based</span>
+          </div>
+
+          <ul class="dms-list">
+            <li><div class="dms-row-top"><span class="dms-field">Customer Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Customer Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Pull</span><span class="dms-tag dms-tag-withro">With RO</span></div><p>Arrives with RO</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Vehicle Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Appointments only</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Appointment Push</span><span class="dms-tag dms-tag-ondemand">On-Demand</span></div><p>Requested</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">RO Pull</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>Every 5 min</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">RO Writeback</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">RO Creation</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Invoices</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Parts Pricing</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Special Order</span><span class="dms-tag dms-tag-na">N/A</span></div><p>N/A</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">F&I History</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Opcodes</span><span class="dms-tag dms-tag-planned">Planned</span></div><p>Planned</p></li>
+
+            <li><div class="dms-row-top"><span class="dms-field">Historical RO</span><span class="dms-tag dms-tag-auto">Auto</span></div><p>One-time</p></li>
+            <li><div class="dms-row-top"><span class="dms-field">Historical Customer</span><span class="dms-tag dms-tag-na">N/A</span></div><p>Not supported</p></li>
           </ul>
         </div>
 
