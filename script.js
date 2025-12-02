@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDealershipNameBinding();
   initAdditionalTrainers();
   initAdditionalPoc();
-  initMapUpdate(); // Added function for map update listener
+  initMapUpdate(); 
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
@@ -124,7 +124,8 @@ function initMapUpdate() {
     if (!addressInput || !mapFrame || !addressInput.value) return;
 
     const address = encodeURIComponent(addressInput.value);
-    const mapSrc = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${address}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+    // FIX: Using the correct, standard Google Maps embed URL format
+    const mapSrc = `https://maps.google.com/maps?q=${address}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
     mapFrame.src = mapSrc;
   });
 }
@@ -439,23 +440,35 @@ function initPdfExport() {
     }
     
     // Temporarily disable elements that shouldn't be in the PDF 
-    const originalSidebarDisplay = document.getElementById('sidebar').style.display;
-    const originalClearBtnDisplay = document.querySelector('#training-summary .clear-page-btn').style.display;
-    document.getElementById('sidebar').style.display = 'none';
-    document.querySelector('#training-summary .clear-page-btn').style.display = 'none';
+    const sidebar = document.getElementById('sidebar');
+    const clearBtn = document.querySelector('#training-summary .clear-page-btn');
+    let originalSidebarDisplay = '';
+    let originalClearBtnDisplay = '';
+
+    if (sidebar) {
+        originalSidebarDisplay = sidebar.style.display;
+        sidebar.style.display = 'none';
+    }
+    if (clearBtn) {
+        originalClearBtnDisplay = clearBtn.style.display;
+        clearBtn.style.display = 'none';
+    }
+
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Capture the entire main content area
-    // Note: doc.html renders all sections even if hidden. You would typically hide all sections
-    // except the summary before export, or export each active page individually.
+    // Capture the entire body content
     doc.html(document.body, {
       callback: (docInstance) => {
         docInstance.save('myKaarma_Training_Checklist.pdf');
         // Restore elements after saving
-        document.getElementById('sidebar').style.display = originalSidebarDisplay;
-        document.querySelector('#training-summary .clear-page-btn').style.display = originalClearBtnDisplay;
+        if (sidebar) {
+            sidebar.style.display = originalSidebarDisplay;
+        }
+        if (clearBtn) {
+            clearBtn.style.display = originalClearBtnDisplay;
+        }
       },
       margin: [20, 20, 20, 20],
       autoPaging: 'text',
