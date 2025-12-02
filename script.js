@@ -1,8 +1,14 @@
+/* ==========================================================
+   myKaarma Interactive Training Checklist – FULL JS
+   With Google Maps Autocomplete + Map Button
+   ========================================================== */
+
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
+  initAddressAutocomplete();        // ⭐ NEW
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
@@ -11,134 +17,163 @@ document.addEventListener('DOMContentLoaded', () => {
   initDmsCards();
 });
 
-/* --------------- NAVIGATION --------------- */
+/* -------------------------------------
+   NAVIGATION
+------------------------------------- */
 function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
 
-  if (!navButtons.length || !sections.length) return;
-
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
-      sections.forEach((sec) => {
-        sec.classList.toggle('active', sec.id === targetId);
-      });
-      navButtons.forEach((b) => b.classList.toggle('active', b === btn));
+
+      sections.forEach((sec) =>
+        sec.classList.toggle('active', sec.id === targetId)
+      );
+
+      navButtons.forEach((b) =>
+        b.classList.toggle('active', b === btn)
+      );
     });
   });
 }
 
-/* --------------- CLEAR PAGE / CLEAR ALL --------------- */
+/* -------------------------------------
+   CLEAR PAGE / CLEAR ALL
+------------------------------------- */
 function clearSection(section) {
-  if (!section) return;
   const inputs = section.querySelectorAll('input, select, textarea');
 
   inputs.forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      el.selectedIndex = 0;
-    } else if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = false;
-    } else {
-      el.value = '';
-    }
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+    else el.value = '';
   });
 }
 
 function initClearPageButtons() {
-  const buttons = document.querySelectorAll('.clear-page-btn');
-  buttons.forEach((btn) => {
+  document.querySelectorAll('.clear-page-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
-      // If we cleared the dealership-info page, refresh topbar name.
-      if (section && section.id === 'dealership-info') {
-        updateDealershipNameDisplay();
-      }
+      if (section.id === 'dealership-info') updateDealershipNameDisplay();
     });
   });
 }
 
 function initClearAllButton() {
-  const clearAllBtn = document.getElementById('clearAllBtn');
-  if (!clearAllBtn) return;
+  const btn = document.getElementById('clearAllBtn');
+  if (!btn) return;
 
-  clearAllBtn.addEventListener('click', () => {
-    const sections = document.querySelectorAll('.page-section');
-    sections.forEach(clearSection);
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.page-section').forEach(clearSection);
     updateDealershipNameDisplay();
   });
 }
 
-/* --------------- DEALERSHIP NAME BINDING --------------- */
+/* -------------------------------------
+   DEALERSHIP NAME TOPBAR SYNC
+------------------------------------- */
 function initDealershipNameBinding() {
-  const dealershipNameInput = document.getElementById('dealershipNameInput');
-  if (!dealershipNameInput) return;
+  const input = document.getElementById('dealershipNameInput');
+  if (!input) return;
 
-  dealershipNameInput.addEventListener('input', updateDealershipNameDisplay);
-  // Initialize on load in case a value is pre-filled.
+  input.addEventListener('input', updateDealershipNameDisplay);
   updateDealershipNameDisplay();
 }
 
 function updateDealershipNameDisplay() {
-  const dealershipNameInput = document.getElementById('dealershipNameInput');
-  const dealershipNameDisplay = document.getElementById('dealershipNameDisplay');
-  if (!dealershipNameDisplay) return;
-
-  const val = dealershipNameInput ? dealershipNameInput.value.trim() : '';
-  dealershipNameDisplay.textContent = val || 'Dealership Name';
+  const txt = document.getElementById('dealershipNameInput');
+  const display = document.getElementById('dealershipNameDisplay');
+  display.textContent = txt?.value?.trim() || 'Dealership Name';
 }
 
-/* --------------- ADDITIONAL TRAINERS (PAGE 1) --------------- */
+/* -------------------------------------
+   ⭐ GOOGLE MAPS AUTOCOMPLETE / MAP BUTTON
+------------------------------------- */
+let googleAutocomplete;
+
+function initAddressAutocomplete() {
+  const addressInput = document.getElementById('dealershipAddressInput');
+  const mapFrame = document.getElementById('dealershipMapFrame');
+  const openBtn = document.getElementById('openAddressInMapsBtn');
+
+  if (!addressInput) return;
+
+  // Load Google Places Autocomplete
+  function loadGoogleMaps() {
+    const script = document.createElement('script');
+    script.src =
+      "https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocompleteInternal";
+    script.async = true;
+    document.head.appendChild(script);
+  }
+
+  window.initAutocompleteInternal = () => {
+    googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['geocode']
+    });
+
+    googleAutocomplete.addListener('place_changed', () => {
+      const place = googleAutocomplete.getPlace();
+      if (!place?.formatted_address) return;
+
+      const encoded = encodeURIComponent(place.formatted_address);
+      mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+    });
+  };
+
+  loadGoogleMaps();
+
+  // Open Google Maps in new tab
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      const text = addressInput.value.trim();
+      if (!text) return;
+      const encoded = encodeURIComponent(text);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+    });
+  }
+}
+
+/* -------------------------------------
+   ADDITIONAL TRAINERS (PAGE 1)
+------------------------------------- */
 function initAdditionalTrainers() {
   const row = document.querySelector('.additional-trainers-row');
   const container = document.getElementById('additionalTrainersContainer');
   if (!row || !container) return;
 
-  const addBtn = row.querySelector('.add-row');
-  if (!addBtn) return;
-
-  addBtn.addEventListener('click', () => {
-    // Create a normal row directly below the integrated row.
+  row.querySelector('.add-row')?.addEventListener('click', () => {
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub';
 
     const label = document.createElement('label');
     label.textContent = 'Additional Trainer';
-    // Match the indented label width/spacing
     label.style.flex = '0 0 36%';
     label.style.paddingRight = '12px';
 
     const input = document.createElement('input');
     input.type = 'text';
 
-    newRow.appendChild(label);
-    newRow.appendChild(input);
-
+    newRow.append(label, input);
     container.appendChild(newRow);
   });
 }
 
-/* --------------- ADDITIONAL POC CARDS (PAGE 2) --------------- */
-/*
-  Behavior:
-  - The .additional-poc-card with the + button is permanent and ALWAYS stays first
-    inside #primaryContactsGrid.
-  - Clicking + keeps whatever text is in that card and appends a new normal
-    Additional POC mini-card AFTER all existing POC cards.
-  - New cards are normal mini-cards with a rounded name textbox (no + button).
-*/
+/* -------------------------------------
+   ADDITIONAL POC ON PAGE 2
+------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
 
-  const templateCard = grid.querySelector('.additional-poc-card');
-  if (!templateCard) return;
+  const template = grid.querySelector('.additional-poc-card');
+  const addBtn = template?.querySelector('.additional-poc-add');
+  if (!template || !addBtn) return;
 
-  const addBtn = templateCard.querySelector('.additional-poc-add');
-  if (!addBtn) return;
-
-  function createNormalPocCard() {
+  function createNormalCard() {
     const card = document.createElement('div');
     card.className = 'mini-card contact-card';
 
@@ -160,275 +195,156 @@ function initAdditionalPoc() {
         <input type="email">
       </div>
     `;
-
     return card;
   }
 
   addBtn.addEventListener('click', () => {
-    const newCard = createNormalPocCard();
-    grid.appendChild(newCard);
+    grid.appendChild(createNormalCard());
   });
 }
 
-/* --------------- SUPPORT TICKETS (PAGE 7) --------------- */
-/*
-  Requirements:
-  - The template card in "Open Support Tickets" (ticket-group-template) always stays first
-    and is the ONLY card with the + button.
-  - When the template's status is changed away from "Open", its data is copied into
-    a new ticket card which moves to the correct status container,
-    and the template is reset to blank Open.
-  - Clicking the + button creates a NEW empty Open ticket card (no + button).
-  - Non-template cards can change status and will simply move between containers.
-*/
-
+/* -------------------------------------
+   SUPPORT TICKETS
+------------------------------------- */
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  if (!openContainer) return;
-
-  const template = openContainer.querySelector('.ticket-group-template');
+  const template = openContainer?.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Ensure template status default is Open
-  const templateStatus = template.querySelector('.ticket-status-select');
-  if (templateStatus) {
-    templateStatus.value = 'Open';
-  }
+  // Template always stays Open
+  const statusSelect = template.querySelector('.ticket-status-select');
+  if (statusSelect) statusSelect.value = 'Open';
 
   const addBtn = template.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard(template, {
-        copyValues: false
-      });
+      const newCard = createTicketCard(template, { copy: false });
       openContainer.appendChild(newCard);
     });
   }
 
-  // Wire up template itself for status changes (special behavior)
   wireTicketStatus(template, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
+    openContainer, tierTwoContainer,
+    closedResolvedContainer, closedFeatureContainer,
     isTemplate: true
   });
 }
 
-/**
- * Creates a new ticket card cloned from the template.
- * @param {HTMLElement} sourceCard - the card to clone (usually the template)
- * @param {Object} options
- *   - copyValues: if true, keep existing input/select values. If false, clear them.
- */
-function createTicketCard(sourceCard, options = {}) {
-  const { copyValues = false } = options;
+function createTicketCard(source, opts = {}) {
+  const card = source.cloneNode(true);
+  const copy = opts.copy ?? false;
 
-  const clone = sourceCard.cloneNode(true);
+  card.classList.remove('ticket-group-template');
+  card.querySelector('.add-ticket-btn')?.remove();
 
-  // No longer the template
-  clone.classList.remove('ticket-group-template');
-  clone.removeAttribute('data-template');
-
-  // Remove the add button from clones
-  const addBtn = clone.querySelector('.add-ticket-btn');
-  if (addBtn) {
-    addBtn.remove();
-  }
-
-  const fields = clone.querySelectorAll('input, select, textarea');
+  const fields = card.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
-    if (!copyValues) {
-      if (el.tagName === 'SELECT') {
-        if (el.classList.contains('ticket-status-select')) {
-          el.value = 'Open';
-        } else {
-          el.selectedIndex = 0;
-        }
-      } else if (el.type === 'checkbox' || el.type === 'radio') {
-        el.checked = false;
-      } else {
-        el.value = '';
-      }
+    if (!copy) {
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      else if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
     }
-    // if copyValues === true we keep existing values as-is
   });
 
-  // Wire up status logic for this new card
-  const openContainer = document.getElementById('openTicketsContainer');
-  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
-
-  wireTicketStatus(clone, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
+  wireTicketStatus(card, {
+    openContainer: document.getElementById('openTicketsContainer'),
+    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
+    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
+    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer'),
     isTemplate: false
   });
 
-  return clone;
+  return card;
 }
 
-/**
- * Clears all fields in the template and resets status to Open.
- */
-function resetTicketTemplate(template) {
-  const fields = template.querySelectorAll('input, select, textarea');
-  fields.forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      if (el.classList.contains('ticket-status-select')) {
-        el.value = 'Open';
-      } else {
-        el.selectedIndex = 0;
-      }
-    } else if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = false;
-    } else {
-      el.value = '';
-    }
+function resetTicketTemplate(card) {
+  card.querySelectorAll('input, select, textarea').forEach((el) => {
+    if (el.tagName === 'SELECT') el.value = (el.classList.contains('ticket-status-select') ? 'Open' : '');
+    else el.value = '';
   });
 }
 
-/**
- * Wires status change for a ticket card.
- * If isTemplate is true, changing status away from "Open" creates a new card with
- * the template's data and moves that card into the correct container, then resets
- * the template.
- * If isTemplate is false, the card itself moves between containers.
- */
-function wireTicketStatus(card, containers) {
-  const {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
-    isTemplate = false
-  } = containers;
-
+function wireTicketStatus(card, ctx) {
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
   select.addEventListener('change', () => {
-    const value = select.value;
+    const status = select.value;
 
-    let targetContainer = openContainer;
-    if (value === 'Tier Two') {
-      targetContainer = tierTwoContainer;
-    } else if (value === 'Closed - Resolved') {
-      targetContainer = closedResolvedContainer;
-    } else if (value === 'Closed – Feature Not Supported') {
-      // Note: EN DASH in "Closed – Feature Not Supported"
-      targetContainer = closedFeatureContainer;
-    } else if (value === 'Open') {
-      targetContainer = openContainer;
-    }
+    let target =
+      status === 'Tier Two' ? ctx.tierTwoContainer :
+      status === 'Closed - Resolved' ? ctx.closedResolvedContainer :
+      status === 'Closed – Feature Not Supported' ? ctx.closedFeatureContainer :
+      ctx.openContainer;
 
-    if (isTemplate) {
-      // Template should never actually leave the Open container.
-      if (value === 'Open' || !targetContainer) {
-        return;
-      }
+    if (ctx.isTemplate) {
+      if (status === 'Open') return;
 
-      // Create a new card WITH the template's data and status.
-      const newCard = createTicketCard(card, { copyValues: true });
-      const newStatus = newCard.querySelector('.ticket-status-select');
-      if (newStatus) {
-        newStatus.value = value;
-      }
+      const newCard = createTicketCard(card, { copy: true });
+      newCard.querySelector('.ticket-status-select').value = status;
 
-      targetContainer.appendChild(newCard);
-
-      // Reset the template back to a blank Open card.
+      target.appendChild(newCard);
       resetTicketTemplate(card);
       return;
     }
 
-    // Normal (non-template) cards just move between containers.
-    if (!targetContainer || targetContainer === card.parentElement) {
-      return;
-    }
-
-    targetContainer.appendChild(card);
+    if (card.parentElement !== target) target.appendChild(card);
   });
 }
 
-/* --------------- TABLE "+" BUTTONS (append empty row) --------------- */
+/* -------------------------------------
+   TABLE ADD-ROW BUTTONS
+------------------------------------- */
 function initTableAddRowButtons() {
-  const tableFooters = document.querySelectorAll('.table-footer .add-row');
-
-  tableFooters.forEach((btn) => {
+  document.querySelectorAll('.table-footer .add-row').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const footer = btn.closest('.table-footer');
-      if (!footer) return;
+      const table = btn.closest('.table-footer')
+                       ?.previousElementSibling
+                       ?.querySelector('table');
 
-      const container = footer.previousElementSibling;
-      if (!container) return;
-
-      const table = container.querySelector('table');
       if (!table) return;
 
       const tbody = table.querySelector('tbody') || table.createTBody();
-      const lastRow = tbody.lastElementChild;
+      const last = tbody.lastElementChild;
+      if (!last) return;
 
-      if (!lastRow) return;
-
-      const newRow = lastRow.cloneNode(true);
-
-      // Clear values in cloned row
-      const fields = newRow.querySelectorAll('input, select, textarea');
-      fields.forEach((el) => {
-        if (el.tagName === 'SELECT') {
-          el.selectedIndex = 0;
-        } else if (el.type === 'checkbox' || el.type === 'radio') {
-          el.checked = false;
-        } else {
-          el.value = '';
-        }
+      const clone = last.cloneNode(true);
+      clone.querySelectorAll('input, select').forEach((el) => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
       });
 
-      tbody.appendChild(newRow);
+      tbody.appendChild(clone);
     });
   });
 }
 
-/* --------------- PDF EXPORT (Summary page) --------------- */
+/* -------------------------------------
+   PDF EXPORT
+------------------------------------- */
 function initPdfExport() {
   const btn = document.getElementById('savePDF');
   if (!btn) return;
 
   btn.addEventListener('click', () => {
-    if (!window.jspdf) {
-      console.warn('jsPDF not available.');
-      return;
-    }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // This is a simple whole-page capture; styling may not be perfect but it works.
     doc.html(document.body, {
-      callback: (docInstance) => {
-        docInstance.save('myKaarma_Training_Checklist.pdf');
-      },
+      callback: (instance) => instance.save('myKaarma_Training_Checklist.pdf'),
       margin: [20, 20, 20, 20],
-      autoPaging: 'text',
-      html2canvas: {
-        scale: 0.6
-      }
+      html2canvas: { scale: 0.6 }
     });
   });
 }
 
-/* --------------- DMS CARDS (optional extension hook) --------------- */
-/*
-  Currently a no-op placeholder. If you later add dynamic behavior
-  for DMS cards (add/remove/collapse), wire it up here.
-*/
+/* -------------------------------------
+   DMS CARDS (placeholder)
+------------------------------------- */
 function initDmsCards() {
-  // No dynamic DMS behavior required yet.
+  // Future dynamic actions go here
 }
