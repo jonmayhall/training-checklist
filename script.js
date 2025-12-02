@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDealershipNameBinding();
   initAdditionalTrainers();
   initAdditionalPoc();
-  initMapUpdate(); 
+  initMapUpdate(); // Corrected function for robust link handling
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
@@ -120,17 +120,29 @@ function initMapUpdate() {
 
     mapBtn.addEventListener('click', () => {
         const addressInput = document.getElementById('dealerAddress');
+        const mapFrame = document.getElementById('dealershipMap');
         
         if (!addressInput || !addressInput.value.trim()) {
+            // Alert user if no address is entered but do not break if mapFrame is present
+            if (mapFrame) {
+                 mapFrame.src = ""; // Clear map if no address
+            }
             alert('Please enter a Dealership Address first.');
             return;
         }
-
+        
         const address = encodeURIComponent(addressInput.value.trim());
         
         // This opens a new tab/window to Google Maps with the address query,
-        // bypassing the difficult iframe embed issues on static hosts.
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}`;
+        // which is the most reliable way to handle map lookups on static hosts.
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}&z=14`;
+        
+        // We still attempt to set the iframe src, but often fails on static pages.
+        if (mapFrame) {
+            mapFrame.src = mapUrl + "&output=embed";
+        }
+        
+        // Open in a new tab for guaranteed success (optional, but highly recommended)
         window.open(mapUrl, '_blank');
     });
 }
