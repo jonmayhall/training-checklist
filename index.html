@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-    <link id="dynamicCSS" rel="stylesheet" href="/public/style.css">
+    <base href="./"> 
+
+    <link id="dynamicCSS" rel="stylesheet" href="style.css">
 
     <script src="http://googleusercontent.com/maps.google.com/7"></script>
 
-    <script defer id="dynamicJS" src="/public/script.js"></script>
+    <script defer id="dynamicJS" src="script.js"></script>
 
     <script>
     (function () {
@@ -17,13 +19,13 @@
 
       // Bust CSS cache
       const css = document.getElementById("dynamicCSS");
-      // FIX: Using the correct path in the script logic too
-      if (css) css.href = `/public/style.css?v=${ts}`; 
+      // If the <base> tag is applied, this simple name should work.
+      if (css) css.href = `style.css?v=${ts}`; 
 
       // Bust JS cache
       const js = document.getElementById("dynamicJS");
-      // FIX: Using the correct path in the script logic too
-      if (js) js.src = `/public/script.js?v=${ts}`;
+      // If the <base> tag is applied, this simple name should work.
+      if (js) js.src = `script.js?v=${ts}`;
     })();
   </script>
 </head>
@@ -32,7 +34,7 @@
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-      <img class="top-logo" src="/public/mykaarma_logo.png" alt="myKaarma Logo">
+<img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
       </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
