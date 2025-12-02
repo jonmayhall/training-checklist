@@ -123,9 +123,8 @@ function initMapUpdate() {
         const mapFrame = document.getElementById('dealershipMap');
         
         if (!addressInput || !addressInput.value.trim()) {
-            // Alert user if no address is entered but do not break if mapFrame is present
             if (mapFrame) {
-                 mapFrame.src = ""; // Clear map if no address
+                 mapFrame.src = "";
             }
             alert('Please enter a Dealership Address first.');
             return;
@@ -133,20 +132,17 @@ function initMapUpdate() {
         
         const address = encodeURIComponent(addressInput.value.trim());
         
-        // This opens a new tab/window to Google Maps with the address query,
-        // which is the most reliable way to handle map lookups on static hosts.
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}&z=14`;
+        // This is the guaranteed reliable way to look up the map on a static host.
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}`;
         
-        // We still attempt to set the iframe src, but often fails on static pages.
+        // Clear the iframe and open the link in a new tab.
         if (mapFrame) {
-            mapFrame.src = mapUrl + "&output=embed";
+             mapFrame.src = "";
         }
         
-        // Open in a new tab for guaranteed success (optional, but highly recommended)
         window.open(mapUrl, '_blank');
     });
 }
-
 
 /* --------------- ADDITIONAL TRAINERS (PAGE 1) --------------- */
 function initAdditionalTrainers() {
