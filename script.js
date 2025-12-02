@@ -144,6 +144,7 @@ function initMapUpdate() {
     });
 }
 
+
 /* --------------- ADDITIONAL TRAINERS (PAGE 1) --------------- */
 function initAdditionalTrainers() {
   const row = document.querySelector('.additional-trainers-row');
