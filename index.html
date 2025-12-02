@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-    <link id="dynamicCSS" rel="stylesheet" href="/style.css">
+    <link id="dynamicCSS" rel="stylesheet" href="/training-checklist/style.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <script defer id="dynamicJS" src="/script.js"></script>
+    <script defer id="dynamicJS" src="/training-checklist/script.js"></script>
 
     <script>
     (function () {
       const ts = Date.now();
+      
+      // Use the explicit full path in the script logic too
       const css = document.getElementById("dynamicCSS");
-      // Use the single slash in the script logic too
-      if (css) css.href = `/style.css?v=${ts}`; 
+      if (css) css.href = `/training-checklist/style.css?v=${ts}`; 
+      
+      // Use the explicit full path in the script logic too
       const js = document.getElementById("dynamicJS");
-      // Use the single slash in the script logic too
-      if (js) js.src = `/script.js?v=${ts}`;
+      if (js) js.src = `/training-checklist/script.js?v=${ts}`;
     })();
   </script>
 </head>
@@ -28,7 +30,7 @@
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-            <img class="top-logo" src="/mykaarma_logo.png" alt="myKaarma Logo">
+                <img class="top-logo" src="/training-checklist/mykaarma_logo.png" alt="myKaarma Logo">
       </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
@@ -79,87 +81,87 @@
         <main>
 
       <section id="onsite-trainers-cem" class="page-section active">
-            <h1>Trainers, Deployment Manager, & CEM</h1>
-            <p class="page-subtitle">
-                Capture onsite trainer details and deployment/CEM context.
-            </p>
-            <button class="clear-page-btn" type="button">Reset This Page</button>
+  <h1>Trainers, Deployment Manager, &amp; CEM</h1>
+  <p class="page-subtitle">
+    Capture onsite trainer details and deployment/CEM context.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-            <div class="section-block">
-                <h2>Lead & Additional Trainers</h2>
+    <div class="section-block">
+    <h2>Lead &amp; Additional Trainers</h2>
 
-                <div class="checklist-row">
-                    <label>Lead Trainer</label>
-                    <select>
-                        <option value="">Select lead trainer</option>
+    <div class="checklist-row">
+      <label>Lead Trainer</label>
+      <select>
+        <option value="">Select lead trainer</option>
 
-                        <optgroup label="1">
-                            <option>Christopher Eskew</option>
-                            <option>Brian Button</option>
-                            <option>Dana Barry</option>
-                        </optgroup>
+                <optgroup label="1">
+          <option>Christopher Eskew</option>
+          <option>Brian Button</option>
+          <option>Dana Barry</option>
+        </optgroup>
 
-                        <option disabled>──────────</option>
+                <option disabled>──────────</option>
 
-                        <optgroup label="2">
-                            <option>Adam Jeffords</option>
-                            <option>Alec Parker</option>
-                            <option>Eliud Garcia</option>
-                            <option>Joel Zavaleta</option>
-                            <option>Kyle Leavitt</option>
-                            <option>Lauren Ramos</option>
-                            <option>Miles Krasic</option>
-                        </optgroup>
+                <optgroup label="2">
+          <option>Adam Jeffords</option>
+          <option>Alec Parker</option>
+          <option>Eliud Garcia</option>
+          <option>Joel Zavaleta</option>
+          <option>Kyle Leavitt</option>
+          <option>Lauren Ramos</option>
+          <option>Miles Krasic</option>
+        </optgroup>
 
-                        <option disabled>──────────</option>
+                <option disabled>──────────</option>
 
-                        <optgroup label="3">
-                            <option>Anthony Carbone</option>
-                            <option>Clyde Chapman</option>
-                            <option>Dennitza Fernandez</option>
-                            <option>Jackson Geraghty</option>
-                            <option>Kevin Mullinax</option>
-                            <option>Sharon Rusta</option>
-                            <option>Terry Hart</option>
-                        </optgroup>
+                <optgroup label="3">
+          <option>Anthony Carbone</option>
+          <option>Clyde Chapman</option>
+          <option>Dennitza Fernandez</option>
+          <option>Jackson Geraghty</option>
+          <option>Kevin Mullinax</option>
+          <option>Sharon Rusta</option>
+          <option>Terry Hart</option>
+        </optgroup>
 
-                    </select>
-                </div>
+      </select>
+    </div>
 
-                <div class="checklist-row additional-trainers-row integrated-plus indent-sub">
-                    <label style="flex: 0 0 36%;">Additional Trainer</label>
-                    <input type="text">
-                    <button class="add-row" type="button">+</button>
-                </div>
+        <div class="checklist-row additional-trainers-row integrated-plus indent-sub">
+      <label style="flex: 0 0 36%;">Additional Trainer</label>
+      <input type="text">
+      <button class="add-row" type="button">+</button>
+    </div>
 
-                <div id="additionalTrainersContainer"></div>
-            </div>
+        <div id="additionalTrainersContainer"></div>
+  </div>
 
-            <div class="section-block notes-block">
-                <h2>Notes – Trainers</h2>
-                <textarea rows="4" placeholder="Notes about trainers..."></textarea>
-            </div>
+    <div class="section-block notes-block">
+    <h2>Notes – Trainers</h2>
+    <textarea rows="4" placeholder="Notes about trainers..."></textarea>
+  </div>
 
-            <div class="section-block">
-                <h2>Deployment & Custom Engagement Manager</h2>
+    <div class="section-block">
+    <h2>Deployment &amp; Custom Engagement Manager</h2>
 
-                <div class="checklist-row">
-                    <label>Deployment Manager</label>
-                    <input type="text">
-                </div>
+    <div class="checklist-row">
+      <label>Deployment Manager</label>
+      <input type="text">
+    </div>
 
-                <div class="checklist-row">
-                    <label>CEM</label>
-                    <input type="text">
-                </div>
-            </div>
+    <div class="checklist-row">
+      <label>CEM</label>
+      <input type="text">
+    </div>
+  </div>
 
-            <div class="section-block notes-block">
-                <h2>Notes – Trainers, Deployment, & CEM</h2>
-                <textarea rows="6" placeholder="High-level notes..."></textarea>
-            </div>
+    <div class="section-block notes-block">
+    <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
+    <textarea rows="6" placeholder="High-level notes..."></textarea>
+  </div>
 
-        </section>
+</section>
 
                         <section id="dealership-info" class="page-section">
         <button type="button" class="clear-page-btn">Reset This Page</button>
