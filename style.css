@@ -1,593 +1,468 @@
-/* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
-   ======================================================= */
+/* =========================================
+   ROOT + GLOBAL
+   ========================================= */
 
-/* --------------- CSS VARIABLES --------------- */
 :root {
-  --orange: #f36f21;
-  --light-orange: #f8b17b;
-  --gray-bg: #d7d7d7;
-  --card-bg: #fff;
-  --border: #dcdcdc;
-  --ink: #222;
-
-  --radius-lg: 18px;       /* cards */
-  --radius-md: 16px;
-  --radius-sm: 14px;       /* inputs / buttons */
-
-  --shadow: 0 2px 8px rgba(0,0,0,0.10);
-
-  --input-width: 260px;    /* default text-box width */
+  --mk-bg: #05070b;
+  --mk-bg-elevated: #0f141c;
+  --mk-bg-section: #141b24;
+  --mk-bg-sidebar: #05070b;
+  --mk-border-subtle: #242b36;
+  --mk-border-strong: #3a4558;
+  --mk-text-main: #f7f8fb;
+  --mk-text-muted: #a8b2c3;
+  --mk-accent: #f37021;         /* myKaarma orange */
+  --mk-accent-soft: rgba(243, 112, 33, 0.1);
+  --mk-accent-strong: rgba(243, 112, 33, 0.4);
+  --mk-accent-green: #16a34a;   /* myKaarma green-ish */
+  --mk-scroll-thumb: #3b4252;
+  --mk-scroll-track: #111827;
+  --mk-danger: #dc2626;
+  --mk-input-bg: #0b1017;
+  --mk-input-border: #2a3342;
+  --mk-input-focus: #4c8dff;
+  --mk-shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.45);
+  --mk-radius-lg: 12px;
+  --mk-radius-xl: 18px;
+  --mk-radius-pill: 999px;
+  --transition-fast: 0.15s ease-out;
+  --transition-med: 0.2s ease-out;
+  --header-height: 70px;
+  --sidebar-width: 260px;
 }
 
-/* --------------- BASE --------------- */
-html, body {
+/* Reset-ish */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
-  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background: var(--gray-bg);
-  color: var(--ink);
-  overflow-x: hidden;
+  padding: 0;
+  height: 100%;
 }
 
-/* no italics anywhere by default */
-*, em, i { 
-  font-style: normal !important;
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #1f2933 0, #05070b 40%, #020308 100%);
+  color: var(--mk-text-main);
 }
 
-/* --------------- TOP BAR --------------- */
+/* =========================================
+   LAYOUT
+   ========================================= */
+
 #topbar {
-  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
-  height: 70px;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
   position: fixed;
   inset: 0 0 auto 0;
+  height: var(--header-height);
+  background: linear-gradient(to right, #05070b, #0b1017, #05070b);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   z-index: 20;
 }
-.topbar-content { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  width: 100%; 
+
+.topbar-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.top-logo { 
-  height: 42px; 
-  object-fit: contain; 
-  display: block;
+
+.top-logo {
+  height: 32px;
+  width: auto;
 }
 
 .topbar-right {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--mk-text-main);
+}
+
+#app {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  padding-top: var(--header-height);
+  height: calc(100vh - var(--header-height));
 }
 
-#dealershipNameDisplay { 
-  color:#fff; 
-  font-size:22px;
-  font-weight:600; 
-  letter-spacing:.5px; 
-}
+/* SIDEBAR */
 
-/* --------------- LAYOUT --------------- */
-#app { 
-  display: flex; 
-  min-height: 100vh; 
-  margin-top: 70px; 
-  overflow-x: hidden; 
-}
-
-/* Darker, modern sidebar */
 #sidebar {
-  background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
-  border-right: 1px solid rgba(15,23,42,0.8);
-  width: 230px;
-  padding: 20px 12px 60px;
-  box-shadow: 0 0 18px rgba(15,23,42,0.6);
-  position: fixed;
-  top: 70px;
-  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--mk-bg-sidebar);
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
+  padding: 16px 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
   overflow-y: auto;
-}
-#sidebar-nav { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
-}
-/* hide icon span but keep label if it exists */
-.nav-icon {
-  display: none;
+  padding-right: 4px;
 }
 
-/* MENU BUTTONS */
 .nav-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  padding: 9px 12px;
-  font-size: 12px;
+  width: 100%;
   text-align: left;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #e5e7eb;
-  transition: .18s;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.nav-btn::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 16%;
-  bottom: 16%;
-  width: 3px;
+  background: transparent;
   border-radius: 999px;
-  background: linear-gradient(to bottom, var(--orange), #22c55e);
-  opacity: 0;
-  transition: opacity .18s;
-}
-.nav-btn:hover {
-  background: rgba(15,23,42,0.85);
-  color: #f9fafb;
-  border-color: rgba(148,163,184,0.45);
-  box-shadow: 0 2px 8px rgba(15,23,42,0.7);
-}
-.nav-btn.active {
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
-  font-weight: 600;
-  border-color: var(--orange);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.65);
-}
-.nav-btn.active::before {
-  opacity: 1;
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  color: var(--mk-text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-/* Clear All at bottom of sidebar */
+.nav-btn:hover {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.nav-btn.active {
+  background: var(--mk-accent-soft);
+  color: var(--mk-accent);
+  border-color: var(--mk-accent);
+  transform: translateX(2px);
+}
+
 #clearAllBtn {
-  position: fixed;
-  left: 24px;
-  bottom: 18px;
-  width: calc(230px - 48px);
-  padding: 7px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.9);
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: var(--mk-radius-pill);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: rgba(127, 29, 29, 0.25);
+  color: #fecaca;
+  font-size: 0.85rem;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
-  opacity: 0.95;
-  transition: background .16s, transform .16s, opacity .16s, border-color .16s, box-shadow .16s;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
+
 #clearAllBtn:hover {
-  background: linear-gradient(90deg, var(--orange), #22c55e);
-  border-color: #f97316;
+  background: rgba(127, 29, 29, 0.4);
+  border-color: rgba(248, 113, 113, 0.9);
   transform: translateY(-1px);
-  opacity: 1;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.75);
 }
+
+/* MAIN AREA */
 
 main {
   flex: 1;
-  margin-left: 230px;
-  padding: 30px 32px;
-  background: var(--gray-bg);
-  box-sizing: border-box;
+  padding: 16px 20px 24px 16px;
+  overflow-y: auto;
 }
 
-/* --------------- PAGE SECTIONS / CARDS --------------- */
 .page-section {
-  position: relative;
   display: none;
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 22px 32px 28px;
-  margin: 0 auto 40px;
-  width: 100%;
-  max-width: 960px;
-  box-sizing: border-box;
-}
-.page-section.active { 
-  display: block; 
+  max-width: 1400px;
+  margin: 0 auto 32px;
 }
 
-/* Page titles */
+.page-section.active {
+  display: block;
+}
+
 .page-section h1 {
-  color: var(--orange);
-  margin: 4px 0 8px 4px;
-  font-size: 26px;
-  font-weight: 700;
-  text-align: left;
-  letter-spacing: .3px;
-  position: relative;
-}
-.page-section h1::after {
-  content: "";
-  display: block;
-  width: 320px;
-  height: 4px;
-  background: var(--orange);
-  margin-top: 8px;
-  border-radius: 2px;
+  font-size: 1.6rem;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
 }
 
-/* Page subtitle */
 .page-subtitle {
-  margin: 4px 0 20px 4px;
-  font-size: 13px;
-  color: #555;
-}
-
-/* Reset button – top-right of each page card */
-.clear-page-btn {
-  position: absolute;
-  top: 16px;
-  right: 24px;
-  padding: 4px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid #bbb;
-  background: #f7f7f7;
-  color: #555;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
-}
-.clear-page-btn:hover {
-  background: #fff;
-  border-color: var(--orange);
-  color: var(--orange);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
-}
-
-/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
-.section-block {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  padding: 0 22px 14px;
-  margin-bottom: 24px;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-}
-.section-block h2 {
   margin: 0 0 16px;
-  padding: 10px 16px;
-  background: var(--orange);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left: -22px;
-  margin-right: -22px;
-}
-/* Extra spacing when a notes card is followed by another card */
-.notes-block {
-  margin-bottom: 32px;
-}
-.notes-block + .section-block,
-.notes-block + .section {
-  margin-top: 10px;
+  font-size: 0.92rem;
+  color: var(--mk-text-muted);
 }
 
-/* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
-.checklist-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  font-size: 14px;
-  padding-left: 40px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
-}
-.section-block .checklist-row:last-of-type {
-  border-bottom: none;
+.clear-page-btn {
+  float: right;
+  margin-top: -8px;
+  margin-left: 8px;
   margin-bottom: 8px;
-  padding-bottom: 0;
-}
-.checklist-row label {
-  flex: 1 1 auto;
-  font-weight: 500;
-  text-align: left;
-  padding-right: 16px;
-  white-space: normal;
-}
-
-/* Inputs on the RIGHT */
-.section-block .checklist-row input[type="text"],
-.section-block .checklist-row input[type="number"],
-.section-block .checklist-row input[type="email"],
-.section-block .checklist-row input[type="tel"],
-.section-block .checklist-row input[type="date"],
-.section-block .checklist-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  box-sizing: border-box;
-}
-.section-block textarea {
-  width: 96%;
-  margin: 6px auto 10px;
-  display: block;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  resize: vertical;
-}
-
-/* Focus */
-.section-block input:focus,
-.section-block select:focus,
-.section-block textarea:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.35);
-  outline: none;
-  background: #fff9f5;
-}
-
-/* Indented sub-rows */
-.indent-sub {
-  padding-left: 60px !important;
-}
-
-/* --------------- ADDITIONAL TRAINERS DIVIDER --------------- */
-.checklist-row.additional-trainers-row,
-.additional-trainer-row {
-  border-bottom: 1px solid #e0e0e0 !important;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-}
-
-/* --------------- MINI-CARDS (Contacts etc.) --------------- */
-/* thin, continuous orange border around entire card */
-.mini-card {
-  border: 1px solid var(--orange);
-  border-radius: var(--radius-md);
-  background: #fff;
-  margin: 0;
-  padding: 6px 0 4px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-/* rows inside mini-card – shared layout */
-.mini-card .checklist-row {
-  margin: 0;
-  border-bottom: 1px solid #e5e5e5;
-  padding: 8px 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.mini-card .checklist-row:last-child {
-  border-bottom: none;
-}
-
-/* move label left + fixed label width */
-.mini-card .checklist-row label {
-  flex: 0 0 36%;
-  font-weight: 500;
-  text-align: left;
-  padding-right: 12px;
-  white-space: nowrap;
-}
-
-/* aligned text boxes */
-.mini-card .checklist-row input[type="text"],
-.mini-card .checklist-row input[type="number"],
-.mini-card .checklist-row input[type="email"],
-.mini-card .checklist-row input[type="tel"],
-.mini-card .checklist-row input[type="date"],
-.mini-card .checklist-row select {
-  flex: 1 1 auto;
-  width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
-
-/* ensure no weird tint */
-.mini-card .checklist-row {
-  background: #fff !important;
-}
-
-/* aliases */
-.contact-card { }
-.champions-card { }
-.blockers-card { }
-
-/* --------------- PRIMARY CONTACTS GRID (2 x N) --------------- */
-.primary-contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 18px;
-  row-gap: 18px;
-  align-items: stretch;
-}
-
-.primary-contacts-grid .mini-card {
-  margin: 0;
-  width: 100%;
-}
-/* --------------- TABLES (Training, Opcodes, etc.) --------------- */
-
-.table-container {
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-  margin-top: 8px;
-}
-
-.scroll-wrapper {
-  max-height: 360px;
-  overflow: auto;
-}
-
-/* Scrollbars (for containers that scroll) */
-.scroll-wrapper::-webkit-scrollbar,
-#sidebar-nav::-webkit-scrollbar,
-main::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.scroll-wrapper::-webkit-scrollbar-thumb,
-#sidebar-nav::-webkit-scrollbar-thumb,
-main::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  padding: 6px 12px;
+  font-size: 0.8rem;
   border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.4);
+  color: var(--mk-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
-.scroll-wrapper::-webkit-scrollbar-track,
-#sidebar-nav::-webkit-scrollbar-track,
-main::-webkit-scrollbar-track {
-  background: #f1f5f9;
+.clear-page-btn:hover {
+  background: rgba(30, 64, 175, 0.45);
+  border-color: rgba(129, 140, 248, 0.9);
 }
 
-.training-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  table-layout: auto;
+/* Floating PDF button */
+
+.floating-btn {
+  position: sticky;
+  top: 8px;
+  float: right;
+  margin-left: 12px;
+  padding: 8px 16px;
+  border-radius: var(--mk-radius-pill);
+  border: 1px solid var(--mk-accent);
+  background: radial-gradient(circle at top left, rgba(243, 112, 33, 0.25), transparent 55%);
+  color: var(--mk-text-main);
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--mk-shadow-soft);
+  z-index: 5;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    background var(--transition-fast);
 }
 
-.training-table thead th {
-  background: var(--orange);
-  color: #ffffff;
-  padding: 6px 6px;
-  text-align: left;
+.floating-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* =========================================
+   SECTIONS / CARDS / ROWS
+   ========================================= */
+
+.section-block {
+  background: var(--mk-bg-section);
+  border-radius: var(--mk-radius-xl);
+  padding: 16px 18px 18px;
+  margin-bottom: 18px;
+  box-shadow: var(--mk-shadow-soft);
+  border: 1px solid var(--mk-border-subtle);
+}
+
+.section-block h2 {
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+  display: inline-block;
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--mk-accent);
+}
+
+.section {
+  margin-bottom: 22px;
+}
+
+.section-header {
+  font-size: 0.95rem;
   font-weight: 600;
-  white-space: nowrap;
-  border-bottom: 1px solid #e2e8f0;
+  color: var(--mk-text-main);
+  margin-bottom: 6px;
+  border-left: 3px solid var(--mk-accent);
+  padding-left: 8px;
 }
 
-.training-table tbody td {
-  padding: 4px 6px;
-  border-top: 1px solid #e5e7eb;
-  vertical-align: middle;
-}
+/* Mini cards (contacts, Monday visit, etc.) */
 
-/* Inputs/selects inside tables: smaller & full width */
-.training-table input[type="text"],
-.training-table input[type="number"],
-.training-table select {
-  width: 100%;
-  max-width: 100%;
-  font-size: 12px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  box-sizing: border-box;
-}
-
-.training-table input[type="checkbox"] {
-  margin-right: 4px;
-}
-
-/* Footer row with "+" button aligned right */
-.table-footer {
-  border-top: 1px solid #e2e8f0;
-  padding: 4px 8px;
-  display: flex;
-  justify-content: flex-end;
-  background: #f9fafb;
-}
-
-/* --------------- SUPPORT TICKETS --------------- */
-
-.ticket-group {
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  padding: 10px 14px 8px;
-  border: 1px solid var(--border);
+.mini-card {
+  background: #111827;
+  border-radius: var(--mk-radius-lg);
+  padding: 12px 14px;
+  border: 1px solid var(--mk-border-subtle);
   margin-bottom: 10px;
 }
 
-.ticket-group-template {
-  border-style: dashed;
-  border-color: var(--orange);
+/* Checklist row layout */
+
+.checklist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-/* Ensure ticket text fields match global look */
-.ticket-group .checklist-row input[type="text"] {
-  border-radius: var(--radius-sm);
-  background: #f7f7f7;
+/* Indented child rows */
+
+.indent-sub {
+  padding-left: 22%;
 }
 
-/* --------------- ORANGE OUTLINE CARD (Automations, etc.) --------------- */
+/* Labels */
 
-.orange-outline-card {
-  border: 1px solid var(--orange);
-  background: #fff7f2;
+.checklist-row label {
+  flex: 0 0 36%;
+  font-size: 0.9rem;
+  color: var(--mk-text-main);
 }
 
-/* --------------- MAP / ADDRESS (Dealership Info page) --------------- */
+/* Global input widths:
+   - All "standard" inputs/selects/textarea share same width
+   - Tables & mini-cards are excluded / overridden
+*/
 
-.address-input-wrap {
+.checklist-row input[type="text"],
+.checklist-row input[type="number"],
+.checklist-row input[type="email"],
+.checklist-row input[type="date"],
+.checklist-row select,
+.checklist-row textarea {
+  flex: 0 0 320px;
+  max-width: 320px;
+}
+
+/* In mini-cards, let controls span more of the card */
+
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="number"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="date"],
+.mini-card .checklist-row select,
+.mini-card .checklist-row textarea {
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+
+/* Base control styling */
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+  background: var(--mk-input-bg);
+  border-radius: 999px;
+  border: 1px solid var(--mk-input-border);
+  color: var(--mk-text-main);
+  font-size: 0.86rem;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+    background var(--transition-fast), transform var(--transition-fast);
+}
+
+textarea {
+  border-radius: 10px;
+  min-height: 64px;
+  resize: vertical;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Round text boxes including support ticket number */
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="date"] {
+  border-radius: 999px;
+}
+
+/* Focus */
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--mk-input-focus);
+  box-shadow: 0 0 0 1px rgba(76, 141, 255, 0.4);
+  background: #0b1220;
+}
+
+/* Muted note span */
+
+.muted-note {
+  font-size: 0.8rem;
+  color: var(--mk-text-muted);
+}
+
+/* Integrated "+" row */
+
+.integrated-plus {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
+.integrated-plus .add-row {
+  flex: 0 0 auto;
+}
+
+/* "+" buttons (ADD BUTTONS BACK TO ORIGINAL LOOK) */
+
+.add-row {
+  border-radius: 999px;
+  border: 1px solid var(--mk-accent);
+  background: var(--mk-accent-soft);
+  color: var(--mk-accent);
+  width: 26px;
+  height: 26px;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.add-row:hover {
+  background: var(--mk-accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(243, 112, 33, 0.45);
+}
+
+/* Notes cards */
+
+.notes-block textarea {
+  min-height: 80px;
+}
+
+/* =========================================
+   MAP / ADDRESS
+   ========================================= */
+
+.address-input-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.address-input-wrap input {
+  flex: 1;
+  max-width: 320px;
 }
 
 .small-map-btn {
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--orange);
-  background: #fff;
-  color: var(--orange);
-  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--mk-accent);
+  background: var(--mk-accent-soft);
+  color: var(--mk-accent);
+  font-size: 0.8rem;
   padding: 5px 10px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .small-map-btn:hover {
-  background: var(--orange);
+  background: var(--mk-accent);
   color: #fff;
 }
 
 .map-wrapper {
-  margin-top: 10px;
-  border-radius: var(--radius-md);
+  margin-top: 12px;
+  border-radius: var(--mk-radius-lg);
   overflow: hidden;
-  border: 1px solid var(--border-light);
-  background: #f8fafc;
+  border: 1px solid var(--mk-border-subtle);
+  background: #020617;
 }
 
 .map-frame {
@@ -599,28 +474,164 @@ main::-webkit-scrollbar-track {
 .map-helper-text {
   margin: 0;
   padding: 6px 10px 8px;
-  font-size: 12px;
-  color: #64748b;
+  font-size: 0.8rem;
+  color: var(--mk-text-muted);
 }
 
-/* --------------- DMS INTEGRATION (LIGHT THEME MINI-CARDS) --------------- */
+/* =========================================
+   PRIMARY CONTACTS GRID
+   ========================================= */
+
+.primary-contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.contact-card {
+  background: #0b1120;
+  border-radius: var(--mk-radius-lg);
+  padding: 10px 12px;
+  border: 1px solid var(--mk-border-subtle);
+}
+
+/* =========================================
+   TABLES (Training, Opcodes, etc.)
+   ========================================= */
+
+.table-container {
+  background: #020617;
+  border-radius: var(--mk-radius-xl);
+  border: 1px solid var(--mk-border-subtle);
+  box-shadow: var(--mk-shadow-soft);
+  overflow: hidden;
+}
+
+.scroll-wrapper {
+  max-height: 360px;
+  overflow: auto;
+}
+
+/* Scrollbars */
+
+.scroll-wrapper::-webkit-scrollbar,
+#sidebar-nav::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-wrapper::-webkit-scrollbar-thumb,
+#sidebar-nav::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb {
+  background: var(--mk-scroll-thumb);
+  border-radius: 999px;
+}
+
+.scroll-wrapper::-webkit-scrollbar-track,
+#sidebar-nav::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track {
+  background: var(--mk-scroll-track);
+}
+
+.training-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.training-table thead th {
+  background: var(--mk-accent);
+  color: #fff;
+  padding: 6px 6px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.training-table tbody td {
+  padding: 4px 6px;
+  border-top: 1px solid rgba(30, 64, 175, 0.3);
+}
+
+/* Inputs and selects inside tables: smaller & full-width */
+
+.training-table input[type="text"],
+.training-table input[type="number"],
+.training-table select {
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.training-table input[type="checkbox"] {
+  margin-right: 4px;
+}
+
+/* Table footer with + row */
+
+.table-footer {
+  border-top: 1px solid var(--mk-border-subtle);
+  padding: 4px 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* =========================================
+   SUPPORT TICKETS
+   ========================================= */
+
+.ticket-group {
+  background: #0b1120;
+  border-radius: var(--mk-radius-lg);
+  padding: 12px 14px;
+  border: 1px solid var(--mk-border-subtle);
+  margin-bottom: 10px;
+}
+
+/* TEMPLATE CARD: remove dotted border, match normal card */
+.ticket-group-template {
+  border-style: solid;
+  border-color: var(--mk-border-subtle);
+}
+
+/* Ensure support ticket number box is rounded & same size as others */
+
+.ticket-group input[type="text"] {
+  border-radius: 999px;
+}
+
+/* =========================================
+   ORANGE OUTLINE CARD
+   ========================================= */
+
+.orange-outline-card {
+  border: 1px solid var(--mk-accent-strong);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+/* =========================================
+   DMS INTEGRATION PAGE
+   ========================================= */
 
 .dms-overview-block {
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  background: var(--mk-bg-section);
 }
 
-/* Legend row above cards */
+/* Legend (COLORED DOTS) */
 
 .dms-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 10px;
-  padding: 4px 2px 0;
+  gap: 8px 18px;
+  font-size: 0.8rem;
+  color: var(--mk-text-muted);
+  margin-bottom: 14px;
 }
 
 .dms-legend > div {
@@ -636,96 +647,118 @@ main::-webkit-scrollbar-track {
   display: inline-block;
 }
 
-/* Legend dot colors (match PDF meaning) */
+/* Legend dot colors */
+
 .dms-dot-auto {
-  background: #22c55e;  /* Automatic / Scheduled pull */
-}
-.dms-dot-ondemand {
-  background: var(--orange); /* Button / On-demand / Push */
-}
-.dms-dot-withro {
-  background: #0ea5e9;  /* With RO only */
-}
-.dms-dot-planned {
-  background: #eab308;  /* Planned / Future */
-}
-.dms-dot-na {
-  background: #9ca3af;  /* Not available */
-}
-.dms-dot-limited {
-  background: #6366f1;  /* Limited / Partial */
-}
-.dms-dot-display {
-  background: #a855f7;  /* Display only */
+  background: var(--mk-accent-green);
 }
 
-/* Grid of DMS cards */
+.dms-dot-ondemand {
+  background: var(--mk-accent);
+}
+
+.dms-dot-withro {
+  background: #22c55e;
+}
+
+.dms-dot-planned {
+  background: #eab308;
+}
+
+.dms-dot-na {
+  background: #4b5563;
+}
+
+.dms-dot-limited {
+  background: #0ea5e9;
+}
+
+.dms-dot-display {
+  background: #a855f7;
+}
+
+/* DMS grid of mini cards */
 
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 10px;
+  gap: 14px;
 }
 
-/* Each DMS card */
+/* DMS card */
 
 .dms-card {
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  padding: 10px 12px 10px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  background: #020617;
+  border-radius: var(--mk-radius-lg);
+  padding: 12px 14px 12px;
+  border: 1px solid var(--mk-border-subtle);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.75);
 }
 
-/* Header: DMS name + Pull/Push badge */
+/* Border color matches chip color (using :has for modern browsers) */
+
+.dms-card:has(.dms-chip-pull) {
+  border-color: var(--mk-accent-green);
+}
+
+.dms-card:has(.dms-chip-push) {
+  border-color: var(--mk-accent);
+}
+
+/* Header: title + chip */
 
 .dms-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+
+/* DMS name styled like page section title: orange + underline a bit longer */
 
 .dms-name {
-  font-size: 14px;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--mk-accent);
   position: relative;
-  padding-bottom: 2px;
+  padding-bottom: 3px;
 }
 
-/* orange underline similar to section titles */
 .dms-name::after {
   content: "";
   position: absolute;
   left: 0;
   bottom: 0;
   height: 2px;
-  width: 120%;
-  background: var(--orange);
+  width: 130%;
+  background: var(--mk-accent);
 }
+
+/* Pull/Push chip */
 
 .dms-chip {
-  font-size: 11px;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
+  padding: 3px 9px;
+  border-radius: var(--mk-radius-pill);
   border: 1px solid transparent;
-  background: #f3f4f6;
-  color: #111827;
+  background: rgba(148, 163, 184, 0.2);
+  color: #ffffff;
 }
 
-/* Pull = greenish, Push = orange badge (text stays dark for light theme) */
+/* Pull = green, Push = orange */
+
 .dms-chip-pull {
-  border-color: #16a34a;
-  background: #dcfce7;
+  background: rgba(22, 163, 74, 0.2);
+  border-color: var(--mk-accent-green);
+  color: #ffffff;
 }
 
 .dms-chip-push {
-  border-color: var(--orange);
-  background: #ffedd5;
+  background: var(--mk-accent-soft);
+  border-color: var(--mk-accent);
+  color: #ffffff;
 }
 
 /* List inside card */
@@ -735,126 +768,151 @@ main::-webkit-scrollbar-track {
   padding: 0;
   margin: 0;
   display: grid;
-  row-gap: 4px;
+  gap: 6px;
 }
 
-/* Single integration line */
+/* Each row */
 
 .dms-row-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .dms-field {
-  font-size: 12px;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: #111827;
+  color: var(--mk-text-main);
 }
 
-/* Tag chip (Auto / On-Demand / With RO / etc.) */
+/* Tag chips */
 
 .dms-tag {
-  font-size: 11px;
+  font-size: 0.7rem;
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--mk-radius-pill);
   border: 1px solid transparent;
   white-space: nowrap;
-  background: #f3f4f6;
-  color: #111827;
+  background: rgba(31, 41, 55, 0.9);
+  color: #e5e7eb;
 }
 
-/* Tag color variants */
+/* Tag colors */
 
 .dms-tag-auto {
-  border-color: #16a34a;
-  background: #dcfce7;
+  background: rgba(22, 163, 74, 0.2);
+  border-color: var(--mk-accent-green);
+  color: #bbf7d0;
 }
 
 .dms-tag-ondemand {
-  border-color: var(--orange);
-  background: #ffedd5;
+  background: rgba(243, 112, 33, 0.2);
+  border-color: var(--mk-accent);
+  color: #fed7aa;
 }
 
 .dms-tag-withro {
-  border-color: #0ea5e9;
-  background: #e0f2fe;
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #bbf7d0;
 }
 
 .dms-tag-planned {
-  border-color: #eab308;
-  background: #fef9c3;
+  background: rgba(234, 179, 8, 0.18);
+  border-color: #facc15;
+  color: #fef9c3;
 }
 
 .dms-tag-na {
-  border-color: #9ca3af;
-  background: #f3f4f6;
+  background: rgba(75, 85, 99, 0.5);
+  border-color: #6b7280;
+  color: #e5e7eb;
 }
 
 .dms-tag-limited {
-  border-color: #6366f1;
-  background: #e0e7ff;
+  background: rgba(14, 165, 233, 0.15);
+  border-color: #0ea5e9;
+  color: #cffafe;
 }
 
 .dms-tag-display {
+  background: rgba(168, 85, 247, 0.15);
   border-color: #a855f7;
-  background: #f3e8ff;
+  color: #f5d0fe;
 }
 
-/* Short description under each row */
+/* Short description under each DMS item */
+
 .dms-list p {
-  margin: 0 0 2px;
-  font-size: 11px;
-  color: #6b7280;
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  color: var(--mk-text-muted);
 }
 
-/* --------------- RESPONSIVE TWEAKS --------------- */
+/* =========================================
+   RESPONSIVE
+   ========================================= */
 
-@media (max-width: 900px) {
-  .checklist-row {
-    padding-left: 24px;
+@media (max-width: 1024px) {
+  #app {
+    flex-direction: column;
   }
+
+  #sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  #sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 120px;
+  }
+
+  main {
+    padding: 12px;
+  }
+
   .indent-sub {
-    padding-left: 40px !important;
+    padding-left: 8%;
   }
 }
 
 @media (max-width: 768px) {
-  .page-section {
-    padding: 0 8px;
-  }
-
   .checklist-row {
     flex-direction: column;
     align-items: flex-start;
-    padding-left: 16px;
   }
 
   .checklist-row label {
-    padding-right: 0;
+    flex: 0 0 auto;
   }
 
-  .section-block .checklist-row input[type="text"],
-  .section-block .checklist-row input[type="number"],
-  .section-block .checklist-row input[type="email"],
-  .section-block .checklist-row input[type="tel"],
-  .section-block .checklist-row input[type="date"],
-  .section-block .checklist-row select {
-    margin-left: 0;
-    width: 100%;
+  .checklist-row input[type="text"],
+  .checklist-row input[type="number"],
+  .checklist-row input[type="email"],
+  .checklist-row input[type="date"],
+  .checklist-row select {
+    flex: 1 1 auto;
     max-width: 100%;
-  }
-
-  .section-block textarea {
     width: 100%;
   }
 
-  .primary-contacts-grid {
-    grid-template-columns: 1fr;
+  .indent-sub {
+    padding-left: 0;
   }
 
-  .dms-grid {
-    grid-template-columns: 1fr;
+  .address-input-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .small-map-btn {
+    align-self: flex-start;
   }
 }
