@@ -11,17 +11,17 @@
   --border: #dcdcdc;
   --ink: #222;
 
-  --radius-lg: 18px; /* cards */
+  --radius-lg: 18px;       /* cards */
   --radius-md: 16px;
-  --radius-sm: 14px; /* inputs / buttons */
+  --radius-sm: 14px;       /* inputs / buttons */
 
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
-  --input-width: 260px; /* default text-box width */
+  --input-width: 260px;    /* default text-box width */
 
   /* DMS-specific accents */
-  --mk-orange: #f36f21; /* myKaarma orange (matches --orange) */
-  --mk-green: #22c55e; /* myKaarma green */
+  --mk-orange: #f36f21;    /* myKaarma orange (matches --orange) */
+  --mk-green: #22c55e;     /* myKaarma green */
   --mk-border: #e5e7eb;
 }
 
@@ -553,16 +553,6 @@ main {
   border-bottom-right-radius: 0;
 }
 
-.additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
-  flex: 0 0 32px;
-  width: 32px;
-  height: 34px;
-  font-size: 16px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin-left: -1px;
-  padding: 0;
-}
-
 /* override generic integrated-plus rule inside mini-card so fields line up */
 .mini-card .checklist-row.integrated-plus input[type="text"] {
   flex: 1 1 auto;
@@ -673,7 +663,7 @@ main {
   color: var(--mk-orange);
   display: inline-block;
   padding-bottom: 2px;
-  padding-right: 46px; /* makes the underline extend past the text */
+  padding-right: 46px;              /* makes the underline extend past the text */
   border-bottom: 2px solid var(--mk-orange);
 }
 
