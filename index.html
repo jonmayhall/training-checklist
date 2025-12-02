@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>myKaarma – Interactive Training Checklist</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myKaarma – Interactive Training Checklist</title>
 
-    <base href="/public/">
+    <base href="/public/">
 
-    <link id="dynamicCSS" rel="stylesheet" href="style.css">
+    <link id="dynamicCSS" rel="stylesheet" href="style.css">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <script defer id="dynamicJS" src="script.js"></script>
+    <script defer id="dynamicJS" src="script.js"></script>
 
-    <script>
-        (function () {
-            const ts = Date.now();
-            const css = document.getElementById("dynamicCSS");
-            if (css) css.href = `style.css?v=${ts}`;
-            const js = document.getElementById("dynamicJS");
-            if (js) js.src = `script.js?v=${ts}`;
-        })();
-    </script>
+    <script>
+    (function () {
+      const ts = Date.now();
+      const css = document.getElementById("dynamicCSS");
+      if (css) css.href = `style.css?v=${ts}`;
+      const js = document.getElementById("dynamicJS");
+      if (js) js.src = `script.js?v=${ts}`;
+    })();
+  </script>
 </head>
-        
+
 <body>
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-<img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
-      </div>
+                <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
+      </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
       </div>
@@ -40,7 +40,7 @@
         <aside id="sidebar">
       <nav id="sidebar-nav">
         <button class="nav-btn active" data-target="onsite-trainers-cem">
-            Trainers, Deployment Manager, & CEM
+            Trainers, Deployment Manager, &amp; CEM
         </button>
         <button class="nav-btn" data-target="dealership-info">
           Dealership Info
@@ -55,7 +55,7 @@
           Training Checklist
         </button>
         <button class="nav-btn" data-target="opcodes-pricing">
-          Opcodes & Pricing
+          Opcodes &amp; Pricing
         </button>
         <button class="nav-btn" data-target="support-ticket">
           Support Tickets
