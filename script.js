@@ -124,8 +124,10 @@ function initMapUpdate() {
     if (!addressInput || !mapFrame || !addressInput.value) return;
 
     const address = encodeURIComponent(addressInput.value);
-    // FIX: Using the correct, standard Google Maps embed URL format
-    const mapSrc = `https://maps.google.com/maps?q=${address}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+    
+    // FINAL FIX: Using the most robust public Google Maps embed URL format
+    const mapSrc = `https://maps.google.com/maps?q=${address}&z=14&output=embed`;
+    
     mapFrame.src = mapSrc;
   });
 }
