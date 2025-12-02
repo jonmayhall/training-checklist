@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-    <base href="/public/">
+    <base href="/">
 
-    <link id="dynamicCSS" rel="stylesheet" href="style.css">
+    <link id="dynamicCSS" rel="stylesheet" href="public/style.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <script defer id="dynamicJS" src="script.js"></script>
+    <script defer id="dynamicJS" src="public/script.js"></script>
 
     <script>
     (function () {
       const ts = Date.now();
       const css = document.getElementById("dynamicCSS");
-      if (css) css.href = `style.css?v=${ts}`;
+      if (css) css.href = `public/style.css?v=${ts}`;
       const js = document.getElementById("dynamicJS");
-      if (js) js.src = `script.js?v=${ts}`;
+      if (js) js.src = `public/script.js?v=${ts}`;
     })();
   </script>
 </head>
@@ -28,7 +28,7 @@
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-                <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
+          <img class="top-logo" src="public/mykaarma_logo.png" alt="myKaarma Logo">
       </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
