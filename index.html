@@ -5,23 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>myKaarma – Interactive Training Checklist</title>
 
-    <link id="dynamicCSS" rel="stylesheet" href="/training-checklist/style.css">
+    <link id="dynamicCSS" rel="stylesheet" href="style.css">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <script defer id="dynamicJS" src="/training-checklist/script.js"></script>
+    <script defer id="dynamicJS" src="script.js"></script>
 
-    <script>
+  <script>
     (function () {
       const ts = Date.now();
-      
-      // Use the explicit full path in the script logic too
       const css = document.getElementById("dynamicCSS");
-      if (css) css.href = `/training-checklist/style.css?v=${ts}`; 
-      
-      // Use the explicit full path in the script logic too
+      // Simple file name in the script logic
+      if (css) css.href = `style.css?v=${ts}`; 
       const js = document.getElementById("dynamicJS");
-      if (js) js.src = `/training-checklist/script.js?v=${ts}`;
+      // Simple file name in the script logic
+      if (js) js.src = `script.js?v=${ts}`;
     })();
   </script>
 </head>
@@ -30,7 +28,7 @@
     <header id="topbar">
     <div class="topbar-content">
       <div class="topbar-left">
-                <img class="top-logo" src="/training-checklist/mykaarma_logo.png" alt="myKaarma Logo">
+            <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma Logo">
       </div>
       <div class="topbar-right">
         <span id="dealershipNameDisplay">Dealership Name</span>
@@ -41,9 +39,9 @@
   <div id="app">
         <aside id="sidebar">
       <nav id="sidebar-nav">
-        <button class="nav-btn active" data-target="onsite-trainers-cem">
-            Trainers, Deployment Manager, &amp; CEM
-        </button>
+        <button class="nav-btn active" data-target="onsite-trainers-cem">
+            Trainers, Deployment Manager, &amp; CEM
+        </button>
         <button class="nav-btn" data-target="dealership-info">
           Dealership Info
         </button>
