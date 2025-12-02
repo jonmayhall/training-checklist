@@ -1,32 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>myKaarma – Interactive Training Checklist</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>myKaarma – Interactive Training Checklist</title>
 
-    <base href="/public/">
+    <link rel="stylesheet" href="style.css">
 
-    <link id="dynamicCSS" rel="stylesheet" href="style.css">
+    <script src="http://googleusercontent.com/maps.google.com/7"></script>
 
-    <script src="http://googleusercontent.com/maps.google.com/7"></script>
-
-    <script defer id="dynamicJS" src="script.js"></script>
-
-    <script>
-    (function () {
-      const ts = Date.now();
-
-      // Bust CSS cache
-      const css = document.getElementById("dynamicCSS");
-      if (css) css.href = `style.css?v=${ts}`;
-
-      // Bust JS cache
-      const js = document.getElementById("dynamicJS");
-      if (js) js.src = `script.js?v=${ts}`;
-    })();
-  </script>
-</head>
+    <script defer src="script.js"></script>
+    
+    </head>
         
 <body>
     <header id="topbar">
