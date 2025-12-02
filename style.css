@@ -18,6 +18,11 @@
   --shadow: 0 2px 8px rgba(0,0,0,0.10);
 
   --input-width: 260px;    /* default text-box width */
+
+  /* DMS-specific accents */
+  --mk-orange: #f36f21;    /* myKaarma orange (matches --orange) */
+  --mk-green: #22c55e;     /* myKaarma green */
+  --mk-border: #e5e7eb;
 }
 
 /* --------------- BASE --------------- */
@@ -313,7 +318,7 @@ main {
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (global width) */
+/* Inputs on the RIGHT (global, non-table, non-mini-card) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -332,11 +337,35 @@ main {
   box-sizing: border-box;
 }
 
-/* Make support ticket “Support Ticket Number” field rounded & same size */
-.ticket-group .checklist-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+/* address input + map button wrapper (page 2) */
+.address-input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: var(--input-width);
+  margin-left: auto;
+}
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;
+}
+.small-map-btn {
+  flex: 0 0 auto;
+  padding: 0 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s, transform .16s;
+}
+.small-map-btn:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .section-block textarea {
@@ -408,7 +437,7 @@ main {
   white-space: nowrap;
 }
 
-/* aligned text boxes */
+/* aligned text boxes (mini-card only) */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
 .mini-card .checklist-row input[type="email"],
@@ -555,12 +584,24 @@ main {
   margin-top: 8px;
 }
 
-/* --------------- DMS PAGE – CARDS with DOTS --------------- */
+/* A simple subtle count style if you add counts in headers later */
+.ticket-count-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block {
   margin-bottom: 28px;
 }
 
+/* Legend row of dot + label text */
 .dms-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -569,6 +610,7 @@ main {
   margin-top: 8px;
 }
 
+/* Colored dots used in legend and inline */
 .dms-dot {
   display: inline-block;
   width: 10px;
@@ -577,7 +619,8 @@ main {
   margin-right: 6px;
 }
 
-.dms-dot-auto      { background: #22c55e; }
+/* dot / tag color mapping */
+.dms-dot-auto      { background: var(--mk-green); }
 .dms-dot-ondemand  { background: #f97316; }
 .dms-dot-withro    { background: #0ea5e9; }
 .dms-dot-planned   { background: #eab308; }
@@ -598,35 +641,41 @@ main {
   padding: 18px;
 }
 
+/* Base card */
 .dms-card {
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--mk-border);
   background: #ffffff;
   box-shadow: 0 4px 10px rgba(15,23,42,0.06);
-  padding: 14px 16px 12px;
+  padding: 12px 14px 10px;
 }
 
-/* card border matches push/pull type */
+/* Push vs Pull card borders */
 .dms-card-push {
-  border-color: var(--orange);
+  border-color: var(--mk-orange);
 }
 .dms-card-pull {
-  border-color: #16a34a;
+  border-color: var(--mk-green);
 }
 
+/* Header: title + chip */
 .dms-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
+/* DMS name – orange with underline similar to page titles */
 .dms-name {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--mk-orange);
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--mk-orange);
 }
 
+/* Small pill for Push-Based / Pull-Based */
 .dms-chip {
   font-size: 11px;
   font-weight: 600;
@@ -634,21 +683,25 @@ main {
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
-/* Push/Pull badges – myKaarma orange & green */
+/* Push-Based = orange */
 .dms-chip-push {
-  background: var(--orange);
-  color: #fff;
-  border-color: #ea580c;
-}
-.dms-chip-pull {
-  background: #16a34a;
-  color: #fff;
-  border-color: #15803d;
+  background: var(--mk-orange);
+  color: #111827;
+  border-color: var(--mk-orange);
 }
 
+/* Pull-Based = green */
+.dms-chip-pull {
+  background: var(--mk-green);
+  color: #022c17;
+  border-color: var(--mk-green);
+}
+
+/* Lines inside cards */
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
@@ -671,12 +724,13 @@ main {
   justify-content: space-between;
   margin-bottom: 2px;
 }
+
 .dms-field {
   font-weight: 600;
   font-size: 13px;
 }
 
-/* DOT ONLY tags */
+/* DOT ONLY tags shown on right side of row */
 .dms-tag {
   display: inline-block;
   width: 12px;
@@ -686,7 +740,7 @@ main {
   font-size: 0;
   color: transparent;
 }
-.dms-tag-auto      { background: #22c55e; }
+.dms-tag-auto      { background: var(--mk-green); }
 .dms-tag-ondemand  { background: #f97316; }
 .dms-tag-withro    { background: #0ea5e9; }
 .dms-tag-planned   { background: #eab308; }
@@ -694,9 +748,8 @@ main {
 .dms-tag-limited   { background: #6366f1; }
 .dms-tag-display   { background: #6b7280; }
 
-/* Short, smaller descriptions under each bullet */
 .dms-list p {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 12px;
   line-height: 1.45;
   color: #4b5563;
@@ -750,7 +803,7 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px;
+  min-width: 900px; /* keep slightly tighter so headers feel aligned with table */
 }
 .training-table th,
 .training-table td {
@@ -939,6 +992,25 @@ main {
 #opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
 #opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
   transform: scale(1.1);
+}
+
+/* --------------- MAP EMBED (Dealership Info page) --------------- */
+.map-wrapper {
+  margin: 16px 0 8px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8f8f8;
+}
+.map-frame {
+  width: 100%;
+  height: 220px;
+  border: 0;
+}
+.map-helper-text {
+  margin: 6px 10px 10px;
+  font-size: 12px;
+  color: #555;
 }
 
 /* --------------- FLOATING PDF BUTTON (summary page) --------------- */
