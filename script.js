@@ -5,22 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initDealershipNameBinding();
   initAdditionalTrainers();
   initAdditionalPoc();
-  initMapUpdate(); // Corrected function for robust link handling
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
   initDmsCards();
 });
-
-/* --------------- UTILITY: GET CONTAINERS (For Support Tickets) --------------- */
-function getTicketContainers() {
-  return {
-    openContainer: document.getElementById('openTicketsContainer'),
-    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
-    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
-    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer')
-  };
-}
 
 /* --------------- NAVIGATION --------------- */
 function initNavigation() {
@@ -78,19 +67,6 @@ function initClearAllButton() {
     const sections = document.querySelectorAll('.page-section');
     sections.forEach(clearSection);
     updateDealershipNameDisplay();
-    // Clear dynamically added rows/cards
-    document.getElementById('additionalTrainersContainer').innerHTML = '';
-    const grid = document.getElementById('primaryContactsGrid');
-    // Remove all but the first four fixed cards and the template card
-    const cards = grid.querySelectorAll('.mini-card');
-    for(let i = 5; i < cards.length; i++) {
-      cards[i].remove();
-    }
-    // Reset the support ticket template and clear other containers
-    const { tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = getTicketContainers();
-    tierTwoContainer.innerHTML = '';
-    closedResolvedContainer.innerHTML = '';
-    closedFeatureContainer.innerHTML = '';
   });
 }
 
@@ -112,38 +88,6 @@ function updateDealershipNameDisplay() {
   const val = dealershipNameInput ? dealershipNameInput.value.trim() : '';
   dealershipNameDisplay.textContent = val || 'Dealership Name';
 }
-
-/* --------------- MAP EMBED ALTERNATIVE (PAGE 2) --------------- */
-function initMapUpdate() {
-    const mapBtn = document.getElementById('updateMapBtn');
-    if (!mapBtn) return;
-
-    mapBtn.addEventListener('click', () => {
-        const addressInput = document.getElementById('dealerAddress');
-        const mapFrame = document.getElementById('dealershipMap');
-        
-        if (!addressInput || !addressInput.value.trim()) {
-            if (mapFrame) {
-                 mapFrame.src = "";
-            }
-            alert('Please enter a Dealership Address first.');
-            return;
-        }
-        
-        const address = encodeURIComponent(addressInput.value.trim());
-        
-        // This is the guaranteed reliable way to look up the map on a static host.
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${address}`;
-        
-        // Clear the iframe and open the link in a new tab.
-        if (mapFrame) {
-             mapFrame.src = "";
-        }
-        
-        window.open(mapUrl, '_blank');
-    });
-}
-
 
 /* --------------- ADDITIONAL TRAINERS (PAGE 1) --------------- */
 function initAdditionalTrainers() {
@@ -176,6 +120,14 @@ function initAdditionalTrainers() {
 }
 
 /* --------------- ADDITIONAL POC CARDS (PAGE 2) --------------- */
+/*
+  Behavior:
+  - The .additional-poc-card with the + button is permanent and ALWAYS stays first
+    inside #primaryContactsGrid.
+  - Clicking + keeps whatever text is in that card and appends a new normal
+    Additional POC mini-card AFTER all existing POC cards.
+  - New cards are normal mini-cards with a rounded name textbox (no + button).
+*/
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
@@ -219,8 +171,22 @@ function initAdditionalPoc() {
 }
 
 /* --------------- SUPPORT TICKETS (PAGE 7) --------------- */
+/*
+  Requirements:
+  - The template card in "Open Support Tickets" (ticket-group-template) always stays first
+    and is the ONLY card with the + button.
+  - When the template's status is changed away from "Open", its data is copied into
+    a new ticket card which moves to the correct status container,
+    and the template is reset to blank Open.
+  - Clicking the + button creates a NEW empty Open ticket card (no + button).
+  - Non-template cards can change status and will simply move between containers.
+*/
+
 function initSupportTickets() {
-  const { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = getTicketContainers();
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
   if (!openContainer) return;
 
@@ -240,18 +206,17 @@ function initSupportTickets() {
         copyValues: false
       });
       openContainer.appendChild(newCard);
-      updateTicketCounts();
     });
   }
 
   // Wire up template itself for status changes (special behavior)
   wireTicketStatus(template, {
-    ...getTicketContainers(),
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: true
   });
-
-  // Run initial count update
-  updateTicketCounts();
 }
 
 /**
@@ -294,8 +259,16 @@ function createTicketCard(sourceCard, options = {}) {
   });
 
   // Wire up status logic for this new card
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+
   wireTicketStatus(clone, {
-    ...getTicketContainers(),
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: false
   });
 
@@ -324,6 +297,10 @@ function resetTicketTemplate(template) {
 
 /**
  * Wires status change for a ticket card.
+ * If isTemplate is true, changing status away from "Open" creates a new card with
+ * the template's data and moves that card into the correct container, then resets
+ * the template.
+ * If isTemplate is false, the card itself moves between containers.
  */
 function wireTicketStatus(card, containers) {
   const {
@@ -353,11 +330,12 @@ function wireTicketStatus(card, containers) {
     }
 
     if (isTemplate) {
-      // Template behavior: copy data to new card and move it, then reset template.
+      // Template should never actually leave the Open container.
       if (value === 'Open' || !targetContainer) {
         return;
       }
 
+      // Create a new card WITH the template's data and status.
       const newCard = createTicketCard(card, { copyValues: true });
       const newStatus = newCard.querySelector('.ticket-status-select');
       if (newStatus) {
@@ -365,34 +343,19 @@ function wireTicketStatus(card, containers) {
       }
 
       targetContainer.appendChild(newCard);
+
+      // Reset the template back to a blank Open card.
       resetTicketTemplate(card);
-      updateTicketCounts();
       return;
     }
 
-    // Normal card behavior: just move the card.
-    if (targetContainer && targetContainer !== card.parentElement) {
-      targetContainer.appendChild(card);
-      updateTicketCounts();
+    // Normal (non-template) cards just move between containers.
+    if (!targetContainer || targetContainer === card.parentElement) {
+      return;
     }
+
+    targetContainer.appendChild(card);
   });
-}
-
-/**
- * Updates the pill counts in the support ticket headers.
- */
-function updateTicketCounts() {
-  const { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = getTicketContainers();
-
-  const openCount = openContainer.querySelectorAll('.ticket-group:not(.ticket-group-template)').length;
-  const tierTwoCount = tierTwoContainer.querySelectorAll('.ticket-group').length;
-  const resolvedCount = closedResolvedContainer.querySelectorAll('.ticket-group').length;
-  const featureCount = closedFeatureContainer.querySelectorAll('.ticket-group').length;
-
-  document.getElementById('openTicketCount').textContent = openCount;
-  document.getElementById('tierTwoTicketCount').textContent = tierTwoCount;
-  document.getElementById('closedResolvedTicketCount').textContent = resolvedCount;
-  document.getElementById('closedFeatureTicketCount').textContent = featureCount;
 }
 
 /* --------------- TABLE "+" BUTTONS (append empty row) --------------- */
@@ -429,14 +392,6 @@ function initTableAddRowButtons() {
         }
       });
 
-      // Reset the row number if it's the opcode table
-      if (table.closest('#opcodes-pricing')) {
-        const firstCell = newRow.querySelector('td:first-child');
-        if (firstCell) {
-          firstCell.textContent = tbody.children.length + 1;
-        }
-      }
-
       tbody.appendChild(newRow);
     });
   });
@@ -449,40 +404,16 @@ function initPdfExport() {
 
   btn.addEventListener('click', () => {
     if (!window.jspdf) {
-      console.warn('jsPDF not available. Ensure the script tag is included.');
+      console.warn('jsPDF not available.');
       return;
     }
-    
-    // Temporarily disable elements that shouldn't be in the PDF 
-    const sidebar = document.getElementById('sidebar');
-    const clearBtn = document.querySelector('#training-summary .clear-page-btn');
-    let originalSidebarDisplay = '';
-    let originalClearBtnDisplay = '';
-
-    if (sidebar) {
-        originalSidebarDisplay = sidebar.style.display;
-        sidebar.style.display = 'none';
-    }
-    if (clearBtn) {
-        originalClearBtnDisplay = clearBtn.style.display;
-        clearBtn.style.display = 'none';
-    }
-
-
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Capture the entire body content
+    // This is a simple whole-page capture; styling may not be perfect but it works.
     doc.html(document.body, {
       callback: (docInstance) => {
         docInstance.save('myKaarma_Training_Checklist.pdf');
-        // Restore elements after saving
-        if (sidebar) {
-            sidebar.style.display = originalSidebarDisplay;
-        }
-        if (clearBtn) {
-            clearBtn.style.display = originalClearBtnDisplay;
-        }
       },
       margin: [20, 20, 20, 20],
       autoPaging: 'text',
@@ -494,16 +425,10 @@ function initPdfExport() {
 }
 
 /* --------------- DMS CARDS (optional extension hook) --------------- */
+/*
+  Currently a no-op placeholder. If you later add dynamic behavior
+  for DMS cards (add/remove/collapse), wire it up here.
+*/
 function initDmsCards() {
-  // Set up listener to update the DMS name on the DMS Integration page
-  const dmsInput = document.getElementById('dmsName');
-  const dmsDisplay = document.getElementById('dmsNameDisplay');
-
-  if (dmsInput && dmsDisplay) {
-    const updateDmsName = () => {
-      dmsDisplay.textContent = dmsInput.value.trim() || 'DMS';
-    };
-    dmsInput.addEventListener('input', updateDmsName);
-    updateDmsName(); // Initial update
-  }
+  // No dynamic DMS behavior required yet.
 }
