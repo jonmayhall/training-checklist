@@ -810,21 +810,20 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px;
+  table-layout: fixed;      /* 🔑 keep columns within card width */
 }
 
 /* Base cells */
 .training-table th,
 .training-table td {
-  white-space: nowrap;
   text-align: center;
   font-size: 13px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 6px 6px;
+  padding: 4px 4px;
 }
 
-/* Headers: allow wrapping so they don’t stretch columns */
+/* Headers: wrap so they don’t blow out columns */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -832,8 +831,7 @@ main {
   position: sticky;
   top: 0;
   z-index: 3;
-  white-space: normal;      /* <-- key change: headers can wrap */
-  padding: 4px 4px;         /* tighter padding */
+  white-space: normal;      /* allow multi-line */
   line-height: 1.25;
 }
 
@@ -849,8 +847,7 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 170px;          /* slightly narrower */
-  min-width: 170px;
+  width: 170px;
 }
 .training-table thead th:first-child { 
   text-align: center;
@@ -878,20 +875,19 @@ main {
   text-align: left;
 }
 
-/* Column widths (generic second col) – slightly trimmed */
+/* Let the rest of the columns shrink as needed */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
-  width: 155px;
-  min-width: 155px;
+  width: auto;
 }
 
-/* Inputs/Selects inside table cells */
+/* Inputs/Selects inside table cells – NO min-width */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
-  min-width: 110px;      /* smaller so columns don’t force big width */
+  min-width: 0;             /* 🔑 stop forcing wide columns */
   box-sizing: border-box;
-  padding: 5px 5px;
+  padding: 4px 4px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
