@@ -761,6 +761,7 @@ main {
   color: #4b5563;
 }
 
+
 /* --------------- Training TABLES --------------- */
 
 .section { 
@@ -803,7 +804,6 @@ main {
   overflow-x: auto;
   background: #fff;
   padding-bottom: 4px;
-  position: relative; /* helps sticky headers/columns behave consistently */
 }
 
 /* Table */
@@ -812,6 +812,8 @@ main {
   width: 100%;
   min-width: 900px;
 }
+
+/* Base cells */
 .training-table th,
 .training-table td {
   white-space: nowrap;
@@ -822,7 +824,7 @@ main {
   padding: 6px 6px;
 }
 
-/* Sticky header — LIGHT ORANGE */
+/* Headers: allow wrapping so they don’t stretch columns */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -830,14 +832,9 @@ main {
   position: sticky;
   top: 0;
   z-index: 3;
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Make first header align visually with Name column contents */
-.training-table thead th:first-child {
-  text-align: left;
-  padding-left: 32px;
+  white-space: normal;      /* <-- key change: headers can wrap */
+  padding: 4px 4px;         /* tighter padding */
+  line-height: 1.25;
 }
 
 /* Smaller white text for notes inside header cells */
@@ -852,8 +849,8 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;
-  min-width: 200px;
+  width: 170px;          /* slightly narrower */
+  min-width: 170px;
 }
 .training-table thead th:first-child { 
   text-align: center;
@@ -881,18 +878,18 @@ main {
   text-align: left;
 }
 
-/* Column widths (generic second col) */
+/* Column widths (generic second col) – slightly trimmed */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
-  width: 185px;
-  min-width: 185px;
+  width: 155px;
+  min-width: 155px;
 }
 
 /* Inputs/Selects inside table cells */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
-  min-width: 130px;
+  min-width: 110px;      /* smaller so columns don’t force big width */
   box-sizing: border-box;
   padding: 5px 5px;
   border-radius: var(--radius-sm);
