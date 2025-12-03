@@ -761,7 +761,6 @@ main {
   color: #4b5563;
 }
 
-
 /* --------------- Training TABLES --------------- */
 
 .section { 
@@ -810,20 +809,21 @@ main {
 .training-table {
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed;      /* 🔑 keep columns within card width */
+  min-width: 900px;          /* 🔙 roomy table again */
+  table-layout: auto;        /* let columns size to content */
 }
 
-/* Base cells */
 .training-table th,
 .training-table td {
+  white-space: nowrap;
   text-align: center;
   font-size: 13px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 4px 4px;
+  padding: 6px 8px;
 }
 
-/* Headers: wrap so they don’t blow out columns */
+/* Sticky header – LIGHT ORANGE */
 .training-table thead th {
   background: var(--light-orange);
   color: #fff;
@@ -831,8 +831,6 @@ main {
   position: sticky;
   top: 0;
   z-index: 3;
-  white-space: normal;      /* allow multi-line */
-  line-height: 1.25;
 }
 
 /* Smaller white text for notes inside header cells */
@@ -847,7 +845,8 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 170px;
+  width: 210px;              /* 🔙 wide enough for name + checkbox */
+  min-width: 210px;
 }
 .training-table thead th:first-child { 
   text-align: center;
@@ -875,19 +874,20 @@ main {
   text-align: left;
 }
 
-/* Let the rest of the columns shrink as needed */
+/* Second column (User Acceptance) – a bit wider */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
-  width: auto;
+  width: 185px;
+  min-width: 185px;
 }
 
-/* Inputs/Selects inside table cells – NO min-width */
+/* Inputs/Selects inside table cells – wide enough for longest option */
 .training-table input[type="text"],
 .training-table select {
   width: 100%;
-  min-width: 0;             /* 🔑 stop forcing wide columns */
+  min-width: 140px;          /* 🔙 so dropdown text fits */
   box-sizing: border-box;
-  padding: 4px 4px;
+  padding: 5px 6px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
@@ -939,6 +939,67 @@ main {
 .table-footer .add-row:hover {
   background: #ff8b42;
   transform: scale(1.05);
+}
+
+/* --------------- OPCODES PAGE --------------- */
+
+/* Turn off sticky/flex first column only for Opcodes section */
+#opcodes-pricing .training-table th:first-child,
+#opcodes-pricing .training-table td:first-child {
+  position: static;
+  left: auto;
+  z-index: 1;
+  width: 60px;
+  min-width: 60px;
+}
+#opcodes-pricing .training-table td:first-child {
+  display: table-cell;
+  padding: 6px 6px;
+  background: inherit;
+}
+
+/* Opcode-related column sizing */
+#opcodes-pricing .training-table th:nth-child(2),
+#opcodes-pricing .training-table td:nth-child(2),
+#opcodes-pricing .training-table th:nth-child(3),
+#opcodes-pricing .training-table td:nth-child(3),
+#opcodes-pricing .training-table th:nth-child(4),
+#opcodes-pricing .training-table td:nth-child(4),
+#opcodes-pricing .training-table th:nth-child(5),
+#opcodes-pricing .training-table td:nth-child(5),
+#opcodes-pricing .training-table th:nth-child(7),
+#opcodes-pricing .training-table td:nth-child(7),
+#opcodes-pricing .training-table th:nth-child(8),
+#opcodes-pricing .training-table td:nth-child(8) {
+  width: 110px;
+  min-width: 100px;
+}
+
+/* Parts Price column – smaller so inputs fit */
+#opcodes-pricing .training-table th:nth-child(6),
+#opcodes-pricing .training-table td:nth-child(6) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 60px;
+}
+
+/* Checkboxes for last 4–5 columns */
+#opcodes-pricing .training-table th:nth-child(9),
+#opcodes-pricing .training-table td:nth-child(9),
+#opcodes-pricing .training-table th:nth-child(10),
+#opcodes-pricing .training-table td:nth-child(10),
+#opcodes-pricing .training-table th:nth-child(11),
+#opcodes-pricing .training-table td:nth-child(11),
+#opcodes-pricing .training-table th:nth-child(12),
+#opcodes-pricing .training-table td:nth-child(12) {
+  width: 90px;
+  min-width: 80px;
+}
+#opcodes-pricing .training-table td:nth-child(9) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(10) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
+#opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
+  transform: scale(1.1);
 }
 
 /* --------------- OPCODES PAGE --------------- */
