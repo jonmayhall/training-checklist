@@ -1001,6 +1001,11 @@ main {
 #opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
   transform: scale(1.1);
 }
+#opcodes-pricing .table-container {
+  margin-left: -22px;
+  margin-right: -22px;
+}
+
 
 /* --------------- OPCODES PAGE --------------- */
 
