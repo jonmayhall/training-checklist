@@ -1,19 +1,21 @@
 /* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS (FINAL)
-   No placeholders. No stubs. Fully implemented.
-   ========================================================== */
+   myKaarma Interactive Training Checklist – FULL JS
+   WITH AUTOCOMPLETE + MAP + DMS AUTOSCROLL/HIGHLIGHT
+========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressMapSystem();
+  initAddressAutocomplete();
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
+  initDmsCards();
+  initDmsLinking();   // ⭐ NEW
 });
 
 /* -------------------------------------
@@ -25,10 +27,15 @@ function initNavigation() {
 
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const target = btn.dataset.target;
+      const targetId = btn.dataset.target;
 
-      sections.forEach(sec => sec.classList.toggle('active', sec.id === target));
-      navButtons.forEach(b => b.classList.toggle('active', b === btn));
+      sections.forEach((sec) =>
+        sec.classList.toggle('active', sec.id === targetId)
+      );
+
+      navButtons.forEach((b) =>
+        b.classList.toggle('active', b === btn)
+      );
     });
   });
 }
@@ -37,7 +44,9 @@ function initNavigation() {
    CLEAR PAGE / CLEAR ALL
 ------------------------------------- */
 function clearSection(section) {
-  section.querySelectorAll('input, select, textarea').forEach(el => {
+  const inputs = section.querySelectorAll('input, select, textarea');
+
+  inputs.forEach((el) => {
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
     else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
     else el.value = '';
@@ -45,7 +54,7 @@ function clearSection(section) {
 }
 
 function initClearPageButtons() {
-  document.querySelectorAll('.clear-page-btn').forEach(btn => {
+  document.querySelectorAll('.clear-page-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
@@ -57,6 +66,7 @@ function initClearPageButtons() {
 function initClearAllButton() {
   const btn = document.getElementById('clearAllBtn');
   if (!btn) return;
+
   btn.addEventListener('click', () => {
     document.querySelectorAll('.page-section').forEach(clearSection);
     updateDealershipNameDisplay();
@@ -64,53 +74,70 @@ function initClearAllButton() {
 }
 
 /* -------------------------------------
-   DEALERSHIP NAME: TOPBAR LIVE SYNC
+   DEALERSHIP NAME TOPBAR SYNC
 ------------------------------------- */
 function initDealershipNameBinding() {
   const input = document.getElementById('dealershipNameInput');
   if (!input) return;
+
   input.addEventListener('input', updateDealershipNameDisplay);
   updateDealershipNameDisplay();
 }
 
 function updateDealershipNameDisplay() {
-  const input = document.getElementById('dealershipNameInput');
+  const txt = document.getElementById('dealershipNameInput');
   const display = document.getElementById('dealershipNameDisplay');
-  display.textContent = input.value.trim() || "Dealership Name";
+  display.textContent = txt?.value?.trim() || 'Dealership Name';
 }
 
 /* -------------------------------------
-   ADDRESS ENTRY → MAP (NO API KEY)
+   ⭐ GOOGLE MAPS AUTOCOMPLETE / MAP BUTTON
 ------------------------------------- */
-function initAddressMapSystem() {
-  const input = document.getElementById('dealershipAddressInput');
-  const frame = document.getElementById('dealershipMapFrame');
-  const btn = document.getElementById('openAddressInMapsBtn');
-  if (!input || !frame) return;
 
-  function updateMap() {
-    const text = input.value.trim();
-    if (!text) return;
-    const encoded = encodeURIComponent(text);
-    frame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+let googleAutocomplete;
+
+function initAddressAutocomplete() {
+  const addressInput = document.getElementById('dealershipAddressInput');
+  const mapFrame = document.getElementById('dealershipMapFrame');
+  const openBtn = document.getElementById('openAddressInMapsBtn');
+
+  if (!addressInput) return;
+
+  // Load Google Maps script
+  function loadScript() {
+    const script = document.createElement('script');
+    script.src =
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initAutocompleteInternal";
+    script.async = true;
+    document.head.appendChild(script);
   }
 
-  input.addEventListener('blur', updateMap);
+  window.initAutocompleteInternal = () => {
+    googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['geocode'],
+    });
 
-  input.addEventListener('keydown', e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      updateMap();
-    }
-  });
+    googleAutocomplete.addListener('place_changed', () => {
+      const place = googleAutocomplete.getPlace();
+      if (!place?.formatted_address) return;
 
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const text = input.value.trim();
+      const encoded = encodeURIComponent(place.formatted_address);
+      mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+    });
+  };
+
+  loadScript();
+
+  // Open in Maps
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      const text = addressInput.value.trim();
       if (!text) return;
       const encoded = encodeURIComponent(text);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
-      frame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+        '_blank'
+      );
     });
   }
 }
@@ -123,41 +150,61 @@ function initAdditionalTrainers() {
   const container = document.getElementById('additionalTrainersContainer');
   if (!row || !container) return;
 
-  const add = row.querySelector('.add-row');
-  if (!add) return;
+  row.querySelector('.add-row')?.addEventListener('click', () => {
+    const newRow = document.createElement('div');
+    newRow.className = 'checklist-row indent-sub';
 
-  add.addEventListener('click', () => {
-    const div = document.createElement('div');
-    div.className = "checklist-row indent-sub";
-    div.innerHTML = `
-      <label style="flex:0 0 36%;padding-right:12px;">Additional Trainer</label>
-      <input type="text">
-    `;
-    container.appendChild(div);
+    const label = document.createElement('label');
+    label.textContent = 'Additional Trainer';
+    label.style.flex = '0 0 36%';
+    label.style.paddingRight = '12px';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+
+    newRow.append(label, input);
+    container.appendChild(newRow);
   });
 }
 
 /* -------------------------------------
-   ADDITIONAL POC (PAGE 2)
+   ADDITIONAL POC
 ------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
 
   const template = grid.querySelector('.additional-poc-card');
-  const button = template?.querySelector('.additional-poc-add');
-  if (!template || !button) return;
+  const addBtn = template?.querySelector('.additional-poc-add');
+  if (!template || !addBtn) return;
 
-  button.addEventListener('click', () => {
+  function createNormalCard() {
     const card = document.createElement('div');
-    card.className = "mini-card contact-card";
+    card.className = 'mini-card contact-card';
+
     card.innerHTML = `
-      <div class="checklist-row"><label>Additional POC</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Role</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Cell</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Email</label><input type="email"></div>
+      <div class="checklist-row">
+        <label>Additional POC</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
     `;
-    grid.appendChild(card);
+    return card;
+  }
+
+  addBtn.addEventListener('click', () => {
+    grid.appendChild(createNormalCard());
   });
 }
 
@@ -165,107 +212,117 @@ function initAdditionalPoc() {
    SUPPORT TICKETS
 ------------------------------------- */
 function initSupportTickets() {
-  const open = document.getElementById('openTicketsContainer');
-  const tier2 = document.getElementById('tierTwoTicketsContainer');
-  const closedResolved = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeature = document.getElementById('closedFeatureTicketsContainer');
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  const template = open?.querySelector('.ticket-group-template');
+  const template = openContainer?.querySelector('.ticket-group-template');
   if (!template) return;
 
-  template.querySelector('.ticket-status-select').value = "Open";
+  const statusSelect = template.querySelector('.ticket-status-select');
+  if (statusSelect) statusSelect.value = 'Open';
 
   const addBtn = template.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const card = createTicket(template, false);
-      open.appendChild(card);
+      const newCard = createTicketCard(template, { copy: false });
+      openContainer.appendChild(newCard);
     });
   }
 
-  attachTicketLogic(template, {
-    isTemplate: true,
-    open, tier2, closedResolved, closedFeature
+  wireTicketStatus(template, {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isTemplate: true
   });
 }
 
-function createTicket(source, copyValues) {
+function createTicketCard(source, opts = {}) {
   const card = source.cloneNode(true);
+  const copy = opts.copy ?? false;
+
   card.classList.remove('ticket-group-template');
   card.querySelector('.add-ticket-btn')?.remove();
 
   const fields = card.querySelectorAll('input, select, textarea');
-  fields.forEach(el => {
-    if (!copyValues) {
-      if (el.tagName === "SELECT") el.selectedIndex = 0;
-      else if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
+  fields.forEach((el) => {
+    if (!copy) {
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      else if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
     }
   });
 
-  attachTicketLogic(card, {
-    isTemplate: false,
-    open: document.getElementById('openTicketsContainer'),
-    tier2: document.getElementById('tierTwoTicketsContainer'),
-    closedResolved: document.getElementById('closedResolvedTicketsContainer'),
-    closedFeature: document.getElementById('closedFeatureTicketsContainer')
+  wireTicketStatus(card, {
+    openContainer: document.getElementById('openTicketsContainer'),
+    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
+    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
+    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer'),
+    isTemplate: false
   });
 
   return card;
 }
 
 function resetTicketTemplate(card) {
-  card.querySelectorAll('input, select, textarea').forEach(el => {
-    if (el.tagName === "SELECT") el.value = "Open";
-    else el.value = "";
+  card.querySelectorAll('input, select, textarea').forEach((el) => {
+    if (el.tagName === 'SELECT')
+      el.value = el.classList.contains('ticket-status-select') ? 'Open' : '';
+    else el.value = '';
   });
 }
 
-function attachTicketLogic(card, ctx) {
+function wireTicketStatus(card, ctx) {
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
   select.addEventListener('change', () => {
-    const val = select.value;
+    const status = select.value;
 
-    let container =
-      val === "Tier Two" ? ctx.tier2 :
-      val === "Closed - Resolved" ? ctx.closedResolved :
-      val === "Closed – Feature Not Supported" ? ctx.closedFeature :
-      ctx.open;
+    let target =
+      status === 'Tier Two' ? ctx.tierTwoContainer :
+      status === 'Closed - Resolved' ? ctx.closedResolvedContainer :
+      status === 'Closed – Feature Not Supported' ? ctx.closedFeatureContainer :
+      ctx.openContainer;
 
     if (ctx.isTemplate) {
-      if (val === "Open") return;
-      const newCard = createTicket(card, true);
-      newCard.querySelector('.ticket-status-select').value = val;
-      container.appendChild(newCard);
+      if (status === 'Open') return;
+
+      const newCard = createTicketCard(card, { copy: true });
+      newCard.querySelector('.ticket-status-select').value = status;
+
+      target.appendChild(newCard);
       resetTicketTemplate(card);
       return;
     }
 
-    if (card.parentElement !== container) container.appendChild(card);
+    if (card.parentElement !== target) target.appendChild(card);
   });
 }
 
 /* -------------------------------------
-   TABLES: ADD NEW ROW
+   TABLE ADD-ROW BUTTONS
 ------------------------------------- */
 function initTableAddRowButtons() {
-  document.querySelectorAll('.table-footer .add-row').forEach(btn => {
+  document.querySelectorAll('.table-footer .add-row').forEach((btn) => {
     btn.addEventListener('click', () => {
       const table = btn.closest('.table-footer')
-        ?.previousElementSibling
-        ?.querySelector('table');
+                       ?.previousElementSibling
+                       ?.querySelector('table');
+
       if (!table) return;
 
       const tbody = table.querySelector('tbody') || table.createTBody();
-      const lastRow = tbody.lastElementChild;
-      if (!lastRow) return;
+      const last = tbody.lastElementChild;
+      if (!last) return;
 
-      const clone = lastRow.cloneNode(true);
-      clone.querySelectorAll('input, select').forEach(el => {
-        if (el.tagName === "SELECT") el.selectedIndex = 0;
-        else el.value = "";
+      const clone = last.cloneNode(true);
+      clone.querySelectorAll('input, select').forEach((el) => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
       });
 
       tbody.appendChild(clone);
@@ -281,14 +338,69 @@ function initPdfExport() {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
-    if (!window.jspdf) return;
     const { jsPDF } = window.jspdf;
-
     const doc = new jsPDF('p', 'pt', 'a4');
+
     doc.html(document.body, {
-      callback: d => d.save("myKaarma_Training_Checklist.pdf"),
-      margin: [20,20,20,20],
+      callback: (instance) => instance.save('myKaarma_Training_Checklist.pdf'),
+      margin: [20, 20, 20, 20],
       html2canvas: { scale: 0.6 }
     });
   });
+}
+
+/* -------------------------------------
+   DMS CARDS (placeholder for future)
+------------------------------------- */
+function initDmsCards() {
+  // left empty by design
+}
+
+/* -------------------------------------
+   ⭐ NEW — LINK DMS DROPDOWN TO DMS PAGE
+------------------------------------- */
+let selectedDms = "";
+
+function initDmsLinking() {
+  const dmsSelect = document.getElementById("dmsSelect");
+  const navButtons = document.querySelectorAll(".nav-btn");
+
+  if (!dmsSelect) return;
+
+  // Track selection
+  dmsSelect.addEventListener("change", () => {
+    selectedDms = dmsSelect.value.trim();
+  });
+
+  // When DMS page is opened
+  navButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.target === "dms-integration") {
+        setTimeout(() => {
+          highlightSelectedDms();
+        }, 150);
+      }
+    });
+  });
+}
+
+function highlightSelectedDms() {
+  if (!selectedDms) return;
+
+  const cards = document.querySelectorAll(".dms-card");
+  let target = null;
+
+  cards.forEach((card) => {
+    const title = card.querySelector(".dms-name")?.textContent.trim().toLowerCase();
+    if (title && title.includes(selectedDms.toLowerCase())) {
+      target = card;
+    }
+  });
+
+  if (!target) return;
+
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  target.classList.add("dms-card-highlight");
+
+  setTimeout(() => target.classList.remove("dms-card-highlight"), 2000);
 }
