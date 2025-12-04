@@ -1,21 +1,21 @@
 /* ==========================================================
    myKaarma Interactive Training Checklist – FULL JS
-   WITH AUTOCOMPLETE + MAP + DMS AUTOSCROLL/HIGHLIGHT
-========================================================== */
+   With Google Maps Autocomplete + Map Button
+   ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressAutocomplete();
+  initAddressAutocomplete();        // ⭐ Google Maps autocomplete
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
   initDmsCards();
-  initDmsLinking();   // ⭐ NEW
+  initDmsLinking();                 // ⭐ Link DMS dropdown → DMS page
 });
 
 /* -------------------------------------
@@ -91,11 +91,8 @@ function updateDealershipNameDisplay() {
 }
 
 /* -------------------------------------
-   ⭐ GOOGLE MAPS AUTOCOMPLETE / MAP BUTTON
+   ⭐ GOOGLE MAPS AUTOCOMPLETE + EMBED MAP
 ------------------------------------- */
-
-let googleAutocomplete;
-
 function initAddressAutocomplete() {
   const addressInput = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
@@ -103,18 +100,16 @@ function initAddressAutocomplete() {
 
   if (!addressInput) return;
 
-  // Load Google Maps script
-  function loadScript() {
-    const script = document.createElement('script');
-    script.src =
-      "https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initAutocompleteInternal";
-    script.async = true;
-    document.head.appendChild(script);
-  }
+  // Load Google Maps Places API
+  const script = document.createElement('script');
+  script.src =
+    "https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initAutocompleteInternal";
+  script.async = true;
+  document.head.appendChild(script);
 
   window.initAutocompleteInternal = () => {
-    googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
-      types: ['geocode'],
+    const googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['geocode']
     });
 
     googleAutocomplete.addListener('place_changed', () => {
@@ -126,24 +121,19 @@ function initAddressAutocomplete() {
     });
   };
 
-  loadScript();
-
-  // Open in Maps
+  // Map button → open in new tab
   if (openBtn) {
     openBtn.addEventListener('click', () => {
       const text = addressInput.value.trim();
       if (!text) return;
       const encoded = encodeURIComponent(text);
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
-        '_blank'
-      );
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
     });
   }
 }
 
 /* -------------------------------------
-   ADDITIONAL TRAINERS
+   ADDITIONAL TRAINERS (PAGE 1)
 ------------------------------------- */
 function initAdditionalTrainers() {
   const row = document.querySelector('.additional-trainers-row');
@@ -168,7 +158,7 @@ function initAdditionalTrainers() {
 }
 
 /* -------------------------------------
-   ADDITIONAL POC
+   ADDITIONAL POC ON PAGE 2
 ------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
@@ -220,6 +210,7 @@ function initSupportTickets() {
   const template = openContainer?.querySelector('.ticket-group-template');
   if (!template) return;
 
+  // Template always stays Open
   const statusSelect = template.querySelector('.ticket-status-select');
   if (statusSelect) statusSelect.value = 'Open';
 
@@ -232,10 +223,8 @@ function initSupportTickets() {
   }
 
   wireTicketStatus(template, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
+    openContainer, tierTwoContainer,
+    closedResolvedContainer, closedFeatureContainer,
     isTemplate: true
   });
 }
@@ -269,8 +258,7 @@ function createTicketCard(source, opts = {}) {
 
 function resetTicketTemplate(card) {
   card.querySelectorAll('input, select, textarea').forEach((el) => {
-    if (el.tagName === 'SELECT')
-      el.value = el.classList.contains('ticket-status-select') ? 'Open' : '';
+    if (el.tagName === 'SELECT') el.value = (el.classList.contains('ticket-status-select') ? 'Open' : '');
     else el.value = '';
   });
 }
@@ -350,14 +338,14 @@ function initPdfExport() {
 }
 
 /* -------------------------------------
-   DMS CARDS (placeholder for future)
+   DMS CARDS (placeholder)
 ------------------------------------- */
 function initDmsCards() {
-  // left empty by design
+  // For future dynamic DMS functions
 }
 
 /* -------------------------------------
-   ⭐ NEW — LINK DMS DROPDOWN TO DMS PAGE
+   ⭐ DMS DROPDOWN → AUTO HIGHLIGHT CARD
 ------------------------------------- */
 let selectedDms = "";
 
@@ -367,12 +355,12 @@ function initDmsLinking() {
 
   if (!dmsSelect) return;
 
-  // Track selection
+  // Save selected DMS
   dmsSelect.addEventListener("change", () => {
     selectedDms = dmsSelect.value.trim();
   });
 
-  // When DMS page is opened
+  // When user navigates to DMS Integration page
   navButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.dataset.target === "dms-integration") {
@@ -400,7 +388,9 @@ function highlightSelectedDms() {
   if (!target) return;
 
   target.scrollIntoView({ behavior: "smooth", block: "center" });
-  target.classList.add("dms-card-highlight");
 
-  setTimeout(() => target.classList.remove("dms-card-highlight"), 2000);
+  target.classList.add("dms-card-highlight");
+  setTimeout(() => {
+    target.classList.remove("dms-card-highlight");
+  }, 2000);
 }
