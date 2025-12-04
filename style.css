@@ -1100,3 +1100,15 @@ main {
   box-shadow: 0 0 20px rgba(243,111,33,0.75) !important;
   transition: box-shadow 0.3s ease-in-out;
 }
+/* --- FIX: myKaarma orange table headers same width as tables --- */
+.section .section-header {
+  background: var(--orange);
+  margin: 0;  /* no negative margins, no extra width */
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* header sits directly on top of the table card */
+.section .section-header + .table-container {
+  margin-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
