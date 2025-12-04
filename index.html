@@ -188,7 +188,7 @@
 
 </section>
 
-  <!-- ========================================================= -->
+<!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
@@ -203,7 +203,7 @@
   <div class="section-block">
     <h2>Dealership Details</h2>
 
-    <!-- Dealer Group (NEW – first) -->
+    <!-- Dealer Group -->
     <div class="checklist-row">
       <label>Dealer Group</label>
       <input type="text" id="dealerGroupInput" placeholder="Dealer group name">
@@ -215,41 +215,43 @@
       <input type="text" id="dealershipNameInput" placeholder="Dealership Name">
     </div>
 
-    <!-- DID (after dealership name) -->
+    <!-- DID -->
     <div class="checklist-row">
       <label>DID</label>
       <input type="text" id="dealershipDidInput" placeholder="DMS / myKaarma DID">
     </div>
 
-    <!-- DMS dropdown (all DMSs from DMS page) -->
+    <!-- DMS DROPDOWN -->
     <div class="checklist-row">
       <label>DMS</label>
       <select id="dmsSelect">
-        <option value=""></option>
-        <option value="CDK">CDK</option>
-        <option value="Reynolds">Reynolds</option>
-        <option value="Dealertrack / Arkona">Dealertrack / Arkona</option>
-        <option value="Dealerbuilt / Lightyear">Dealerbuilt / Lightyear</option>
-        <option value="Automate">Automate</option>
-        <option value="PBS">PBS</option>
-        <option value="Tekion">Tekion</option>
-        <option value="Other">Other</option>
+        <option value="" selected disabled>Select DMS</option>
+        <option>CDK</option>
+        <option>Reynolds & Reynolds</option>
+        <option>Tekion</option>
+        <option>Dealertrack</option>
+        <option>Autosoft</option>
+        <option>Dominion</option>
+        <option>Auto/Mate</option>
+        <option>SDS</option>
+        <option>MyKaarma Native</option>
       </select>
     </div>
 
-    <!-- Address + Map + Autocomplete -->
+    <!-- Dealership Address + MAP button -->
     <div class="checklist-row">
       <label>Dealership Address</label>
 
       <div class="address-input-wrap">
         <button type="button" id="openAddressInMapsBtn" class="small-map-btn">
-          Map
+          MAP
         </button>
 
         <input
           type="text"
           id="dealershipAddressInput"
           placeholder="Start typing address…"
+          autocomplete="off"
         >
       </div>
     </div>
@@ -265,8 +267,8 @@
       ></iframe>
 
       <p class="map-helper-text">
-        Select an address above to update this map.<br>
-        Click “Map” to open full directions in Google Maps.
+        Select an address above to update this map.  
+        Click “MAP” to open full directions in Google Maps.
       </p>
     </div>
   </div>
@@ -276,7 +278,6 @@
     <h2>Primary Contacts</h2>
 
     <div id="primaryContactsGrid" class="primary-contacts-grid">
-
       <!-- SERVICE MANAGER -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -295,25 +296,7 @@
         </div>
       </div>
 
-      <!-- PARTS MANAGER -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Parts Manager</label>
-          <input type="text">
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- ADDITIONAL POC TEMPLATE -->
+      <!-- ADDITIONAL POC TEMPLATE (ALWAYS FIRST IN JS) -->
       <div class="mini-card contact-card additional-poc-card ticket-group-template">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
@@ -336,11 +319,20 @@
           <input type="email">
         </div>
       </div>
-
     </div>
   </div>
 
 </section>
+
+
+<!-- ========================================================= -->
+<!-- GOOGLE MAPS API (AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o — keep private)       -->
+<!-- ========================================================= -->
+<script 
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initDealerMap" 
+  async 
+  defer>
+</script>
 
       <!-- ========================================================= -->
       <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
@@ -4020,11 +4012,6 @@
     </main>
   </div>
   
-<!-- Google Maps JavaScript API (REQUIRED) -->
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initDealerMap"
-  async
-  defer
 ></script>
   
 </body>
