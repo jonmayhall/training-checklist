@@ -591,14 +591,21 @@ body {
 
 /* small card number in top-right corner */
 .ticket-group::after {
-  content: "#" counter(support-ticket-counter);
+  content: "Ticket # " counter(support-ticket-counter);
   position: absolute;
-  top: 8px;
-  right: 14px;
-  font-size: 11px;
+  top: 14px;               /* more vertical cushion */
+  right: 20px;             /* more horizontal cushion */
+  font-size: 13px;
   font-weight: 600;
-  color: var(--orange);
-  opacity: 0.85;
+  color: #ffffff;
+  
+  background: var(--orange);
+  padding: 6px 14px;       /* BIG cushion */
+  border-radius: 20px;     /* soft pill shape */
+  border: 1px solid rgba(0,0,0,0.08);
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  pointer-events: none;
 }
 
 /* Short Summary row – make textbox ~3/4 of the card */
