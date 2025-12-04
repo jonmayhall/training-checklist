@@ -188,7 +188,7 @@
 
 </section>
 
-   <!-- ========================================================= -->
+  <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
@@ -203,52 +203,49 @@
   <div class="section-block">
     <h2>Dealership Details</h2>
 
+    <!-- Dealer Group (NEW – first) -->
+    <div class="checklist-row">
+      <label>Dealer Group</label>
+      <input type="text" id="dealerGroupInput" placeholder="Dealer group name">
+    </div>
+
+    <!-- Dealership Name -->
     <div class="checklist-row">
       <label>Dealership Name</label>
       <input type="text" id="dealershipNameInput" placeholder="Dealership Name">
     </div>
 
+    <!-- DID (after dealership name) -->
     <div class="checklist-row">
-      <label>Dealer Group / Parent Company</label>
-      <input type="text" placeholder="e.g., ABC Auto Group">
+      <label>DID</label>
+      <input type="text" id="dealershipDidInput" placeholder="DMS / myKaarma DID">
     </div>
 
+    <!-- DMS dropdown (all DMSs from DMS page) -->
     <div class="checklist-row">
       <label>DMS</label>
-      <input type="text" placeholder="CDK, Reynolds, Dealertrack, etc.">
-    </div>
-
-    <div class="checklist-row">
-      <label>DMS Store / Dealer Code</label>
-      <input type="text" placeholder="Store # / BAC / Dealer code">
-    </div>
-
-    <div class="checklist-row">
-      <label>Time Zone</label>
-      <select>
-        <option></option>
-        <option>Eastern</option>
-        <option>Central</option>
-        <option>Mountain</option>
-        <option>Pacific</option>
-        <option>Alaska</option>
-        <option>Hawaii</option>
+      <select id="dmsSelect">
+        <option value=""></option>
+        <option value="CDK">CDK</option>
+        <option value="Reynolds">Reynolds</option>
+        <option value="Dealertrack / Arkona">Dealertrack / Arkona</option>
+        <option value="Dealerbuilt / Lightyear">Dealerbuilt / Lightyear</option>
+        <option value="Automate">Automate</option>
+        <option value="PBS">PBS</option>
+        <option value="Tekion">Tekion</option>
+        <option value="Other">Other</option>
       </select>
     </div>
 
-    <div class="checklist-row">
-      <label>Main Phone Number</label>
-      <input type="tel" placeholder="555-555-5555">
-    </div>
-
+    <!-- Address + Map + Autocomplete -->
     <div class="checklist-row">
       <label>Dealership Address</label>
 
-      <!-- Map button on LEFT, text box on RIGHT -->
       <div class="address-input-wrap">
         <button type="button" id="openAddressInMapsBtn" class="small-map-btn">
           Map
         </button>
+
         <input
           type="text"
           id="dealershipAddressInput"
@@ -266,8 +263,10 @@
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
+
       <p class="map-helper-text">
-        Select an address above to update this map. Click “Map” to open directions in Google Maps.
+        Select an address above to update this map.<br>
+        Click “Map” to open full directions in Google Maps.
       </p>
     </div>
   </div>
@@ -284,10 +283,12 @@
           <label>Service Manager</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
@@ -300,116 +301,42 @@
           <label>Parts Manager</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- WARRANTY ADMIN -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Warranty Admin</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- SHOP FOREMAN -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Shop Foreman</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- DEPLOYMENT MANAGER -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Deployment Manager</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- CUSTOMER EXPERIENCE MANAGER -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>CEM</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- ADDITIONAL POC TEMPLATE (with +) -->
-      <div class="mini-card contact-card additional-poc-card">
+      <!-- ADDITIONAL POC TEMPLATE -->
+      <div class="mini-card contact-card additional-poc-card ticket-group-template">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
           <input type="text" class="additional-poc-name">
-          <button class="add-row additional-poc-add" type="button">+</button>
+          <button class="add-row additional-poc-add">+</button>
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Role</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
+
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- ======================== DEALERSHIP HOURS ======================== -->
-  <div class="section-block">
-    <h2>Dealership Hours</h2>
-
-    <div class="checklist-row">
-      <label>Service Hours</label>
-      <input type="text" placeholder="e.g., Mon–Fri 7–6, Sat 8–4">
-    </div>
-
-    <div class="checklist-row">
-      <label>Parts Hours</label>
-      <input type="text" placeholder="e.g., Mon–Fri 7–6, Sat 8–4">
     </div>
   </div>
 
