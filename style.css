@@ -1059,3 +1059,8 @@ main {
   flex: 0 0 36%;
   padding-right: 12px;
 }
+/* Highlight DMS card when selected from dropdown */
+.dms-card-highlight {
+  box-shadow: 0 0 20px rgba(243,111,33,0.75) !important;
+  transition: box-shadow 0.3s ease-in-out;
+}
