@@ -1287,3 +1287,113 @@ body {
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   transition: background .18s, transform .18s;
 }
+
+/* ================================
+   SUPPORT TICKETS – FINAL REFINES
+   ================================ */
+
+/* Thin orange border + relative for badge */
+.ticket-group {
+  position: relative;
+  margin: 16px 0;
+  padding: 18px 20px 20px;
+  border-radius: 18px;
+  border: 1px solid var(--orange);
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* --- Ticket numbering per container --- */
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer {
+  counter-reset: ticket-counter;
+}
+
+.ticket-group {
+  counter-increment: ticket-counter;
+}
+
+/* Clean badge in top-right corner with cushion */
+.ticket-group::after {
+  content: "Ticket # " counter(ticket-counter);
+  position: absolute;
+  top: 12px;         /* vertical cushion */
+  right: 20px;       /* horizontal cushion */
+  padding: 6px 16px; /* big pill padding */
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--orange);
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
+/* Template should still show as Ticket #1 even before clones */
+.ticket-group.ticket-group-template::after {
+  content: "Ticket # 1";
+}
+
+/* --------------------------------
+   Integrated Ticket # + Add button
+   -------------------------------- */
+
+/* Make the first row behave like your integrated trainer row */
+.ticket-group .checklist-row.integrated-plus {
+  align-items: stretch;
+  gap: 0;
+}
+
+/* Keep label on the left, like others */
+.ticket-group .checklist-row.integrated-plus label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* Ticket # input: same width as other inputs + flat right edge */
+.ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 36px);
+  max-width: calc(var(--input-width) - 36px);
+  margin-left: auto;
+  margin-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* + button snapped to right side, same height, rounded on right */
+.ticket-group .checklist-row.integrated-plus .add-ticket-btn {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+}
+.ticket-group .checklist-row.integrated-plus .add-ticket-btn:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------
+   Short summary row = ~3/4 width
+   -------------------------------- */
+
+/* Make the "Short summary of the issue" field span most of the card */
+.ticket-group input[placeholder="Short summary of the issue"] {
+  flex: 1 1 auto;
+  max-width: none;
+  width: 100%;
+}
