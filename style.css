@@ -571,27 +571,74 @@ main {
   width: 100%;
 }
 
-/* --- Support Tickets: make all text inputs same pill shape --- */
-.ticket-group .checklist-row input[type="text"],
-.ticket-group .checklist-row input[type="email"],
-.ticket-group .checklist-row input[type="url"],
-.ticket-group .checklist-row input[type="tel"] {
-  width: 100%;
-  max-width: 100%;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);   /* rounded on BOTH sides */
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  box-sizing: border-box;
+/* =========================
+   SUPPORT TICKETS – FIELD SIZING & LAYOUT
+   ========================= */
+
+/* 1) Default: all ticket inputs/selects same width as other fields */
+#support-tickets .ticket-group .checklist-row input[type="text"],
+#support-tickets .ticket-group .checklist-row input[type="url"],
+#support-tickets .ticket-group .checklist-row select {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
 }
 
-/* In case any ticket rows are using .integrated-plus, restore right rounding */
-.ticket-group .checklist-row.integrated-plus input[type="text"] {
+/* 2) Issue Summary row (2nd row) = wider (about 3/4 of the card) */
+#support-tickets .ticket-group .checklist-row:nth-of-type(2) input[type="text"] {
+  flex: 0 0 75% !important;
+  width: 75% !important;
+}
+
+/* 3) TEMPLATE CARD ONLY: first row with the + button gets integrated styling
+      - Ticket # box same base width as others, but squared on right
+      - + button attached to the right side
+*/
+#support-tickets .ticket-group.ticket-group-template .checklist-row:first-of-type {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+#support-tickets .ticket-group.ticket-group-template .checklist-row:first-of-type label {
   flex: 1 1 auto;
-  width: 100%;
-  border-top-right-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
+  padding-right: 16px;
+}
+
+/* Ticket # input in template – same width as other fields but
+   with flat right edge so it merges with the + button */
+#support-tickets .ticket-group.ticket-group-template .checklist-row:first-of-type input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Integrated + button */
+#support-tickets .ticket-group.ticket-group-template .checklist-row:first-of-type .add-ticket-btn {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  transition: background .18s, transform .18s;
+}
+
+#support-tickets .ticket-group.ticket-group-template .checklist-row:first-of-type .add-ticket-btn:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
@@ -1173,9 +1220,4 @@ main {
   justify-content: center;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   transition: background .18s, transform .18s;
-}
-
-#support-tickets .ticket-group .checklist-row:has(> .add-ticket-btn) .add-ticket-btn:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
 }
