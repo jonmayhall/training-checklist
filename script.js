@@ -1,6 +1,6 @@
 /* ==========================================================
    myKaarma Interactive Training Checklist – FULL JS
-   With Google Maps Autocomplete + Map Button
+   (with Google Maps autocomplete + MAP button)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,14 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressAutocomplete();        // ⭐ Google Maps autocomplete
+  // 🔹 DO NOT call initDealerMap() here – Google calls it via callback
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
   initTableAddRowButtons();
   initPdfExport();
   initDmsCards();
-  initDmsLinking();                 // ⭐ Link DMS dropdown → DMS page
 });
 
 /* -------------------------------------
@@ -25,17 +24,19 @@ function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
 
+  if (!navButtons.length || !sections.length) return;
+
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
 
-      sections.forEach((sec) =>
-        sec.classList.toggle('active', sec.id === targetId)
-      );
+      sections.forEach((sec) => {
+        sec.classList.toggle('active', sec.id === targetId);
+      });
 
-      navButtons.forEach((b) =>
-        b.classList.toggle('active', b === btn)
-      );
+      navButtons.forEach((b) => {
+        b.classList.toggle('active', b === btn);
+      });
     });
   });
 }
@@ -44,31 +45,40 @@ function initNavigation() {
    CLEAR PAGE / CLEAR ALL
 ------------------------------------- */
 function clearSection(section) {
+  if (!section) return;
   const inputs = section.querySelectorAll('input, select, textarea');
 
   inputs.forEach((el) => {
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
-    else el.value = '';
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = false;
+    } else {
+      el.value = '';
+    }
   });
 }
 
 function initClearPageButtons() {
-  document.querySelectorAll('.clear-page-btn').forEach((btn) => {
+  const buttons = document.querySelectorAll('.clear-page-btn');
+  buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
-      if (section.id === 'dealership-info') updateDealershipNameDisplay();
+      if (section && section.id === 'dealership-info') {
+        updateDealershipNameDisplay();
+      }
     });
   });
 }
 
 function initClearAllButton() {
-  const btn = document.getElementById('clearAllBtn');
-  if (!btn) return;
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  if (!clearAllBtn) return;
 
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.page-section').forEach(clearSection);
+  clearAllBtn.addEventListener('click', () => {
+    const sections = document.querySelectorAll('.page-section');
+    sections.forEach(clearSection);
     updateDealershipNameDisplay();
   });
 }
@@ -77,56 +87,60 @@ function initClearAllButton() {
    DEALERSHIP NAME TOPBAR SYNC
 ------------------------------------- */
 function initDealershipNameBinding() {
-  const input = document.getElementById('dealershipNameInput');
-  if (!input) return;
+  const dealershipNameInput = document.getElementById('dealershipNameInput');
+  if (!dealershipNameInput) return;
 
-  input.addEventListener('input', updateDealershipNameDisplay);
+  dealershipNameInput.addEventListener('input', updateDealershipNameDisplay);
   updateDealershipNameDisplay();
 }
 
 function updateDealershipNameDisplay() {
-  const txt = document.getElementById('dealershipNameInput');
-  const display = document.getElementById('dealershipNameDisplay');
-  display.textContent = txt?.value?.trim() || 'Dealership Name';
+  const dealershipNameInput = document.getElementById('dealershipNameInput');
+  const dealershipNameDisplay = document.getElementById('dealershipNameDisplay');
+  if (!dealershipNameDisplay) return;
+
+  const val = dealershipNameInput ? dealershipNameInput.value.trim() : '';
+  dealershipNameDisplay.textContent = val || 'Dealership Name';
 }
 
 /* -------------------------------------
-   ⭐ GOOGLE MAPS AUTOCOMPLETE + EMBED MAP
+   GOOGLE MAPS: AUTOCOMPLETE + MAP BUTTON
+   (this is the callback from the script tag)
 ------------------------------------- */
-function initAddressAutocomplete() {
+function initDealerMap() {
   const addressInput = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
   const openBtn = document.getElementById('openAddressInMapsBtn');
 
-  if (!addressInput) return;
+  if (!addressInput) {
+    console.warn('Dealer map: address input not found.');
+    return;
+  }
 
-  // Load Google Maps Places API
-  const script = document.createElement('script');
-  script.src =
-    "https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initAutocompleteInternal";
-  script.async = true;
-  document.head.appendChild(script);
-
-  window.initAutocompleteInternal = () => {
-    const googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+  // Autocomplete, only if Places is available
+  if (window.google && google.maps && google.maps.places) {
+    const autocomplete = new google.maps.places.Autocomplete(addressInput, {
       types: ['geocode']
     });
 
-    googleAutocomplete.addListener('place_changed', () => {
-      const place = googleAutocomplete.getPlace();
-      if (!place?.formatted_address) return;
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      const addr = (place && place.formatted_address) || addressInput.value.trim();
+      if (!addr || !mapFrame) return;
 
-      const encoded = encodeURIComponent(place.formatted_address);
+      const encoded = encodeURIComponent(addr);
       mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
     });
-  };
+  } else {
+    console.warn('Google Maps Places API not available.');
+  }
 
-  // Map button → open in new tab
+  // MAP button → open Google Maps in new tab
   if (openBtn) {
     openBtn.addEventListener('click', () => {
-      const text = addressInput.value.trim();
-      if (!text) return;
-      const encoded = encodeURIComponent(text);
+      const addr = addressInput.value.trim();
+      if (!addr) return;
+      const encoded = encodeURIComponent(addr);
       window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
     });
   }
@@ -140,7 +154,10 @@ function initAdditionalTrainers() {
   const container = document.getElementById('additionalTrainersContainer');
   if (!row || !container) return;
 
-  row.querySelector('.add-row')?.addEventListener('click', () => {
+  const addBtn = row.querySelector('.add-row');
+  if (!addBtn) return;
+
+  addBtn.addEventListener('click', () => {
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub';
 
@@ -152,23 +169,27 @@ function initAdditionalTrainers() {
     const input = document.createElement('input');
     input.type = 'text';
 
-    newRow.append(label, input);
+    newRow.appendChild(label);
+    newRow.appendChild(input);
+
     container.appendChild(newRow);
   });
 }
 
 /* -------------------------------------
-   ADDITIONAL POC ON PAGE 2
+   ADDITIONAL POC CARDS (PAGE 2)
 ------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
 
-  const template = grid.querySelector('.additional-poc-card');
-  const addBtn = template?.querySelector('.additional-poc-add');
-  if (!template || !addBtn) return;
+  const templateCard = grid.querySelector('.additional-poc-card');
+  if (!templateCard) return;
 
-  function createNormalCard() {
+  const addBtn = templateCard.querySelector('.additional-poc-add');
+  if (!addBtn) return;
+
+  function createNormalPocCard() {
     const card = document.createElement('div');
     card.className = 'mini-card contact-card';
 
@@ -190,16 +211,18 @@ function initAdditionalPoc() {
         <input type="email">
       </div>
     `;
+
     return card;
   }
 
   addBtn.addEventListener('click', () => {
-    grid.appendChild(createNormalCard());
+    const newCard = createNormalPocCard();
+    grid.appendChild(newCard);
   });
 }
 
 /* -------------------------------------
-   SUPPORT TICKETS
+   SUPPORT TICKETS (PAGE 7)
 ------------------------------------- */
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
@@ -207,190 +230,231 @@ function initSupportTickets() {
   const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  const template = openContainer?.querySelector('.ticket-group-template');
+  if (!openContainer) return;
+
+  const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Template always stays Open
-  const statusSelect = template.querySelector('.ticket-status-select');
-  if (statusSelect) statusSelect.value = 'Open';
+  // Ensure template status default is Open
+  const templateStatus = template.querySelector('.ticket-status-select');
+  if (templateStatus) {
+    templateStatus.value = 'Open';
+  }
 
   const addBtn = template.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard(template, { copy: false });
+      const newCard = createTicketCard(template, {
+        copyValues: false
+      });
       openContainer.appendChild(newCard);
     });
   }
 
+  // Wire up template itself for status changes (special behavior)
   wireTicketStatus(template, {
-    openContainer, tierTwoContainer,
-    closedResolvedContainer, closedFeatureContainer,
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: true
   });
 }
 
-function createTicketCard(source, opts = {}) {
-  const card = source.cloneNode(true);
-  const copy = opts.copy ?? false;
+function createTicketCard(sourceCard, options = {}) {
+  const { copyValues = false } = options;
 
-  card.classList.remove('ticket-group-template');
-  card.querySelector('.add-ticket-btn')?.remove();
+  const clone = sourceCard.cloneNode(true);
 
-  const fields = card.querySelectorAll('input, select, textarea');
+  // No longer the template
+  clone.classList.remove('ticket-group-template');
+  clone.removeAttribute('data-template');
+
+  // Remove the add button from clones
+  const addBtn = clone.querySelector('.add-ticket-btn');
+  if (addBtn) {
+    addBtn.remove();
+  }
+
+  const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
-    if (!copy) {
-      if (el.tagName === 'SELECT') el.selectedIndex = 0;
-      else if (el.type === 'checkbox') el.checked = false;
-      else el.value = '';
+    if (!copyValues) {
+      if (el.tagName === 'SELECT') {
+        if (el.classList.contains('ticket-status-select')) {
+          el.value = 'Open';
+        } else {
+          el.selectedIndex = 0;
+        }
+      } else if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else {
+        el.value = '';
+      }
     }
   });
 
-  wireTicketStatus(card, {
-    openContainer: document.getElementById('openTicketsContainer'),
-    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
-    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
-    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer'),
+  // Wire up status logic for this new card
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+
+  wireTicketStatus(clone, {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: false
   });
 
-  return card;
+  return clone;
 }
 
-function resetTicketTemplate(card) {
-  card.querySelectorAll('input, select, textarea').forEach((el) => {
-    if (el.tagName === 'SELECT') el.value = (el.classList.contains('ticket-status-select') ? 'Open' : '');
-    else el.value = '';
+function resetTicketTemplate(template) {
+  const fields = template.querySelectorAll('input, select, textarea');
+  fields.forEach((el) => {
+    if (el.tagName === 'SELECT') {
+      if (el.classList.contains('ticket-status-select')) {
+        el.value = 'Open';
+      } else {
+        el.selectedIndex = 0;
+      }
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = false;
+    } else {
+      el.value = '';
+    }
   });
 }
 
-function wireTicketStatus(card, ctx) {
+function wireTicketStatus(card, containers) {
+  const {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isTemplate = false
+  } = containers;
+
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
   select.addEventListener('change', () => {
-    const status = select.value;
+    const value = select.value;
 
-    let target =
-      status === 'Tier Two' ? ctx.tierTwoContainer :
-      status === 'Closed - Resolved' ? ctx.closedResolvedContainer :
-      status === 'Closed – Feature Not Supported' ? ctx.closedFeatureContainer :
-      ctx.openContainer;
+    let targetContainer = openContainer;
+    if (value === 'Tier Two') {
+      targetContainer = tierTwoContainer;
+    } else if (value === 'Closed - Resolved') {
+      targetContainer = closedResolvedContainer;
+    } else if (value === 'Closed – Feature Not Supported') {
+      // Note: EN DASH in "Closed – Feature Not Supported"
+      targetContainer = closedFeatureContainer;
+    } else if (value === 'Open') {
+      targetContainer = openContainer;
+    }
 
-    if (ctx.isTemplate) {
-      if (status === 'Open') return;
+    if (isTemplate) {
+      // Template should never actually leave the Open container.
+      if (value === 'Open' || !targetContainer) {
+        return;
+      }
 
-      const newCard = createTicketCard(card, { copy: true });
-      newCard.querySelector('.ticket-status-select').value = status;
+      // Create a new card WITH the template's data and status.
+      const newCard = createTicketCard(card, { copyValues: true });
+      const newStatus = newCard.querySelector('.ticket-status-select');
+      if (newStatus) {
+        newStatus.value = value;
+      }
 
-      target.appendChild(newCard);
+      targetContainer.appendChild(newCard);
+
+      // Reset the template back to a blank Open card.
       resetTicketTemplate(card);
       return;
     }
 
-    if (card.parentElement !== target) target.appendChild(card);
+    // Normal (non-template) cards just move between containers.
+    if (!targetContainer || targetContainer === card.parentElement) {
+      return;
+    }
+
+    targetContainer.appendChild(card);
   });
 }
 
 /* -------------------------------------
-   TABLE ADD-ROW BUTTONS
+   TABLE "+" BUTTONS (append empty row)
 ------------------------------------- */
 function initTableAddRowButtons() {
-  document.querySelectorAll('.table-footer .add-row').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const table = btn.closest('.table-footer')
-                       ?.previousElementSibling
-                       ?.querySelector('table');
+  const tableFooters = document.querySelectorAll('.table-footer .add-row');
 
+  tableFooters.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const footer = btn.closest('.table-footer');
+      if (!footer) return;
+
+      const container = footer.previousElementSibling;
+      if (!container) return;
+
+      const table = container.querySelector('table');
       if (!table) return;
 
       const tbody = table.querySelector('tbody') || table.createTBody();
-      const last = tbody.lastElementChild;
-      if (!last) return;
+      const lastRow = tbody.lastElementChild;
 
-      const clone = last.cloneNode(true);
-      clone.querySelectorAll('input, select').forEach((el) => {
-        if (el.tagName === 'SELECT') el.selectedIndex = 0;
-        else el.value = '';
+      if (!lastRow) return;
+
+      const newRow = lastRow.cloneNode(true);
+
+      // Clear values in cloned row
+      const fields = newRow.querySelectorAll('input, select, textarea');
+      fields.forEach((el) => {
+        if (el.tagName === 'SELECT') {
+          el.selectedIndex = 0;
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
+        } else {
+          el.value = '';
+        }
       });
 
-      tbody.appendChild(clone);
+      tbody.appendChild(newRow);
     });
   });
 }
 
 /* -------------------------------------
-   PDF EXPORT
+   PDF EXPORT (Summary page)
 ------------------------------------- */
 function initPdfExport() {
   const btn = document.getElementById('savePDF');
   if (!btn) return;
 
   btn.addEventListener('click', () => {
+    if (!window.jspdf) {
+      console.warn('jsPDF not available.');
+      return;
+    }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
     doc.html(document.body, {
-      callback: (instance) => instance.save('myKaarma_Training_Checklist.pdf'),
+      callback: (docInstance) => {
+        docInstance.save('myKaarma_Training_Checklist.pdf');
+      },
       margin: [20, 20, 20, 20],
-      html2canvas: { scale: 0.6 }
-    });
-  });
-}
-
-/* -------------------------------------
-   DMS CARDS (placeholder)
-------------------------------------- */
-function initDmsCards() {
-  // For future dynamic DMS functions
-}
-
-/* -------------------------------------
-   ⭐ DMS DROPDOWN → AUTO HIGHLIGHT CARD
-------------------------------------- */
-let selectedDms = "";
-
-function initDmsLinking() {
-  const dmsSelect = document.getElementById("dmsSelect");
-  const navButtons = document.querySelectorAll(".nav-btn");
-
-  if (!dmsSelect) return;
-
-  // Save selected DMS
-  dmsSelect.addEventListener("change", () => {
-    selectedDms = dmsSelect.value.trim();
-  });
-
-  // When user navigates to DMS Integration page
-  navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (btn.dataset.target === "dms-integration") {
-        setTimeout(() => {
-          highlightSelectedDms();
-        }, 150);
+      autoPaging: 'text',
+      html2canvas: {
+        scale: 0.6
       }
     });
   });
 }
 
-function highlightSelectedDms() {
-  if (!selectedDms) return;
-
-  const cards = document.querySelectorAll(".dms-card");
-  let target = null;
-
-  cards.forEach((card) => {
-    const title = card.querySelector(".dms-name")?.textContent.trim().toLowerCase();
-    if (title && title.includes(selectedDms.toLowerCase())) {
-      target = card;
-    }
-  });
-
-  if (!target) return;
-
-  target.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  target.classList.add("dms-card-highlight");
-  setTimeout(() => {
-    target.classList.remove("dms-card-highlight");
-  }, 2000);
+/* -------------------------------------
+   DMS CARDS (placeholder for future)
+------------------------------------- */
+function initDmsCards() {
+  // No dynamic DMS behavior required yet.
 }
