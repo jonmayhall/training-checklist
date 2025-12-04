@@ -593,7 +593,10 @@ body {
 .ticket-group .checklist-row.integrated-plus::after {
   content: "Ticket # " counter(ticket-counter);
   position: absolute;
-  top: 4px;                 /* ← moved higher for centered appearance */
+
+  /* move label higher so it's centered between top border and Ticket # field */
+  top: -2px;              /* try -2px; if you want it even higher, use -4px */
+
   right: 84px;
 
   font-size: 12px;
@@ -602,8 +605,8 @@ body {
 
   background: #fff7f0;
   border: 1px solid #f57c26;
-  padding: 3px 8px;
-  border-radius: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 
   pointer-events: none;
