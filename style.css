@@ -1397,3 +1397,41 @@ body {
   max-width: none;
   width: 100%;
 }
+
+/* ===============================
+   Support Tickets – Ticket # label
+   =============================== */
+
+/* Turn OFF the big badge I added earlier */
+.ticket-group::after {
+  content: none !important;
+}
+
+/* Make the first row taller and position the label above the input */
+.ticket-group .checklist-row.integrated-plus {
+  position: relative;
+  padding-top: 28px; /* space for Ticket # text above */
+}
+
+/* Small “Ticket # 1 / 2 / 3…” label above the Ticket # field, right side */
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer {
+  counter-reset: ticket-counter;
+}
+
+.ticket-group {
+  counter-increment: ticket-counter;
+}
+
+.ticket-group .checklist-row.integrated-plus::after {
+  content: "Ticket # " counter(ticket-counter);
+  position: absolute;
+  top: 6px;          /* vertical cushion from top of card */
+  right: 76px;       /* leaves room for the + button on far right */
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;       /* neutral gray text */
+  pointer-events: none;
+}
