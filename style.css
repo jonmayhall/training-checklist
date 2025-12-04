@@ -571,30 +571,24 @@ main {
   width: 100%;
 }
 
-/* --------------- SUPPORT TICKETS --------------- */
-
-.ticket-group {
-  margin: 16px 0;
-  padding: 14px 18px 18px;
-  border-radius: 16px;
-  border: 1px solid #e1e1e1;
-  background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+/* Make Ticket # and other text inputs inside ticket cards full-width and rounded */
+.ticket-group .checklist-row input[type="text"],
+.ticket-group .checklist-row input[type="number"],
+.ticket-group .checklist-row input[type="email"],
+.ticket-group .checklist-row input[type="tel"] {
+  flex: 1 1 auto;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: var(--radius-sm);
 }
 
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 8px;
-}
-
-/* A simple subtle count style if you add counts in headers later */
-.ticket-count-pill {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: #fee2e2;
-  color: #b91c1c;
+/* In case any ticket rows are using .integrated-plus, restore right rounding */
+.ticket-group .checklist-row.integrated-plus input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
