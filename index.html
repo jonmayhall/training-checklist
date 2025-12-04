@@ -203,55 +203,49 @@
   <div class="section-block">
     <h2>Dealership Details</h2>
 
-    <!-- Dealer Group -->
     <div class="checklist-row">
       <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput" placeholder="Dealer group name">
+      <input type="text" id="dealerGroupInput" placeholder="Dealer Group Name">
     </div>
 
-    <!-- Dealership Name -->
     <div class="checklist-row">
       <label>Dealership Name</label>
       <input type="text" id="dealershipNameInput" placeholder="Dealership Name">
     </div>
 
-    <!-- DID -->
     <div class="checklist-row">
       <label>DID</label>
-      <input type="text" id="dealershipDidInput" placeholder="DMS / myKaarma DID">
+      <input type="text" id="dealershipDidInput" placeholder="Dealership ID (DID)">
     </div>
 
-    <!-- DMS DROPDOWN -->
     <div class="checklist-row">
       <label>DMS</label>
-      <select id="dmsSelect">
-        <option value="" selected disabled>Select DMS</option>
+      <select id="dealershipDmsSelect">
+        <option></option>
         <option>CDK</option>
-        <option>Reynolds & Reynolds</option>
+        <option>Reynolds</option>
+        <option>Dealertrack / Arkona</option>
+        <option>Dealerbuilt / Lightyear</option>
+        <option>Automate</option>
+        <option>PBS</option>
         <option>Tekion</option>
-        <option>Dealertrack</option>
-        <option>Autosoft</option>
-        <option>Dominion</option>
-        <option>Auto/Mate</option>
-        <option>SDS</option>
-        <option>MyKaarma Native</option>
+        <option>Other</option>
       </select>
     </div>
 
-    <!-- Dealership Address + MAP button -->
     <div class="checklist-row">
       <label>Dealership Address</label>
 
       <div class="address-input-wrap">
+        <!-- Map button on the LEFT, text box on the RIGHT -->
         <button type="button" id="openAddressInMapsBtn" class="small-map-btn">
-          MAP
+          Map
         </button>
 
         <input
           type="text"
           id="dealershipAddressInput"
           placeholder="Start typing address…"
-          autocomplete="off"
         >
       </div>
     </div>
@@ -265,10 +259,9 @@
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
-
       <p class="map-helper-text">
-        Select an address above to update this map.  
-        Click “MAP” to open full directions in Google Maps.
+        Select or type an address above to update this map.  
+        Click “Map” to open directions in Google Maps.
       </p>
     </div>
   </div>
@@ -278,30 +271,77 @@
     <h2>Primary Contacts</h2>
 
     <div id="primaryContactsGrid" class="primary-contacts-grid">
-      <!-- SERVICE MANAGER -->
+
+      <!-- SERVICE DIRECTOR -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
-          <label>Service Manager</label>
+          <label>Service Director</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Cell</label>
           <input type="text">
         </div>
-
         <div class="checklist-row indent-sub">
           <label>Email</label>
           <input type="email">
         </div>
       </div>
 
-      <!-- ADDITIONAL POC TEMPLATE (ALWAYS FIRST IN JS) -->
-      <div class="mini-card contact-card additional-poc-card ticket-group-template">
+      <!-- SERVICE MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Service Manager</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
+        </div>
+      </div>
+
+      <!-- GENERAL MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>General Manager</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
+        </div>
+      </div>
+
+      <!-- PARTS MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Parts Manager</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
+        </div>
+      </div>
+
+      <!-- ADDITIONAL POC TEMPLATE (with + button) -->
+      <div class="mini-card contact-card additional-poc-card">
         <div class="checklist-row integrated-plus">
           <label>Additional POC</label>
           <input type="text" class="additional-poc-name">
-          <button class="add-row additional-poc-add">+</button>
+          <button class="add-row additional-poc-add" type="button">+</button>
         </div>
 
         <div class="checklist-row indent-sub">
@@ -319,20 +359,11 @@
           <input type="email">
         </div>
       </div>
+
     </div>
   </div>
 
 </section>
-
-
-<!-- ========================================================= -->
-<!-- GOOGLE MAPS API (AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o — keep private)       -->
-<!-- ========================================================= -->
-<script 
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRdohFEgjYGb__CCfg-9xqyUuFmEn2F3o&libraries=places&callback=initDealerMap" 
-  async 
-  defer>
-</script>
 
       <!-- ========================================================= -->
       <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
