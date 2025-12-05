@@ -2834,7 +2834,7 @@
       </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS                                  -->
+<!-- PAGE: SUPPORT TICKETS                                     -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
@@ -2853,8 +2853,8 @@
       <!-- TEMPLATE CARD (stays in Open, has + button) -->
       <div class="ticket-group ticket-group-template">
 
-        <!-- Ticket number badge (JS renumbers: Ticket # 1, 2, 3...) -->
-        <div class="ticket-number-pill">Ticket # 1</div>
+        <!-- Simple Ticket label in top-left -->
+        <div class="ticket-id-label">Ticket #</div>
 
         <!-- Support Ticket Number (integrated with + button) -->
         <div class="checklist-row integrated-plus">
@@ -2873,7 +2873,7 @@
           </button>
         </div>
 
-        <!-- Issue Summary (wider field – styled in CSS) -->
+        <!-- Issue Summary (wider field) -->
         <div class="checklist-row">
           <label>Issue Summary</label>
           <input
@@ -2912,25 +2912,19 @@
   <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
   <div class="section-block">
     <h2>Tier Two Support Tickets</h2>
-    <div id="tierTwoTicketsContainer">
-      <!-- Cards moved here automatically when status is set to "Tier Two" -->
-    </div>
+    <div id="tierTwoTicketsContainer"></div>
   </div>
 
   <!-- ======================== CLOSED - RESOLVED SUPPORT TICKETS ======================== -->
   <div class="section-block">
     <h2>Closed - Resolved Support Tickets</h2>
-    <div id="closedResolvedTicketsContainer">
-      <!-- Cards moved here automatically when status is set to "Closed - Resolved" -->
-    </div>
+    <div id="closedResolvedTicketsContainer"></div>
   </div>
 
   <!-- ======================== CLOSED – FEATURE NOT SUPPORTED ======================== -->
   <div class="section-block">
     <h2>Closed – Feature Not Supported</h2>
-    <div id="closedFeatureTicketsContainer">
-      <!-- Cards moved here automatically when status is set to "Closed – Feature Not Supported" -->
-    </div>
+    <div id="closedFeatureTicketsContainer"></div>
   </div>
 </section>
 
