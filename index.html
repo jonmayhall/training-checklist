@@ -2833,13 +2833,13 @@
         </div>
       </section>
 
-<!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS                                  -->
+      <!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKETS                                   -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track open, escalated, and resolved tickets so nothing slips through the cracks.
+    Track open issues, escalation to myKaarma Support, and final resolutions so nothing is lost after go-live.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
@@ -2849,63 +2849,62 @@
     <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
-      <!-- TEMPLATE CARD (always stays in Open, JS clones this) -->
-      <div class="ticket-group ticket-group-template">
-        <!-- Ticket number label, top-left -->
-        <div class="ticket-header-row">
-          <span class="ticket-number-label">Ticket # 1</span>
+
+      <!-- TEMPLATE CARD – ALWAYS STAYS HERE; JS CLONES THIS -->
+      <div class="ticket-group ticket-group-template" data-ticket-index="1">
+        <!-- Ticket number label (top-left, orange, buffered nicely) -->
+        <div class="ticket-card-header">
+          <span class="ticket-card-number">Ticket # 1</span>
         </div>
 
-        <!-- Support ticket number with integrated + button -->
-        <div class="checklist-row integrated-plus">
+        <!-- Support Ticket Number with integrated + button (adds NEW card) -->
+        <div class="checklist-row integrated-plus ticket-number-row">
           <label>Support Ticket Number</label>
-          <input type="text" class="ticket-number-input" placeholder="Ticket #">
+          <input type="text" class="ticket-number-input" placeholder="e.g., 123456">
           <button type="button" class="add-row add-ticket-btn">+</button>
         </div>
 
-        <!-- Issue summary (wider input, CSS makes it ~3/4 width) -->
-        <div class="checklist-row">
-          <label>Issue Summary</label>
-          <input type="text"
-                 class="ticket-summary-input"
-                 placeholder="Short summary of the issue">
+        <!-- Short summary – 3/4 width (styled in CSS) -->
+        <div class="checklist-row ticket-summary-row">
+          <label>Short Summary of the Issue</label>
+          <input type="text" class="ticket-summary-input" placeholder="Brief description of the issue">
         </div>
 
-        <!-- Status select – this is what the JS uses to move cards -->
+        <!-- Status dropdown (drives column movement via JS) -->
         <div class="checklist-row">
-          <label>Ticket Status</label>
+          <label>Status</label>
           <select class="ticket-status-select">
-            <option value="Open">Open</option>
-            <option value="Tier Two">Tier Two</option>
-            <option value="Closed - Resolved">Closed - Resolved</option>
-            <option value="Closed – Feature Not Supported">
-              Closed – Feature Not Supported
-            </option>
+            <option>Open</option>
+            <option>Tier Two</option>
+            <option>Closed - Resolved</option>
+            <option>Closed – Feature Not Supported</option>
           </select>
         </div>
 
-        <!-- Zendesk link -->
-        <div class="checklist-row">
-          <label>Zendesk link</label>
-          <input type="text" placeholder="Paste Zendesk link">
+        <!-- Additional notes -->
+        <div class="checklist-row ticket-notes-row">
+          <label>Additional Notes</label>
+          <textarea class="ticket-notes" placeholder="Details, troubleshooting steps, contacts, or context…"></textarea>
         </div>
-      </div>
-    </div>
+
+      </div> <!-- end .ticket-group-template -->
+
+    </div> <!-- /#openTicketsContainer -->
   </div>
 
-  <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
+  <!-- ======================== TIER TWO / MYKAARMA SUPPORT ======================== -->
   <div class="section-block">
-    <h2>Tier Two Support Tickets</h2>
+    <h2>Tier Two / myKaarma Support</h2>
     <div id="tierTwoTicketsContainer">
-      <!-- Cards moved here by JS when status = Tier Two -->
+      <!-- Cards moved here automatically when status = Tier Two -->
     </div>
   </div>
 
-  <!-- ======================== CLOSED - RESOLVED ======================== -->
+  <!-- ======================== CLOSED – RESOLVED ======================== -->
   <div class="section-block">
-    <h2>Closed - Resolved Support Tickets</h2>
+    <h2>Closed – Resolved</h2>
     <div id="closedResolvedTicketsContainer">
-      <!-- Cards moved here by JS when status = Closed - Resolved -->
+      <!-- Cards moved here automatically when status = Closed - Resolved -->
     </div>
   </div>
 
@@ -2913,7 +2912,7 @@
   <div class="section-block">
     <h2>Closed – Feature Not Supported</h2>
     <div id="closedFeatureTicketsContainer">
-      <!-- Cards moved here by JS when status = Closed – Feature Not Supported -->
+      <!-- Cards moved here automatically when status = Closed – Feature Not Supported -->
     </div>
   </div>
 </section>
