@@ -213,20 +213,9 @@ function initAdditionalPoc() {
   });
 }
 
-/* -------------------------------------
-   SUPPORT TICKETS (PAGE 7)
+//* -------------------------------------
+   SUPPORT TICKETS
 ------------------------------------- */
-/*
-  Behavior:
-  - Template card in "Open Support Tickets" is the ONLY card with the + button.
-  - Clicking + creates ONE new blank card in Open (no + button).
-  - Changing Status on template:
-      * If changed away from "Open" => clone with data, move clone, reset template.
-  - Changing Status on non-template:
-      * Moves that card between containers.
-  - Cards are auto-numbered: Ticket # 1, Ticket # 2, ... across all containers.
-*/
-
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
@@ -235,27 +224,30 @@ function initSupportTickets() {
 
   if (!openContainer) return;
 
-  const template =
-    openContainer.querySelector('.ticket-group-template') ||
-    openContainer.querySelector('.ticket-group');
-
+  const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
+  // Template should always say "Ticket # 1" on load
+  const label = template.querySelector('.ticket-label');
+  if (label) label.textContent = 'Ticket # 1';
+
+  // Template status default is Open
   const templateStatus = template.querySelector('.ticket-status-select');
   if (templateStatus) {
     templateStatus.value = 'Open';
   }
 
+  // "+" in the template creates a NEW open ticket card
   const addBtn = template.querySelector('.add-ticket-btn');
-  if (addBtn && !addBtn.dataset.bound) {
-    addBtn.dataset.bound = 'true';
+  if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard(template, { copyValues: false });
+      const newCard = createTicketCard(template, { copy: false });
       openContainer.appendChild(newCard);
-      renumberSupportTickets();
+      renumberTickets();
     });
   }
 
+  // Wire template status changes (special behavior)
   wireTicketStatus(template, {
     openContainer,
     tierTwoContainer,
@@ -264,41 +256,38 @@ function initSupportTickets() {
     isTemplate: true
   });
 
-  // Initial numbering
-  renumberSupportTickets();
+  // First-pass numbering
+  renumberTickets();
 }
 
 /**
  * Creates a new ticket card cloned from the template.
- * @param {HTMLElement} sourceCard - the card to clone (usually the template)
- * @param {Object} options
- *   - copyValues: if true, keep existing input/select values. If false, clear them.
+ * @param {HTMLElement} source - usually the template card
+ * @param {Object} opts
+ *   - copy: if true, keep existing values; if false, blank them
  */
-function createTicketCard(sourceCard, options = {}) {
-  const { copyValues = false } = options;
+function createTicketCard(source, opts = {}) {
+  const { copy = false } = opts;
 
-  const clone = sourceCard.cloneNode(true);
+  const card = source.cloneNode(true);
+  card.classList.remove('ticket-group-template');
 
-  // No longer the template
-  clone.classList.remove('ticket-group-template');
-  clone.removeAttribute('data-template');
+  // Remove the + button from cloned cards
+  const addBtn = card.querySelector('.add-ticket-btn');
+  if (addBtn) addBtn.remove();
 
-  // Remove the add button from clones
-  const addBtn = clone.querySelector('.add-ticket-btn');
-  if (addBtn) {
-    addBtn.remove();
+  // For cloned cards we want the Support Ticket Number field
+  // to behave like a normal rounded textbox (no integrated +)
+  const numRow = card.querySelector('.ticket-number-row');
+  if (numRow) {
+    numRow.classList.remove('integrated-plus');
   }
 
-  // Clear or keep values
-  const fields = clone.querySelectorAll('input, select, textarea');
+  const fields = card.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
-    if (!copyValues) {
+    if (!copy) {
       if (el.tagName === 'SELECT') {
-        if (el.classList.contains('ticket-status-select')) {
-          el.value = 'Open';
-        } else {
-          el.selectedIndex = 0;
-        }
+        el.selectedIndex = 0;
       } else if (el.type === 'checkbox' || el.type === 'radio') {
         el.checked = false;
       } else {
@@ -308,7 +297,7 @@ function createTicketCard(sourceCard, options = {}) {
   });
 
   // Wire up status logic for this new card
-  wireTicketStatus(clone, {
+  wireTicketStatus(card, {
     openContainer: document.getElementById('openTicketsContainer'),
     tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
     closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
@@ -316,7 +305,7 @@ function createTicketCard(sourceCard, options = {}) {
     isTemplate: false
   });
 
-  return clone;
+  return card;
 }
 
 /**
@@ -341,6 +330,10 @@ function resetTicketTemplate(template) {
 
 /**
  * Wires status change for a ticket card.
+ * If isTemplate is true, changing status away from "Open" creates a new
+ * card with the template's data and moves that card into the correct container,
+ * then resets the template.
+ * If isTemplate is false, the card itself moves between containers.
  */
 function wireTicketStatus(card, containers) {
   const {
@@ -363,69 +356,48 @@ function wireTicketStatus(card, containers) {
     } else if (value === 'Closed - Resolved') {
       targetContainer = closedResolvedContainer;
     } else if (value === 'Closed – Feature Not Supported') {
+      // EN DASH in this label
       targetContainer = closedFeatureContainer;
     } else if (value === 'Open') {
       targetContainer = openContainer;
     }
 
     if (isTemplate) {
-      // Template should never leave Open container.
-      if (value === 'Open' || !targetContainer) {
-        return;
-      }
+      // Template stays put; use its data to create a new card
+      if (value === 'Open' || !targetContainer) return;
 
-      // Create a new card WITH the template's data and status.
-      const newCard = createTicketCard(card, { copyValues: true });
+      const newCard = createTicketCard(card, { copy: true });
       const newStatus = newCard.querySelector('.ticket-status-select');
-      if (newStatus) {
-        newStatus.value = value;
-      }
+      if (newStatus) newStatus.value = value;
 
       targetContainer.appendChild(newCard);
       resetTicketTemplate(card);
-      renumberSupportTickets();
+      renumberTickets();
       return;
     }
 
-    // Normal (non-template) cards just move between containers.
-    if (!targetContainer || targetContainer === card.parentElement) {
-      renumberSupportTickets();
-      return;
+    // Normal (non-template) cards just move between containers
+    if (targetContainer && targetContainer !== card.parentElement) {
+      targetContainer.appendChild(card);
     }
-
-    targetContainer.appendChild(card);
-    renumberSupportTickets();
+    renumberTickets();
   });
 }
 
 /**
- * Renumber all support tickets across all containers.
- * Looks for an element with .ticket-number-label inside each .ticket-group
- * and sets its text to "Ticket # N".
+ * Renumber all ticket cards so labels show:
+ * Ticket # 1, Ticket # 2, Ticket # 3, ...
+ * (ordered by appearance in the DOM)
  */
-function renumberSupportTickets() {
-  const containerIds = [
-    'openTicketsContainer',
-    'tierTwoTicketsContainer',
-    'closedResolvedTicketsContainer',
-    'closedFeatureTicketsContainer'
-  ];
-
-  let counter = 1;
-
-  containerIds.forEach((id) => {
-    const container = document.getElementById(id);
-    if (!container) return;
-
-    const cards = container.querySelectorAll('.ticket-group');
-    cards.forEach((card) => {
-      if (card.classList.contains('ticket-group-template')) return;
-      const label = card.querySelector('.ticket-number-label');
-      if (label) {
-        label.textContent = `Ticket # ${counter}`;
-      }
-      counter++;
-    });
+function renumberTickets() {
+  const cards = document.querySelectorAll('.ticket-group');
+  let index = 1;
+  cards.forEach((card) => {
+    const label = card.querySelector('.ticket-label');
+    if (label) {
+      label.textContent = `Ticket # ${index}`;
+      index += 1;
+    }
   });
 }
 
