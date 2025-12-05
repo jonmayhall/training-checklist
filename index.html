@@ -2836,70 +2836,103 @@
 <!-- ========================================================= -->
 <!-- PAGE 7: SUPPORT TICKETS                                  -->
 <!-- ========================================================= -->
-<div id="supportTicketsPage" class="page">
+<section id="support-tickets" class="page-section">
+  <h1>Support Tickets</h1>
+  <p class="page-subtitle">
+    Track open issues, escalations, and resolutions with myKaarma Support.
+  </p>
 
-    <div class="page-card">
-        <h2 class="section-title">Open Support Tickets</h2>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Container where tickets will be added -->
-        <div id="openTicketsContainer">
+  <!-- ======================== OPEN SUPPORT TICKETS ======================== -->
+  <div class="section-block">
+    <h2>Open Support Tickets</h2>
 
-            <!-- ==================== TEMPLATE CARD (CLONED BY JS) ==================== -->
-            <div class="ticket-group ticket-group-template">
+    <div id="openTicketsContainer">
 
-                <!-- Ticket Number Label -->
-                <span class="ticket-card-label">Ticket # 1</span>
+      <!-- TEMPLATE CARD (stays in Open, has + button) -->
+      <div class="ticket-group ticket-group-template">
 
-                <!-- Support Ticket Number w/ integrated add button -->
-                <div class="checklist-row integrated-plus">
-                    <label>Support Ticket Number</label>
-                    <input type="text" class="ticket-number-input" placeholder="Ticket #">
-                    <button type="button" class="add-ticket-btn">+</button>
-                </div>
+        <!-- Ticket number badge (JS renumbers: Ticket # 1, 2, 3...) -->
+        <div class="ticket-number-pill">Ticket # 1</div>
 
-                <!-- Issue Summary (3/4 width input) -->
-                <div class="checklist-row">
-                    <label>Issue Summary</label>
-                    <input type="text" class="issue-summary-input" placeholder="Short summary of the issue">
-                </div>
-
-                <!-- Ticket Status -->
-                <div class="checklist-row">
-                    <label>Ticket Status</label>
-                    <select class="ticket-status-select">
-                        <option value="Open" selected>Open</option>
-                        <option value="Tier Two">Tier Two</option>
-                        <option value="Closed - Resolved">Closed - Resolved</option>
-                        <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
-                    </select>
-                </div>
-
-                <!-- Zendesk link -->
-                <div class="checklist-row">
-                    <label>Zendesk link</label>
-                    <input type="text" placeholder="Paste Zendesk link">
-                </div>
-
-            </div>
-            <!-- ==================== END TEMPLATE ==================== -->
-
+        <!-- Support Ticket Number (integrated with + button) -->
+        <div class="checklist-row integrated-plus">
+          <label>Support Ticket Number</label>
+          <input
+            type="text"
+            class="ticket-number-input"
+            placeholder="Ticket #"
+          >
+          <button
+            type="button"
+            class="add-ticket-btn"
+            aria-label="Add another ticket"
+          >
+            +
+          </button>
         </div>
+
+        <!-- Issue Summary (wider field – styled in CSS) -->
+        <div class="checklist-row">
+          <label>Issue Summary</label>
+          <input
+            type="text"
+            class="ticket-summary-input"
+            placeholder="Short summary of the issue"
+          >
+        </div>
+
+        <!-- Ticket Status -->
+        <div class="checklist-row">
+          <label>Ticket Status</label>
+          <select class="ticket-status-select">
+            <option value="Open">Open</option>
+            <option value="Tier Two">Tier Two</option>
+            <option value="Closed - Resolved">Closed - Resolved</option>
+            <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
+          </select>
+        </div>
+
+        <!-- Zendesk link -->
+        <div class="checklist-row">
+          <label>Zendesk link</label>
+          <input
+            type="text"
+            class="ticket-zendesk-input"
+            placeholder="Paste Zendesk link"
+          >
+        </div>
+
+      </div><!-- /.ticket-group.ticket-group-template -->
+
+    </div><!-- /#openTicketsContainer -->
+  </div><!-- /.section-block -->
+
+  <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
+  <div class="section-block">
+    <h2>Tier Two Support Tickets</h2>
+    <div id="tierTwoTicketsContainer">
+      <!-- Cards moved here automatically when status is set to "Tier Two" -->
     </div>
+  </div>
 
-
-    <!-- ======================= TIER TWO ======================= -->
-    <div class="page-card">
-        <h2 class="section-title">Tier Two Support Tickets</h2>
-        <div id="tierTwoTicketsContainer"></div>
+  <!-- ======================== CLOSED - RESOLVED SUPPORT TICKETS ======================== -->
+  <div class="section-block">
+    <h2>Closed - Resolved Support Tickets</h2>
+    <div id="closedResolvedTicketsContainer">
+      <!-- Cards moved here automatically when status is set to "Closed - Resolved" -->
     </div>
+  </div>
 
-    <!-- ======================= CLOSED ========================== -->
-    <div class="page-card">
-        <h2 class="section-title">Closed - Resolved Support Tickets</h2>
-        <div id="closedTicketsContainer"></div>
+  <!-- ======================== CLOSED – FEATURE NOT SUPPORTED ======================== -->
+  <div class="section-block">
+    <h2>Closed – Feature Not Supported</h2>
+    <div id="closedFeatureTicketsContainer">
+      <!-- Cards moved here automatically when status is set to "Closed – Feature Not Supported" -->
     </div>
-
-</div>
+  </div>
+</section>
 
 <section id="dms-integration" class="page-section">
   <h1>DMS Integration</h1>
