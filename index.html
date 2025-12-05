@@ -2839,102 +2839,83 @@
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track all open, escalated, and resolved support tickets during onsite.
+    Track open, escalated, and resolved tickets so nothing slips through the cracks.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ======================= OPEN TICKETS ======================= -->
-  <div class="section">
-    <div class="section-header">Open Support Tickets</div>
+  <!-- ======================== OPEN SUPPORT TICKETS ======================== -->
+  <div class="section-block">
+    <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
-
-      <!-- ********* TEMPLATE CARD (ONLY THIS ONE HAS "+") ********* -->
+      <!-- TEMPLATE CARD (always stays in Open, JS clones this) -->
       <div class="ticket-group ticket-group-template">
+        <!-- Ticket number label, top-left -->
+        <div class="ticket-header-row">
+          <span class="ticket-number-label">Ticket # 1</span>
+        </div>
 
-        <!-- Ticket # label -->
-        <div class="ticket-id-label">Ticket # 1</div>
-
-        <!-- Support Ticket Number -->
+        <!-- Support ticket number with integrated + button -->
         <div class="checklist-row integrated-plus">
           <label>Support Ticket Number</label>
-          <input
-            type="text"
-            class="ticket-number-input"
-            placeholder="Ticket #"
-          >
-          <button
-            type="button"
-            class="add-ticket-btn"
-            aria-label="Add another ticket"
-          >+</button>
+          <input type="text" class="ticket-number-input" placeholder="Ticket #">
+          <button type="button" class="add-row add-ticket-btn">+</button>
         </div>
 
-        <!-- Issue Summary -->
+        <!-- Issue summary (wider input, CSS makes it ~3/4 width) -->
         <div class="checklist-row">
           <label>Issue Summary</label>
-          <input
-            type="text"
-            class="ticket-summary-input"
-            placeholder="Short summary of the issue"
-          >
+          <input type="text"
+                 class="ticket-summary-input"
+                 placeholder="Short summary of the issue">
         </div>
 
-        <!-- Status -->
+        <!-- Status select – this is what the JS uses to move cards -->
         <div class="checklist-row">
           <label>Ticket Status</label>
           <select class="ticket-status-select">
             <option value="Open">Open</option>
             <option value="Tier Two">Tier Two</option>
             <option value="Closed - Resolved">Closed - Resolved</option>
-            <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
+            <option value="Closed – Feature Not Supported">
+              Closed – Feature Not Supported
+            </option>
           </select>
         </div>
 
         <!-- Zendesk link -->
         <div class="checklist-row">
-          <label>Zendesk Link</label>
-          <input
-            type="text"
-            class="ticket-zendesk-input"
-            placeholder="Paste Zendesk link"
-          >
+          <label>Zendesk link</label>
+          <input type="text" placeholder="Paste Zendesk link">
         </div>
-      </div><!-- /.ticket-group-template -->
-    </div><!-- /#openTicketsContainer -->
-  </div><!-- /.section -->
+      </div>
+    </div>
+  </div>
 
-
-  <!-- ======================= TIER TWO TICKETS ======================= -->
-  <div class="section">
-    <div class="section-header">Tier Two Tickets</div>
-
+  <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
+  <div class="section-block">
+    <h2>Tier Two Support Tickets</h2>
     <div id="tierTwoTicketsContainer">
-      <!-- Cards added here dynamically -->
+      <!-- Cards moved here by JS when status = Tier Two -->
     </div>
   </div>
 
-
-  <!-- ======================= CLOSED - RESOLVED ======================= -->
-  <div class="section">
-    <div class="section-header">Closed - Resolved</div>
-
+  <!-- ======================== CLOSED - RESOLVED ======================== -->
+  <div class="section-block">
+    <h2>Closed - Resolved Support Tickets</h2>
     <div id="closedResolvedTicketsContainer">
-      <!-- Cards added here dynamically -->
+      <!-- Cards moved here by JS when status = Closed - Resolved -->
     </div>
   </div>
 
-
-  <!-- ======================= CLOSED – FEATURE NOT SUPPORTED ======================= -->
-  <div class="section">
-    <div class="section-header">Closed – Feature Not Supported</div>
-
+  <!-- ======================== CLOSED – FEATURE NOT SUPPORTED ======================== -->
+  <div class="section-block">
+    <h2>Closed – Feature Not Supported</h2>
     <div id="closedFeatureTicketsContainer">
-      <!-- Cards added here dynamically -->
+      <!-- Cards moved here by JS when status = Closed – Feature Not Supported -->
     </div>
   </div>
-
 </section>
 
 <section id="dms-integration" class="page-section">
