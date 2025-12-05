@@ -2834,29 +2834,29 @@
       </section>
 
 <!-- ========================================================= -->
-<!-- PAGE: SUPPORT TICKETS                                     -->
+<!-- PAGE 7: SUPPORT TICKETS                                  -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track open issues, escalations, and resolutions with myKaarma Support.
+    Track all open, escalated, and resolved support tickets during onsite.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ======================== OPEN SUPPORT TICKETS ======================== -->
-  <div class="section-block">
-    <h2>Open Support Tickets</h2>
+  <!-- ======================= OPEN TICKETS ======================= -->
+  <div class="section">
+    <div class="section-header">Open Support Tickets</div>
 
     <div id="openTicketsContainer">
 
-      <!-- TEMPLATE CARD (stays in Open, has + button) -->
+      <!-- ********* TEMPLATE CARD (ONLY THIS ONE HAS "+") ********* -->
       <div class="ticket-group ticket-group-template">
 
-        <!-- Simple Ticket label in top-left -->
-        <div class="ticket-id-label">Ticket #</div>
+        <!-- Ticket # label -->
+        <div class="ticket-id-label">Ticket # 1</div>
 
-        <!-- Support Ticket Number (integrated with + button) -->
+        <!-- Support Ticket Number -->
         <div class="checklist-row integrated-plus">
           <label>Support Ticket Number</label>
           <input
@@ -2868,12 +2868,10 @@
             type="button"
             class="add-ticket-btn"
             aria-label="Add another ticket"
-          >
-            +
-          </button>
+          >+</button>
         </div>
 
-        <!-- Issue Summary (wider field) -->
+        <!-- Issue Summary -->
         <div class="checklist-row">
           <label>Issue Summary</label>
           <input
@@ -2883,7 +2881,7 @@
           >
         </div>
 
-        <!-- Ticket Status -->
+        <!-- Status -->
         <div class="checklist-row">
           <label>Ticket Status</label>
           <select class="ticket-status-select">
@@ -2896,36 +2894,47 @@
 
         <!-- Zendesk link -->
         <div class="checklist-row">
-          <label>Zendesk link</label>
+          <label>Zendesk Link</label>
           <input
             type="text"
             class="ticket-zendesk-input"
             placeholder="Paste Zendesk link"
           >
         </div>
-
-      </div><!-- /.ticket-group.ticket-group-template -->
-
+      </div><!-- /.ticket-group-template -->
     </div><!-- /#openTicketsContainer -->
-  </div><!-- /.section-block -->
+  </div><!-- /.section -->
 
-  <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
-  <div class="section-block">
-    <h2>Tier Two Support Tickets</h2>
-    <div id="tierTwoTicketsContainer"></div>
+
+  <!-- ======================= TIER TWO TICKETS ======================= -->
+  <div class="section">
+    <div class="section-header">Tier Two Tickets</div>
+
+    <div id="tierTwoTicketsContainer">
+      <!-- Cards added here dynamically -->
+    </div>
   </div>
 
-  <!-- ======================== CLOSED - RESOLVED SUPPORT TICKETS ======================== -->
-  <div class="section-block">
-    <h2>Closed - Resolved Support Tickets</h2>
-    <div id="closedResolvedTicketsContainer"></div>
+
+  <!-- ======================= CLOSED - RESOLVED ======================= -->
+  <div class="section">
+    <div class="section-header">Closed - Resolved</div>
+
+    <div id="closedResolvedTicketsContainer">
+      <!-- Cards added here dynamically -->
+    </div>
   </div>
 
-  <!-- ======================== CLOSED – FEATURE NOT SUPPORTED ======================== -->
-  <div class="section-block">
-    <h2>Closed – Feature Not Supported</h2>
-    <div id="closedFeatureTicketsContainer"></div>
+
+  <!-- ======================= CLOSED – FEATURE NOT SUPPORTED ======================= -->
+  <div class="section">
+    <div class="section-header">Closed – Feature Not Supported</div>
+
+    <div id="closedFeatureTicketsContainer">
+      <!-- Cards added here dynamically -->
+    </div>
   </div>
+
 </section>
 
 <section id="dms-integration" class="page-section">
