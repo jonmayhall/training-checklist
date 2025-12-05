@@ -1,8 +1,8 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
+   myKaarma Interactive Training Checklist – FULL CSS (Clean)
    ======================================================= */
 
-/* --------------- 1. CSS VARIABLES --------------- */
+/* --------------- CSS VARIABLES --------------- */
 :root {
   --orange: #f36f21;
   --light-orange: #f8b17b;
@@ -25,7 +25,7 @@
   --mk-border: #e5e7eb;
 }
 
-/* --------------- 2. BASE --------------- */
+/* --------------- BASE --------------- */
 html, body {
   margin: 0;
   font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -39,7 +39,7 @@ html, body {
   font-style: normal !important;
 }
 
-/* --------------- 3. TOP BAR --------------- */
+/* --------------- TOP BAR --------------- */
 #topbar {
   background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
   height: 70px;
@@ -76,7 +76,7 @@ html, body {
   letter-spacing:.5px; 
 }
 
-/* --------------- 4. LAYOUT (SIDEBAR + MAIN) --------------- */
+/* --------------- LAYOUT --------------- */
 #app { 
   display: flex; 
   min-height: 100vh; 
@@ -191,7 +191,7 @@ main {
   box-sizing: border-box;
 }
 
-/* --------------- 5. PAGE SECTIONS / CARDS --------------- */
+/* --------------- PAGE SECTIONS / CARDS --------------- */
 .page-section {
   position: relative;
   display: none;
@@ -260,7 +260,7 @@ main {
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
-/* --------------- 6. SECTION BLOCKS (NON-TABLE CARDS) --------------- */
+/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
 .section-block {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -294,12 +294,7 @@ main {
   margin-top: 10px;
 }
 
-/* Optional orange outline card */
-.orange-outline-card {
-  border-color: var(--orange);
-}
-
-/* --------------- 7. NON-TABLE ROWS (Q&A lines) --------------- */
+/* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
 .checklist-row {
   display: flex;
   align-items: center;
@@ -369,7 +364,6 @@ main {
   padding-left: 60px !important;
 }
 
-/* --------------- 8. SPECIAL ROWS --------------- */
 /* Additional Trainers divider */
 .checklist-row.additional-trainers-row,
 .additional-trainer-row {
@@ -378,7 +372,8 @@ main {
   padding-bottom: 10px;
 }
 
-/* --------------- 9. MINI-CARDS (Contacts etc.) --------------- */
+/* --------------- MINI-CARDS (Contacts etc.) --------------- */
+/* thin, continuous orange border around entire card */
 .mini-card {
   border: 1px solid var(--orange);
   border-radius: var(--radius-md);
@@ -439,7 +434,7 @@ main {
 .champions-card { }
 .blockers-card { }
 
-/* --------------- 10. PRIMARY CONTACTS GRID (2 x N) --------------- */
+/* --------------- PRIMARY CONTACTS GRID (2 x N) --------------- */
 .primary-contacts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -453,8 +448,7 @@ main {
   width: 100%;
 }
 
-/* --------------- 11. INTEGRATED “+” ROWS --------------- */
-/* Layout: label | input | + button */
+/* --------------- Integrated “+” rows (Trainings, Additional Trainer, POC, Tickets) --------------- */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -469,7 +463,7 @@ main {
   padding-right: 16px;
 }
 
-/* Text box in integrated rows (default) */
+/* default integrated text box */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
@@ -509,7 +503,7 @@ main {
   transform: translateY(-1px);
 }
 
-/* --------------- 12. Additional POC integrated row tweaks --------------- */
+/* --------------- Additional POC integrated row tweaks --------------- */
 .additional-poc-card .checklist-row.integrated-plus label {
   white-space: nowrap;
   font-size: 13px;
@@ -517,7 +511,6 @@ main {
   padding-right: 12px;
 }
 
-/* inside mini-card we want full-width + button at end */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 1 1 auto;
   width: 100%;
@@ -543,56 +536,132 @@ main {
   width: 100%;
 }
 
-/* --------------- 13. SUPPORT TICKETS --------------- */
+/* Additional Trainers integrated row alignment */
+.additional-trainers-row.integrated-plus.indent-sub label {
+  flex: 0 0 36%;
+  padding-right: 12px;
+}
+
+/* --------------- GOOGLE MAP ADDRESS INPUT (button on the LEFT) --------------- */
+
+.address-input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: var(--input-width);
+  margin-left: auto;
+}
+
+.address-input-wrap button.small-map-btn {
+  flex: 0 0 60px;
+  padding: 0 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s, transform .16s;
+}
+.address-input-wrap button.small-map-btn:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+/* --------------- MAP EMBED (Dealership Info page) --------------- */
+.map-wrapper {
+  margin: 16px 0 8px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8f8f8;
+}
+.map-frame {
+  width: 100%;
+  height: 220px;
+  border: 0;
+}
+.map-helper-text {
+  margin: 6px 10px 10px;
+  font-size: 12px;
+  color: #555;
+}
+
+/* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
   margin: 16px 0;
   padding: 12px 18px 16px;
   border-radius: 16px;
-  border: 1px solid var(--orange);          /* thin orange border */
+  border: 1px solid var(--orange);   /* thin orange border */
   background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
 }
 
-/* clean top row spacing */
+/* top label row: "Ticket # 1" etc. */
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.ticket-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--orange);
+  padding: 4px 0 2px 0; /* nice cushion above & a bit below */
+}
+
+/* tighten top spacing of first checklist row */
 .ticket-group .checklist-row:first-of-type {
   margin-top: 6px;
 }
 
-/* Ticket # label in top-left of each card */
-.ticket-id-label {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--orange);
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(243,111,33,0.4);
-  background: #fff7f0;
-  margin-left: 2px;
-  margin-top: 2px;
-  margin-bottom: 6px;
+/* integrated Ticket Number row (input + + button) */
+.ticket-number-row.integrated-plus input.ticket-number-input {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-/* If you add a class to the short summary row/input, this will make it ~3/4 width */
-.ticket-group .short-summary-input {
-  max-width: 75%;
+.ticket-number-row.integrated-plus .add-ticket-btn {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-/* Legacy pill if you ever re-enable counts */
-.ticket-count-pill {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: #fee2e2;
-  color: #b91c1c;
+/* additional ticket number inputs (non-integrated rows) */
+.ticket-group .checklist-row.additional-ticket-row input[type="text"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);    /* fully rounded, like normal textboxes */
 }
 
-/* --------------- 14. DMS PAGE – GRID CARDS with DOTS --------------- */
+/* short summary text ~ 3/4 width of card */
+.ticket-group .ticket-summary-input {
+  flex: 0 0 70%;
+  max-width: 70%;
+}
+
+/* ensure all labels in ticket cards are vertically centered between dividers */
+.ticket-group .checklist-row {
+  align-items: center;
+}
+
+/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block {
   margin-bottom: 28px;
@@ -623,6 +692,10 @@ main {
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
 
+/* if you ever use these extra types in legend */
+.dms-dot-limited   { background: #6366f1; }
+.dms-dot-display   { background: #6b7280; }
+
 .dms-table-container {
   margin-top: 16px;
   border-radius: var(--radius-lg);
@@ -647,13 +720,10 @@ main {
   padding: 12px 14px 10px;
 }
 
-/* Push vs Pull card borders (optional) */
-.dms-card-push {
-  border-color: var(--mk-orange);
-}
-.dms-card-pull {
-  border-color: var(--mk-green);
-}
+/* If you want special borders later:
+   .dms-card-push { border-color: var(--mk-orange); }
+   .dms-card-pull { border-color: var(--mk-green); }
+*/
 
 /* Header: title + chip */
 .dms-card-header {
@@ -670,7 +740,7 @@ main {
   color: var(--mk-orange);
   display: inline-block;
   padding-bottom: 2px;
-  padding-right: 46px;              /* makes the underline extend past the text */
+  padding-right: 46px;
   border-bottom: 2px solid var(--mk-orange);
 }
 
@@ -754,7 +824,7 @@ main {
   color: #4b5563;
 }
 
-/* --------------- 15. Training TABLES --------------- */
+/* --------------- Training TABLES --------------- */
 
 .section { 
   margin-bottom: 40px; 
@@ -767,7 +837,7 @@ main {
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px -22px 0;
+  margin: 18px -22px 0;  /* span full card width */
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
@@ -776,7 +846,7 @@ main {
 .section-header + .table-container {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  margin: 0 -22px 32px;
+  margin-top: 0;
 }
 
 /* Table Card */
@@ -787,6 +857,7 @@ main {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow);
+  margin: 0 -22px 32px;  /* match header width to card */
   padding: 0;
   box-sizing: border-box;
 }
@@ -933,7 +1004,7 @@ main {
   transform: scale(1.05);
 }
 
-/* --------------- 16. OPCODES PAGE --------------- */
+/* --------------- OPCODES PAGE --------------- */
 
 /* Turn off sticky/flex first column only for Opcodes section */
 #opcodes-pricing .training-table th:first-child,
@@ -950,7 +1021,7 @@ main {
   background: inherit;
 }
 
-/* Opcode-related column sizing */
+/* Opcode-related column sizing – enough for dropdown text */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -967,7 +1038,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller so inputs fit */
+/* Parts Price column – smaller so it doesn’t overflow */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -994,58 +1065,7 @@ main {
   transform: scale(1.1);
 }
 
-/* --------------- 17. MAP EMBED (Dealership Info page) --------------- */
-.address-input-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  width: var(--input-width);
-  margin-left: auto;
-}
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: auto;
-}
-
-/* small Map button on LEFT now */
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 0 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  cursor: pointer;
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
-}
-.small-map-btn:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.map-wrapper {
-  margin: 16px 0 8px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #f8f8f8;
-}
-.map-frame {
-  width: 100%;
-  height: 220px;
-  border: 0;
-}
-.map-helper-text {
-  margin: 6px 10px 10px;
-  font-size: 12px;
-  color: #555;
-}
-
-/* --------------- 18. FLOATING PDF BUTTON (summary page) --------------- */
+/* --------------- FLOATING PDF BUTTON (summary page) --------------- */
 #training-summary .floating-btn {
   background: var(--orange);
   color: #fff;
@@ -1068,20 +1088,23 @@ main {
   background: #ff8b42;
 }
 
-/* --------------- 19. Muted note --------------- */
+/* --------------- Muted note --------------- */
 .muted-note {
   font-size: 0.9em;
   color: #666;
-  font-style: italic !important;
 }
 
-/* --------------- 20. RESPONSIVE --------------- */
+/* --------------- RESPONSIVE --------------- */
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
   main { margin-left: 190px; padding: 20px; }
 
   .primary-contacts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    margin: 0 -12px 24px;
   }
 }
 @media (max-width: 600px) {
@@ -1091,43 +1114,8 @@ main {
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
-}
 
-/* --------------- 21. ALIGN INTEGRATED ADDITIONAL TRAINER ROW --------------- */
-.additional-trainers-row.integrated-plus.indent-sub label {
-  flex: 0 0 36%;
-  padding-right: 12px;
-}
-
-/* --- Support Tickets visual fixes --- */
-
-/* Orange pill in the TOP RIGHT with padding below */
-.ticket-header-row {
-  display: flex;
-  justify-content: flex-end;   /* right side */
-  align-items: flex-start;
-  margin: 2px 0 10px;          /* more padding below */
-}
-
-.ticket-number-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--orange);
-  padding: 2px 10px 4px;
-  border-radius: 999px;
-  border: 1px solid var(--orange);
-  background: #fff7f0;
-}
-
-/* Make Ticket # textboxes on additional cards full-width + rounded */
-.ticket-group .ticket-number-input {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm); /* rounded on both sides */
-}
-
-/* For the TEMPLATE card only, keep integrated look with the + button */
-.ticket-group-template .checklist-row.integrated-plus .ticket-number-input {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  .table-container {
+    margin: 0 -8px 20px;
+  }
 }
