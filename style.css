@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (Clean)
+   myKaarma Interactive Training Checklist – FULL CSS
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -337,6 +337,37 @@ main {
   box-sizing: border-box;
 }
 
+/* address input + map button wrapper (page 2) */
+.address-input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: var(--input-width);
+  margin-left: auto;
+}
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;
+}
+.small-map-btn {
+  flex: 0 0 auto;
+  padding: 0 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s, transform .16s;
+}
+.small-map-btn:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -364,7 +395,7 @@ main {
   padding-left: 60px !important;
 }
 
-/* Additional Trainers divider */
+/* --------------- ADDITIONAL TRAINERS DIVIDER --------------- */
 .checklist-row.additional-trainers-row,
 .additional-trainer-row {
   border-bottom: 1px solid #e0e0e0 !important;
@@ -448,7 +479,8 @@ main {
   width: 100%;
 }
 
-/* --------------- Integrated “+” rows (Trainings, Additional Trainer, POC, Tickets) --------------- */
+/* --------------- Integrated “+” rows --------------- */
+/* Layout: label | input | + button */
 
 .section-block .checklist-row.integrated-plus,
 .section-block .checklist-row:has(> .add-row) {
@@ -463,7 +495,7 @@ main {
   padding-right: 16px;
 }
 
-/* default integrated text box */
+/* Text box in integrated rows (default) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row:has(> .add-row) input[type="text"] {
@@ -511,6 +543,7 @@ main {
   padding-right: 12px;
 }
 
+/* inside mini-card we want full-width + button at end */
 .additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
   flex: 1 1 auto;
   width: 100%;
@@ -536,77 +569,18 @@ main {
   width: 100%;
 }
 
-/* Additional Trainers integrated row alignment */
-.additional-trainers-row.integrated-plus.indent-sub label {
-  flex: 0 0 36%;
-  padding-right: 12px;
-}
-
-/* --------------- GOOGLE MAP ADDRESS INPUT (button on the LEFT) --------------- */
-
-.address-input-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  width: var(--input-width);
-  margin-left: auto;
-}
-
-.address-input-wrap button.small-map-btn {
-  flex: 0 0 60px;
-  padding: 0 8px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  cursor: pointer;
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
-}
-.address-input-wrap button.small-map-btn:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: auto;
-}
-
-/* --------------- MAP EMBED (Dealership Info page) --------------- */
-.map-wrapper {
-  margin: 16px 0 8px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #f8f8f8;
-}
-.map-frame {
-  width: 100%;
-  height: 220px;
-  border: 0;
-}
-.map-helper-text {
-  margin: 6px 10px 10px;
-  font-size: 12px;
-  color: #555;
-}
-
 /* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
   margin: 16px 0;
-  padding: 12px 18px 16px;
+  padding: 10px 18px 16px;
   border-radius: 16px;
   border: 1px solid var(--orange);   /* thin orange border */
   background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* top label row: "Ticket # 1" etc. */
+/* Top label: Ticket # 1, Ticket # 2, etc. */
 .ticket-header {
   display: flex;
   align-items: center;
@@ -620,45 +594,29 @@ main {
   font-size: 13px;
   font-weight: 600;
   color: var(--orange);
-  padding: 4px 0 2px 0; /* nice cushion above & a bit below */
+  padding-top: 4px;
+  padding-bottom: 4px;  /* cushion above/below text */
 }
 
-/* tighten top spacing of first checklist row */
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 6px;
-}
-
-/* integrated Ticket Number row (input + + button) */
-.ticket-number-row.integrated-plus input.ticket-number-input {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.ticket-number-row.integrated-plus .add-ticket-btn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-/* additional ticket number inputs (non-integrated rows) */
-.ticket-group .checklist-row.additional-ticket-row input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);    /* fully rounded, like normal textboxes */
-}
-
-/* short summary text ~ 3/4 width of card */
-.ticket-group .ticket-summary-input {
-  flex: 0 0 70%;
-  max-width: 70%;
-}
-
-/* ensure all labels in ticket cards are vertically centered between dividers */
+/* center content vertically in rows */
 .ticket-group .checklist-row {
   align-items: center;
+}
+
+/* If you give the Support Ticket Number input this class, ensure full rounding */
+.ticket-group .ticket-number-input {
+  border-radius: var(--radius-sm);
+}
+
+/* A simple subtle count style (if you add counts elsewhere later) */
+.ticket-count-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
@@ -692,10 +650,6 @@ main {
 .dms-dot-planned   { background: #eab308; }
 .dms-dot-na        { background: #9ca3af; }
 
-/* if you ever use these extra types in legend */
-.dms-dot-limited   { background: #6366f1; }
-.dms-dot-display   { background: #6b7280; }
-
 .dms-table-container {
   margin-top: 16px;
   border-radius: var(--radius-lg);
@@ -720,10 +674,13 @@ main {
   padding: 12px 14px 10px;
 }
 
-/* If you want special borders later:
-   .dms-card-push { border-color: var(--mk-orange); }
-   .dms-card-pull { border-color: var(--mk-green); }
-*/
+/* Push vs Pull card borders */
+.dms-card-push {
+  border-color: var(--mk-orange);
+}
+.dms-card-pull {
+  border-color: var(--mk-green);
+}
 
 /* Header: title + chip */
 .dms-card-header {
@@ -740,7 +697,7 @@ main {
   color: var(--mk-orange);
   display: inline-block;
   padding-bottom: 2px;
-  padding-right: 46px;
+  padding-right: 46px;              /* makes the underline extend past the text */
   border-bottom: 2px solid var(--mk-orange);
 }
 
@@ -837,12 +794,10 @@ main {
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px -22px 0;  /* span full card width */
+  margin: 18px -22px 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
-
-/* --- FIX: myKaarma orange table headers same width as tables --- */
 .section-header + .table-container {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
@@ -857,7 +812,7 @@ main {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow);
-  margin: 0 -22px 32px;  /* match header width to card */
+  margin-bottom: 32px;
   padding: 0;
   box-sizing: border-box;
 }
@@ -1004,6 +959,14 @@ main {
   transform: scale(1.05);
 }
 
+/* --- FIX: myKaarma orange table headers same width as tables --- */
+.section-header {
+  margin: 18px 0 0;        /* remove negative margins so header = table width */
+}
+.section-header + .table-container {
+  margin-top: 0;
+}
+
 /* --------------- OPCODES PAGE --------------- */
 
 /* Turn off sticky/flex first column only for Opcodes section */
@@ -1021,7 +984,7 @@ main {
   background: inherit;
 }
 
-/* Opcode-related column sizing – enough for dropdown text */
+/* Opcode-related column sizing */
 #opcodes-pricing .training-table th:nth-child(2),
 #opcodes-pricing .training-table td:nth-child(2),
 #opcodes-pricing .training-table th:nth-child(3),
@@ -1038,7 +1001,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller so it doesn’t overflow */
+/* Parts Price column – smaller so inputs fit and don’t overflow */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -1063,6 +1026,25 @@ main {
 #opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
 #opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
   transform: scale(1.1);
+}
+
+/* --------------- MAP EMBED (Dealership Info page) --------------- */
+.map-wrapper {
+  margin: 16px 0 8px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8f8f8;
+}
+.map-frame {
+  width: 100%;
+  height: 220px;
+  border: 0;
+}
+.map-helper-text {
+  margin: 6px 10px 10px;
+  font-size: 12px;
+  color: #555;
 }
 
 /* --------------- FLOATING PDF BUTTON (summary page) --------------- */
@@ -1092,6 +1074,7 @@ main {
 .muted-note {
   font-size: 0.9em;
   color: #666;
+  font-style: italic !important;
 }
 
 /* --------------- RESPONSIVE --------------- */
@@ -1102,10 +1085,6 @@ main {
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
-
-  .table-container {
-    margin: 0 -12px 24px;
-  }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
@@ -1114,8 +1093,10 @@ main {
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .table-container {
-    margin: 0 -8px 20px;
-  }
+/* --------------- ALIGN INTEGRATED ADDITIONAL TRAINER ROW --------------- */
+.additional-trainers-row.integrated-plus.indent-sub label {
+  flex: 0 0 36%;
+  padding-right: 12px;
 }
