@@ -1,13 +1,13 @@
-/* =======================================================
+/* ==========================================================
    myKaarma Interactive Training Checklist – FULL JS
-   ======================================================= */
+   ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressMapBinding();      // address → embedded map + "Map" button
+  initAddressMapButton();       // Map button + basic embed
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initDmsCards();
 });
 
-/* --------------- NAVIGATION --------------- */
+/* -------------------------------------
+   NAVIGATION
+------------------------------------- */
 function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
@@ -26,15 +28,21 @@ function initNavigation() {
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
+
       sections.forEach((sec) => {
         sec.classList.toggle('active', sec.id === targetId);
       });
-      navButtons.forEach((b) => b.classList.toggle('active', b === btn));
+
+      navButtons.forEach((b) =>
+        b.classList.toggle('active', b === btn)
+      );
     });
   });
 }
 
-/* --------------- CLEAR PAGE / CLEAR ALL --------------- */
+/* -------------------------------------
+   CLEAR PAGE / CLEAR ALL
+------------------------------------- */
 function clearSection(section) {
   if (!section) return;
   const inputs = section.querySelectorAll('input, select, textarea');
@@ -56,7 +64,6 @@ function initClearPageButtons() {
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
-      // If we cleared the dealership-info page, refresh topbar name.
       if (section && section.id === 'dealership-info') {
         updateDealershipNameDisplay();
       }
@@ -75,7 +82,9 @@ function initClearAllButton() {
   });
 }
 
-/* --------------- DEALERSHIP NAME BINDING (TOPBAR) --------------- */
+/* -------------------------------------
+   DEALERSHIP NAME TOPBAR SYNC
+------------------------------------- */
 function initDealershipNameBinding() {
   const dealershipNameInput = document.getElementById('dealershipNameInput');
   if (!dealershipNameInput) return;
@@ -94,52 +103,74 @@ function updateDealershipNameDisplay() {
   dealershipNameDisplay.textContent = val || 'Dealership Name';
 }
 
-/* --------------- ADDRESS → EMBEDDED MAP + MAP BUTTON --------------- */
-/* Uses a simple Google Maps embed URL – no API key required */
-function initAddressMapBinding() {
+/* -------------------------------------
+   ADDRESS MAP BUTTON + BASIC EMBED
+   (no key needed here – just uses iframe)
+------------------------------------- */
+function initAddressMapButton() {
   const addressInput = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
   const openBtn = document.getElementById('openAddressInMapsBtn');
 
-  if (!addressInput || !mapFrame) return;
+  if (!addressInput || !mapFrame || !openBtn) return;
 
-  // Default map (optional)
-  mapFrame.src =
-    'https://www.google.com/maps?q=United+States&output=embed';
-
-  function updateMapFromAddress() {
-    const text = addressInput.value.trim();
+  function updateEmbedFromText(text) {
     if (!text) return;
     const encoded = encodeURIComponent(text);
     mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
   }
 
-  // Update map when they leave the field / change value
-  addressInput.addEventListener('blur', updateMapFromAddress);
-  addressInput.addEventListener('change', updateMapFromAddress);
-
-  // If they hit Enter in the address box, also update the map
-  addressInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      updateMapFromAddress();
-    }
+  // Open Google Maps in a new tab
+  openBtn.addEventListener('click', () => {
+    const text = addressInput.value.trim();
+    if (!text) return;
+    const encoded = encodeURIComponent(text);
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+      '_blank'
+    );
   });
 
-  // Map button: open in new tab + update iframe
-  if (openBtn) {
-    openBtn.addEventListener('click', () => {
-      const text = addressInput.value.trim();
-      if (!text) return;
-      const encoded = encodeURIComponent(text);
-      const url = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
-      window.open(url, '_blank');
-      mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
-    });
-  }
+  // If the user types an address and leaves the field, update the iframe
+  addressInput.addEventListener('change', () => {
+    const text = addressInput.value.trim();
+    updateEmbedFromText(text);
+  });
 }
 
-/* --------------- ADDITIONAL TRAINERS (PAGE 1) --------------- */
+/* -------------------------------------
+   OPTIONAL: GOOGLE MAPS AUTOCOMPLETE HOOK
+   (expects script tag with callback=initAddressAutocomplete)
+------------------------------------- */
+function initAddressAutocomplete() {
+  const addressInput = document.getElementById('dealershipAddressInput');
+  const mapFrame = document.getElementById('dealershipMapFrame');
+
+  if (!addressInput || !mapFrame) return;
+  if (!window.google || !google.maps || !google.maps.places) return;
+
+  const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+    types: ['geocode']
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+    const addr = place && place.formatted_address
+      ? place.formatted_address
+      : addressInput.value.trim();
+
+    if (!addr) return;
+    const encoded = encodeURIComponent(addr);
+    mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+  });
+}
+
+// Make it available for the Google Maps script callback
+window.initAddressAutocomplete = initAddressAutocomplete;
+
+/* -------------------------------------
+   ADDITIONAL TRAINERS (PAGE 1)
+------------------------------------- */
 function initAdditionalTrainers() {
   const row = document.querySelector('.additional-trainers-row');
   const container = document.getElementById('additionalTrainersContainer');
@@ -148,18 +179,12 @@ function initAdditionalTrainers() {
   const addBtn = row.querySelector('.add-row');
   if (!addBtn) return;
 
-  // Prevent double-binding
-  if (addBtn.dataset.bound === 'true') return;
-  addBtn.dataset.bound = 'true';
-
   addBtn.addEventListener('click', () => {
-    // Create a normal row directly below the integrated row.
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub';
 
     const label = document.createElement('label');
     label.textContent = 'Additional Trainer';
-    // Match the indented label width/spacing
     label.style.flex = '0 0 36%';
     label.style.paddingRight = '12px';
 
@@ -173,13 +198,9 @@ function initAdditionalTrainers() {
   });
 }
 
-/* --------------- ADDITIONAL POC CARDS (PAGE 2) --------------- */
-/*
-  Behavior:
-  - The .additional-poc-card with the + button is permanent and stays in the grid.
-  - Clicking + appends a new normal Additional POC mini-card AFTER existing POCs.
-  - New cards are normal mini-cards with a rounded name textbox (no + button).
-*/
+/* -------------------------------------
+   ADDITIONAL POC CARDS (PAGE 2)
+------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
@@ -189,10 +210,6 @@ function initAdditionalPoc() {
 
   const addBtn = templateCard.querySelector('.additional-poc-add');
   if (!addBtn) return;
-
-  // Prevent double-binding
-  if (addBtn.dataset.bound === 'true') return;
-  addBtn.dataset.bound = 'true';
 
   function createNormalPocCard() {
     const card = document.createElement('div');
@@ -226,18 +243,12 @@ function initAdditionalPoc() {
   });
 }
 
-/* --------------- SUPPORT TICKETS (PAGE 7) --------------- */
-/*
-  Requirements:
-  - The template card in "Open Support Tickets" (ticket-group-template) always stays first
-    and is the ONLY card with the + button.
-  - When the template's status is changed away from "Open", its data is copied into
-    a new ticket card which moves to the correct status container,
-    and the template is reset to blank Open.
-  - Clicking the + button creates a NEW empty Open ticket card (no + button).
-  - Non-template cards can change status and will simply move between containers.
-*/
-
+/* -------------------------------------
+   SUPPORT TICKETS (PAGE 7)
+   - Template stays in Open
+   - + adds ONE card
+   - Ticket #1, #2, #3… in top-left of each card
+------------------------------------- */
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
@@ -255,22 +266,19 @@ function initSupportTickets() {
     templateStatus.value = 'Open';
   }
 
+  // "+" button on template: creates ONE new open ticket card
   const addBtn = template.querySelector('.add-ticket-btn');
   if (addBtn) {
-    // Prevent double-binding
-    if (addBtn.dataset.bound !== 'true') {
-      addBtn.dataset.bound = 'true';
-
-      addBtn.addEventListener('click', () => {
-        const newCard = createTicketCard(template, {
-          copyValues: false
-        });
-        openContainer.appendChild(newCard);
+    addBtn.addEventListener('click', () => {
+      const newCard = createTicketCard(template, {
+        copyValues: false
       });
-    }
+      openContainer.appendChild(newCard);
+      renumberAllTickets();
+    });
   }
 
-  // Wire up template itself for status changes (special behavior)
+  // Wire template status changes (special behavior)
   wireTicketStatus(template, {
     openContainer,
     tierTwoContainer,
@@ -278,6 +286,9 @@ function initSupportTickets() {
     closedFeatureContainer,
     isTemplate: true
   });
+
+  // Initial numbering
+  renumberAllTickets();
 }
 
 /**
@@ -301,6 +312,7 @@ function createTicketCard(sourceCard, options = {}) {
     addBtn.remove();
   }
 
+  // Reset / keep field values
   const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (!copyValues) {
@@ -316,8 +328,13 @@ function createTicketCard(sourceCard, options = {}) {
         el.value = '';
       }
     }
-    // if copyValues === true we keep existing values as-is
   });
+
+  // Ticket # label text will be set by renumberAllTickets()
+  const idLabel = clone.querySelector('.ticket-id-label');
+  if (idLabel) {
+    idLabel.textContent = '';
+  }
 
   // Wire up status logic for this new card
   const openContainer = document.getElementById('openTicketsContainer');
@@ -357,10 +374,34 @@ function resetTicketTemplate(template) {
 }
 
 /**
+ * Re-number tickets in all containers so each card shows Ticket #1, #2, #3...
+ * based on its position within its container.
+ */
+function renumberAllTickets() {
+  const containers = [
+    document.getElementById('openTicketsContainer'),
+    document.getElementById('tierTwoTicketsContainer'),
+    document.getElementById('closedResolvedTicketsContainer'),
+    document.getElementById('closedFeatureTicketsContainer')
+  ];
+
+  containers.forEach((container) => {
+    if (!container) return;
+    const cards = container.querySelectorAll('.ticket-group');
+    cards.forEach((card, index) => {
+      const label = card.querySelector('.ticket-id-label');
+      if (label) {
+        label.textContent = `Ticket # ${index + 1}`;
+      }
+    });
+  });
+}
+
+/**
  * Wires status change for a ticket card.
  * If isTemplate is true, changing status away from "Open" creates a new card with
- * the template's data and status, moves that card into the correct container,
- * then resets the template.
+ * the template's data and moves that card into the correct container, then resets
+ * the template.
  * If isTemplate is false, the card itself moves between containers.
  */
 function wireTicketStatus(card, containers) {
@@ -384,7 +425,6 @@ function wireTicketStatus(card, containers) {
     } else if (value === 'Closed - Resolved') {
       targetContainer = closedResolvedContainer;
     } else if (value === 'Closed – Feature Not Supported') {
-      // Note: EN DASH in "Closed – Feature Not Supported"
       targetContainer = closedFeatureContainer;
     } else if (value === 'Open') {
       targetContainer = openContainer;
@@ -393,6 +433,7 @@ function wireTicketStatus(card, containers) {
     if (isTemplate) {
       // Template should never actually leave the Open container.
       if (value === 'Open' || !targetContainer) {
+        renumberAllTickets();
         return;
       }
 
@@ -407,27 +448,30 @@ function wireTicketStatus(card, containers) {
 
       // Reset the template back to a blank Open card.
       resetTicketTemplate(card);
+      if (select) select.value = 'Open';
+
+      renumberAllTickets();
       return;
     }
 
     // Normal (non-template) cards just move between containers.
     if (!targetContainer || targetContainer === card.parentElement) {
+      renumberAllTickets();
       return;
     }
 
     targetContainer.appendChild(card);
+    renumberAllTickets();
   });
 }
 
-/* --------------- TABLE "+" BUTTONS (append empty row) --------------- */
+/* -------------------------------------
+   TABLE "+" BUTTONS (append empty row)
+------------------------------------- */
 function initTableAddRowButtons() {
   const tableFooters = document.querySelectorAll('.table-footer .add-row');
 
   tableFooters.forEach((btn) => {
-    // Prevent double-binding
-    if (btn.dataset.bound === 'true') return;
-    btn.dataset.bound = 'true';
-
     btn.addEventListener('click', () => {
       const footer = btn.closest('.table-footer');
       if (!footer) return;
@@ -462,7 +506,9 @@ function initTableAddRowButtons() {
   });
 }
 
-/* --------------- PDF EXPORT (Summary page) --------------- */
+/* -------------------------------------
+   PDF EXPORT (Summary page)
+------------------------------------- */
 function initPdfExport() {
   const btn = document.getElementById('savePDF');
   if (!btn) return;
@@ -475,7 +521,6 @@ function initPdfExport() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Simple whole-page capture
     doc.html(document.body, {
       callback: (docInstance) => {
         docInstance.save('myKaarma_Training_Checklist.pdf');
@@ -489,11 +534,9 @@ function initPdfExport() {
   });
 }
 
-/* --------------- DMS CARDS (optional extension hook) --------------- */
-/*
-  Currently a no-op placeholder. If you later add dynamic behavior
-  for DMS cards (add/remove/collapse), wire it up here.
-*/
+/* -------------------------------------
+   DMS CARDS (placeholder)
+------------------------------------- */
 function initDmsCards() {
   // No dynamic DMS behavior required yet.
 }
