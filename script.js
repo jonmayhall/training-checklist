@@ -180,6 +180,7 @@ function initAdditionalPoc() {
 /* -------------------------------------
    SUPPORT TICKETS
 ------------------------------------- */
+
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
@@ -191,29 +192,25 @@ function initSupportTickets() {
   const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Wrap inner content so we can prepend a badge cleanly on clones
-  ensureTicketInnerWrapper(template);
+  // Template status should always default to Open
+  const templateStatus = template.querySelector('.ticket-status-select');
+  if (templateStatus) {
+    templateStatus.value = 'Open';
+  }
 
-  // Template status always Open
-  const statusSelect = template.querySelector('.ticket-status-select');
-  if (statusSelect) statusSelect.value = 'Open';
-
+  // + button on template: create ONE new ticket card in Open
   const addBtn = template.querySelector('.add-ticket-btn');
-  if (addBtn && addBtn.dataset.bound !== 'true') {
-    addBtn.dataset.bound = 'true';
+  if (addBtn) {
     addBtn.addEventListener('click', () => {
       const newCard = createTicketCard(template, {
-        copyValues: false,
-        openContainer,
-        tierTwoContainer,
-        closedResolvedContainer,
-        closedFeatureContainer
+        copyValues: false
       });
       openContainer.appendChild(newCard);
       renumberTickets();
     });
   }
 
+  // Wire the template itself as special behavior for status changes
   wireTicketStatus(template, {
     openContainer,
     tierTwoContainer,
@@ -223,40 +220,40 @@ function initSupportTickets() {
   });
 }
 
-/* make sure each ticket card has an inner wrapper for badge + rows */
-function ensureTicketInnerWrapper(card) {
-  if (card.querySelector('.ticket-group-inner')) return;
-
-  const rows = Array.from(card.children);
-  const inner = document.createElement('div');
-  inner.className = 'ticket-group-inner';
-
-  rows.forEach((child) => inner.appendChild(child));
-  card.appendChild(inner);
-}
-
-/* create card from template */
-function createTicketCard(sourceCard, opts = {}) {
-  const {
-    copyValues = false,
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer
-  } = opts;
+/**
+ * Creates a new ticket card cloned from the template.
+ * - copyValues = true keeps existing values (for template hand-off)
+ * - copyValues = false creates a blank card
+ */
+function createTicketCard(sourceCard, options = {}) {
+  const { copyValues = false } = options;
 
   const clone = sourceCard.cloneNode(true);
+
+  // No longer the template
   clone.classList.remove('ticket-group-template');
-  clone.removeAttribute('data-template');
 
-  // make sure structure is correct
-  ensureTicketInnerWrapper(clone);
-
-  // remove any add button from clones
+  // Remove the + button from clones
   const addBtn = clone.querySelector('.add-ticket-btn');
-  if (addBtn) addBtn.remove();
+  if (addBtn) {
+    addBtn.remove();
+  }
 
-  // reset or keep values
+  // Ensure we have a .ticket-group-inner wrapper
+  let inner = clone.querySelector('.ticket-group-inner');
+  if (!inner) {
+    inner = document.createElement('div');
+    inner.className = 'ticket-group-inner';
+    while (clone.firstChild) {
+      inner.appendChild(clone.firstChild);
+    }
+    clone.appendChild(inner);
+  }
+
+  // Inject the Ticket # pill at the top of the inner content
+  injectTicketBadge(inner);
+
+  // Clear values if requested
   const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (!copyValues) {
@@ -274,22 +271,26 @@ function createTicketCard(sourceCard, opts = {}) {
     }
   });
 
-  // add / update Ticket # badge
-  injectTicketBadge(clone);
+  // Wire up status logic for this new card
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
 
-  // wire status changes
   wireTicketStatus(clone, {
-    openContainer: openContainer || document.getElementById('openTicketsContainer'),
-    tierTwoContainer: tierTwoContainer || document.getElementById('tierTwoTicketsContainer'),
-    closedResolvedContainer: closedResolvedContainer || document.getElementById('closedResolvedTicketsContainer'),
-    closedFeatureContainer: closedFeatureContainer || document.getElementById('closedFeatureTicketsContainer'),
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: false
   });
 
   return clone;
 }
 
-/* reset template back to blank Open card */
+/**
+ * Clears the template so it is a blank Open ticket again.
+ */
 function resetTicketTemplate(template) {
   const fields = template.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
@@ -307,7 +308,11 @@ function resetTicketTemplate(template) {
   });
 }
 
-/* status wiring */
+/**
+ * Attach status-change behavior:
+ * - Template: change status to create a new card in target container, then reset template
+ * - Normal card: move card to target container
+ */
 function wireTicketStatus(card, containers) {
   const {
     openContainer,
@@ -320,9 +325,6 @@ function wireTicketStatus(card, containers) {
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
-  if (select.dataset.bound === 'true') return;
-  select.dataset.bound = 'true';
-
   select.addEventListener('change', () => {
     const value = select.value;
 
@@ -331,24 +333,27 @@ function wireTicketStatus(card, containers) {
       targetContainer = tierTwoContainer;
     } else if (value === 'Closed - Resolved') {
       targetContainer = closedResolvedContainer;
-    } else if (value === 'Closed – Feature Not Supported') {
+    } else if (
+      value === 'Closed – Feature Not Supported' || // EN dash
+      value === 'Closed - Feature Not Supported'    // normal dash (just in case)
+    ) {
       targetContainer = closedFeatureContainer;
     } else if (value === 'Open') {
       targetContainer = openContainer;
     }
 
-    if (isTemplate) {
-      if (value === 'Open' || !targetContainer) return;
+    if (!targetContainer) return;
 
-      const newCard = createTicketCard(card, {
-        copyValues: true,
-        openContainer,
-        tierTwoContainer,
-        closedResolvedContainer,
-        closedFeatureContainer
-      });
+    if (isTemplate) {
+      // Template should never leave the Open container
+      if (value === 'Open') return;
+
+      // Create card WITH template data and move it
+      const newCard = createTicketCard(card, { copyValues: true });
       const newStatus = newCard.querySelector('.ticket-status-select');
-      if (newStatus) newStatus.value = value;
+      if (newStatus) {
+        newStatus.value = value;
+      }
 
       targetContainer.appendChild(newCard);
       resetTicketTemplate(card);
@@ -356,41 +361,47 @@ function wireTicketStatus(card, containers) {
       return;
     }
 
-    if (!targetContainer || targetContainer === card.parentElement) return;
-    targetContainer.appendChild(card);
-    renumberTickets();
+    // Non-template cards simply move between containers
+    if (card.parentElement !== targetContainer) {
+      targetContainer.appendChild(card);
+      renumberTickets();
+    }
   });
 }
 
-/* inject the "Ticket # X" badge into cloned cards */
-function injectTicketBadge(card) {
-  ensureTicketInnerWrapper(card);
-
-  const inner = card.querySelector('.ticket-group-inner');
-  if (!inner) return;
-
-  let badge = inner.querySelector('.ticket-badge');
-  if (!badge) {
-    badge = document.createElement('div');
-    badge.className = 'ticket-badge';
-    // insert at the top of inner
-    inner.insertBefore(badge, inner.firstChild);
-  }
-}
-
-/* renumber all non-template tickets: Ticket # 1, 2, 3... */
+/**
+ * Adds / updates Ticket # pills in the order cards appear
+ */
 function renumberTickets() {
-  const allCards = document.querySelectorAll('.ticket-group:not(.ticket-group-template)');
-  let index = 1;
+  const allCards = document.querySelectorAll(
+    '#openTicketsContainer .ticket-group:not(.ticket-group-template), ' +
+    '#tierTwoTicketsContainer .ticket-group, ' +
+    '#closedResolvedTicketsContainer .ticket-group, ' +
+    '#closedFeatureTicketsContainer .ticket-group'
+  );
 
+  let index = 1;
   allCards.forEach((card) => {
-    injectTicketBadge(card);
     const badge = card.querySelector('.ticket-badge');
     if (badge) {
       badge.textContent = `Ticket # ${index}`;
-      index += 1;
+      index++;
     }
   });
+}
+
+/**
+ * Injects a Ticket # pill at the top of a ticket-group-inner
+ */
+function injectTicketBadge(innerContainer) {
+  // Remove any existing badge first
+  const existing = innerContainer.querySelector('.ticket-badge');
+  if (existing) existing.remove();
+
+  const badge = document.createElement('div');
+  badge.className = 'ticket-badge';
+  badge.textContent = 'Ticket # ?'; // real number set by renumberTickets()
+  innerContainer.insertBefore(badge, innerContainer.firstChild);
 }
 
 /* -------------------------------------
