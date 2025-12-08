@@ -1,5 +1,5 @@
 /* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS
+   myKaarma Interactive Training Checklist – FULL JS (clean)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,10 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
-
   if (!navButtons.length || !sections.length) return;
 
   navButtons.forEach((btn) => {
+    // prevent double-binding
+    if (btn.dataset.bound === 'true') return;
+    btn.dataset.bound = 'true';
+
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
 
@@ -55,6 +58,9 @@ function clearSection(section) {
 
 function initClearPageButtons() {
   document.querySelectorAll('.clear-page-btn').forEach((btn) => {
+    if (btn.dataset.bound === 'true') return;
+    btn.dataset.bound = 'true';
+
     btn.addEventListener('click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
@@ -67,7 +73,8 @@ function initClearPageButtons() {
 
 function initClearAllButton() {
   const btn = document.getElementById('clearAllBtn');
-  if (!btn) return;
+  if (!btn || btn.dataset.bound === 'true') return;
+  btn.dataset.bound = 'true';
 
   btn.addEventListener('click', () => {
     document.querySelectorAll('.page-section').forEach(clearSection);
@@ -80,7 +87,8 @@ function initClearAllButton() {
 ------------------------------------- */
 function initDealershipNameBinding() {
   const input = document.getElementById('dealershipNameInput');
-  if (!input) return;
+  if (!input || input.dataset.bound === 'true') return;
+  input.dataset.bound = 'true';
 
   input.addEventListener('input', updateDealershipNameDisplay);
   updateDealershipNameDisplay();
@@ -105,7 +113,8 @@ function initAdditionalTrainers() {
   if (!row || !container) return;
 
   const addBtn = row.querySelector('.add-row');
-  if (!addBtn) return;
+  if (!addBtn || addBtn.dataset.bound === 'true') return;
+  addBtn.dataset.bound = 'true';
 
   addBtn.addEventListener('click', () => {
     const newRow = document.createElement('div');
@@ -135,7 +144,8 @@ function initAdditionalPoc() {
   if (!template) return;
 
   const addBtn = template.querySelector('.additional-poc-add');
-  if (!addBtn) return;
+  if (!addBtn || addBtn.dataset.bound === 'true') return;
+  addBtn.dataset.bound = 'true';
 
   function createNormalCard() {
     const card = document.createElement('div');
@@ -181,16 +191,26 @@ function initSupportTickets() {
   const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
+  // Wrap inner content so we can prepend a badge cleanly on clones
+  ensureTicketInnerWrapper(template);
+
   // Template status always Open
   const statusSelect = template.querySelector('.ticket-status-select');
   if (statusSelect) statusSelect.value = 'Open';
 
   const addBtn = template.querySelector('.add-ticket-btn');
-  if (addBtn) {
+  if (addBtn && addBtn.dataset.bound !== 'true') {
+    addBtn.dataset.bound = 'true';
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard(template, { copyValues: false });
+      const newCard = createTicketCard(template, {
+        copyValues: false,
+        openContainer,
+        tierTwoContainer,
+        closedResolvedContainer,
+        closedFeatureContainer
+      });
       openContainer.appendChild(newCard);
-      updateTicketBadges();
+      renumberTickets();
     });
   }
 
@@ -203,27 +223,40 @@ function initSupportTickets() {
   });
 }
 
-/**
- * Creates a new ticket card cloned from the template.
- * @param {HTMLElement} sourceCard - the card to clone (usually the template)
- * @param {Object} options
- *   - copyValues: if true, keep existing input/select values. If false, clear them.
- */
-function createTicketCard(sourceCard, options = {}) {
-  const { copyValues = false } = options;
+/* make sure each ticket card has an inner wrapper for badge + rows */
+function ensureTicketInnerWrapper(card) {
+  if (card.querySelector('.ticket-group-inner')) return;
+
+  const rows = Array.from(card.children);
+  const inner = document.createElement('div');
+  inner.className = 'ticket-group-inner';
+
+  rows.forEach((child) => inner.appendChild(child));
+  card.appendChild(inner);
+}
+
+/* create card from template */
+function createTicketCard(sourceCard, opts = {}) {
+  const {
+    copyValues = false,
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer
+  } = opts;
 
   const clone = sourceCard.cloneNode(true);
-
-  // no longer the template
   clone.classList.remove('ticket-group-template');
   clone.removeAttribute('data-template');
 
-  // remove ADD button from clones
-  const addBtn = clone.querySelector('.add-ticket-btn');
-  if (addBtn) {
-    addBtn.remove();
-  }
+  // make sure structure is correct
+  ensureTicketInnerWrapper(clone);
 
+  // remove any add button from clones
+  const addBtn = clone.querySelector('.add-ticket-btn');
+  if (addBtn) addBtn.remove();
+
+  // reset or keep values
   const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (!copyValues) {
@@ -241,26 +274,22 @@ function createTicketCard(sourceCard, options = {}) {
     }
   });
 
-  // Wire up status logic for this new card
-  const openContainer = document.getElementById('openTicketsContainer');
-  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+  // add / update Ticket # badge
+  injectTicketBadge(clone);
 
+  // wire status changes
   wireTicketStatus(clone, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
+    openContainer: openContainer || document.getElementById('openTicketsContainer'),
+    tierTwoContainer: tierTwoContainer || document.getElementById('tierTwoTicketsContainer'),
+    closedResolvedContainer: closedResolvedContainer || document.getElementById('closedResolvedTicketsContainer'),
+    closedFeatureContainer: closedFeatureContainer || document.getElementById('closedFeatureTicketsContainer'),
     isTemplate: false
   });
 
   return clone;
 }
 
-/**
- * Clears all fields in the template and resets status to Open.
- */
+/* reset template back to blank Open card */
 function resetTicketTemplate(template) {
   const fields = template.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
@@ -278,9 +307,7 @@ function resetTicketTemplate(template) {
   });
 }
 
-/**
- * Wires status change for a ticket card.
- */
+/* status wiring */
 function wireTicketStatus(card, containers) {
   const {
     openContainer,
@@ -292,6 +319,9 @@ function wireTicketStatus(card, containers) {
 
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
+
+  if (select.dataset.bound === 'true') return;
+  select.dataset.bound = 'true';
 
   select.addEventListener('change', () => {
     const value = select.value;
@@ -308,32 +338,59 @@ function wireTicketStatus(card, containers) {
     }
 
     if (isTemplate) {
-      // Template never leaves Open
       if (value === 'Open' || !targetContainer) return;
 
-      const newCard = createTicketCard(card, { copyValues: true });
+      const newCard = createTicketCard(card, {
+        copyValues: true,
+        openContainer,
+        tierTwoContainer,
+        closedResolvedContainer,
+        closedFeatureContainer
+      });
       const newStatus = newCard.querySelector('.ticket-status-select');
       if (newStatus) newStatus.value = value;
 
       targetContainer.appendChild(newCard);
       resetTicketTemplate(card);
-      updateTicketBadges();
+      renumberTickets();
       return;
     }
 
     if (!targetContainer || targetContainer === card.parentElement) return;
-
     targetContainer.appendChild(card);
-    updateTicketBadges();
+    renumberTickets();
   });
 }
 
-/**
- * OPTIONAL: if you decide later to show counts/badges,
- * you can enhance this. For now it just exists as a hook.
- */
-function updateTicketBadges() {
-  // Currently no visible badges; left as a hook.
+/* inject the "Ticket # X" badge into cloned cards */
+function injectTicketBadge(card) {
+  ensureTicketInnerWrapper(card);
+
+  const inner = card.querySelector('.ticket-group-inner');
+  if (!inner) return;
+
+  let badge = inner.querySelector('.ticket-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.className = 'ticket-badge';
+    // insert at the top of inner
+    inner.insertBefore(badge, inner.firstChild);
+  }
+}
+
+/* renumber all non-template tickets: Ticket # 1, 2, 3... */
+function renumberTickets() {
+  const allCards = document.querySelectorAll('.ticket-group:not(.ticket-group-template)');
+  let index = 1;
+
+  allCards.forEach((card) => {
+    injectTicketBadge(card);
+    const badge = card.querySelector('.ticket-badge');
+    if (badge) {
+      badge.textContent = `Ticket # ${index}`;
+      index += 1;
+    }
+  });
 }
 
 /* -------------------------------------
@@ -343,6 +400,9 @@ function initTableAddRowButtons() {
   const tableFooters = document.querySelectorAll('.table-footer .add-row');
 
   tableFooters.forEach((btn) => {
+    if (btn.dataset.bound === 'true') return;
+    btn.dataset.bound = 'true';
+
     btn.addEventListener('click', () => {
       const footer = btn.closest('.table-footer');
       if (!footer) return;
@@ -359,7 +419,6 @@ function initTableAddRowButtons() {
 
       const newRow = lastRow.cloneNode(true);
 
-      // Clear values in cloned row
       const fields = newRow.querySelectorAll('input, select, textarea');
       fields.forEach((el) => {
         if (el.tagName === 'SELECT') {
@@ -381,7 +440,8 @@ function initTableAddRowButtons() {
 ------------------------------------- */
 function initPdfExport() {
   const btn = document.getElementById('savePDF');
-  if (!btn) return;
+  if (!btn || btn.dataset.bound === 'true') return;
+  btn.dataset.bound = 'true';
 
   btn.addEventListener('click', () => {
     if (!window.jspdf) {
@@ -406,5 +466,5 @@ function initPdfExport() {
    DMS CARDS (placeholder)
 ------------------------------------- */
 function initDmsCards() {
-  // Future dynamic behavior for DMS cards can go here
+  // no-op for now
 }
