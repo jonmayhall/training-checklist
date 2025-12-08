@@ -645,16 +645,20 @@ main {
   background: #ff8b42;
 }
 
-/* Cloned cards: no + button, normal rounded box */
-.ticket-group:not(.ticket-group-template) .ticket-number-wrap {
-  flex: 0 0 var(--input-width);
-  max-width: var(--input-width);
+/* Support Tickets – ticket # row tweaks */
+
+/* Cloned cards (no +) should have a normal rounded textbox */
+.ticket-group .ticket-number-row:not(:has(> .add-ticket-btn)) .ticket-number-input {
+  border-radius: var(--radius-sm);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
 }
-.ticket-group:not(.ticket-group-template) .ticket-number-input {
-  border-radius: var(--radius-sm);   /* rounded both sides */
-}
-.ticket-group:not(.ticket-group-template) .ticket-number-wrap .add-ticket-btn {
-  display: none;
+
+/* Default template card – keep the input width consistent */
+.ticket-group .ticket-number-row .ticket-number-input {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
 }
 
 /* Match the standard right-side control widths */
