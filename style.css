@@ -216,6 +216,7 @@ main {
   font-weight: 700;
   text-align: left;
   letter-spacing: .3px;
+  position: relative;
 }
 .page-section h1::after {
   content: "";
@@ -472,6 +473,7 @@ main {
   row-gap: 18px;
   align-items: stretch;
 }
+
 .primary-contacts-grid .mini-card {
   margin: 0;
   width: 100%;
@@ -550,6 +552,7 @@ main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
   flex: 0 0 32px;
   width: 32px;
@@ -559,9 +562,72 @@ main {
   margin-left: -1px;
   padding: 0;
 }
+
+/* override generic integrated-plus rule inside mini-card so fields line up */
 .mini-card .checklist-row.integrated-plus input[type="text"] {
   flex: 1 1 auto;
   width: 100%;
+}
+
+/* --------------- SUPPORT TICKETS --------------- */
+
+.ticket-group {
+  margin: 16px 0;
+  padding: 20px 18px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--orange);   /* thin orange border for each ticket card */
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  position: relative;
+}
+
+/* Ticket # badge (orange, top-left) for NON-template cards */
+.ticket-badge {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--orange);
+}
+
+/* Give the rows some vertical balance so labels are centered between lines */
+.ticket-group .checklist-row {
+  margin-bottom: 14px;
+  padding: 10px 0;
+  padding-left: 40px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.ticket-group .checklist-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Support Ticket Number integrated row in template – same width as others */
+.ticket-group .ticket-number-row.integrated-plus input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+}
+
+/* Cloned "Support Ticket Number" rows – full-width, rounded right side */
+.ticket-group .ticket-number-row-clone input[type="text"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+  margin-left: auto;
+}
+
+/* Safety: any integrated-plus ticket-number row without a + button should behave like normal */
+.ticket-group .ticket-number-row.integrated-plus:not(:has(.add-ticket-btn)) input[type="text"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
@@ -602,6 +668,7 @@ main {
   box-shadow: var(--shadow);
   background: #fff;
 }
+
 .dms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -619,8 +686,12 @@ main {
 }
 
 /* Push vs Pull card borders */
-.dms-card-push { border-color: var(--mk-orange); }
-.dms-card-pull { border-color: var(--mk-green); }
+.dms-card-push {
+  border-color: var(--mk-orange);
+}
+.dms-card-pull {
+  border-color: var(--mk-green);
+}
 
 /* Header: title + chip */
 .dms-card-header {
@@ -637,7 +708,7 @@ main {
   color: var(--mk-orange);
   display: inline-block;
   padding-bottom: 2px;
-  padding-right: 46px;
+  padding-right: 46px;              /* makes the underline extend past the text */
   border-bottom: 2px solid var(--mk-orange);
 }
 
@@ -652,17 +723,22 @@ main {
   border: 1px solid transparent;
   white-space: nowrap;
 }
+
+/* Push-Based = orange, white text */
 .dms-chip-push {
   background: var(--mk-orange);
   color: #ffffff;
   border-color: var(--mk-orange);
 }
+
+/* Pull-Based = green, white text */
 .dms-chip-pull {
   background: var(--mk-green);
   color: #ffffff;
   border-color: var(--mk-green);
 }
 
+/* Lines inside cards */
 .dms-list {
   list-style: none;
   margin: 8px 0 0;
@@ -685,6 +761,7 @@ main {
   justify-content: space-between;
   margin-bottom: 2px;
 }
+
 .dms-field {
   font-weight: 600;
   font-size: 13px;
@@ -732,8 +809,6 @@ main {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
-
-/* --- FIX: myKaarma orange table headers same width as tables --- */
 .section-header + .table-container {
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
@@ -786,6 +861,8 @@ main {
   top: 0;
   z-index: 3;
 }
+
+/* Smaller white text for notes inside header cells */
 .training-table thead th .muted-note {
   font-size: 0.8em;
   color: #fff;
@@ -855,8 +932,12 @@ main {
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd) { background: #fff; }
-.training-table tr:nth-child(even) { background: #fafafa; }
+.training-table tr:nth-child(odd) { 
+  background: #fff; 
+}
+.training-table tr:nth-child(even) { 
+  background: #fafafa; 
+}
 
 /* Table footer + "+" button  */
 .table-footer {
@@ -931,7 +1012,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last columns */
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -996,7 +1077,6 @@ main {
 .muted-note {
   font-size: 0.9em;
   color: #666;
-  font-style: italic !important;
 }
 
 /* --------------- RESPONSIVE --------------- */
@@ -1021,99 +1101,4 @@ main {
 .additional-trainers-row.integrated-plus.indent-sub label {
   flex: 0 0 36%;
   padding-right: 12px;
-}
-
-/* =======================================================
-   SUPPORT TICKETS SECTION
-   ======================================================= */
-
-/* Card shell for each ticket */
-.ticket-group {
-  margin: 18px 0;
-  padding: 18px 22px 20px;
-  border-radius: 16px;
-  border: 1px solid var(--orange);
-  background: #fff;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
-  position: relative;
-}
-
-/* Small orange “Ticket # X” pill in top-left */
-.ticket-badge {
-  position: absolute;
-  top: 10px;
-  left: 22px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--orange);
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: #fff7f2;
-  border: 1px solid #fed7aa;
-}
-.ticket-badge:empty {
-  display: none;
-}
-
-/* Remove the big left indent inside ticket groups */
-.ticket-group .checklist-row {
-  padding-left: 0;
-}
-
-/* Give first row some breathing room below badge */
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 26px;
-}
-
-/* Status + other fields use the normal global width */
-.ticket-group .checklist-row input[type="text"],
-.ticket-group .checklist-row select {
-  width: var(--input-width);
-}
-
-/* Short summary stays wider (about 3/4 of card) */
-.ticket-group .summary-row input[type="text"] {
-  flex: 0 0 70%;
-  width: 70%;
-}
-
-/* Integrated + button on Support Ticket Number row */
-.ticket-group .ticket-number-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-}
-
-/* Make sure extra cloned ticket-number inputs (no +) look normal */
-.ticket-group .ticket-number-row:not(.integrated-plus) input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-}
-
-/* Center labels vertically between dividers */
-.ticket-group .checklist-row label {
-  display: flex;
-  align-items: center;
-}
-
-/* Keep add-ticket button visually consistent with other + buttons */
-.ticket-group .add-ticket-btn {
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: .18s ease-in-out;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ticket-group .add-ticket-btn:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
 }
