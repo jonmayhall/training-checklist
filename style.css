@@ -10,6 +10,9 @@
   --card-bg: #fff;
   --border: #dcdcdc;
   --ink: #222;
+  --divider: #e0e0e0;
+  --text-dark: #222;
+  --field-bg: #f7f7f7;
 
   --radius-lg: 18px;       /* cards */
   --radius-md: 16px;
@@ -303,7 +306,7 @@ main {
   font-size: 14px;
   padding-left: 40px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--divider);
 }
 .section-block .checklist-row:last-of-type {
   border-bottom: none;
@@ -311,14 +314,16 @@ main {
   padding-bottom: 0;
 }
 .checklist-row label {
-  flex: 1 1 auto;
+  flex: 0 0 280px;
   font-weight: 500;
   text-align: left;
   padding-right: 16px;
   white-space: normal;
 }
 
-/* Inputs on the RIGHT (global, non-table, non-mini-card) */
+/* --------------- GLOBAL: SINGLE-LINE INPUTS & DROPDOWNS
+   (ALL PAGES, MATCH "MONDAY VISIT" LAYOUT)
+   ------------------------------------------------------ */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -332,7 +337,7 @@ main {
   padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #f7f7f7;
+  background: var(--field-bg);
   font-size: 13px;
   box-sizing: border-box;
 }
@@ -345,7 +350,11 @@ main {
   width: var(--input-width);
   margin-left: auto;
 }
-.address-input-wrap button.small-map-btn {
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;
+}
+.small-map-btn {
   flex: 0 0 auto;
   padding: 0 10px;
   font-size: 11px;
@@ -357,18 +366,13 @@ main {
   cursor: pointer;
   transition: background .16s, border-color .16s, color .16s, transform .16s;
 }
-.address-input-wrap button.small-map-btn:hover {
+.small-map-btn:hover {
   background: var(--orange);
   border-color: var(--orange);
   color: #fff;
   transform: translateY(-1px);
 }
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: auto;
-}
 
-/* Textareas */
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -414,7 +418,6 @@ main {
   padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
-  position: relative;
 }
 
 /* rows inside mini-card – shared layout */
@@ -571,164 +574,6 @@ main {
   width: 100%;
 }
 
-/* ============================================================
-   SUPPORT TICKETS — CARD STRUCTURE
-============================================================ */
-
-.ticket-group {
-  border: 2px solid var(--orange);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 22px;
-  background: white;
-  box-sizing: border-box;
-}
-
-/* Template card (first card): no Ticket # label */
-.ticket-group-template .ticket-card-number {
-  display: none;
-}
-
-/* ============================================================
-   TICKET HEADER LABEL — "Ticket # 1", "Ticket # 2", etc.
-============================================================ */
-
-.ticket-card-header {
-  width: 100%;
-  padding: 2px 0 10px 2px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-
-.ticket-card-number {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--orange);
-  line-height: 1.2;
-  padding-bottom: 4px;
-}
-
-/* ============================================================
-   CHECKLIST ROWS
-============================================================ */
-
-.checklist-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--divider);
-}
-
-.checklist-row:last-child {
-  border-bottom: none;
-}
-
-.checklist-row label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dark);
-  width: 280px;                /* ensures labels align vertically */
-}
-
-/* ============================================================
-   TEXT INPUT / TEXTAREA / SELECT CONSISTENCY
-============================================================ */
-
-.ticket-group input[type="text"],
-.ticket-group textarea,
-.ticket-group select {
-  font-size: 14px;
-  padding: 9px 14px;
-  background: var(--field-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  outline: none;
-  box-sizing: border-box;
-}
-
-/* keep Short Summary the same wide layout */
-.ticket-summary-textarea {
-  width: calc(var(--input-width) * 1);
-  height: 44px;
-  resize: none;
-}
-
-/* ============================================================
-   TEMPLATE — SUPPORT TICKET NUMBER (INPUT + ADD BUTTON)
-============================================================ */
-
-.ticket-number-wrap {
-  display: flex;
-  align-items: stretch;
-  width: var(--input-width);
-  margin-left: auto;
-  justify-content: flex-end;
-}
-
-.ticket-number-input {
-  flex: 1 1 auto;
-  border-radius: var(--radius-sm);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  padding: 9px 12px;
-}
-
-/* + button on TEMPLATE card only */
-.add-ticket-btn {
-  width: 38px;
-  height: 38px;
-  background: var(--orange);
-  color: white;
-  border: none;
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  cursor: pointer;
-}
-
-/* remove + button from cloned cards (handled in JS but ensure no space remains) */
-.ticket-group:not(.ticket-group-template) .add-ticket-btn {
-  display: none !important;
-}
-
-/* ============================================================
-   STATUS DROPDOWN
-============================================================ */
-
-.ticket-status-select {
-  width: var(--input-width);
-}
-
-/* ============================================================
-   CLONED CARDS — SUPPORT TICKET NUMBER INPUT
-   (No + button, so rounded right side returns)
-============================================================ */
-
-.ticket-group:not(.ticket-group-template) .ticket-number-input {
-  border-radius: var(--radius-sm);
-}
-
-/* Ensure cloned ticket-number-input has full width */
-.ticket-group:not(.ticket-group-template) .ticket-number-wrap {
-  width: var(--input-width);
-}
-
-/* ============================================================
-   CLEANUP — REMOVE ANY POSSIBLE BLACK TEXT OVERRIDES
-============================================================ */
-
-.ticket-label,
-.ticket-card-number.black,
-.ticket-number-label {
-  color: inherit !important;
-}
-
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block {
@@ -807,7 +652,7 @@ main {
   color: var(--mk-orange);
   display: inline-block;
   padding-bottom: 2px;
-  padding-right: 46px;              /* makes the underline extend past the text */
+  padding-right: 46px;
   border-bottom: 2px solid var(--mk-orange);
 }
 
@@ -897,14 +742,14 @@ main {
   margin-bottom: 40px; 
 }
 
-/* Section header bar above tables – aligns with table width */
+/* Section header bar above tables */
 .section-header {
   background: var(--orange);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px -22px 0;  /* ensures orange header is same width as table/card */
+  margin: 18px -22px 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
@@ -1111,7 +956,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last columns */
+/* Checkboxes for last 4–5 columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
@@ -1179,6 +1024,119 @@ main {
   font-style: italic !important;
 }
 
+/* --------------- SUPPORT TICKETS (cards) --------------- */
+
+.ticket-group {
+  border: 2px solid var(--orange);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 22px;
+  background: white;
+  box-sizing: border-box;
+}
+
+/* Template card (first card): no Ticket # label */
+.ticket-group-template .ticket-card-number {
+  display: none;
+}
+
+/* Ticket header label top-left */
+.ticket-card-header {
+  width: 100%;
+  padding: 2px 0 6px 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.ticket-card-number {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--orange);
+  line-height: 1.2;
+  padding-bottom: 4px;
+}
+
+/* Support ticket rows re-use global checklist-row + label styles */
+
+/* Inputs / selects / textarea inside ticket groups */
+.ticket-group input[type="text"],
+.ticket-group textarea,
+.ticket-group select {
+  font-size: 14px;
+  padding: 9px 14px;
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* Short summary stays wide */
+.ticket-summary-textarea {
+  width: calc(var(--input-width) * 1);
+  height: 44px;
+  resize: none;
+}
+
+/* Number input + + button wrapper on template */
+.ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  width: var(--input-width);
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.ticket-number-input {
+  flex: 1 1 auto;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 9px 12px;
+}
+
+/* + button, template only */
+.add-ticket-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+}
+
+/* hide + on clones */
+.ticket-group:not(.ticket-group-template) .add-ticket-btn {
+  display: none !important;
+}
+
+/* Status dropdown */
+.ticket-status-select {
+  width: var(--input-width);
+}
+
+/* cloned ticket-number inputs: normal rounding */
+.ticket-group:not(.ticket-group-template) .ticket-number-input {
+  border-radius: var(--radius-sm);
+}
+.ticket-group:not(.ticket-group-template) .ticket-number-wrap {
+  width: var(--input-width);
+}
+
+/* safety: remove any stray black ticket labels */
+.ticket-label,
+.ticket-card-number.black,
+.ticket-number-label {
+  color: inherit !important;
+}
+
 /* --------------- RESPONSIVE --------------- */
 @media (max-width: 900px) {
   #sidebar { width: 190px; }
@@ -1187,6 +1145,14 @@ main {
   .primary-contacts-grid {
     grid-template-columns: 1fr;
   }
+
+  .checklist-row {
+    padding-left: 20px;
+  }
+
+  .checklist-row label {
+    flex-basis: 220px;
+  }
 }
 @media (max-width: 600px) {
   #sidebar { display: none; }
@@ -1194,6 +1160,25 @@ main {
 
   .primary-contacts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .checklist-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checklist-row label {
+    margin-bottom: 6px;
+    flex-basis: auto;
+  }
+
+  .section-block .checklist-row input[type="text"],
+  .section-block .checklist-row input[type="number"],
+  .section-block .checklist-row input[type="email"],
+  .section-block .checklist-row input[type="tel"],
+  .section-block .checklist-row input[type="date"],
+  .section-block .checklist-row select {
+    margin-left: 0;
   }
 }
 
