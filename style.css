@@ -569,104 +569,73 @@ main {
   width: 100%;
 }
 
-/* --------------- SUPPORT TICKETS (CLEAN LAYOUT) --------------- */
+/* --------------- SUPPORT TICKETS --------------- */
 
 .ticket-group {
   margin: 16px 0;
-  padding: 14px 18px 18px;
-  border-radius: var(--radius-lg);
+  padding: 18px 24px 20px;
+  border-radius: 16px;
   border: 1px solid var(--orange);
   background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  position: relative;
 }
 
-/* Make these rows behave like your normal Q&A rows */
+/* Orange “Ticket #” pill in top-left */
+.ticket-badge {
+  position: absolute;
+  top: 10px;
+  left: 28px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Push rows to the right so they don’t sit under the pill */
 .ticket-group .checklist-row {
-  padding-left: 40px;           /* match other section-block rows */
-  padding-bottom: 10px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #e0e0e0;
-}
-.ticket-group .checklist-row:last-of-type {
-  border-bottom: none;
-  margin-bottom: 8px;
-  padding-bottom: 0;
+  padding-left: 56px;
 }
 
-.ticket-group .checklist-row label {
-  flex: 1 1 auto;
-  padding-right: 16px;
-  text-align: left;
+/* Ticket number row */
+.ticket-number-row label {
+  flex: 0 0 220px;
 }
 
-/* -------- Support Ticket Number integrated field + button -------- */
-
-.ticket-number-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
+.ticket-number-input {
   flex: 0 0 var(--input-width);
-  max-width: var(--input-width);
-  margin-left: auto;
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
 }
 
-/* Override global input width rules for this specific field */
-.ticket-group .ticket-number-input {
-  flex: 1 1 auto;
-  width: auto;
-  margin-left: 0;
-  margin-right: 0;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  box-sizing: border-box;
-}
-
-/* + button attached to right side on TEMPLATE card only */
+/* Default template card "+" button */
 .ticket-group-template .add-ticket-btn {
-  flex: 0 0 34px;
+  margin-left: 8px;
   width: 34px;
   height: 34px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border: 1px solid var(--orange);
+  border-radius: 50%;
+  border: none;
   background: var(--orange);
   color: #fff;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
 }
+
 .ticket-group-template .add-ticket-btn:hover {
   background: #ff8b42;
 }
 
-/* Support Tickets – ticket # row tweaks */
-
-/* Cloned cards (no +) should have a normal rounded textbox */
-.ticket-group .ticket-number-row:not(:has(> .add-ticket-btn)) .ticket-number-input {
-  border-radius: var(--radius-sm);
-  width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* Default template card – keep the input width consistent */
-.ticket-group .ticket-number-row .ticket-number-input {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-}
-
-/* Match the standard right-side control widths */
-.ticket-group .checklist-row select,
-.ticket-group .checklist-row input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
+/* Wider “Short Summary of the Issue” box */
+.ticket-summary-input {
+  flex: 0 0 70%;
+  max-width: 70%;
 }
 
 /* -------- Make the Short Summary field much wider -------- */
