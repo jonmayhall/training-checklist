@@ -1,1143 +1,341 @@
-/* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
-   ======================================================= */
+/* ========================================================================== */
+/*                                ROOT VARIABLES                              */
+/* ========================================================================== */
 
-/* --------------- CSS VARIABLES --------------- */
 :root {
   --orange: #f36f21;
-  --light-orange: #f8b17b;
-  --gray-bg: #d7d7d7;
-  --card-bg: #fff;
+  --orange-light: #f9b88a;
+  --orange-soft: #ffe4d1;
+  --text: #333;
+  --text-light: #666;
+  --bg: #f3f3f3;
+  --white: #fff;
+
   --border: #dcdcdc;
-  --ink: #222;
+  --border-dark: #bcbcbc;
 
-  --radius-lg: 18px;       /* cards */
-  --radius-md: 16px;
-  --radius-sm: 14px;       /* inputs / buttons */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-pill: 40px;
 
-  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  --input-height: 42px;
+  --input-width: 340px;
+  --input-wide: 480px;
 
-  --input-width: 260px;    /* default text-box width */
-
-  /* DMS-specific accents */
-  --mk-orange: #f36f21;    /* myKaarma orange (matches --orange) */
-  --mk-green: #22c55e;     /* myKaarma green */
-  --mk-border: #e5e7eb;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-/* --------------- BASE --------------- */
-html, body {
+/* ========================================================================== */
+/*                               GLOBAL ELEMENTS                              */
+/* ========================================================================== */
+
+body {
   margin: 0;
-  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background: var(--gray-bg);
-  color: var(--ink);
-  overflow-x: hidden;
+  padding: 0;
+  background: var(--bg);
+  font-family: "Inter", sans-serif;
+  color: var(--text);
+  line-height: 1.4;
 }
 
-/* no italics anywhere by default */
-*, em, i {
-  font-style: normal !important;
-}
-
-/* --------------- TOP BAR --------------- */
-#topbar {
-  background: linear-gradient(90deg, #000 0%, var(--orange) 100%);
-  height: 70px;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 20;
-}
-.topbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-.top-logo {
-  height: 42px;
-  object-fit: contain;
-  display: block;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-#dealershipNameDisplay {
-  color:#fff;
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:.5px;
-}
-
-/* --------------- LAYOUT --------------- */
-#app {
-  display: flex;
-  min-height: 100vh;
-  margin-top: 70px;
-  overflow-x: hidden;
-}
-
-/* Darker, modern sidebar */
-#sidebar {
-  background: linear-gradient(180deg, #0b1220 0%, #111827 35%, #020617 100%);
-  border-right: 1px solid rgba(15,23,42,0.8);
-  width: 230px;
-  padding: 20px 12px 60px;
-  box-shadow: 0 0 18px rgba(15,23,42,0.6);
-  position: fixed;
-  top: 70px;
-  bottom: 0;
-  overflow-y: auto;
-}
-#sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* hide icon span but keep label if it exists */
-.nav-icon {
-  display: none;
-}
-
-/* MENU BUTTONS */
-.nav-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  padding: 9px 12px;
-  font-size: 12px;
-  text-align: left;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #e5e7eb;
-  transition: .18s;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.nav-btn::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 16%;
-  bottom: 16%;
-  width: 3px;
-  border-radius: 999px;
-  background: linear-gradient(to bottom, var(--orange), #22c55e);
-  opacity: 0;
-  transition: opacity .18s;
-}
-.nav-btn:hover {
-  background: rgba(15,23,42,0.85);
-  color: #f9fafb;
-  border-color: rgba(148,163,184,0.45);
-  box-shadow: 0 2px 8px rgba(15,23,42,0.7);
-}
-.nav-btn.active {
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
+h1, h2, h3, h4 {
+  margin: 0;
   font-weight: 600;
-  border-color: var(--orange);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.65);
-}
-.nav-btn.active::before {
-  opacity: 1;
+  color: var(--text);
 }
 
-/* Clear All at bottom of sidebar */
-#clearAllBtn {
-  position: fixed;
-  left: 24px;
-  bottom: 18px;
-  width: calc(230px - 48px);
-  padding: 7px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.9);
-  background: rgba(15,23,42,0.95);
-  color: #f9fafb;
+button {
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
-  opacity: 0.95;
-  transition: background .16s, transform .16s, opacity .16s, border-color .16s, box-shadow .16s;
-}
-#clearAllBtn:hover {
-  background: linear-gradient(90deg, var(--orange), #22c55e);
-  border-color: #f97316;
-  transform: translateY(-1px);
-  opacity: 1;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.75);
 }
 
-main {
-  flex: 1;
-  margin-left: 230px;
-  padding: 30px 32px;
-  background: var(--gray-bg);
-  box-sizing: border-box;
-}
+/* ========================================================================== */
+/*                                PAGE WRAPPER                                */
+/* ========================================================================== */
 
-/* --------------- PAGE SECTIONS / CARDS --------------- */
 .page-section {
-  position: relative;
-  display: none;
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
+  background: var(--white);
+  width: min(100%, 1000px);
+  margin: 24px auto;
+  padding: 28px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 22px 32px 28px;
-  margin: 0 auto 40px;
-  width: 100%;
-  max-width: 960px;
-  box-sizing: border-box;
-}
-.page-section.active {
-  display: block;
 }
 
-/* Page titles */
 .page-section h1 {
-  color: var(--orange);
-  margin: 4px 0 8px 4px;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
-  text-align: left;
-  letter-spacing: .3px;
-  position: relative;
-}
-.page-section h1::after {
-  content: "";
-  display: block;
-  width: 320px;
-  height: 4px;
-  background: var(--orange);
-  margin-top: 8px;
-  border-radius: 2px;
+  margin-bottom: 8px;
 }
 
-/* Page subtitle */
 .page-subtitle {
-  margin: 4px 0 20px 4px;
-  font-size: 13px;
-  color: #555;
+  color: var(--text-light);
+  font-size: 15px;
+  margin-bottom: 18px;
 }
 
-/* Reset button – top-right of each page card */
+/* CLEAR PAGE BUTTON */
 .clear-page-btn {
-  position: absolute;
-  top: 16px;
-  right: 24px;
-  padding: 4px 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid #bbb;
-  background: #f7f7f7;
-  color: #555;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background .18s, transform .18s, box-shadow .18s, border-color .18s, color .18s;
+  float: right;
+  background: #fafafa;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 6px 14px;
+  font-size: 13px;
 }
 .clear-page-btn:hover {
+  border-color: var(--border-dark);
   background: #fff;
-  border-color: var(--orange);
-  color: var(--orange);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
 
-/* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
+/* ========================================================================== */
+/*                         SECTION / CARD CONTAINERS                          */
+/* ========================================================================== */
+
 .section-block {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  padding: 0 22px 14px;
-  margin-bottom: 24px;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
+  margin-top: 28px;
 }
+
 .section-block h2 {
-  margin: 0 0 16px;
-  padding: 10px 16px;
   background: var(--orange);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left: -22px;
-  margin-right: -22px;
+  color: var(--white);
+  padding: 12px 20px;
+  font-size: 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
-/* Extra spacing when a notes card is followed by another card */
-.notes-block {
-  margin-bottom: 32px;
-}
-.notes-block + .section-block,
-.notes-block + .section {
-  margin-top: 10px;
+/* Card under each orange header */
+.card {
+  background: var(--white);
+  padding: 22px 26px;
+  border: 1px solid var(--orange-soft);
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
+/* ========================================================================== */
+/*                               CHECKLIST ROWS                               */
+/* ========================================================================== */
+
 .checklist-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  font-size: 14px;
-  padding-left: 40px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
 }
-.section-block .checklist-row:last-of-type {
+
+.checklist-row:last-child {
   border-bottom: none;
-  margin-bottom: 8px;
-  padding-bottom: 0;
 }
+
 .checklist-row label {
-  flex: 1 1 auto;
-  font-weight: 500;
-  text-align: left;
-  padding-right: 16px;
-  white-space: normal;
+  width: 260px;
+  font-size: 15px;
 }
 
-/* Inputs on the RIGHT (global, non-table, non-mini-card) */
-.section-block .checklist-row input[type="text"],
-.section-block .checklist-row input[type="number"],
-.section-block .checklist-row input[type="email"],
-.section-block .checklist-row input[type="tel"],
-.section-block .checklist-row input[type="date"],
-.section-block .checklist-row select {
-  flex: 0 0 var(--input-width);
+.checklist-row input,
+.checklist-row select,
+.checklist-row textarea {
+  height: var(--input-height);
   width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-  padding: 7px 10px;
+  max-width: var(--input-width);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  background: #f8f8f8;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  box-sizing: border-box;
+  transition: 0.15s;
 }
 
-/* address input + map button wrapper (page 2) */
-.address-input-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  width: var(--input-width);
-  margin-left: auto;
-}
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: auto;
-}
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 0 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  cursor: pointer;
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
-}
-.small-map-btn:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.section-block textarea {
-  width: 96%;
-  margin: 6px auto 10px;
-  display: block;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
+.checklist-row textarea {
+  height: 100px;
   resize: vertical;
 }
 
-/* Focus */
-.section-block input:focus,
-.section-block select:focus,
-.section-block textarea:focus {
+.checklist-row input:focus,
+.checklist-row select:focus,
+.checklist-row textarea:focus {
   border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.35);
+  background: #fffdf9;
+  box-shadow: 0 0 4px rgba(255, 132, 50, 0.4);
   outline: none;
-  background: #fff9f5;
 }
 
-/* Indented sub-rows */
-.indent-sub {
-  padding-left: 60px !important;
+/* ========================================================================== */
+/*                                   TABLES                                   */
+/* ========================================================================== */
+
+.table-card {
+  margin-top: 24px;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid #eee;
+  padding-bottom: 20px;
 }
 
-/* --------------- ADDITIONAL TRAINERS DIVIDER --------------- */
-.checklist-row.additional-trainers-row,
-.additional-trainer-row {
-  border-bottom: 1px solid #e0e0e0 !important;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-}
-
-/* --------------- MINI-CARDS (Contacts etc.) --------------- */
-/* thin, continuous orange border around entire card */
-.mini-card {
-  border: 1px solid var(--orange);
-  border-radius: var(--radius-md);
-  background: #fff;
-  margin: 0;
-  padding: 6px 0 4px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-/* rows inside mini-card – shared layout */
-.mini-card .checklist-row {
-  margin: 0;
-  border-bottom: 1px solid #e5e5e5;
-  padding: 8px 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.mini-card .checklist-row:last-child {
-  border-bottom: none;
-}
-
-/* move verbiage left + fixed label width */
-.mini-card .checklist-row label {
-  flex: 0 0 36%;
-  font-weight: 500;
-  text-align: left;
-  padding-right: 12px;
-  white-space: nowrap;
-}
-
-/* aligned text boxes (mini-card only) */
-.mini-card .checklist-row input[type="text"],
-.mini-card .checklist-row input[type="number"],
-.mini-card .checklist-row input[type="email"],
-.mini-card .checklist-row input[type="tel"],
-.mini-card .checklist-row input[type="date"],
-.mini-card .checklist-row select {
-  flex: 1 1 auto;
-  width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-}
-
-/* ensure no weird tint */
-.mini-card .checklist-row {
-  background: #fff !important;
-}
-
-/* semantic aliases */
-.contact-card { }
-.champions-card { }
-.blockers-card { }
-
-/* --------------- PRIMARY CONTACTS GRID (2 x N) --------------- */
-.primary-contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 18px;
-  row-gap: 18px;
-  align-items: stretch;
-}
-
-.primary-contacts-grid .mini-card {
-  margin: 0;
-  width: 100%;
-}
-
-/* --------------- Integrated “+” rows --------------- */
-/* Layout: label | input | + button */
-
-.section-block .checklist-row.integrated-plus,
-.section-block .checklist-row:has(> .add-row) {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-}
-
-.section-block .checklist-row.integrated-plus label,
-.section-block .checklist-row:has(> .add-row) label {
-  flex: 1 1 auto;
-  padding-right: 16px;
-}
-
-/* Text box in integrated rows (default) */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"],
-.section-block .checklist-row:has(> .add-row) input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  margin-left: auto;
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Integrated + button – default */
-.section-block .checklist-row.integrated-plus > .add-row,
-.section-block .checklist-row:has(> .add-row) > .add-row {
-  flex: 0 0 34px;
-  position: relative;
-  margin-left: -1px;
+.table-card h3 {
   background: var(--orange);
   color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
+  padding: 12px 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
   font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: .18s ease-in-out;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead th {
+  background: var(--orange-light);
+  padding: 12px;
+  font-weight: 600;
+  border-right: 1px solid #fff;
+}
+
+thead th:last-child {
+  border-right: none;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+td input,
+td select {
+  width: 95%;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+/* ========================================================================== */
+/*                              ADD ROW BUTTONS                               */
+/* ========================================================================== */
+
+.add-row-btn,
+.add-support-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--orange);
+  border-radius: 50%;
+  color: #fff;
+  border: none;
+  font-size: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.section-block .checklist-row.integrated-plus > .add-row:hover,
-.section-block .checklist-row:has(> .add-row) > .add-row:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
+
+.add-row-btn:hover,
+.add-support-btn:hover {
+  background: #ff7f32;
 }
 
-/* --------------- Additional POC integrated row tweaks --------------- */
-.additional-poc-card .checklist-row.integrated-plus label {
-  white-space: nowrap;
-  font-size: 13px;
-  flex: 0 0 36%;
-  padding-right: 12px;
-}
-
-/* inside mini-card we want full-width + button at end */
-.additional-poc-card .checklist-row.integrated-plus input.additional-poc-name {
-  flex: 1 1 auto;
-  width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.additional-poc-card .checklist-row.integrated-plus .additional-poc-add {
-  flex: 0 0 32px;
-  width: 32px;
-  height: 34px;
-  font-size: 16px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin-left: -1px;
-  padding: 0;
-}
-
-/* override generic integrated-plus rule inside mini-card so fields line up */
-.mini-card .checklist-row.integrated-plus input[type="text"] {
-  flex: 1 1 auto;
-  width: 100%;
-}
-
-/* --------------- SUPPORT TICKETS --------------- */
+/* ========================================================================== */
+/*                          SUPPORT TICKET PAGE LAYOUT                         */
+/* ========================================================================== */
 
 .support-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 10px;
+  gap: 30px;
+  margin-top: 20px;
 }
 
 .support-column h3 {
-  margin: 0 0 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.ticket-group {
-  margin: 8px 0 16px;
-  padding: 14px 20px 16px;
-  border-radius: 16px;
-  border: 1px solid var(--orange);
-  background: #fff;
-}
-
-.ticket-group-inner {
-  position: relative;
-}
-
-/* Orange Ticket # pill (only on cloned cards, not template) */
-.ticket-pill {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--orange);
-  color: #fff;
+  font-size: 20px;
   margin-bottom: 10px;
 }
 
-/* Put the pill at the very top of the card contents */
-.ticket-group-inner .ticket-pill {
+/* Support ticket card (all statuses) */
+.ticket-group {
+  background: var(--white);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  border: 1px solid var(--orange);
+  border-radius: var(--radius);
+  color: var(--text);
   position: relative;
-  top: 0;
 }
 
-/* Checklist rows inside support tickets reuse global styles */
+/* Orange Ticket # pill */
+.ticket-pill {
+  position: absolute;
+  top: -12px;
+  left: 18px;
+  background: var(--orange);
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+
+/* Hide pill on first default card */
+.ticket-group.no-pill .ticket-pill {
+  display: none;
+}
+
+/* Support ticket rows */
 .ticket-group .checklist-row {
   padding-left: 0;
 }
 
-/* Support Ticket Number row with integrated + */
-.ticket-number-row.integrated-plus label {
-  flex: 1 1 auto;
-}
-
-/* Ticket number input: same width & rounded right like others */
-.ticket-group .ticket-number-row.integrated-plus input.ticket-number-input {
-  flex: 0 0 var(--input-width);
+/* Support ticket number input */
+.ticket-number-input {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
   width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
 }
 
-/* + button attached to ticket number input */
-.ticket-group .ticket-number-row.integrated-plus .add-ticket-btn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border: 1px solid var(--orange);
+/* + button attached */
+.add-ticket-btn {
   background: var(--orange);
-  color: #fff;
-  cursor: pointer;
-  margin-left: -1px;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  color: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: none;
+  font-size: 22px;
+  margin-left: -2px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Summary input a bit wider, still aligned to the right */
-.ticket-group .summary-row input.ticket-summary-input {
-  flex: 0 0 calc(var(--input-width) * 1.3);
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: 0;
+.add-ticket-btn:hover {
+  background: #ff7f32;
 }
 
-/* Make sure selects/inputs match your global look */
-.ticket-group input[type="text"],
-.ticket-group select {
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
+/* Summary field wider */
+.ticket-summary-input {
+  width: calc(var(--input-width) * 1.4);
+  max-width: calc(var(--input-width) * 1.4);
 }
 
-.ticket-group input[type="text"]:focus,
-.ticket-group select:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.35);
-  outline: none;
-  background: #fff9f5;
+/* Status dropdown */
+.ticket-status-select {
+  width: var(--input-width);
 }
+
+/* ========================================================================== */
+/*                              MOBILE RESPONSIVE                             */
+/* ========================================================================== */
 
 @media (max-width: 900px) {
   .support-columns {
     grid-template-columns: 1fr;
   }
-}
 
-/* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
-
-.dms-overview-block {
-  margin-bottom: 28px;
-}
-
-/* Legend row of dot + label text */
-.dms-legend {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 6px 18px;
-  font-size: 13px;
-  margin-top: 8px;
-}
-
-/* Colored dots used in legend and inline */
-.dms-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  margin-right: 6px;
-}
-
-/* dot / tag color mapping */
-.dms-dot-auto      { background: var(--mk-green); }
-.dms-dot-ondemand  { background: #f97316; }
-.dms-dot-withro    { background: #0ea5e9; }
-.dms-dot-planned   { background: #eab308; }
-.dms-dot-na        { background: #9ca3af; }
-
-/* DMS card grid */
-.dms-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  padding: 18px;
-}
-
-/* Base card */
-.dms-card {
-  border-radius: 16px;
-  border: 1px solid var(--mk-border);
-  background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15,23,42,0.06);
-  padding: 12px 14px 10px;
-}
-
-/* Push vs Pull card borders */
-.dms-card-push { border-color: var(--mk-orange); }
-.dms-card-pull { border-color: var(--mk-green); }
-
-/* Header: title + chip */
-.dms-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-/* DMS name – orange with longer underline */
-.dms-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--mk-orange);
-  display: inline-block;
-  padding-bottom: 2px;
-  padding-right: 46px;
-  border-bottom: 2px solid var(--mk-orange);
-}
-
-/* Small pill for Push-Based / Pull-Based */
-.dms-chip {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  white-space: nowrap;
-}
-.dms-chip-push {
-  background: var(--mk-orange);
-  color: #ffffff;
-  border-color: var(--mk-orange);
-}
-.dms-chip-pull {
-  background: var(--mk-green);
-  color: #ffffff;
-  border-color: var(--mk-green);
-}
-
-/* Lines inside cards */
-.dms-list {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-}
-.dms-list li {
-  padding-top: 8px;
-  margin-top: 8px;
-  border-top: 1px solid #e5e7eb;
-}
-.dms-list li:first-child {
-  border-top: none;
-  margin-top: 0;
-  padding-top: 2px;
-}
-
-.dms-row-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2px;
-}
-
-.dms-field {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-/* DOT ONLY tags shown on right side of row */
-.dms-tag {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  flex-shrink: 0;
-  font-size: 0;
-  color: transparent;
-}
-.dms-tag-auto      { background: var(--mk-green); }
-.dms-tag-ondemand  { background: #f97316; }
-.dms-tag-withro    { background: #0ea5e9; }
-.dms-tag-planned   { background: #eab308; }
-.dms-tag-na        { background: #9ca3af; }
-.dms-tag-limited   { background: #6366f1; }
-.dms-tag-display   { background: #6b7280; }
-
-.dms-list p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: #4b5563;
-}
-
-/* --------------- Training TABLES --------------- */
-
-.section {
-  margin-bottom: 40px;
-}
-
-/* Section header bar above tables (myKaarma orange) – matches table width */
-.section-header {
-  background: var(--orange);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 10px 18px;
-  margin: 18px -22px 0;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  border-bottom: 1px solid var(--border);
-}
-.section-header + .table-container {
-  border-top: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  margin-top: 0;
-}
-
-/* Table Card */
-.table-container {
-  width: 100%;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  box-shadow: var(--shadow);
-  margin-bottom: 32px;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.scroll-wrapper {
-  display: block;
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  padding-bottom: 4px;
-}
-
-/* Table */
-.training-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 900px;
-}
-.training-table th,
-.training-table td {
-  white-space: nowrap;
-  text-align: center;
-  font-size: 13px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 6px;
-}
-
-/* Sticky header — LIGHT ORANGE */
-.training-table thead th {
-  background: var(--light-orange);
-  color: #fff;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
-
-/* Smaller white text for notes inside header cells */
-.training-table thead th .muted-note {
-  font-size: 0.8em;
-  color: #fff;
-}
-
-/* Sticky first column – for checklists (not Opcodes; overridden later) */
-.training-table th:first-child,
-.training-table td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 4;
-  width: 200px;
-  min-width: 200px;
-}
-.training-table thead th:first-child {
-  text-align: center;
-}
-.training-table td:first-child {
-  background: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-.training-table td:first-child input[type="checkbox"] {
-  flex-shrink: 0;
-  transform: scale(1.05);
-  margin-right: 8px;
-}
-.training-table td:first-child input[type="text"] {
-  width: 95%;
-  padding: 7px 8px;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  text-align: left;
-}
-
-/* Column widths (generic second col) */
-.training-table th:nth-child(2),
-.training-table td:nth-child(2) {
-  width: 185px;
-  min-width: 185px;
-}
-
-/* Inputs/Selects inside table cells */
-.training-table input[type="text"],
-.training-table select {
-  width: 100%;
-  min-width: 130px;
-  box-sizing: border-box;
-  padding: 5px 5px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  text-align: center;
-}
-.training-table input[type="text"]:focus,
-.training-table select:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 4px rgba(243,111,33,0.4);
-  outline: none;
-  background: #fff9f5;
-}
-
-/* Alternating rows */
-.training-table tr:nth-child(odd) {
-  background: #fff;
-}
-.training-table tr:nth-child(even) {
-  background: #fafafa;
-}
-
-/* Table footer + "+" button  */
-.table-footer {
-  width: 100%;
-  background: #f5f5f5;
-  border-top: 1px solid var(--border);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-  box-sizing: border-box;
-}
-.table-footer .add-row {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: .2s;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
-}
-.table-footer .add-row:hover {
-  background: #ff8b42;
-  transform: scale(1.05);
-}
-
-/* --------------- OPCODES PAGE --------------- */
-
-/* Turn off sticky/flex first column only for Opcodes section */
-#opcodes-pricing .training-table th:first-child,
-#opcodes-pricing .training-table td:first-child {
-  position: static;
-  left: auto;
-  z-index: 1;
-  width: 60px;
-  min-width: 60px;
-}
-#opcodes-pricing .training-table td:first-child {
-  display: table-cell;
-  padding: 6px 6px;
-  background: inherit;
-}
-
-/* Opcode-related column sizing */
-#opcodes-pricing .training-table th:nth-child(2),
-#opcodes-pricing .training-table td:nth-child(2),
-#opcodes-pricing .training-table th:nth-child(3),
-#opcodes-pricing .training-table td:nth-child(3),
-#opcodes-pricing .training-table th:nth-child(4),
-#opcodes-pricing .training-table td:nth-child(4),
-#opcodes-pricing .training-table th:nth-child(5),
-#opcodes-pricing .training-table td:nth-child(5),
-#opcodes-pricing .training-table th:nth-child(7),
-#opcodes-pricing .training-table td:nth-child(7),
-#opcodes-pricing .training-table th:nth-child(8),
-#opcodes-pricing .training-table td:nth-child(8) {
-  width: 110px;
-  min-width: 100px;
-}
-
-/* Parts Price column – smaller so inputs fit */
-#opcodes-pricing .training-table th:nth-child(6),
-#opcodes-pricing .training-table td:nth-child(6) {
-  width: 80px;
-  max-width: 80px;
-  min-width: 60px;
-}
-
-/* Checkboxes for last 4–5 columns */
-#opcodes-pricing .training-table th:nth-child(9),
-#opcodes-pricing .training-table td:nth-child(9),
-#opcodes-pricing .training-table th:nth-child(10),
-#opcodes-pricing .training-table td:nth-child(10),
-#opcodes-pricing .training-table th:nth-child(11),
-#opcodes-pricing .training-table td:nth-child(11),
-#opcodes-pricing .training-table th:nth-child(12),
-#opcodes-pricing .training-table td:nth-child(12) {
-  width: 90px;
-  min-width: 80px;
-}
-#opcodes-pricing .training-table td:nth-child(9) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(10) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(11) input[type="checkbox"],
-#opcodes-pricing .training-table td:nth-child(12) input[type="checkbox"] {
-  transform: scale(1.1);
-}
-
-/* --------------- MAP EMBED (Dealership Info page) --------------- */
-.map-wrapper {
-  margin: 16px 0 8px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #f8f8f8;
-}
-.map-frame {
-  width: 100%;
-  height: 220px;
-  border: 0;
-}
-.map-helper-text {
-  margin: 6px 10px 10px;
-  font-size: 12px;
-  color: #555;
-}
-
-/* --------------- FLOATING PDF BUTTON (summary page) --------------- */
-#training-summary .floating-btn {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  position: absolute;
-  top: 18px;
-  right: 24px;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-#training-summary .floating-btn:hover {
-  background: #ff8b42;
-}
-
-/* --------------- Muted note --------------- */
-.muted-note {
-  font-size: 0.9em;
-  color: #666;
-  font-style: italic !important;
-}
-
-/* --------------- RESPONSIVE --------------- */
-@media (max-width: 900px) {
-  #sidebar { width: 190px; }
-  main { margin-left: 190px; padding: 20px; }
-
-  .primary-contacts-grid {
-    grid-template-columns: 1fr;
+  .checklist-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
-}
-@media (max-width: 600px) {
-  #sidebar { display: none; }
-  main { margin-left: 0; padding: 16px; }
 
-  .primary-contacts-grid {
-    grid-template-columns: 1fr;
+  .checklist-row label {
+    margin-bottom: 6px;
   }
-}
-
-/* --------------- ALIGN INTEGRATED ADDITIONAL TRAINER ROW --------------- */
-.additional-trainers-row.integrated-plus.indent-sub label {
-  flex: 0 0 36%;
-  padding-right: 12px;
 }
