@@ -345,11 +345,7 @@ main {
   width: var(--input-width);
   margin-left: auto;
 }
-.address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: auto;
-}
-.small-map-btn {
+.address-input-wrap button.small-map-btn {
   flex: 0 0 auto;
   padding: 0 10px;
   font-size: 11px;
@@ -361,13 +357,18 @@ main {
   cursor: pointer;
   transition: background .16s, border-color .16s, color .16s, transform .16s;
 }
-.small-map-btn:hover {
+.address-input-wrap button.small-map-btn:hover {
   background: var(--orange);
   border-color: var(--orange);
   color: #fff;
   transform: translateY(-1px);
 }
+.address-input-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;
+}
 
+/* Textareas */
 .section-block textarea {
   width: 96%;
   margin: 6px auto 10px;
@@ -413,6 +414,7 @@ main {
   padding: 6px 0 4px;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
 /* rows inside mini-card – shared layout */
@@ -573,42 +575,100 @@ main {
 
 .ticket-group {
   margin: 16px 0;
-  padding: 10px 18px 16px;
+  padding: 14px 18px 18px;
   border-radius: 16px;
-  border: 1px solid var(--orange);   /* thin orange border */
+  border: 1px solid var(--orange);  /* thin orange border */
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  position: relative;
 }
 
-/* Top label: Ticket # 1, Ticket # 2, etc. */
-.ticket-header {
+/* ticket header – Ticket # 1 / 2 / 3, top-left */
+.ticket-card-header {
+  width: 100%;
+  padding: 6px 6px 4px 6px;
+  margin: 0 0 4px 0;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e5e5e5;
 }
 
-.ticket-label {
-  font-size: 13px;
+.ticket-card-number {
+  font-size: 14px;
   font-weight: 600;
-  color: var(--orange);
-  padding-top: 4px;
-  padding-bottom: 4px;  /* cushion above/below text */
+  color: var(--orange);      /* myKaarma orange */
+  margin: 0;
+  padding: 2px 0 4px 0;
+  line-height: 1.3;
 }
 
-/* center content vertically in rows */
-.ticket-group .checklist-row {
+/* Ensure first content row sits close under the header */
+.ticket-group .checklist-row:first-of-type {
+  margin-top: 4px;
+}
+
+/* Support Ticket Number integrated field + button */
+.ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+}
+
+.ticket-number-wrap input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* When there IS an add-ticket-btn, integrate it to the right side */
+.ticket-number-wrap:has(.add-ticket-btn) input[type="text"] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ticket-number-wrap .add-ticket-btn {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  transition: background .18s, transform .18s;
+}
+.ticket-number-wrap .add-ticket-btn:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
 }
 
-/* If you give the Support Ticket Number input this class, ensure full rounding */
-.ticket-group .ticket-number-input {
+/* Cloned cards (no add button) – keep textbox fully rounded */
+.ticket-number-wrap:not(:has(.add-ticket-btn)) input[type="text"] {
   border-radius: var(--radius-sm);
 }
 
-/* A simple subtle count style (if you add counts elsewhere later) */
+/* Short summary textarea a bit wider (3/4 of card) */
+.ticket-summary-textarea {
+  width: 75%;
+}
+
+/* A simple subtle count style if you ever add counts in headers later */
 .ticket-count-pill {
   display: inline-block;
   margin-left: 8px;
@@ -787,14 +847,14 @@ main {
   margin-bottom: 40px; 
 }
 
-/* Section header bar above tables */
+/* Section header bar above tables – aligns with table width */
 .section-header {
   background: var(--orange);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   padding: 10px 18px;
-  margin: 18px -22px 0;
+  margin: 18px -22px 0;  /* ensures orange header is same width as table/card */
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
 }
@@ -959,14 +1019,6 @@ main {
   transform: scale(1.05);
 }
 
-/* --- FIX: myKaarma orange table headers same width as tables --- */
-.section-header {
-  margin: 18px 0 0;        /* remove negative margins so header = table width */
-}
-.section-header + .table-container {
-  margin-top: 0;
-}
-
 /* --------------- OPCODES PAGE --------------- */
 
 /* Turn off sticky/flex first column only for Opcodes section */
@@ -1001,7 +1053,7 @@ main {
   min-width: 100px;
 }
 
-/* Parts Price column – smaller so inputs fit and don’t overflow */
+/* Parts Price column – smaller so inputs fit */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width: 80px;
@@ -1009,7 +1061,7 @@ main {
   min-width: 60px;
 }
 
-/* Checkboxes for last 4–5 columns */
+/* Checkboxes for last columns */
 #opcodes-pricing .training-table th:nth-child(9),
 #opcodes-pricing .training-table td:nth-child(9),
 #opcodes-pricing .training-table th:nth-child(10),
