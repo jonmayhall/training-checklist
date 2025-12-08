@@ -2833,7 +2833,7 @@
         </div>
       </section>
 
-     <!-- ========================================================= -->
+    <!-- ========================================================= -->
 <!-- PAGE 7: SUPPORT TICKETS                                  -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
@@ -2850,12 +2850,9 @@
 
     <div id="openTicketsContainer">
 
-      <!-- THIS IS THE ONLY “TEMPLATE” CARD.
-           It starts with NO Ticket # label.
-           JS will number cloned cards Ticket # 1, Ticket # 2, etc. -->
+      <!-- TEMPLATE CARD (no Ticket # label, has + button) -->
       <div class="ticket-group ticket-group-template">
 
-        <!-- Header label – empty for template -->
         <div class="ticket-card-header">
           <span class="ticket-card-number"></span>
         </div>
@@ -2874,6 +2871,7 @@
 
         <div class="checklist-row">
           <label>Short Summary of the Issue</label>
+          <!-- keep this textarea wide (same as now) -->
           <textarea
             class="ticket-summary-textarea"
             placeholder="Brief description of the issue"
@@ -2888,13 +2886,6 @@
             <option value="Closed - Resolved">Closed - Resolved</option>
             <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
           </select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Additional Notes</label>
-          <textarea
-            placeholder="Details, troubleshooting steps, contacts, or context…"
-          ></textarea>
         </div>
 
       </div> <!-- /ticket-group-template -->
