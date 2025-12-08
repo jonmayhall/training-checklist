@@ -569,30 +569,79 @@ main {
   width: 100%;
 }
 
-/* --------------- SUPPORT TICKETS --------------- */
+/* --------------- SUPPORT TICKETS (CLEAN LAYOUT) --------------- */
 
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
-  border-radius: 16px;
-  border: 1px solid #e1e1e1;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--orange);
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 8px;
+/* Use normal row padding but not indented like main Q&A */
+.ticket-group .checklist-row {
+  padding-left: 0;
 }
 
-/* A simple subtle count style if you add counts in headers later */
-.ticket-count-pill {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: #fee2e2;
-  color: #b91c1c;
+/* Integrated Support Ticket Number row on the TEMPLATE card */
+.ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: var(--input-width);
+  margin-left: auto;
+}
+
+.ticket-number-input {
+  flex: 1 1 auto;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* + button attached to the right side on the TEMPLATE only */
+.ticket-group-template .add-ticket-btn {
+  flex: 0 0 34px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
+}
+.ticket-group-template .add-ticket-btn:hover {
+  background: #ff8b42;
+}
+
+/* Cloned cards: no + button, normal rounded box */
+.ticket-group:not(.ticket-group-template) .ticket-number-wrap {
+  width: var(--input-width);
+}
+.ticket-group:not(.ticket-group-template) .ticket-number-input {
+  border-radius: var(--radius-sm);
+}
+.ticket-group:not(.ticket-group-template) .ticket-number-wrap .add-ticket-btn {
+  display: none;
+}
+
+/* Match the standard right-side control widths */
+.ticket-group .checklist-row select,
+.ticket-group .checklist-row input[type="text"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+}
+
+/* Make the summary field longer (about 3/4 of the card) */
+.ticket-summary-input {
+  flex: 0 0 calc(var(--input-width) * 1.4);
+  width: calc(var(--input-width) * 1.4);
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
