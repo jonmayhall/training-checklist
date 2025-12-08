@@ -569,78 +569,30 @@ main {
   width: 100%;
 }
 
-/* --------------- SUPPORT TICKETS --------------- */
+/* ========== SUPPORT TICKETS ========== */
 
 .ticket-group {
   margin: 16px 0;
   padding: 14px 18px 18px;
   border-radius: 16px;
-  border: 1px solid var(--orange);
+  border: 1px solid #f97316; /* thin myKaarma orange border */
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* Keep rows consistent with other cards */
-.ticket-group .checklist-row {
-  padding-left: 40px;
-  padding-right: 40px;
-}
-
-/* TEMPLATE ticket number row (with +) – integrated on the right */
-.ticket-group.ticket-group-template .ticket-number-row.integrated-plus input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  margin-left: auto;
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.ticket-group.ticket-group-template .ticket-number-row.integrated-plus .add-ticket-btn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border: 1px solid var(--orange);
-  background: var(--orange);
-  color: #fff;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
+/* inner wrapper so badge stays on top, rows below */
+.ticket-group-inner {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: -1px;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  padding: 0;
-}
-.ticket-group.ticket-group-template .ticket-number-row.integrated-plus .add-ticket-btn:hover {
-  background: #ff8b42;
+  flex-direction: column;
 }
 
-/* CLONED tickets – normal textbox: rounded on both sides & same width as others */
-.ticket-group:not(.ticket-group-template) .ticket-number-row.integrated-plus input[type="text"] {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-  margin-right: 0;
-  border-top-right-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
-}
-
-/* Short Summary of the Issue – longer input (about 3/4 card) */
-.ticket-group .summary-row label {
-  flex: 0 0 22%;
-  padding-right: 12px;
-}
+/* Longer Short Summary text box (about 3/4 card width) */
 .ticket-group .summary-row input[type="text"] {
   flex: 0 0 70%;
-  width: 70%;
-  margin-left: auto;
-  margin-right: 0;
+  max-width: 520px;
 }
 
-/* Small orange Ticket # pill in top-left of cloned cards */
+/* Orange Ticket # pill on cloned cards ONLY */
 .ticket-badge {
   display: inline-block;
   align-self: flex-start;
@@ -650,15 +602,9 @@ main {
   background: var(--orange);
   padding: 3px 12px;
   border-radius: 999px;
-  margin: 6px 0 10px 40px; /* aligns with left padding of rows */
+  margin: 4px 0 10px 40px;
 }
 
-}
-.ticket-group-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
