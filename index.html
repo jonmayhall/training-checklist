@@ -2839,7 +2839,7 @@
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track active issues, escalations, and resolutions.
+    Track open, escalated, and resolved myKaarma support tickets.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
@@ -2849,24 +2849,21 @@
 
     <div class="support-columns">
 
-      <!-- ========================= OPEN TICKETS ========================= -->
+      <!-- ============ OPEN TICKETS ============ -->
       <div class="support-column">
         <h3>Open</h3>
-
         <div id="openTicketsContainer">
 
-          <!-- ================= TEMPLATE CARD (DO NOT REMOVE) ================= -->
+          <!-- TEMPLATE: stays in Open, no Ticket # pill -->
           <div class="ticket-group ticket-group-template">
             <div class="ticket-group-inner">
 
-              <!-- LINE 1: Support Ticket Number + Add Button -->
               <div class="checklist-row integrated-plus ticket-number-row">
                 <label>Support Ticket Number</label>
                 <input type="text" class="ticket-number-input">
                 <button type="button" class="add-ticket-btn">+</button>
               </div>
 
-              <!-- LINE 2: Status -->
               <div class="checklist-row">
                 <label>Status</label>
                 <select class="ticket-status-select">
@@ -2877,32 +2874,31 @@
                 </select>
               </div>
 
-              <!-- LINE 3: Short Summary -->
               <div class="checklist-row summary-row">
                 <label>Short Summary of the Issue</label>
-                <input type="text">
+                <input type="text" class="ticket-summary-input">
               </div>
 
             </div>
           </div>
-          <!-- =============== END TEMPLATE (CLONES COME FROM THIS) =============== -->
+          <!-- END TEMPLATE -->
 
         </div>
       </div>
 
-      <!-- ========================= TIER TWO ========================= -->
+      <!-- ============ TIER TWO ============ -->
       <div class="support-column">
         <h3>Tier Two</h3>
         <div id="tierTwoTicketsContainer"></div>
       </div>
 
-      <!-- ========================= CLOSED - RESOLVED ========================= -->
+      <!-- ============ CLOSED - RESOLVED ============ -->
       <div class="support-column">
         <h3>Closed - Resolved</h3>
         <div id="closedResolvedTicketsContainer"></div>
       </div>
 
-      <!-- ========================= FEATURE NOT SUPPORTED ========================= -->
+      <!-- ============ FEATURE NOT SUPPORTED ============ -->
       <div class="support-column">
         <h3>Closed – Feature Not Supported</h3>
         <div id="closedFeatureTicketsContainer"></div>
