@@ -238,9 +238,14 @@ function initAdditionalPoc() {
   });
 }
 
-/* --------------- SUPPORT TICKETS (PAGE 7) --------------- */
-
-let ticketSequence = 0; // used to number cloned tickets
+/* --------------- SUPPORT TICKETS (CLEAN LOGIC) --------------- */
+/*
+  Behavior:
+  - The template card in Open (ticket-group-template) ALWAYS stays in Open.
+  - Template is the ONLY card with the "+" button.
+  - Clicking "+" adds exactly ONE new empty Open ticket card (no "+" button).
+  - Changing Status moves the card between the four containers.
+*/
 
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
@@ -253,23 +258,22 @@ function initSupportTickets() {
   const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Ensure template status is Open
+  // Ensure template status is always "Open"
   const templateStatus = template.querySelector('.ticket-status-select');
-  if (templateStatus) templateStatus.value = 'Open';
+  if (templateStatus) {
+    templateStatus.value = 'Open';
+  }
 
-  // + button on template: create a NEW Open card
+  // "+" button on template – adds ONE new Open card
   const addBtn = template.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard(template, {
-        copyValues: true
-      });
+      const newCard = createTicketCard(template, { copyValues: false });
       openContainer.appendChild(newCard);
-      renumberTicketCards();
     });
   }
 
-  // Status changes on template: send a copy to the right column, reset template
+  // Wire status logic for the template (special behavior)
   wireTicketStatus(template, {
     openContainer,
     tierTwoContainer,
@@ -280,50 +284,56 @@ function initSupportTickets() {
 }
 
 /**
- * Clone a ticket card.
- * copyValues = true keeps the current field values (for template copies).
+ * Creates a new ticket card cloned from the template.
+ * @param {HTMLElement} sourceCard - the card to clone (usually the template)
+ * @param {Object} options
+ *   - copyValues: if true, keep existing input/select values. If false, clear them.
  */
 function createTicketCard(sourceCard, options = {}) {
   const { copyValues = false } = options;
 
   const clone = sourceCard.cloneNode(true);
+
+  // Clones are normal cards (no template class, no "+")
   clone.classList.remove('ticket-group-template');
 
-  // Remove the + button from clones so they don't spawn more cards
   const addBtn = clone.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
 
-  // Clear or keep values
-  const fields = clone.querySelectorAll('input, select');
+  const fields = clone.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (!copyValues) {
       if (el.tagName === 'SELECT') {
-        el.selectedIndex = 0;
+        if (el.classList.contains('ticket-status-select')) {
+          el.value = 'Open';
+        } else {
+          el.selectedIndex = 0;
+        }
+      } else if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
       } else {
         el.value = '';
       }
     }
   });
 
-  // Add / ensure Ticket # pill
-  let pill = clone.querySelector('.ticket-pill');
-  if (!pill) {
-    pill = document.createElement('div');
-    pill.className = 'ticket-pill';
-    const inner = clone.querySelector('.ticket-group-inner');
-    if (inner) {
-      inner.insertBefore(pill, inner.firstChild);
-    } else {
-      clone.insertBefore(pill, clone.firstChild);
-    }
+  // Make sure the placeholder stays correct on clones
+  const numberInput = clone.querySelector('.ticket-number-input');
+  if (numberInput && !numberInput.placeholder) {
+    numberInput.placeholder = 'Zendesk ticket #';
   }
 
-  // Wire status behavior for this non-template card
+  // Wire status logic for this new card
+  const openContainer = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer = document.getElementById('closedFeatureTicketsContainer');
+
   wireTicketStatus(clone, {
-    openContainer: document.getElementById('openTicketsContainer'),
-    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
-    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
-    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer'),
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
     isTemplate: false
   });
 
@@ -331,10 +341,10 @@ function createTicketCard(sourceCard, options = {}) {
 }
 
 /**
- * Reset the template back to a blank Open card.
+ * Clears all fields in the template and resets status to Open.
  */
 function resetTicketTemplate(template) {
-  const fields = template.querySelectorAll('input, select');
+  const fields = template.querySelectorAll('input, select, textarea');
   fields.forEach((el) => {
     if (el.tagName === 'SELECT') {
       if (el.classList.contains('ticket-status-select')) {
@@ -342,6 +352,8 @@ function resetTicketTemplate(template) {
       } else {
         el.selectedIndex = 0;
       }
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = false;
     } else {
       el.value = '';
     }
@@ -349,7 +361,10 @@ function resetTicketTemplate(template) {
 }
 
 /**
- * Attach behavior when Status changes.
+ * Wires status change for a ticket card.
+ * - Template: when status changes away from "Open", create a new card with its data
+ *   in the correct container and reset template to blank Open.
+ * - Non-template: the card itself moves between containers.
  */
 function wireTicketStatus(card, containers) {
   const {
@@ -373,48 +388,29 @@ function wireTicketStatus(card, containers) {
       targetContainer = closedResolvedContainer;
     } else if (value === 'Closed – Feature Not Supported') {
       targetContainer = closedFeatureContainer;
+    } else if (value === 'Open') {
+      targetContainer = openContainer;
     }
 
+    if (!targetContainer) return;
+
     if (isTemplate) {
-      // Template never leaves Open; status change creates a copy in the right column
-      if (!targetContainer || value === 'Open') {
-        return;
-      }
+      // Template never leaves Open; instead, clone into target when status != Open
+      if (value === 'Open') return;
+
       const newCard = createTicketCard(card, { copyValues: true });
-      // set the clone's status explicitly
-      const statusSelect = newCard.querySelector('.ticket-status-select');
-      if (statusSelect) statusSelect.value = value;
+      const newStatus = newCard.querySelector('.ticket-status-select');
+      if (newStatus) newStatus.value = value;
 
       targetContainer.appendChild(newCard);
       resetTicketTemplate(card);
-      renumberTicketCards();
       return;
     }
 
-    // Non-template cards: move them between columns
-    if (!targetContainer) return;
+    // Normal cards move between containers
     if (card.parentElement !== targetContainer) {
       targetContainer.appendChild(card);
-      renumberTicketCards();
     }
-  });
-}
-
-/**
- * Number all non-template cards Ticket #1, #2, #3… in the order
- * they appear across all containers.
- */
-function renumberTicketCards() {
-  const allCards = document.querySelectorAll(
-    '.ticket-group:not(.ticket-group-template)'
-  );
-  let n = 1;
-  allCards.forEach((card) => {
-    let pill = card.querySelector('.ticket-pill');
-    if (pill) {
-      pill.textContent = 'Ticket # ' + n;
-    }
-    n += 1;
   });
 }
 
