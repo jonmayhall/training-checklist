@@ -1119,3 +1119,28 @@ main {
   flex: 0 0 36%;
   padding-right: 12px;
 }
+
+/* ===== Support Tickets – pill position & spacing ===== */
+
+.ticket-group {
+  position: relative;
+  padding-top: 40px; /* give space for pill at the top */
+}
+
+.ticket-pill {
+  position: absolute;
+  top: 10px;
+  left: 32px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: var(--brand-orange, #ff7a1a);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* make sure the top row line doesn't crash into the pill */
+.ticket-group .checklist-row:first-of-type {
+  margin-top: 8px;
+}
