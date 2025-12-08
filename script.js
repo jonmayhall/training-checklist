@@ -205,8 +205,7 @@ function initSupportTickets() {
   const template = openContainer.querySelector('.ticket-group-template');
   if (!template) return;
 
-  // Template stays UN-NUMBERED.
-  // We'll number only cloned cards as Ticket # 1, 2, 3, ...
+  // Template stays un-numbered.
   let ticketCounter = 0;
 
   // Wire status movement for the template card
@@ -217,9 +216,10 @@ function initSupportTickets() {
     closedFeatureContainer
   });
 
-  // Add button on the template card
+  // Add button on the template card – prevent double binding
   const addBtn = template.querySelector('.add-ticket-btn');
-  if (addBtn) {
+  if (addBtn && !addBtn.dataset.bound) {
+    addBtn.dataset.bound = 'true';
     addBtn.addEventListener('click', () => {
       const newCard = createTicketCard(template);
 
@@ -243,9 +243,6 @@ function initSupportTickets() {
 
 /**
  * Create a clean ticket card from the template.
- * - Clears all inputs/textarea
- * - Removes the + button so only the original has it
- * - Leaves room for Ticket # label
  */
 function createTicketCard(template) {
   const card = template.cloneNode(true);
@@ -253,7 +250,7 @@ function createTicketCard(template) {
   // Remove template-only class
   card.classList.remove('ticket-group-template');
 
-  // Clear the header label text
+  // Clear header label text
   const label = card.querySelector('.ticket-card-number');
   if (label) label.textContent = '';
 
