@@ -2850,19 +2850,18 @@
 
     <div id="openTicketsContainer">
 
-      <!-- TEMPLATE CARD (no Ticket # pill, has + button) -->
+      <!-- TEMPLATE CARD (stays at top, NO ticket badge, HAS + button) -->
       <div class="ticket-group ticket-group-template">
-
         <div class="ticket-group-inner">
 
-          <!-- Support Ticket Number + ADD button -->
+          <!-- Support Ticket Number + + button -->
           <div class="checklist-row ticket-number-row integrated-plus">
             <label>Support Ticket Number</label>
-            <input type="text" placeholder="Ticket # from myKaarma or Jira">
+            <input type="text" placeholder="Zendesk ticket #">
             <button type="button" class="add-row add-ticket-btn">+</button>
           </div>
 
-          <!-- Status comes BEFORE summary -->
+          <!-- Status (BEFORE summary) -->
           <div class="checklist-row">
             <label>Status</label>
             <select class="ticket-status-select">
@@ -2874,7 +2873,7 @@
             </select>
           </div>
 
-          <!-- Short Summary -->
+          <!-- Short Summary (longer text box) -->
           <div class="checklist-row summary-row">
             <label>Short Summary of the Issue</label>
             <input type="text">
