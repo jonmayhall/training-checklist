@@ -2839,72 +2839,76 @@
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track open, escalated, and resolved myKaarma support tickets.
+    Track open issues with myKaarma Support, escalation status, and resolution details.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
+  <!-- OPEN TICKETS -->
   <div class="section-block">
-    <h2>Support Tickets</h2>
+    <h2>Open Support Tickets</h2>
 
-    <div class="support-columns">
-
-      <!-- ============ OPEN TICKETS ============ -->
-      <div class="support-column">
-        <h3>Open</h3>
-        <div id="openTicketsContainer">
-
-          <!-- TEMPLATE: stays in Open, no Ticket # pill -->
-          <div class="ticket-group ticket-group-template">
-            <div class="ticket-group-inner">
-
-              <div class="checklist-row integrated-plus ticket-number-row">
-                <label>Support Ticket Number</label>
-                <input type="text" class="ticket-number-input">
-                <button type="button" class="add-ticket-btn">+</button>
-              </div>
-
-              <div class="checklist-row">
-                <label>Status</label>
-                <select class="ticket-status-select">
-                  <option>Open</option>
-                  <option>Tier Two</option>
-                  <option>Closed - Resolved</option>
-                  <option>Closed – Feature Not Supported</option>
-                </select>
-              </div>
-
-              <div class="checklist-row summary-row">
-                <label>Short Summary of the Issue</label>
-                <input type="text" class="ticket-summary-input">
-              </div>
-
-            </div>
+    <div id="openTicketsContainer">
+      <!-- TEMPLATE CARD (stays in Open, has + button) -->
+      <div class="ticket-group ticket-group-template">
+        <div class="checklist-row">
+          <label>Support Ticket Number</label>
+          <div class="ticket-number-wrap">
+            <input
+              type="text"
+              class="ticket-number-input"
+              placeholder="Zendesk ticket #"
+            >
+            <button type="button" class="add-ticket-btn add-row">+</button>
           </div>
-          <!-- END TEMPLATE -->
+        </div>
 
+        <div class="checklist-row">
+          <label>Status</label>
+          <select class="ticket-status-select">
+            <option>Open</option>
+            <option>Tier Two</option>
+            <option>Closed - Resolved</option>
+            <option>Closed – Feature Not Supported</option>
+          </select>
+        </div>
+
+        <div class="checklist-row">
+          <label>Short Summary of the Issue</label>
+          <input
+            type="text"
+            class="ticket-summary-input"
+            placeholder="High-level description of the issue"
+          >
+        </div>
+
+        <div class="checklist-row">
+          <label>Primary Contact for this Issue</label>
+          <input
+            type="text"
+            placeholder="Who at the dealership owns follow-up"
+          >
         </div>
       </div>
-
-      <!-- ============ TIER TWO ============ -->
-      <div class="support-column">
-        <h3>Tier Two</h3>
-        <div id="tierTwoTicketsContainer"></div>
-      </div>
-
-      <!-- ============ CLOSED - RESOLVED ============ -->
-      <div class="support-column">
-        <h3>Closed - Resolved</h3>
-        <div id="closedResolvedTicketsContainer"></div>
-      </div>
-
-      <!-- ============ FEATURE NOT SUPPORTED ============ -->
-      <div class="support-column">
-        <h3>Closed – Feature Not Supported</h3>
-        <div id="closedFeatureTicketsContainer"></div>
-      </div>
-
     </div>
+  </div>
+
+  <!-- TIER TWO / ESCALATED -->
+  <div class="section-block">
+    <h2>Tier Two / Escalated Tickets</h2>
+    <div id="tierTwoTicketsContainer"></div>
+  </div>
+
+  <!-- CLOSED - RESOLVED -->
+  <div class="section-block">
+    <h2>Closed – Resolved</h2>
+    <div id="closedResolvedTicketsContainer"></div>
+  </div>
+
+  <!-- CLOSED – FEATURE NOT SUPPORTED -->
+  <div class="section-block">
+    <h2>Closed – Feature Not Supported</h2>
+    <div id="closedFeatureTicketsContainer"></div>
   </div>
 </section>
 
