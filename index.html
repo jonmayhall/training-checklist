@@ -2833,85 +2833,99 @@
         </div>
       </section>
 
-<!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS                                   -->
-<!-- ========================================================= -->
-<section id="support-tickets" class="page-section">
-  <h1>Support Tickets</h1>
-  <p class="page-subtitle">
-    Capture active issues, ownership, and status so CEM, Deployment, and Support stay aligned.
-  </p>
+/* ========== SUPPORT TICKETS (CLEAN) ========== */
 
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+.ticket-group {
+  margin: 16px 0;
+  padding: 14px 18px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--orange); /* thin myKaarma orange border */
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
 
-  <!-- ================= OPEN SUPPORT TICKETS ================= -->
-  <div class="section-block">
-    <h2>Open Support Tickets</h2>
+/* inner wrapper so badge sits on top, rows below */
+.ticket-group-inner {
+  display: flex;
+  flex-direction: column;
+}
 
-    <div id="openTicketsContainer">
+/* Orange Ticket # pill in top-left (cloned cards only) */
+.ticket-number-pill {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--orange);
+  padding: 3px 12px;
+  border-radius: 999px;
+  margin: 2px 0 8px 40px; /* left aligns with other labels, small gap above row */
+}
 
-      <!-- TEMPLATE CARD (stays at top, NO ticket badge, HAS + button) -->
-      <div class="ticket-group ticket-group-template">
-        <div class="ticket-group-inner">
+/* First row: Support Ticket Number with integrated + button */
+.ticket-group .checklist-row.ticket-number-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
 
-          <!-- Support Ticket Number + + button -->
-          <div class="checklist-row ticket-number-row integrated-plus">
-            <label>Support Ticket Number</label>
-            <input type="text" placeholder="Zendesk ticket #">
-            <button type="button" class="add-row add-ticket-btn">+</button>
-          </div>
+/* label same behaviour as other rows */
+.ticket-group .checklist-row.ticket-number-row label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
 
-          <!-- Status (BEFORE summary) -->
-          <div class="checklist-row">
-            <label>Status</label>
-            <select class="ticket-status-select">
-              <option></option>
-              <option>Open</option>
-              <option>Tier Two</option>
-              <option>Closed - Resolved</option>
-              <option>Closed – Feature Not Supported</option>
-            </select>
-          </div>
+/* ✅ Ticket # text box – same width as normal right-side inputs, rounded right OFF (so + can attach) */
+.ticket-group .checklist-row.ticket-number-row .ticket-number-input {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+}
 
-          <!-- Short Summary (longer text box) -->
-          <div class="checklist-row summary-row">
-            <label>Short Summary of the Issue</label>
-            <input type="text">
-          </div>
+/* ✅ Integrated + button – attaches cleanly to the right side */
+.ticket-group .checklist-row.ticket-number-row .add-ticket-btn {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  transition: background .18s, transform .18s;
+}
+.ticket-group .checklist-row.ticket-number-row .add-ticket-btn:hover {
+  background: #ff8b42;
+  transform: translateY(-1px);
+}
 
-        </div>
-      </div>
+/* Make Short Summary text box longer (about 3/4 of card) */
+.ticket-group .summary-row input[type="text"] {
+  flex: 0 0 70%;
+  max-width: 520px;
+}
 
-    </div>
-  </div>
-
-  <!-- ================= TIER TWO SUPPORT TICKETS ================= -->
-  <div class="section-block">
-    <h2>Tier Two / Escalated</h2>
-
-    <div id="tierTwoTicketsContainer">
-      <!-- Cards move here when Status = Tier Two -->
-    </div>
-  </div>
-
-  <!-- ================= CLOSED - RESOLVED ================= -->
-  <div class="section-block">
-    <h2>Closed – Resolved</h2>
-
-    <div id="closedResolvedTicketsContainer">
-      <!-- Cards move here when Status = Closed - Resolved -->
-    </div>
-  </div>
-
-  <!-- ================= CLOSED – FEATURE NOT SUPPORTED ================= -->
-  <div class="section-block">
-    <h2>Closed – Feature Not Supported</h2>
-
-    <div id="closedFeatureTicketsContainer">
-      <!-- Cards move here when Status = Closed – Feature Not Supported -->
-    </div>
-  </div>
-</section>
+/* make all other rows inside ticket match normal checklist spacing */
+.ticket-group .checklist-row {
+  padding-left: 40px;
+}
 
 <section id="dms-integration" class="page-section">
   <h1>DMS Integration</h1>
