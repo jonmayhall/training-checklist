@@ -2833,7 +2833,7 @@
         </div>
       </section>
 
-    <!-- ========================================================= -->
+   <!-- ========================================================= -->
 <!-- PAGE 7: SUPPORT TICKETS                                  -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
@@ -2844,41 +2844,35 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ======================== OPEN SUPPORT TICKETS ======================== -->
+  <!-- ======================== OPEN TICKETS ======================== -->
   <div class="section-block">
     <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
 
-      <!-- TEMPLATE CARD (no Ticket # label, has + button) -->
+      <!-- TEMPLATE CARD – stays first, used for cloning -->
       <div class="ticket-group ticket-group-template">
+        <!-- badge is empty on the template; clones will be numbered Ticket # 1, 2, 3… -->
+        <div class="ticket-badge" data-ticket-label=""></div>
 
-        <div class="ticket-card-header">
-          <span class="ticket-card-number"></span>
-        </div>
-
-        <div class="checklist-row">
+        <!-- Support Ticket Number (with + button – ONLY on the template) -->
+        <div class="checklist-row integrated-plus ticket-number-row">
           <label>Support Ticket Number</label>
-          <div class="ticket-number-wrap">
-            <input
-              type="text"
-              placeholder="e.g., 123456"
-              class="ticket-number-input"
-            >
-            <button type="button" class="add-ticket-btn">+</button>
-          </div>
+          <input 
+            type="text" 
+            class="ticket-number-input"
+            placeholder="e.g., 123456"
+          >
+          <button 
+            type="button" 
+            class="add-row add-ticket-btn"
+          >
+            +
+          </button>
         </div>
 
-        <div class="checklist-row">
-          <label>Short Summary of the Issue</label>
-          <!-- keep this textarea wide (same as now) -->
-          <textarea
-            class="ticket-summary-textarea"
-            placeholder="Brief description of the issue"
-          ></textarea>
-        </div>
-
-        <div class="checklist-row">
+        <!-- Status FIRST -->
+        <div class="checklist-row status-row">
           <label>Status</label>
           <select class="ticket-status-select">
             <option value="Open" selected>Open</option>
@@ -2888,28 +2882,60 @@
           </select>
         </div>
 
-      </div> <!-- /ticket-group-template -->
+        <!-- Short Summary (3/4 width, leave as-is) -->
+        <div class="checklist-row summary-row">
+          <label>Short Summary of the Issue</label>
+          <input
+            type="text"
+            class="ticket-summary-input"
+            placeholder="Brief description of the issue"
+          >
+        </div>
 
-    </div> <!-- /openTicketsContainer -->
-  </div>
+        <!-- Zendesk link -->
+        <div class="checklist-row">
+          <label>Zendesk link</label>
+          <input 
+            type="text" 
+            class="ticket-zendesk-input"
+            placeholder="Paste Zendesk link"
+          >
+        </div>
 
-  <!-- ======================== TIER TWO SUPPORT TICKETS ======================== -->
+      </div><!-- /.ticket-group-template -->
+
+    </div><!-- /#openTicketsContainer -->
+  </div><!-- /.section-block (Open) -->
+
+
+  <!-- ======================== TIER TWO TICKETS ======================== -->
   <div class="section-block">
     <h2>Tier Two Support Tickets</h2>
-    <div id="tierTwoTicketsContainer"></div>
+
+    <div id="tierTwoTicketsContainer">
+      <!-- Cards with status "Tier Two" will move here automatically via JS -->
+    </div>
   </div>
 
-  <!-- ======================== CLOSED - RESOLVED ======================== -->
+
+  <!-- ============== CLOSED - RESOLVED SUPPORT TICKETS ================ -->
   <div class="section-block">
     <h2>Closed - Resolved Support Tickets</h2>
-    <div id="closedResolvedTicketsContainer"></div>
+
+    <div id="closedResolvedTicketsContainer">
+      <!-- Cards with status "Closed - Resolved" will move here via JS -->
+    </div>
   </div>
 
-  <!-- ======================== CLOSED - FEATURE NOT SUPPORTED ======================== -->
+  <!-- ======= CLOSED – FEATURE NOT SUPPORTED SUPPORT TICKETS ========= -->
   <div class="section-block">
     <h2>Closed – Feature Not Supported</h2>
-    <div id="closedFeatureTicketsContainer"></div>
+
+    <div id="closedFeatureTicketsContainer">
+      <!-- Cards with status "Closed – Feature Not Supported" will move here via JS -->
+    </div>
   </div>
+
 </section>
 
 <section id="dms-integration" class="page-section">
