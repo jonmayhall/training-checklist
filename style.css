@@ -571,112 +571,162 @@ main {
   width: 100%;
 }
 
-/* --------------- SUPPORT TICKETS --------------- */
+/* ============================================================
+   SUPPORT TICKETS — CARD STRUCTURE
+============================================================ */
 
 .ticket-group {
-  margin: 16px 0;
-  padding: 14px 18px 18px;
-  border-radius: 16px;
-  border: 1px solid var(--orange);  /* thin orange border */
-  background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-  position: relative;
+  border: 2px solid var(--orange);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 22px;
+  background: white;
+  box-sizing: border-box;
 }
 
-/* ticket header – Ticket # 1 / 2 / 3, top-left */
+/* Template card (first card): no Ticket # label */
+.ticket-group-template .ticket-card-number {
+  display: none;
+}
+
+/* ============================================================
+   TICKET HEADER LABEL — "Ticket # 1", "Ticket # 2", etc.
+============================================================ */
+
 .ticket-card-header {
   width: 100%;
-  padding: 6px 6px 4px 6px;
-  margin: 0 0 4px 0;
+  padding: 2px 0 10px 2px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
 }
 
 .ticket-card-number {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--orange);
+  line-height: 1.2;
+  padding-bottom: 4px;
+}
+
+/* ============================================================
+   CHECKLIST ROWS
+============================================================ */
+
+.checklist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.checklist-row:last-child {
+  border-bottom: none;
+}
+
+.checklist-row label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--orange);      /* myKaarma orange */
-  margin: 0;
-  padding: 2px 0 4px 0;
-  line-height: 1.3;
+  color: var(--text-dark);
+  width: 280px;                /* ensures labels align vertically */
 }
 
-/* Ensure first content row sits close under the header */
-.ticket-group .checklist-row:first-of-type {
-  margin-top: 4px;
-}
+/* ============================================================
+   TEXT INPUT / TEXTAREA / SELECT CONSISTENCY
+============================================================ */
 
-/* Support Ticket Number integrated field + button */
-.ticket-number-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-}
-
-.ticket-number-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: 100%;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
+.ticket-group input[type="text"],
+.ticket-group textarea,
+.ticket-group select {
+  font-size: 14px;
+  padding: 9px 14px;
+  background: var(--field-bg);
   border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
+  border-radius: var(--radius-sm);
+  outline: none;
   box-sizing: border-box;
 }
 
-/* When there IS an add-ticket-btn, integrate it to the right side */
-.ticket-number-wrap:has(.add-ticket-btn) input[type="text"] {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+/* keep Short Summary the same wide layout */
+.ticket-summary-textarea {
+  width: calc(var(--input-width) * 1);
+  height: 44px;
+  resize: none;
 }
 
-.ticket-number-wrap .add-ticket-btn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  margin-left: -1px;
+/* ============================================================
+   TEMPLATE — SUPPORT TICKET NUMBER (INPUT + ADD BUTTON)
+============================================================ */
+
+.ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  width: var(--input-width);
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.ticket-number-input {
+  flex: 1 1 auto;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 9px 12px;
+}
+
+/* + button on TEMPLATE card only */
+.add-ticket-btn {
+  width: 38px;
+  height: 38px;
   background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
+  color: white;
+  border: none;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  transition: background .18s, transform .18s;
-}
-.ticket-number-wrap .add-ticket-btn:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
 }
 
-/* Cloned cards (no add button) – keep textbox fully rounded */
-.ticket-number-wrap:not(:has(.add-ticket-btn)) input[type="text"] {
+/* remove + button from cloned cards (handled in JS but ensure no space remains) */
+.ticket-group:not(.ticket-group-template) .add-ticket-btn {
+  display: none !important;
+}
+
+/* ============================================================
+   STATUS DROPDOWN
+============================================================ */
+
+.ticket-status-select {
+  width: var(--input-width);
+}
+
+/* ============================================================
+   CLONED CARDS — SUPPORT TICKET NUMBER INPUT
+   (No + button, so rounded right side returns)
+============================================================ */
+
+.ticket-group:not(.ticket-group-template) .ticket-number-input {
   border-radius: var(--radius-sm);
 }
 
-/* Short summary textarea a bit wider (3/4 of card) */
-.ticket-summary-textarea {
-  width: 75%;
+/* Ensure cloned ticket-number-input has full width */
+.ticket-group:not(.ticket-group-template) .ticket-number-wrap {
+  width: var(--input-width);
 }
 
-/* A simple subtle count style if you ever add counts in headers later */
-.ticket-count-pill {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: #fee2e2;
-  color: #b91c1c;
+/* ============================================================
+   CLEANUP — REMOVE ANY POSSIBLE BLACK TEXT OVERRIDES
+============================================================ */
+
+.ticket-label,
+.ticket-card-number.black,
+.ticket-number-label {
+  color: inherit !important;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
