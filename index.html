@@ -2833,95 +2833,83 @@
         </div>
       </section>
 
- <!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS                                  -->
+<!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKETS                                   -->
 <!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track open issues, who owns them, and make sure nothing falls through the cracks.
+    Capture active issues, ownership, and status so CEM, Deployment, and Support stay aligned.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ========== OPEN TICKETS (template lives here) ========== -->
+  <!-- ================= OPEN SUPPORT TICKETS ================= -->
   <div class="section-block">
     <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
 
-      <!-- TEMPLATE CARD – ALWAYS STAYS HERE, NO STATUS MOVE -->
-      <div class="ticket-group ticket-group-template" data-template="true">
-        <div class="checklist-row ticket-number-row integrated-plus">
-          <label>Support Ticket Number</label>
-          <input type="text" class="ticket-number-input">
-          <button type="button" class="add-ticket-btn">+</button>
-        </div>
+      <!-- TEMPLATE CARD (no Ticket # pill, has + button) -->
+      <div class="ticket-group ticket-group-template">
 
-        <div class="checklist-row">
-          <label>Status</label>
-          <select class="ticket-status-select">
-            <option></option>
-            <option>Open</option>
-            <option>Tier Two</option>
-            <option>Closed - Resolved</option>
-            <option>Closed – Feature Not Supported</option>
-          </select>
-        </div>
+        <div class="ticket-group-inner">
 
-        <div class="checklist-row summary-row">
-          <label>Short Summary of the Issue</label>
-          <input type="text">
-        </div>
+          <!-- Support Ticket Number + ADD button -->
+          <div class="checklist-row ticket-number-row integrated-plus">
+            <label>Support Ticket Number</label>
+            <input type="text" placeholder="Ticket # from myKaarma or Jira">
+            <button type="button" class="add-row add-ticket-btn">+</button>
+          </div>
 
-        <div class="checklist-row">
-          <label>Owner at Dealership</label>
-          <input type="text">
-        </div>
+          <!-- Status comes BEFORE summary -->
+          <div class="checklist-row">
+            <label>Status</label>
+            <select class="ticket-status-select">
+              <option></option>
+              <option>Open</option>
+              <option>Tier Two</option>
+              <option>Closed - Resolved</option>
+              <option>Closed – Feature Not Supported</option>
+            </select>
+          </div>
 
-        <div class="checklist-row">
-          <label>Owner at myKaarma</label>
-          <input type="text">
-        </div>
+          <!-- Short Summary -->
+          <div class="checklist-row summary-row">
+            <label>Short Summary of the Issue</label>
+            <input type="text">
+          </div>
 
-        <div class="checklist-row">
-          <label>Date Opened</label>
-          <input type="date">
-        </div>
-
-        <div class="checklist-row">
-          <label>Last Update</label>
-          <input type="date">
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ========== TIER TWO ========== -->
+  <!-- ================= TIER TWO SUPPORT TICKETS ================= -->
   <div class="section-block">
     <h2>Tier Two / Escalated</h2>
 
     <div id="tierTwoTicketsContainer">
-      <!-- Cards with Status = Tier Two will appear here -->
+      <!-- Cards move here when Status = Tier Two -->
     </div>
   </div>
 
-  <!-- ========== CLOSED - RESOLVED ========== -->
+  <!-- ================= CLOSED - RESOLVED ================= -->
   <div class="section-block">
     <h2>Closed – Resolved</h2>
 
     <div id="closedResolvedTicketsContainer">
-      <!-- Cards with Status = Closed - Resolved will appear here -->
+      <!-- Cards move here when Status = Closed - Resolved -->
     </div>
   </div>
 
-  <!-- ========== CLOSED – FEATURE NOT SUPPORTED ========== -->
+  <!-- ================= CLOSED – FEATURE NOT SUPPORTED ================= -->
   <div class="section-block">
     <h2>Closed – Feature Not Supported</h2>
 
     <div id="closedFeatureTicketsContainer">
-      <!-- Cards with Status = Closed – Feature Not Supported will appear here -->
+      <!-- Cards move here when Status = Closed – Feature Not Supported -->
     </div>
   </div>
 </section>
