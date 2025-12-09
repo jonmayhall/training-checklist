@@ -1406,3 +1406,51 @@ main {
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
   background: #ff8b42;
 }
+/* ============================================================
+   SUPPORT TICKET NUMBER — MAKE IT MATCH OTHER INTEGRATED PLUS
+   ============================================================ */
+
+/* Wrapper for pill + plus button */
+.integrated-plus-input {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 480px; /* matches your other pill inputs */
+}
+
+/* Input portion */
+.integrated-plus-input input.ticket-number-input {
+    flex: 1 1 auto;
+    height: 44px;
+    padding: 0 16px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 14px;
+    border-radius: 999px 0 0 999px; /* left rounded, right flat for + button */
+    box-sizing: border-box;
+}
+
+/* + button */
+.integrated-plus-input .add-ticket-btn {
+    width: 50px;
+    height: 44px;
+    border: none;
+    background: var(--orange);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 0 999px 999px 0; /* pill right side */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Added ticket cards → no + button, fully rounded pill */
+.ticket-group:not([data-base="true"]) .integrated-plus-input .add-ticket-btn {
+    display: none;
+}
+
+.ticket-group:not([data-base="true"]) .integrated-plus-input input.ticket-number-input {
+    border-radius: 999px !important; /* full pill */
+}
