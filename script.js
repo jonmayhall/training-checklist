@@ -237,10 +237,9 @@ function initAdditionalPoc() {
   });
 }
 
-/* =====================================
-   SUPPORT TICKETS
-===================================== */
-
+/* -------------------------------------
+   SUPPORT TICKETS (clean version)
+------------------------------------- */
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
@@ -252,137 +251,129 @@ function initSupportTickets() {
   const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
   if (!baseCard) return;
 
-  // Base card should never have an orange badge
-  const baseBadge = baseCard.querySelector('.ticket-badge');
-  if (baseBadge) baseBadge.remove();
+  // Base card status is always Open
+  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
+  if (baseStatusSelect) {
+    baseStatusSelect.value = 'Open';
+  }
 
-  // Wire the "+" on the base card
+  // Global counter for Ticket # badges on added cards
+  let ticketCounter = 0;
+
   const addBtn = baseCard.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketCard({
-        template: baseCard,
-        openContainer,
-        tierTwoContainer,
-        closedResolvedContainer,
-        closedFeatureContainer
-      });
-
+      ticketCounter += 1;
+      const newCard = createSupportTicketCard(baseCard, ticketCounter);
       openContainer.appendChild(newCard);
-      renumberTicketBadges();
     });
   }
 
-  // Wire status for base card
-  wireTicketStatus(baseCard, {
+  // Wire base card (it never moves)
+  wireSupportTicketStatus(baseCard, {
     openContainer,
     tierTwoContainer,
     closedResolvedContainer,
-    closedFeatureContainer
+    closedFeatureContainer,
+    isBase: true
   });
-
-  renumberTicketBadges();
 }
 
-function createTicketCard(ctx) {
-  const {
-    template,
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer
-  } = ctx;
+/**
+ * Creates a new support ticket card cloned from the base card.
+ * Adds an orange "Ticket #n" badge and removes the + button.
+ */
+function createSupportTicketCard(baseCard, ticketNumber) {
+  const clone = baseCard.cloneNode(true);
 
-  const card = template.cloneNode(true);
-  card.dataset.base = 'false';
+  // Mark as non-base card
+  clone.removeAttribute('data-base');
+  clone.classList.add('support-ticket-card');
 
-  // Remove any existing badge on clone
-  const existingBadge = card.querySelector('.ticket-badge');
-  if (existingBadge) existingBadge.remove();
-
-  // Remove "+" from cloned cards
-  const cloneAddBtn = card.querySelector('.add-ticket-btn');
-  if (cloneAddBtn) cloneAddBtn.remove();
-
-  resetTicketCardFields(card);
-
-  // Create badge for this card
-  const badge = document.createElement('div');
-  badge.className = 'ticket-badge';
-  card.appendChild(badge);
-
-  wireTicketStatus(card, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer
-  });
-
-  return card;
-}
-
-function resetTicketCardFields(card) {
-  const textInputs = card.querySelectorAll('input[type="text"], input[type="email"], input[type="url"]');
-  textInputs.forEach((input) => {
+  // Clear all text inputs
+  clone.querySelectorAll('input[type="text"]').forEach((input) => {
     input.value = '';
   });
 
-  const statusSelect = card.querySelector('.ticket-status-select');
+  // Reset status to Open
+  const statusSelect = clone.querySelector('.ticket-status-select');
   if (statusSelect) {
     statusSelect.value = 'Open';
   }
+
+  // Remove the + button and unwrap the number input
+  const wrap = clone.querySelector('.ticket-number-wrap');
+  if (wrap) {
+    const addBtn = wrap.querySelector('.add-ticket-btn');
+    const numberInput = wrap.querySelector('.ticket-number-input');
+
+    if (addBtn) addBtn.remove();
+
+    // Replace wrapper with the input so added cards just have a normal pill
+    if (numberInput) {
+      wrap.replaceWith(numberInput);
+    }
+  }
+
+  // Add orange Ticket # badge at the top-left
+  const badge = document.createElement('div');
+  badge.className = 'ticket-badge';
+  badge.textContent = `Ticket #${ticketNumber}`;
+  clone.insertBefore(badge, clone.firstElementChild);
+
+  // Wire status changes for this cloned card
+  wireSupportTicketStatus(clone, {
+    openContainer: document.getElementById('openTicketsContainer'),
+    tierTwoContainer: document.getElementById('tierTwoTicketsContainer'),
+    closedResolvedContainer: document.getElementById('closedResolvedTicketsContainer'),
+    closedFeatureContainer: document.getElementById('closedFeatureTicketsContainer'),
+    isBase: false
+  });
+
+  return clone;
 }
 
-function wireTicketStatus(card, containers) {
+/**
+ * Moves a ticket card into the correct section when Status changes.
+ * Base card never moves; its status is forced back to Open.
+ */
+function wireSupportTicketStatus(card, containers) {
   const {
     openContainer,
     tierTwoContainer,
     closedResolvedContainer,
-    closedFeatureContainer
+    closedFeatureContainer,
+    isBase
   } = containers;
 
   const statusSelect = card.querySelector('.ticket-status-select');
   if (!statusSelect) return;
 
   statusSelect.addEventListener('change', () => {
-    const status = statusSelect.value;
+    const value = statusSelect.value;
     let target = openContainer;
 
-    if (status === 'Tier Two') {
+    if (value === 'Tier Two') {
       target = tierTwoContainer;
-    } else if (status === 'Closed - Resolved') {
+    } else if (value === 'Closed - Resolved') {
       target = closedResolvedContainer;
-    } else if (status === 'Closed – Feature Not Supported') {
+    } else if (value === 'Closed – Feature Not Supported') {
       target = closedFeatureContainer;
+    } else {
+      target = openContainer;
     }
 
-    if (target) {
+    if (isBase) {
+      // Base card never leaves Open; force it back if changed
+      if (value !== 'Open') {
+        statusSelect.value = 'Open';
+      }
+      return;
+    }
+
+    if (target && target !== card.parentElement) {
       target.appendChild(card);
     }
-
-    renumberTicketBadges();
-  });
-}
-
-function renumberTicketBadges() {
-  // Remove badges from base cards
-  const baseCards = document.querySelectorAll('.ticket-group[data-base="true"]');
-  baseCards.forEach((baseCard) => {
-    const badge = baseCard.querySelector('.ticket-badge');
-    if (badge) badge.remove();
-  });
-
-  // Number all non-base cards
-  const numberedCards = document.querySelectorAll('.ticket-group:not([data-base="true"])');
-  let counter = 1;
-  numberedCards.forEach((card) => {
-    let badge = card.querySelector('.ticket-badge');
-    if (!badge) {
-      badge = document.createElement('div');
-      badge.className = 'ticket-badge';
-      card.appendChild(badge);
-    }
-    badge.textContent = `Ticket # ${counter++}`;
   });
 }
 
