@@ -1061,3 +1061,26 @@ main {
     flex:1 1 auto;
   }
 }
+/* ==========================================================
+   FIX: Added Support Ticket Cards → Support Ticket Number Box
+   ========================================================== */
+
+/* Applies ONLY to cloned support ticket cards (non-base cards) */
+.ticket-group:not([data-base="true"]) .support-ticket-number input[type="text"] {
+    width: 100%;
+    border-radius: 12px; /* Match other inputs */
+    padding-right: 16px; /* Prevent text from touching the right */
+    box-sizing: border-box;
+}
+
+/* Fix the container so the rounded input aligns perfectly */
+.ticket-group:not([data-base="true"]) .support-ticket-number {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Remove leftover spacing from when the + button existed */
+.ticket-group:not([data-base="true"]) .support-ticket-number .add-ticket-btn {
+    display: none !important;
+}
