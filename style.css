@@ -1099,3 +1099,65 @@ main {
     border-top-right-radius: 999px !important;
     border-bottom-right-radius: 999px !important;
 }
+/* ========================================================= */
+/* SUPPORT TICKETS – ROW LAYOUT + FIELD SIZING FIXES         */
+/* ========================================================= */
+
+/* Make each support-ticket row behave like your other pages:
+   label on the left, field on the right, aligned and consistent. */
+.ticket-section .ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Label column width inside support tickets */
+.ticket-section .ticket-row > label {
+  flex: 0 0 32%;
+}
+
+/* Inputs and dropdowns take the remaining space, no overflow */
+.ticket-section .ticket-row input,
+.ticket-section .ticket-row select {
+  flex: 1 0 0;
+  width: auto !important;   /* override any old width settings */
+  max-width: 100%;
+}
+
+/* The Short Summary input uses the same layout, just flexed correctly */
+.ticket-section .ticket-summary-row input {
+  flex: 1 0 0;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* ========================================================= */
+/* SUPPORT TICKETS – TICKET NUMBER INPUT PILL FIX            */
+/* ========================================================= */
+
+/* Make every Support Ticket Number textbox look like a normal pill,
+   with a rounded right side and full width in its column. */
+.ticket-section .ticket-number-input {
+  width: 100% !important;
+  max-width: 100%;
+  border-radius: 9999px;    /* full pill, rounded right side */
+}
+
+/* If you are still using the integrated plus button wrapper,
+   keep the input and button aligned nicely. */
+.ticket-section .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+/* Input grows, plus button hugs the right side */
+.ticket-section .ticket-number-wrap .ticket-number-input {
+  flex: 1 0 0;
+}
+
+/* Optional: make sure the + button stays its own pill and
+   does NOT flatten the right side of the text box */
+.ticket-section .ticket-number-wrap .add-ticket-btn {
+  margin-left: 8px;
+}
