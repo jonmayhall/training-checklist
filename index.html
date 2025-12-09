@@ -2842,40 +2842,37 @@
     Track open issues with myKaarma Support, escalation status, and resolution details.
   </p>
 
+  <!-- Reset this page -->
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ============ OPEN SUPPORT TICKETS ============ -->
+  <!-- ===================== OPEN SUPPORT TICKETS ===================== -->
   <div class="section-block ticket-section">
     <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
-      <!-- Base (default) card – no visible ticket badge, just fields -->
-      <div class="ticket-group" data-base="true">
+      <!-- Base card: no orange badge, has integrated + button -->
+      <div class="ticket-group support-ticket-card" data-base="true" data-status="Open">
         <div class="ticket-group-inner">
 
-          <div class="ticket-row ticket-number-row">
-    <label>Support Ticket Number</label>
-
-<!-- Support Ticket Number – SAME integrated-plus pattern as Additional Trainer -->
-<div class="checklist-row integrated-plus support-ticket-number-row">
-  <label>Support Ticket Number</label>
-  <input
-    type="text"
-    class="ticket-number-input"
-    placeholder="Zendesk ticket #"
-  />
-  <button
-    type="button"
-    class="add-ticket-btn add-row"
-    title="Add another support ticket"
-  >
-    +
-  </button>
-</div>
-
+          <!-- Support Ticket Number – integrated plus (matches Additional Trainer style) -->
+          <div class="checklist-row integrated-plus support-ticket-number-row">
+            <label>Support Ticket Number</label>
+            <input
+              type="text"
+              class="ticket-number-input"
+              placeholder="Zendesk ticket #"
+            />
+            <button
+              type="button"
+              class="add-ticket-btn add-row"
+              title="Add another support ticket"
+            >
+              +
+            </button>
+          </div>
 
           <!-- Status -->
-          <div class="ticket-row">
+          <div class="checklist-row">
             <label>Status</label>
             <select class="ticket-status-select">
               <option value="Open" selected>Open</option>
@@ -2888,40 +2885,53 @@
           </div>
 
           <!-- Short Summary -->
-          <div class="ticket-row ticket-summary-row">
+          <div class="checklist-row ticket-summary-row">
             <label>Short Summary of the Issue</label>
             <input
               type="text"
+              class="ticket-summary-input"
               placeholder="High-level description of the issue"
             />
           </div>
 
-          <!-- Zendesk link -->
-          <div class="ticket-row">
+          <!-- Zendesk Link -->
+          <div class="checklist-row">
             <label>Zendesk Link</label>
-            <input type="text" placeholder="Paste Zendesk link" />
+            <input
+              type="text"
+              class="ticket-link-input"
+              placeholder="Paste Zendesk link"
+            />
           </div>
+
         </div>
       </div>
+      <!-- Any additional Open tickets will be cloned into this container via JS -->
     </div>
   </div>
 
-  <!-- ============ TIER TWO / ESCALATED ============ -->
+  <!-- ===================== TIER TWO / ESCALATED ===================== -->
   <div class="section-block ticket-section">
     <h2>Tier Two / Escalated Tickets</h2>
-    <div id="tierTwoTicketsContainer"></div>
+    <div id="tierTwoTicketsContainer">
+      <!-- Cards moved here by JS when status = "Tier Two" -->
+    </div>
   </div>
 
-  <!-- ============ CLOSED - RESOLVED ============ -->
+  <!-- ===================== CLOSED - RESOLVED ===================== -->
   <div class="section-block ticket-section">
     <h2>Closed - Resolved Support Tickets</h2>
-    <div id="closedResolvedTicketsContainer"></div>
+    <div id="closedResolvedTicketsContainer">
+      <!-- Cards moved here by JS when status = "Closed - Resolved" -->
+    </div>
   </div>
 
-  <!-- ============ CLOSED - FEATURE NOT SUPPORTED ============ -->
+  <!-- ===== CLOSED – FEATURE NOT SUPPORTED ===== -->
   <div class="section-block ticket-section">
     <h2>Closed - Feature Not Supported</h2>
-    <div id="closedFeatureTicketsContainer"></div>
+    <div id="closedFeatureTicketsContainer">
+      <!-- Cards moved here by JS when status = "Closed – Feature Not Supported" -->
+    </div>
   </div>
 </section>
 
