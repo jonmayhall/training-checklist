@@ -2855,15 +2855,24 @@
 
           <div class="ticket-row ticket-number-row">
     <label>Support Ticket Number</label>
-    <div class="integrated-plus-input">
-        <input
-            type="text"
-            class="ticket-number-input"
-            placeholder="Zendesk ticket #"
-        />
-        <button type="button" class="add-ticket-btn">+</button>
-    </div>
+
+<!-- Support Ticket Number – SAME integrated-plus pattern as Additional Trainer -->
+<div class="checklist-row integrated-plus support-ticket-number-row">
+  <label>Support Ticket Number</label>
+  <input
+    type="text"
+    class="ticket-number-input"
+    placeholder="Zendesk ticket #"
+  />
+  <button
+    type="button"
+    class="add-ticket-btn add-row"
+    title="Add another support ticket"
+  >
+    +
+  </button>
 </div>
+
 
           <!-- Status -->
           <div class="ticket-row">
