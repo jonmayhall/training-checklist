@@ -1219,3 +1219,66 @@ main {
 #support-tickets .ticket-number-wrap .add-ticket-btn {
   flex: 0 0 auto;
 }
+/* =========================================================
+   SUPPORT TICKETS – MAKE FIELDS MATCH GLOBAL PILL STYLE
+   ========================================================= */
+
+/* Layout for each row (label left, field right) */
+#support-tickets .ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+#support-tickets .ticket-row > label {
+  flex: 0 0 32%;
+}
+
+/* Field column */
+#support-tickets .ticket-row > input,
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap {
+  flex: 1 1 0;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Make all Support Tickets inputs & dropdowns look like the
+   rest of your app’s pill-style fields */
+#support-tickets .ticket-row input[type="text"],
+#support-tickets .ticket-row select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Keep “Short Summary of the Issue” aligned with the others */
+#support-tickets .ticket-summary-row input[type="text"] {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Ticket number pill (added cards too) */
+#support-tickets .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+#support-tickets .ticket-number-input {
+  flex: 1 1 0;
+  width: 100%;
+  border-radius: 9999px; /* rounded both sides */
+}
+
+/* Plus button stays its own little pill, not stretching the input */
+#support-tickets .ticket-number-wrap .add-ticket-btn {
+  flex: 0 0 auto;
+}
