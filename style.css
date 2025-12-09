@@ -1343,3 +1343,66 @@ main {
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
   background: #ff8b42;
 }
+/* =========================================================
+   SUPPORT TICKETS — INTEGRATED PLUS FIX (FINAL)
+   Make the Support Ticket Number textbox + + button look
+   EXACTLY like all other integrated-plus rows in the project.
+   ========================================================= */
+
+/* Base card only */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-left: 40px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Label: left side */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-row > label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* Wrapper for input + button */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  width: var(--input-width);
+}
+
+/* Textbox: flattened right edge so + button attaches cleanly */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-input {
+  flex: 1 1 auto;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  height: 34px;
+  box-sizing: border-box;
+}
+
+/* + button is part of the textbox */
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn {
+  width: 34px;
+  height: 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+}
+
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
+  background: #ff8b42;
+}
