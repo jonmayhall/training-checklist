@@ -352,6 +352,7 @@ main {
   flex: 1 1 auto;
   width: 100%;
   max-width: 100%;
+}
 
 /* MAP button – fixed size, doesn’t stretch the group */
 .small-map-btn {
@@ -891,15 +892,15 @@ main {
 
 /* Support Ticket Orange Badge – increase space below it */
 .ticket-badge {
-    background: var(--orange);
-    color: #fff;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 999px;
-    display: inline-block;
-    margin-bottom: 14px;   /* Increased from 6–8px → adds more space above text */
-    margin-top: 2px;       /* Slight lift */
+  background: var(--orange);
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 14px;
+  margin-top: 2px;
 }
 
 /* Row layout – label left, field right, with dividers */
