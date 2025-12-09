@@ -1084,3 +1084,56 @@ main {
 .ticket-group:not([data-base="true"]) .support-ticket-number .add-ticket-btn {
     display: none !important;
 }
+/* ==========================================================
+   SUPPORT TICKETS – FIELD ALIGNMENT FIXES
+   ========================================================== */
+
+/* 1) Additional Support Ticket Number textboxes
+   ------------------------------------------------
+   - Make all Support Ticket Number inputs pill-shaped and full width
+   - Then re-flatten ONLY the base card that still has the + button
+*/
+
+/* Base layout for number row */
+.ticket-group .support-ticket-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Default: normal pill input for ALL cards (added cards use this) */
+.ticket-group .support-ticket-number input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 999px;               /* rounded both sides */
+}
+
+/* Override ONLY the first/base card that still has the integrated + button */
+.ticket-group .support-ticket-number:has(.add-ticket-btn) input[type="text"] {
+  border-top-right-radius: 0;         /* flat edge to meet + button */
+  border-bottom-right-radius: 0;
+}
+
+
+/* 2) Short Summary of the Issue – align right edge
+   ------------------------------------------------
+   Assumes the summary row has a wrapper like .ticket-summary-row
+   around the input/textarea.
+*/
+
+/* Make the Short Summary field line up with other inputs */
+.ticket-group .ticket-summary-row input[type="text"],
+.ticket-group .ticket-summary-row textarea {
+  width: 100%;
+  max-width: 540px;                   /* tweak if your other inputs use a different width */
+  box-sizing: border-box;
+  border-radius: 999px;               /* match other text boxes */
+}
+
+/* Ensure the row itself doesn’t stretch oddly */
+.ticket-group .ticket-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
