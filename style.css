@@ -485,125 +485,67 @@ main {
   transform: translateY(-1px);
 }
 
-/* --------------- SUPPORT TICKETS – LAYOUT --------------- */
+/* ========================================================= */
+/* SUPPORT TICKET INPUT FIXES                                */
+/* ========================================================= */
 
-.ticket-section { margin-top:12px; }
-
-.ticket-group {
-  position: relative;
-  margin: 16px 0;
-  padding: 22px 22px 18px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--orange);
-  background: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+/* Base styling */
+.ticket-number-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
 }
 
-/* Orange Ticket # pill (top-left) */
-.ticket-badge {
-  position: absolute;
-  top: 10px;
-  left: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 12px;
+.ticket-number-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 8px 0 0 8px;   /* left rounded only */
+  background: #f7f7f7;
+}
+
+/* Correct shape for PLUS button (integrated look) */
+.add-ticket-btn {
+  padding: 0 16px;
+  height: 42px;
+  border: none;
+  background-color: var(--mykaarmaOrange);
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 0 8px 8px 0;  /* RIGHT rounded corner */
+  cursor: pointer;
+}
+
+/* ========================================================= */
+/* ADDED (DUPLICATE) SUPPORT TICKET CARDS                    */
+/* ========================================================= */
+
+/* The orange pill badge that appears only on added cards */
+.ticket-pill {
+  display: inline-block;
+  margin-bottom: 4px;
+  background-color: var(--mykaarmaOrange);
+  color: white;
+  padding: 6px 14px;
   border-radius: 999px;
-  background: var(--orange);
-  color: #fff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
-/* Inner content gets some top padding so rows don’t collide with pill */
-.ticket-group-inner {
-  margin-top: 18px;
+/* Fix the added Support Ticket Number field so RIGHT SIDE ROUNDS properly */
+.ticket-group:not([data-base="true"]) .ticket-number-input {
+  border-right: 1px solid #ddd !important;
+  border-radius: 8px !important; /* fully rounded like other inputs */
 }
 
-/* Each row in ticket card */
-.ticket-row {
-  display:flex;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid #f0f0f0;
-  font-size:14px;
-}
-.ticket-row:last-child {
-  border-bottom:none;
-}
-.ticket-row label {
-  flex: 0 0 220px;
-  padding-left: 40px;
-  font-weight:500;
-}
-
-/* Shared ticket inputs */
-.ticket-row input[type="text"],
-.ticket-row select {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left:auto;
-  padding:7px 10px;
-  border-radius: var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-}
-
-/* Short Summary longer field */
-.ticket-row.ticket-summary-row input[type="text"],
-.ticket-row.ticket-summary-row textarea {
-  flex: 0 0 75%;
-  width: 75%;
-}
-
-/* Integrated "+" for Support Ticket Number (only first row of each card) */
-.ticket-row.ticket-number-row {
-  align-items: stretch;
-}
-.ticket-number-wrap {
-  margin-left:auto;
-  display:flex;
-  align-items:stretch;
-}
-.ticket-number-wrap input[type="text"] {
-  flex:0 0 calc(var(--input-width) - 34px);
-  width:calc(var(--input-width) - 34px);
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-}
-.ticket-number-wrap .add-ticket-btn {
-  flex:0 0 34px;
-  width:34px;
-  height:34px;
-  margin-left:-1px;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  border:1px solid var(--orange);
-  background:var(--orange);
-  color:#fff;
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 1px 4px rgba(243,111,33,0.25);
-  transition:background .18s, transform .18s;
-}
-.ticket-number-wrap .add-ticket-btn:hover {
-  background:#ff8b42;
-  transform: translateY(-1px);
-}
-
-/* Small pill if you ever show counts (optional) */
-.ticket-count-pill {
-  display:inline-block;
-  margin-left:8px;
-  padding:1px 8px;
-  border-radius:999px;
-  font-size:11px;
-  background:#fee2e2;
-  color:#b91c1c;
+/* Align Summary text box width with other fields */
+.ticket-summary-row input {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px 14px;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
