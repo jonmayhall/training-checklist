@@ -337,22 +337,21 @@ main {
   font-size: 13px;
 }
 
-/* Dealership Address – align with other right-side fields */
-.address-input-wrap {
+/* Dealership Address row – match other input alignment */
+#dealership-info .address-input-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
-
-  /* same total width & right edge as your other text boxes */
+  gap: 6px;
+  flex: 0 0 var(--input-width);   /* same width as other text boxes */
   width: var(--input-width);
-  margin-left: auto;
+  margin-left: auto;              /* right-align like other fields */
 }
 
-/* Address text box – fills the remaining space inside the group */
-.address-input-wrap input[type="text"] {
+/* Address text box fills the group, button doesn’t stretch it */
+#dealership-info .address-input-wrap input[type="text"] {
   flex: 1 1 auto;
-  width: auto;
-}
+  width: 100%;
+  max-width: 100%;
 
 /* MAP button – fixed size, doesn’t stretch the group */
 .small-map-btn {
