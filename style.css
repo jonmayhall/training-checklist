@@ -1454,3 +1454,50 @@ main {
 .ticket-group:not([data-base="true"]) .integrated-plus-input input.ticket-number-input {
     border-radius: 999px !important; /* full pill */
 }
+/* =========================================================
+   SUPPORT TICKETS – INTEGRATED PLUS MATCHES OTHER ROWS
+   ========================================================= */
+
+/* Give each support ticket card a comfortable orange border */
+.support-ticket-card {
+  border: 1px solid var(--orange);
+  border-radius: var(--radius-lg);
+  padding: 16px 22px 18px;
+  margin-bottom: 18px;
+}
+
+/* Make the Support Ticket Number row use the same layout
+   as other integrated-plus rows, but sized like your pills */
+#support-tickets .support-ticket-number-row input.ticket-number-input {
+  flex: 1 1 auto;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px 0 0 999px;  /* rounded left, flat right to meet + */
+  box-sizing: border-box;
+}
+
+#support-tickets .support-ticket-number-row .add-ticket-btn {
+  width: 50px;
+  height: 44px;
+  border: none;
+  background: var(--orange);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 0 999px 999px 0;   /* pill on right side */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ✅ Added cards (clones) – NO + button, fully rounded textbox */
+#support-tickets .ticket-group:not([data-base="true"])
+  .support-ticket-number-row .add-ticket-btn {
+  display: none;
+}
+
+#support-tickets .ticket-group:not([data-base="true"])
+  .support-ticket-number-row input.ticket-number-input {
+  border-radius: 999px;              /* full pill on added cards */
+}
