@@ -1161,3 +1161,61 @@ main {
 .ticket-section .ticket-number-wrap .add-ticket-btn {
   margin-left: 8px;
 }
+/* ========================================================= */
+/* SUPPORT TICKETS – LAYOUT + FIELD FIXES                    */
+/* ========================================================= */
+
+/* Make each row on the Support Tickets page behave like your
+   normal checklist rows: label left, field right. */
+#support-tickets .ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Label column */
+#support-tickets .ticket-row > label {
+  flex: 0 0 32%;
+}
+
+/* Field column (inputs, selects, wrappers) */
+#support-tickets .ticket-row > input,
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap {
+  flex: 1 1 0;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* Short Summary of the Issue – keep within same width as others */
+#support-tickets .ticket-summary-row input {
+  flex: 1 1 0;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* ========================================================= */
+/* SUPPORT TICKETS – TICKET NUMBER INPUT PILL                */
+/* ========================================================= */
+
+/* Wrapper for ticket number + plus button */
+#support-tickets .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* Make ALL Support Ticket Number text boxes look like a normal
+   pill, same width as other fields, rounded on both sides. */
+#support-tickets .ticket-number-input {
+  flex: 1 1 0;
+  width: 100% !important;
+  max-width: 100%;
+  border-radius: 9999px;       /* rounded right side, same as others */
+}
+
+/* Keep the + button separated so it doesn't flatten the pill */
+#support-tickets .ticket-number-wrap .add-ticket-btn {
+  flex: 0 0 auto;
+}
