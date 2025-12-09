@@ -1137,3 +1137,23 @@ main {
   align-items: center;
   gap: 12px;
 }
+/* ==========================================================
+   SUPPORT TICKET NUMBER — FIX RIGHT-SIDE ROUNDED CORNER
+   ========================================================== */
+
+/* Default: ALL support ticket inputs should be fully rounded */
+.support-ticket-card input.support-ticket-number-input {
+    border-radius: 999px;            /* full pill shape */
+}
+
+/* Only the FIRST card has the + button → flatten right side */
+.support-ticket-card:first-of-type input.support-ticket-number-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* ALL added support ticket cards → enforce rounded right side */
+.support-ticket-card:not(:first-of-type) input.support-ticket-number-input {
+    border-top-right-radius: 999px !important;
+    border-bottom-right-radius: 999px !important;
+}
