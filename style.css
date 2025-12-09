@@ -881,19 +881,17 @@ main {
   margin-top: 4px;
 }
 
-/* Orange Ticket # pill – ONLY for added cards (JS inserts this) */
-#support-tickets .ticket-badge {
-  position: absolute;
-  top: 10px;
-  left: 18px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--orange);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+/* Support Ticket Orange Badge – increase space below it */
+.ticket-badge {
+    background: var(--orange);
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 14px;   /* Increased from 6–8px → adds more space above text */
+    margin-top: 2px;       /* Slight lift */
 }
 
 /* Row layout – label left, field right, with dividers */
