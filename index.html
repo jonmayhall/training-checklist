@@ -2849,33 +2849,32 @@
     <h2>Open Support Tickets</h2>
 
     <div id="openTicketsContainer">
-      <!-- Base “template” card (no orange badge) -->
-      <div
-        class="ticket-group support-ticket-card"
-        data-base="true"
-        data-ticket-id="0"
-      >
+      <!-- Base (default) card – no visible ticket badge, just fields -->
+      <div class="ticket-group" data-base="true">
         <div class="ticket-group-inner">
 
-          <!-- Support Ticket Number – integrated + just like other rows -->
-          <div class="checklist-row integrated-plus support-ticket-number-row">
+          <!-- Support Ticket Number + integrated + button -->
+          <div class="ticket-row ticket-number-row">
             <label>Support Ticket Number</label>
-            <input
-              type="text"
-              class="support-ticket-number-input ticket-number-input"
-              placeholder="Zendesk ticket #"
-            />
-            <button
-              type="button"
-              class="add-row add-ticket-btn"
-              title="Add another support ticket"
-            >
-              +
-            </button>
+
+            <div class="ticket-number-wrap">
+              <input
+                type="text"
+                class="ticket-number-input"
+                placeholder="Zendesk ticket #"
+              />
+              <button
+                type="button"
+                class="add-ticket-btn"
+                title="Add another support ticket"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <!-- Status -->
-          <div class="checklist-row ticket-row">
+          <div class="ticket-row">
             <label>Status</label>
             <select class="ticket-status-select">
               <option value="Open" selected>Open</option>
@@ -2888,7 +2887,7 @@
           </div>
 
           <!-- Short Summary -->
-          <div class="checklist-row ticket-row ticket-summary-row">
+          <div class="ticket-row ticket-summary-row">
             <label>Short Summary of the Issue</label>
             <input
               type="text"
@@ -2897,11 +2896,10 @@
           </div>
 
           <!-- Zendesk link -->
-          <div class="checklist-row ticket-row">
+          <div class="ticket-row">
             <label>Zendesk Link</label>
             <input type="text" placeholder="Paste Zendesk link" />
           </div>
-
         </div>
       </div>
     </div>
