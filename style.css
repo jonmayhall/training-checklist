@@ -486,66 +486,66 @@ main {
 }
 
 /* ========================================================= */
-/* SUPPORT TICKET INPUT FIXES                                */
+/* SUPPORT TICKETS – ROW LAYOUT + FIELD SIZING FIXES         */
 /* ========================================================= */
 
-/* Base styling */
-.ticket-number-wrap {
+/* Make each support-ticket row behave like your other pages:
+   label on the left, field on the right, aligned and consistent. */
+.ticket-section .ticket-row {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+/* Label column width inside support tickets */
+.ticket-section .ticket-row > label {
+  flex: 0 0 32%;
+}
+
+/* Inputs and dropdowns take the remaining space, no overflow */
+.ticket-section .ticket-row input,
+.ticket-section .ticket-row select {
+  flex: 1 0 0;
+  width: auto !important;   /* override any old width settings */
+  max-width: 100%;
+}
+
+/* The Short Summary input uses the same layout, just flexed correctly */
+.ticket-section .ticket-summary-row input {
+  flex: 1 0 0;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* ========================================================= */
+/* SUPPORT TICKETS – TICKET NUMBER INPUT PILL FIX            */
+/* ========================================================= */
+
+/* Make every Support Ticket Number textbox look like a normal pill,
+   with a rounded right side and full width in its column. */
+.ticket-section .ticket-number-input {
+  width: 100% !important;
+  max-width: 100%;
+  border-radius: 9999px;    /* full pill, rounded right side */
+}
+
+/* If you are still using the integrated plus button wrapper,
+   keep the input and button aligned nicely. */
+.ticket-section .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
   gap: 0;
-  width: 100%;
 }
 
-.ticket-number-input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-right: none;
-  border-radius: 8px 0 0 8px;   /* left rounded only */
-  background: #f7f7f7;
+/* Input grows, plus button hugs the right side */
+.ticket-section .ticket-number-wrap .ticket-number-input {
+  flex: 1 0 0;
 }
 
-/* Correct shape for PLUS button (integrated look) */
-.add-ticket-btn {
-  padding: 0 16px;
-  height: 42px;
-  border: none;
-  background-color: var(--mykaarmaOrange);
-  color: white;
-  font-size: 20px;
-  font-weight: 600;
-  border-radius: 0 8px 8px 0;  /* RIGHT rounded corner */
-  cursor: pointer;
-}
-
-/* ========================================================= */
-/* ADDED (DUPLICATE) SUPPORT TICKET CARDS                    */
-/* ========================================================= */
-
-/* The orange pill badge that appears only on added cards */
-.ticket-pill {
-  display: inline-block;
-  margin-bottom: 4px;
-  background-color: var(--mykaarmaOrange);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* Fix the added Support Ticket Number field so RIGHT SIDE ROUNDS properly */
-.ticket-group:not([data-base="true"]) .ticket-number-input {
-  border-right: 1px solid #ddd !important;
-  border-radius: 8px !important; /* fully rounded like other inputs */
-}
-
-/* Align Summary text box width with other fields */
-.ticket-summary-row input {
-  width: 100%;
-  border-radius: 8px;
-  padding: 10px 14px;
+/* Optional: make sure the + button stays its own pill and
+   does NOT flatten the right side of the text box */
+.ticket-section .ticket-number-wrap .add-ticket-btn {
+  margin-left: 8px;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
