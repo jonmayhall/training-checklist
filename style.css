@@ -1070,3 +1070,81 @@ main {
   background:#ff8b42;
   transform: translateY(-1px);
 }
+/* =========================================================
+   SUPPORT TICKETS – FINAL VISUAL TWEAKS
+   ========================================================= */
+
+/* 1) Orange border on all support ticket cards */
+#support-tickets .ticket-group {
+  border: 1px solid var(--orange);
+  border-radius: var(--radius-lg);
+}
+
+/* 2) BASE CARD (with + button) – match integrated-plus rows */
+#support-tickets .support-ticket-card[data-base="true"] .support-ticket-number-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-left: 40px;          /* match other checklist rows */
+}
+
+#support-tickets .support-ticket-card[data-base="true"] .support-ticket-number-row label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* Textbox aligned + flat right edge to meet + button */
+#support-tickets .support-ticket-card[data-base="true"] .support-ticket-number-input {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Integrated + button on the right – same style as other + buttons */
+#support-tickets .support-ticket-card[data-base="true"] .add-ticket-btn {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+}
+
+/* 3) ADDED CARDS – ticket number input = normal pill, rounded on right */
+#support-tickets .support-ticket-card:not([data-base="true"]) .support-ticket-number-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 40px;
+}
+
+#support-tickets .support-ticket-card:not([data-base="true"]) .support-ticket-number-row label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* Added ticket inputs: same width as other fields, rounded both sides */
+#support-tickets .support-ticket-card:not([data-base="true"]) .support-ticket-number-input {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: var(--radius-sm);       /* rounded right side restored */
+}
+
+/* Added cards do NOT have a + button */
+#support-tickets .support-ticket-card:not([data-base="true"]) .support-ticket-number-row .add-ticket-btn {
+  display: none;
+}
