@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initClearPageButtons();
   initClearAllButton();
   initDealershipNameBinding();
-  initAddressMap();
+  initAddressAutocomplete();
   initAdditionalTrainers();
   initAdditionalPoc();
   initSupportTickets();
@@ -45,12 +45,17 @@ function initNavigation() {
 ------------------------------------- */
 function clearSection(section) {
   if (!section) return;
+
   const inputs = section.querySelectorAll('input, select, textarea');
 
   inputs.forEach((el) => {
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
-    else el.value = '';
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.checked = false;
+    } else {
+      el.value = '';
+    }
   });
 }
 
@@ -88,43 +93,69 @@ function initDealershipNameBinding() {
 }
 
 function updateDealershipNameDisplay() {
-  const txt = document.getElementById('dealershipNameInput');
+  const src = document.getElementById('dealershipNameInput');
   const display = document.getElementById('dealershipNameDisplay');
   if (!display) return;
 
-  display.textContent = txt && txt.value.trim()
-    ? txt.value.trim()
-    : 'Dealership Name';
+  const value = src && src.value ? src.value.trim() : '';
+  display.textContent = value || 'Dealership Name';
 }
 
 /* -------------------------------------
-   DEALERSHIP ADDRESS → SIMPLE MAP
-   (no JS Maps API – just iframe & "Map" button)
+   GOOGLE MAPS AUTOCOMPLETE + MAP BUTTON
 ------------------------------------- */
-function initAddressMap() {
-  const input = document.getElementById('dealershipAddressInput');
-  const frame = document.getElementById('dealershipMapFrame');
-  const btn = document.getElementById('openAddressInMapsBtn');
 
-  if (!input) return;
+let googleAutocomplete;
 
-  function updateIframe() {
-    if (!frame) return;
-    const text = input.value.trim();
-    if (!text) {
-      frame.src = '';
+function initAddressAutocomplete() {
+  const addressInput = document.getElementById('dealershipAddressInput');
+  const mapFrame = document.getElementById('dealershipMapFrame');
+  const openBtn = document.getElementById('openAddressInMapsBtn');
+
+  if (!addressInput) return;
+
+  // Load Google Maps Places library dynamically
+  function loadGoogleMaps() {
+    if (window.google && window.google.maps && window.google.maps.places) {
+      initAutocompleteInternal();
       return;
     }
-    const encoded = encodeURIComponent(text);
-    frame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+
+    const existing = document.querySelector('script[data-mk-maps="1"]');
+    if (existing) return;
+
+    const script = document.createElement('script');
+    script.src =
+      'https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocompleteInternal';
+    script.async = true;
+    script.defer = true;
+    script.dataset.mkMaps = '1';
+    document.head.appendChild(script);
   }
 
-  input.addEventListener('change', updateIframe);
-  input.addEventListener('blur', updateIframe);
+  window.initAutocompleteInternal = () => {
+    if (!window.google || !window.google.maps || !window.google.maps.places) return;
 
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const text = input.value.trim();
+    googleAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['geocode']
+    });
+
+    googleAutocomplete.addListener('place_changed', () => {
+      const place = googleAutocomplete.getPlace();
+      if (!place || !place.formatted_address) return;
+
+      const encoded = encodeURIComponent(place.formatted_address);
+      if (mapFrame) {
+        mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+      }
+    });
+  };
+
+  loadGoogleMaps();
+
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      const text = addressInput.value.trim();
       if (!text) return;
       const encoded = encodeURIComponent(text);
       window.open(
@@ -164,7 +195,7 @@ function initAdditionalTrainers() {
 }
 
 /* -------------------------------------
-   ADDITIONAL POC ON PAGE 2
+   ADDITIONAL POC (PAGE 2)
 ------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
@@ -206,29 +237,9 @@ function initAdditionalPoc() {
   });
 }
 
-/* -------------------------------------
-   SUPPORT TICKETS (PAGE 7)
-------------------------------------- */
-/*
-  Structure expected in HTML:
-
-  <div id="openTicketsContainer">
-    <div class="ticket-group ticket-group-template">
-      <span class="ticket-pill">Ticket # 1</span>   <-- optional, JS will add if missing
-      ...
-      <div class="integrated-plus">
-        <input class="ticket-number-input" ...>
-        <button type="button" class="add-ticket-btn">+</button>
-      </div>
-      <select class="ticket-status-select">...</select>
-      ...
-    </div>
-  </div>
-
-  <div id="tierTwoTicketsContainer"></div>
-  <div id="closedResolvedTicketsContainer"></div>
-  <div id="closedFeatureTicketsContainer"></div>
-*/
+/* =====================================
+   SUPPORT TICKETS
+===================================== */
 
 function initSupportTickets() {
   const openContainer = document.getElementById('openTicketsContainer');
@@ -238,196 +249,148 @@ function initSupportTickets() {
 
   if (!openContainer) return;
 
-  const template = openContainer.querySelector('.ticket-group-template');
-  if (!template) return;
+  const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
+  if (!baseCard) return;
 
-  // Make sure template has a pill
-  let templatePill = template.querySelector('.ticket-pill');
-  if (!templatePill) {
-    templatePill = document.createElement('span');
-    templatePill.className = 'ticket-pill';
-    templatePill.textContent = 'Ticket # 1';
-    template.insertBefore(templatePill, template.firstChild);
-  } else {
-    templatePill.textContent = 'Ticket # 1';
-  }
+  // Base card should never have an orange badge
+  const baseBadge = baseCard.querySelector('.ticket-badge');
+  if (baseBadge) baseBadge.remove();
 
-  // Template status default = Open
-  const templateStatus = template.querySelector('.ticket-status-select');
-  if (templateStatus) templateStatus.value = 'Open';
-
-  // + button only on template
-  const addBtn = template.querySelector('.add-ticket-btn');
+  // Wire the "+" on the base card
+  const addBtn = baseCard.querySelector('.add-ticket-btn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const newCard = createTicketFromTemplate(template, 'Open', {
+      const newCard = createTicketCard({
+        template: baseCard,
         openContainer,
         tierTwoContainer,
         closedResolvedContainer,
         closedFeatureContainer
       });
+
       openContainer.appendChild(newCard);
+      renumberTicketBadges();
     });
   }
 
-  // Wire template status-change logic
-  wireTicketStatus(template, {
+  // Wire status for base card
+  wireTicketStatus(baseCard, {
     openContainer,
     tierTwoContainer,
     closedResolvedContainer,
-    closedFeatureContainer,
-    isTemplate: true
+    closedFeatureContainer
   });
+
+  renumberTicketBadges();
 }
 
-/**
- * Returns the next ticket number for cloned cards.
- * We only count cards with class .ticket-group-clone, so
- * template is always Ticket #1 and clones start at Ticket #2.
- */
-function getNextTicketNumber() {
-  const clones = document.querySelectorAll('.ticket-group-clone');
-  return clones.length + 2; // 2, 3, 4, ...
-}
-
-/**
- * Creates a new ticket card from the template.
- * statusValue is the status to set on the new card ("Open", "Tier Two", etc.)
- */
-function createTicketFromTemplate(template, statusValue, containers) {
-  const { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = containers;
+function createTicketCard(ctx) {
+  const {
+    template,
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer
+  } = ctx;
 
   const card = template.cloneNode(true);
-  card.classList.remove('ticket-group-template');
-  card.classList.add('ticket-group-clone');
+  card.dataset.base = 'false';
 
-  // Remove + button on clones (only template can create new tickets)
-  const addBtnClone = card.querySelector('.add-ticket-btn');
-  if (addBtnClone) addBtnClone.remove();
+  // Remove any existing badge on clone
+  const existingBadge = card.querySelector('.ticket-badge');
+  if (existingBadge) existingBadge.remove();
 
-  // Clear fields on clone & set status
-  const fields = card.querySelectorAll('input, select, textarea');
-  fields.forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      if (el.classList.contains('ticket-status-select')) {
-        el.value = statusValue || 'Open';
-      } else {
-        el.selectedIndex = 0;
-      }
-    } else if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = false;
-    } else {
-      el.value = '';
-    }
-  });
+  // Remove "+" from cloned cards
+  const cloneAddBtn = card.querySelector('.add-ticket-btn');
+  if (cloneAddBtn) cloneAddBtn.remove();
 
-  // Ensure each clone has its own pill with incrementing number
-  let pill = card.querySelector('.ticket-pill');
-  if (!pill) {
-    pill = document.createElement('span');
-    pill.className = 'ticket-pill';
-    card.insertBefore(pill, card.firstChild);
-  }
-  pill.textContent = `Ticket # ${getNextTicketNumber()}`;
+  resetTicketCardFields(card);
 
-  // Wire status for new card
+  // Create badge for this card
+  const badge = document.createElement('div');
+  badge.className = 'ticket-badge';
+  card.appendChild(badge);
+
   wireTicketStatus(card, {
     openContainer,
     tierTwoContainer,
     closedResolvedContainer,
-    closedFeatureContainer,
-    isTemplate: false
+    closedFeatureContainer
   });
 
   return card;
 }
 
-/**
- * Moves a non-template card into the correct container based on status.
- */
-function moveTicketCard(card, containers, statusValue) {
-  if (!card) return;
-
-  const { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer } = containers;
-  const status = (statusValue || '').toLowerCase();
-
-  let target = openContainer;
-  if (status.includes('tier two')) {
-    target = tierTwoContainer;
-  } else if (status.includes('resolved')) {
-    target = closedResolvedContainer;
-  } else if (status.includes('feature')) {
-    target = closedFeatureContainer;
-  }
-
-  if (target && card.parentElement !== target) {
-    target.appendChild(card);
-  }
-}
-
-/**
- * Resets the template card back to a clean Open state.
- */
-function resetTicketTemplate(template) {
-  const fields = template.querySelectorAll('input, select, textarea');
-  fields.forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      if (el.classList.contains('ticket-status-select')) {
-        el.value = 'Open';
-      } else {
-        el.selectedIndex = 0;
-      }
-    } else if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = false;
-    } else {
-      el.value = '';
-    }
+function resetTicketCardFields(card) {
+  const textInputs = card.querySelectorAll('input[type="text"], input[type="email"], input[type="url"]');
+  textInputs.forEach((input) => {
+    input.value = '';
   });
+
+  const statusSelect = card.querySelector('.ticket-status-select');
+  if (statusSelect) {
+    statusSelect.value = 'Open';
+  }
 }
 
-/**
- * Wires status-change behavior for a ticket card (template or clone).
- */
-function wireTicketStatus(card, ctx) {
+function wireTicketStatus(card, containers) {
   const {
     openContainer,
     tierTwoContainer,
     closedResolvedContainer,
-    closedFeatureContainer,
-    isTemplate
-  } = ctx;
+    closedFeatureContainer
+  } = containers;
 
-  const select = card.querySelector('.ticket-status-select');
-  if (!select) return;
+  const statusSelect = card.querySelector('.ticket-status-select');
+  if (!statusSelect) return;
 
-  select.addEventListener('change', () => {
-    const status = select.value;
+  statusSelect.addEventListener('change', () => {
+    const status = statusSelect.value;
+    let target = openContainer;
 
-    if (isTemplate) {
-      // Template never leaves Open; if status != Open, clone & reset
-      if (!status || status === 'Open') return;
-
-      const newCard = createTicketFromTemplate(
-        card,
-        status,
-        { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer }
-      );
-      moveTicketCard(newCard, { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer }, status);
-      resetTicketTemplate(card);
-    } else {
-      moveTicketCard(card, { openContainer, tierTwoContainer, closedResolvedContainer, closedFeatureContainer }, status);
+    if (status === 'Tier Two') {
+      target = tierTwoContainer;
+    } else if (status === 'Closed - Resolved') {
+      target = closedResolvedContainer;
+    } else if (status === 'Closed – Feature Not Supported') {
+      target = closedFeatureContainer;
     }
+
+    if (target) {
+      target.appendChild(card);
+    }
+
+    renumberTicketBadges();
+  });
+}
+
+function renumberTicketBadges() {
+  // Remove badges from base cards
+  const baseCards = document.querySelectorAll('.ticket-group[data-base="true"]');
+  baseCards.forEach((baseCard) => {
+    const badge = baseCard.querySelector('.ticket-badge');
+    if (badge) badge.remove();
+  });
+
+  // Number all non-base cards
+  const numberedCards = document.querySelectorAll('.ticket-group:not([data-base="true"])');
+  let counter = 1;
+  numberedCards.forEach((card) => {
+    let badge = card.querySelector('.ticket-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'ticket-badge';
+      card.appendChild(badge);
+    }
+    badge.textContent = `Ticket # ${counter++}`;
   });
 }
 
 /* -------------------------------------
-   TABLE "+" BUTTONS – only for tables
+   TABLE ADD-ROW BUTTONS (Checklists / Opcodes)
 ------------------------------------- */
 function initTableAddRowButtons() {
-  // Only look at + buttons inside .table-footer so we don't touch Support Tickets
-  const tableAddButtons = document.querySelectorAll('.table-footer .add-row');
-
-  tableAddButtons.forEach((btn) => {
+  document.querySelectorAll('.table-footer .add-row').forEach((btn) => {
     btn.addEventListener('click', () => {
       const footer = btn.closest('.table-footer');
       if (!footer) return;
@@ -442,10 +405,10 @@ function initTableAddRowButtons() {
       const lastRow = tbody.lastElementChild;
       if (!lastRow) return;
 
-      const newRow = lastRow.cloneNode(true);
+      const clone = lastRow.cloneNode(true);
 
-      const fields = newRow.querySelectorAll('input, select, textarea');
-      fields.forEach((el) => {
+      // Clear inputs/selects in the cloned row
+      clone.querySelectorAll('input, select, textarea').forEach((el) => {
         if (el.tagName === 'SELECT') {
           el.selectedIndex = 0;
         } else if (el.type === 'checkbox' || el.type === 'radio') {
@@ -455,7 +418,7 @@ function initTableAddRowButtons() {
         }
       });
 
-      tbody.appendChild(newRow);
+      tbody.appendChild(clone);
     });
   });
 }
@@ -465,9 +428,11 @@ function initTableAddRowButtons() {
 ------------------------------------- */
 function initPdfExport() {
   const btn = document.getElementById('savePDF');
-  if (!btn || !window.jspdf) return;
+  if (!btn) return;
 
   btn.addEventListener('click', () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
@@ -480,8 +445,8 @@ function initPdfExport() {
 }
 
 /* -------------------------------------
-   DMS CARDS (placeholder for future logic)
+   DMS CARDS (placeholder for future)
 ------------------------------------- */
 function initDmsCards() {
-  // Future dynamic behavior for DMS Integration page
+  // Reserved for any future DMS card interactivity
 }
