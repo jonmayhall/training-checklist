@@ -4149,58 +4149,60 @@
     </main>
   </div>
   
-></script>
-  
-  <script 
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU60-nQCusNisxhqSp-6vDow5meFKUaOA&libraries=places&callback=initDealerMap"
-  async 
-  defer>
-</script>
+  <!-- Your main JS file (navigation, add buttons, etc.) -->
+  <script src="script.js"></script>
 
-<script src="script.js"></script>  <!-- your main JS file -->
-</body>
-</html>
+  <!-- GOOGLE MAPS AUTOCOMPLETE + MAP PREVIEW -->
+  <script>
+    let addressAutocomplete;
 
-<!-- GOOGLE MAPS AUTOCOMPLETE + MAP PREVIEW -->
-<script>
-let addressAutocomplete;
+    function initAddressAutocomplete() {
+      const input   = document.getElementById("dealershipAddressInput");
+      const mapFrame = document.getElementById("dealershipMapFrame");
+      const mapWrap  = document.getElementById("mapPreviewWrapper");
+      const mapBtn   = document.getElementById("openAddressInMapsBtn");
 
-function initAddressAutocomplete() {
-    const input = document.getElementById("dealershipAddressInput");
-    const mapFrame = document.getElementById("dealershipMapFrame");
-    const mapWrap = document.getElementById("mapPreviewWrapper");
-    const mapBtn = document.getElementById("openAddressInMapsBtn");
+      if (!input) return;
 
-    if (!input) return;
-
-    addressAutocomplete = new google.maps.places.Autocomplete(input, {
+      // Attach Google Places autocomplete to the address input
+      addressAutocomplete = new google.maps.places.Autocomplete(input, {
         types: ["geocode"]
-    });
+      });
 
-    addressAutocomplete.addListener("place_changed", () => {
+      // When user picks a place, update the embedded map
+      addressAutocomplete.addListener("place_changed", () => {
         const place = addressAutocomplete.getPlace();
-        if (!place.geometry) return;
+        if (!place || !place.geometry) return;
 
-        const address = place.formatted_address;
+        const address = place.formatted_address || input.value;
         const encoded = encodeURIComponent(address);
 
-        mapWrap.style.display = "block";
-        mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
-    });
+        if (mapWrap)  mapWrap.style.display = "block";
+        if (mapFrame) mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+      });
 
-    mapBtn?.addEventListener("click", () => {
-        const text = input.value.trim();
-        if (!text) return;
-        const encoded = encodeURIComponent(text);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
-    });
-}
-</script>
+      // "MAP" button → open Google Maps in a new tab with the typed address
+      if (mapBtn) {
+        mapBtn.addEventListener("click", () => {
+          const text = input.value.trim();
+          if (!text) return;
+          const encoded = encodeURIComponent(text);
+          window.open(
+            `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+            "_blank"
+          );
+        });
+      }
+    }
+  </script>
 
-<!-- LOAD GOOGLE MAPS JS API AIzaSyDtJSZv2Vll93ep61GqMASTJPdgH3KhT5w -->
-<script async 
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtJSZv2Vll93ep61GqMASTJPdgH3KhT5w&libraries=places&callback=initAddressAutocomplete">
-</script>
+  <!-- LOAD GOOGLE MAPS JS API (ONE script tag only) -->
+  <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtJSZv2Vll93ep61GqMASTJPdgH3KhT5w&libraries=places&callback=initAddressAutocomplete">
+  </script>
 
 </body>
 </html>
+
