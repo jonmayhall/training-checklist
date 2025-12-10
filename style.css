@@ -336,55 +336,58 @@ main {
   font-size: 13px;
 }
 
-/* --------------- DEALERSHIP ADDRESS ROW (FIXED) --------------- */
-/* Make the address row behave like other rows but with integrated Map button
-   on the RIGHT side of the textbox, and the whole group aligned with other fields. */
+/* --------------- DEALERSHIP ADDRESS – INTEGRATED MAP BUTTON --------------- */
+/* Behaves like integrated "+" rows: input on the left, orange button
+   attached on the right, same height and alignment as other fields. */
+
 #dealership-info .checklist-row .address-input-wrap {
   display: flex;
   align-items: stretch;
   gap: 0;
   flex: 0 0 var(--input-width);
   width: var(--input-width);
-  margin-left: auto;              /* aligns with other inputs */
+  margin-left: auto;                /* right-align with other fields */
 }
 
-/* Address text box: fills most of the width, flat right side to meet the Map button */
+/* Address text box – same look as other inputs, flat right side */
 #dealership-info .address-input-wrap input[type="text"] {
   flex: 1 1 auto;
-  width: 100%;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  height: 34px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border: 1px solid var(--border);
+  border-right: none;               /* merges visually with button */
+  background: #f7f7f7;
+  font-size: 13px;
 }
 
-/* MAP button – orange, slightly taller, sits on the right like your + buttons */
+/* Map button – same size/feel as integrated "+" buttons */
 #dealership-info .address-input-wrap .small-map-btn {
-  flex: 0 0 44px;
-  width: 44px;
+  flex: 0 0 34px;
+  width: 34px;
   height: 34px;
-  margin-left: -1px;
+  margin-left: -1px;                 /* hides double border */
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   border: 1px solid var(--orange);
   background: var(--orange);
   color: #fff;
   font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   transition: background .16s, border-color .16s, color .16s, transform .16s;
 }
+
 #dealership-info .address-input-wrap .small-map-btn:hover {
   background: #ff8b42;
   border-color: #ff8b42;
   transform: translateY(-1px);
-}
-
-/* (Generic small-map-btn fallback if used anywhere else) */
-.small-map-btn {
-  font-family: inherit;
 }
 
 /* Textareas */
