@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
+   myKaarma Interactive Training Checklist – FULL CSS (Clean Build)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -265,6 +265,7 @@ main {
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
+
 /* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
 .section-block {
   background: #fff;
@@ -336,58 +337,59 @@ main {
   font-size: 13px;
 }
 
-/* --------------- DEALERSHIP ADDRESS – INTEGRATED MAP BUTTON --------------- */
-/* Behaves like integrated "+" rows: input on the left, orange button
-   attached on the right, same height and alignment as other fields. */
-
-#dealership-info .checklist-row .address-input-wrap {
+/* ---------- Dealership Address row – integrated MAP button ---------- */
+/* wrapper behaves like a single field on the right */
+#dealership-info .address-input-wrap {
   display: flex;
   align-items: stretch;
   gap: 0;
-  flex: 0 0 var(--input-width);
+  flex: 0 0 var(--input-width);   /* same width as other text boxes */
   width: var(--input-width);
-  margin-left: auto;                /* right-align with other fields */
+  margin-left: auto;              /* right-align like other fields */
 }
 
-/* Address text box – same look as other inputs, flat right side */
+/* address text box – same width logic as integrated + buttons */
 #dealership-info .address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  height: 34px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  border: 1px solid var(--border);
-  border-right: none;               /* merges visually with button */
-  background: #f7f7f7;
-  font-size: 13px;
+  order: 1;
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-left: 0;
 }
 
-/* Map button – same size/feel as integrated "+" buttons */
+/* MAP button – integrated on the right, same style as other "+" buttons */
 #dealership-info .address-input-wrap .small-map-btn {
+  order: 2;
   flex: 0 0 34px;
+  margin-left: -1px;
   width: 34px;
   height: 34px;
-  margin-left: -1px;                 /* hides double border */
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border: 1px solid var(--orange);
   background: var(--orange);
   color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  cursor: pointer;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
+  padding: 0;
 }
 
 #dealership-info .address-input-wrap .small-map-btn:hover {
   background: #ff8b42;
-  border-color: #ff8b42;
+  border-color: var(--orange);
   transform: translateY(-1px);
+}
+
+/* (If you ever use .small-map-btn somewhere else, this keeps a sane default) */
+.small-map-btn {
+  font-size: 11px;
 }
 
 /* Textareas */
@@ -507,6 +509,7 @@ main {
   background:#ff8b42;
   transform: translateY(-1px);
 }
+
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block { margin-bottom:28px; }
@@ -880,6 +883,7 @@ main {
   font-size: 12px;
   color: #555;
 }
+
 /* --------------- SUPPORT TICKETS – CLEAN BUILD --------------- */
 
 #support-tickets .ticket-section {
@@ -902,7 +906,7 @@ main {
   margin-top: 4px;
 }
 
-/* Support Ticket Orange Badge – with extra space above the first row */
+/* Support Ticket Orange Badge – with extra space below */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -912,7 +916,7 @@ main {
   border-radius: 999px;
   display: inline-block;
   margin-top: 2px;
-  margin-bottom: 18px;   /* EXTRA PADDING ABOVE "Support Ticket Number" */
+  margin-bottom: 14px;   /* gives cushion above "Support Ticket Number" */
 }
 
 /* Row layout – label left, field right, with dividers */
@@ -938,7 +942,7 @@ main {
   padding-right: 16px;
 }
 
-/* Fields – same size behavior as normal text boxes */
+/* Fields – same pill style as other inputs */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
@@ -958,7 +962,7 @@ main {
   font-size: 13px;
 }
 
-/* Short Summary ~ 3/4 card width */
+/* Short Summary ~ 70% card width */
 #support-tickets .ticket-summary-row input[type="text"] {
   flex: 0 0 70%;
   width: 70%;
@@ -1007,6 +1011,7 @@ main {
   width: var(--input-width);
   border-radius: var(--radius-sm);
 }
+
 /* --------------- FLOATING PDF BUTTON (Summary) --------------- */
 #training-summary .floating-btn {
   background: var(--orange);
