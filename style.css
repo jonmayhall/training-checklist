@@ -337,47 +337,52 @@ main {
   font-size: 13px;
 }
 
-/* Dealership Address – wider input + taller button */
+/* --------- Dealership Address row – wider input + orange Map button --------- */
 #dealership-info .address-input-wrap {
-    display: flex;
-    align-items: stretch;
-    gap: 8px;
-    flex: 0 0 400px;          /* ⬅️ wider than normal 260px */
-    width: 400px;
-    margin-left: auto;        /* right-align like other fields */
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex: 0 0 400px;       /* wider than default inputs */
+  width: 400px;
+  margin-left: auto;
+  margin-right: 0;
 }
 
-/* Address text box fills the group, button doesn’t stretch it */
 #dealership-info .address-input-wrap input[type="text"] {
   flex: 1 1 auto;
   width: 100%;
   max-width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
 }
 
-/* Taller ORANGE Map button */
+/* Taller, orange Map button */
 #dealership-info .small-map-btn {
-    flex: 0 0 auto;
-    padding: 0 14px;
-    height: 36px;              /* ⬅️ taller button */
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-radius: 999px;
-    border: 1px solid var(--orange);
-    background: var(--orange); /* ⬅️ ORANGE */
-    color: #fff;               /* white text */
-    cursor: pointer;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .16s, transform .16s;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  height: 36px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .16s, transform .16s;
 }
 
 #dealership-info .small-map-btn:hover {
-    background: #ff8b42;
-    transform: translateY(-1px);
+  background: #ff8b42;
+  transform: translateY(-1px);
 }
 
 /* Textareas */
@@ -894,7 +899,7 @@ main {
   margin-top: 4px;
 }
 
-/* Support Ticket Orange Badge – increase space below it */
+/* Support Ticket Orange Badge – more padding above text */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -903,7 +908,7 @@ main {
   font-weight: 600;
   border-radius: 999px;
   display: inline-block;
-  margin-bottom: 14px;
+  margin-bottom: 14px;  /* extra cushion above first row */
   margin-top: 2px;
 }
 
