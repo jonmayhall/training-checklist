@@ -838,12 +838,18 @@ main {
   min-width:100px;
 }
 
-/* Parts Price column – smaller */
+/* Parts Price column – match other main columns */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
-  width:80px;
-  max-width:80px;
-  min-width:60px;
+  width:110px;
+  min-width:100px;
+}
+
+/* Make sure the Parts Price text box fits inside its column */
+#opcodes-pricing .training-table td:nth-child(6) input[type="text"] {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Checkbox columns */
