@@ -337,14 +337,14 @@ main {
   font-size: 13px;
 }
 
-/* Dealership Address row – match other input alignment */
+/* Dealership Address – wider input + taller button */
 #dealership-info .address-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 var(--input-width);   /* same width as other text boxes */
-  width: var(--input-width);
-  margin-left: auto;              /* right-align like other fields */
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    flex: 0 0 400px;          /* ⬅️ wider than normal 260px */
+    width: 400px;
+    margin-left: auto;        /* right-align like other fields */
 }
 
 /* Address text box fills the group, button doesn’t stretch it */
@@ -354,26 +354,30 @@ main {
   max-width: 100%;
 }
 
-/* MAP button – fixed size, doesn’t stretch the group */
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 0 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
+/* Taller ORANGE Map button */
+#dealership-info .small-map-btn {
+    flex: 0 0 auto;
+    padding: 0 14px;
+    height: 36px;              /* ⬅️ taller button */
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    border: 1px solid var(--orange);
+    background: var(--orange); /* ⬅️ ORANGE */
+    color: #fff;               /* white text */
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .16s, transform .16s;
 }
 
-.small-map-btn:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
+#dealership-info .small-map-btn:hover {
+    background: #ff8b42;
+    transform: translateY(-1px);
 }
 
 /* Textareas */
