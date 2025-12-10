@@ -191,192 +191,169 @@
 </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 2: DEALERSHIP INFO                                   -->
+<!-- PAGE 2: DEALERSHIP INFORMATION                            -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
-  <h1>Dealership Info</h1>
+  <h1>Dealership Information</h1>
   <p class="page-subtitle">
-    Core dealership details required for setup, communication, and validation.
+    Core identifiers, contact information, and address validation.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ========================= -->
-  <!-- DEALER GROUP -->
-  <!-- ========================= -->
+  <!-- ========== DEALERSHIP DETAILS CARD ========== -->
   <div class="section-block">
-    <h2>Dealer Group</h2>
+    <h2>Dealership Details</h2>
 
+    <!-- Dealer Group -->
     <div class="checklist-row">
       <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput">
+      <input type="text" id="dealerGroup" />
     </div>
-  </div>
 
-  <!-- ========================= -->
-  <!-- DEALERSHIP NAME + DID -->
-  <!-- ========================= -->
-  <div class="section-block">
-    <h2>Dealership Name</h2>
-
+    <!-- Dealership Name -->
     <div class="checklist-row">
       <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput">
+      <input type="text" id="dealershipNameInput" />
     </div>
 
+    <!-- DID -->
     <div class="checklist-row">
       <label>DID</label>
-      <input type="text" id="didInput">
+      <input type="text" id="dealershipDID" />
     </div>
-  </div>
 
-  <!-- ========================= -->
-  <!-- DMS SELECTION -->
-  <!-- ========================= -->
-  <div class="section-block">
-    <h2>DMS System</h2>
-
+    <!-- DMS -->
     <div class="checklist-row">
-      <label>DMS Provider</label>
-      <select id="dmsSelect">
+      <label>DMS</label>
+      <select id="dealershipDMS">
         <option value="">Select DMS</option>
         <option>CDK</option>
         <option>Reynolds & Reynolds</option>
-        <option>Tekion</option>
-        <option>Auto/Mate</option>
         <option>Dealertrack</option>
-        <option>Dominion</option>
-        <option>Quorum</option>
-        <option>PBS</option>
         <option>Serti</option>
+        <option>Automate</option>
+        <option>Dominion</option>
+        <option>Tekion</option>
+        <option>Autosoft</option>
+        <option>PBS</option>
+        <option>Other</option>
       </select>
     </div>
-  </div>
 
-  <!-- ========================= -->
-  <!-- DEALERSHIP ADDRESS + MAP -->
-  <!-- ========================= -->
-  <div class="section-block">
-    <h2>Dealership Address</h2>
-
+    <!-- Address + MAP BUTTON -->
     <div class="checklist-row">
       <label>Address</label>
 
       <div class="address-input-wrap">
         <input
           type="text"
-          id="dealershipAddress"
-          autocomplete="off"
+          id="dealershipAddressInput"
           placeholder="Start typing dealership address"
+          autocomplete="off"
+        />
+
+        <button
+          type="button"
+          class="small-map-btn"
+          id="openAddressInMapsBtn"
         >
-        <button class="small-map-btn" type="button" id="openMapSearch">
           Map
         </button>
       </div>
     </div>
 
-    <!-- MAP PREVIEW -->
+    <!-- Map Preview -->
     <div id="mapPreviewWrapper" class="map-wrapper" style="display:none;">
-      <iframe id="mapFrame" class="map-frame" loading="lazy"></iframe>
-      <p class="map-helper-text">Showing selected dealership location</p>
+      <iframe id="dealershipMapFrame" class="map-frame"></iframe>
+      <div class="map-helper-text">
+        Preview updates automatically when you select an address.
+      </div>
     </div>
+
   </div>
 
-  <!-- ========================= -->
-  <!-- PRIMARY CONTACTS -->
-  <!-- ========================= -->
+  <!-- ========== PRIMARY CONTACTS CARD ========== -->
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div class="primary-contacts-grid" id="primaryContactsGrid">
+    <div class="primary-contacts-grid">
 
       <!-- Service Director -->
-      <div class="mini-card contact-card">
+      <div class="mini-card">
         <div class="checklist-row">
           <label>Service Director</label>
-          <input type="text">
+          <input type="text" id="serviceDirectorName" />
         </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
+        <div class="checklist-row">
           <label>Email</label>
-          <input type="email">
+          <input type="email" id="serviceDirectorEmail" />
+        </div>
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input type="tel" id="serviceDirectorPhone" />
         </div>
       </div>
 
       <!-- Service Manager -->
-      <div class="mini-card contact-card">
+      <div class="mini-card">
         <div class="checklist-row">
           <label>Service Manager</label>
-          <input type="text">
+          <input type="text" id="serviceManagerName" />
         </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
+        <div class="checklist-row">
           <label>Email</label>
-          <input type="email">
+          <input type="email" id="serviceManagerEmail" />
+        </div>
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input type="tel" id="serviceManagerPhone" />
         </div>
       </div>
 
       <!-- General Manager -->
-      <div class="mini-card contact-card">
+      <div class="mini-card">
         <div class="checklist-row">
           <label>General Manager</label>
-          <input type="text">
+          <input type="text" id="generalManagerName" />
         </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
+        <div class="checklist-row">
           <label>Email</label>
-          <input type="email">
+          <input type="email" id="generalManagerEmail" />
+        </div>
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input type="tel" id="generalManagerPhone" />
         </div>
       </div>
 
       <!-- Parts Manager -->
-      <div class="mini-card contact-card">
+      <div class="mini-card">
         <div class="checklist-row">
           <label>Parts Manager</label>
-          <input type="text">
+          <input type="text" id="partsManagerName" />
         </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email">
-        </div>
-      </div>
-
-      <!-- ADDITIONAL POC TEMPLATE (always stays FIRST in its type) -->
-      <div class="mini-card additional-poc-card">
         <div class="checklist-row">
-          <label>Additional POC</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Role</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text">
-        </div>
-        <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email">
+          <input type="email" id="partsManagerEmail" />
         </div>
-
-        <button class="additional-poc-add" type="button">+</button>
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input type="tel" id="partsManagerPhone" />
+        </div>
       </div>
 
     </div>
+
+    <!-- Additional POC -->
+    <div class="checklist-row integrated-plus">
+      <label>Additional POC</label>
+      <input type="text" id="additionalPOCInput" />
+      <button type="button" class="add-row" id="addAdditionalPOC">+</button>
+    </div>
+
+    <div id="additionalPOCContainer"></div>
+
   </div>
 </section>
 
@@ -4164,6 +4141,47 @@
 <script src="script.js"></script>  <!-- your main JS file -->
 </body>
 </html>
+
+<!-- GOOGLE MAPS AUTOCOMPLETE + MAP PREVIEW -->
+<script>
+let addressAutocomplete;
+
+function initAddressAutocomplete() {
+    const input = document.getElementById("dealershipAddressInput");
+    const mapFrame = document.getElementById("dealershipMapFrame");
+    const mapWrap = document.getElementById("mapPreviewWrapper");
+    const mapBtn = document.getElementById("openAddressInMapsBtn");
+
+    if (!input) return;
+
+    addressAutocomplete = new google.maps.places.Autocomplete(input, {
+        types: ["geocode"]
+    });
+
+    addressAutocomplete.addListener("place_changed", () => {
+        const place = addressAutocomplete.getPlace();
+        if (!place.geometry) return;
+
+        const address = place.formatted_address;
+        const encoded = encodeURIComponent(address);
+
+        mapWrap.style.display = "block";
+        mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+    });
+
+    mapBtn?.addEventListener("click", () => {
+        const text = input.value.trim();
+        if (!text) return;
+        const encoded = encodeURIComponent(text);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
+    });
+}
+</script>
+
+<!-- LOAD GOOGLE MAPS JS API AIzaSyDtJSZv2Vll93ep61GqMASTJPdgH3KhT5w -->
+<script async 
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtJSZv2Vll93ep61GqMASTJPdgH3KhT5w&libraries=places&callback=initAddressAutocomplete">
+</script>
 
 </body>
 </html>
