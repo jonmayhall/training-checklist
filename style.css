@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (Clean Build)
+   myKaarma Interactive Training Checklist – FULL CSS
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -265,7 +265,6 @@ main {
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0,0,0,0.16);
 }
-
 /* --------------- SECTION BLOCKS (NON-TABLE CARDS) --------------- */
 .section-block {
   background: #fff;
@@ -337,52 +336,55 @@ main {
   font-size: 13px;
 }
 
-/* --------- Dealership Address row – wider input + orange Map button --------- */
-#dealership-info .address-input-wrap {
+/* --------------- DEALERSHIP ADDRESS ROW (FIXED) --------------- */
+/* Make the address row behave like other rows but with integrated Map button
+   on the RIGHT side of the textbox, and the whole group aligned with other fields. */
+#dealership-info .checklist-row .address-input-wrap {
   display: flex;
   align-items: stretch;
-  gap: 8px;
-  flex: 0 0 400px;       /* wider than default inputs */
-  width: 400px;
-  margin-left: auto;
-  margin-right: 0;
+  gap: 0;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;              /* aligns with other inputs */
 }
 
+/* Address text box: fills most of the width, flat right side to meet the Map button */
 #dealership-info .address-input-wrap input[type="text"] {
   flex: 1 1 auto;
   width: 100%;
-  max-width: 100%;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-/* Taller, orange Map button */
-#dealership-info .small-map-btn {
-  flex: 0 0 auto;
-  padding: 0 14px;
-  height: 36px;
+/* MAP button – orange, slightly taller, sits on the right like your + buttons */
+#dealership-info .address-input-wrap .small-map-btn {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 34px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: 1px solid var(--orange);
+  background: var(--orange);
+  color: #fff;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--orange);
-  background: var(--orange);
-  color: #fff;
   cursor: pointer;
-  white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background .16s, transform .16s;
+  transition: background .16s, border-color .16s, color .16s, transform .16s;
+}
+#dealership-info .address-input-wrap .small-map-btn:hover {
+  background: #ff8b42;
+  border-color: #ff8b42;
+  transform: translateY(-1px);
 }
 
-#dealership-info .small-map-btn:hover {
-  background: #ff8b42;
-  transform: translateY(-1px);
+/* (Generic small-map-btn fallback if used anywhere else) */
+.small-map-btn {
+  font-family: inherit;
 }
 
 /* Textareas */
@@ -502,7 +504,6 @@ main {
   background:#ff8b42;
   transform: translateY(-1px);
 }
-
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
 
 .dms-overview-block { margin-bottom:28px; }
@@ -876,7 +877,6 @@ main {
   font-size: 12px;
   color: #555;
 }
-
 /* --------------- SUPPORT TICKETS – CLEAN BUILD --------------- */
 
 #support-tickets .ticket-section {
@@ -899,7 +899,7 @@ main {
   margin-top: 4px;
 }
 
-/* Support Ticket Orange Badge – more padding above text */
+/* Support Ticket Orange Badge – with extra space above the first row */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -908,8 +908,8 @@ main {
   font-weight: 600;
   border-radius: 999px;
   display: inline-block;
-  margin-bottom: 14px;  /* extra cushion above first row */
   margin-top: 2px;
+  margin-bottom: 18px;   /* EXTRA PADDING ABOVE "Support Ticket Number" */
 }
 
 /* Row layout – label left, field right, with dividers */
@@ -935,7 +935,7 @@ main {
   padding-right: 16px;
 }
 
-/* Fields – same pill style as other inputs */
+/* Fields – same size behavior as normal text boxes */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
@@ -1004,7 +1004,6 @@ main {
   width: var(--input-width);
   border-radius: var(--radius-sm);
 }
-
 /* --------------- FLOATING PDF BUTTON (Summary) --------------- */
 #training-summary .floating-btn {
   background: var(--orange);
