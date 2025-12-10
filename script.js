@@ -9,35 +9,43 @@ document.addEventListener("DOMContentLoaded", () => {
   initPOCAddButtons();
   initSupportTicketSystem();
   initTrainingTableAddButtons();
-  initDealershipAddressMap();   // NEW — map embed wiring
+  initDealershipAddressMap();   // map embed wiring
 });
 
 /* =========================================================
-   NAVIGATION
+   NAVIGATION  (uses data-target like your HTML)
 ========================================================= */
 function initNavigation() {
   const pages = document.querySelectorAll(".page-section");
   const navButtons = document.querySelectorAll(".nav-btn");
 
   function showPage(id) {
-    pages.forEach(p => p.classList.remove("active"));
-    const page = document.getElementById(id);
-    if (page) page.classList.add("active");
+    if (!id) return;
 
-    navButtons.forEach(b => b.classList.remove("active"));
-    document.querySelector(`[data-page='${id}']`)?.classList.add("active");
+    // Show the correct page
+    pages.forEach(p => {
+      p.classList.toggle("active", p.id === id);
+    });
+
+    // Highlight correct nav button
+    navButtons.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.target === id);
+    });
   }
 
+  // Click handlers on nav buttons
   navButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      const page = btn.dataset.page;
-      showPage(page);
-      localStorage.setItem("activePage", page);
+      const targetId = btn.dataset.target;
+      showPage(targetId);
+      localStorage.setItem("activePage", targetId);
     });
   });
 
+  // Restore last page or default to first nav's target
   const saved = localStorage.getItem("activePage");
-  showPage(saved || "dealership-info");
+  const defaultId = saved || (navButtons[0] && navButtons[0].dataset.target) || "dealership-info";
+  showPage(defaultId);
 }
 
 /* =========================================================
@@ -89,6 +97,10 @@ function initDealershipNameBinding() {
 ========================================================= */
 function initPOCAddButtons() {
   document.querySelectorAll(".additional-poc-add").forEach(btn => {
+    // avoid double-binding if this runs again
+    if (btn.dataset.bound === "true") return;
+    btn.dataset.bound = "true";
+
     btn.addEventListener("click", () => {
       const card = btn.closest(".contact-card");
       if (!card) return;
@@ -98,7 +110,8 @@ function initPOCAddButtons() {
 
       card.after(clone);
 
-      initPOCAddButtons(); // rebind new + buttons
+      // Bind the + button inside the newly created card
+      initPOCAddButtons();
     });
   });
 }
@@ -115,16 +128,26 @@ function initSupportTicketSystem() {
   if (!openContainer) return;
 
   const baseCard = openContainer.querySelector("[data-base='true']");
+  if (!baseCard) return;
 
-  // -------- Add Ticket --------
-  baseCard.querySelector(".add-ticket-btn").addEventListener("click", () => {
-    const newCard = cloneSupportTicketCard();
-    openContainer.appendChild(newCard);
-  });
+  // -------- Add Ticket from base card --------
+  const baseAddBtn = baseCard.querySelector(".add-ticket-btn");
+  if (baseAddBtn && baseAddBtn.dataset.bound !== "true") {
+    baseAddBtn.dataset.bound = "true";
+    baseAddBtn.addEventListener("click", () => {
+      const newCard = cloneSupportTicketCard();
+      openContainer.appendChild(newCard);
+    });
+  }
 
-  // Attach listeners to moves
+  // Attach listeners so tickets move when status changes
   function attachStatusListener(card) {
     const select = card.querySelector(".ticket-status-select");
+    if (!select) return;
+
+    if (select.dataset.bound === "true") return;
+    select.dataset.bound = "true";
+
     select.addEventListener("change", () => {
       moveCard(card, select.value);
     });
@@ -132,6 +155,7 @@ function initSupportTicketSystem() {
 
   // Moves ticket to correct section
   function moveCard(card, status) {
+    // Remove any older badge
     card.querySelector(".ticket-badge")?.remove();
 
     if (status === "Open") {
@@ -149,7 +173,7 @@ function initSupportTicketSystem() {
     }
   }
 
-  // Assistive badge
+  // Orange badge
   function setBadge(card, text) {
     const badge = document.createElement("div");
     badge.className = "ticket-badge";
@@ -162,13 +186,16 @@ function initSupportTicketSystem() {
     const template = baseCard.cloneNode(true);
     template.removeAttribute("data-base");
 
-    template.querySelector(".add-ticket-btn").remove();
+    // Remove + from clone
+    const addBtn = template.querySelector(".add-ticket-btn");
+    if (addBtn) addBtn.remove();
 
+    // Clear values
     template.querySelectorAll("input").forEach(i => (i.value = ""));
-    template.querySelector(".ticket-status-select").value = "Open";
+    const statusSelect = template.querySelector(".ticket-status-select");
+    if (statusSelect) statusSelect.value = "Open";
 
     attachStatusListener(template);
-
     setBadge(template, "Ticket");
 
     return template;
@@ -182,25 +209,32 @@ function initSupportTicketSystem() {
 ========================================================= */
 function initTrainingTableAddButtons() {
   document.querySelectorAll(".table-footer .add-row").forEach(btn => {
+    if (btn.dataset.bound === "true") return;
+    btn.dataset.bound = "true";
+
     btn.addEventListener("click", () => {
-      const table = btn.closest(".table-container").querySelector(".training-table tbody");
-      if (!table) return;
+      const container = btn.closest(".table-container");
+      if (!container) return;
 
-      const firstRow = table.querySelector("tr");
+      const tbody = container.querySelector(".training-table tbody");
+      if (!tbody) return;
+
+      const firstRow = tbody.querySelector("tr");
+      if (!firstRow) return;
+
       const clone = firstRow.cloneNode(true);
-
       clone.querySelectorAll("input, select").forEach(el => {
         if (el.type === "checkbox") el.checked = false;
         else el.value = "";
       });
 
-      table.appendChild(clone);
+      tbody.appendChild(clone);
     });
   });
 }
 
 /* =========================================================
-   SIMPLE ADDRESS → EMBEDDED MAP (NO API KEY NEEDED)
+   SIMPLE ADDRESS → EMBEDDED MAP (NO API KEY)
 ========================================================= */
 function initDealershipAddressMap() {
   const addressInput = document.getElementById("dealershipAddressInput");
@@ -219,6 +253,7 @@ function initDealershipAddressMap() {
     mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
   }
 
+  // Hit Enter in the address field → update map
   addressInput.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -226,17 +261,23 @@ function initDealershipAddressMap() {
     }
   });
 
+  // Leaving the field also updates map
   addressInput.addEventListener("blur", () => {
     updateMap();
   });
 
-  if (mapButton) {
+  // Map button opens full Google Maps AND updates embed
+  if (mapButton && mapButton.dataset.bound !== "true") {
+    mapButton.dataset.bound = "true";
     mapButton.addEventListener("click", () => {
       const value = addressInput.value.trim();
       if (!value) return;
 
       const encoded = encodeURIComponent(value);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+        "_blank"
+      );
 
       mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
     });
