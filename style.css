@@ -337,42 +337,48 @@ main {
   font-size: 13px;
 }
 
-/* Dealership Address row – wider input, aligned with others */
+/* Dealership Address row – integrated Map button like other "+" rows */
 #dealership-info .address-input-wrap {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 360px;     /* wider than default input */
-  width: 360px;
-  margin-left: auto;   /* keep right-aligned like other fields */
+  align-items: stretch;
+  gap: 0;
+  flex: 0 0 var(--input-width);      /* same width as other text boxes */
+  width: var(--input-width);
+  margin-left: auto;                 /* right-align with other fields */
 }
 
-/* Address text box fills the group */
+/* Text box takes most of the width, flat on the right to meet the button */
 #dealership-info .address-input-wrap input[type="text"] {
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: 100%;
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-/* MAP button – fixed size, matches style of other small buttons */
-.small-map-btn {
-  flex: 0 0 auto;
-  padding: 0 10px;
+/* Map button integrated on the right, matching other "+" buttons */
+#dealership-info .address-input-wrap .small-map-btn {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
   font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f7f7f7;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background .16s, border-color .16s, color .16s, transform .16s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
 }
-.small-map-btn:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
+
+#dealership-info .address-input-wrap .small-map-btn:hover {
+  background:#ff8b42;
 }
 
 /* Textareas */
@@ -909,6 +915,7 @@ main {
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;              /* match question font size on other pages */
 }
 #support-tickets .ticket-row:last-child {
   border-bottom: none;
@@ -920,19 +927,18 @@ main {
 #support-tickets .ticket-row > label {
   flex: 1 1 auto;
   font-weight: 500;
+  font-size: 14px;              /* match other labels */
   text-align: left;
   padding-right: 16px;
 }
 
-/* Make Support ticket fields match global input style */
-#support-tickets .ticket-row input[type="text"],
-#support-tickets .ticket-row select,
-#support-tickets .ticket-summary-input {
-  font-size: 13px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
+/* Fields – same pill style + width as global Q&A inputs */
+#support-tickets .ticket-row > input[type="text"],
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap {
+  flex: 0 0 var(--input-width);     /* same width as other inputs */
+  width: var(--input-width);
+  margin-left: auto;
 }
 
 #support-tickets .ticket-row input[type="text"],
@@ -942,32 +948,15 @@ main {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
-  font-size: 13px;
+  font-size: 13px;                 /* same as other dropdowns/text boxes */
 }
 
-/* 🟧 Short Summary – label on top, textarea full width */
-#support-tickets .ticket-summary-row {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-/* Label above textarea */
-#support-tickets .ticket-summary-row > label {
-  padding-right: 0;
-  margin-bottom: 6px;
-}
-
-/* Full-width textarea that can grow downward */
-#support-tickets .ticket-summary-row .ticket-summary-input {
-  width: 100%;
-  max-width: 100%;
-  min-height: 48px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  resize: vertical;         /* user can drag to expand */
+/* Short Summary ~ 3/4 card width */
+#support-tickets .ticket-summary-row input[type="text"],
+#support-tickets .ticket-summary-row textarea {
+  flex: 0 0 70%;
+  width: 70%;
+  max-width: 70%;
   box-sizing: border-box;
 }
 
