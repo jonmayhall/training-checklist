@@ -922,6 +922,33 @@ main {
   margin-bottom: 0;
   padding-bottom: 0;
 }
+/* Make the Short Summary row vertical (label on top, box below) */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Give a little space between label and the textarea */
+#support-tickets .ticket-summary-row > label {
+  margin-bottom: 4px;
+}
+
+/* Short Summary textarea: same height as other boxes, 
+   auto-grow, right edge aligned with other fields, nearly full card width */
+#support-tickets .ticket-summary-input {
+  align-self: flex-end;
+  width: calc(100% - 40px);   /* card width minus left+right padding (20px each) */
+  max-width: calc(100% - 40px);
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  min-height: 34px;           /* match height of other text boxes */
+  resize: none;               /* let JS handle the growing cleanly */
+  margin-left: auto;          /* keeps right edge aligned with other inputs */
+}
 
 /* Label column (similar feel to checklist-row) */
 #support-tickets .ticket-row > label {
@@ -952,8 +979,7 @@ main {
 }
 
 /* Short Summary ~ 3/4 card width */
-#support-tickets .ticket-summary-row input[type="text"],
-#support-tickets .ticket-summary-row textarea {
+#support-tickets .ticket-summary-row input[type="text"] {
   flex: 0 0 70%;
   width: 70%;
   max-width: 70%;
