@@ -872,7 +872,9 @@ main {
   color: #555;
 }
 
-/* --------------- SUPPORT TICKETS – CLEAN BUILD --------------- */
+/* ---------------------------------------------------------
+   SUPPORT TICKETS – FULL CLEAN CSS BLOCK
+--------------------------------------------------------- */
 
 #support-tickets .ticket-section {
   margin-bottom: 24px;
@@ -889,12 +891,12 @@ main {
   box-shadow: var(--shadow);
 }
 
-/* Inner wrapper so badge sits above */
+/* Inner wrapper for spacing */
 #support-tickets .ticket-group-inner {
   margin-top: 4px;
 }
 
-/* Orange Badge */
+/* Orange badge */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -907,7 +909,7 @@ main {
   margin-top: 2px;
 }
 
-/* Ticket row layout */
+/* Generic ticket row layout */
 #support-tickets .ticket-row {
   display: flex;
   align-items: center;
@@ -915,15 +917,16 @@ main {
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
-  font-size: 14px;
+  font-size: 14px; /* match main Q&A rows */
 }
+
 #support-tickets .ticket-row:last-child {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
-/* Labels */
+/* Label column – same style as other sections */
 #support-tickets .ticket-row > label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -932,7 +935,7 @@ main {
   padding-right: 16px;
 }
 
-/* Inputs + dropdowns aligned right */
+/* Fields – same width + pill styling as all other inputs */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
@@ -951,33 +954,107 @@ main {
   font-size: 13px;
 }
 
-/* ---------------- SHORT SUMMARY FIXED + PERFECT ALIGNMENT ---------------- */
+/* Integrated ticket number + + button (base card only) */
+#support-tickets .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
+}
 
-/* Label on top, textarea below */
+/* Base card input gets flattened right side */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-input {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* + Button on base card */
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
+}
+
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
+  background: #ff8b42;
+}
+
+/* Non-base cards get normal rounded ticket number input */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------------------------------------------------------
+   SHORT SUMMARY OF THE ISSUE — FULL-WIDTH TEXTAREA
+--------------------------------------------------------- */
+
+/* Stack label above textarea */
 #support-tickets .ticket-summary-row {
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
+  padding-bottom: 10px; /* keep divider spacing consistent */
 }
 
-/* Space under label */
+/* Label spacing */
 #support-tickets .ticket-summary-row > label {
   margin-bottom: 4px;
+  padding-right: 0;
 }
 
-/* Short Summary textarea — EXACT MATCH to other input widths + auto-grow */
+/* Full-width textarea inside the card */
 #support-tickets .ticket-summary-input {
-  align-self: flex-end;          /* right edge matches other fields */
-  width: var(--input-width);     /* identical width */
-  max-width: var(--input-width);
-  min-height: 34px;              /* same height as text inputs */
+  width: 100%;             /* full usable width of card */
+  max-width: 100%;
+  min-height: 34px;        /* same initial size as all other inputs */
   padding: 7px 10px;
+  box-sizing: border-box;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
-  resize: none;                  /* JS handles expansion */
-  box-sizing: border-box;
-  margin: 0 0 0 auto;            /* overrides default auto-centering */
+  resize: none;            /* JS auto-grow handles height */
+}
+
+/* ---------------------------------------------------------
+   MOBILE RESPONSIVE
+--------------------------------------------------------- */
+@media (max-width: 600px) {
+  #support-tickets .ticket-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #support-tickets .ticket-row > label {
+    margin-bottom: 4px;
+  }
+
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap {
+    width: 100%;
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+
+  #support-tickets .ticket-summary-input {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* ---------------- BASE CARD: Ticket Number + "+" button ---------------- */
