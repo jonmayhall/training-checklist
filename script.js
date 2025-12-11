@@ -1,5 +1,5 @@
 /* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS (Guarded)
+   myKaarma Interactive Training Checklist – FULL JS (Updated)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPdfExport();
   initDmsCards();
   initAutoGrowTicketSummary();
+  initTrainingChecklistColors();   // color-code dropdowns on Training Checklist
 });
 
 /* -------------------------------------
@@ -23,8 +24,8 @@ function bindOnce(el, event, handler, key) {
   if (!el) return;
   const flag = `__bound_${key}`;
   if (el[flag]) return;          // already wired, do nothing
-  el.addEventListener(event, handler);
   el[flag] = true;
+  el.addEventListener(event, handler);
 }
 
 /* -------------------------------------
@@ -228,10 +229,11 @@ function initAdditionalPoc() {
    - Base card in Open section has data-base="true"
    - + button creates ONE new card
    - Status dropdown moves cards between sections
+   - Base card Status is disabled/greyed (template only)
 ------------------------------------- */
 function initSupportTickets() {
-  const openContainer          = document.getElementById('openTicketsContainer');
-  const tierTwoContainer       = document.getElementById('tierTwoTicketsContainer');
+  const openContainer   = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureContainer  = document.getElementById('closedFeatureTicketsContainer');
 
@@ -240,13 +242,7 @@ function initSupportTickets() {
   const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
   if (!baseCard) return;
 
-  // 🔒 Disable Status dropdown on the base (template) card to avoid confusion
-  const baseStatus = baseCard.querySelector('.ticket-status-select');
-  if (baseStatus) {
-    baseStatus.disabled = true;
-  }
-
-  // Wire status change for base card (logic still keeps it in Open)
+  // Wire status change for base card (it never moves)
   wireTicketStatus(baseCard, {
     openContainer,
     tierTwoContainer,
@@ -254,6 +250,13 @@ function initSupportTickets() {
     closedFeatureContainer,
     isBase: true
   });
+
+  // Disable Status dropdown on the base template card so users can't change it
+  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
+  if (baseStatusSelect) {
+    baseStatusSelect.disabled = true;
+    baseStatusSelect.classList.add('ticket-status-disabled');
+  }
 
   // + button on base card → add ONE new ticket card
   const addBtn = baseCard.querySelector('.add-ticket-btn');
@@ -283,17 +286,13 @@ function createTicketCard(template, ctx) {
   const addBtn = card.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
 
-  // Re-enable status for cloned cards (important since base was disabled)
-  const statusSelect = card.querySelector('.ticket-status-select');
-  if (statusSelect) {
-    statusSelect.disabled = false;
-  }
-
   // Clear inputs/selects/textarea values
   card.querySelectorAll('input, select, textarea').forEach((el) => {
     if (el.tagName === 'SELECT') {
       if (el.classList.contains('ticket-status-select')) {
-        el.value = 'Open'; // new card starts Open
+        el.value = 'Open';     // new card starts Open
+        el.disabled = false;   // ensure status is selectable on clones
+        el.classList.remove('ticket-status-disabled');
       } else {
         el.selectedIndex = 0;
       }
@@ -344,6 +343,7 @@ function wireTicketStatus(card, ctx) {
 
     // Base card never moves – it's just the template
     if (ctx.isBase) {
+      // in case anything tries to change it, snap back
       if (status !== 'Open') {
         select.value = 'Open';
       }
@@ -430,6 +430,60 @@ function initTableAddRowButtons() {
       tbody.appendChild(clone);
     }, `tableAdd_${idx}`);
   });
+}
+
+/* -------------------------------------
+   TRAINING CHECKLIST – COLOR-CODE DROPDOWNS
+   (Yes/Web&Mobile/Fully Adopted = green, etc.)
+------------------------------------- */
+function initTrainingChecklistColors() {
+  const section = document.getElementById('training-checklist');
+  if (!section) return;
+
+  // Initial pass on all selects in this page
+  const selects = section.querySelectorAll('select');
+  selects.forEach(applyUaColor);
+
+  // Event delegation so cloned rows are handled automatically
+  bindOnce(section, 'change', (evt) => {
+    const target = evt.target;
+    if (!target || target.tagName !== 'SELECT') return;
+    applyUaColor(target);
+  }, 'tcColors');
+}
+
+function applyUaColor(selectEl) {
+  const val = (selectEl.value || '').trim().toLowerCase();
+
+  // Remove any previous state classes
+  selectEl.classList.remove('ua-green', 'ua-yellow', 'ua-red', 'ua-gray');
+
+  if (!val) return;
+
+  // Green: positive / fully adopted
+  if (val === 'yes' || val === 'web & mobile' || val === 'fully adopted') {
+    selectEl.classList.add('ua-green');
+    return;
+  }
+
+  // Yellow: neutral / partial
+  if (val === 'web' || val === 'mobile' ||
+      val === 'neutral / mixed' || val === 'mostly adopted') {
+    selectEl.classList.add('ua-yellow');
+    return;
+  }
+
+  // Red: negative / needs help
+  if (val === 'no' || val === 'not trained' ||
+      val === 'needs support' || val === 'not accepted') {
+    selectEl.classList.add('ua-red');
+    return;
+  }
+
+  // Gray: N/A
+  if (val === 'n/a' || val === 'na') {
+    selectEl.classList.add('ua-gray');
+  }
 }
 
 /* -------------------------------------
