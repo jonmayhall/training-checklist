@@ -1,5 +1,5 @@
 /* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS (Updated)
+   myKaarma Interactive Training Checklist – FULL JS (Guarded)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPdfExport();
   initDmsCards();
   initAutoGrowTicketSummary();
-  initTrainingAcceptanceDropdowns();   // <--- NEW COLOR LOGIC ENABLED
+  initAcceptanceColorCoding();  // color-coded dropdowns in training checklist tables
 });
 
 /* -------------------------------------
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function bindOnce(el, event, handler, key) {
   if (!el) return;
   const flag = `__bound_${key}`;
-  if (el[flag]) return;
+  if (el[flag]) return;          // already wired, do nothing
   el.addEventListener(event, handler);
   el[flag] = true;
 }
@@ -35,17 +35,20 @@ function initNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.page-section');
 
-  navButtons.forEach(btn => {
+  if (!navButtons.length || !sections.length) return;
+
+  navButtons.forEach((btn) => {
     bindOnce(btn, 'click', () => {
       const targetId = btn.dataset.target;
 
-      sections.forEach(sec =>
+      sections.forEach((sec) =>
         sec.classList.toggle('active', sec.id === targetId)
       );
-      navButtons.forEach(b =>
+
+      navButtons.forEach((b) =>
         b.classList.toggle('active', b === btn)
       );
-    }, `nav_${btn.dataset.target}`);
+    }, 'navClick');
   });
 }
 
@@ -53,29 +56,36 @@ function initNavigation() {
    CLEAR PAGE / CLEAR ALL
 ------------------------------------- */
 function clearSection(section) {
+  if (!section) return;
   const inputs = section.querySelectorAll('input, select, textarea');
-  inputs.forEach(el => {
+
+  inputs.forEach((el) => {
     if (el.tagName === 'SELECT') {
       el.selectedIndex = 0;
     } else if (el.type === 'checkbox' || el.type === 'radio') {
       el.checked = false;
-    } else el.value = '';
+    } else {
+      el.value = '';
+    }
   });
 }
 
 function initClearPageButtons() {
-  document.querySelectorAll('.clear-page-btn').forEach((btn, i) => {
+  document.querySelectorAll('.clear-page-btn').forEach((btn, idx) => {
     bindOnce(btn, 'click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
-      if (section.id === 'dealership-info') updateDealershipNameDisplay();
-    }, `clearPage_${i}`);
+      if (section && section.id === 'dealership-info') {
+        updateDealershipNameDisplay();
+      }
+    }, `clearPage_${idx}`);
   });
 }
 
 function initClearAllButton() {
   const btn = document.getElementById('clearAllBtn');
   if (!btn) return;
+
   bindOnce(btn, 'click', () => {
     document.querySelectorAll('.page-section').forEach(clearSection);
     updateDealershipNameDisplay();
@@ -89,34 +99,44 @@ function initDealershipNameBinding() {
   const input = document.getElementById('dealershipNameInput');
   if (!input) return;
 
-  bindOnce(input, 'input', updateDealershipNameDisplay, 'dName');
+  bindOnce(input, 'input', updateDealershipNameDisplay, 'dnameInput');
   updateDealershipNameDisplay();
 }
 
 function updateDealershipNameDisplay() {
-  const inp = document.getElementById('dealershipNameInput');
-  const out = document.getElementById('dealershipNameDisplay');
-  out.textContent = inp?.value.trim() || 'Dealership Name';
+  const txt = document.getElementById('dealershipNameInput');
+  const display = document.getElementById('dealershipNameDisplay');
+  if (!display) return;
+
+  display.textContent = txt && txt.value.trim()
+    ? txt.value.trim()
+    : 'Dealership Name';
 }
 
 /* -------------------------------------
-   GOOGLE MAPS AUTOCOMPLETE
+   GOOGLE MAPS AUTOCOMPLETE (DEALERSHIP ADDRESS)
+   (Maps script should call: callback=initAddressAutocomplete)
 ------------------------------------- */
 function initAddressAutocomplete() {
-  const input = document.getElementById('dealershipAddressInput');
+  const input    = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
-  const mapBtn = document.getElementById('openAddressInMapsBtn');
+  const mapBtn   = document.getElementById('openAddressInMapsBtn');
 
-  if (!input || !window.google?.maps?.places) return;
+  if (!input || !window.google || !google.maps || !google.maps.places) return;
 
-  const ac = new google.maps.places.Autocomplete(input, { types: ['geocode'] });
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['geocode']
+  });
 
-  ac.addListener('place_changed', () => {
-    const place = ac.getPlace();
-    const addr = place?.formatted_address || input.value.trim();
-    if (!addr) return;
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+    const address = place && place.formatted_address
+      ? place.formatted_address
+      : input.value.trim();
 
-    const encoded = encodeURIComponent(addr);
+    if (!address || !mapFrame) return;
+
+    const encoded = encodeURIComponent(address);
     mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
   });
 
@@ -134,7 +154,7 @@ function initAddressAutocomplete() {
 }
 
 /* -------------------------------------
-   ADDITIONAL TRAINERS
+   ADDITIONAL TRAINERS (PAGE 1)
 ------------------------------------- */
 function initAdditionalTrainers() {
   const row = document.querySelector('.additional-trainers-row');
@@ -143,91 +163,145 @@ function initAdditionalTrainers() {
   if (!row || !container) return;
 
   const addBtn = row.querySelector('.add-row');
+  if (!addBtn) return;
+
   bindOnce(addBtn, 'click', () => {
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub additional-trainer-row';
-    newRow.innerHTML = `
-      <label>Additional Trainer</label>
-      <input type="text">
-    `;
+
+    const label = document.createElement('label');
+    label.textContent = 'Additional Trainer';
+    label.style.flex = '1 1 auto';
+    label.style.paddingRight = '16px';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+
+    newRow.append(label, input);
     container.appendChild(newRow);
   }, 'addTrainer');
 }
 
 /* -------------------------------------
-   ADDITIONAL POC CARDS
+   ADDITIONAL POC ON PAGE 2
 ------------------------------------- */
 function initAdditionalPoc() {
   const grid = document.getElementById('primaryContactsGrid');
   if (!grid) return;
 
   const template = grid.querySelector('.additional-poc-card');
-  const addBtn = template?.querySelector('.additional-poc-add');
+  const addBtn = template ? template.querySelector('.additional-poc-add') : null;
   if (!template || !addBtn) return;
 
-  function makeCard() {
-    const c = document.createElement('div');
-    c.className = 'mini-card contact-card';
-    c.innerHTML = `
-      <div class="checklist-row"><label>Additional POC</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Role</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Cell</label><input type="text"></div>
-      <div class="checklist-row indent-sub"><label>Email</label><input type="email"></div>
+  function createAdditionalPocCard() {
+    const card = document.createElement('div');
+    card.className = 'mini-card contact-card';
+
+    card.innerHTML = `
+      <div class="checklist-row">
+        <label>Additional POC</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text">
+      </div>
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email">
+      </div>
     `;
-    return c;
+    return card;
   }
 
   bindOnce(addBtn, 'click', () => {
-    grid.appendChild(makeCard());
+    const newCard = createAdditionalPocCard();
+    grid.appendChild(newCard);
   }, 'addPOC');
 }
 
 /* -------------------------------------
    SUPPORT TICKETS
+   - Base card in Open section has data-base="true"
+   - + button creates ONE new card
+   - Status dropdown on base card is disabled/greyed out
+   - Status dropdown on added cards moves them between sections
 ------------------------------------- */
 function initSupportTickets() {
-  const openC = document.getElementById('openTicketsContainer');
-  const tierC = document.getElementById('tierTwoTicketsContainer');
-  const resC = document.getElementById('closedResolvedTicketsContainer');
-  const featC = document.getElementById('closedFeatureTicketsContainer');
+  const openContainer   = document.getElementById('openTicketsContainer');
+  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
+  const closedFeatureContainer  = document.getElementById('closedFeatureTicketsContainer');
 
-  const base = openC?.querySelector('.ticket-group[data-base="true"]');
-  if (!base) return;
+  if (!openContainer) return;
 
-  // Disable status selection on base card
-  const baseStatus = base.querySelector('.ticket-status-select');
-  if (baseStatus) {
-    baseStatus.disabled = true;
-    baseStatus.style.opacity = "0.6";
-    baseStatus.style.pointerEvents = "none";
+  const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
+  if (!baseCard) return;
+
+  // Wire status change for base card (but keep it in Open, disabled)
+  wireTicketStatus(baseCard, {
+    openContainer,
+    tierTwoContainer,
+    closedResolvedContainer,
+    closedFeatureContainer,
+    isBase: true
+  });
+
+  // Disable the status dropdown on the base card so it looks greyed-out
+  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
+  if (baseStatusSelect) {
+    baseStatusSelect.disabled = true;
+    baseStatusSelect.classList.add('ticket-status-disabled');
   }
 
-  wireTicketStatus(base, { openC, tierC, resC, featC, isBase: true });
+  // + button on base card → add ONE new ticket card
+  const addBtn = baseCard.querySelector('.add-ticket-btn');
+  if (addBtn) {
+    bindOnce(addBtn, 'click', () => {
+      const newCard = createTicketCard(baseCard, {
+        openContainer,
+        tierTwoContainer,
+        closedResolvedContainer,
+        closedFeatureContainer
+      });
+      openContainer.appendChild(newCard);
+      renumberTicketBadges();
+    }, 'supportAdd');
+  }
 
-  const addBtn = base.querySelector('.add-ticket-btn');
-  bindOnce(addBtn, 'click', () => {
-    const newCard = createTicketCard(base, { openC, tierC, resC, featC });
-    openC.appendChild(newCard);
-    renumberTicketBadges();
-  }, 'ticketAdd');
-
+  // Make sure any existing cloned cards get badge numbers
   renumberTicketBadges();
 }
 
 function createTicketCard(template, ctx) {
   const card = template.cloneNode(true);
-  card.removeAttribute('data-base');
+  card.removeAttribute('data-base');     // mark as normal card
   card.classList.add('ticket-group-clone');
 
+  // Remove + button from cloned cards
   const addBtn = card.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
 
-  card.querySelectorAll('input, select, textarea').forEach(el => {
+  // Clear inputs/selects/textarea values
+  card.querySelectorAll('input, select, textarea').forEach((el) => {
     if (el.tagName === 'SELECT') {
-      el.value = el.classList.contains('ticket-status-select') ? 'Open' : '';
-    } else el.value = '';
+      if (el.classList.contains('ticket-status-select')) {
+        el.value = 'Open'; // new card starts Open
+        el.disabled = false; // make sure cloned cards are enabled
+        el.classList.remove('ticket-status-disabled');
+      } else {
+        el.selectedIndex = 0;
+      }
+    } else {
+      el.value = '';
+    }
   });
 
+  // Ensure a badge element exists
   let badge = card.querySelector('.ticket-badge');
   if (!badge) {
     badge = document.createElement('div');
@@ -235,8 +309,16 @@ function createTicketCard(template, ctx) {
     card.insertBefore(badge, card.firstChild);
   }
 
-  wireTicketStatus(card, ctx);
+  // Wire status change behavior
+  wireTicketStatus(card, {
+    openContainer: ctx.openContainer,
+    tierTwoContainer: ctx.tierTwoContainer,
+    closedResolvedContainer: ctx.closedResolvedContainer,
+    closedFeatureContainer: ctx.closedFeatureContainer,
+    isBase: false
+  });
 
+  // Wire auto-grow to the Short Summary textarea in this card
   const summary = card.querySelector('.ticket-summary-input');
   if (summary) hookAutoGrow(summary);
 
@@ -248,58 +330,70 @@ function wireTicketStatus(card, ctx) {
   if (!select) return;
 
   bindOnce(select, 'change', () => {
-    const val = select.value;
+    const status = select.value;
+    let target = ctx.openContainer;
 
-    if (ctx.isBase) {
-      select.value = 'Open';
-      return;
+    if (status === 'Tier Two') {
+      target = ctx.tierTwoContainer || ctx.openContainer;
+    } else if (status === 'Closed - Resolved') {
+      target = ctx.closedResolvedContainer || ctx.openContainer;
+    } else if (status === 'Closed – Feature Not Supported') {
+      target = ctx.closedFeatureContainer || ctx.openContainer;
     }
 
-    let target = ctx.openC;
-    if (val === 'Tier Two') target = ctx.tierC;
-    else if (val === 'Closed - Resolved') target = ctx.resC;
-    else if (val === 'Closed – Feature Not Supported') target = ctx.featC;
+    // Base card never moves – it's just the template
+    if (ctx.isBase) {
+      if (status !== 'Open') {
+        select.value = 'Open';
+      }
+      return;
+    }
 
     if (target && card.parentElement !== target) {
       target.appendChild(card);
       renumberTicketBadges();
     }
-  }, `status_${Math.random()}`);
+  }, `status_${Math.random().toString(36).slice(2)}`);
 }
 
 function renumberTicketBadges() {
-  const all = document.querySelectorAll(
+  const allCards = document.querySelectorAll(
     '#openTicketsContainer .ticket-group:not([data-base="true"]), ' +
     '#tierTwoTicketsContainer .ticket-group, ' +
     '#closedResolvedTicketsContainer .ticket-group, ' +
     '#closedFeatureTicketsContainer .ticket-group'
   );
 
-  let n = 1;
-  all.forEach(card => {
+  let counter = 1;
+  allCards.forEach((card) => {
     let badge = card.querySelector('.ticket-badge');
     if (!badge) {
       badge = document.createElement('div');
       badge.className = 'ticket-badge';
       card.insertBefore(badge, card.firstChild);
     }
-    badge.textContent = `Ticket # ${n++}`;
+    badge.textContent = `Ticket # ${counter}`;
+    counter++;
   });
 }
 
 /* -------------------------------------
-   AUTO-GROW FOR SHORT SUMMARY
+   AUTO-GROW SHORT SUMMARY TEXTAREA
 ------------------------------------- */
 function initAutoGrowTicketSummary() {
-  document.querySelectorAll('.ticket-summary-input').forEach(hookAutoGrow);
+  const all = document.querySelectorAll('.ticket-summary-input');
+  all.forEach(hookAutoGrow);
 }
 
 function hookAutoGrow(el) {
-  function resize() {
+  if (!el || el.tagName !== 'TEXTAREA') return;
+
+  const resize = () => {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
-  }
-  bindOnce(el, 'input', resize, `grow_${Math.random()}`);
+  };
+
+  bindOnce(el, 'input', resize, 'summaryGrow');
   resize();
 }
 
@@ -313,24 +407,108 @@ function initTableAddRowButtons() {
       const table = btn.closest('.table-footer')
         ?.previousElementSibling
         ?.querySelector('table');
+
       if (!table) return;
 
-      const tbody = table.querySelector('tbody');
+      const tbody = table.querySelector('tbody') || table.createTBody();
       const last = tbody.lastElementChild;
+      if (!last) return;
+
       const clone = last.cloneNode(true);
 
-      clone.querySelectorAll('input, select').forEach(el => {
-        if (el.tagName === 'SELECT') el.selectedIndex = 0;
-        else if (el.type === 'checkbox') el.checked = false;
-        else el.value = '';
+      clone.querySelectorAll('input, select').forEach((el) => {
+        if (el.tagName === 'SELECT') {
+          el.selectedIndex = 0;
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
+        } else {
+          el.value = '';
+        }
       });
 
       tbody.appendChild(clone);
 
-      // Apply color logic to new dropdowns
-      initTrainingAcceptanceDropdowns();
-    }, `tblAdd_${idx}`);
+      // Make sure new selects also get acceptance color-coding
+      initAcceptanceColorCodingForRoot(clone);
+    }, `tableAdd_${idx}`);
   });
+}
+
+/* -------------------------------------
+   ACCEPTANCE COLOR-CODING (Training Checklist)
+   Applies to selects in #training-checklist tables
+------------------------------------- */
+function initAcceptanceColorCoding() {
+  const root = document.getElementById('training-checklist');
+  if (!root) return;
+  initAcceptanceColorCodingForRoot(root);
+}
+
+function initAcceptanceColorCodingForRoot(root) {
+  if (!root) return;
+  const allSelects = root.querySelectorAll('table.training-table select');
+
+  allSelects.forEach((sel) => {
+    applyAcceptanceColor(sel);
+    bindOnce(sel, 'change', handleAcceptanceChange, 'acceptanceChange');
+  });
+}
+
+function handleAcceptanceChange(e) {
+  applyAcceptanceColor(e.target);
+}
+
+function applyAcceptanceColor(select) {
+  if (!select) return;
+
+  // Clear previous classes
+  select.classList.remove(
+    'accept-yes',
+    'accept-web-mobile',
+    'accept-neutral',
+    'accept-no',
+    'accept-na'
+  );
+
+  const val = (select.value || '').trim().toLowerCase();
+  if (!val) return;
+
+  // Green: Yes / Web & Mobile / Fully Adopted
+  if (
+    val === 'yes' ||
+    val === 'web & mobile' ||
+    val === 'fully adopted'
+  ) {
+    select.classList.add('accept-yes');
+    return;
+  }
+
+  // Yellow: Web / Mobile / Mostly Adopted / Neutral / Mixed
+  if (
+    val === 'web' ||
+    val === 'mobile' ||
+    val === 'mostly adopted' ||
+    val === 'neutral / mixed'
+  ) {
+    select.classList.add('accept-neutral');
+    return;
+  }
+
+  // Red: No / Not Trained / Needs Support / Not Accepted
+  if (
+    val === 'no' ||
+    val === 'not trained' ||
+    val === 'needs support' ||
+    val === 'not accepted'
+  ) {
+    select.classList.add('accept-no');
+    return;
+  }
+
+  // Grey: N/A or NA
+  if (val === 'n/a' || val === 'na') {
+    select.classList.add('accept-na');
+  }
 }
 
 /* -------------------------------------
@@ -345,44 +523,16 @@ function initPdfExport() {
     const doc = new jsPDF('p', 'pt', 'a4');
 
     doc.html(document.body, {
-      callback: d => d.save('myKaarma_Training_Checklist.pdf'),
+      callback: (instance) => instance.save('myKaarma_Training_Checklist.pdf'),
       margin: [20, 20, 20, 20],
       html2canvas: { scale: 0.6 }
     });
-  }, 'pdfSave');
+  }, 'pdfExport');
 }
 
 /* -------------------------------------
-   DMS CARDS (placeholder)
+   DMS CARDS (placeholder for future logic)
 ------------------------------------- */
-function initDmsCards() {}
-
-/* -------------------------------------
-   TRAINING CHECKLIST – DROPDOWN COLOR LOGIC
-------------------------------------- */
-function initTrainingAcceptanceDropdowns() {
-  const section = document.getElementById('training-checklist');
-  if (!section) return;
-
-  const selects = section.querySelectorAll('.training-table select');
-
-  const GREEN = ['Yes', 'Web & Mobile', 'Fully Adopted'];
-  const YELLOW = ['Web', 'Mobile', 'Neutral / Mixed', 'Mostly Adopted'];
-  const RED = ['No', 'Not Trained', 'Needs Support', 'Not Accepted'];
-  const GRAY = ['N/A', 'NA'];
-
-  function applyColor(sel) {
-    const v = sel.value.trim();
-    sel.classList.remove('accept-green', 'accept-yellow', 'accept-red', 'accept-gray');
-
-    if (GREEN.includes(v)) sel.classList.add('accept-green');
-    else if (YELLOW.includes(v)) sel.classList.add('accept-yellow');
-    else if (RED.includes(v)) sel.classList.add('accept-red');
-    else if (GRAY.includes(v)) sel.classList.add('accept-gray');
-  }
-
-  selects.forEach((sel, i) => {
-    applyColor(sel);
-    bindOnce(sel, 'change', () => applyColor(sel), `trainColor_${i}`);
-  });
+function initDmsCards() {
+  // Reserved for future dynamic behaviors on the DMS page.
 }
