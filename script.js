@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPdfExport();
   initDmsCards();
   initAutoGrowTicketSummary();
-  initAcceptanceColorCoding();  // color-coded dropdowns in training checklist tables
+  initAcceptanceColorCoding();   // Training Checklist color-coding
 });
 
 /* -------------------------------------
@@ -228,11 +228,10 @@ function initAdditionalPoc() {
    SUPPORT TICKETS
    - Base card in Open section has data-base="true"
    - + button creates ONE new card
-   - Status dropdown on base card is disabled/greyed out
-   - Status dropdown on added cards moves them between sections
+   - Status dropdown moves cards between sections
 ------------------------------------- */
 function initSupportTickets() {
-  const openContainer   = document.getElementById('openTicketsContainer');
+  const openContainer    = document.getElementById('openTicketsContainer');
   const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureContainer  = document.getElementById('closedFeatureTicketsContainer');
@@ -242,7 +241,15 @@ function initSupportTickets() {
   const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
   if (!baseCard) return;
 
-  // Wire status change for base card (but keep it in Open, disabled)
+  // Base card: Status should be fixed/open + disabled so users know it doesn't do anything
+  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
+  if (baseStatusSelect) {
+    baseStatusSelect.value = 'Open';
+    baseStatusSelect.disabled = true;
+    baseStatusSelect.classList.add('ticket-status-readonly'); // CSS greys it out
+  }
+
+  // Wire status change for base card (even though we force it to stay Open)
   wireTicketStatus(baseCard, {
     openContainer,
     tierTwoContainer,
@@ -250,13 +257,6 @@ function initSupportTickets() {
     closedFeatureContainer,
     isBase: true
   });
-
-  // Disable the status dropdown on the base card so it looks greyed-out
-  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
-  if (baseStatusSelect) {
-    baseStatusSelect.disabled = true;
-    baseStatusSelect.classList.add('ticket-status-disabled');
-  }
 
   // + button on base card → add ONE new ticket card
   const addBtn = baseCard.querySelector('.add-ticket-btn');
@@ -286,14 +286,18 @@ function createTicketCard(template, ctx) {
   const addBtn = card.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
 
+  // Enable the status dropdown on cloned cards
+  const statusSelect = card.querySelector('.ticket-status-select');
+  if (statusSelect) {
+    statusSelect.disabled = false;
+    statusSelect.classList.remove('ticket-status-readonly');
+    statusSelect.value = 'Open'; // new card starts Open
+  }
+
   // Clear inputs/selects/textarea values
   card.querySelectorAll('input, select, textarea').forEach((el) => {
     if (el.tagName === 'SELECT') {
-      if (el.classList.contains('ticket-status-select')) {
-        el.value = 'Open'; // new card starts Open
-        el.disabled = false; // make sure cloned cards are enabled
-        el.classList.remove('ticket-status-disabled');
-      } else {
+      if (!el.classList.contains('ticket-status-select')) {
         el.selectedIndex = 0;
       }
     } else {
@@ -398,43 +402,6 @@ function hookAutoGrow(el) {
 }
 
 /* -------------------------------------
-   TABLE ADD-ROW BUTTONS
-------------------------------------- */
-function initTableAddRowButtons() {
-  const buttons = document.querySelectorAll('.table-footer .add-row');
-  buttons.forEach((btn, idx) => {
-    bindOnce(btn, 'click', () => {
-      const table = btn.closest('.table-footer')
-        ?.previousElementSibling
-        ?.querySelector('table');
-
-      if (!table) return;
-
-      const tbody = table.querySelector('tbody') || table.createTBody();
-      const last = tbody.lastElementChild;
-      if (!last) return;
-
-      const clone = last.cloneNode(true);
-
-      clone.querySelectorAll('input, select').forEach((el) => {
-        if (el.tagName === 'SELECT') {
-          el.selectedIndex = 0;
-        } else if (el.type === 'checkbox' || el.type === 'radio') {
-          el.checked = false;
-        } else {
-          el.value = '';
-        }
-      });
-
-      tbody.appendChild(clone);
-
-      // Make sure new selects also get acceptance color-coding
-      initAcceptanceColorCodingForRoot(clone);
-    }, `tableAdd_${idx}`);
-  });
-}
-
-/* -------------------------------------
    ACCEPTANCE COLOR-CODING (Training Checklist)
    Applies to selects in #training-checklist tables
 ------------------------------------- */
@@ -461,10 +428,9 @@ function handleAcceptanceChange(e) {
 function applyAcceptanceColor(select) {
   if (!select) return;
 
-  // Clear previous classes
+  // Remove any previous color classes
   select.classList.remove(
     'accept-yes',
-    'accept-web-mobile',
     'accept-neutral',
     'accept-no',
     'accept-na'
@@ -473,42 +439,100 @@ function applyAcceptanceColor(select) {
   const val = (select.value || '').trim().toLowerCase();
   if (!val) return;
 
-  // Green: Yes / Web & Mobile / Fully Adopted
+  // GREEN:
+  //  - "Yes", "Yes – Fully Adopted", etc.
+  //  - "Web & Mobile"
+  //  - anything that clearly says "fully adopted"
   if (
-    val === 'yes' ||
-    val === 'web & mobile' ||
-    val === 'fully adopted'
+    val.startsWith('yes') ||
+    val.includes('web & mobile') ||
+    val.includes('fully adopted')
   ) {
     select.classList.add('accept-yes');
     return;
   }
 
-  // Yellow: Web / Mobile / Mostly Adopted / Neutral / Mixed
+  // YELLOW:
+  //  - "Web", "Mobile"
+  //  - "Mostly Adopted"
+  //  - "Neutral / Mixed"
   if (
     val === 'web' ||
     val === 'mobile' ||
-    val === 'mostly adopted' ||
-    val === 'neutral / mixed'
+    val.includes('mostly adopted') ||
+    val.includes('neutral') ||
+    val.includes('mixed')
   ) {
     select.classList.add('accept-neutral');
     return;
   }
 
-  // Red: No / Not Trained / Needs Support / Not Accepted
+  // RED:
+  //  - "No"
+  //  - "Not Trained"
+  //  - "Needs Support"
+  //  - "Not Accepted"
   if (
-    val === 'no' ||
-    val === 'not trained' ||
-    val === 'needs support' ||
-    val === 'not accepted'
+    val.startsWith('no') ||
+    val.includes('not trained') ||
+    val.includes('needs support') ||
+    val.includes('not accepted')
   ) {
     select.classList.add('accept-no');
     return;
   }
 
-  // Grey: N/A or NA
+  // GREY:
+  //  - "N/A" or "NA"
   if (val === 'n/a' || val === 'na') {
     select.classList.add('accept-na');
   }
+}
+
+/* -------------------------------------
+   TABLE ADD-ROW BUTTONS
+------------------------------------- */
+function initTableAddRowButtons() {
+  const buttons = document.querySelectorAll('.table-footer .add-row');
+  buttons.forEach((btn, idx) => {
+    bindOnce(btn, 'click', () => {
+      const table = btn.closest('.table-footer')
+        ?.previousElementSibling
+        ?.querySelector('table');
+
+      if (!table) return;
+
+      const tbody = table.querySelector('tbody') || table.createTBody();
+      const last = tbody.lastElementChild;
+      if (!last) return;
+
+      const clone = last.cloneNode(true);
+
+      // Reset inputs/selects in cloned row
+      clone.querySelectorAll('input, select').forEach((el) => {
+        if (el.tagName === 'SELECT') {
+          el.selectedIndex = 0;
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
+        } else {
+          el.value = '';
+        }
+      });
+
+      tbody.appendChild(clone);
+
+      // If this table lives on the Training Checklist page,
+      // hook up acceptance color-coding for the new row
+      const trainingSection = document.getElementById('training-checklist');
+      if (trainingSection && trainingSection.contains(table)) {
+        const newSelects = clone.querySelectorAll('select');
+        newSelects.forEach((sel) => {
+          applyAcceptanceColor(sel);
+          bindOnce(sel, 'change', handleAcceptanceChange, 'acceptanceChange');
+        });
+      }
+    }, `tableAdd_${idx}`);
+  });
 }
 
 /* -------------------------------------
