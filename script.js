@@ -230,8 +230,8 @@ function initAdditionalPoc() {
    - Status dropdown moves cards between sections
 ------------------------------------- */
 function initSupportTickets() {
-  const openContainer   = document.getElementById('openTicketsContainer');
-  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
+  const openContainer          = document.getElementById('openTicketsContainer');
+  const tierTwoContainer       = document.getElementById('tierTwoTicketsContainer');
   const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
   const closedFeatureContainer  = document.getElementById('closedFeatureTicketsContainer');
 
@@ -240,7 +240,13 @@ function initSupportTickets() {
   const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
   if (!baseCard) return;
 
-  // Wire status change for base card
+  // 🔒 Disable Status dropdown on the base (template) card to avoid confusion
+  const baseStatus = baseCard.querySelector('.ticket-status-select');
+  if (baseStatus) {
+    baseStatus.disabled = true;
+  }
+
+  // Wire status change for base card (logic still keeps it in Open)
   wireTicketStatus(baseCard, {
     openContainer,
     tierTwoContainer,
@@ -276,6 +282,12 @@ function createTicketCard(template, ctx) {
   // Remove + button from cloned cards
   const addBtn = card.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
+
+  // Re-enable status for cloned cards (important since base was disabled)
+  const statusSelect = card.querySelector('.ticket-status-select');
+  if (statusSelect) {
+    statusSelect.disabled = false;
+  }
 
   // Clear inputs/selects/textarea values
   card.querySelectorAll('input, select, textarea').forEach((el) => {
