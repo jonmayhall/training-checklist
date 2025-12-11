@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (Clean Build, Updated)
+   myKaarma Interactive Training Checklist – FULL CSS (Clean Build, Updated + Summary Fix)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -922,30 +922,39 @@ main {
   margin-bottom: 0;
   padding-bottom: 0;
 }
-/* Make the Short Summary row vertical (label on top, box below) */
-#support-tickets .ticket-summary-row {
-  flex-direction: column;
-  align-items: flex-start;   /* label stays aligned on left */
+
+/* Label column (similar feel to checklist-row) */
+#support-tickets .ticket-row > label {
+  flex: 1 1 auto;
+  font-weight: 500;
+  font-size: 14px;              /* match other labels */
+  text-align: left;
+  padding-right: 16px;
 }
 
-/* Label spacing */
-#support-tickets .ticket-summary-row > label {
-  margin-bottom: 4px;
+/* Fields – same pill style + width as global Q&A inputs */
+#support-tickets .ticket-row > input[type="text"],
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap {
+  flex: 0 0 var(--input-width);     /* same width as other inputs */
+  width: var(--input-width);
+  margin-left: auto;
 }
 
-/* Short Summary textarea aligned EXACTLY with other answer boxes */
-#support-tickets .ticket-summary-input {
-  margin-left: auto;                 /* right-aligns like other inputs */
-  width: var(--input-width);         /* SAME WIDTH as Status, Zendesk Link, etc. */
-  max-width: var(--input-width);
-  min-height: 34px;                  /* match height of input boxes */
+#support-tickets .ticket-row input[type="text"],
+#support-tickets .ticket-row select {
+  width: 100%;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
-  font-size: 13px;
-  resize: none;                      /* JS handles auto-grow */
-  box-sizing: border-box;
+  font-size: 13px;                 /* same as other dropdowns/text boxes */
+}
+
+/* Integrated Support Ticket Number + button on BASE card */
+#support-tickets .ticket-number-wrap {
+  display: flex;
+  align-items: stretch;
 }
 
 /* Base card only: flatten right side to merge with + button */
@@ -984,6 +993,35 @@ main {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   border-radius: var(--radius-sm);
+}
+
+/* Short Summary row: label on top, textarea beneath */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Space between label and textarea */
+#support-tickets .ticket-summary-row > label {
+  margin-bottom: 4px;
+}
+
+/* Short Summary textarea:
+   - Same base height as other boxes
+   - Same width/right alignment as other fields
+   - Auto-grows via JS */
+#support-tickets .ticket-summary-input {
+  align-self: flex-end;          /* right edge lines up with other fields */
+  width: var(--input-width);     /* same width as Status / Zendesk Link */
+  max-width: var(--input-width);
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  resize: none;                  /* JS handles the growing */
 }
 
 /* --------------- MONDAY VISIT – TINY TWEAKS --------------- */
@@ -1074,7 +1112,9 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
-  #support-tickets .ticket-summary-row input[type="text"] {
+  #support-tickets .ticket-summary-input {
     width: 100%;
+    max-width: 100%;
+    align-self: stretch;
   }
 }
