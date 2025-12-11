@@ -924,13 +924,15 @@ main {
   padding-right: 16px;
 }
 
-/* Fields – same pill style as other inputs */
-#support-tickets .ticket-row > input[type="text"],
-#support-tickets .ticket-row > select,
-#support-tickets .ticket-row > .ticket-number-wrap {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
+/* Make Support ticket fields match global input style */
+#support-tickets .ticket-row input[type="text"],
+#support-tickets .ticket-row select,
+#support-tickets .ticket-summary-input {
+  font-size: 13px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
 }
 
 #support-tickets .ticket-row input[type="text"],
