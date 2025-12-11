@@ -25,6 +25,26 @@
   --mk-border: #e5e7eb;
 }
 
+/* Global text/placeholder styling for all text boxes */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+textarea,
+select {
+  font-size: 13px;
+  font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+
+/* Make placeholder text consistent everywhere */
+input::placeholder,
+textarea::placeholder {
+  font-size: 13px;
+  color: #9ca3af;
+  opacity: 1;  /* keep it visible but subdued */
+}
+
 /* --------------- BASE --------------- */
 html, body {
   margin: 0;
