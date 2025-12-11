@@ -889,12 +889,12 @@ main {
   box-shadow: var(--shadow);
 }
 
-/* Inner wrapper so we can drop badge above the content */
+/* Inner wrapper so badge sits above */
 #support-tickets .ticket-group-inner {
   margin-top: 4px;
 }
 
-/* Support Ticket Orange Badge */
+/* Orange Badge */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -907,7 +907,7 @@ main {
   margin-top: 2px;
 }
 
-/* Row layout – label left, field right, with dividers */
+/* Ticket row layout */
 #support-tickets .ticket-row {
   display: flex;
   align-items: center;
@@ -915,7 +915,7 @@ main {
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
-  font-size: 14px;              /* match question font size on other pages */
+  font-size: 14px;
 }
 #support-tickets .ticket-row:last-child {
   border-bottom: none;
@@ -923,20 +923,20 @@ main {
   padding-bottom: 0;
 }
 
-/* Label column (similar feel to checklist-row) */
+/* Labels */
 #support-tickets .ticket-row > label {
   flex: 1 1 auto;
   font-weight: 500;
-  font-size: 14px;              /* match other labels */
+  font-size: 14px;
   text-align: left;
   padding-right: 16px;
 }
 
-/* Fields – same pill style + width as global Q&A inputs */
+/* Inputs + dropdowns aligned right */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
-  flex: 0 0 var(--input-width);     /* same width as other inputs */
+  flex: 0 0 var(--input-width);
   width: var(--input-width);
   margin-left: auto;
 }
@@ -948,16 +948,46 @@ main {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
-  font-size: 13px;                 /* same as other dropdowns/text boxes */
+  font-size: 13px;
 }
 
-/* Integrated Support Ticket Number + button on BASE card */
+/* ---------------- SHORT SUMMARY FIXED + PERFECT ALIGNMENT ---------------- */
+
+/* Label on top, textarea below */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Space under label */
+#support-tickets .ticket-summary-row > label {
+  margin-bottom: 4px;
+}
+
+/* Short Summary textarea — EXACT MATCH to other input widths + auto-grow */
+#support-tickets .ticket-summary-input {
+  align-self: flex-end;          /* right edge matches other fields */
+  width: var(--input-width);     /* identical width */
+  max-width: var(--input-width);
+  min-height: 34px;              /* same height as text inputs */
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  resize: none;                  /* JS handles expansion */
+  box-sizing: border-box;
+  margin: 0 0 0 auto;            /* overrides default auto-centering */
+}
+
+/* ---------------- BASE CARD: Ticket Number + "+" button ---------------- */
+
 #support-tickets .ticket-number-wrap {
   display: flex;
   align-items: stretch;
 }
 
-/* Base card only: flatten right side to merge with + button */
+/* Base card — flatten right side to merge with + button */
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -965,8 +995,8 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* + button on base card – same style as other integrated + */
-#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn {
+/* The + button on the base card */
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn {
   flex: 0 0 34px;
   margin-left: -1px;
   background: var(--orange);
@@ -982,46 +1012,43 @@ main {
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  padding: 0;
 }
-#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn:hover {
-  background:#ff8b42;
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
+  background: #ff8b42;
 }
 
-/* Added cards: Support Ticket Number = normal textbox, rounded both sides */
+/* Cloned cards: ticket number input is normal rounded box */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   border-radius: var(--radius-sm);
 }
 
-/* Short Summary row: label on top, textarea beneath */
-#support-tickets .ticket-summary-row {
-  flex-direction: column;
-  align-items: flex-start;
-}
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 600px) {
+  #support-tickets .ticket-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-/* Space between label and textarea */
-#support-tickets .ticket-summary-row > label {
-  margin-bottom: 4px;
-}
+  #support-tickets .ticket-row > label {
+    margin-bottom: 4px;
+  }
 
-/* Short Summary textarea:
-   - Same base height as other boxes
-   - Same width/right alignment as other fields
-   - Auto-grows via JS */
-#support-tickets .ticket-summary-input {
-  align-self: flex-end;          /* right edge lines up with other fields */
-  width: var(--input-width);     /* same width as Status / Zendesk Link */
-  max-width: var(--input-width);
-  min-height: 34px;
-  box-sizing: border-box;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  resize: none;                  /* JS handles the growing */
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap {
+    width: 100%;
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+
+  #support-tickets .ticket-summary-input {
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+    margin-left: 0;
+  }
 }
 
 /* --------------- MONDAY VISIT – TINY TWEAKS --------------- */
