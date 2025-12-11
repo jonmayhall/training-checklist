@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (Clean Build, Updated + Summary Fix)
+   myKaarma Interactive Training Checklist – FULL CSS (Updated)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -872,9 +872,7 @@ main {
   color: #555;
 }
 
-/* ---------------------------------------------------------
-   SUPPORT TICKETS – FULL CLEAN CSS BLOCK
---------------------------------------------------------- */
+/* --------------- SUPPORT TICKETS – CLEAN BUILD --------------- */
 
 #support-tickets .ticket-section {
   margin-bottom: 24px;
@@ -891,12 +889,12 @@ main {
   box-shadow: var(--shadow);
 }
 
-/* Inner wrapper for spacing */
+/* Inner wrapper so we can drop badge above the content */
 #support-tickets .ticket-group-inner {
   margin-top: 4px;
 }
 
-/* Orange badge */
+/* Support Ticket Orange Badge */
 .ticket-badge {
   background: var(--orange);
   color: #fff;
@@ -909,7 +907,7 @@ main {
   margin-top: 2px;
 }
 
-/* Generic ticket row layout */
+/* Row layout – label left, field right, with dividers */
 #support-tickets .ticket-row {
   display: flex;
   align-items: center;
@@ -917,16 +915,15 @@ main {
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
-  font-size: 14px; /* match main Q&A rows */
+  font-size: 14px;
 }
-
 #support-tickets .ticket-row:last-child {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
-/* Label column – same style as other sections */
+/* Label column (similar feel to checklist-row) */
 #support-tickets .ticket-row > label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -935,11 +932,11 @@ main {
   padding-right: 16px;
 }
 
-/* Fields – same width + pill styling as all other inputs */
+/* Fields – same pill style + width as global Q&A inputs */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
-  flex: 0 0 var(--input-width);
+  flex: 0 0 var(--input-width);     /* same width as other inputs */
   width: var(--input-width);
   margin-left: auto;
 }
@@ -951,16 +948,42 @@ main {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
-  font-size: 13px;
+  font-size: 13px;                 /* same as other dropdowns/text boxes */
 }
 
-/* Integrated ticket number + + button (base card only) */
+/* Short Summary row: stack label on top, textbox under it but aligned to answer column */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#support-tickets .ticket-summary-row > label {
+  margin-bottom: 4px;
+}
+
+/* Short Summary textarea: same width as other answer boxes, auto-grow */
+#support-tickets .ticket-summary-input {
+  align-self: flex-end;              /* anchors to the same right edge as other fields */
+  width: var(--input-width);
+  max-width: var(--input-width);
+  margin-left: auto;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  min-height: 34px;                  /* match height of other text boxes */
+  box-sizing: border-box;
+  resize: none;                      /* let JS handle the growing cleanly */
+}
+
+/* Integrated Support Ticket Number + button on BASE card */
 #support-tickets .ticket-number-wrap {
   display: flex;
   align-items: stretch;
 }
 
-/* Base card input gets flattened right side */
+/* Base card only: flatten right side to merge with + button */
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
@@ -968,8 +991,8 @@ main {
   border-bottom-right-radius: 0;
 }
 
-/* + Button on base card */
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn {
+/* + button on base card – same style as other integrated + */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn {
   flex: 0 0 34px;
   margin-left: -1px;
   background: var(--orange);
@@ -987,155 +1010,54 @@ main {
   box-shadow: 0 1px 4px rgba(243,111,33,0.25);
   padding: 0;
 }
-
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
-  background: #ff8b42;
+#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn:hover {
+  background:#ff8b42;
 }
 
-/* Non-base cards get normal rounded ticket number input */
+/* Added cards: Support Ticket Number = normal textbox, rounded both sides */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
   border-radius: var(--radius-sm);
 }
 
-/* Disable the Status dropdown ONLY on the base ticket */
-#support-tickets .ticket-group[data-base="true"] .ticket-status-select {
-  pointer-events: none;       /* cannot click or open */
-  background: #e5e5e5 !important;
-  color: #777 !important;
-  border-color: #ccc !important;
-  opacity: 0.75;
+/* Disabled Status on base card */
+.ticket-status-disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ---------------------------------------------------------
-   SHORT SUMMARY OF THE ISSUE — FULL-WIDTH TEXTAREA
---------------------------------------------------------- */
+/* --------------- TRAINING CHECKLIST – USER ACCEPTANCE COLORS --------------- */
 
-/* Stack label above textarea */
-#support-tickets .ticket-summary-row {
-  flex-direction: column;
-  align-items: stretch;
-  padding-bottom: 10px; /* keep divider spacing consistent */
+#training-checklist select.ua-green,
+#training-checklist select.ua-yellow,
+#training-checklist select.ua-red,
+#training-checklist select.ua-gray {
+  /* ensure text legible; explicit text colors for each state below */
 }
 
-/* Label spacing */
-#support-tickets .ticket-summary-row > label {
-  margin-bottom: 4px;
-  padding-right: 0;
+#training-checklist select.ua-green {
+  background: #dcfce7 !important;
+  border-color: #bbf7d0 !important;
+  color: #166534 !important;
 }
 
-/* Full-width textarea inside the card */
-#support-tickets .ticket-summary-input {
-  width: 100%;             /* full usable width of card */
-  max-width: 100%;
-  min-height: 34px;        /* same initial size as all other inputs */
-  padding: 7px 10px;
-  box-sizing: border-box;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  resize: none;            /* JS auto-grow handles height */
+#training-checklist select.ua-yellow {
+  background: #fef9c3 !important;
+  border-color: #fde68a !important;
+  color: #92400e !important;
 }
 
-/* ---------------------------------------------------------
-   MOBILE RESPONSIVE
---------------------------------------------------------- */
-@media (max-width: 600px) {
-  #support-tickets .ticket-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  #support-tickets .ticket-row > label {
-    margin-bottom: 4px;
-  }
-
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap {
-    width: 100%;
-    flex: 0 0 auto;
-    margin-left: 0;
-  }
-
-  #support-tickets .ticket-summary-input {
-    width: 100%;
-    max-width: 100%;
-  }
+#training-checklist select.ua-red {
+  background: #fee2e2 !important;
+  border-color: #fecaca !important;
+  color: #991b1b !important;
 }
 
-/* ---------------- BASE CARD: Ticket Number + "+" button ---------------- */
-
-#support-tickets .ticket-number-wrap {
-  display: flex;
-  align-items: stretch;
-}
-
-/* Base card — flatten right side to merge with + button */
-#support-tickets .ticket-group[data-base="true"] .ticket-number-input {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* The + button on the base card */
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn {
-  flex: 0 0 34px;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-}
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover {
-  background: #ff8b42;
-}
-
-/* Cloned cards: ticket number input is normal rounded box */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input {
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  border-radius: var(--radius-sm);
-}
-
-/* ---------------- RESPONSIVE ---------------- */
-@media (max-width: 600px) {
-  #support-tickets .ticket-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  #support-tickets .ticket-row > label {
-    margin-bottom: 4px;
-  }
-
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap {
-    width: 100%;
-    flex: 0 0 auto;
-    margin-left: 0;
-  }
-
-  #support-tickets .ticket-summary-input {
-    width: 100%;
-    max-width: 100%;
-    align-self: stretch;
-    margin-left: 0;
-  }
+#training-checklist select.ua-gray {
+  background: #e5e7eb !important;
+  border-color: #d1d5db !important;
+  color: #374151 !important;
 }
 
 /* --------------- MONDAY VISIT – TINY TWEAKS --------------- */
@@ -1226,9 +1148,10 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
-  #support-tickets .ticket-summary-input {
+  #support-tickets .ticket-summary-row .ticket-summary-input {
     width: 100%;
     max-width: 100%;
     align-self: stretch;
+    margin-left: 0;
   }
 }
