@@ -2897,20 +2897,21 @@
             </select>
           </div>
 
-          <!-- Short Summary (3/4 width) -->
-          <div class="ticket-row ticket-summary-row">
-            <label>Short Summary of the Issue</label>
-            <input
-              type="text"
-              placeholder="High-level description of the issue"
-            />
-          </div>
+          <!-- ZENDESK LINK (now ABOVE short summary) -->
+<div class="ticket-row">
+  <label>Zendesk Link</label>
+  <input type="text" placeholder="Paste Zendesk link">
+</div>
 
-          <!-- Zendesk link -->
-          <div class="ticket-row">
-            <label>Zendesk Link</label>
-            <input type="text" placeholder="Paste Zendesk link" />
-          </div>
+<!-- SHORT SUMMARY (textarea, full width, expandable) -->
+<div class="ticket-row ticket-summary-row">
+  <label>Short Summary of the Issue</label>
+  <textarea
+    class="ticket-summary-input"
+    rows="2"
+    placeholder="High-level description of the issue"
+  ></textarea>
+</div>
         </div>
       </div>
     </div>
