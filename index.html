@@ -201,23 +201,23 @@
 
     <div class="checklist-row">
       <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput" placeholder="Dealer Group Name">
+      <input type="text" id="dealerGroupInput">
     </div>
 
     <div class="checklist-row">
       <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Dealership Name">
+      <input type="text" id="dealershipNameInput">
     </div>
 
     <div class="checklist-row">
       <label>DID</label>
-      <input type="text" id="dealershipDidInput" placeholder="Dealership ID (DID)">
+      <input type="text" id="dealershipDidInput">
     </div>
 
     <div class="checklist-row">
       <label>DMS</label>
       <select id="dealershipDmsSelect">
-        <option value="">Select DMS…</option>
+        <option value=""></option>
         <option>CDK Drive</option>
         <option>CDK Elead</option>
         <option>Reynolds &amp; Reynolds</option>
@@ -234,32 +234,34 @@
       <label>Dealership Address</label>
 
       <div class="address-input-wrap">
-        <button type="button" id="openAddressInMapsBtn" class="small-map-btn">
-          Map
-        </button>
-
         <input
           type="text"
           id="dealershipAddressInput"
-          placeholder="Start typing address…"
           autocomplete="off"
         >
+        <button
+          type="button"
+          id="openAddressInMapsBtn"
+          class="small-map-btn"
+        >
+          Map
+        </button>
       </div>
     </div>
 
     <!-- Map Preview -->
-    <div id="mapPreviewWrapper" class="map-wrapper">
-  <iframe
-    id="dealershipMapFrame"
-    class="map-frame"
-    src=""
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-  ></iframe>
-  <p class="map-helper-text">
-    Select an address above to update this map. Click “Map” to open directions in Google Maps.
-  </p>
-</div>
+    <div class="map-wrapper" id="mapPreviewWrapper">
+      <iframe
+        id="dealershipMapFrame"
+        class="map-frame"
+        src=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      <p class="map-helper-text">
+        Select an address above to update this map. Click “Map” to open directions in Google Maps.
+      </p>
+    </div>
   </div>
 
   <!-- ======================== PRIMARY CONTACTS ======================== -->
@@ -339,7 +341,6 @@
           <input
             type="text"
             class="additional-poc-name"
-            placeholder="Name"
           >
           <button
             type="button"
@@ -366,12 +367,14 @@
         </div>
       </div>
 
-      <!-- Notes – Trainers, Deployment, & CEM -->
-  <div class="section-block notes-block">
-    <h2>Notes – Dealership Info</h2>
-    <textarea rows="6" placeholder="High-level notes..."></textarea>
+    </div>
   </div>
 
+  <!-- ======================== NOTES – DEALERSHIP INFO ======================== -->
+  <div class="section-block notes-block">
+    <h2>Notes &mdash; Dealership Info</h2>
+    <textarea></textarea>
+  </div>
 </section>
 
       <!-- ========================================================= -->
