@@ -977,36 +977,30 @@ main {
   font-size: 13px;
 }
 
-/* ---------- Short Summary row ---------- */
-
-/* Make the Short Summary row vertical: label on top, box below */
+/* Short Summary row: label on top, box below */
 #support-tickets .ticket-summary-row {
   flex-direction: column;
   align-items: stretch;
 }
 
-/* Space between label and textarea */
+/* Space between label and box */
 #support-tickets .ticket-summary-row > label {
   margin-bottom: 4px;
 }
 
-/* Short Summary textarea:
-   - same base height as other boxes
-   - aligned on the right edge with other fields
-   - same width as other answer boxes
-   - auto-grow via JS */
+/* Short Summary textarea: full card width (inside padding), 
+   same base height as other boxes, auto-grow via JS */
 #support-tickets .ticket-summary-input {
-  align-self: flex-end;           /* keeps right edge aligned with other inputs */
-  width: var(--input-width);      /* EXACT same width as other inputs */
-  max-width: var(--input-width);
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
-  min-height: 34px;               /* same starting height */
-  resize: none;                   /* JS handles vertical growth */
+  min-height: 34px;
+  resize: none;
 }
 
 /* Integrated Support Ticket Number + button on BASE card */
