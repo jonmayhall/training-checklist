@@ -983,92 +983,68 @@
 </section>
 
  <!-- ========================================================= -->
-<!-- PAGE 5 : TRAINING CHECKLIST                               -->
+<!-- PAGE 5: TRAINING CHECKLIST                               -->
 <!-- ========================================================= -->
 <section id="training-checklist" class="page-section">
   <h1>Training Checklist</h1>
   <p class="page-subtitle">
-    Track adoption by role and ensure every user can work confidently in myKaarma.
+    Track training coverage by role, user acceptance, and how each team is using myKaarma.
   </p>
+
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Techs & Advisors Morning Meetings -->
-  <div class="section-block">
-    <h2>Techs &amp; Advisors Morning Meetings</h2>
-
-    <div class="checklist-row">
-      <label>Tuesday morning meeting</label>
-      <select>
-        <option></option>
-        <option>Managers, Techs &amp; Advisors</option>
-        <option>Managers &amp; Techs Only</option>
-        <option>Managers &amp; Advisors Only</option>
-        <option>No Meetings</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Wednesday morning meeting</label>
-      <select>
-        <option></option>
-        <option>Managers</option>
-        <option>Techs &amp; Advisors</option>
-        <option>Managers &amp; Techs Only</option>
-        <option>Managers &amp; Advisors Only</option>
-        <option>No Meetings</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Thursday morning meeting</label>
-      <select>
-        <option></option>
-        <option>Managers</option>
-        <option>Techs &amp; Advisors</option>
-        <option>Managers &amp; Techs Only</option>
-        <option>Managers &amp; Advisors Only</option>
-        <option>No Meetings</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Technicians – Checklist -->
+  <!-- =========================
+       TECHNICIAN – CHECKLIST
+       ========================= -->
   <div class="section">
-    <div class="section-header">
-      <span>Technicians – Checklist</span>
-    </div>
+    <div class="section-header">Technician – Checklist</div>
     <div class="table-container">
       <div class="scroll-wrapper">
         <table class="training-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
               <th>DMS ID</th>
-              <th>Logged In</th>
-              <th>Workflow Order</th>
-              <th>OCR</th>
-              <th>MPI</th>
-              <th>Self Assign/Take</th>
-              <th>Dispatch</th>
-              <th>Left MPI Panel</th>
-              <th>Prev. Declines</th>
-              <th>ShopChat</th>
-              <th>Media</th>
-              <th>Status Change</th>
-              <th>Notifications</th>
-              <th>RO History</th>
-              <th>Inspection History</th>
-              <th>MPI History</th>
-              <th>Filters</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Row 1 -->
             <tr>
+              <!-- Updated -->
+              <td><input type="checkbox"></td>
+              <!-- Skill -->
+              <td><input type="text"></td>
+              <!-- DMS ID -->
               <td>
-                <input type="checkbox">
-                <input type="text">
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                  <option>N/A</option>
+                </select>
+              </td>
+              <!-- Web Training -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- Mobile Training -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
               </td>
               <!-- User Acceptance -->
               <td>
@@ -1079,197 +1055,12 @@
                   <option>Neutral / Mixed</option>
                   <option>Needs Support</option>
                   <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>N/A</option>
-                </select>
-              </td>
-              <!-- Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Workflow Order -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Self Assign/Take -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Dispatch -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Media -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
                 </select>
               </td>
             </tr>
-
-            <!-- Row 2 -->
             <tr>
-              <td>
-                <input type="checkbox">
-                <input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -1278,175 +1069,24 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Workflow Order -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Self Assign/Take -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Dispatch -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Media -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-            </tr>
-
-            <!-- Row 3 -->
-            <tr>
-              <td>
-                <input type="checkbox">
-                <input type="text">
-              </td>
-              <!-- User Acceptance -->
               <td>
                 <select>
                   <option></option>
@@ -1455,175 +1095,6 @@
                   <option>Neutral / Mixed</option>
                   <option>Needs Support</option>
                   <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>N/A</option>
-                </select>
-              </td>
-              <!-- Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Workflow Order -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Self Assign/Take -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Dispatch -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Media -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
                 </select>
               </td>
             </tr>
@@ -1636,60 +1107,33 @@
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block notes-block">
     <h2>Notes — Technicians</h2>
     <textarea></textarea>
   </div>
 
-  <!-- Service Advisors – Checklist -->
+  <!-- =========================
+       SERVICE ADVISOR – CHECKLIST
+       ========================= -->
   <div class="section">
-    <div class="section-header">
-      <span>Service Advisors – Checklist</span>
-    </div>
+    <div class="section-header">Service Advisor – Checklist</div>
     <div class="table-container">
       <div class="scroll-wrapper">
         <table class="training-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
               <th>DMS ID</th>
-              <th>Logged In</th>
-              <th>MCI</th>
-              <th>Prev. Declines</th>
-              <th>Workflow Order</th>
-              <th>Status Change</th>
-              <th>OCR</th>
-              <th>Custom Recs</th>
-              <th>ShopChat</th>
-              <th>Left MPI Panel</th>
-              <th>Sending MPI</th>
-              <th>Sending Video</th>
-              <th>Notifications</th>
-              <th>RO History</th>
-              <th>Inspection History</th>
-              <th>MPI History</th>
-              <th>Filters</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Row 1 -->
             <tr>
-              <td>
-                <input type="checkbox"><input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -1698,185 +1142,38 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MCI -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Prev. Declines -->
               <td>
                 <select>
                   <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Workflow Order -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Custom Recs -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending Video -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
                 </select>
               </td>
             </tr>
-
-            <!-- Row 2 -->
             <tr>
-              <td>
-                <input type="checkbox"><input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -1885,174 +1182,24 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MCI -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Workflow Order -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Custom Recs -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending Video -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-            </tr>
-
-            <!-- Row 3 -->
-            <tr>
-              <td>
-                <input type="checkbox"><input type="text">
-              </td>
-              <!-- User Acceptance -->
               <td>
                 <select>
                   <option></option>
@@ -2061,175 +1208,6 @@
                   <option>Neutral / Mixed</option>
                   <option>Needs Support</option>
                   <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>N/A</option>
-                </select>
-              </td>
-              <!-- Logged In -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MCI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Workflow Order -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Custom Recs -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending MPI -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Sending Video -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
                 </select>
               </td>
             </tr>
@@ -2242,57 +1220,33 @@
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block notes-block">
     <h2>Notes — Service Advisors</h2>
     <textarea></textarea>
   </div>
 
-  <!-- Parts Representatives – Checklist -->
+  <!-- =========================
+       PARTS REPRESENTATIVE – CHECKLIST
+       ========================= -->
   <div class="section">
-    <div class="section-header">
-      <span>Parts Representatives – Checklist</span>
-    </div>
+    <div class="section-header">Parts Representative – Checklist</div>
     <div class="table-container">
       <div class="scroll-wrapper">
         <table class="training-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
               <th>DMS ID</th>
-              <th>Logged In</th>
-              <th>Left MPI Panel</th>
-              <th>Workflow Order</th>
-              <th>Status Change</th>
-              <th>OCR</th>
-              <th>Take</th>
-              <th>Parts Estimate</th>
-              <th>DMS History</th>
-              <th>Prev. Declines</th>
-              <th>ShopChat</th>
-              <th>SOP</th>
-              <th>Notifications</th>
-              <th>Filters</th>
+              <th>Parts Training</th>
+              <th>Pricing / Quotes</th>
+              <th>User Acceptance</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Row 1 -->
             <tr>
-              <td>
-                <input type="checkbox"><input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -2301,7 +1255,6 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
@@ -2310,7 +1263,6 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
@@ -2319,124 +1271,20 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Workflow Order -->
               <td>
                 <select>
                   <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Take -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Parts Estimate -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- DMS History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- SOP -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
                 </select>
               </td>
             </tr>
-
-            <!-- Row 2 -->
             <tr>
-              <td>
-                <input type="checkbox"><input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -2445,7 +1293,6 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
@@ -2454,7 +1301,6 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Left MPI Panel -->
               <td>
                 <select>
                   <option></option>
@@ -2463,103 +1309,14 @@
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Workflow Order -->
               <td>
                 <select>
                   <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- OCR -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Take -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Parts Estimate -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- DMS History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- SOP -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
                 </select>
               </td>
             </tr>
@@ -2572,46 +1329,34 @@
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block notes-block">
     <h2>Notes — Parts Representatives</h2>
     <textarea></textarea>
   </div>
 
-  <!-- BDC / Scheduler – Checklist -->
+  <!-- =========================
+       SHOP FOREMAN / SHOP DISPATCHER – CHECKLIST
+       ========================= -->
   <div class="section">
-    <div class="section-header">
-      <span>BDC / Scheduler – Checklist</span>
-    </div>
+    <div class="section-header">Shop Foreman / Shop Dispatcher – Checklist</div>
     <div class="table-container">
       <div class="scroll-wrapper">
         <table class="training-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
               <th>DMS ID</th>
-              <th>Logged In</th>
-              <th>Scheduler</th>
-              <th>Declined Services</th>
-              <th>ServiceConnect</th>
-              <th>Routing</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
             </tr>
           </thead>
           <tbody>
+            <!-- Starts with ONE row by design -->
             <tr>
-              <td><input type="checkbox"><input type="text"></td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -2620,49 +1365,32 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Scheduler -->
               <td>
                 <select>
                   <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Declined Services -->
               <td>
                 <select>
                   <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ServiceConnect -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Routing -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
                 </select>
               </td>
             </tr>
@@ -2675,271 +1403,149 @@
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block notes-block">
+    <h2>Notes — Shop Foreman / Shop Dispatcher</h2>
+    <textarea></textarea>
+  </div>
+
+  <!-- =========================
+       BDC / SCHEDULER – CHECKLIST
+       ========================= -->
+  <div class="section">
+    <div class="section-header">BDC / Scheduler – Checklist</div>
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
+              <th>DMS ID</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <!-- Logged In instead of Login -->
+              <td><input type="text" value="Logged In"></td>
+              <!-- DMS ID (no N/A for this table) -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+              </td>
+              <!-- Web Training -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- Mobile Training -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <!-- User Acceptance (canonical dropdown) -->
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block notes-block">
     <h2>Notes — BDC / Scheduler</h2>
     <textarea></textarea>
   </div>
 
-  <!-- PU&D Drivers – Checklist -->
+  <!-- =========================
+       PU&D DRIVER – CHECKLIST
+       ========================= -->
   <div class="section">
-    <div class="section-header">
-      <span>PU&amp;D Drivers – Checklist</span>
-    </div>
+    <div class="section-header">PU&amp;D Driver – Checklist</div>
     <div class="table-container">
       <div class="scroll-wrapper">
         <table class="training-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
-              <th>Logged In</th>
-              <th>Mobile App</th>
-              <th>Assigned Trips</th>
-              <th>Trip Navigation</th>
-              <th>Notes</th>
-              <th>Communication</th>
-              <th>Notifications</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="checkbox"><input type="text"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <button class="add-row" type="button">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Notes — PU&amp;D Drivers</h2>
-    <textarea></textarea>
-  </div>
-
-  <!-- PU&D Dispatcher – Checklist -->
-  <div class="section">
-    <div class="section-header">
-      <span>PU&amp;D Dispatcher – Checklist</span>
-    </div>
-    <div class="table-container">
-      <div class="scroll-wrapper">
-        <table class="training-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
-              <th>Trip Creation</th>
-              <th>Vehicles</th>
-              <th>Adding Drivers</th>
-              <th>Global Map</th>
-              <th>Notifications</th>
-              <th>Mobile App</th>
-              <th>Drivers View</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="checkbox"><input type="text"></td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <td>
-                <select>
-                  <option></option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <button class="add-row" type="button">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <h2>Notes — PU&amp;D Dispatcher</h2>
-    <textarea></textarea>
-  </div>
-
-  <!-- Shop Foreman / Shop Dispatcher – Checklist -->
-  <div class="section">
-    <div class="section-header">
-      <span>Shop Foreman / Shop Dispatcher – Checklist</span>
-    </div>
-    <div class="table-container">
-      <div class="scroll-wrapper">
-        <table class="training-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>User Acceptance</th>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
               <th>DMS ID</th>
-              <th>Logged In</th>
-              <th>Workflow Order</th>
-              <th>OCR</th>
-              <th>MPI</th>
-              <th>Self Assign/Take</th>
-              <th>Dispatch</th>
-              <th>Left MPI Panel</th>
-              <th>Prev. Declines</th>
-              <th>ShopChat</th>
-              <th>Media</th>
-              <th>Status Change</th>
-              <th>Notifications</th>
-              <th>RO History</th>
-              <th>Inspection History</th>
-              <th>MPI History</th>
-              <th>Filters</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Single Row -->
             <tr>
-              <td>
-                <input type="checkbox">
-                <input type="text">
-              </td>
-              <!-- User Acceptance -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Fully Adopted</option>
-                  <option>Mostly Adopted</option>
-                  <option>Neutral / Mixed</option>
-                  <option>Needs Support</option>
-                  <option>Not Accepted</option>
-                </select>
-              </td>
-              <!-- DMS ID -->
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
               <td>
                 <select>
                   <option></option>
@@ -2948,164 +1554,72 @@
                   <option>N/A</option>
                 </select>
               </td>
-              <!-- Logged In -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Workflow Order -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- OCR -->
               <td>
                 <select>
                   <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                  <option>N/A</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- MPI -->
               <td>
                 <select>
                   <option></option>
+                  <option>Web &amp; Mobile</option>
                   <option>Web</option>
                   <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
                   <option>Not Trained</option>
                 </select>
               </td>
-              <!-- Self Assign/Take -->
               <td>
                 <select>
                   <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Dispatch -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Left MPI Panel -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Prev. Declines -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- ShopChat -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Media -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Status Change -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Notifications -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- RO History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Inspection History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- MPI History -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
-                </select>
-              </td>
-              <!-- Filters -->
-              <td>
-                <select>
-                  <option></option>
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Web &amp; Mobile</option>
-                  <option>Not Trained</option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
                 </select>
               </td>
             </tr>
@@ -3118,8 +1632,121 @@
     </div>
   </div>
 
-  <div class="section-block">
-    <h2>Notes — Shop Foreman / Shop Dispatcher</h2>
+  <div class="section-block notes-block">
+    <h2>Notes — PU&amp;D Driver</h2>
+    <textarea></textarea>
+  </div>
+
+  <!-- =========================
+       PU&D DISPATCHER – CHECKLIST
+       ========================= -->
+  <div class="section">
+    <div class="section-header">PU&amp;D Dispatcher – Checklist</div>
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Updated</th>
+              <th>Skill / Workflow Item</th>
+              <th>DMS ID</th>
+              <th>Web Training</th>
+              <th>Mobile Training</th>
+              <th>User Acceptance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                  <option>N/A</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><input type="text"></td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Yes</option>
+                  <option>No</option>
+                  <option>N/A</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Web &amp; Mobile</option>
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Not Trained</option>
+                </select>
+              </td>
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block notes-block">
+    <h2>Notes — PU&amp;D Dispatcher</h2>
     <textarea></textarea>
   </div>
 </section>
