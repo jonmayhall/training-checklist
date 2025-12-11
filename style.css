@@ -943,10 +943,30 @@ main {
   font-size: 13px;
 }
 
-/* Short Summary ~ 3/4 card width */
-#support-tickets .ticket-summary-row input[type="text"] {
-  flex: 0 0 70%;
-  width: 70%;
+/* 🟧 Short Summary – label on top, textarea full width */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Label above textarea */
+#support-tickets .ticket-summary-row > label {
+  padding-right: 0;
+  margin-bottom: 6px;
+}
+
+/* Full-width textarea that can grow downward */
+#support-tickets .ticket-summary-row .ticket-summary-input {
+  width: 100%;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  resize: vertical;         /* user can drag to expand */
+  box-sizing: border-box;
 }
 
 /* Integrated Support Ticket Number + button on BASE card */
