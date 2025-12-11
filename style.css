@@ -999,6 +999,16 @@ main {
   border-radius: var(--radius-sm);
 }
 
+/* Disable the Status dropdown ONLY on the base ticket */
+#support-tickets .ticket-group[data-base="true"] .ticket-status-select {
+  pointer-events: none;       /* cannot click or open */
+  background: #e5e5e5 !important;
+  color: #777 !important;
+  border-color: #ccc !important;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 /* ---------------------------------------------------------
    SHORT SUMMARY OF THE ISSUE — FULL-WIDTH TEXTAREA
 --------------------------------------------------------- */
