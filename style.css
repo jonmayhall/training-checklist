@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS (Updated)
+   myKaarma Interactive Training Checklist – FULL CSS
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -639,7 +639,7 @@ main {
 /* --------------- Training TABLES --------------- */
 
 .section {
-  margin-bottom: 40px;
+  margin-bottom:40px;
 }
 
 /* Section header above tables – width aligned with tables */
@@ -667,156 +667,142 @@ main {
 }
 
 .scroll-wrapper {
-  display: block;
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  padding-bottom: 4px;
+  display:block;
+  width:100%;
+  overflow-x:auto;
+  background:#fff;
+  padding-bottom:4px;
 }
 
 /* Table */
 .training-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 900px;
+  border-collapse:collapse;
+  width:100%;
+  min-width:900px;
 }
 .training-table th,
 .training-table td {
-  white-space: nowrap;
-  text-align: center;
-  font-size: 13px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 6px;
+  white-space:nowrap;
+  text-align:center;
+  font-size:13px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:6px 6px;
 }
 
 /* Sticky header – light orange */
 .training-table thead th {
-  background: var(--light-orange);
-  color: #fff;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  background:var(--light-orange);
+  color:#fff;
+  font-weight:600;
+  position:sticky;
+  top:0;
+  z-index:3;
 }
 .training-table thead th .muted-note {
-  font-size: 0.8em;
-  color: #fff;
+  font-size:0.8em;
+  color:#fff;
 }
 
-/* Sticky first column for checklists */
+/* Sticky first column for Training Checklist tables */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;
-  min-width: 200px;
+  width: 60px;
+  min-width: 60px;
 }
 .training-table thead th:first-child {
-  text-align: center;
+  text-align:center;
 }
 .training-table td:first-child {
-  background: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-.training-table td:first-child input[type="checkbox"] {
-  flex-shrink: 0;
-  transform: scale(1.05);
-  margin-right: 8px;
-}
-.training-table td:first-child input[type="text"] {
-  width: 95%;
-  padding: 7px 8px;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  text-align: left;
+  background:#fff;
+  text-align:center;
 }
 
 /* Generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2) {
-  width: 185px;
-  min-width: 185px;
+  width:185px;
+  min-width:185px;
 }
 
 /* Inputs/Selects in table */
 .training-table input[type="text"],
 .training-table select {
-  width: 100%;
-  min-width: 130px;
-  padding: 5px 5px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  text-align: center;
+  width:100%;
+  min-width:130px;
+  padding:5px 5px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  text-align:center;
 }
 
 /* Alternating rows */
-.training-table tr:nth-child(odd)  { background: #fff;    }
-.training-table tr:nth-child(even) { background: #fafafa; }
+.training-table tr:nth-child(odd) { background:#fff; }
+.training-table tr:nth-child(even){ background:#fafafa; }
 
 /* Table footer + "+" button */
 .table-footer {
-  width: 100%;
-  background: #f5f5f5;
-  border-top: 1px solid var(--border);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
+  width:100%;
+  background:#f5f5f5;
+  border-top:1px solid var(--border);
+  padding:6px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  border-bottom-left-radius:var(--radius-lg);
+  border-bottom-right-radius:var(--radius-lg);
 }
 .table-footer .add-row {
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: .2s;
-  box-shadow: 0 1px 3px rgba(243,111,33,0.25);
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:22px;
+  height:22px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.2s;
+  box-shadow:0 1px 3px rgba(243,111,33,0.25);
 }
 .table-footer .add-row:hover {
-  background: #ff8b42;
-  transform: scale(1.05);
+  background:#ff8b42;
+  transform:scale(1.05);
 }
 
-/* --------------- Training Checklist – acceptance colors --------------- */
+/* === Training Checklist – acceptance color coding === */
 
-.training-table select.accept-green {
+/* Green: Yes, Web & Mobile, Fully Adopted */
+.training-table select.accept-yes {
   background: #dcfce7;
-  border-color: #bbf7d0;
-  color: #166534;
+  border-color: #22c55e;
+  color: #14532d;
 }
 
-.training-table select.accept-yellow {
+/* Yellow: Web, Mobile, Mostly Adopted, Neutral / Mixed */
+.training-table select.accept-neutral {
   background: #fef9c3;
-  border-color: #facc15;
+  border-color: #eab308;
   color: #854d0e;
 }
 
-.training-table select.accept-red {
+/* Red: No, Not Trained, Needs Support, Not Accepted */
+.training-table select.accept-no {
   background: #fee2e2;
-  border-color: #fecaca;
-  color: #b91c1c;
+  border-color: #ef4444;
+  color: #7f1d1d;
 }
 
-.training-table select.accept-gray {
+/* Grey: N/A / NA */
+.training-table select.accept-na {
   background: #e5e7eb;
-  border-color: #d1d5db;
-  color: #4b5563;
+  border-color: #9ca3af;
+  color: #374151;
 }
 
 /* --------------- OPCODES PAGE --------------- */
@@ -853,7 +839,7 @@ main {
   min-width:100px;
 }
 
-/* Parts Price column – now same width as others so it doesn't overflow */
+/* Parts Price column – same width as others */
 #opcodes-pricing .training-table th:nth-child(6),
 #opcodes-pricing .training-table td:nth-child(6) {
   width:110px;
@@ -962,7 +948,7 @@ main {
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
-  flex: 0 0 var(--input-width);  /* same width as other inputs */
+  flex: 0 0 var(--input-width);
   width: var(--input-width);
   margin-left: auto;
 }
@@ -975,32 +961,6 @@ main {
   border: 1px solid var(--border);
   background: #f7f7f7;
   font-size: 13px;
-}
-
-/* Short Summary row: label on top, box below */
-#support-tickets .ticket-summary-row {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-/* Space between label and box */
-#support-tickets .ticket-summary-row > label {
-  margin-bottom: 4px;
-}
-
-/* Short Summary textarea: full card width (inside padding), 
-   same base height as other boxes, auto-grow via JS */
-#support-tickets .ticket-summary-input {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #f7f7f7;
-  font-size: 13px;
-  min-height: 34px;
-  resize: none;
 }
 
 /* Integrated Support Ticket Number + button on BASE card */
@@ -1037,7 +997,7 @@ main {
   padding: 0;
 }
 #support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn:hover {
-  background: #ff8b42;
+  background:#ff8b42;
 }
 
 /* Added cards: Support Ticket Number = normal textbox, rounded both sides */
@@ -1047,44 +1007,29 @@ main {
   border-radius: var(--radius-sm);
 }
 
-/* Disabled status dropdown on base card (JS adds .status-disabled) */
-#support-tickets .ticket-status-select.status-disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
+/* Short Summary row – label on top, full-width box below */
+#support-tickets .ticket-summary-row {
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* --------------- TRAINING CHECKLIST – USER ACCEPTANCE COLORS --------------- */
-
-#training-checklist select.ua-green,
-#training-checklist select.ua-yellow,
-#training-checklist select.ua-red,
-#training-checklist select.ua-gray {
-  /* ensure text legible; explicit text colors for each state below */
+/* Label spacing above textarea */
+#support-tickets .ticket-summary-row > label {
+  margin-bottom: 4px;
 }
 
-#training-checklist select.ua-green {
-  background: #dcfce7 !important;
-  border-color: #bbf7d0 !important;
-  color: #166534 !important;
-}
-
-#training-checklist select.ua-yellow {
-  background: #fef9c3 !important;
-  border-color: #fde68a !important;
-  color: #92400e !important;
-}
-
-#training-checklist select.ua-red {
-  background: #fee2e2 !important;
-  border-color: #fecaca !important;
-  color: #991b1b !important;
-}
-
-#training-checklist select.ua-gray {
-  background: #e5e7eb !important;
-  border-color: #d1d5db !important;
-  color: #374151 !important;
+/* Short Summary textarea: full card width, same initial height, auto-grow via JS */
+#support-tickets .ticket-summary-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  font-size: 13px;
+  min-height: 34px;
+  resize: none; /* JS handles the height */
 }
 
 /* --------------- MONDAY VISIT – TINY TWEAKS --------------- */
@@ -1173,12 +1118,6 @@ main {
   #support-tickets .ticket-row > .ticket-number-wrap {
     width: 100%;
     flex: 0 0 auto;
-    margin-left: 0;
-  }
-  #support-tickets .ticket-summary-row .ticket-summary-input {
-    width: 100%;
-    max-width: 100%;
-    align-self: stretch;
     margin-left: 0;
   }
 }
