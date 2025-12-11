@@ -1,5 +1,5 @@
 /* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS (Clean)
+   myKaarma Interactive Training Checklist – FULL JS (Guarded)
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,8 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
   initTableAddRowButtons();
   initPdfExport();
   initDmsCards();
-  initAutoGrowTicketSummary();     // ⭐ auto-resize Short Summary textareas
+  initAutoGrowTicketSummary();
 });
+
+/* -------------------------------------
+   SMALL HELPER – BIND EVENT ONCE
+------------------------------------- */
+function bindOnce(el, event, handler, key) {
+  if (!el) return;
+  const flag = `__bound_${key}`;
+  if (el[flag]) return;          // already wired, do nothing
+  el.addEventListener(event, handler);
+  el[flag] = true;
+}
 
 /* -------------------------------------
    NAVIGATION
@@ -26,7 +37,7 @@ function initNavigation() {
   if (!navButtons.length || !sections.length) return;
 
   navButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
+    bindOnce(btn, 'click', () => {
       const targetId = btn.dataset.target;
 
       sections.forEach((sec) =>
@@ -36,7 +47,7 @@ function initNavigation() {
       navButtons.forEach((b) =>
         b.classList.toggle('active', b === btn)
       );
-    });
+    }, 'navClick');
   });
 }
 
@@ -59,14 +70,14 @@ function clearSection(section) {
 }
 
 function initClearPageButtons() {
-  document.querySelectorAll('.clear-page-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  document.querySelectorAll('.clear-page-btn').forEach((btn, idx) => {
+    bindOnce(btn, 'click', () => {
       const section = btn.closest('.page-section');
       clearSection(section);
       if (section && section.id === 'dealership-info') {
         updateDealershipNameDisplay();
       }
-    });
+    }, `clearPage_${idx}`);
   });
 }
 
@@ -74,10 +85,10 @@ function initClearAllButton() {
   const btn = document.getElementById('clearAllBtn');
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
+  bindOnce(btn, 'click', () => {
     document.querySelectorAll('.page-section').forEach(clearSection);
     updateDealershipNameDisplay();
-  });
+  }, 'clearAll');
 }
 
 /* -------------------------------------
@@ -87,7 +98,7 @@ function initDealershipNameBinding() {
   const input = document.getElementById('dealershipNameInput');
   if (!input) return;
 
-  input.addEventListener('input', updateDealershipNameDisplay);
+  bindOnce(input, 'input', updateDealershipNameDisplay, 'dnameInput');
   updateDealershipNameDisplay();
 }
 
@@ -106,9 +117,9 @@ function updateDealershipNameDisplay() {
    (Maps script should call: callback=initAddressAutocomplete)
 ------------------------------------- */
 function initAddressAutocomplete() {
-  const input   = document.getElementById('dealershipAddressInput');
+  const input    = document.getElementById('dealershipAddressInput');
   const mapFrame = document.getElementById('dealershipMapFrame');
-  const mapBtn  = document.getElementById('openAddressInMapsBtn');
+  const mapBtn   = document.getElementById('openAddressInMapsBtn');
 
   if (!input || !window.google || !google.maps || !google.maps.places) return;
 
@@ -129,7 +140,7 @@ function initAddressAutocomplete() {
   });
 
   if (mapBtn) {
-    mapBtn.addEventListener('click', () => {
+    bindOnce(mapBtn, 'click', () => {
       const text = input.value.trim();
       if (!text) return;
       const encoded = encodeURIComponent(text);
@@ -137,7 +148,7 @@ function initAddressAutocomplete() {
         `https://www.google.com/maps/search/?api=1&query=${encoded}`,
         '_blank'
       );
-    });
+    }, 'mapBtn');
   }
 }
 
@@ -153,7 +164,7 @@ function initAdditionalTrainers() {
   const addBtn = row.querySelector('.add-row');
   if (!addBtn) return;
 
-  addBtn.addEventListener('click', () => {
+  bindOnce(addBtn, 'click', () => {
     const newRow = document.createElement('div');
     newRow.className = 'checklist-row indent-sub additional-trainer-row';
 
@@ -167,7 +178,7 @@ function initAdditionalTrainers() {
 
     newRow.append(label, input);
     container.appendChild(newRow);
-  });
+  }, 'addTrainer');
 }
 
 /* -------------------------------------
@@ -206,10 +217,10 @@ function initAdditionalPoc() {
     return card;
   }
 
-  addBtn.addEventListener('click', () => {
+  bindOnce(addBtn, 'click', () => {
     const newCard = createAdditionalPocCard();
     grid.appendChild(newCard);
-  });
+  }, 'addPOC');
 }
 
 /* -------------------------------------
@@ -241,7 +252,7 @@ function initSupportTickets() {
   // + button on base card → add ONE new ticket card
   const addBtn = baseCard.querySelector('.add-ticket-btn');
   if (addBtn) {
-    addBtn.addEventListener('click', () => {
+    bindOnce(addBtn, 'click', () => {
       const newCard = createTicketCard(baseCard, {
         openContainer,
         tierTwoContainer,
@@ -250,29 +261,27 @@ function initSupportTickets() {
       });
       openContainer.appendChild(newCard);
       renumberTicketBadges();
-    });
+    }, 'supportAdd');
   }
 
-  // Initial badge numbering
+  // Make sure any existing cloned cards get badge numbers
   renumberTicketBadges();
 }
 
 function createTicketCard(template, ctx) {
-  // cloneNode(true) to copy structure
   const card = template.cloneNode(true);
-  card.removeAttribute('data-base');     // make it a normal card
+  card.removeAttribute('data-base');     // mark as normal card
   card.classList.add('ticket-group-clone');
 
   // Remove + button from cloned cards
   const addBtn = card.querySelector('.add-ticket-btn');
   if (addBtn) addBtn.remove();
 
-  // Clear input/select/textarea values
+  // Clear inputs/selects/textarea values
   card.querySelectorAll('input, select, textarea').forEach((el) => {
     if (el.tagName === 'SELECT') {
-      // default status = Open for new cards
       if (el.classList.contains('ticket-status-select')) {
-        el.value = 'Open';
+        el.value = 'Open'; // new card starts Open
       } else {
         el.selectedIndex = 0;
       }
@@ -309,7 +318,7 @@ function wireTicketStatus(card, ctx) {
   const select = card.querySelector('.ticket-status-select');
   if (!select) return;
 
-  select.addEventListener('change', () => {
+  bindOnce(select, 'change', () => {
     const status = select.value;
     let target = ctx.openContainer;
 
@@ -321,11 +330,9 @@ function wireTicketStatus(card, ctx) {
       target = ctx.closedFeatureContainer || ctx.openContainer;
     }
 
-    // For the base card, we don't physically move it;
-    // it always stays in "Open" and you use it as an entry template.
+    // Base card never moves – it's just the template
     if (ctx.isBase) {
       if (status !== 'Open') {
-        // Reset base card status to Open so it stays there.
         select.value = 'Open';
       }
       return;
@@ -335,7 +342,7 @@ function wireTicketStatus(card, ctx) {
       target.appendChild(card);
       renumberTicketBadges();
     }
-  });
+  }, `status_${Math.random().toString(36).slice(2)}`);
 }
 
 function renumberTicketBadges() {
@@ -368,7 +375,6 @@ function initAutoGrowTicketSummary() {
 }
 
 function hookAutoGrow(el) {
-  // Make sure it's a textarea
   if (!el || el.tagName !== 'TEXTAREA') return;
 
   const resize = () => {
@@ -376,8 +382,7 @@ function hookAutoGrow(el) {
     el.style.height = el.scrollHeight + 'px';
   };
 
-  el.addEventListener('input', resize);
-  // Initial sizing
+  bindOnce(el, 'input', resize, 'summaryGrow');
   resize();
 }
 
@@ -385,8 +390,9 @@ function hookAutoGrow(el) {
    TABLE ADD-ROW BUTTONS
 ------------------------------------- */
 function initTableAddRowButtons() {
-  document.querySelectorAll('.table-footer .add-row').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  const buttons = document.querySelectorAll('.table-footer .add-row');
+  buttons.forEach((btn, idx) => {
+    bindOnce(btn, 'click', () => {
       const table = btn.closest('.table-footer')
         ?.previousElementSibling
         ?.querySelector('table');
@@ -410,7 +416,7 @@ function initTableAddRowButtons() {
       });
 
       tbody.appendChild(clone);
-    });
+    }, `tableAdd_${idx}`);
   });
 }
 
@@ -421,7 +427,7 @@ function initPdfExport() {
   const btn = document.getElementById('savePDF');
   if (!btn || !window.jspdf) return;
 
-  btn.addEventListener('click', () => {
+  bindOnce(btn, 'click', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'pt', 'a4');
 
@@ -430,7 +436,7 @@ function initPdfExport() {
       margin: [20, 20, 20, 20],
       html2canvas: { scale: 0.6 }
     });
-  });
+  }, 'pdfExport');
 }
 
 /* -------------------------------------
