@@ -1140,4 +1140,28 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
+   /* ---------- Ghost text / placeholder styling ---------- */
+
+/* Inputs + textareas: light grey ghost text */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;           /* make sure browsers don't fade it further */
+}
+
+/* Default/ghost option in dropdowns = light grey */
+select option[data-ghost="true"] {
+  color: #9ca3af;
+}
+
+/* Once a real value is chosen, use normal ink color */
+select {
+  color: var(--ink);
+}
+
+/* Some browsers keep using the option color; this helps normalize */
+select:focus option {
+  color: var(--ink);
+}
+
 }
