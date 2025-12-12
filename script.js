@@ -35,7 +35,6 @@
   function clearInputsInContainer(container) {
     if (!container) return;
 
-    // Inputs
     qsa(
       'input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]',
       container
@@ -43,19 +42,15 @@
       i.value = "";
     });
 
-    // Textareas
     qsa("textarea", container).forEach((t) => (t.value = ""));
 
-    // Selects
     qsa("select", container).forEach((s) => {
       const ghost = qs('option[value=""][data-ghost="true"], option[value=""]', s);
       if (ghost) s.value = "";
       else s.selectedIndex = 0;
-
       setSelectPlaceholderState(s);
     });
 
-    // Checkboxes
     qsa('input[type="checkbox"]', container).forEach((c) => (c.checked = false));
   }
 
@@ -89,10 +84,9 @@
 
   /* -------------------------
      Integrated “+” Rows (non-table)
-     - clones the checklist-row.integrated-plus
-     - Special rule:
-       * Additional Trainer rows: clones should be a NORMAL textbox row (no + or – button)
-       * Other integrated-plus rows: clones should have a – remove button
+     - clones checklist-row.integrated-plus
+     - IMPORTANT FIX:
+       Keep .add-row class for styling, add .remove-row for behavior
   ------------------------- */
   function addIntegratedPlusRow(addBtn) {
     const row = addBtn.closest(".checklist-row.integrated-plus");
@@ -100,30 +94,18 @@
 
     const clone = row.cloneNode(true);
 
-    // Detect "Additional Trainer" row
-    const isAdditionalTrainer =
-      row.classList.contains("additional-trainers-row") ||
-      clone.classList.contains("additional-trainers-row");
-
-    // Handle the button in the cloned row
-    const cloneBtn = qs(".add-row", clone) || qs(".remove-row", clone);
+    // Swap + to – on the cloned row button
+    const cloneBtn = qs(".add-row", clone);
     if (cloneBtn) {
-      if (isAdditionalTrainer) {
-        // ✅ Added Additional Trainer rows should be normal textboxes (no button)
-        cloneBtn.remove();
-      } else {
-        // ✅ Other integrated-plus clones get a remove (–) button
-        cloneBtn.textContent = "–";
-        cloneBtn.title = "Remove";
-        cloneBtn.classList.add("remove-row");
-        cloneBtn.classList.remove("add-row");
-      }
+      cloneBtn.textContent = "–";
+      cloneBtn.title = "Remove";
+      // KEEP add-row for orange styling, just add remove-row marker
+      cloneBtn.classList.add("remove-row");
+      // (Do NOT remove .add-row)
     }
 
-    // Clear clone input values
     clearInputsInContainer(clone);
 
-    // Insert after the last integrated-plus row in this section-block
     const parent = row.parentElement;
     if (!parent) return;
 
@@ -139,8 +121,6 @@
 
   /* -------------------------
      Table “+” Row Buttons
-     - expects button inside .table-footer .add-row
-     - clones last tbody row
   ------------------------- */
   function addTableRow(addBtn) {
     const footer = addBtn.closest(".table-footer");
@@ -162,14 +142,11 @@
     clearInputsInContainer(clone);
     tbody.appendChild(clone);
 
-    // Re-apply dropdown placeholder style
     qsa("select", clone).forEach(setSelectPlaceholderState);
   }
 
   /* -------------------------
      Support Tickets
-     - Add ticket card
-     - Move card by status dropdown
   ------------------------- */
   function getTicketContainers() {
     return {
@@ -223,22 +200,16 @@
     const { open, tierTwo, closedResolved, closedFeature } = getTicketContainers();
     if (!ticketGroup) return;
 
-    // Ensure there is only ONE badge at the top
     const existingBadge = qs(".ticket-badge", ticketGroup);
     if (existingBadge) existingBadge.remove();
 
     const badge = buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`);
     ticketGroup.insertAdjacentElement("afterbegin", badge);
 
-    if (status === "Tier Two") {
-      tierTwo?.appendChild(ticketGroup);
-    } else if (status === "Closed - Resolved") {
-      closedResolved?.appendChild(ticketGroup);
-    } else if (status === "Closed – Feature Not Supported") {
-      closedFeature?.appendChild(ticketGroup);
-    } else {
-      open?.appendChild(ticketGroup);
-    }
+    if (status === "Tier Two") tierTwo?.appendChild(ticketGroup);
+    else if (status === "Closed - Resolved") closedResolved?.appendChild(ticketGroup);
+    else if (status === "Closed – Feature Not Supported") closedFeature?.appendChild(ticketGroup);
+    else open?.appendChild(ticketGroup);
   }
 
   function addSupportTicketCard(addBtn) {
@@ -251,13 +222,11 @@
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    // Remove the + button from cloned card (only base card should have +)
     const plus = qs(".add-ticket-btn", clone);
     if (plus) plus.remove();
 
     clearInputsInContainer(clone);
 
-    // Default status to Open if present
     const statusSelect = qs(".ticket-status-select", clone);
     if (statusSelect) {
       statusSelect.value = "Open";
@@ -314,28 +283,24 @@
   ------------------------- */
   function bindDelegatedEvents() {
     document.addEventListener("click", (e) => {
-      // Sidebar nav
       const navBtn = e.target.closest("#sidebar .nav-btn");
       if (navBtn) {
         handleSidebarClick(navBtn);
         return;
       }
 
-      // Reset page
       const resetBtn = e.target.closest(".clear-page-btn");
       if (resetBtn) {
         resetThisPage(resetBtn);
         return;
       }
 
-      // Support tickets add
       const addTicketBtn = e.target.closest(".add-ticket-btn");
       if (addTicketBtn) {
         addSupportTicketCard(addTicketBtn);
         return;
       }
 
-      // Support tickets remove
       const removeTicketBtn = e.target.closest(".remove-ticket-btn");
       if (removeTicketBtn) {
         const group = removeTicketBtn.closest(".ticket-group");
@@ -343,17 +308,17 @@
         return;
       }
 
+      // ✅ Integrated-plus remove FIRST (because it still has .add-row for styling)
+      const removeRowBtn = e.target.closest(".checklist-row.integrated-plus .remove-row");
+      if (removeRowBtn) {
+        removeIntegratedRow(removeRowBtn);
+        return;
+      }
+
       // Integrated-plus add
       const addRowBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
       if (addRowBtn) {
         addIntegratedPlusRow(addRowBtn);
-        return;
-      }
-
-      // Integrated-plus remove
-      const removeRowBtn = e.target.closest(".checklist-row.integrated-plus .remove-row");
-      if (removeRowBtn) {
-        removeIntegratedRow(removeRowBtn);
         return;
       }
 
@@ -368,16 +333,13 @@
     document.addEventListener("change", (e) => {
       const sel = e.target;
 
-      // Placeholder styling for dropdowns
       if (sel && sel.tagName === "SELECT") {
         setSelectPlaceholderState(sel);
       }
 
-      // Ticket status changes → move card
       if (sel && sel.classList && sel.classList.contains("ticket-status-select")) {
         const group = sel.closest(".ticket-group");
-        const status = sel.value;
-        moveTicketGroupByStatus(group, status);
+        moveTicketGroupByStatus(group, sel.value);
       }
     });
 
@@ -389,9 +351,6 @@
     });
   }
 
-  /* -------------------------
-     Init (must run after DOM)
-  ------------------------- */
   function init() {
     bindDelegatedEvents();
     initAllSelectPlaceholders();
