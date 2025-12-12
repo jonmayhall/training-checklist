@@ -1,11 +1,10 @@
 /* ============================================================
-   myKaarma Interactive Training Checklist — script.js
+   myKaarma Interactive Training Checklist — script.js (FULL)
    Fixes:
-   - Sidebar nav Pages 1–11 not showing
-   - Add-row (+) buttons not working
+   - Pages 8–11 not showing (nav selector + section activation)
+   - Add (+) buttons not working (delegation + table/integrated)
    - Reset This Page
-   - Grey ghost text on NON-table dropdowns only
-   - Google Places init safety
+   - Dropdown ghost styling matches CSS: select.is-placeholder
 ============================================================ */
 
 (function () {
@@ -21,26 +20,30 @@
     return !!el.closest("table");
   }
 
-  function setSelectGhostState(selectEl) {
-    // Only applies to selects that have an option marked data-ghost="true"
+  function setSelectPlaceholderState(selectEl) {
     if (!selectEl) return;
+
+    // Only apply to non-table selects (you said no table ghost text)
+    if (isInsideTable(selectEl)) return;
+
     const ghostOption = selectEl.querySelector('option[data-ghost="true"]');
-    if (!ghostOption) return;
+    if (!ghostOption) {
+      // If no ghost option exists, never apply placeholder class
+      selectEl.classList.remove("is-placeholder");
+      return;
+    }
 
-    // If current value is empty or selected option is the ghost option
     const selected = selectEl.options[selectEl.selectedIndex];
-    const isGhost = !selectEl.value || (selected && selected.hasAttribute("data-ghost"));
+    const isGhost =
+      !selectEl.value ||
+      (selected && selected.hasAttribute("data-ghost"));
 
-    if (isGhost) selectEl.classList.add("is-ghost");
-    else selectEl.classList.remove("is-ghost");
+    if (isGhost) selectEl.classList.add("is-placeholder");
+    else selectEl.classList.remove("is-placeholder");
   }
 
-  function initGhostSelects() {
-    // Apply to selects OUTSIDE tables only
-    qsa("select").forEach((sel) => {
-      if (isInsideTable(sel)) return; // your rule: no ghost styling in tables
-      setSelectGhostState(sel);
-    });
+  function initAllSelectPlaceholderStates() {
+    qsa("select").forEach(setSelectPlaceholderState);
   }
 
   function clearField(el) {
@@ -55,10 +58,8 @@
     } else if (tag === "textarea") {
       el.value = "";
     } else if (tag === "select") {
-      // Reset to first option (usually blank/ghost)
       el.selectedIndex = 0;
-      // Apply ghost style if relevant and not in table
-      if (!isInsideTable(el)) setSelectGhostState(el);
+      setSelectPlaceholderState(el);
     }
   }
 
@@ -68,84 +69,92 @@
   }
 
   function getAllPageSections() {
-    // Don’t assume they’re inside <main>
+    // Do NOT assume inside <main> — your CSS/HTML can vary
     return qsa(".page-section");
   }
 
   function showSectionById(targetId) {
-    const sections = getAllPageSections();
     const target = document.getElementById(targetId);
-
     if (!target) {
-      console.warn("Section not found for id:", targetId);
+      console.warn("Sidebar target not found:", targetId);
       return;
     }
 
-    sections.forEach((sec) => sec.classList.remove("active"));
+    getAllPageSections().forEach((sec) => sec.classList.remove("active"));
     target.classList.add("active");
 
-    // scroll to top so it feels consistent
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function setActiveNavButton(btn) {
-    // Works for any sidebar container
-    qsa("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
+  function setActiveNavButton(clickedBtn) {
+    // Clear active on ALL nav buttons in the UI (wherever they live)
+    qsa(".nav-btn").forEach((b) => b.classList.remove("active"));
+    clickedBtn.classList.add("active");
   }
 
   function ensureInitialActivePage() {
     const sections = getAllPageSections();
     if (!sections.length) return;
 
-    const alreadyActive = sections.find((s) => s.classList.contains("active"));
-    if (alreadyActive) return;
+    const existing = sections.find((s) => s.classList.contains("active"));
+    if (existing) return;
 
-    // If a nav button is active, use it
-    const activeBtn = qs("#sidebar .nav-btn.active");
+    const activeBtn = qs(".nav-btn.active");
     if (activeBtn && activeBtn.dataset.target) {
       showSectionById(activeBtn.dataset.target);
       return;
     }
 
-    // Otherwise show the first section
     sections[0].classList.add("active");
   }
 
   /* -----------------------------
-     Add Row (+) for tables
-     - Works via event delegation
+     Add Row: TABLE (+)
+     - Button is typically: .table-footer .add-row
   ----------------------------- */
-  function handleAddRowClick(buttonEl) {
-    const tableContainer = buttonEl.closest(".table-container");
+  function addTableRow(addBtn) {
+    const tableContainer = addBtn.closest(".table-container");
     if (!tableContainer) return;
 
-    const table = qs("table", tableContainer);
-    const tbody = table ? qs("tbody", table) : null;
+    const tbody = qs("table tbody", tableContainer);
     if (!tbody) return;
 
-    // Choose a base row to clone:
-    // Prefer first row in tbody (stable), otherwise last row
     const baseRow = tbody.querySelector("tr") || tbody.lastElementChild;
     if (!baseRow) return;
 
     const clone = baseRow.cloneNode(true);
 
-    // Clear all fields in the cloned row
-    qsa("input, textarea, select", clone).forEach((el) => {
-      clearField(el);
+    // Clear all fields in cloned row
+    qsa("input, textarea, select", clone).forEach((el) => clearField(el));
 
-      // IMPORTANT: No table ghost placeholders — so do NOT add class is-ghost here.
-      // (We also don’t run ghost logic inside tables)
-    });
+    // IMPORTANT: Do NOT add placeholder styling inside tables
+    // (CSS already forces table selects to normal ink)
 
     tbody.appendChild(clone);
   }
 
   /* -----------------------------
-     Support Ticket "Add" (+)
+     Add Row: INTEGRATED PLUS (+)
+     - For rows like phone/additional field lines
+     - Structure: .checklist-row.integrated-plus > input + button.add-row
   ----------------------------- */
-  function handleAddTicketClick(btn) {
+  function addIntegratedPlusRow(addBtn) {
+    const row = addBtn.closest(".checklist-row.integrated-plus");
+    if (!row) return;
+
+    const clone = row.cloneNode(true);
+
+    // Remove any existing values in inputs/selects
+    qsa("input, textarea, select", clone).forEach((el) => clearField(el));
+
+    // Put clone right after current row
+    row.insertAdjacentElement("afterend", clone);
+  }
+
+  /* -----------------------------
+     Support Ticket Add (+)
+  ----------------------------- */
+  function addSupportTicket(addBtn) {
     const openContainer = qs("#openTicketsContainer");
     if (!openContainer) return;
 
@@ -155,12 +164,9 @@
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    // Clear fields inside clone
-    qsa("input, textarea, select", clone).forEach((el) => {
-      clearField(el);
-    });
+    clearContainer(clone);
 
-    // Default status to Open if that select exists
+    // Default status to Open
     const statusSel = qs(".ticket-status-select", clone);
     if (statusSel) statusSel.value = "Open";
 
@@ -169,36 +175,26 @@
 
   /* -----------------------------
      Reset This Page
-     - Clears inputs/selects/textareas
-     - Removes extra cloned rows in tables
-     - Keeps first row in each table
-     - Resets support tickets containers to base only
   ----------------------------- */
   function resetPage(sectionEl) {
     if (!sectionEl) return;
 
-    // 1) Clear all standard inputs
+    // Clear inputs/selects/textareas
     clearContainer(sectionEl);
 
-    // 2) Reset each table body to only its first row
+    // Reset tables to first row only
     qsa("table.training-table tbody", sectionEl).forEach((tbody) => {
       const rows = qsa("tr", tbody);
-      if (rows.length <= 1) return;
-
-      // Keep first row, remove the rest
-      rows.slice(1).forEach((r) => r.remove());
-
-      // Clear first row too
-      clearContainer(rows[0]);
+      if (rows.length > 1) rows.slice(1).forEach((r) => r.remove());
+      if (rows[0]) clearContainer(rows[0]);
     });
 
-    // 3) Support tickets: keep only base group in Open, clear other status containers
+    // Reset support tickets containers
     const open = qs("#openTicketsContainer", sectionEl);
     if (open) {
       qsa(".ticket-group", open).forEach((group) => {
         if (group.getAttribute("data-base") === "true") {
           clearContainer(group);
-          // restore default status
           const statusSel = qs(".ticket-status-select", group);
           if (statusSel) statusSel.value = "Open";
         } else {
@@ -212,72 +208,63 @@
       if (c) c.innerHTML = "";
     });
 
-    // 4) Re-apply ghost styling on non-table selects
-    initGhostSelects();
+    // Re-apply dropdown placeholder styling
+    initAllSelectPlaceholderStates();
   }
 
   /* -----------------------------
-     Event Delegation (KEY FIX)
-     - Makes nav + add buttons work always
+     Delegated Events (KEY FIX)
   ----------------------------- */
   function bindDelegatedEvents() {
     document.addEventListener("click", (e) => {
-      const navBtn = e.target.closest("#sidebar .nav-btn");
-      if (navBtn) {
-        const targetId = navBtn.dataset.target;
-
-        if (!targetId) {
-          console.warn("Nav button missing data-target:", navBtn);
-          return;
-        }
-
+      // NAV
+      const navBtn = e.target.closest(".nav-btn");
+      if (navBtn && navBtn.dataset && navBtn.dataset.target) {
         setActiveNavButton(navBtn);
-        showSectionById(targetId);
+        showSectionById(navBtn.dataset.target);
         return;
       }
 
-      const addRowBtn = e.target.closest("button.add-row");
-      if (addRowBtn) {
-        handleAddRowClick(addRowBtn);
-        return;
-      }
-
-      const addTicketBtn = e.target.closest("button.add-ticket-btn");
-      if (addTicketBtn) {
-        handleAddTicketClick(addTicketBtn);
-        return;
-      }
-
-      const resetBtn = e.target.closest("button.clear-page-btn");
+      // RESET THIS PAGE
+      const resetBtn = e.target.closest(".clear-page-btn");
       if (resetBtn) {
         const section = resetBtn.closest(".page-section");
         resetPage(section);
         return;
       }
+
+      // SUPPORT TICKETS ADD (+)
+      const addTicketBtn = e.target.closest(".add-ticket-btn");
+      if (addTicketBtn) {
+        addSupportTicket(addTicketBtn);
+        return;
+      }
+
+      // ADD ROW (+) — handle both table-footer and integrated-plus
+      const addRowBtn = e.target.closest("button.add-row");
+      if (addRowBtn) {
+        if (addRowBtn.closest(".table-footer")) addTableRow(addRowBtn);
+        else if (addRowBtn.closest(".checklist-row.integrated-plus")) addIntegratedPlusRow(addRowBtn);
+        else if (addRowBtn.closest(".table-container")) addTableRow(addRowBtn); // fallback
+        return;
+      }
     });
 
-    // Dropdown ghost styling: delegated change
+    // SELECT placeholder styling
     document.addEventListener("change", (e) => {
       const sel = e.target.closest("select");
       if (!sel) return;
-      if (isInsideTable(sel)) return; // no table ghost behavior
-      setSelectGhostState(sel);
+      setSelectPlaceholderState(sel);
     });
   }
 
   /* -----------------------------
-     Google Places Autocomplete
-     (safe/no-crash if missing)
+     Google Places callback safety
   ----------------------------- */
   window.initAddressAutocomplete = function () {
     try {
       if (!window.google || !google.maps || !google.maps.places) return;
-
-      // If you have specific address inputs, target them here by id/class
-      // Example:
-      // const addr = document.getElementById("dealershipAddress");
-      // if (addr) new google.maps.places.Autocomplete(addr);
-
+      // Hook up specific inputs here if needed
     } catch (err) {
       console.warn("initAddressAutocomplete error:", err);
     }
@@ -288,10 +275,7 @@
   ----------------------------- */
   document.addEventListener("DOMContentLoaded", () => {
     bindDelegatedEvents();
-    initGhostSelects();
+    initAllSelectPlaceholderStates();
     ensureInitialActivePage();
-
-    // IMPORTANT: If your CSS hides all .page-section by default and only shows .active,
-    // this guarantees at least one page shows.
   });
 })();
