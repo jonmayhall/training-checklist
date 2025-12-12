@@ -786,7 +786,25 @@ main {
   font-size:13px;
   text-align:center;
 }
+/* Training Checklist – layout for Name cell: checkbox + pill input */
+#training-checklist .training-table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
+/* Checkbox: fixed size */
+#training-checklist .training-table td:first-child input[type="checkbox"] {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+/* Textbox: fills remaining space inside the Name cell */
+#training-checklist .training-table td:first-child input[type="text"] {
+  flex: 1 1 auto;
+  width: auto;   /* override width:100% from generic rule */
+  min-width: 0;  /* allow it to shrink to fit */
+}
 /* Alternating rows */
 .training-table tr:nth-child(odd) { background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
