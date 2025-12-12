@@ -746,14 +746,18 @@ main {
   color:#fff;
 }
 
-/* Sticky first column for Training Checklist tables */
+/* Sticky first column – no fixed width globally */
 .training-table th:first-child,
 .training-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 200px;
-  min-width: 200px;
+}
+/* Training Checklist: make the Name column wider */
+#training-checklist .training-table th:first-child,
+#training-checklist .training-table td:first-child {
+  width: 260px;      /* adjust if you want even more */
+  min-width: 260px;
 }
 .training-table thead th:first-child {
   text-align:center;
