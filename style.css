@@ -57,9 +57,10 @@ select.is-placeholder {
   color: #9ca3af;
 }
 
-/* Also support explicit ghost options if used */
-select option[data-ghost="true"] {
-  color: #9ca3af;
+/* Table dropdowns: always use normal text color (no ghost styling) */
+.training-table select,
+.training-table select.is-placeholder {
+  color: var(--ink) !important;
 }
 
 /* Table dropdowns: always use normal text color (no ghost styling) */
