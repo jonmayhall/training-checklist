@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -18,8 +18,10 @@
   <script>
     (function () {
       const ts = Date.now();
+
       const css = document.getElementById("dynamicCSS");
       if (css) css.href = `style.css?v=${ts}`;
+
       const js = document.getElementById("dynamicJS");
       if (js) js.src = `script.js?v=${ts}`;
     })();
@@ -95,7 +97,7 @@
         </p>
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Lead & Additional Trainers -->
+        <!-- LEAD TRAINER + ADDITIONAL TRAINER -->
         <div class="section-block">
           <h2>Lead &amp; Additional Trainers</h2>
 
@@ -103,12 +105,15 @@
             <label>Lead Trainer</label>
             <select>
               <option value="" data-ghost="true">Select lead trainer</option>
+
               <optgroup label="1">
                 <option>Christopher Eskew</option>
                 <option>Brian Button</option>
                 <option>Dana Barry</option>
               </optgroup>
+
               <option disabled>──────────</option>
+
               <optgroup label="2">
                 <option>Adam Jeffords</option>
                 <option>Alec Parker</option>
@@ -118,7 +123,9 @@
                 <option>Lauren Ramos</option>
                 <option>Miles Krasic</option>
               </optgroup>
+
               <option disabled>──────────</option>
+
               <optgroup label="3">
                 <option>Anthony Carbone</option>
                 <option>Clyde Chapman</option>
@@ -131,18 +138,16 @@
             </select>
           </div>
 
-          <!-- Additional Trainer (indented with + Button) -->
           <div class="checklist-row additional-trainers-row integrated-plus indent-sub">
             <label style="flex: 0 0 36%;">Additional Trainer</label>
             <input type="text" placeholder="Enter additional trainer name">
             <button class="add-row" type="button">+</button>
           </div>
 
-          <!-- JS-Appended Additional Trainers -->
           <div id="additionalTrainersContainer"></div>
         </div>
 
-        <!-- Deployment & CEM -->
+        <!-- DEPLOYMENT MANAGER + CEM -->
         <div class="section-block">
           <h2>Deployment &amp; Custom Engagement Manager</h2>
 
@@ -157,7 +162,6 @@
           </div>
         </div>
 
-        <!-- Notes -->
         <div class="section-block notes-block">
           <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
           <textarea rows="6" placeholder="High-level notes about trainers, deployment, and CEM"></textarea>
@@ -176,7 +180,7 @@
 
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Dealership Details -->
+        <!-- DEALERSHIP DETAILS -->
         <div class="section-block">
           <h2>Dealership Details</h2>
 
@@ -226,12 +230,11 @@
                 id="openAddressInMapsBtn"
                 class="small-map-btn"
               >
-                MAP
+                Map
               </button>
             </div>
           </div>
 
-          <!-- Map Preview -->
           <div class="map-wrapper" id="mapPreviewWrapper">
             <iframe
               id="dealershipMapFrame"
@@ -241,12 +244,12 @@
               referrerpolicy="no-referrer-when-downgrade"
             ></iframe>
             <p class="map-helper-text">
-              Select an address above to update this map. Click “MAP” to open directions in Google Maps.
+              Select an address above to update this map. Click “Map” to open directions in Google Maps.
             </p>
           </div>
         </div>
 
-        <!-- Primary Contacts -->
+        <!-- PRIMARY CONTACTS -->
         <div class="section-block">
           <h2>Primary Contacts</h2>
 
@@ -281,7 +284,7 @@
               <div class="checklist-row indent-sub">
                 <label>Email</label>
                 <input type="email" placeholder="Enter email address">
-              </div }
+              </div>
             </div>
 
             <!-- GENERAL MANAGER -->
@@ -316,7 +319,7 @@
               </div>
             </div>
 
-            <!-- ADDITIONAL POC TEMPLATE (with + button) -->
+            <!-- ADDITIONAL POC TEMPLATE -->
             <div class="mini-card contact-card additional-poc-card">
               <div class="checklist-row integrated-plus">
                 <label>Additional POC</label>
@@ -353,7 +356,6 @@
           </div>
         </div>
 
-        <!-- Notes – Dealership Info -->
         <div class="section-block notes-block">
           <h2>Notes &mdash; Dealership Info</h2>
           <textarea placeholder="Additional notes about dealership structure, history, or expectations"></textarea>
@@ -553,7 +555,7 @@
 
           <div class="checklist-row">
             <label>Manufacturer parts catalog link (resource)</label>
-            <input type="text" placeholder="Paste link to the manufacturer parts catalog">
+            <input type="text" placeholder="Paste link to manufacturer parts catalog">
           </div>
         </div>
 
@@ -722,7 +724,7 @@
           <div class="checklist-row">
             <label>Is Mobile Check-in (MCI) configured and enabled?</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>In Progress</option>
@@ -732,7 +734,7 @@
           <div class="checklist-row">
             <label>Are the correct MPI forms and opcodes tied to MCI workflows?</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>Partial</option>
@@ -775,7 +777,7 @@
         </p>
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Service Manager Review -->
+        <!-- SERVICE MANAGER REVIEW -->
         <div class="section-block">
           <h2>Service Manager Review</h2>
 
@@ -844,7 +846,7 @@
           <div class="checklist-row indent-sub">
             <label>Who is involved in the MCI process?</label>
             <select>
-              <option value="" data-ghost="true">Select roles</option>
+              <option value="" data-ghost="true">Select MCI users</option>
               <option>Advisors</option>
               <option>Porters</option>
               <option>Advisors &amp; Porters</option>
@@ -858,7 +860,7 @@
           <textarea placeholder="Notes from the Service Manager review and expectations"></textarea>
         </div>
 
-        <!-- Service Manager Alignment -->
+        <!-- SERVICE MANAGER ALIGNMENT -->
         <div class="section-block">
           <h2>Service Manager Alignment</h2>
 
@@ -886,7 +888,7 @@
           <div class="checklist-row indent-sub">
             <label>myKaarma departure time each day (5:00 pm)</label>
             <select>
-              <option value="" data-ghost="true">Select departure time</option>
+              <option value="" data-ghost="true">Select departure plan</option>
               <option>Yes, 5:00 pm</option>
               <option>Different time</option>
               <option>No agreement</option>
@@ -899,7 +901,7 @@
               plus a Tuesday visit to Parts.
             </label>
             <select>
-              <option value="" data-ghost="true">Select agreement status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>Partially</option>
               <option>No</option>
@@ -912,7 +914,7 @@
           <textarea placeholder="Notes about ongoing alignment with the Service Manager"></textarea>
         </div>
 
-        <!-- Devices & Access -->
+        <!-- DEVICES & ACCESS -->
         <div class="section-block">
           <h2>Devices &amp; Access</h2>
 
@@ -963,7 +965,7 @@
         </div>
       </section>
 
-<!-- ========================================================= -->
+      <!-- ========================================================= -->
       <!-- PAGE 5: TRAINING CHECKLIST                               -->
       <!-- ========================================================= -->
       <section id="training-checklist" class="page-section">
@@ -974,7 +976,7 @@
 
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Technician – Checklist -->
+        <!-- TECHNICIAN – CHECKLIST -->
         <div class="section">
           <div class="section-header">Technician – Checklist</div>
           <div class="table-container">
@@ -993,10 +995,10 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter technician skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1004,7 +1006,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1013,7 +1015,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1021,8 +1023,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1033,10 +1035,10 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter technician skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1044,7 +1046,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1053,7 +1055,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1061,8 +1063,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1085,7 +1087,7 @@
           <textarea placeholder="Notes about technician training and adoption"></textarea>
         </div>
 
-        <!-- Service Advisor – Checklist -->
+        <!-- SERVICE ADVISOR – CHECKLIST -->
         <div class="section">
           <div class="section-header">Service Advisor – Checklist</div>
           <div class="table-container">
@@ -1104,10 +1106,10 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter advisor skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1115,7 +1117,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1124,7 +1126,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1132,8 +1134,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1144,10 +1146,10 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter advisor skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1155,7 +1157,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1164,7 +1166,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1172,8 +1174,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1196,7 +1198,7 @@
           <textarea placeholder="Notes about advisor training and adoption"></textarea>
         </div>
 
-        <!-- Parts Representative – Checklist -->
+        <!-- PARTS REPRESENTATIVE – CHECKLIST -->
         <div class="section">
           <div class="section-header">Parts Representative – Checklist</div>
           <div class="table-container">
@@ -1215,10 +1217,10 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter parts skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1226,7 +1228,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select parts training status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>Not Trained</option>
@@ -1234,15 +1236,15 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select pricing/quotes status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>Not Trained</option>
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1253,10 +1255,10 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter parts skill or workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1264,7 +1266,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select parts training status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>Not Trained</option>
@@ -1272,15 +1274,15 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select pricing/quotes status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>Not Trained</option>
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1303,7 +1305,7 @@
           <textarea placeholder="Notes about parts training and adoption"></textarea>
         </div>
 
-        <!-- Shop Foreman / Shop Dispatcher – Checklist -->
+        <!-- SHOP FOREMAN / SHOP DISPATCHER – CHECKLIST -->
         <div class="section">
           <div class="section-header">Shop Foreman / Shop Dispatcher – Checklist</div>
           <div class="table-container">
@@ -1320,13 +1322,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Starts with ONE row by design -->
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter shop foreman / dispatcher workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1334,7 +1335,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1343,7 +1344,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1351,8 +1352,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1375,7 +1376,7 @@
           <textarea placeholder="Notes about shop foreman and dispatcher training"></textarea>
         </div>
 
-        <!-- BDC / Scheduler – Checklist -->
+        <!-- BDC / SCHEDULER – CHECKLIST -->
         <div class="section">
           <div class="section-header">BDC / Scheduler – Checklist</div>
           <div class="table-container">
@@ -1394,17 +1395,17 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" value="Logged In" readonly></td>
+                    <td><input type="text" value="Logged In"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                       </select>
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1413,7 +1414,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1421,8 +1422,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1433,17 +1434,17 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter BDC / scheduler workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                       </select>
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1452,7 +1453,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1460,8 +1461,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1484,7 +1485,7 @@
           <textarea placeholder="Notes about BDC and scheduler training"></textarea>
         </div>
 
-        <!-- PU&D Driver – Checklist -->
+        <!-- PU&D DRIVER – CHECKLIST -->
         <div class="section">
           <div class="section-header">PU&amp;D Driver – Checklist</div>
           <div class="table-container">
@@ -1503,10 +1504,10 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter PU&amp;D driver workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1514,7 +1515,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1523,7 +1524,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1531,8 +1532,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1543,10 +1544,10 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter PU&amp;D driver workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1554,7 +1555,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1563,7 +1564,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1571,8 +1572,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1595,7 +1596,7 @@
           <textarea placeholder="Notes about PU&amp;D driver training"></textarea>
         </div>
 
-        <!-- PU&D Dispatcher – Checklist -->
+        <!-- PU&D DISPATCHER – CHECKLIST -->
         <div class="section">
           <div class="section-header">PU&amp;D Dispatcher – Checklist</div>
           <div class="table-container">
@@ -1614,10 +1615,10 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter PU&amp;D dispatcher workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1625,7 +1626,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1634,7 +1635,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1642,8 +1643,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1654,10 +1655,10 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter PU&amp;D dispatcher workflow item"></td>
+                    <td><input type="text"></td>
                     <td>
                       <select>
-                        <option value="">Select DMS ID status</option>
+                        <option></option>
                         <option>Yes</option>
                         <option>No</option>
                         <option>N/A</option>
@@ -1665,7 +1666,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select web training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1674,7 +1675,7 @@
                     </td>
                     <td>
                       <select>
-                        <option value="">Select mobile training status</option>
+                        <option></option>
                         <option>Web &amp; Mobile</option>
                         <option>Web</option>
                         <option>Mobile</option>
@@ -1682,8 +1683,8 @@
                       </select>
                     </td>
                     <td>
-                      <select class="user-acceptance-select">
-                        <option value="">Select user acceptance</option>
+                      <select>
+                        <option></option>
                         <option>Fully Adopted</option>
                         <option>Mostly Adopted</option>
                         <option>Neutral / Mixed</option>
@@ -1717,7 +1718,6 @@
         </p>
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Opcodes -->
         <div class="section">
           <div class="section-header">Opcodes</div>
           <div class="table-container">
@@ -1742,13 +1742,13 @@
                 <tbody>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter opcode"></td>
-                    <td><input type="text" placeholder="Enter duration (e.g., 1.0 hr)"></td>
-                    <td><input type="text" placeholder="Enter labor price"></td>
-                    <td><input type="text" placeholder="Enter flat rate hours"></td>
-                    <td><input type="text" placeholder="Enter parts price"></td>
-                    <td><input type="text" placeholder="Enter pay type"></td>
-                    <td><input type="text" placeholder="Enter order number"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
                     <td><input type="checkbox"></td>
                     <td><input type="checkbox"></td>
                     <td><input type="checkbox"></td>
@@ -1756,13 +1756,13 @@
                   </tr>
                   <tr>
                     <td><input type="checkbox"></td>
-                    <td><input type="text" placeholder="Enter opcode"></td>
-                    <td><input type="text" placeholder="Enter duration (e.g., 1.0 hr)"></td>
-                    <td><input type="text" placeholder="Enter labor price"></td>
-                    <td><input type="text" placeholder="Enter flat rate hours"></td>
-                    <td><input type="text" placeholder="Enter parts price"></td>
-                    <td><input type="text" placeholder="Enter pay type"></td>
-                    <td><input type="text" placeholder="Enter order number"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
                     <td><input type="checkbox"></td>
                     <td><input type="checkbox"></td>
                     <td><input type="checkbox"></td>
@@ -1794,15 +1794,13 @@
 
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Open Support Tickets -->
+        <!-- OPEN SUPPORT TICKETS -->
         <div class="section-block ticket-section">
           <h2>Open Support Tickets</h2>
 
           <div id="openTicketsContainer">
-            <!-- Base card (NO badge, integrated +, never moves) -->
             <div class="ticket-group" data-base="true">
               <div class="ticket-group-inner">
-                <!-- Support Ticket Number + integrated plus -->
                 <div class="ticket-row ticket-number-row">
                   <label>Support Ticket Number</label>
                   <div class="ticket-number-wrap">
@@ -1821,11 +1819,10 @@
                   </div>
                 </div>
 
-                <!-- Status -->
                 <div class="ticket-row">
                   <label>Status</label>
                   <select class="ticket-status-select">
-                    <option value="Open" data-ghost="true">Open (base ticket)</option>
+                    <option value="Open" selected>Open</option>
                     <option value="Tier Two">Tier Two</option>
                     <option value="Closed - Resolved">Closed - Resolved</option>
                     <option value="Closed – Feature Not Supported">
@@ -1834,13 +1831,11 @@
                   </select>
                 </div>
 
-                <!-- Zendesk Link -->
                 <div class="ticket-row">
                   <label>Zendesk Link</label>
                   <input type="text" placeholder="Paste full Zendesk ticket URL">
                 </div>
 
-                <!-- Short Summary -->
                 <div class="ticket-row ticket-summary-row">
                   <label>Short Summary of the Issue</label>
                   <textarea
@@ -1854,7 +1849,7 @@
           </div>
         </div>
 
-        <!-- Tier Two / Escalated -->
+        <!-- Tier Two -->
         <div class="section-block ticket-section">
           <h2>Tier Two / Escalated Tickets</h2>
           <div id="tierTwoTicketsContainer"></div>
@@ -1873,258 +1868,938 @@
         </div>
       </section>
 
-    <!-- ========================================================= -->
-<!-- PAGE 8: DMS Integration                                   -->
-<!-- ========================================================= -->
-<section id="dms-integration" class="page-section">
-  <h1>DMS Integration</h1>
-  <p class="page-subtitle">
-    Reference how each DMS shares data with myKaarma so you can quickly explain timing,
-    behavior, and any gaps.
-  </p>
+      <!-- ========================================================= -->
+      <!-- PAGE 8: DMS Integration                                   -->
+      <!-- ========================================================= -->
+      <section id="dms-integration" class="page-section">
+        <h1>DMS Integration</h1>
+        <p class="page-subtitle">
+          Reference how each DMS shares data with myKaarma so you can quickly explain timing, behavior, and any gaps.
+        </p>
+        <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+        <div class="section-block dms-overview-block">
+          <h2>DMS Integration Matrix</h2>
 
-  <div class="section-block dms-overview-block">
-    <h2>DMS Integration Matrix</h2>
+          <div class="dms-legend">
+            <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled pull</div>
+            <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button driven</div>
+            <div><span class="dms-dot dms-dot-withro"></span>With RO only</div>
+            <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+            <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
+            <div><span class="dms-dot dms-dot-limited"></span>Limited / Partial</div>
+            <div><span class="dms-dot dms-dot-display"></span>Display only (no writeback)</div>
+          </div>
 
-    <!-- Legend -->
-    <div class="dms-legend">
-      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled pull</div>
-      <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button driven</div>
-      <div><span class="dms-dot dms-dot-withro"></span>With RO only</div>
-      <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
-      <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
-      <div><span class="dms-dot dms-dot-limited"></span>Limited / Partial</div>
-      <div><span class="dms-dot dms-dot-display"></span>Display only (no writeback)</div>
-    </div>
+          <div class="dms-grid">
+            <!-- CDK -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">CDK</span>
+                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+              </div>
 
-    <!-- Main DMS Grid -->
-    <div class="dms-grid">
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 minutes</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
 
-      <!-- CDK -->
-      <div class="dms-card dms-card-push">
-        <div class="dms-card-header">
-          <div class="dms-name">CDK Drive</div>
-          <span class="dms-chip dms-chip-push">Push + Pull</span>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>With appointment</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 minutes</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 minutes</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>From ServiceCart</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Check-in workflow</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 minutes</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>When adding</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 minutes</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Nightly sync</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Nightly sync</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Reynolds -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">Reynolds</span>
+                <span class="dms-chip dms-chip-push">Push-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Scheduled work</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>With appointment</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>From myKaarma</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Dealertrack / Arkona -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">Dealertrack / Arkona</span>
+                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>RO opened</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>With appointments</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 2 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>ServiceCart</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Check-in</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoice</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 15 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Nightly</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Dealerbuilt / Lightyear -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">Dealerbuilt / Lightyear</span>
+                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Appointments only</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 2 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Check-in</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not available</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not available</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not available</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Nightly sync</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Automate -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">Automate</span>
+                <span class="dms-chip dms-chip-push">Push-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not used</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not used</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not used</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Automatic</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- PBS -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">PBS</span>
+                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>With appointment</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 2 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>ServiceCart</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Check-in</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not integrated</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Nightly</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Tekion -->
+            <div class="dms-card">
+              <div class="dms-card-header">
+                <span class="dms-name">Tekion</span>
+                <span class="dms-chip dms-chip-pull">Pull-Based</span>
+              </div>
+
+              <ul class="dms-list">
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Customer Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Pull</span>
+                    <span class="dms-tag dms-tag-withro">With RO</span>
+                  </div>
+                  <p>Arrives with RO</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Vehicle Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Appointments only</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Appointment Push</span>
+                    <span class="dms-tag dms-tag-ondemand">On-Demand</span>
+                  </div>
+                  <p>Requested</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Pull</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>Every 5 min</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Writeback</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">RO Creation</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Invoices</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Parts Pricing</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Special Order</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>N/A</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">F&amp;I History</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Opcodes</span>
+                    <span class="dms-tag dms-tag-planned">Planned</span>
+                  </div>
+                  <p>Planned</p>
+                </li>
+
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical RO</span>
+                    <span class="dms-tag dms-tag-auto">Auto</span>
+                  </div>
+                  <p>One-time</p>
+                </li>
+                <li>
+                  <div class="dms-row-top">
+                    <span class="dms-field">Historical Customer</span>
+                    <span class="dms-tag dms-tag-na">N/A</span>
+                  </div>
+                  <p>Not supported</p>
+                </li>
+              </ul>
+            </div>
+
+          </div>
         </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Customers &amp; Vehicles</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Nightly sync of customers and vehicles. New records appear automatically in myKaarma.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">RO Creation / Updates</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Open ROs and status changes are updated on a scheduled pull throughout the day.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">MPI / Line Item Writeback</span>
-              <span class="dms-tag dms-tag-ondemand"></span>
-            </div>
-            <p>Approved lines can be written back to CDK from ServiceCart using the integration button.</p>
-          </li>
-        </ul>
-      </div>
+      </section>
 
-      <!-- Reynolds -->
-      <div class="dms-card dms-card-push">
-        <div class="dms-card-header">
-          <div class="dms-name">Reynolds &amp; Reynolds</div>
-          <span class="dms-chip dms-chip-push">Push + Pull</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Customers &amp; Vehicles</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Customer and vehicle data sync automatically via scheduled updates.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">RO Header Data</span>
-              <span class="dms-tag dms-tag-withro"></span>
-            </div>
-            <p>RO details update when the RO is active inside Reynolds.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Line Items / Pricing</span>
-              <span class="dms-tag dms-tag-limited"></span>
-            </div>
-            <p>Some pricing/line data syncs, while other detail fields remain limited or view-only.</p>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Dealertrack -->
-      <div class="dms-card dms-card-push">
-        <div class="dms-card-header">
-          <div class="dms-name">Dealertrack</div>
-          <span class="dms-chip dms-chip-push">Push + Pull</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Appointments</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>The scheduler reads Dealertrack appointments and syncs availability.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">ROs / Status</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Open ROs update throughout the day for communication and MPI workflows.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Writeback</span>
-              <span class="dms-tag dms-tag-ondemand"></span>
-            </div>
-            <p>ServiceCart-approved work can be written back through the integration.</p>
-          </li>
-        </ul>
-      </div>
-
-      <!-- DealerBuilt -->
-      <div class="dms-card dms-card-pull">
-        <div class="dms-card-header">
-          <div class="dms-name">DealerBuilt</div>
-          <span class="dms-chip dms-chip-pull">Pull Focused</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Customer / Vehicle Data</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Automatic pull of customer and vehicle info for communication and RO lookup.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">RO Data</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Open RO details sync for messaging, media, and payment workflows.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Writeback</span>
-              <span class="dms-tag dms-tag-na"></span>
-            </div>
-            <p>No writeback; ServiceCart is presentation only.</p>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Automate -->
-      <div class="dms-card dms-card-pull">
-        <div class="dms-card-header">
-          <div class="dms-name">Automate</div>
-          <span class="dms-chip dms-chip-pull">Pull Focused</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Customers / Vehicles</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Automatic pull for customer and vehicle data updates.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Appointments</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Scheduler syncs appointments directly from Automate.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">RO Writeback</span>
-              <span class="dms-tag dms-tag-na"></span>
-            </div>
-            <p>No writeback—line edits must be done in the DMS.</p>
-          </li>
-        </ul>
-      </div>
-
-      <!-- PBS (Restored before Tekion) -->
-      <div class="dms-card dms-card-pull">
-        <div class="dms-card-header">
-          <div class="dms-name">PBS</div>
-          <span class="dms-chip dms-chip-pull">Pull Focused</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Customers &amp; Vehicles</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Nightly automatic pull keeps customer and vehicle data updated.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">RO Header &amp; Status</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>ROs sync for messaging, approvals, and payments.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Writeback</span>
-              <span class="dms-tag dms-tag-na"></span>
-            </div>
-            <p>No writeback; edits must be completed inside PBS.</p>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Tekion -->
-      <div class="dms-card dms-card-push">
-        <div class="dms-card-header">
-          <div class="dms-name">Tekion</div>
-          <span class="dms-chip dms-chip-push">Modern API</span>
-        </div>
-        <ul class="dms-list">
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Real-time APIs</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Real-time updates for customers, vehicles, and repair orders.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Appointments</span>
-              <span class="dms-tag dms-tag-auto"></span>
-            </div>
-            <p>Scheduler syncs Tekion appointments with minimal delay.</p>
-          </li>
-          <li>
-            <div class="dms-row-top">
-              <span class="dms-field">Line Item Handling</span>
-              <span class="dms-tag dms-tag-limited"></span>
-            </div>
-            <p>Some line-level operations are display-only depending on integration scope.</p>
-          </li>
-        </ul>
-      </div>
-
-    </div><!-- end dms-grid -->
-
-  </div><!-- end section-block -->
-</section>
-
-<!-- ========================================================= -->
+      <!-- ========================================================= -->
       <!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
       <!-- ========================================================= -->
       <section id="post-training" class="page-section">
@@ -2134,14 +2809,13 @@
         </p>
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Training Completion by Role -->
         <div class="section-block">
           <h2>Training Completion by Role</h2>
 
           <div class="checklist-row">
             <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
             <select>
-              <option value="" data-ghost="true">Select training status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes — Fully Trained</option>
               <option>Partially Trained</option>
               <option>No</option>
@@ -2152,7 +2826,7 @@
           <div class="checklist-row">
             <label>Are all Technicians trained and using myKaarma from start to finish?</label>
             <select>
-              <option value="" data-ghost="true">Select training status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes — Fully Trained</option>
               <option>Partially Trained</option>
               <option>No</option>
@@ -2163,7 +2837,7 @@
           <div class="checklist-row">
             <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
             <select>
-              <option value="" data-ghost="true">Select training status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes — Fully Trained</option>
               <option>Partially Trained</option>
               <option>No</option>
@@ -2177,7 +2851,6 @@
           <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
         </div>
 
-        <!-- Final Sign-Off -->
         <div class="section-block">
           <h2>Final Sign-Off</h2>
 
@@ -2210,14 +2883,13 @@
           <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
         </div>
 
-        <!-- DMS & Data Validation -->
         <div class="section-block">
           <h2>DMS &amp; Data Validation</h2>
 
           <div class="checklist-row">
             <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
             <select>
-              <option value="" data-ghost="true">Select data status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>Inconsistent</option>
               <option>No</option>
@@ -2228,7 +2900,7 @@
           <div class="checklist-row">
             <label>Opcodes and pricing align between myKaarma and the DMS.</label>
             <select>
-              <option value="" data-ghost="true">Select alignment status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes — Correct</option>
               <option>Some Issues</option>
               <option>Major Issues</option>
@@ -2237,7 +2909,6 @@
           </div>
         </div>
 
-        <!-- Automations -->
         <div class="section-block orange-outline-card">
           <h2>Automations</h2>
 
@@ -2248,7 +2919,7 @@
           <div class="checklist-row indent-sub">
             <label>Appointment Reminders</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2258,7 +2929,7 @@
           <div class="checklist-row indent-sub">
             <label>Welcome Texts</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2268,7 +2939,7 @@
           <div class="checklist-row indent-sub">
             <label>MPIs</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2278,7 +2949,7 @@
           <div class="checklist-row indent-sub">
             <label>Videos</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2288,7 +2959,7 @@
           <div class="checklist-row indent-sub">
             <label>Payment Requests</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2298,7 +2969,7 @@
           <div class="checklist-row indent-sub">
             <label>Follow-up</label>
             <select>
-              <option value="" data-ghost="true">Select status</option>
+              <option value="" data-ghost="true">Select answer</option>
               <option>Yes</option>
               <option>No</option>
               <option>N/A</option>
@@ -2323,7 +2994,6 @@
 
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <!-- Resource Links -->
         <div class="section-block">
           <h2>Resource Links</h2>
 
@@ -2373,7 +3043,7 @@
           <div class="checklist-row">
             <label>Overall training outcome</label>
             <select>
-              <option value="" data-ghost="true">Select overall outcome</option>
+              <option value="" data-ghost="true">Select outcome</option>
               <option>Exceeded Expectations</option>
               <option>Met Expectations</option>
               <option>Partially Met Expectations</option>
@@ -2436,7 +3106,7 @@
     </main>
   </div>
 
-  <!-- LOAD GOOGLE MAPS JS API -->
+  <!-- GOOGLE MAPS JS API (initAddressAutocomplete is defined in script.js) -->
   <script
     async
     defer
@@ -2444,4 +3114,3 @@
   </script>
 
 </body>
-</html>
