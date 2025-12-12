@@ -1,281 +1,412 @@
-/* ============================================================
-   myKaarma Interactive Training Checklist — script.js (FULL)
-   Fixes:
-   - Pages 8–11 not showing (nav selector + section activation)
-   - Add (+) buttons not working (delegation + table/integrated)
-   - Reset This Page
-   - Dropdown ghost styling matches CSS: select.is-placeholder
-============================================================ */
+/* =========================================================
+   myKaarma Interactive Training Checklist — FULL script.js
+   - Sidebar nav (Pages 1–11)
+   - Add row buttons (tables + integrated-plus rows)
+   - Support tickets add/move by status
+   - Page reset buttons
+   - Dropdown ghost styling (non-table only)
+   ========================================================= */
 
 (function () {
   "use strict";
 
-  /* -----------------------------
+  /* -------------------------
      Helpers
-  ----------------------------- */
+  ------------------------- */
   const qs = (sel, root = document) => root.querySelector(sel);
   const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  function isInsideTable(el) {
-    return !!el.closest("table");
+  function isInTrainingTable(el) {
+    return !!el.closest(".training-table");
   }
 
-  function setSelectPlaceholderState(selectEl) {
-    if (!selectEl) return;
+  function setSelectPlaceholderState(select) {
+    // Only apply placeholder styling for non-table dropdowns
+    if (isInTrainingTable(select)) return;
 
-    // Only apply to non-table selects (you said no table ghost text)
-    if (isInsideTable(selectEl)) return;
-
-    const ghostOption = selectEl.querySelector('option[data-ghost="true"]');
-    if (!ghostOption) {
-      // If no ghost option exists, never apply placeholder class
-      selectEl.classList.remove("is-placeholder");
-      return;
-    }
-
-    const selected = selectEl.options[selectEl.selectedIndex];
-    const isGhost =
-      !selectEl.value ||
-      (selected && selected.hasAttribute("data-ghost"));
-
-    if (isGhost) selectEl.classList.add("is-placeholder");
-    else selectEl.classList.remove("is-placeholder");
+    const isPlaceholder = !select.value || select.value === "";
+    select.classList.toggle("is-placeholder", isPlaceholder);
   }
 
-  function initAllSelectPlaceholderStates() {
+  function initAllSelectPlaceholders() {
     qsa("select").forEach(setSelectPlaceholderState);
   }
 
-  function clearField(el) {
-    if (!el) return;
-
-    const tag = el.tagName.toLowerCase();
-    const type = (el.getAttribute("type") || "").toLowerCase();
-
-    if (tag === "input") {
-      if (type === "checkbox" || type === "radio") el.checked = false;
-      else el.value = "";
-    } else if (tag === "textarea") {
-      el.value = "";
-    } else if (tag === "select") {
-      el.selectedIndex = 0;
-      setSelectPlaceholderState(el);
-    }
-  }
-
-  function clearContainer(container) {
+  function clearInputsInContainer(container) {
     if (!container) return;
-    qsa("input, textarea, select", container).forEach(clearField);
+
+    // Inputs
+    qsa('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]', container)
+      .forEach((i) => {
+        // Keep hidden/system inputs untouched if any
+        if (i.type === "date") i.value = "";
+        else i.value = "";
+      });
+
+    // Textareas
+    qsa("textarea", container).forEach((t) => (t.value = ""));
+
+    // Selects
+    qsa("select", container).forEach((s) => {
+      // If you have a ghost option with value="", this will select it
+      const ghost = qs('option[value=""][data-ghost="true"], option[value=""]', s);
+      if (ghost) s.value = "";
+      else s.selectedIndex = 0;
+
+      setSelectPlaceholderState(s);
+    });
+
+    // Checkboxes
+    qsa('input[type="checkbox"]', container).forEach((c) => (c.checked = false));
   }
 
-  function getAllPageSections() {
-    // Do NOT assume inside <main> — your CSS/HTML can vary
-    return qsa(".page-section");
+  function ensureOnlyOneActiveSection(targetSection) {
+    qsa("main .page-section").forEach((sec) => sec.classList.remove("active"));
+    if (targetSection) targetSection.classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function showSectionById(targetId) {
-    const target = document.getElementById(targetId);
-    if (!target) {
+  function ensureOnlyOneActiveNav(btn) {
+    qsa("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+  }
+
+  /* -------------------------
+     Sidebar Nav (Pages 1–11)
+  ------------------------- */
+  function handleSidebarClick(btn) {
+    const targetId = btn?.dataset?.target;
+    if (!targetId) return;
+
+    const targetSection = document.getElementById(targetId);
+    if (!targetSection) {
       console.warn("Sidebar target not found:", targetId);
       return;
     }
 
-    getAllPageSections().forEach((sec) => sec.classList.remove("active"));
-    target.classList.add("active");
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    ensureOnlyOneActiveNav(btn);
+    ensureOnlyOneActiveSection(targetSection);
   }
 
-  function setActiveNavButton(clickedBtn) {
-    // Clear active on ALL nav buttons in the UI (wherever they live)
-    qsa(".nav-btn").forEach((b) => b.classList.remove("active"));
-    clickedBtn.classList.add("active");
-  }
-
-  function ensureInitialActivePage() {
-    const sections = getAllPageSections();
-    if (!sections.length) return;
-
-    const existing = sections.find((s) => s.classList.contains("active"));
-    if (existing) return;
-
-    const activeBtn = qs(".nav-btn.active");
-    if (activeBtn && activeBtn.dataset.target) {
-      showSectionById(activeBtn.dataset.target);
-      return;
-    }
-
-    sections[0].classList.add("active");
-  }
-
-  /* -----------------------------
-     Add Row: TABLE (+)
-     - Button is typically: .table-footer .add-row
-  ----------------------------- */
-  function addTableRow(addBtn) {
-    const tableContainer = addBtn.closest(".table-container");
-    if (!tableContainer) return;
-
-    const tbody = qs("table tbody", tableContainer);
-    if (!tbody) return;
-
-    const baseRow = tbody.querySelector("tr") || tbody.lastElementChild;
-    if (!baseRow) return;
-
-    const clone = baseRow.cloneNode(true);
-
-    // Clear all fields in cloned row
-    qsa("input, textarea, select", clone).forEach((el) => clearField(el));
-
-    // IMPORTANT: Do NOT add placeholder styling inside tables
-    // (CSS already forces table selects to normal ink)
-
-    tbody.appendChild(clone);
-  }
-
-  /* -----------------------------
-     Add Row: INTEGRATED PLUS (+)
-     - For rows like phone/additional field lines
-     - Structure: .checklist-row.integrated-plus > input + button.add-row
-  ----------------------------- */
+  /* -------------------------
+     Integrated “+” Rows (non-table)
+     - clones the checklist-row.integrated-plus
+  ------------------------- */
   function addIntegratedPlusRow(addBtn) {
     const row = addBtn.closest(".checklist-row.integrated-plus");
     if (!row) return;
 
     const clone = row.cloneNode(true);
 
-    // Remove any existing values in inputs/selects
-    qsa("input, textarea, select", clone).forEach((el) => clearField(el));
+    // In the cloned row, swap + button to a remove button
+    const cloneBtn = qs(".add-row", clone);
+    if (cloneBtn) {
+      cloneBtn.textContent = "–";
+      cloneBtn.title = "Remove";
+      cloneBtn.classList.add("remove-row");
+      cloneBtn.classList.remove("add-row");
+    }
 
-    // Put clone right after current row
-    row.insertAdjacentElement("afterend", clone);
+    // Clear clone input values
+    clearInputsInContainer(clone);
+
+    // Insert after the original row (or after last integrated row in that block)
+    const parent = row.parentElement;
+    if (!parent) return;
+
+    // Insert after the last integrated-plus row in this section-block
+    const siblings = qsa(".checklist-row.integrated-plus", parent);
+    const last = siblings[siblings.length - 1] || row;
+    last.insertAdjacentElement("afterend", clone);
   }
 
-  /* -----------------------------
-     Support Ticket Add (+)
-  ----------------------------- */
-  function addSupportTicket(addBtn) {
-    const openContainer = qs("#openTicketsContainer");
-    if (!openContainer) return;
+  function removeIntegratedRow(removeBtn) {
+    const row = removeBtn.closest(".checklist-row.integrated-plus");
+    if (row) row.remove();
+  }
 
-    const baseGroup = openContainer.querySelector(".ticket-group[data-base='true']");
+  /* -------------------------
+     Table “+” Row Buttons
+     - expects button inside .table-footer .add-row
+     - clones last tbody row
+  ------------------------- */
+  function addTableRow(addBtn) {
+    const footer = addBtn.closest(".table-footer");
+    if (!footer) return;
+
+    // Look upward for the nearest table-container, then find tbody
+    const tableContainer = footer.closest(".table-container");
+    if (!tableContainer) return;
+
+    const table = qs("table.training-table", tableContainer);
+    const tbody = table ? qs("tbody", table) : null;
+    if (!tbody) return;
+
+    const rows = qsa("tr", tbody);
+    if (rows.length === 0) return;
+
+    const lastRow = rows[rows.length - 1];
+    const clone = lastRow.cloneNode(true);
+
+    // Clear inputs/selects/checkboxes inside cloned row
+    clearInputsInContainer(clone);
+
+    tbody.appendChild(clone);
+
+    // Re-apply dropdown placeholder style
+    qsa("select", clone).forEach(setSelectPlaceholderState);
+  }
+
+  /* -------------------------
+     Support Tickets
+     - Add ticket card
+     - Move card by status dropdown
+  ------------------------- */
+  function getTicketContainers() {
+    return {
+      open: qs("#openTicketsContainer"),
+      tierTwo: qs("#tierTwoTicketsContainer"),
+      closedResolved: qs("#closedResolvedTicketsContainer"),
+      closedFeature: qs("#closedFeatureTicketsContainer"),
+    };
+  }
+
+  function buildTicketBadge(text) {
+    const badge = document.createElement("div");
+    badge.className = "ticket-badge";
+    badge.textContent = text;
+    return badge;
+  }
+
+  function addRemoveTicketBtn(ticketGroup) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "remove-ticket-btn";
+    btn.title = "Remove this ticket";
+    btn.textContent = "Remove";
+    btn.style.marginTop = "10px";
+    btn.style.padding = "6px 10px";
+    btn.style.borderRadius = "999px";
+    btn.style.border = "1px solid #bbb";
+    btn.style.background = "#f7f7f7";
+    btn.style.cursor = "pointer";
+    btn.style.fontSize = "11px";
+    btn.style.textTransform = "uppercase";
+    btn.style.letterSpacing = "0.08em";
+    ticketGroup.appendChild(btn);
+  }
+
+  function ticketBadgeTextForStatus(status) {
+    switch (status) {
+      case "Tier Two":
+        return "Tier Two / Escalated";
+      case "Closed - Resolved":
+        return "Closed - Resolved";
+      case "Closed – Feature Not Supported":
+        return "Closed – Feature Not Supported";
+      case "Open":
+      default:
+        return "Open";
+    }
+  }
+
+  function moveTicketGroupByStatus(ticketGroup, status) {
+    const { open, tierTwo, closedResolved, closedFeature } = getTicketContainers();
+    if (!ticketGroup) return;
+
+    // Ensure there is only ONE badge at the top
+    const existingBadge = qs(".ticket-badge", ticketGroup);
+    if (existingBadge) existingBadge.remove();
+
+    const badge = buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`);
+    ticketGroup.insertAdjacentElement("afterbegin", badge);
+
+    // Move to correct container
+    if (status === "Tier Two") {
+      tierTwo?.appendChild(ticketGroup);
+    } else if (status === "Closed - Resolved") {
+      closedResolved?.appendChild(ticketGroup);
+    } else if (status === "Closed – Feature Not Supported") {
+      closedFeature?.appendChild(ticketGroup);
+    } else {
+      open?.appendChild(ticketGroup);
+    }
+  }
+
+  function addSupportTicketCard(addBtn) {
+    const baseGroup = addBtn.closest(".ticket-group");
     if (!baseGroup) return;
 
+    const containers = getTicketContainers();
+    if (!containers.open) return;
+
+    // Clone base group
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    clearContainer(clone);
+    // Remove the + button from cloned card (only base card should have +)
+    const plus = qs(".add-ticket-btn", clone);
+    if (plus) plus.remove();
 
-    // Default status to Open
-    const statusSel = qs(".ticket-status-select", clone);
-    if (statusSel) statusSel.value = "Open";
+    // Clear inputs
+    clearInputsInContainer(clone);
 
-    openContainer.appendChild(clone);
+    // Default status to Open if present
+    const statusSelect = qs(".ticket-status-select", clone);
+    if (statusSelect) {
+      statusSelect.value = "Open";
+      setSelectPlaceholderState(statusSelect);
+    }
+
+    // Add badge + remove button
+    const badge = buildTicketBadge("Status: Open");
+    clone.insertAdjacentElement("afterbegin", badge);
+    addRemoveTicketBtn(clone);
+
+    // Append to open container
+    containers.open.appendChild(clone);
+
+    // Auto-size summary textarea
+    const summary = qs(".ticket-summary-input", clone);
+    if (summary) autosizeTextarea(summary);
   }
 
-  /* -----------------------------
-     Reset This Page
-  ----------------------------- */
-  function resetPage(sectionEl) {
-    if (!sectionEl) return;
+  function autosizeTextarea(textarea) {
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = Math.max(textarea.scrollHeight, 34) + "px";
+  }
 
-    // Clear inputs/selects/textareas
-    clearContainer(sectionEl);
+  /* -------------------------
+     Reset Page Button
+  ------------------------- */
+  function resetThisPage(btn) {
+    const section = btn.closest(".page-section");
+    if (!section) return;
 
-    // Reset tables to first row only
-    qsa("table.training-table tbody", sectionEl).forEach((tbody) => {
-      const rows = qsa("tr", tbody);
-      if (rows.length > 1) rows.slice(1).forEach((r) => r.remove());
-      if (rows[0]) clearContainer(rows[0]);
-    });
+    // Clear the section inputs
+    clearInputsInContainer(section);
 
-    // Reset support tickets containers
-    const open = qs("#openTicketsContainer", sectionEl);
-    if (open) {
-      qsa(".ticket-group", open).forEach((group) => {
-        if (group.getAttribute("data-base") === "true") {
-          clearContainer(group);
-          const statusSel = qs(".ticket-status-select", group);
-          if (statusSel) statusSel.value = "Open";
+    // Special: support tickets — remove all extra cards and clear base card fields
+    if (section.id === "support-tickets") {
+      // Remove all ticket-group except base group
+      const allGroups = qsa(".ticket-group", section);
+      allGroups.forEach((g) => {
+        if (g.dataset.base === "true") {
+          clearInputsInContainer(g);
+          // reset base status to Open if present
+          const s = qs(".ticket-status-select", g);
+          if (s) s.value = "Open";
         } else {
-          group.remove();
+          g.remove();
         }
       });
+
+      // Clear other containers
+      qs("#tierTwoTicketsContainer")?.replaceChildren();
+      qs("#closedResolvedTicketsContainer")?.replaceChildren();
+      qs("#closedFeatureTicketsContainer")?.replaceChildren();
     }
 
-    ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach((id) => {
-      const c = qs(`#${id}`, sectionEl);
-      if (c) c.innerHTML = "";
-    });
-
-    // Re-apply dropdown placeholder styling
-    initAllSelectPlaceholderStates();
+    // Re-init placeholder states
+    initAllSelectPlaceholders();
   }
 
-  /* -----------------------------
-     Delegated Events (KEY FIX)
-  ----------------------------- */
+  /* -------------------------
+     Global Click + Change Delegation
+  ------------------------- */
   function bindDelegatedEvents() {
     document.addEventListener("click", (e) => {
-      // NAV
-      const navBtn = e.target.closest(".nav-btn");
-      if (navBtn && navBtn.dataset && navBtn.dataset.target) {
-        setActiveNavButton(navBtn);
-        showSectionById(navBtn.dataset.target);
+      // Sidebar nav
+      const navBtn = e.target.closest("#sidebar .nav-btn");
+      if (navBtn) {
+        handleSidebarClick(navBtn);
         return;
       }
 
-      // RESET THIS PAGE
+      // Reset page
       const resetBtn = e.target.closest(".clear-page-btn");
       if (resetBtn) {
-        const section = resetBtn.closest(".page-section");
-        resetPage(section);
+        resetThisPage(resetBtn);
         return;
       }
 
-      // SUPPORT TICKETS ADD (+)
+      // Support tickets add
       const addTicketBtn = e.target.closest(".add-ticket-btn");
       if (addTicketBtn) {
-        addSupportTicket(addTicketBtn);
+        addSupportTicketCard(addTicketBtn);
         return;
       }
 
-      // ADD ROW (+) — handle both table-footer and integrated-plus
-      const addRowBtn = e.target.closest("button.add-row");
+      // Support tickets remove
+      const removeTicketBtn = e.target.closest(".remove-ticket-btn");
+      if (removeTicketBtn) {
+        const group = removeTicketBtn.closest(".ticket-group");
+        if (group) group.remove();
+        return;
+      }
+
+      // Integrated-plus add
+      const addRowBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
       if (addRowBtn) {
-        if (addRowBtn.closest(".table-footer")) addTableRow(addRowBtn);
-        else if (addRowBtn.closest(".checklist-row.integrated-plus")) addIntegratedPlusRow(addRowBtn);
-        else if (addRowBtn.closest(".table-container")) addTableRow(addRowBtn); // fallback
+        addIntegratedPlusRow(addRowBtn);
+        return;
+      }
+
+      // Integrated-plus remove
+      const removeRowBtn = e.target.closest(".checklist-row.integrated-plus .remove-row");
+      if (removeRowBtn) {
+        removeIntegratedRow(removeRowBtn);
+        return;
+      }
+
+      // Table add-row
+      const tableAddBtn = e.target.closest(".table-footer .add-row");
+      if (tableAddBtn) {
+        addTableRow(tableAddBtn);
         return;
       }
     });
 
-    // SELECT placeholder styling
     document.addEventListener("change", (e) => {
-      const sel = e.target.closest("select");
-      if (!sel) return;
-      setSelectPlaceholderState(sel);
+      const sel = e.target;
+
+      // Placeholder styling for dropdowns
+      if (sel && sel.tagName === "SELECT") {
+        setSelectPlaceholderState(sel);
+      }
+
+      // Ticket status changes → move card
+      if (sel && sel.classList && sel.classList.contains("ticket-status-select")) {
+        const group = sel.closest(".ticket-group");
+        const status = sel.value;
+        moveTicketGroupByStatus(group, status);
+      }
+    });
+
+    document.addEventListener("input", (e) => {
+      const ta = e.target;
+      if (ta && ta.classList && ta.classList.contains("ticket-summary-input")) {
+        autosizeTextarea(ta);
+      }
     });
   }
 
-  /* -----------------------------
-     Google Places callback safety
-  ----------------------------- */
-  window.initAddressAutocomplete = function () {
-    try {
-      if (!window.google || !google.maps || !google.maps.places) return;
-      // Hook up specific inputs here if needed
-    } catch (err) {
-      console.warn("initAddressAutocomplete error:", err);
-    }
-  };
-
-  /* -----------------------------
-     Init
-  ----------------------------- */
-  document.addEventListener("DOMContentLoaded", () => {
+  /* -------------------------
+     Init (must run after DOM)
+  ------------------------- */
+  function init() {
     bindDelegatedEvents();
-    initAllSelectPlaceholderStates();
-    ensureInitialActivePage();
-  });
+    initAllSelectPlaceholders();
+
+    // Ensure one section is visible on load (first .nav-btn.active or first section)
+    const activeBtn = qs("#sidebar .nav-btn.active") || qs("#sidebar .nav-btn");
+    if (activeBtn) handleSidebarClick(activeBtn);
+
+    // Autosize any existing ticket summary textareas
+    qsa(".ticket-summary-input").forEach(autosizeTextarea);
+  }
+
+  // IMPORTANT: ensure JS runs AFTER HTML exists
+  document.addEventListener("DOMContentLoaded", init);
 })();
