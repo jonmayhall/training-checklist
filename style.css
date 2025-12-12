@@ -716,12 +716,6 @@ main {
   background:#fff;
   padding-bottom:4px;
 }
-/* Make the NAME column wider on all Training Checklist tables */
-#training-checklist .training-table th:first-child,
-#training-checklist .training-table td:first-child {
-  min-width: 200px;  /* adjust to taste: 180–240px */
-  width: 200px;
-}
 /* Table */
 .training-table {
   border-collapse:collapse;
@@ -758,8 +752,8 @@ main {
   position: sticky;
   left: 0;
   z-index: 4;
-  width: 60px;
-  min-width: 60px;
+  width: 200px;
+  min-width: 200px;
 }
 .training-table thead th:first-child {
   text-align:center;
