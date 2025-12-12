@@ -98,31 +98,19 @@
 
     const clone = row.cloneNode(true);
 
-    // In the cloned row, swap + button to a remove button
-    const cloneBtn = qs(".add-row", clone);
-    if (cloneBtn) {
-      cloneBtn.textContent = "–";
-      cloneBtn.title = "Remove";
-      cloneBtn.classList.add("remove-row");
-      cloneBtn.classList.remove("add-row");
-    }
+     // In the cloned row, REMOVE any add/remove buttons (no + or – on added rows)
+    clone.querySelectorAll(".add-row, .remove-row").forEach(btn => btn.remove());
 
     // Clear clone input values
     clearInputsInContainer(clone);
 
-    // Insert after the original row (or after last integrated row in that block)
+    // Insert after the last integrated-plus row in this section-block
     const parent = row.parentElement;
     if (!parent) return;
 
-    // Insert after the last integrated-plus row in this section-block
     const siblings = qsa(".checklist-row.integrated-plus", parent);
     const last = siblings[siblings.length - 1] || row;
     last.insertAdjacentElement("afterend", clone);
-  }
-
-  function removeIntegratedRow(removeBtn) {
-    const row = removeBtn.closest(".checklist-row.integrated-plus");
-    if (row) row.remove();
   }
 
   /* -------------------------
@@ -353,12 +341,10 @@
         return;
       }
 
-      // Integrated-plus remove
-      const removeRowBtn = e.target.closest(".checklist-row.integrated-plus .remove-row");
-      if (removeRowBtn) {
-        removeIntegratedRow(removeRowBtn);
-        return;
-      }
+       function removeIntegratedRow(removeBtn) {
+    const row = removeBtn.closest(".checklist-row.integrated-plus");
+    if (row) row.remove();
+  }
 
       // Table add-row
       const tableAddBtn = e.target.closest(".table-footer .add-row");
