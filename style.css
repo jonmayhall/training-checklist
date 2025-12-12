@@ -716,7 +716,12 @@ main {
   background:#fff;
   padding-bottom:4px;
 }
-
+/* Make the NAME column wider on all Training Checklist tables */
+#training-checklist .training-table th:first-child,
+#training-checklist .training-table td:first-child {
+  min-width: 200px;  /* adjust to taste: 180–240px */
+  width: 200px;
+}
 /* Table */
 .training-table {
   border-collapse:collapse;
@@ -1163,11 +1168,4 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
-   /* Make the NAME column wider on all Training Checklist tables */
-#training-checklist .training-table th:first-child,
-#training-checklist .training-table td:first-child {
-  min-width: 200px;  /* adjust to taste: 180–240px */
-  width: 200px;
-}
-
 }
