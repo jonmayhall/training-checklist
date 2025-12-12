@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -1873,38 +1873,256 @@
         </div>
       </section>
 
-      <!-- ========================================================= -->
-      <!-- PAGE 8: DMS Integration                                   -->
-      <!-- ========================================================= -->
-      <section id="dms-integration" class="page-section">
-        <h1>DMS Integration</h1>
-        <p class="page-subtitle">
-          Reference how each DMS shares data with myKaarma so you can quickly explain timing, behavior, and any gaps.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+    <!-- ========================================================= -->
+<!-- PAGE 8: DMS Integration                                   -->
+<!-- ========================================================= -->
+<section id="dms-integration" class="page-section">
+  <h1>DMS Integration</h1>
+  <p class="page-subtitle">
+    Reference how each DMS shares data with myKaarma so you can quickly explain timing,
+    behavior, and any gaps.
+  </p>
 
-        <div class="section-block dms-overview-block">
-          <h2>DMS Integration Matrix</h2>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-          <!-- Legend -->
-          <div class="dms-legend">
-            <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled pull</div>
-            <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button driven</div>
-            <div><span class="dms-dot dms-dot-withro"></span>With RO only</div>
-            <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
-            <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
-            <div><span class="dms-dot dms-dot-limited"></span>Limited / Partial</div>
-            <div><span class="dms-dot dms-dot-display"></span>Display only (no writeback)</div>
-          </div>
+  <div class="section-block dms-overview-block">
+    <h2>DMS Integration Matrix</h2>
 
-          <!-- Main DMS grid (unchanged content) -->
-          <div class="dms-grid">
-            <!-- CDK, Reynolds, Dealertrack, Dealerbuilt, Automate, PBS, Tekion cards -->
-            <!-- (Content left as in your original; no inputs/selects here so no ghost text needed) -->
-            <!-- ... existing DMS cards markup stays exactly the same ... -->
-          </div>
+    <!-- Legend -->
+    <div class="dms-legend">
+      <div><span class="dms-dot dms-dot-auto"></span>Automatic / Scheduled pull</div>
+      <div><span class="dms-dot dms-dot-ondemand"></span>On-Demand / Button driven</div>
+      <div><span class="dms-dot dms-dot-withro"></span>With RO only</div>
+      <div><span class="dms-dot dms-dot-planned"></span>Planned / Future</div>
+      <div><span class="dms-dot dms-dot-na"></span>Not Available / N/A</div>
+      <div><span class="dms-dot dms-dot-limited"></span>Limited / Partial</div>
+      <div><span class="dms-dot dms-dot-display"></span>Display only (no writeback)</div>
+    </div>
+
+    <!-- Main DMS Grid -->
+    <div class="dms-grid">
+
+      <!-- CDK -->
+      <div class="dms-card dms-card-push">
+        <div class="dms-card-header">
+          <div class="dms-name">CDK Drive</div>
+          <span class="dms-chip dms-chip-push">Push + Pull</span>
         </div>
-      </section>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Customers &amp; Vehicles</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Nightly sync of customers and vehicles. New records appear automatically in myKaarma.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">RO Creation / Updates</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Open ROs and status changes are updated on a scheduled pull throughout the day.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">MPI / Line Item Writeback</span>
+              <span class="dms-tag dms-tag-ondemand"></span>
+            </div>
+            <p>Approved lines can be written back to CDK from ServiceCart using the integration button.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Reynolds -->
+      <div class="dms-card dms-card-push">
+        <div class="dms-card-header">
+          <div class="dms-name">Reynolds &amp; Reynolds</div>
+          <span class="dms-chip dms-chip-push">Push + Pull</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Customers &amp; Vehicles</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Customer and vehicle data sync automatically via scheduled updates.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">RO Header Data</span>
+              <span class="dms-tag dms-tag-withro"></span>
+            </div>
+            <p>RO details update when the RO is active inside Reynolds.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Line Items / Pricing</span>
+              <span class="dms-tag dms-tag-limited"></span>
+            </div>
+            <p>Some pricing/line data syncs, while other detail fields remain limited or view-only.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Dealertrack -->
+      <div class="dms-card dms-card-push">
+        <div class="dms-card-header">
+          <div class="dms-name">Dealertrack</div>
+          <span class="dms-chip dms-chip-push">Push + Pull</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Appointments</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>The scheduler reads Dealertrack appointments and syncs availability.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">ROs / Status</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Open ROs update throughout the day for communication and MPI workflows.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Writeback</span>
+              <span class="dms-tag dms-tag-ondemand"></span>
+            </div>
+            <p>ServiceCart-approved work can be written back through the integration.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- DealerBuilt -->
+      <div class="dms-card dms-card-pull">
+        <div class="dms-card-header">
+          <div class="dms-name">DealerBuilt</div>
+          <span class="dms-chip dms-chip-pull">Pull Focused</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Customer / Vehicle Data</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Automatic pull of customer and vehicle info for communication and RO lookup.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">RO Data</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Open RO details sync for messaging, media, and payment workflows.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Writeback</span>
+              <span class="dms-tag dms-tag-na"></span>
+            </div>
+            <p>No writeback; ServiceCart is presentation only.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Automate -->
+      <div class="dms-card dms-card-pull">
+        <div class="dms-card-header">
+          <div class="dms-name">Automate</div>
+          <span class="dms-chip dms-chip-pull">Pull Focused</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Customers / Vehicles</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Automatic pull for customer and vehicle data updates.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Appointments</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Scheduler syncs appointments directly from Automate.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">RO Writeback</span>
+              <span class="dms-tag dms-tag-na"></span>
+            </div>
+            <p>No writeback—line edits must be done in the DMS.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- PBS (Restored before Tekion) -->
+      <div class="dms-card dms-card-pull">
+        <div class="dms-card-header">
+          <div class="dms-name">PBS</div>
+          <span class="dms-chip dms-chip-pull">Pull Focused</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Customers &amp; Vehicles</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Nightly automatic pull keeps customer and vehicle data updated.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">RO Header &amp; Status</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>ROs sync for messaging, approvals, and payments.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Writeback</span>
+              <span class="dms-tag dms-tag-na"></span>
+            </div>
+            <p>No writeback; edits must be completed inside PBS.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tekion -->
+      <div class="dms-card dms-card-push">
+        <div class="dms-card-header">
+          <div class="dms-name">Tekion</div>
+          <span class="dms-chip dms-chip-push">Modern API</span>
+        </div>
+        <ul class="dms-list">
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Real-time APIs</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Real-time updates for customers, vehicles, and repair orders.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Appointments</span>
+              <span class="dms-tag dms-tag-auto"></span>
+            </div>
+            <p>Scheduler syncs Tekion appointments with minimal delay.</p>
+          </li>
+          <li>
+            <div class="dms-row-top">
+              <span class="dms-field">Line Item Handling</span>
+              <span class="dms-tag dms-tag-limited"></span>
+            </div>
+            <p>Some line-level operations are display-only depending on integration scope.</p>
+          </li>
+        </ul>
+      </div>
+
+    </div><!-- end dms-grid -->
+
+  </div><!-- end section-block -->
+</section>
 
 <!-- ========================================================= -->
       <!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
