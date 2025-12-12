@@ -1,619 +1,368 @@
-/* ==========================================================
-   myKaarma Interactive Training Checklist – FULL JS (Guarded)
-   ========================================================== */
+/* =========================================================
+   myKaarma Interactive Training Checklist — script.js
+   Updates included:
+   - Sidebar nav now supports Pages 1–11 (any .page-section with matching id)
+   - Prevents “double add” issues by using event delegation (single listener)
+   - Add-row cloning for tables (+)
+   - Support Tickets: add new ticket group (+), move tickets by Status
+   - Reset This Page clears inputs/selects/textareas and removes added rows/groups
+   - Ghost/grey dropdown behavior ONLY for selects that have data-ghost options
+     (and it skips all selects inside tables to honor “no ghost text on tables”)
+   - Google Places address autocomplete hook (safe/no-op if not available)
+========================================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNavigation();
-  initClearPageButtons();
-  initClearAllButton();
-  initDealershipNameBinding();
-  initAdditionalTrainers();
-  initAdditionalPoc();
-  initSupportTickets();
-  initTableAddRowButtons();
-  initPdfExport();
-  initDmsCards();
-  initAutoGrowTicketSummary();
-  initAcceptanceColorCoding();   // Training Checklist color-coding
-  initDropdownGhosts();          // Grey "Select an option…" for non-table dropdowns
-});
+(() => {
+  "use strict";
 
-/* -------------------------------------
-   SMALL HELPER – BIND EVENT ONCE
-------------------------------------- */
-function bindOnce(el, event, handler, key) {
-  if (!el) return;
-  const flag = `__bound_${key}`;
-  if (el[flag]) return;          // already wired, do nothing
-  el.addEventListener(event, handler);
-  el[flag] = true;
-}
+  /* -----------------------------
+     Helpers
+  ----------------------------- */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-/* -------------------------------------
-   DROPDOWN GHOST TEXT ("Select an option…")
-   - Applies ONLY to selects NOT inside tables
-------------------------------------- */
-function initDropdownGhosts() {
-  const selects = document.querySelectorAll('select:not(table select)');
-  selects.forEach(setupGhostSelect);
-}
+  const isInTable = (el) => !!el.closest("table");
 
-function setupGhostSelect(select) {
-  // Initialize state
-  updateSelectPlaceholderState(select);
+  const clearControl = (el) => {
+    if (!el) return;
 
-  // Update on change
-  select.addEventListener('change', () => {
-    updateSelectPlaceholderState(select);
-  });
-}
+    const tag = el.tagName?.toLowerCase();
 
-/**
- * Ensures .is-placeholder is applied ONLY when:
- * - The select is NOT inside a table
- * - Its value is empty (placeholder "Select an option…")
- */
-function updateSelectPlaceholderState(select) {
-  if (!select) return;
-
-  // Never apply ghost styling to selects inside any table
-  if (select.closest('table')) {
-    select.classList.remove('is-placeholder');
-    return;
-  }
-
-  const val = select.value;
-  if (val === '' || val == null) {
-    select.classList.add('is-placeholder');
-  } else {
-    select.classList.remove('is-placeholder');
-  }
-}
-
-/* -------------------------------------
-   NAVIGATION
-------------------------------------- */
-function initNavigation() {
-  const navButtons = document.querySelectorAll('.nav-btn');
-  const sections = document.querySelectorAll('.page-section');
-
-  if (!navButtons.length || !sections.length) return;
-
-  navButtons.forEach((btn) => {
-    bindOnce(btn, 'click', () => {
-      const targetId = btn.dataset.target;
-
-      sections.forEach((sec) =>
-        sec.classList.toggle('active', sec.id === targetId)
-      );
-
-      navButtons.forEach((b) =>
-        b.classList.toggle('active', b === btn)
-      );
-    }, 'navClick');
-  });
-}
-
-/* -------------------------------------
-   CLEAR PAGE / CLEAR ALL
-------------------------------------- */
-function clearSection(section) {
-  if (!section) return;
-  const inputs = section.querySelectorAll('input, select, textarea');
-
-  inputs.forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      el.selectedIndex = 0;
-
-      // Reset ghost state for non-table dropdowns
-      if (!el.closest('table')) {
-        updateSelectPlaceholderState(el);
-      }
-    } else if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = false;
-    } else {
-      el.value = '';
-    }
-  });
-}
-
-function initClearPageButtons() {
-  document.querySelectorAll('.clear-page-btn').forEach((btn, idx) => {
-    bindOnce(btn, 'click', () => {
-      const section = btn.closest('.page-section');
-      clearSection(section);
-      if (section && section.id === 'dealership-info') {
-        updateDealershipNameDisplay();
-      }
-    }, `clearPage_${idx}`);
-  });
-}
-
-function initClearAllButton() {
-  const btn = document.getElementById('clearAllBtn');
-  if (!btn) return;
-
-  bindOnce(btn, 'click', () => {
-    document.querySelectorAll('.page-section').forEach(clearSection);
-    updateDealershipNameDisplay();
-  }, 'clearAll');
-}
-
-/* -------------------------------------
-   DEALERSHIP NAME TOPBAR SYNC
-------------------------------------- */
-function initDealershipNameBinding() {
-  const input = document.getElementById('dealershipNameInput');
-  if (!input) return;
-
-  bindOnce(input, 'input', updateDealershipNameDisplay, 'dnameInput');
-  updateDealershipNameDisplay();
-}
-
-function updateDealershipNameDisplay() {
-  const txt = document.getElementById('dealershipNameInput');
-  const display = document.getElementById('dealershipNameDisplay');
-  if (!display) return;
-
-  display.textContent = txt && txt.value.trim()
-    ? txt.value.trim()
-    : 'Dealership Name';
-}
-
-/* -------------------------------------
-   GOOGLE MAPS AUTOCOMPLETE (DEALERSHIP ADDRESS)
-   (Maps script should call: callback=initAddressAutocomplete)
-------------------------------------- */
-function initAddressAutocomplete() {
-  const input    = document.getElementById('dealershipAddressInput');
-  const mapFrame = document.getElementById('dealershipMapFrame');
-  const mapBtn   = document.getElementById('openAddressInMapsBtn');
-
-  if (!input || !window.google || !google.maps || !google.maps.places) return;
-
-  const autocomplete = new google.maps.places.Autocomplete(input, {
-    types: ['geocode']
-  });
-
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
-    const address = place && place.formatted_address
-      ? place.formatted_address
-      : input.value.trim();
-
-    if (!address || !mapFrame) return;
-
-    const encoded = encodeURIComponent(address);
-    mapFrame.src = `https://www.google.com/maps?q=${encoded}&output=embed`;
-  });
-
-  if (mapBtn) {
-    bindOnce(mapBtn, 'click', () => {
-      const text = input.value.trim();
-      if (!text) return;
-      const encoded = encodeURIComponent(text);
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${encoded}`,
-        '_blank'
-      );
-    }, 'mapBtn');
-  }
-}
-
-/* -------------------------------------
-   ADDITIONAL TRAINERS (PAGE 1)
-------------------------------------- */
-function initAdditionalTrainers() {
-  const row = document.querySelector('.additional-trainers-row');
-  const container = document.getElementById('additionalTrainersContainer');
-
-  if (!row || !container) return;
-
-  const addBtn = row.querySelector('.add-row');
-  if (!addBtn) return;
-
-  bindOnce(addBtn, 'click', () => {
-    const newRow = document.createElement('div');
-    newRow.className = 'checklist-row indent-sub additional-trainer-row';
-
-    const label = document.createElement('label');
-    label.textContent = 'Additional Trainer';
-    label.style.flex = '1 1 auto';
-    label.style.paddingRight = '16px';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-
-    newRow.append(label, input);
-    container.appendChild(newRow);
-  }, 'addTrainer');
-}
-
-/* -------------------------------------
-   ADDITIONAL POC ON PAGE 2
-------------------------------------- */
-function initAdditionalPoc() {
-  const grid = document.getElementById('primaryContactsGrid');
-  if (!grid) return;
-
-  const template = grid.querySelector('.additional-poc-card');
-  const addBtn = template ? template.querySelector('.additional-poc-add') : null;
-  if (!template || !addBtn) return;
-
-  function createAdditionalPocCard() {
-    const card = document.createElement('div');
-    card.className = 'mini-card contact-card';
-
-    card.innerHTML = `
-      <div class="checklist-row">
-        <label>Additional POC</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Role</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email">
-      </div>
-    `;
-    return card;
-  }
-
-  bindOnce(addBtn, 'click', () => {
-    const newCard = createAdditionalPocCard();
-    grid.appendChild(newCard);
-  }, 'addPOC');
-}
-
-/* -------------------------------------
-   SUPPORT TICKETS
-   - Base card in Open section has data-base="true"
-   - + button creates ONE new card
-   - Status dropdown moves cards between sections
-------------------------------------- */
-function initSupportTickets() {
-  const openContainer    = document.getElementById('openTicketsContainer');
-  const tierTwoContainer = document.getElementById('tierTwoTicketsContainer');
-  const closedResolvedContainer = document.getElementById('closedResolvedTicketsContainer');
-  const closedFeatureContainer  = document.getElementById('closedFeatureTicketsContainer');
-
-  if (!openContainer) return;
-
-  const baseCard = openContainer.querySelector('.ticket-group[data-base="true"]');
-  if (!baseCard) return;
-
-  // Base card: Status should be fixed/open + disabled so users know it doesn't do anything
-  const baseStatusSelect = baseCard.querySelector('.ticket-status-select');
-  if (baseStatusSelect) {
-    baseStatusSelect.value = 'Open';
-    baseStatusSelect.disabled = true;
-    baseStatusSelect.classList.add('ticket-status-readonly'); // CSS greys it out
-  }
-
-  // Wire status change for base card (even though we force it to stay Open)
-  wireTicketStatus(baseCard, {
-    openContainer,
-    tierTwoContainer,
-    closedResolvedContainer,
-    closedFeatureContainer,
-    isBase: true
-  });
-
-  // + button on base card → add ONE new ticket card
-  const addBtn = baseCard.querySelector('.add-ticket-btn');
-  if (addBtn) {
-    bindOnce(addBtn, 'click', () => {
-      const newCard = createTicketCard(baseCard, {
-        openContainer,
-        tierTwoContainer,
-        closedResolvedContainer,
-        closedFeatureContainer
-      });
-      openContainer.appendChild(newCard);
-      renumberTicketBadges();
-    }, 'supportAdd');
-  }
-
-  // Make sure any existing cloned cards get badge numbers
-  renumberTicketBadges();
-}
-
-function createTicketCard(template, ctx) {
-  const card = template.cloneNode(true);
-  card.removeAttribute('data-base');     // mark as normal card
-  card.classList.add('ticket-group-clone');
-
-  // Remove + button from cloned cards
-  const addBtn = card.querySelector('.add-ticket-btn');
-  if (addBtn) addBtn.remove();
-
-  // Enable the status dropdown on cloned cards
-  const statusSelect = card.querySelector('.ticket-status-select');
-  if (statusSelect) {
-    statusSelect.disabled = false;
-    statusSelect.classList.remove('ticket-status-readonly');
-    statusSelect.value = 'Open'; // new card starts Open
-  }
-
-  // Clear inputs/selects/textarea values
-  card.querySelectorAll('input, select, textarea').forEach((el) => {
-    if (el.tagName === 'SELECT') {
-      if (!el.classList.contains('ticket-status-select')) {
-        el.selectedIndex = 0;
-      }
-    } else {
-      el.value = '';
-    }
-  });
-
-  // Ensure ghost styling is correct for any non-table selects in this card
-  const localSelects = card.querySelectorAll('select');
-  localSelects.forEach((sel) => {
-    if (!sel.closest('table')) {
-      setupGhostSelect(sel);
-    }
-  });
-
-  // Ensure a badge element exists
-  let badge = card.querySelector('.ticket-badge');
-  if (!badge) {
-    badge = document.createElement('div');
-    badge.className = 'ticket-badge';
-    card.insertBefore(badge, card.firstChild);
-  }
-
-  // Wire status change behavior
-  wireTicketStatus(card, {
-    openContainer: ctx.openContainer,
-    tierTwoContainer: ctx.tierTwoContainer,
-    closedResolvedContainer: ctx.closedResolvedContainer,
-    closedFeatureContainer: ctx.closedFeatureContainer,
-    isBase: false
-  });
-
-  // Wire auto-grow to the Short Summary textarea in this card
-  const summary = card.querySelector('.ticket-summary-input');
-  if (summary) hookAutoGrow(summary);
-
-  return card;
-}
-
-function wireTicketStatus(card, ctx) {
-  const select = card.querySelector('.ticket-status-select');
-  if (!select) return;
-
-  bindOnce(select, 'change', () => {
-    const status = select.value;
-    let target = ctx.openContainer;
-
-    if (status === 'Tier Two') {
-      target = ctx.tierTwoContainer || ctx.openContainer;
-    } else if (status === 'Closed - Resolved') {
-      target = ctx.closedResolvedContainer || ctx.openContainer;
-    } else if (status === 'Closed – Feature Not Supported') {
-      target = ctx.closedFeatureContainer || ctx.openContainer;
-    }
-
-    // Base card never moves – it's just the template
-    if (ctx.isBase) {
-      if (status !== 'Open') {
-        select.value = 'Open';
-      }
+    if (tag === "input") {
+      const type = (el.getAttribute("type") || "text").toLowerCase();
+      if (type === "checkbox" || type === "radio") el.checked = false;
+      else el.value = "";
       return;
     }
 
-    if (target && card.parentElement !== target) {
-      target.appendChild(card);
-      renumberTicketBadges();
+    if (tag === "textarea") {
+      el.value = "";
+      return;
     }
-  }, `status_${Math.random().toString(36).slice(2)}`);
-}
 
-function renumberTicketBadges() {
-  const allCards = document.querySelectorAll(
-    '#openTicketsContainer .ticket-group:not([data-base="true"]), ' +
-    '#tierTwoTicketsContainer .ticket-group, ' +
-    '#closedResolvedTicketsContainer .ticket-group, ' +
-    '#closedFeatureTicketsContainer .ticket-group'
-  );
-
-  let counter = 1;
-  allCards.forEach((card) => {
-    let badge = card.querySelector('.ticket-badge');
-    if (!badge) {
-      badge = document.createElement('div');
-      badge.className = 'ticket-badge';
-      card.insertBefore(badge, card.firstChild);
+    if (tag === "select") {
+      // Reset to first option
+      el.selectedIndex = 0;
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+      return;
     }
-    badge.textContent = `Ticket # ${counter}`;
-    counter++;
-  });
-}
-
-/* -------------------------------------
-   AUTO-GROW SHORT SUMMARY TEXTAREA
-------------------------------------- */
-function initAutoGrowTicketSummary() {
-  const all = document.querySelectorAll('.ticket-summary-input');
-  all.forEach(hookAutoGrow);
-}
-
-function hookAutoGrow(el) {
-  if (!el || el.tagName !== 'TEXTAREA') return;
-
-  const resize = () => {
-    el.style.height = 'auto';
-    el.style.height = el.scrollHeight + 'px';
   };
 
-  bindOnce(el, 'input', resize, 'summaryGrow');
-  resize();
-}
+  const sectionFromButton = (btn) => {
+    const targetId = btn?.dataset?.target;
+    if (!targetId) return null;
+    return document.getElementById(targetId) || null;
+  };
 
-/* -------------------------------------
-   ACCEPTANCE COLOR-CODING (Training Checklist)
-   Applies to selects in #training-checklist tables
-------------------------------------- */
-function initAcceptanceColorCoding() {
-  const root = document.getElementById('training-checklist');
-  if (!root) return;
-  initAcceptanceColorCodingForRoot(root);
-}
+  /* -----------------------------
+     Sidebar Navigation (Pages 1–11)
+  ----------------------------- */
+  const setActiveSection = (targetId) => {
+    const targetSection = document.getElementById(targetId);
+    if (!targetSection) {
+      console.warn("Sidebar target not found:", targetId);
+      return;
+    }
 
-function initAcceptanceColorCodingForRoot(root) {
-  if (!root) return;
-  const allSelects = root.querySelectorAll('table.training-table select');
+    // Buttons
+    $$("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
+    const matchingBtn = $(`#sidebar .nav-btn[data-target="${CSS.escape(targetId)}"]`);
+    if (matchingBtn) matchingBtn.classList.add("active");
 
-  allSelects.forEach((sel) => {
-    applyAcceptanceColor(sel);
-    bindOnce(sel, 'change', handleAcceptanceChange, 'acceptanceChange');
-  });
-}
+    // Sections
+    $$("main .page-section").forEach((sec) => sec.classList.remove("active"));
+    targetSection.classList.add("active");
 
-function handleAcceptanceChange(e) {
-  applyAcceptanceColor(e.target);
-}
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-function applyAcceptanceColor(select) {
-  if (!select) return;
+  const initSidebarNav = () => {
+    const sidebar = $("#sidebar");
+    if (!sidebar) return;
 
-  // Remove any previous color classes
-  select.classList.remove(
-    'accept-yes',
-    'accept-neutral',
-    'accept-no',
-    'accept-na'
-  );
+    // Single delegated listener prevents duplicate bindings
+    sidebar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".nav-btn");
+      if (!btn) return;
 
-  const val = (select.value || '').trim().toLowerCase();
-  if (!val) return;
+      const targetId = btn.dataset.target;
+      if (!targetId) return;
 
-  // GREEN:
-  //  - "Yes", "Yes – Fully Adopted", etc.
-  //  - "Web & Mobile"
-  //  - anything that clearly says "fully adopted"
-  if (
-    val.startsWith('yes') ||
-    val.includes('web & mobile') ||
-    val.includes('fully adopted')
-  ) {
-    select.classList.add('accept-yes');
-    return;
-  }
+      setActiveSection(targetId);
+    });
 
-  // YELLOW:
-  //  - "Web", "Mobile"
-  //  - "Mostly Adopted"
-  //  - "Neutral / Mixed"
-  if (
-    val === 'web' ||
-    val === 'mobile' ||
-    val.includes('mostly adopted') ||
-    val.includes('neutral') ||
-    val.includes('mixed')
-  ) {
-    select.classList.add('accept-neutral');
-    return;
-  }
+    // Initial active: if there is already an active button, honor it; else first button
+    const activeBtn = $("#sidebar .nav-btn.active") || $("#sidebar .nav-btn");
+    const activeSection = sectionFromButton(activeBtn);
+    if (activeBtn && activeSection) setActiveSection(activeSection.id);
+  };
 
-  // RED:
-  //  - "No"
-  //  - "Not Trained"
-  //  - "Needs Support"
-  //  - "Not Accepted"
-  if (
-    val.startsWith('no') ||
-    val.includes('not trained') ||
-    val.includes('needs support') ||
-    val.includes('not accepted')
-  ) {
-    select.classList.add('accept-no');
-    return;
-  }
+  /* -----------------------------
+     Ghost/Grey Dropdown Text (no tables)
+     Rule: Only selects that have <option data-ghost="true"> should get ghost styling.
+           And we skip all selects inside tables.
+  ----------------------------- */
+  const syncGhostSelect = (selectEl) => {
+    if (!selectEl || selectEl.tagName.toLowerCase() !== "select") return;
+    if (isInTable(selectEl)) return;
 
-  // GREY:
-  //  - "N/A" or "NA"
-  if (val === 'n/a' || val === 'na') {
-    select.classList.add('accept-na');
-  }
-}
+    const ghostOption = selectEl.querySelector('option[data-ghost="true"]');
+    if (!ghostOption) return;
 
-/* -------------------------------------
-   TABLE ADD-ROW BUTTONS
-------------------------------------- */
-function initTableAddRowButtons() {
-  const buttons = document.querySelectorAll('.table-footer .add-row');
-  buttons.forEach((btn, idx) => {
-    bindOnce(btn, 'click', () => {
-      const table = btn.closest('.table-footer')
-        ?.previousElementSibling
-        ?.querySelector('table');
+    const isGhostSelected =
+      selectEl.selectedIndex === 0 &&
+      selectEl.options[0] &&
+      selectEl.options[0].hasAttribute("data-ghost");
 
-      if (!table) return;
+    selectEl.classList.toggle("is-ghost", isGhostSelected);
+    selectEl.classList.toggle("has-value", !isGhostSelected);
+  };
 
-      const tbody = table.querySelector('tbody') || table.createTBody();
-      const last = tbody.lastElementChild;
-      if (!last) return;
+  const initGhostSelects = () => {
+    $$("select").forEach((sel) => syncGhostSelect(sel));
 
-      const clone = last.cloneNode(true);
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest("select");
+      if (!sel) return;
+      syncGhostSelect(sel);
+    });
+  };
 
-      // Reset inputs/selects in cloned row
-      clone.querySelectorAll('input, select').forEach((el) => {
-        if (el.tagName === 'SELECT') {
-          el.selectedIndex = 0;
-          // Ensure NO ghost styling in tables
-          el.classList.remove('is-placeholder');
-        } else if (el.type === 'checkbox' || el.type === 'radio') {
-          el.checked = false;
-        } else {
-          el.value = '';
-        }
+  /* -----------------------------
+     Add Row (+) for tables
+     - clones last row in tbody of the nearest .table-container
+     - clears all inputs/selects/textareas in that cloned row
+  ----------------------------- */
+  const cloneTableRow = (btn) => {
+    const container = btn.closest(".table-container");
+    if (!container) return;
+
+    const table = $("table", container);
+    const tbody = table ? $("tbody", table) : null;
+    if (!tbody) return;
+
+    const rows = $$("tr", tbody);
+    if (rows.length === 0) return;
+
+    const sourceRow = rows[rows.length - 1];
+    const newRow = sourceRow.cloneNode(true);
+
+    // Clear cloned row controls
+    $$("input, textarea, select", newRow).forEach((el) => clearControl(el));
+
+    tbody.appendChild(newRow);
+  };
+
+  /* -----------------------------
+     Reset This Page
+     - clears all inputs/selects/textareas in the section
+     - resets selects to first option
+     - removes extra rows (keeps the first 1 row in each table body)
+     - support tickets: keeps base group only in Open container
+  ----------------------------- */
+  const resetSection = (sectionEl) => {
+    if (!sectionEl) return;
+
+    // Clear all controls
+    $$("input, textarea, select", sectionEl).forEach((el) => clearControl(el));
+
+    // Remove extra table rows (keep first row)
+    $$("table.training-table tbody", sectionEl).forEach((tbody) => {
+      const rows = $$("tr", tbody);
+      rows.slice(1).forEach((r) => r.remove());
+    });
+
+    // Support tickets reset behavior
+    const open = $("#openTicketsContainer", sectionEl);
+    const tier2 = $("#tierTwoTicketsContainer", sectionEl);
+    const closedResolved = $("#closedResolvedTicketsContainer", sectionEl);
+    const closedFeature = $("#closedFeatureTicketsContainer", sectionEl);
+
+    if (tier2) tier2.innerHTML = "";
+    if (closedResolved) closedResolved.innerHTML = "";
+    if (closedFeature) closedFeature.innerHTML = "";
+
+    if (open) {
+      // Keep only the base group, remove the rest
+      const groups = $$(".ticket-group", open);
+      groups.forEach((g) => {
+        if (g.dataset.base === "true") return;
+        g.remove();
       });
 
-      tbody.appendChild(clone);
-
-      // If this table lives on the Training Checklist page,
-      // hook up acceptance color-coding for the new row
-      const trainingSection = document.getElementById('training-checklist');
-      if (trainingSection && trainingSection.contains(table)) {
-        const newSelects = clone.querySelectorAll('select');
-        newSelects.forEach((sel) => {
-          applyAcceptanceColor(sel);
-          bindOnce(sel, 'change', handleAcceptanceChange, 'acceptanceChange');
-        });
+      // Ensure base group fields are cleared and status is Open
+      const base = $('.ticket-group[data-base="true"]', open);
+      if (base) {
+        $$("input, textarea, select", base).forEach((el) => clearControl(el));
+        const status = $(".ticket-status-select", base);
+        if (status) {
+          status.value = "Open";
+          status.dispatchEvent(new Event("change", { bubbles: true }));
+        }
       }
-    }, `tableAdd_${idx}`);
-  });
-}
+    }
 
-/* -------------------------------------
-   PDF EXPORT
-------------------------------------- */
-function initPdfExport() {
-  const btn = document.getElementById('savePDF');
-  if (!btn || !window.jspdf) return;
+    // Re-sync ghost selects in this section
+    $$("select", sectionEl).forEach((sel) => syncGhostSelect(sel));
+  };
 
-  bindOnce(btn, 'click', () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
+  const initResetButtons = () => {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".clear-page-btn");
+      if (!btn) return;
 
-    doc.html(document.body, {
-      callback: (instance) => instance.save('myKaarma_Training_Checklist.pdf'),
-      margin: [20, 20, 20, 20],
-      html2canvas: { scale: 0.6 }
+      const section = btn.closest(".page-section");
+      resetSection(section);
     });
-  }, 'pdfExport');
-}
+  };
 
-/* -------------------------------------
-   DMS CARDS (placeholder for future logic)
-------------------------------------- */
-function initDmsCards() {
-  // Reserved for future dynamic behaviors on the DMS page.
-}
+  /* -----------------------------
+     Support Tickets
+     - Add ticket group (+ button) in Open Tickets
+     - Move ticket groups between containers when Status changes
+  ----------------------------- */
+  const getTicketContainers = () => ({
+    open: $("#openTicketsContainer"),
+    tier2: $("#tierTwoTicketsContainer"),
+    closedResolved: $("#closedResolvedTicketsContainer"),
+    closedFeature: $("#closedFeatureTicketsContainer"),
+  });
+
+  const destinationForStatus = (statusValue) => {
+    const c = getTicketContainers();
+    if (!c.open) return null;
+
+    if (statusValue === "Tier Two") return c.tier2 || c.open;
+    if (statusValue === "Closed - Resolved") return c.closedResolved || c.open;
+    if (statusValue === "Closed – Feature Not Supported") return c.closedFeature || c.open;
+
+    // Default: Open
+    return c.open;
+  };
+
+  const addSupportTicketGroup = (btn) => {
+    const c = getTicketContainers();
+    if (!c.open) return;
+
+    const base = $('.ticket-group[data-base="true"]', c.open);
+    if (!base) {
+      console.warn("Base ticket group not found in openTicketsContainer");
+      return;
+    }
+
+    const clone = base.cloneNode(true);
+    clone.dataset.base = "false";
+
+    // Clear fields
+    $$("input, textarea, select", clone).forEach((el) => clearControl(el));
+
+    // Default status Open
+    const status = $(".ticket-status-select", clone);
+    if (status) status.value = "Open";
+
+    // Append to Open container
+    c.open.appendChild(clone);
+
+    // Re-sync ghost selects in clone (if any)
+    $$("select", clone).forEach((sel) => syncGhostSelect(sel));
+  };
+
+  const initSupportTickets = () => {
+    // One delegated click handler for add-ticket-btn prevents “adds two”
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-ticket-btn");
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      addSupportTicketGroup(btn);
+    });
+
+    // Move tickets based on Status selection
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest(".ticket-status-select");
+      if (!sel) return;
+
+      const group = sel.closest(".ticket-group");
+      if (!group) return;
+
+      const dest = destinationForStatus(sel.value);
+      if (!dest) return;
+
+      dest.appendChild(group);
+    });
+  };
+
+  /* -----------------------------
+     Google Places Autocomplete (safe/no-op)
+     - Attaches to any input with class "address-autocomplete"
+       OR any input with data-address-autocomplete="true"
+  ----------------------------- */
+  window.initAddressAutocomplete = function initAddressAutocomplete() {
+    try {
+      if (!window.google?.maps?.places?.Autocomplete) return;
+
+      const inputs = [
+        ...$$('input.address-autocomplete'),
+        ...$$('input[data-address-autocomplete="true"]'),
+      ];
+
+      inputs.forEach((input) => {
+        // prevent double-binding
+        if (input.dataset.placesBound === "true") return;
+
+        const ac = new google.maps.places.Autocomplete(input, {
+          types: ["address"],
+          componentRestrictions: { country: "us" },
+        });
+
+        // If you want formatted address on selection:
+        ac.addListener("place_changed", () => {
+          const place = ac.getPlace();
+          if (place?.formatted_address) input.value = place.formatted_address;
+        });
+
+        input.dataset.placesBound = "true";
+      });
+    } catch (err) {
+      console.warn("initAddressAutocomplete error:", err);
+    }
+  };
+
+  /* -----------------------------
+     Global delegated handler for table add-row (+)
+     (single listener = no duplicates)
+  ----------------------------- */
+  const initAddRowButtons = () => {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button.add-row");
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      cloneTableRow(btn);
+    });
+  };
+
+  /* -----------------------------
+     Init
+  ----------------------------- */
+  document.addEventListener("DOMContentLoaded", () => {
+    initSidebarNav();
+    initResetButtons();
+    initAddRowButtons();
+    initSupportTickets();
+    initGhostSelects();
+
+    // If any section is already marked active in HTML, ensure sidebar button matches
+    const activeSection = $("main .page-section.active");
+    if (activeSection) {
+      const btn = $(`#sidebar .nav-btn[data-target="${CSS.escape(activeSection.id)}"]`);
+      if (btn) {
+        $$("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+    }
+  });
+})();
