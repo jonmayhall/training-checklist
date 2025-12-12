@@ -25,7 +25,7 @@
   --mk-border: #e5e7eb;
 }
 
-/* Global text/placeholder styling for all text boxes */
+/* Global text styling for all text boxes and dropdowns */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -37,12 +37,35 @@ select {
   font-family: "Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
-/* Make placeholder text consistent everywhere */
+/* Make placeholder text consistent everywhere (text inputs + textareas) */
 input::placeholder,
 textarea::placeholder {
   font-size: 13px;
   color: #9ca3af;
   opacity: 1;  /* keep it visible but subdued */
+}
+
+/* ---------- Ghost text / placeholder styling for dropdowns ---------- */
+
+/* Base dropdown text color */
+select {
+  color: var(--ink);
+}
+
+/* Non-table dropdowns: grey ghost state when showing "Select an option…" */
+select.is-placeholder {
+  color: #9ca3af;
+}
+
+/* Also support explicit ghost options if used */
+select option[data-ghost="true"] {
+  color: #9ca3af;
+}
+
+/* Table dropdowns: always use normal text color (no ghost styling) */
+.training-table select,
+.training-table select.is-placeholder {
+  color: var(--ink);
 }
 
 /* --------------- BASE --------------- */
@@ -1140,28 +1163,4 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
-   /* ---------- Ghost text / placeholder styling ---------- */
-
-/* Inputs + textareas: light grey ghost text */
-input::placeholder,
-textarea::placeholder {
-  color: #9ca3af;
-  opacity: 1;           /* make sure browsers don't fade it further */
-}
-
-/* Default/ghost option in dropdowns = light grey */
-select option[data-ghost="true"] {
-  color: #9ca3af;
-}
-
-/* Once a real value is chosen, use normal ink color */
-select {
-  color: var(--ink);
-}
-
-/* Some browsers keep using the option color; this helps normalize */
-select:focus option {
-  color: var(--ink);
-}
-
 }
