@@ -1,368 +1,297 @@
-/* =========================================================
+/* ============================================================
    myKaarma Interactive Training Checklist — script.js
-   Updates included:
-   - Sidebar nav now supports Pages 1–11 (any .page-section with matching id)
-   - Prevents “double add” issues by using event delegation (single listener)
-   - Add-row cloning for tables (+)
-   - Support Tickets: add new ticket group (+), move tickets by Status
-   - Reset This Page clears inputs/selects/textareas and removes added rows/groups
-   - Ghost/grey dropdown behavior ONLY for selects that have data-ghost options
-     (and it skips all selects inside tables to honor “no ghost text on tables”)
-   - Google Places address autocomplete hook (safe/no-op if not available)
-========================================================= */
+   Fixes:
+   - Sidebar nav Pages 1–11 not showing
+   - Add-row (+) buttons not working
+   - Reset This Page
+   - Grey ghost text on NON-table dropdowns only
+   - Google Places init safety
+============================================================ */
 
-(() => {
+(function () {
   "use strict";
 
   /* -----------------------------
      Helpers
   ----------------------------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const qs = (sel, root = document) => root.querySelector(sel);
+  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const isInTable = (el) => !!el.closest("table");
+  function isInsideTable(el) {
+    return !!el.closest("table");
+  }
 
-  const clearControl = (el) => {
-    if (!el) return;
-
-    const tag = el.tagName?.toLowerCase();
-
-    if (tag === "input") {
-      const type = (el.getAttribute("type") || "text").toLowerCase();
-      if (type === "checkbox" || type === "radio") el.checked = false;
-      else el.value = "";
-      return;
-    }
-
-    if (tag === "textarea") {
-      el.value = "";
-      return;
-    }
-
-    if (tag === "select") {
-      // Reset to first option
-      el.selectedIndex = 0;
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-      return;
-    }
-  };
-
-  const sectionFromButton = (btn) => {
-    const targetId = btn?.dataset?.target;
-    if (!targetId) return null;
-    return document.getElementById(targetId) || null;
-  };
-
-  /* -----------------------------
-     Sidebar Navigation (Pages 1–11)
-  ----------------------------- */
-  const setActiveSection = (targetId) => {
-    const targetSection = document.getElementById(targetId);
-    if (!targetSection) {
-      console.warn("Sidebar target not found:", targetId);
-      return;
-    }
-
-    // Buttons
-    $$("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
-    const matchingBtn = $(`#sidebar .nav-btn[data-target="${CSS.escape(targetId)}"]`);
-    if (matchingBtn) matchingBtn.classList.add("active");
-
-    // Sections
-    $$("main .page-section").forEach((sec) => sec.classList.remove("active"));
-    targetSection.classList.add("active");
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const initSidebarNav = () => {
-    const sidebar = $("#sidebar");
-    if (!sidebar) return;
-
-    // Single delegated listener prevents duplicate bindings
-    sidebar.addEventListener("click", (e) => {
-      const btn = e.target.closest(".nav-btn");
-      if (!btn) return;
-
-      const targetId = btn.dataset.target;
-      if (!targetId) return;
-
-      setActiveSection(targetId);
-    });
-
-    // Initial active: if there is already an active button, honor it; else first button
-    const activeBtn = $("#sidebar .nav-btn.active") || $("#sidebar .nav-btn");
-    const activeSection = sectionFromButton(activeBtn);
-    if (activeBtn && activeSection) setActiveSection(activeSection.id);
-  };
-
-  /* -----------------------------
-     Ghost/Grey Dropdown Text (no tables)
-     Rule: Only selects that have <option data-ghost="true"> should get ghost styling.
-           And we skip all selects inside tables.
-  ----------------------------- */
-  const syncGhostSelect = (selectEl) => {
-    if (!selectEl || selectEl.tagName.toLowerCase() !== "select") return;
-    if (isInTable(selectEl)) return;
-
+  function setSelectGhostState(selectEl) {
+    // Only applies to selects that have an option marked data-ghost="true"
+    if (!selectEl) return;
     const ghostOption = selectEl.querySelector('option[data-ghost="true"]');
     if (!ghostOption) return;
 
-    const isGhostSelected =
-      selectEl.selectedIndex === 0 &&
-      selectEl.options[0] &&
-      selectEl.options[0].hasAttribute("data-ghost");
+    // If current value is empty or selected option is the ghost option
+    const selected = selectEl.options[selectEl.selectedIndex];
+    const isGhost = !selectEl.value || (selected && selected.hasAttribute("data-ghost"));
 
-    selectEl.classList.toggle("is-ghost", isGhostSelected);
-    selectEl.classList.toggle("has-value", !isGhostSelected);
-  };
+    if (isGhost) selectEl.classList.add("is-ghost");
+    else selectEl.classList.remove("is-ghost");
+  }
 
-  const initGhostSelects = () => {
-    $$("select").forEach((sel) => syncGhostSelect(sel));
-
-    document.addEventListener("change", (e) => {
-      const sel = e.target.closest("select");
-      if (!sel) return;
-      syncGhostSelect(sel);
+  function initGhostSelects() {
+    // Apply to selects OUTSIDE tables only
+    qsa("select").forEach((sel) => {
+      if (isInsideTable(sel)) return; // your rule: no ghost styling in tables
+      setSelectGhostState(sel);
     });
-  };
+  }
 
-  /* -----------------------------
-     Add Row (+) for tables
-     - clones last row in tbody of the nearest .table-container
-     - clears all inputs/selects/textareas in that cloned row
-  ----------------------------- */
-  const cloneTableRow = (btn) => {
-    const container = btn.closest(".table-container");
-    if (!container) return;
+  function clearField(el) {
+    if (!el) return;
 
-    const table = $("table", container);
-    const tbody = table ? $("tbody", table) : null;
-    if (!tbody) return;
+    const tag = el.tagName.toLowerCase();
+    const type = (el.getAttribute("type") || "").toLowerCase();
 
-    const rows = $$("tr", tbody);
-    if (rows.length === 0) return;
-
-    const sourceRow = rows[rows.length - 1];
-    const newRow = sourceRow.cloneNode(true);
-
-    // Clear cloned row controls
-    $$("input, textarea, select", newRow).forEach((el) => clearControl(el));
-
-    tbody.appendChild(newRow);
-  };
-
-  /* -----------------------------
-     Reset This Page
-     - clears all inputs/selects/textareas in the section
-     - resets selects to first option
-     - removes extra rows (keeps the first 1 row in each table body)
-     - support tickets: keeps base group only in Open container
-  ----------------------------- */
-  const resetSection = (sectionEl) => {
-    if (!sectionEl) return;
-
-    // Clear all controls
-    $$("input, textarea, select", sectionEl).forEach((el) => clearControl(el));
-
-    // Remove extra table rows (keep first row)
-    $$("table.training-table tbody", sectionEl).forEach((tbody) => {
-      const rows = $$("tr", tbody);
-      rows.slice(1).forEach((r) => r.remove());
-    });
-
-    // Support tickets reset behavior
-    const open = $("#openTicketsContainer", sectionEl);
-    const tier2 = $("#tierTwoTicketsContainer", sectionEl);
-    const closedResolved = $("#closedResolvedTicketsContainer", sectionEl);
-    const closedFeature = $("#closedFeatureTicketsContainer", sectionEl);
-
-    if (tier2) tier2.innerHTML = "";
-    if (closedResolved) closedResolved.innerHTML = "";
-    if (closedFeature) closedFeature.innerHTML = "";
-
-    if (open) {
-      // Keep only the base group, remove the rest
-      const groups = $$(".ticket-group", open);
-      groups.forEach((g) => {
-        if (g.dataset.base === "true") return;
-        g.remove();
-      });
-
-      // Ensure base group fields are cleared and status is Open
-      const base = $('.ticket-group[data-base="true"]', open);
-      if (base) {
-        $$("input, textarea, select", base).forEach((el) => clearControl(el));
-        const status = $(".ticket-status-select", base);
-        if (status) {
-          status.value = "Open";
-          status.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-      }
+    if (tag === "input") {
+      if (type === "checkbox" || type === "radio") el.checked = false;
+      else el.value = "";
+    } else if (tag === "textarea") {
+      el.value = "";
+    } else if (tag === "select") {
+      // Reset to first option (usually blank/ghost)
+      el.selectedIndex = 0;
+      // Apply ghost style if relevant and not in table
+      if (!isInsideTable(el)) setSelectGhostState(el);
     }
+  }
 
-    // Re-sync ghost selects in this section
-    $$("select", sectionEl).forEach((sel) => syncGhostSelect(sel));
-  };
+  function clearContainer(container) {
+    if (!container) return;
+    qsa("input, textarea, select", container).forEach(clearField);
+  }
 
-  const initResetButtons = () => {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".clear-page-btn");
-      if (!btn) return;
+  function getAllPageSections() {
+    // Don’t assume they’re inside <main>
+    return qsa(".page-section");
+  }
 
-      const section = btn.closest(".page-section");
-      resetSection(section);
-    });
-  };
+  function showSectionById(targetId) {
+    const sections = getAllPageSections();
+    const target = document.getElementById(targetId);
 
-  /* -----------------------------
-     Support Tickets
-     - Add ticket group (+ button) in Open Tickets
-     - Move ticket groups between containers when Status changes
-  ----------------------------- */
-  const getTicketContainers = () => ({
-    open: $("#openTicketsContainer"),
-    tier2: $("#tierTwoTicketsContainer"),
-    closedResolved: $("#closedResolvedTicketsContainer"),
-    closedFeature: $("#closedFeatureTicketsContainer"),
-  });
-
-  const destinationForStatus = (statusValue) => {
-    const c = getTicketContainers();
-    if (!c.open) return null;
-
-    if (statusValue === "Tier Two") return c.tier2 || c.open;
-    if (statusValue === "Closed - Resolved") return c.closedResolved || c.open;
-    if (statusValue === "Closed – Feature Not Supported") return c.closedFeature || c.open;
-
-    // Default: Open
-    return c.open;
-  };
-
-  const addSupportTicketGroup = (btn) => {
-    const c = getTicketContainers();
-    if (!c.open) return;
-
-    const base = $('.ticket-group[data-base="true"]', c.open);
-    if (!base) {
-      console.warn("Base ticket group not found in openTicketsContainer");
+    if (!target) {
+      console.warn("Section not found for id:", targetId);
       return;
     }
 
-    const clone = base.cloneNode(true);
-    clone.dataset.base = "false";
+    sections.forEach((sec) => sec.classList.remove("active"));
+    target.classList.add("active");
 
-    // Clear fields
-    $$("input, textarea, select", clone).forEach((el) => clearControl(el));
+    // scroll to top so it feels consistent
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-    // Default status Open
-    const status = $(".ticket-status-select", clone);
-    if (status) status.value = "Open";
+  function setActiveNavButton(btn) {
+    // Works for any sidebar container
+    qsa("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
 
-    // Append to Open container
-    c.open.appendChild(clone);
+  function ensureInitialActivePage() {
+    const sections = getAllPageSections();
+    if (!sections.length) return;
 
-    // Re-sync ghost selects in clone (if any)
-    $$("select", clone).forEach((sel) => syncGhostSelect(sel));
-  };
+    const alreadyActive = sections.find((s) => s.classList.contains("active"));
+    if (alreadyActive) return;
 
-  const initSupportTickets = () => {
-    // One delegated click handler for add-ticket-btn prevents “adds two”
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".add-ticket-btn");
-      if (!btn) return;
+    // If a nav button is active, use it
+    const activeBtn = qs("#sidebar .nav-btn.active");
+    if (activeBtn && activeBtn.dataset.target) {
+      showSectionById(activeBtn.dataset.target);
+      return;
+    }
 
-      e.preventDefault();
-      e.stopPropagation();
-
-      addSupportTicketGroup(btn);
-    });
-
-    // Move tickets based on Status selection
-    document.addEventListener("change", (e) => {
-      const sel = e.target.closest(".ticket-status-select");
-      if (!sel) return;
-
-      const group = sel.closest(".ticket-group");
-      if (!group) return;
-
-      const dest = destinationForStatus(sel.value);
-      if (!dest) return;
-
-      dest.appendChild(group);
-    });
-  };
+    // Otherwise show the first section
+    sections[0].classList.add("active");
+  }
 
   /* -----------------------------
-     Google Places Autocomplete (safe/no-op)
-     - Attaches to any input with class "address-autocomplete"
-       OR any input with data-address-autocomplete="true"
+     Add Row (+) for tables
+     - Works via event delegation
   ----------------------------- */
-  window.initAddressAutocomplete = function initAddressAutocomplete() {
-    try {
-      if (!window.google?.maps?.places?.Autocomplete) return;
+  function handleAddRowClick(buttonEl) {
+    const tableContainer = buttonEl.closest(".table-container");
+    if (!tableContainer) return;
 
-      const inputs = [
-        ...$$('input.address-autocomplete'),
-        ...$$('input[data-address-autocomplete="true"]'),
-      ];
+    const table = qs("table", tableContainer);
+    const tbody = table ? qs("tbody", table) : null;
+    if (!tbody) return;
 
-      inputs.forEach((input) => {
-        // prevent double-binding
-        if (input.dataset.placesBound === "true") return;
+    // Choose a base row to clone:
+    // Prefer first row in tbody (stable), otherwise last row
+    const baseRow = tbody.querySelector("tr") || tbody.lastElementChild;
+    if (!baseRow) return;
 
-        const ac = new google.maps.places.Autocomplete(input, {
-          types: ["address"],
-          componentRestrictions: { country: "us" },
-        });
+    const clone = baseRow.cloneNode(true);
 
-        // If you want formatted address on selection:
-        ac.addListener("place_changed", () => {
-          const place = ac.getPlace();
-          if (place?.formatted_address) input.value = place.formatted_address;
-        });
+    // Clear all fields in the cloned row
+    qsa("input, textarea, select", clone).forEach((el) => {
+      clearField(el);
 
-        input.dataset.placesBound = "true";
+      // IMPORTANT: No table ghost placeholders — so do NOT add class is-ghost here.
+      // (We also don’t run ghost logic inside tables)
+    });
+
+    tbody.appendChild(clone);
+  }
+
+  /* -----------------------------
+     Support Ticket "Add" (+)
+  ----------------------------- */
+  function handleAddTicketClick(btn) {
+    const openContainer = qs("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const baseGroup = openContainer.querySelector(".ticket-group[data-base='true']");
+    if (!baseGroup) return;
+
+    const clone = baseGroup.cloneNode(true);
+    clone.removeAttribute("data-base");
+
+    // Clear fields inside clone
+    qsa("input, textarea, select", clone).forEach((el) => {
+      clearField(el);
+    });
+
+    // Default status to Open if that select exists
+    const statusSel = qs(".ticket-status-select", clone);
+    if (statusSel) statusSel.value = "Open";
+
+    openContainer.appendChild(clone);
+  }
+
+  /* -----------------------------
+     Reset This Page
+     - Clears inputs/selects/textareas
+     - Removes extra cloned rows in tables
+     - Keeps first row in each table
+     - Resets support tickets containers to base only
+  ----------------------------- */
+  function resetPage(sectionEl) {
+    if (!sectionEl) return;
+
+    // 1) Clear all standard inputs
+    clearContainer(sectionEl);
+
+    // 2) Reset each table body to only its first row
+    qsa("table.training-table tbody", sectionEl).forEach((tbody) => {
+      const rows = qsa("tr", tbody);
+      if (rows.length <= 1) return;
+
+      // Keep first row, remove the rest
+      rows.slice(1).forEach((r) => r.remove());
+
+      // Clear first row too
+      clearContainer(rows[0]);
+    });
+
+    // 3) Support tickets: keep only base group in Open, clear other status containers
+    const open = qs("#openTicketsContainer", sectionEl);
+    if (open) {
+      qsa(".ticket-group", open).forEach((group) => {
+        if (group.getAttribute("data-base") === "true") {
+          clearContainer(group);
+          // restore default status
+          const statusSel = qs(".ticket-status-select", group);
+          if (statusSel) statusSel.value = "Open";
+        } else {
+          group.remove();
+        }
       });
+    }
+
+    ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach((id) => {
+      const c = qs(`#${id}`, sectionEl);
+      if (c) c.innerHTML = "";
+    });
+
+    // 4) Re-apply ghost styling on non-table selects
+    initGhostSelects();
+  }
+
+  /* -----------------------------
+     Event Delegation (KEY FIX)
+     - Makes nav + add buttons work always
+  ----------------------------- */
+  function bindDelegatedEvents() {
+    document.addEventListener("click", (e) => {
+      const navBtn = e.target.closest("#sidebar .nav-btn");
+      if (navBtn) {
+        const targetId = navBtn.dataset.target;
+
+        if (!targetId) {
+          console.warn("Nav button missing data-target:", navBtn);
+          return;
+        }
+
+        setActiveNavButton(navBtn);
+        showSectionById(targetId);
+        return;
+      }
+
+      const addRowBtn = e.target.closest("button.add-row");
+      if (addRowBtn) {
+        handleAddRowClick(addRowBtn);
+        return;
+      }
+
+      const addTicketBtn = e.target.closest("button.add-ticket-btn");
+      if (addTicketBtn) {
+        handleAddTicketClick(addTicketBtn);
+        return;
+      }
+
+      const resetBtn = e.target.closest("button.clear-page-btn");
+      if (resetBtn) {
+        const section = resetBtn.closest(".page-section");
+        resetPage(section);
+        return;
+      }
+    });
+
+    // Dropdown ghost styling: delegated change
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest("select");
+      if (!sel) return;
+      if (isInsideTable(sel)) return; // no table ghost behavior
+      setSelectGhostState(sel);
+    });
+  }
+
+  /* -----------------------------
+     Google Places Autocomplete
+     (safe/no-crash if missing)
+  ----------------------------- */
+  window.initAddressAutocomplete = function () {
+    try {
+      if (!window.google || !google.maps || !google.maps.places) return;
+
+      // If you have specific address inputs, target them here by id/class
+      // Example:
+      // const addr = document.getElementById("dealershipAddress");
+      // if (addr) new google.maps.places.Autocomplete(addr);
+
     } catch (err) {
       console.warn("initAddressAutocomplete error:", err);
     }
   };
 
   /* -----------------------------
-     Global delegated handler for table add-row (+)
-     (single listener = no duplicates)
-  ----------------------------- */
-  const initAddRowButtons = () => {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("button.add-row");
-      if (!btn) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      cloneTableRow(btn);
-    });
-  };
-
-  /* -----------------------------
      Init
   ----------------------------- */
   document.addEventListener("DOMContentLoaded", () => {
-    initSidebarNav();
-    initResetButtons();
-    initAddRowButtons();
-    initSupportTickets();
+    bindDelegatedEvents();
     initGhostSelects();
+    ensureInitialActivePage();
 
-    // If any section is already marked active in HTML, ensure sidebar button matches
-    const activeSection = $("main .page-section.active");
-    if (activeSection) {
-      const btn = $(`#sidebar .nav-btn[data-target="${CSS.escape(activeSection.id)}"]`);
-      if (btn) {
-        $$("#sidebar .nav-btn").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-      }
-    }
+    // IMPORTANT: If your CSS hides all .page-section by default and only shows .active,
+    // this guarantees at least one page shows.
   });
 })();
