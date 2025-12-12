@@ -67,6 +67,24 @@ select option[data-ghost="true"] {
 .training-table select.is-placeholder {
   color: var(--ink);
 }
+/* ---------- Ensure added rows keep fully rounded inputs ---------- */
+
+/* All standard inputs should be pill-shaped */
+.checklist-row input[type="text"],
+.checklist-row input[type="email"],
+.checklist-row input[type="number"],
+.checklist-row input[type="tel"],
+.checklist-row input[type="date"],
+.checklist-row textarea {
+  border-radius: 999px;
+}
+
+/* Integrated-plus rows: restore right-side rounding */
+.checklist-row.integrated-plus input[type="text"],
+.checklist-row.integrated-plus textarea {
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
 
 /* --------------- BASE --------------- */
 html, body {
