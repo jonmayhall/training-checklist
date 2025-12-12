@@ -753,11 +753,11 @@ main {
   left: 0;
   z-index: 4;
 }
-/* Training Checklist: make the Name column wider */
+/* Training Checklist: make the Name column a bit wider */
 #training-checklist .training-table th:first-child,
 #training-checklist .training-table td:first-child {
-  width: 260px;      /* adjust if you want even more */
-  min-width: 260px;
+  width: 210px;
+  min-width: 210px;
 }
 .training-table thead th:first-child {
   text-align:center;
