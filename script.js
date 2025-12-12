@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDmsCards();
   initAutoGrowTicketSummary();
   initAcceptanceColorCoding();   // Training Checklist color-coding
+  initDropdownGhosts();          // Grey "Select an option…" for non-table dropdowns
 });
 
 /* -------------------------------------
@@ -26,6 +27,47 @@ function bindOnce(el, event, handler, key) {
   if (el[flag]) return;          // already wired, do nothing
   el.addEventListener(event, handler);
   el[flag] = true;
+}
+
+/* -------------------------------------
+   DROPDOWN GHOST TEXT ("Select an option…")
+   - Applies ONLY to selects NOT inside tables
+------------------------------------- */
+function initDropdownGhosts() {
+  const selects = document.querySelectorAll('select:not(table select)');
+  selects.forEach(setupGhostSelect);
+}
+
+function setupGhostSelect(select) {
+  // Initialize state
+  updateSelectPlaceholderState(select);
+
+  // Update on change
+  select.addEventListener('change', () => {
+    updateSelectPlaceholderState(select);
+  });
+}
+
+/**
+ * Ensures .is-placeholder is applied ONLY when:
+ * - The select is NOT inside a table
+ * - Its value is empty (placeholder "Select an option…")
+ */
+function updateSelectPlaceholderState(select) {
+  if (!select) return;
+
+  // Never apply ghost styling to selects inside any table
+  if (select.closest('table')) {
+    select.classList.remove('is-placeholder');
+    return;
+  }
+
+  const val = select.value;
+  if (val === '' || val == null) {
+    select.classList.add('is-placeholder');
+  } else {
+    select.classList.remove('is-placeholder');
+  }
 }
 
 /* -------------------------------------
@@ -62,6 +104,11 @@ function clearSection(section) {
   inputs.forEach((el) => {
     if (el.tagName === 'SELECT') {
       el.selectedIndex = 0;
+
+      // Reset ghost state for non-table dropdowns
+      if (!el.closest('table')) {
+        updateSelectPlaceholderState(el);
+      }
     } else if (el.type === 'checkbox' || el.type === 'radio') {
       el.checked = false;
     } else {
@@ -305,6 +352,14 @@ function createTicketCard(template, ctx) {
     }
   });
 
+  // Ensure ghost styling is correct for any non-table selects in this card
+  const localSelects = card.querySelectorAll('select');
+  localSelects.forEach((sel) => {
+    if (!sel.closest('table')) {
+      setupGhostSelect(sel);
+    }
+  });
+
   // Ensure a badge element exists
   let badge = card.querySelector('.ticket-badge');
   if (!badge) {
@@ -512,6 +567,8 @@ function initTableAddRowButtons() {
       clone.querySelectorAll('input, select').forEach((el) => {
         if (el.tagName === 'SELECT') {
           el.selectedIndex = 0;
+          // Ensure NO ghost styling in tables
+          el.classList.remove('is-placeholder');
         } else if (el.type === 'checkbox' || el.type === 'radio') {
           el.checked = false;
         } else {
