@@ -36,19 +36,18 @@
     if (!container) return;
 
     // Inputs
-    qsa('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]', container)
-      .forEach((i) => {
-        // Keep hidden/system inputs untouched if any
-        if (i.type === "date") i.value = "";
-        else i.value = "";
-      });
+    qsa(
+      'input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]',
+      container
+    ).forEach((i) => {
+      i.value = "";
+    });
 
     // Textareas
     qsa("textarea", container).forEach((t) => (t.value = ""));
 
     // Selects
     qsa("select", container).forEach((s) => {
-      // If you have a ghost option with value="", this will select it
       const ghost = qs('option[value=""][data-ghost="true"], option[value=""]', s);
       if (ghost) s.value = "";
       else s.selectedIndex = 0;
@@ -91,6 +90,9 @@
   /* -------------------------
      Integrated “+” Rows (non-table)
      - clones the checklist-row.integrated-plus
+     - Special rule:
+       * Additional Trainer rows: clones should be a NORMAL textbox row (no + or – button)
+       * Other integrated-plus rows: clones should have a – remove button
   ------------------------- */
   function addIntegratedPlusRow(addBtn) {
     const row = addBtn.closest(".checklist-row.integrated-plus");
@@ -98,8 +100,25 @@
 
     const clone = row.cloneNode(true);
 
-     // In the cloned row, REMOVE any add/remove buttons (no + or – on added rows)
-    clone.querySelectorAll(".add-row, .remove-row").forEach(btn => btn.remove());
+    // Detect "Additional Trainer" row
+    const isAdditionalTrainer =
+      row.classList.contains("additional-trainers-row") ||
+      clone.classList.contains("additional-trainers-row");
+
+    // Handle the button in the cloned row
+    const cloneBtn = qs(".add-row", clone) || qs(".remove-row", clone);
+    if (cloneBtn) {
+      if (isAdditionalTrainer) {
+        // ✅ Added Additional Trainer rows should be normal textboxes (no button)
+        cloneBtn.remove();
+      } else {
+        // ✅ Other integrated-plus clones get a remove (–) button
+        cloneBtn.textContent = "–";
+        cloneBtn.title = "Remove";
+        cloneBtn.classList.add("remove-row");
+        cloneBtn.classList.remove("add-row");
+      }
+    }
 
     // Clear clone input values
     clearInputsInContainer(clone);
@@ -113,6 +132,11 @@
     last.insertAdjacentElement("afterend", clone);
   }
 
+  function removeIntegratedRow(removeBtn) {
+    const row = removeBtn.closest(".checklist-row.integrated-plus");
+    if (row) row.remove();
+  }
+
   /* -------------------------
      Table “+” Row Buttons
      - expects button inside .table-footer .add-row
@@ -122,7 +146,6 @@
     const footer = addBtn.closest(".table-footer");
     if (!footer) return;
 
-    // Look upward for the nearest table-container, then find tbody
     const tableContainer = footer.closest(".table-container");
     if (!tableContainer) return;
 
@@ -136,9 +159,7 @@
     const lastRow = rows[rows.length - 1];
     const clone = lastRow.cloneNode(true);
 
-    // Clear inputs/selects/checkboxes inside cloned row
     clearInputsInContainer(clone);
-
     tbody.appendChild(clone);
 
     // Re-apply dropdown placeholder style
@@ -209,7 +230,6 @@
     const badge = buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`);
     ticketGroup.insertAdjacentElement("afterbegin", badge);
 
-    // Move to correct container
     if (status === "Tier Two") {
       tierTwo?.appendChild(ticketGroup);
     } else if (status === "Closed - Resolved") {
@@ -228,7 +248,6 @@
     const containers = getTicketContainers();
     if (!containers.open) return;
 
-    // Clone base group
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
@@ -236,7 +255,6 @@
     const plus = qs(".add-ticket-btn", clone);
     if (plus) plus.remove();
 
-    // Clear inputs
     clearInputsInContainer(clone);
 
     // Default status to Open if present
@@ -246,15 +264,12 @@
       setSelectPlaceholderState(statusSelect);
     }
 
-    // Add badge + remove button
     const badge = buildTicketBadge("Status: Open");
     clone.insertAdjacentElement("afterbegin", badge);
     addRemoveTicketBtn(clone);
 
-    // Append to open container
     containers.open.appendChild(clone);
 
-    // Auto-size summary textarea
     const summary = qs(".ticket-summary-input", clone);
     if (summary) autosizeTextarea(summary);
   }
@@ -272,17 +287,13 @@
     const section = btn.closest(".page-section");
     if (!section) return;
 
-    // Clear the section inputs
     clearInputsInContainer(section);
 
-    // Special: support tickets — remove all extra cards and clear base card fields
     if (section.id === "support-tickets") {
-      // Remove all ticket-group except base group
       const allGroups = qsa(".ticket-group", section);
       allGroups.forEach((g) => {
         if (g.dataset.base === "true") {
           clearInputsInContainer(g);
-          // reset base status to Open if present
           const s = qs(".ticket-status-select", g);
           if (s) s.value = "Open";
         } else {
@@ -290,13 +301,11 @@
         }
       });
 
-      // Clear other containers
       qs("#tierTwoTicketsContainer")?.replaceChildren();
       qs("#closedResolvedTicketsContainer")?.replaceChildren();
       qs("#closedFeatureTicketsContainer")?.replaceChildren();
     }
 
-    // Re-init placeholder states
     initAllSelectPlaceholders();
   }
 
@@ -341,10 +350,12 @@
         return;
       }
 
-       function removeIntegratedRow(removeBtn) {
-    const row = removeBtn.closest(".checklist-row.integrated-plus");
-    if (row) row.remove();
-  }
+      // Integrated-plus remove
+      const removeRowBtn = e.target.closest(".checklist-row.integrated-plus .remove-row");
+      if (removeRowBtn) {
+        removeIntegratedRow(removeRowBtn);
+        return;
+      }
 
       // Table add-row
       const tableAddBtn = e.target.closest(".table-footer .add-row");
@@ -385,14 +396,11 @@
     bindDelegatedEvents();
     initAllSelectPlaceholders();
 
-    // Ensure one section is visible on load (first .nav-btn.active or first section)
     const activeBtn = qs("#sidebar .nav-btn.active") || qs("#sidebar .nav-btn");
     if (activeBtn) handleSidebarClick(activeBtn);
 
-    // Autosize any existing ticket summary textareas
     qsa(".ticket-summary-input").forEach(autosizeTextarea);
   }
 
-  // IMPORTANT: ensure JS runs AFTER HTML exists
   document.addEventListener("DOMContentLoaded", init);
 })();
