@@ -1293,5 +1293,57 @@ main {
     width: 100%;
     flex: 0 0 auto;
     margin-left: 0;
+/* =========================================================
+   FIX: Integrated + rows in MINI-CARDS (Additional POC)
+   - make the + / – buttons match your orange style
+   - keep the input visually correct
+   ========================================================= */
+
+/* 1) Style the add/remove button inside mini-cards like section-block */
+.mini-card .checklist-row.integrated-plus > .add-row,
+.mini-card .checklist-row.integrated-plus > .remove-row {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
+}
+
+.mini-card .checklist-row.integrated-plus > .add-row:hover,
+.mini-card .checklist-row.integrated-plus > .remove-row:hover {
+  background:#ff8b42;
+  transform: translateY(-1px);
+}
+
+/* 2) Make mini-card integrated-plus inputs actually integrate (flat RIGHT, rounded LEFT) */
+.mini-card .checklist-row.integrated-plus input[type="text"],
+.mini-card .checklist-row.integrated-plus input[type="tel"] {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* =========================================================
+   FIX: When JS clones an integrated-plus row, it removes the
+   class in the clone. BUT if anything still ends up with a
+   button removed and "integrated-plus" left behind, force it.
+   ========================================================= */
+
+/* Any checklist-row that DOES NOT contain an .add-row button
+   should NEVER be styled as integrated-plus (prevents flat-right clones) */
+.checklist-row.integrated-plus:not(:has(.add-row)) input[type="text"],
+.checklist-row.integrated-plus:not(:has(.add-row)) input[type="tel"] {
+  border-top-right-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
   }
 }
