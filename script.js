@@ -2,7 +2,8 @@
    myKaarma Interactive Training Checklist — FULL script.js
    - Sidebar nav (Pages 1–11)
    - Add row buttons (tables + integrated-plus rows)
-   - Additional POC: clone entire mini-card + remove button
+   - Additional POC: adds ENTIRE mini-card (NO +/- on added cards)
+   - Additional Trainer: adds another ROW (NO +/- on added rows)
    - Support tickets add/move by status
    - Page reset buttons
    - Dropdown ghost styling (non-table only)
@@ -36,20 +37,27 @@
   function clearInputsInContainer(container) {
     if (!container) return;
 
+    // Inputs
     qsa(
       'input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]',
       container
-    ).forEach((i) => (i.value = ""));
+    ).forEach((i) => {
+      i.value = "";
+    });
 
+    // Textareas
     qsa("textarea", container).forEach((t) => (t.value = ""));
 
+    // Selects
     qsa("select", container).forEach((s) => {
       const ghost = qs('option[value=""][data-ghost="true"], option[value=""]', s);
       if (ghost) s.value = "";
       else s.selectedIndex = 0;
+
       setSelectPlaceholderState(s);
     });
 
+    // Checkboxes
     qsa('input[type="checkbox"]', container).forEach((c) => (c.checked = false));
   }
 
@@ -81,76 +89,106 @@
     ensureOnlyOneActiveSection(targetSection);
   }
 
-  /* -------------------------
+  /* =========================================================
      Integrated “+” Rows (non-table)
-     - clones the checklist-row.integrated-plus (ROW ONLY)
-     - clones DO NOT keep + or – buttons (per your requirement)
-  ------------------------- */
+
+     RULES:
+     - Only the TEMPLATE row/card has the "+" button.
+     - Added rows/cards have NO buttons at all.
+     - Additional Trainer: adds another ROW (no button on added rows)
+     - Additional POC: adds another MINI-CARD (no button on added cards)
+     ========================================================= */
+
+  function addAdditionalPocCard(addBtn) {
+    // Base card is marked data-base="true" in your HTML
+    const baseCard = addBtn.closest('.additional-poc-card[data-base="true"]');
+    if (!baseCard) return;
+
+    const clone = baseCard.cloneNode(true);
+
+    // Not base anymore
+    clone.removeAttribute("data-base");
+
+    // Clear inputs/selects/etc
+    clearInputsInContainer(clone);
+
+    // Remove any + / – buttons from the clone entirely
+    clone.querySelectorAll(".add-row, .remove-row, .additional-poc-add").forEach((b) => b.remove());
+
+    // Make the first row normal so the textbox is fully rounded (no integrated-plus styling)
+    const firstRow = qs(".checklist-row", clone);
+    if (firstRow) firstRow.classList.remove("integrated-plus");
+
+    // Insert after the last Additional POC card in the grid
+    const grid = qs("#primaryContactsGrid") || baseCard.parentElement;
+    if (!grid) return;
+
+    const cards = qsa(".additional-poc-card", grid);
+    const last = cards[cards.length - 1] || baseCard;
+    last.insertAdjacentElement("afterend", clone);
+  }
+
+  function addAdditionalTrainerRow(row) {
+    // row is the template .checklist-row.integrated-plus for "Additional Trainer"
+    const clone = row.cloneNode(true);
+
+    // Remove buttons from the clone entirely
+    clone.querySelectorAll(".add-row, .remove-row").forEach((b) => b.remove());
+
+    // Remove integrated-plus so the textbox becomes fully rounded (normal row)
+    clone.classList.remove("integrated-plus");
+
+    // Clear cloned inputs
+    clearInputsInContainer(clone);
+
+    // Prefer the dedicated container if present
+    const container = qs("#additionalTrainersContainer");
+    if (container) {
+      container.appendChild(clone);
+      return;
+    }
+
+    // Fallback: insert after last additional trainer row near this section
+    const parent = row.parentElement;
+    if (!parent) return;
+
+    const allTrainerRows = qsa(".checklist-row", parent).filter((r) => {
+      const lab = qs("label", r);
+      return lab && lab.textContent.trim().toLowerCase() === "additional trainer";
+    });
+    const last = allTrainerRows[allTrainerRows.length - 1] || row;
+    last.insertAdjacentElement("afterend", clone);
+  }
+
   function addIntegratedPlusRow(addBtn) {
     const row = addBtn.closest(".checklist-row.integrated-plus");
     if (!row) return;
 
-    // If this is the Additional POC add button, handle differently (clone CARD)
+    // Additional POC button adds a whole card
     if (addBtn.classList.contains("additional-poc-add")) {
       addAdditionalPocCard(addBtn);
       return;
     }
 
-    const clone = row.cloneNode(true);
-
-    // In the cloned row, REMOVE any add/remove buttons (no + or – on added rows)
-    qsa(".add-row, .remove-row", clone).forEach((btn) => btn.remove());
-
-    clearInputsInContainer(clone);
-
-    const parent = row.parentElement;
-    if (!parent) return;
-
-    const siblings = qsa(".checklist-row.integrated-plus", parent);
-    const last = siblings[siblings.length - 1] || row;
-    last.insertAdjacentElement("afterend", clone);
-  }
-
-  /* -------------------------
-     Additional POC (SPECIAL)
-     - clones the ENTIRE mini-card .additional-poc-card
-     - swaps + to – remove button on cloned cards
-     - removes entire card on –
-  ------------------------- */
-  function addAdditionalPocCard(addBtn) {
-    const baseCard = addBtn.closest(".additional-poc-card");
-    if (!baseCard) return;
-
-    const clone = baseCard.cloneNode(true);
-
-    // Clear all fields in cloned card
-    clearInputsInContainer(clone);
-
-    // Convert the cloned card button (+) into a remove (–)
-    const btn = qs(".additional-poc-add", clone) || qs(".add-row", clone);
-    if (btn) {
-      btn.textContent = "–";
-      btn.title = "Remove";
-      btn.classList.add("remove-row", "additional-poc-remove");
-      btn.classList.remove("add-row", "additional-poc-add");
+    // Additional Trainer row adds another row
+    const label = qs("label", row);
+    const labelText = (label?.textContent || "").trim().toLowerCase();
+    if (labelText === "additional trainer") {
+      addAdditionalTrainerRow(row);
+      return;
     }
 
-    // Insert clone after the last Additional POC card in the same grid/container
-    const parent = baseCard.parentElement;
-    if (!parent) return;
-
-    const cards = qsa(".additional-poc-card", parent);
-    const last = cards[cards.length - 1] || baseCard;
-    last.insertAdjacentElement("afterend", clone);
-  }
-
-  function removeAdditionalPocCard(removeBtn) {
-    const card = removeBtn.closest(".additional-poc-card");
-    if (card) card.remove();
+    // Generic integrated-plus row: clone as a normal row (no buttons)
+    const clone = row.cloneNode(true);
+    clone.querySelectorAll(".add-row, .remove-row").forEach((b) => b.remove());
+    clone.classList.remove("integrated-plus");
+    clearInputsInContainer(clone);
+    row.insertAdjacentElement("afterend", clone);
   }
 
   /* -------------------------
      Table “+” Row Buttons
+     - expects button inside .table-footer .add-row
      - clones last tbody row
   ------------------------- */
   function addTableRow(addBtn) {
@@ -173,11 +211,15 @@
     clearInputsInContainer(clone);
 
     tbody.appendChild(clone);
+
+    // Re-apply dropdown placeholder style (non-table handler exits early, but safe)
     qsa("select", clone).forEach(setSelectPlaceholderState);
   }
 
   /* -------------------------
      Support Tickets
+     - Add ticket card
+     - Move card by status dropdown
   ------------------------- */
   function getTicketContainers() {
     return {
@@ -231,6 +273,7 @@
     const { open, tierTwo, closedResolved, closedFeature } = getTicketContainers();
     if (!ticketGroup) return;
 
+    // Ensure only ONE badge at the top
     const existingBadge = qs(".ticket-badge", ticketGroup);
     if (existingBadge) existingBadge.remove();
 
@@ -248,6 +291,12 @@
     }
   }
 
+  function autosizeTextarea(textarea) {
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = Math.max(textarea.scrollHeight, 34) + "px";
+  }
+
   function addSupportTicketCard(addBtn) {
     const baseGroup = addBtn.closest(".ticket-group");
     if (!baseGroup) return;
@@ -258,11 +307,13 @@
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
+    // Remove + button from cloned card
     const plus = qs(".add-ticket-btn", clone);
     if (plus) plus.remove();
 
     clearInputsInContainer(clone);
 
+    // Default status to Open
     const statusSelect = qs(".ticket-status-select", clone);
     if (statusSelect) {
       statusSelect.value = "Open";
@@ -279,12 +330,6 @@
     if (summary) autosizeTextarea(summary);
   }
 
-  function autosizeTextarea(textarea) {
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = Math.max(textarea.scrollHeight, 34) + "px";
-  }
-
   /* -------------------------
      Reset Page Button
   ------------------------- */
@@ -294,6 +339,7 @@
 
     clearInputsInContainer(section);
 
+    // Special: support tickets
     if (section.id === "support-tickets") {
       const allGroups = qsa(".ticket-group", section);
       allGroups.forEach((g) => {
@@ -311,6 +357,23 @@
       qs("#closedFeatureTicketsContainer")?.replaceChildren();
     }
 
+    // Special: Additional POC cards — keep base, remove extras
+    if (section.id === "dealership-info") {
+      const grid = qs("#primaryContactsGrid", section);
+      if (grid) {
+        const pocCards = qsa(".additional-poc-card", grid);
+        pocCards.forEach((card) => {
+          if (card.dataset.base === "true") clearInputsInContainer(card);
+          else card.remove();
+        });
+      }
+    }
+
+    // Special: Additional Trainers — clear added rows in container if present
+    if (section.id === "onsite-trainers-cem") {
+      qs("#additionalTrainersContainer", section)?.replaceChildren();
+    }
+
     initAllSelectPlaceholders();
   }
 
@@ -321,15 +384,24 @@
     document.addEventListener("click", (e) => {
       // Sidebar nav
       const navBtn = e.target.closest("#sidebar .nav-btn");
-      if (navBtn) return handleSidebarClick(navBtn);
+      if (navBtn) {
+        handleSidebarClick(navBtn);
+        return;
+      }
 
       // Reset page
       const resetBtn = e.target.closest(".clear-page-btn");
-      if (resetBtn) return resetThisPage(resetBtn);
+      if (resetBtn) {
+        resetThisPage(resetBtn);
+        return;
+      }
 
       // Support tickets add
       const addTicketBtn = e.target.closest(".add-ticket-btn");
-      if (addTicketBtn) return addSupportTicketCard(addTicketBtn);
+      if (addTicketBtn) {
+        addSupportTicketCard(addTicketBtn);
+        return;
+      }
 
       // Support tickets remove
       const removeTicketBtn = e.target.closest(".remove-ticket-btn");
@@ -339,27 +411,34 @@
         return;
       }
 
-      // Additional POC remove (removes entire mini-card)
-      const removePocBtn = e.target.closest(".additional-poc-remove");
-      if (removePocBtn) return removeAdditionalPocCard(removePocBtn);
-
-      // Integrated-plus add (row cloning; Additional POC is intercepted inside)
+      // Integrated-plus add (+)
       const addRowBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
-      if (addRowBtn) return addIntegratedPlusRow(addRowBtn);
+      if (addRowBtn) {
+        addIntegratedPlusRow(addRowBtn);
+        return;
+      }
 
       // Table add-row
       const tableAddBtn = e.target.closest(".table-footer .add-row");
-      if (tableAddBtn) return addTableRow(tableAddBtn);
+      if (tableAddBtn) {
+        addTableRow(tableAddBtn);
+        return;
+      }
     });
 
     document.addEventListener("change", (e) => {
       const sel = e.target;
 
-      if (sel && sel.tagName === "SELECT") setSelectPlaceholderState(sel);
+      // Placeholder styling for dropdowns
+      if (sel && sel.tagName === "SELECT") {
+        setSelectPlaceholderState(sel);
+      }
 
+      // Ticket status changes → move card
       if (sel && sel.classList && sel.classList.contains("ticket-status-select")) {
         const group = sel.closest(".ticket-group");
-        moveTicketGroupByStatus(group, sel.value);
+        const status = sel.value;
+        moveTicketGroupByStatus(group, status);
       }
     });
 
@@ -372,7 +451,7 @@
   }
 
   /* -------------------------
-     Init (must run after DOM)
+     Init
   ------------------------- */
   function init() {
     bindDelegatedEvents();
