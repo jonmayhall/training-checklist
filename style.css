@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist – FULL CSS
+   myKaarma Interactive Training Checklist – FULL CSS (Cosmetics + Fixes)
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
@@ -48,88 +48,15 @@ textarea::placeholder {
 /* ---------- Ghost text / placeholder styling for dropdowns ---------- */
 
 /* Base dropdown text color */
-select {
-  color: var(--ink);
-}
+select { color: var(--ink); }
 
 /* Non-table dropdowns: grey ghost state when showing "Select an option…" */
-select.is-placeholder {
-  color: #9ca3af;
-}
+select.is-placeholder { color: #9ca3af; }
 
 /* Table dropdowns: always use normal text color (no ghost styling) */
 .training-table select,
 .training-table select.is-placeholder {
   color: var(--ink) !important;
-}
-
-/* Table dropdowns: always use normal text color (no ghost styling) */
-.training-table select,
-.training-table select.is-placeholder {
-  color: var(--ink);
-}
-/* ---------- Ensure added rows keep fully rounded inputs ---------- */
-
-/* All standard inputs should be pill-shaped */
-.checklist-row input[type="text"],
-.checklist-row input[type="email"],
-.checklist-row input[type="number"],
-.checklist-row input[type="tel"],
-.checklist-row input[type="date"],
-.checklist-row textarea {
-  border-radius: 999px;
-}
-
-/* Integrated-plus rows: restore right-side rounding */
-.checklist-row.integrated-plus input[type="text"],
-.checklist-row.integrated-plus textarea {
-  border-top-right-radius: 999px !important;
-  border-bottom-right-radius: 999px !important;
-}
-/* =========================================================
-   FIX: integrated-plus rows when button is NOT a direct child
-   (keeps input + button truly integrated)
-   ========================================================= */
-
-/* Wrap any right-side content as a single integrated unit */
-.section-block .checklist-row.integrated-plus .integrated-wrap,
-.section-block .checklist-row.integrated-plus .ticket-number-wrap,
-.section-block .checklist-row.integrated-plus .input-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  flex: 0 0 var(--input-width);
-  width: var(--input-width);
-  margin-left: auto;
-}
-
-/* Make the input take the left portion and be flat ONLY on the right */
-.section-block .checklist-row.integrated-plus .integrated-wrap input[type="text"],
-.section-block .checklist-row.integrated-plus .ticket-number-wrap input[type="text"],
-.section-block .checklist-row.integrated-plus .input-wrap input[type="text"],
-.section-block .checklist-row.integrated-plus .integrated-wrap input[type="tel"],
-.section-block .checklist-row.integrated-plus .ticket-number-wrap input[type="tel"],
-.section-block .checklist-row.integrated-plus .input-wrap input[type="tel"] {
-  flex: 1 1 auto;
-  width: auto;
-  border-top-left-radius: var(--radius-sm);
-  border-bottom-left-radius: var(--radius-sm);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Button becomes the right “cap” and sits flush */
-.section-block .checklist-row.integrated-plus .integrated-wrap .add-row,
-.section-block .checklist-row.integrated-plus .integrated-wrap .remove-row,
-.section-block .checklist-row.integrated-plus .ticket-number-wrap .add-row,
-.section-block .checklist-row.integrated-plus .ticket-number-wrap .remove-row,
-.section-block .checklist-row.integrated-plus .input-wrap .add-row,
-.section-block .checklist-row.integrated-plus .input-wrap .remove-row {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  margin-left: -1px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 /* --------------- BASE --------------- */
@@ -169,30 +96,16 @@ html, body {
   object-fit: contain;
   display: block;
 }
-
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 #dealershipNameDisplay {
   color:#fff;
   font-size:22px;
   font-weight:600;
   letter-spacing:.5px;
-}
-/* ===== Two-column section layout ===== */
-.section-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-
-@media (max-width: 900px) {
-  .section-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* --------------- LAYOUT --------------- */
@@ -220,7 +133,6 @@ html, body {
   flex-direction: column;
   gap: 6px;
 }
-
 .nav-icon { display:none; }
 
 /* MENU BUTTONS */
@@ -264,9 +176,7 @@ html, body {
   border-color: var(--orange);
   box-shadow: 0 4px 10px rgba(0,0,0,0.65);
 }
-.nav-btn.active::before {
-  opacity: 1;
-}
+.nav-btn.active::before { opacity: 1; }
 
 /* Clear All button */
 #clearAllBtn {
@@ -324,9 +234,7 @@ main {
   width: 100%;
   max-width: 960px;
 }
-.page-section.active {
-  display:block;
-}
+.page-section.active { display:block; }
 
 /* Page titles */
 .page-section h1 {
@@ -411,9 +319,7 @@ main {
 /* Notes extra gap */
 .notes-block { margin-bottom:32px; }
 .notes-block + .section-block,
-.notes-block + .section {
-  margin-top:10px;
-}
+.notes-block + .section { margin-top:10px; }
 
 /* --------------- NON-TABLE ROWS (Q&A lines) --------------- */
 .checklist-row {
@@ -456,50 +362,6 @@ main {
   font-size: 13px;
 }
 
-/* Dealership Address row – integrated Map button like other "+" rows */
-#dealership-info .address-input-wrap {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  flex: 0 0 var(--input-width);      /* same width as other text boxes */
-  width: var(--input-width);
-  margin-left: auto;                 /* right-align with other fields */
-}
-
-/* Text box takes most of the width, flat on the right to meet the button */
-#dealership-info .address-input-wrap input[type="text"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Map button integrated on the right, matching other "+" buttons */
-#dealership-info .address-input-wrap .small-map-btn {
-  flex: 0 0 34px;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  padding: 0;
-}
-
-#dealership-info .address-input-wrap .small-map-btn:hover {
-  background:#ff8b42;
-}
-
 /* Textareas */
 .section-block textarea {
   width: 96%;
@@ -526,9 +388,7 @@ main {
 }
 
 /* Indented sub-rows */
-.indent-sub {
-  padding-left: 60px !important;
-}
+.indent-sub { padding-left: 60px !important; }
 
 /* --------------- MINI-CARDS (Contacts etc.) --------------- */
 .mini-card {
@@ -544,9 +404,7 @@ main {
   border-bottom: 1px solid #e5e5e5;
   padding: 8px 24px;
 }
-.mini-card .checklist-row:last-child {
-  border-bottom:none;
-}
+.mini-card .checklist-row:last-child { border-bottom:none; }
 
 /* fixed label width inside mini-card */
 .mini-card .checklist-row label {
@@ -577,95 +435,155 @@ main {
   row-gap: 18px;
 }
 
-/* --------------- SCOPE-FREE INTEGRATED “+ / –” ROWS --------------- */
-/* Works in section-blocks AND mini-cards */
+/* --------------- MAP (Dealership Info) --------------- */
 
-.checklist-row.integrated-plus{
-  display:flex;
-  align-items:stretch;
-  gap:0 !important;                 /* kill the default 12px gap */
+/* Dealership Address row – integrated Map button like other "+" rows */
+#dealership-info .address-input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
 }
 
-/* Label rules (section rows keep flex label, mini-cards keep fixed label width) */
-.section-block .checklist-row.integrated-plus label{
-  flex:1 1 auto;
-  padding-right:16px;
-}
-.mini-card .checklist-row.integrated-plus label{
-  flex:0 0 36%;
-  padding-right:12px;
-  white-space:nowrap;
-}
-
-/* INPUT: fused to button (flat on RIGHT) */
-.checklist-row.integrated-plus input[type="text"],
-.checklist-row.integrated-plus input[type="tel"],
-.checklist-row.integrated-plus input[type="email"],
-.checklist-row.integrated-plus input[type="number"],
-.checklist-row.integrated-plus input[type="date"]{
-  margin-left:auto;
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
+/* Text box takes most of the width, flat on the RIGHT to meet the button */
+#dealership-info .address-input-wrap input[type="text"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
 }
 
-/* Section-block integrated rows use your fixed input width system */
+/* Map button integrated on the right */
+#dealership-info .address-input-wrap .small-map-btn {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
+}
+#dealership-info .address-input-wrap .small-map-btn:hover { background:#ff8b42; }
+
+/* Map embed */
+.map-wrapper {
+  margin: 16px 0 8px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8f8f8;
+}
+.map-frame {
+  width: 100%;
+  height: 220px;
+  border: 0;
+}
+.map-helper-text {
+  margin: 6px 10px 10px;
+  font-size: 12px;
+  color: #555;
+}
+
+/* --------------- GENERIC INTEGRATED “+” ROWS --------------- */
+.section-block .checklist-row.integrated-plus {
+  display: flex;
+  align-items: stretch;
+  gap: 0;                 /* must be 0 to “merge” the button */
+}
+
+/* Keep label normal in integrated-plus */
+.section-block .checklist-row.integrated-plus label {
+  flex: 1 1 auto;
+  padding-right: 16px;
+}
+
+/* INPUT when the + button exists (base template rows only) */
 .section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"],
-.section-block .checklist-row.integrated-plus input[type="email"],
-.section-block .checklist-row.integrated-plus input[type="number"],
-.section-block .checklist-row.integrated-plus input[type="date"]{
-  flex:0 0 calc(var(--input-width) - 34px);
-  width:calc(var(--input-width) - 34px);
+.section-block .checklist-row.integrated-plus input[type="tel"] {
+  flex: 0 0 calc(var(--input-width) - 34px);
+  width: calc(var(--input-width) - 34px);
+  margin-left: auto;
+
+  /* FLAT ONLY ON THE RIGHT (touching button) */
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  /* FORCE LEFT to stay rounded */
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
 }
 
-/* Mini-card integrated rows should fill remaining space next to fixed label */
-.mini-card .checklist-row.integrated-plus input[type="text"],
-.mini-card .checklist-row.integrated-plus input[type="tel"],
-.mini-card .checklist-row.integrated-plus input[type="email"],
-.mini-card .checklist-row.integrated-plus input[type="number"],
-.mini-card .checklist-row.integrated-plus input[type="date"]{
-  flex:1 1 auto;
-  width:auto;
-}
-
-/* Button: fused to input */
-.checklist-row.integrated-plus .add-row,
-.checklist-row.integrated-plus .remove-row{
-  flex:0 0 34px;
-  margin-left:-1px;
-  width:34px;
-  height:34px;
+/* Button must be the direct child of the row */
+.section-block .checklist-row.integrated-plus > .add-row {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  cursor:pointer;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  transition: .18s ease-in-out;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
 }
-
-/* + button style */
-.checklist-row.integrated-plus .add-row{
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  font-size:18px;
-  font-weight:700;
-  box-shadow:0 1px 4px rgba(243,111,33,0.25);
-}
-.checklist-row.integrated-plus .add-row:hover{
+.section-block .checklist-row.integrated-plus > .add-row:hover {
   background:#ff8b42;
+  transform: translateY(-1px);
 }
 
-/* – button style (keep yours grey like screenshot) */
-.checklist-row.integrated-plus .remove-row{
-  background:#f7f7f7;
-  color:#222;
-  border:1px solid #777;
-  font-size:18px;
-  font-weight:700;
+/* ---------------- FIX: when the button is NOT present (cloned rows)
+   The textbox must be FULL WIDTH and fully rounded.
+   This fixes “flat right side” + “button floating to the right” issues
+   on added Additional Trainer lines, etc.
+--------------------------------------------------------------- */
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="text"],
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="tel"] {
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  border-radius: var(--radius-sm) !important;
+}
+
+/* ---------------- FIX: Additional POC cards MUST NOT show a white + button
+   Only the BASE Additional POC card (data-base="true") can show +.
+--------------------------------------------------------------- */
+.additional-poc-card:not([data-base="true"]) .add-row,
+.additional-poc-card:not([data-base="true"]) .additional-poc-add {
+  display: none !important;
+}
+
+/* If a non-base Additional POC card still has integrated-plus styling,
+   make its POC textbox fully rounded/full width */
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"] {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  border-radius: var(--radius-sm) !important;
+  border-top-right-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
-
 .dms-overview-block { margin-bottom:28px; }
 
 .dms-legend {
@@ -802,10 +720,7 @@ main {
 }
 
 /* --------------- Training TABLES --------------- */
-
-.section {
-  margin-bottom:40px;
-}
+.section { margin-bottom:40px; }
 
 /* Section header above tables – width aligned with tables */
 .section-header {
@@ -838,6 +753,7 @@ main {
   background:#fff;
   padding-bottom:4px;
 }
+
 /* Table */
 .training-table {
   border-collapse:collapse;
@@ -875,15 +791,14 @@ main {
   left: 0;
   z-index: 4;
 }
+
 /* Training Checklist: make the Name column a bit wider */
 #training-checklist .training-table th:first-child,
 #training-checklist .training-table td:first-child {
   width: 210px;
   min-width: 210px;
 }
-.training-table thead th:first-child {
-  text-align:center;
-}
+.training-table thead th:first-child { text-align:center; }
 .training-table td:first-child {
   background:#fff;
   text-align:center;
@@ -908,25 +823,23 @@ main {
   font-size:13px;
   text-align:center;
 }
+
 /* Training Checklist – layout for Name cell: checkbox + pill input */
 #training-checklist .training-table td:first-child {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-
-/* Checkbox: fixed size */
 #training-checklist .training-table td:first-child input[type="checkbox"] {
   flex: 0 0 auto;
   margin: 0;
 }
-
-/* Textbox: fills remaining space inside the Name cell */
 #training-checklist .training-table td:first-child input[type="text"] {
   flex: 1 1 auto;
-  width: auto;   /* override width:100% from generic rule */
-  min-width: 0;  /* allow it to shrink to fit */
+  width: auto;
+  min-width: 0;
 }
+
 /* Alternating rows */
 .training-table tr:nth-child(odd) { background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
@@ -1051,30 +964,8 @@ main {
   transform:scale(1.1);
 }
 
-/* --------------- MAP EMBED (Dealership Info) --------------- */
-.map-wrapper {
-  margin: 16px 0 8px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #f8f8f8;
-}
-.map-frame {
-  width: 100%;
-  height: 220px;
-  border: 0;
-}
-.map-helper-text {
-  margin: 6px 10px 10px;
-  font-size: 12px;
-  color: #555;
-}
-
 /* --------------- SUPPORT TICKETS – CLEAN BUILD --------------- */
-
-#support-tickets .ticket-section {
-  margin-bottom: 24px;
-}
+#support-tickets .ticket-section { margin-bottom: 24px; }
 
 /* Support ticket card */
 #support-tickets .ticket-group {
@@ -1086,11 +977,7 @@ main {
   background: #fff;
   box-shadow: var(--shadow);
 }
-
-/* Inner wrapper so we can drop badge above the content */
-#support-tickets .ticket-group-inner {
-  margin-top: 4px;
-}
+#support-tickets .ticket-group-inner { margin-top: 4px; }
 
 /* Support Ticket Orange Badge */
 .ticket-badge {
@@ -1120,8 +1007,6 @@ main {
   margin-bottom: 0;
   padding-bottom: 0;
 }
-
-/* Label column (similar feel to checklist-row) */
 #support-tickets .ticket-row > label {
   flex: 1 1 auto;
   font-weight: 500;
@@ -1130,7 +1015,7 @@ main {
   padding-right: 16px;
 }
 
-/* Fields – same pill style + width as global Q&A inputs */
+/* Fields – same style + width as global Q&A inputs */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap {
@@ -1138,7 +1023,6 @@ main {
   width: var(--input-width);
   margin-left: auto;
 }
-
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select {
   width: 100%;
@@ -1154,16 +1038,14 @@ main {
   display: flex;
   align-items: stretch;
 }
-
-/* Base card only: flatten right side to merge with + button */
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input {
   flex: 0 0 calc(var(--input-width) - 34px);
   width: calc(var(--input-width) - 34px);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
 }
-
-/* + button on base card – same style as other integrated + */
 #support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn {
   flex: 0 0 34px;
   margin-left: -1px;
@@ -1198,13 +1080,7 @@ main {
   flex-direction: column;
   align-items: stretch;
 }
-
-/* Label spacing above textarea */
-#support-tickets .ticket-summary-row > label {
-  margin-bottom: 4px;
-}
-
-/* Short Summary textarea: full card width, same initial height, auto-grow via JS */
+#support-tickets .ticket-summary-row > label { margin-bottom: 4px; }
 #support-tickets .ticket-summary-input {
   width: 100%;
   max-width: 100%;
@@ -1215,23 +1091,16 @@ main {
   background: #f7f7f7;
   font-size: 13px;
   min-height: 34px;
-  resize: none; /* JS handles the height */
+  resize: none;
 }
 
 /* --------------- MONDAY VISIT – TINY TWEAKS --------------- */
-
-/* Make sure Monday Visit inputs & dropdowns match global sizing */
 #monday-visit .section-block .checklist-row input[type="text"],
 #monday-visit .section-block .checklist-row select {
   flex: 0 0 var(--input-width);
   width: var(--input-width);
 }
-
-/* Add a little vertical space between stacked mini-cards
-   (Service Manager Alignment) on Monday Visit page */
-#monday-visit .mini-card + .mini-card {
-  margin-top: 10px;
-}
+#monday-visit .mini-card + .mini-card { margin-top: 10px; }
 
 /* --------------- FLOATING PDF BUTTON (Summary) --------------- */
 #training-summary .floating-btn {
@@ -1248,9 +1117,7 @@ main {
   top: 18px;
   right: 24px;
 }
-#training-summary .floating-btn:hover {
-  background:#ff8b42;
-}
+#training-summary .floating-btn:hover { background:#ff8b42; }
 
 /* --------------- Muted note --------------- */
 .muted-note {
@@ -1264,17 +1131,13 @@ main {
   #sidebar { width:190px; }
   main { margin-left:190px; padding:20px; }
 
-  .primary-contacts-grid {
-    grid-template-columns:1fr;
-  }
+  .primary-contacts-grid { grid-template-columns:1fr; }
 }
 @media (max-width: 600px) {
   #sidebar { display:none; }
   main { margin-left:0; padding:16px; }
 
-  .primary-contacts-grid {
-    grid-template-columns:1fr;
-  }
+  .primary-contacts-grid { grid-template-columns:1fr; }
 
   .checklist-row {
     flex-direction:column;
@@ -1296,92 +1159,12 @@ main {
     flex-direction: column;
     align-items: flex-start;
   }
-  #support-tickets .ticket-row > label {
-    margin-bottom: 4px;
-  }
+  #support-tickets .ticket-row > label { margin-bottom: 4px; }
   #support-tickets .ticket-row > input[type="text"],
   #support-tickets .ticket-row > select,
   #support-tickets .ticket-row > .ticket-number-wrap {
     width: 100%;
     flex: 0 0 auto;
     margin-left: 0;
-/* =========================================================
-   FIX: Integrated + rows in MINI-CARDS (Additional POC)
-   - make the + / – buttons match your orange style
-   - keep the input visually correct
-   ========================================================= */
-
-/* 1) Style the add/remove button inside mini-cards like section-block */
-.mini-card .checklist-row.integrated-plus > .add-row,
-.mini-card .checklist-row.integrated-plus > .remove-row {
-  flex: 0 0 34px;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  padding: 0;
-}
-
-.mini-card .checklist-row.integrated-plus > .add-row:hover,
-.mini-card .checklist-row.integrated-plus > .remove-row:hover {
-  background:#ff8b42;
-  transform: translateY(-1px);
-}
-
-/* 2) Make mini-card integrated-plus inputs actually integrate (flat RIGHT, rounded LEFT) */
-.mini-card .checklist-row.integrated-plus input[type="text"],
-.mini-card .checklist-row.integrated-plus input[type="tel"] {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
-/* =========================================================
-   FIX: When JS clones an integrated-plus row, it removes the
-   class in the clone. BUT if anything still ends up with a
-   button removed and "integrated-plus" left behind, force it.
-   ========================================================= */
-
-/* Any checklist-row that DOES NOT contain an .add-row button
-   should NEVER be styled as integrated-plus (prevents flat-right clones) */
-.checklist-row.integrated-plus:not(:has(.add-row)) input[type="text"],
-.checklist-row.integrated-plus:not(:has(.add-row)) input[type="tel"] {
-  border-top-right-radius: var(--radius-sm) !important;
-  border-bottom-right-radius: var(--radius-sm) !important;
   }
-}
-/* Make integrated + / – buttons inside MINI-CARDS match orange style */
-.mini-card .checklist-row.integrated-plus > .add-row,
-.mini-card .checklist-row.integrated-plus > .remove-row {
-  flex: 0 0 34px;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition: .18s ease-in-out;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
-  padding: 0;
-}
-.mini-card .checklist-row.integrated-plus > .add-row:hover,
-.mini-card .checklist-row.integrated-plus > .remove-row:hover {
-  background:#ff8b42;
-  transform: translateY(-1px);
 }
