@@ -132,206 +132,119 @@
   </div>
 </section>
 
-      <!-- ========================================================= -->
+  <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
   <h1>Dealership Info</h1>
   <p class="page-subtitle">
-    Core dealership details and key contacts your team will work with.
+    Capture dealership details, location, and primary contacts for the onsite visit.
   </p>
-
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- DEALERSHIP DETAILS -->
+  <!-- FULL WIDTH: Address + Map (keep full width) -->
   <div class="section-block">
-    <h2>Dealership Details</h2>
-
-    <div class="checklist-row">
-      <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput" placeholder="Enter dealer group name">
-    </div>
-
-    <div class="checklist-row">
-      <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Enter dealership name">
-    </div>
-
-    <div class="checklist-row">
-      <label>DID</label>
-      <input type="text" id="dealershipDidInput" placeholder="Enter dealership DID">
-    </div>
-
-    <div class="checklist-row">
-      <label>DMS</label>
-      <select id="dealershipDmsSelect">
-        <option value="" data-ghost="true">Select DMS</option>
-        <option>CDK</option>
-        <option>Reynolds &amp; Reynolds</option>
-        <option>Dealertrack</option>
-        <option>Automate</option>
-        <option>Autosoft</option>
-        <option>DealerBuilt</option>
-        <option>PBS</option>
-        <option>Tekion</option>
-        <option>Other / Not Listed</option>
-      </select>
-    </div>
+    <h2>Dealership Location</h2>
 
     <div class="checklist-row">
       <label>Dealership Address</label>
 
+      <!-- integrated textbox + map button (matches your CSS) -->
       <div class="address-input-wrap">
-        <input
-          type="text"
-          id="dealershipAddressInput"
-          autocomplete="off"
-          placeholder="Enter dealership address"
-        >
-        <button
-          type="button"
-          id="openAddressInMapsBtn"
-          class="small-map-btn"
-        >
-          Map
-        </button>
+        <input id="dealershipAddress" type="text" placeholder="Start typing address…" />
+        <button type="button" class="small-map-btn" title="Open map">MAP</button>
       </div>
     </div>
 
-    <div class="map-wrapper" id="mapPreviewWrapper">
-      <iframe
-        id="dealershipMapFrame"
-        class="map-frame"
-        src=""
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-      ></iframe>
-      <p class="map-helper-text">
-        Select an address above to update this map. Click “Map” to open directions in Google Maps.
-      </p>
+    <div class="map-wrapper">
+      <iframe class="map-frame" id="dealershipMapFrame" loading="lazy"></iframe>
+      <div class="map-helper-text">
+        If the map doesn’t load, confirm the address and try again.
+      </div>
     </div>
   </div>
 
-  <!-- PRIMARY CONTACTS -->
+  <!-- SIDE-BY-SIDE: Details + Notes -->
+  <div class="two-col-grid">
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Dealership Details</h2>
+
+        <div class="checklist-row">
+          <label>Dealership Name</label>
+          <input type="text" placeholder="Enter dealership name" />
+        </div>
+
+        <div class="checklist-row">
+          <label>Dealer Group</label>
+          <input type="text" placeholder="Enter dealer group (if applicable)" />
+        </div>
+
+        <div class="checklist-row">
+          <label>DMS Provider</label>
+          <select>
+            <option value="" data-ghost="true">Select DMS</option>
+            <option>CDK</option>
+            <option>Reynolds</option>
+            <option>Dealertrack / Arkona</option>
+            <option>Dealerbuilt / Lightyear</option>
+            <option>PBS</option>
+            <option>Tekion</option>
+            <option>Automate</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="checklist-row">
+          <label>Store / Rooftop ID</label>
+          <input type="text" placeholder="Enter rooftop / store ID" />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Notes — Dealership Info</h2>
+        <textarea placeholder="Notes about the dealership, key context, or any risks"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL WIDTH: Primary Contacts (best full width, but your grid inside handles columns) -->
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div id="primaryContactsGrid" class="primary-contacts-grid">
-
-      <!-- SERVICE DIRECTOR -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Service Director</label>
-          <input type="text" placeholder="Enter Service Director name">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter email address">
-        </div>
-      </div>
-
-      <!-- SERVICE MANAGER -->
-      <div class="mini-card contact-card">
+    <div class="primary-contacts-grid">
+      <div class="mini-card">
         <div class="checklist-row">
           <label>Service Manager</label>
-          <input type="text" placeholder="Enter Service Manager name">
+          <input type="text" placeholder="Name" />
         </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter email address">
-        </div>
-      </div>
-
-      <!-- GENERAL MANAGER -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>General Manager</label>
-          <input type="text" placeholder="Enter General Manager name">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter email address">
-        </div>
-      </div>
-
-      <!-- PARTS MANAGER -->
-      <div class="mini-card contact-card">
-        <div class="checklist-row">
-          <label>Parts Manager</label>
-          <input type="text" placeholder="Enter Parts Manager name">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
-        </div>
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter email address">
-        </div>
-      </div>
-
-      <!-- ADDITIONAL POC TEMPLATE (base card) -->
-      <div class="mini-card contact-card additional-poc-card" data-base="true">
-        <div class="checklist-row integrated-plus">
-          <label>Additional POC</label>
-          <input
-            type="text"
-            class="additional-poc-name"
-            placeholder="Enter additional POC name"
-          />
-          <button
-            type="button"
-            class="add-row additional-poc-add"
-            title="Add another POC"
-          >+</button>
-        </div>
-
-        <div class="checklist-row">
-          <label>Email</label>
-          <input
-            type="email"
-            class="additional-poc-email"
-            placeholder="Enter email address"
-          >
-        </div>
-
         <div class="checklist-row">
           <label>Phone</label>
-          <input
-            type="tel"
-            class="additional-poc-phone"
-            placeholder="Enter phone number"
-          >
+          <input type="tel" placeholder="Phone number" />
         </div>
-
         <div class="checklist-row">
-          <label>Role / Title</label>
-          <input
-            type="text"
-            class="additional-poc-role"
-            placeholder="Enter role or title"
-          >
+          <label>Email</label>
+          <input type="email" placeholder="Email address" />
         </div>
       </div>
 
+      <div class="mini-card">
+        <div class="checklist-row">
+          <label>Parts Manager</label>
+          <input type="text" placeholder="Name" />
+        </div>
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input type="tel" placeholder="Phone number" />
+        </div>
+        <div class="checklist-row">
+          <label>Email</label>
+          <input type="email" placeholder="Email address" />
+        </div>
+      </div>
     </div>
-  </div>
-
-  <div class="section-block notes-block">
-    <h2>Notes &mdash; Dealership Info</h2>
-    <textarea placeholder="Additional notes about dealership structure, history, or expectations"></textarea>
   </div>
 </section>
 
@@ -3191,10 +3104,9 @@
         </div>
       </section>
 
-   <!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS
-     (SIDE-BY-SIDE applied)
-     ========================================================= -->
+  <!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKETS                                  -->
+<!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
@@ -3203,80 +3115,78 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- Row 1 -->
-  <div class="grid-2">
-    <!-- OPEN SUPPORT TICKETS -->
-    <div class="section-block ticket-section">
-      <h2>Open Support Tickets</h2>
+  <div class="two-col-grid">
+    <!-- LEFT: OPEN TICKETS -->
+    <div class="col-stack">
+      <div class="section-block ticket-section">
+        <h2>Open Support Tickets</h2>
 
-      <div id="openTicketsContainer">
-        <div class="ticket-group" data-base="true">
-          <div class="ticket-group-inner">
-            <div class="ticket-row ticket-number-row">
-              <label>Support Ticket Number</label>
-              <div class="ticket-number-wrap">
-                <input
-                  type="text"
-                  class="ticket-number-input"
-                  placeholder="Enter Zendesk ticket number"
-                />
-                <button
-                  type="button"
-                  class="add-ticket-btn"
-                  title="Add another support ticket"
-                >+</button>
+        <div id="openTicketsContainer">
+          <div class="ticket-group" data-base="true">
+            <div class="ticket-group-inner">
+              <div class="ticket-row ticket-number-row">
+                <label>Support Ticket Number</label>
+                <div class="ticket-number-wrap">
+                  <input
+                    type="text"
+                    class="ticket-number-input"
+                    placeholder="Enter Zendesk ticket number"
+                  />
+                  <button
+                    type="button"
+                    class="add-ticket-btn"
+                    title="Add another support ticket"
+                  >+</button>
+                </div>
               </div>
-            </div>
 
-            <div class="ticket-row">
-              <label>Status</label>
-              <select class="ticket-status-select">
-                <option value="Open" selected>Open</option>
-                <option value="Tier Two">Tier Two</option>
-                <option value="Closed - Resolved">Closed - Resolved</option>
-                <option value="Closed – Feature Not Supported">
-                  Closed – Feature Not Supported
-                </option>
-              </select>
-            </div>
+              <div class="ticket-row">
+                <label>Status</label>
+                <select class="ticket-status-select">
+                  <option value="Open" selected>Open</option>
+                  <option value="Tier Two">Tier Two</option>
+                  <option value="Closed - Resolved">Closed - Resolved</option>
+                  <option value="Closed – Feature Not Supported">
+                    Closed – Feature Not Supported
+                  </option>
+                </select>
+              </div>
 
-            <div class="ticket-row">
-              <label>Zendesk Link</label>
-              <input type="text" placeholder="Paste full Zendesk ticket URL">
-            </div>
+              <div class="ticket-row">
+                <label>Zendesk Link</label>
+                <input type="text" placeholder="Paste full Zendesk ticket URL">
+              </div>
 
-            <div class="ticket-row ticket-summary-row">
-              <label>Short Summary of the Issue</label>
-              <textarea
-                class="ticket-summary-input"
-                rows="2"
-                placeholder="High-level description of the issue"
-              ></textarea>
+              <div class="ticket-row ticket-summary-row">
+                <label>Short Summary of the Issue</label>
+                <textarea
+                  class="ticket-summary-input"
+                  rows="2"
+                  placeholder="High-level description of the issue"
+                ></textarea>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tier Two -->
-    <div class="section-block ticket-section">
-      <h2>Tier Two / Escalated Tickets</h2>
-      <div id="tierTwoTicketsContainer"></div>
-    </div>
-  </div>
+    <!-- RIGHT: ESCALATED + CLOSED STACKED -->
+    <div class="col-stack">
+      <div class="section-block ticket-section">
+        <h2>Tier Two / Escalated Tickets</h2>
+        <div id="tierTwoTicketsContainer"></div>
+      </div>
 
-  <!-- Row 2 -->
-  <div class="grid-2" style="margin-top:16px;">
-    <!-- Closed - Resolved -->
-    <div class="section-block ticket-section">
-      <h2>Closed - Resolved Support Tickets</h2>
-      <div id="closedResolvedTicketsContainer"></div>
-    </div>
+      <div class="section-block ticket-section">
+        <h2>Closed - Resolved Support Tickets</h2>
+        <div id="closedResolvedTicketsContainer"></div>
+      </div>
 
-    <!-- Closed - Feature Not Supported -->
-    <div class="section-block ticket-section">
-      <h2>Closed - Feature Not Supported</h2>
-      <div id="closedFeatureTicketsContainer"></div>
+      <div class="section-block ticket-section">
+        <h2>Closed - Feature Not Supported</h2>
+        <div id="closedFeatureTicketsContainer"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -4213,9 +4123,8 @@
       </section>
 
   <!-- ========================================================= -->
-<!-- PAGE 9: POST-TRAINING CHECKLIST
-     (SIDE-BY-SIDE applied)
-     ========================================================= -->
+<!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
+<!-- ========================================================= -->
 <section id="post-training" class="page-section">
   <h1>Post-Training Verification</h1>
   <p class="page-subtitle">
@@ -4223,181 +4132,198 @@
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <div class="grid-2">
-    <div class="section-block">
-      <h2>Training Completion by Role</h2>
+  <!-- ROW 1: Completion + Notes -->
+  <div class="two-col-grid">
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Training Completion by Role</h2>
 
-      <div class="checklist-row">
-        <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes — Fully Trained</option>
-          <option>Partially Trained</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
+        <div class="checklist-row">
+          <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes — Fully Trained</option>
+            <option>Partially Trained</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
 
-      <div class="checklist-row">
-        <label>Are all Technicians trained and using myKaarma from start to finish?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes — Fully Trained</option>
-          <option>Partially Trained</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
+        <div class="checklist-row">
+          <label>Are all Technicians trained and using myKaarma from start to finish?</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes — Fully Trained</option>
+            <option>Partially Trained</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
 
-      <div class="checklist-row">
-        <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes — Fully Trained</option>
-          <option>Partially Trained</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="checklist-row">
+          <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes — Fully Trained</option>
+            <option>Partially Trained</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="section-block">
-      <h2>Final Sign-Off</h2>
-
-      <div class="checklist-row">
-        <label>Did you conduct a tech and advisors walkthrough with the Service Manager?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Did you conduct a parts rep walkthrough with the Parts Manager?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Post-training CEM follow-up call.</label>
-        <input type="date" placeholder="Select follow-up date">
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Notes — Training Completion</h2>
+        <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
       </div>
     </div>
   </div>
 
-  <div class="section-block">
-    <h2>Notes — Training Completion</h2>
-    <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
-  </div>
+  <!-- ROW 2: Final Sign-Off + Notes -->
+  <div class="two-col-grid">
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Final Sign-Off</h2>
 
-  <div class="section-block">
-    <h2>Notes — Final Sign-Off</h2>
-    <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
-  </div>
+        <div class="checklist-row">
+          <label>Did you conduct a tech and advisors walkthrough with the Service Manager?</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
 
-  <div class="grid-2">
-    <div class="section-block">
-      <h2>DMS &amp; Data Validation</h2>
+        <div class="checklist-row">
+          <label>Did you conduct a parts rep walkthrough with the Parts Manager?</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
 
-      <div class="checklist-row">
-        <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>Inconsistent</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Opcodes and pricing align between myKaarma and the DMS.</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes — Correct</option>
-          <option>Some Issues</option>
-          <option>Major Issues</option>
-          <option>N/A</option>
-        </select>
+        <div class="checklist-row">
+          <label>Post-training CEM follow-up call.</label>
+          <input type="date" placeholder="Select follow-up date">
+        </div>
       </div>
     </div>
 
-    <div class="section-block orange-outline-card">
-      <h2>Automations</h2>
-
-      <div class="checklist-row">
-        <label>Are the following automations active?</label>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Appointment Reminders</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Welcome Texts</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>MPIs</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Videos</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Payment Requests</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>ServiceConnect / Follow-up</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>Notes — Final Sign-Off</h2>
+        <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
       </div>
     </div>
   </div>
 
-  <div class="section-block">
-    <h2>Notes — DMS &amp; Automations</h2>
-    <textarea placeholder="Specific findings, mismatches, or items that require follow-up"></textarea>
+  <!-- ROW 3: DMS Validation + Automations -->
+  <div class="two-col-grid">
+    <div class="col-stack">
+      <div class="section-block">
+        <h2>DMS &amp; Data Validation</h2>
+
+        <div class="checklist-row">
+          <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>Inconsistent</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row">
+          <label>Opcodes and pricing align between myKaarma and the DMS.</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes — Correct</option>
+            <option>Some Issues</option>
+            <option>Major Issues</option>
+            <option>N/A</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Notes — DMS &amp; Automations</h2>
+        <textarea placeholder="Specific findings, mismatches, or items that require follow-up"></textarea>
+      </div>
+    </div>
+
+    <div class="col-stack">
+      <div class="section-block orange-outline-card">
+        <h2>Automations</h2>
+
+        <div class="checklist-row">
+          <label>Are the following automations active?</label>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Appointment Reminders</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Welcome Texts</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>MPIs</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Videos</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Payment Requests</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>ServiceConnect / Follow-up</label>
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
