@@ -1,10 +1,5 @@
 /* =========================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   - Sidebar nav (Pages 1–11)
-   - Add row buttons (tables + integrated-plus rows)
-   - Support tickets add/move by status
-   - Page reset buttons
-   - Dropdown ghost styling (non-table only)
    ========================================================= */
 
 (function () {
@@ -21,7 +16,6 @@
   }
 
   function setSelectPlaceholderState(select) {
-    // Only apply placeholder styling for non-table dropdowns
     if (isInTrainingTable(select)) return;
     const isPlaceholder = !select.value || select.value === "";
     select.classList.toggle("is-placeholder", isPlaceholder);
@@ -63,17 +57,14 @@
   }
 
   /* -------------------------
-     Sidebar Nav (Pages 1–11)
+     Sidebar Nav
   ------------------------- */
   function handleSidebarClick(btn) {
     const targetId = btn?.dataset?.target;
     if (!targetId) return;
 
     const targetSection = document.getElementById(targetId);
-    if (!targetSection) {
-      console.warn("Sidebar target not found:", targetId);
-      return;
-    }
+    if (!targetSection) return;
 
     ensureOnlyOneActiveNav(btn);
     ensureOnlyOneActiveSection(targetSection);
@@ -81,79 +72,91 @@
 
   /* -------------------------
      Integrated “+” Rows (non-table)
-     - clones the checklist-row.integrated-plus
   ------------------------- */
 
-  // Decide if THIS integrated-plus row should clone as a NORMAL row (no button)
-  // We key off the placeholder text so you don't have to change HTML.
-  function shouldCloneAsPlainRow(row) {
-    const input = qs('input[type="text"], input[type="tel"], textarea', row);
-    const ph = (input?.getAttribute("placeholder") || "").toLowerCase();
-
-    // Add any other phrases you want treated as "plain clones"
-    if (ph.includes("additional trainer")) return true;
-    if (ph.includes("additional poc")) return true;
-
-    return false;
+  function getPlaceholderTextFromRow(row) {
+    const field =
+      qs('input[type="text"], input[type="tel"], textarea', row) ||
+      qs("select", row);
+    return (field?.getAttribute("placeholder") || "").toLowerCase();
   }
 
-  function forceFullyRoundedInputs(container) {
-    // Hard reset corners so nothing stays "flat"
-    qsa('input[type="text"], input[type="tel"], textarea', container).forEach((el) => {
-      el.style.borderRadius = "999px";
-      el.style.borderTopLeftRadius = "999px";
-      el.style.borderBottomLeftRadius = "999px";
-      el.style.borderTopRightRadius = "999px";
-      el.style.borderBottomRightRadius = "999px";
-    });
+  function isAdditionalPocRow(row) {
+    const ph = getPlaceholderTextFromRow(row);
+    return ph.includes("additional poc");
   }
 
   function addIntegratedPlusRow(addBtn) {
     const row = addBtn.closest(".checklist-row.integrated-plus");
     if (!row) return;
 
+    // ✅ SPECIAL CASE: "Additional POC" clones the ENTIRE mini-card
+    if (isAdditionalPocRow(row) && row.closest(".mini-card")) {
+      addAdditionalPocCard(addBtn);
+      return;
+    }
+
+    // Default behavior: clone just the row and turn + into –
     const clone = row.cloneNode(true);
     clearInputsInContainer(clone);
 
-    // If this row should produce a NORMAL textbox (no + / –)
-    if (shouldCloneAsPlainRow(row)) {
-      // Remove any integrated button(s)
-      clone.querySelectorAll(".add-row, .remove-row").forEach((btn) => btn.remove());
-
-      // CRITICAL: stop integrated-plus styling in CSS
-      clone.classList.remove("integrated-plus");
-
-      // Ensure textbox is fully rounded
-      forceFullyRoundedInputs(clone);
-    } else {
-      // Normal behavior: swap + to –
-      const cloneBtn = qs(".add-row", clone);
-      if (cloneBtn) {
-        cloneBtn.textContent = "–";
-        cloneBtn.title = "Remove";
-        cloneBtn.classList.add("remove-row");
-        // Keep .add-row for your orange styling; remove handler keys off .remove-row
-      }
+    const cloneBtn = qs(".add-row", clone);
+    if (cloneBtn) {
+      cloneBtn.textContent = "–";
+      cloneBtn.title = "Remove";
+      cloneBtn.classList.add("remove-row");
+      // keep .add-row for styling if you want; remove logic keys off .remove-row
     }
 
     const parent = row.parentElement;
     if (!parent) return;
 
-    const siblings = qsa(".checklist-row", parent);
+    const siblings = qsa(".checklist-row.integrated-plus", parent);
     const last = siblings[siblings.length - 1] || row;
     last.insertAdjacentElement("afterend", clone);
   }
 
   function removeIntegratedRow(removeBtn) {
-    // Remove only the row that has the remove button
-    const row = removeBtn.closest(".checklist-row");
-    if (row) row.remove();
+    // If the remove button is inside a mini-card "Additional POC", remove the whole card
+    const mini = removeBtn.closest(".mini-card");
+    const row = removeBtn.closest(".checklist-row.integrated-plus");
+    const ph = row ? getPlaceholderTextFromRow(row) : "";
+
+    if (mini && ph.includes("additional poc")) {
+      mini.remove();
+      return;
+    }
+
+    // Otherwise remove just the row
+    const r = removeBtn.closest(".checklist-row.integrated-plus");
+    if (r) r.remove();
+  }
+
+  // ✅ Clone entire Additional POC mini-card
+  function addAdditionalPocCard(addBtn) {
+    const row = addBtn.closest(".checklist-row.integrated-plus");
+    const miniCard = row?.closest(".mini-card");
+    if (!miniCard) return;
+
+    const clone = miniCard.cloneNode(true);
+    clearInputsInContainer(clone);
+
+    // In cloned mini-card: convert the top "+" button into a "–" remove button
+    const topRow = qs(".checklist-row.integrated-plus", clone);
+    const btn = topRow ? qs(".add-row, .remove-row", topRow) : null;
+    if (btn) {
+      btn.textContent = "–";
+      btn.title = "Remove";
+      btn.classList.add("remove-row");
+      btn.classList.remove("add-row"); // optional
+    }
+
+    // Insert cloned mini-card after this one
+    miniCard.insertAdjacentElement("afterend", clone);
   }
 
   /* -------------------------
      Table “+” Row Buttons
-     - expects button inside .table-footer .add-row
-     - clones last tbody row
   ------------------------- */
   function addTableRow(addBtn) {
     const footer = addBtn.closest(".table-footer");
@@ -167,11 +170,9 @@
     if (!tbody) return;
 
     const rows = qsa("tr", tbody);
-    if (rows.length === 0) return;
+    if (!rows.length) return;
 
-    const lastRow = rows[rows.length - 1];
-    const clone = lastRow.cloneNode(true);
-
+    const clone = rows[rows.length - 1].cloneNode(true);
     clearInputsInContainer(clone);
     tbody.appendChild(clone);
 
@@ -195,6 +196,12 @@
     badge.className = "ticket-badge";
     badge.textContent = text;
     return badge;
+  }
+
+  function autosizeTextarea(textarea) {
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = Math.max(textarea.scrollHeight, 34) + "px";
   }
 
   function addRemoveTicketBtn(ticketGroup) {
@@ -223,7 +230,6 @@
         return "Closed - Resolved";
       case "Closed – Feature Not Supported":
         return "Closed – Feature Not Supported";
-      case "Open":
       default:
         return "Open";
     }
@@ -233,22 +239,16 @@
     const { open, tierTwo, closedResolved, closedFeature } = getTicketContainers();
     if (!ticketGroup) return;
 
-    const existingBadge = qs(".ticket-badge", ticketGroup);
-    if (existingBadge) existingBadge.remove();
-
-    const badge = buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`);
-    ticketGroup.insertAdjacentElement("afterbegin", badge);
+    qs(".ticket-badge", ticketGroup)?.remove();
+    ticketGroup.insertAdjacentElement(
+      "afterbegin",
+      buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`)
+    );
 
     if (status === "Tier Two") tierTwo?.appendChild(ticketGroup);
     else if (status === "Closed - Resolved") closedResolved?.appendChild(ticketGroup);
     else if (status === "Closed – Feature Not Supported") closedFeature?.appendChild(ticketGroup);
     else open?.appendChild(ticketGroup);
-  }
-
-  function autosizeTextarea(textarea) {
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = Math.max(textarea.scrollHeight, 34) + "px";
   }
 
   function addSupportTicketCard(addBtn) {
@@ -261,16 +261,13 @@
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    const plus = qs(".add-ticket-btn", clone);
-    if (plus) plus.remove();
-
+    qs(".add-ticket-btn", clone)?.remove();
     clearInputsInContainer(clone);
 
     const statusSelect = qs(".ticket-status-select", clone);
     if (statusSelect) statusSelect.value = "Open";
 
-    const badge = buildTicketBadge("Status: Open");
-    clone.insertAdjacentElement("afterbegin", badge);
+    clone.insertAdjacentElement("afterbegin", buildTicketBadge("Status: Open"));
     addRemoveTicketBtn(clone);
 
     containers.open.appendChild(clone);
@@ -280,7 +277,7 @@
   }
 
   /* -------------------------
-     Reset Page Button
+     Reset Page
   ------------------------- */
   function resetThisPage(btn) {
     const section = btn.closest(".page-section");
@@ -289,8 +286,7 @@
     clearInputsInContainer(section);
 
     if (section.id === "support-tickets") {
-      const allGroups = qsa(".ticket-group", section);
-      allGroups.forEach((g) => {
+      qsa(".ticket-group", section).forEach((g) => {
         if (g.dataset.base === "true") {
           clearInputsInContainer(g);
           const s = qs(".ticket-status-select", g);
@@ -309,7 +305,7 @@
   }
 
   /* -------------------------
-     Global Click + Change Delegation
+     Delegated Events
   ------------------------- */
   function bindDelegatedEvents() {
     document.addEventListener("click", (e) => {
@@ -323,31 +319,16 @@
       if (addTicketBtn) return void addSupportTicketCard(addTicketBtn);
 
       const removeTicketBtn = e.target.closest(".remove-ticket-btn");
-      if (removeTicketBtn) {
-        removeTicketBtn.closest(".ticket-group")?.remove();
-        return;
-      }
+      if (removeTicketBtn) return void removeTicketBtn.closest(".ticket-group")?.remove();
 
-      // Integrated-plus remove (the "–" button)
-      const removeRowBtn = e.target.closest(".checklist-row .remove-row");
-      if (removeRowBtn) {
-        removeIntegratedRow(removeRowBtn);
-        return;
-      }
+      const removeRowBtn = e.target.closest(".remove-row");
+      if (removeRowBtn) return void removeIntegratedRow(removeRowBtn);
 
-      // Integrated-plus add (the "+" button)
       const addRowBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
-      if (addRowBtn) {
-        addIntegratedPlusRow(addRowBtn);
-        return;
-      }
+      if (addRowBtn) return void addIntegratedPlusRow(addRowBtn);
 
-      // Table add-row
       const tableAddBtn = e.target.closest(".table-footer .add-row");
-      if (tableAddBtn) {
-        addTableRow(tableAddBtn);
-        return;
-      }
+      if (tableAddBtn) return void addTableRow(tableAddBtn);
     });
 
     document.addEventListener("change", (e) => {
@@ -356,8 +337,7 @@
       if (sel && sel.tagName === "SELECT") setSelectPlaceholderState(sel);
 
       if (sel && sel.classList && sel.classList.contains("ticket-status-select")) {
-        const group = sel.closest(".ticket-group");
-        moveTicketGroupByStatus(group, sel.value);
+        moveTicketGroupByStatus(sel.closest(".ticket-group"), sel.value);
       }
     });
 
@@ -369,9 +349,6 @@
     });
   }
 
-  /* -------------------------
-     Init
-  ------------------------- */
   function init() {
     bindDelegatedEvents();
     initAllSelectPlaceholders();
