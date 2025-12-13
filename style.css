@@ -1057,4 +1057,74 @@ main {
     flex: 0 0 auto;
     margin-left: 0;
   }
+   /* =======================================================
+   HEADER / TOPBAR — RESTORE (PASTE AT VERY BOTTOM)
+   ======================================================= */
+
+/* Make sure the fixed topbar is visible and on top */
+#topbar{
+  display:flex !important;
+  background: linear-gradient(90deg, #000 0%, var(--orange) 100%) !important;
+  height: 70px !important;
+  align-items: center !important;
+  padding: 0 40px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+}
+
+/* Topbar inner layout */
+#topbar .topbar-content{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+}
+
+/* Logo sizing + force it visible */
+#topbar .top-logo{
+  height: 42px !important;
+  max-height: 42px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  display:block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Right side dealer name */
+#topbar #dealershipNameDisplay{
+  color:#fff !important;
+  font-size:22px !important;
+  font-weight:600 !important;
+  letter-spacing:.5px !important;
+}
+
+/* Ensure your app/content starts below the fixed topbar */
+#app{ margin-top: 70px !important; }
+main{ padding-top: 30px !important; } /* keeps your cushion */
+
+/* =======================================================
+   PAGE TITLE (H1) — restore clean “myKaarma look”
+   ======================================================= */
+.page-section h1{
+  color: var(--orange) !important;
+  margin: 4px 0 8px 4px !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  letter-spacing: .3px !important;
+}
+.page-section h1::after{
+  content:"" !important;
+  display:block !important;
+  width: 360px !important;     /* looks like your original */
+  max-width: 80% !important;   /* prevents ugly overrun */
+  height: 4px !important;
+  background: var(--orange) !important;
+  margin-top: 8px !important;
+  border-radius: 2px !important;
+}
 }
