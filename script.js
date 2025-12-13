@@ -1,12 +1,14 @@
 /* =========================================================
    myKaarma Interactive Training Checklist — FULL script.js
    - Sidebar nav (Pages 1–11)
-   - Add row buttons (tables + integrated-plus rows)
-   - Additional POC: adds ENTIRE mini-card (NO +/- on added cards)
-   - Additional Trainer: adds another ROW (NO +/- on added rows)
+   - Add row buttons (tables)
+   - Integrated-plus (ONLY for simple single-field lines)
+   - Additional Trainer: clones a NORMAL rounded line (no +, no flat edges)
+   - Additional POC: clones ENTIRE mini-card (no + on clones)
    - Support tickets add/move by status
    - Page reset buttons
    - Dropdown ghost styling (non-table only)
+   - Google Places Address Autocomplete + Map preview + Map button
    ========================================================= */
 
 (function () {
@@ -23,9 +25,8 @@
   }
 
   function setSelectPlaceholderState(select) {
-    // Only apply placeholder styling for non-table dropdowns
-    if (isInTrainingTable(select)) return;
-
+    if (!select || select.tagName !== "SELECT") return;
+    if (isInTrainingTable(select)) return; // never ghost-style table selects
     const isPlaceholder = !select.value || select.value === "";
     select.classList.toggle("is-placeholder", isPlaceholder);
   }
@@ -37,27 +38,24 @@
   function clearInputsInContainer(container) {
     if (!container) return;
 
-    // Inputs
-    qsa(
-      'input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]',
-      container
-    ).forEach((i) => {
-      i.value = "";
-    });
+    // text/number/email/tel/date
+    qsa('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"]', container)
+      .forEach((i) => {
+        i.value = "";
+      });
 
-    // Textareas
+    // textareas
     qsa("textarea", container).forEach((t) => (t.value = ""));
 
-    // Selects
+    // selects
     qsa("select", container).forEach((s) => {
       const ghost = qs('option[value=""][data-ghost="true"], option[value=""]', s);
       if (ghost) s.value = "";
       else s.selectedIndex = 0;
-
       setSelectPlaceholderState(s);
     });
 
-    // Checkboxes
+    // checkboxes
     qsa('input[type="checkbox"]', container).forEach((c) => (c.checked = false));
   }
 
@@ -73,7 +71,7 @@
   }
 
   /* -------------------------
-     Sidebar Nav (Pages 1–11)
+     Sidebar Nav
   ------------------------- */
   function handleSidebarClick(btn) {
     const targetId = btn?.dataset?.target;
@@ -90,106 +88,105 @@
   }
 
   /* =========================================================
-     Integrated “+” Rows (non-table)
+     ADDITIONAL TRAINER (YOUR EXACT HTML ON PAGE 1)
 
-     RULES:
-     - Only the TEMPLATE row/card has the "+" button.
-     - Added rows/cards have NO buttons at all.
-     - Additional Trainer: adds another ROW (no button on added rows)
-     - Additional POC: adds another MINI-CARD (no button on added cards)
-     ========================================================= */
+     Base row is:
+       <div class="checklist-row integrated-plus">
+         <label>Additional Trainer</label>
+         <input type="text" ...>
+         <button class="add-row">+</button>
+       </div>
+       <div id="additionalTrainersContainer"></div>
 
+     Behavior:
+       - Click + : create a NORMAL checklist-row (NOT integrated-plus)
+       - New row has ONLY label + rounded input (no button)
+       - Insert into #additionalTrainersContainer
+  ========================================================= */
+  function addAdditionalTrainerLine(addBtn) {
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus");
+    if (!baseRow) return;
+
+    const container = qs("#additionalTrainersContainer", baseRow.closest(".section-block")) || qs("#additionalTrainersContainer");
+    if (!container) return;
+
+    const input = qs('input[type="text"]', baseRow);
+    const placeholder = input?.getAttribute("placeholder") || "Enter additional trainer name";
+
+    const row = document.createElement("div");
+    row.className = "checklist-row"; // IMPORTANT: NOT integrated-plus
+
+    // Build label + input (no button)
+    row.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" placeholder="${escapeHtml(placeholder)}">
+    `;
+
+    container.appendChild(row);
+  }
+
+  /* =========================================================
+     ADDITIONAL POC (CLONE ENTIRE CARD)
+
+     Base card:
+       <div class="mini-card contact-card additional-poc-card" data-base="true"> ... </div>
+
+     Behavior:
+       - Click + on base card only
+       - Clone the entire card
+       - Remove the + button from the clone
+       - Convert the name line to NORMAL (remove integrated-plus so it rounds)
+       - Add a "Remove POC" button on the clone
+  ========================================================= */
   function addAdditionalPocCard(addBtn) {
-    // Base card is marked data-base="true" in your HTML
-    const baseCard = addBtn.closest('.additional-poc-card[data-base="true"]');
+    const baseCard = addBtn.closest(".additional-poc-card");
     if (!baseCard) return;
+
+    // Only base card should spawn clones
+    const isBase = baseCard.dataset.base === "true";
+    if (!isBase) return;
 
     const clone = baseCard.cloneNode(true);
 
-    // Not base anymore
-    clone.removeAttribute("data-base");
+    // Clone is NOT base
+    clone.dataset.base = "false";
 
-    // Clear inputs/selects/etc
+    // Remove the + button from the clone completely
+    qsa(".additional-poc-add, .add-row", clone).forEach((b) => b.remove());
+
+    // IMPORTANT: remove integrated-plus styling from the name row so it becomes rounded
+    const nameRow = qs(".checklist-row.integrated-plus", clone);
+    if (nameRow) nameRow.classList.remove("integrated-plus");
+
+    // Clear all fields in clone
     clearInputsInContainer(clone);
 
-    // Remove any + / – buttons from the clone entirely
-    clone.querySelectorAll(".add-row, .remove-row, .additional-poc-add").forEach((b) => b.remove());
+    // Add a remove button at bottom of the clone card
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-poc-card-btn";
+    removeBtn.textContent = "Remove POC";
+    removeBtn.style.marginTop = "10px";
+    removeBtn.style.padding = "6px 10px";
+    removeBtn.style.borderRadius = "999px";
+    removeBtn.style.border = "1px solid #bbb";
+    removeBtn.style.background = "#f7f7f7";
+    removeBtn.style.cursor = "pointer";
+    removeBtn.style.fontSize = "11px";
+    removeBtn.style.textTransform = "uppercase";
+    removeBtn.style.letterSpacing = "0.08em";
 
-    // Make the first row normal so the textbox is fully rounded (no integrated-plus styling)
-    const firstRow = qs(".checklist-row", clone);
-    if (firstRow) firstRow.classList.remove("integrated-plus");
+    clone.appendChild(removeBtn);
 
-    // Insert after the last Additional POC card in the grid
-    const grid = qs("#primaryContactsGrid") || baseCard.parentElement;
-    if (!grid) return;
-
+    // Insert clone AFTER the last additional-poc-card in the same grid
+    const grid = baseCard.closest(".primary-contacts-grid") || baseCard.parentElement;
     const cards = qsa(".additional-poc-card", grid);
     const last = cards[cards.length - 1] || baseCard;
     last.insertAdjacentElement("afterend", clone);
   }
 
-  function addAdditionalTrainerRow(row) {
-    // row is the template .checklist-row.integrated-plus for "Additional Trainer"
-    const clone = row.cloneNode(true);
-
-    // Remove buttons from the clone entirely
-    clone.querySelectorAll(".add-row, .remove-row").forEach((b) => b.remove());
-
-    // Remove integrated-plus so the textbox becomes fully rounded (normal row)
-    clone.classList.remove("integrated-plus");
-
-    // Clear cloned inputs
-    clearInputsInContainer(clone);
-
-    // Prefer the dedicated container if present
-    const container = qs("#additionalTrainersContainer");
-    if (container) {
-      container.appendChild(clone);
-      return;
-    }
-
-    // Fallback: insert after last additional trainer row near this section
-    const parent = row.parentElement;
-    if (!parent) return;
-
-    const allTrainerRows = qsa(".checklist-row", parent).filter((r) => {
-      const lab = qs("label", r);
-      return lab && lab.textContent.trim().toLowerCase() === "additional trainer";
-    });
-    const last = allTrainerRows[allTrainerRows.length - 1] || row;
-    last.insertAdjacentElement("afterend", clone);
-  }
-
-  function addIntegratedPlusRow(addBtn) {
-    const row = addBtn.closest(".checklist-row.integrated-plus");
-    if (!row) return;
-
-    // Additional POC button adds a whole card
-    if (addBtn.classList.contains("additional-poc-add")) {
-      addAdditionalPocCard(addBtn);
-      return;
-    }
-
-    // Additional Trainer row adds another row
-    const label = qs("label", row);
-    const labelText = (label?.textContent || "").trim().toLowerCase();
-    if (labelText === "additional trainer") {
-      addAdditionalTrainerRow(row);
-      return;
-    }
-
-    // Generic integrated-plus row: clone as a normal row (no buttons)
-    const clone = row.cloneNode(true);
-    clone.querySelectorAll(".add-row, .remove-row").forEach((b) => b.remove());
-    clone.classList.remove("integrated-plus");
-    clearInputsInContainer(clone);
-    row.insertAdjacentElement("afterend", clone);
-  }
-
   /* -------------------------
      Table “+” Row Buttons
-     - expects button inside .table-footer .add-row
-     - clones last tbody row
   ------------------------- */
   function addTableRow(addBtn) {
     const footer = addBtn.closest(".table-footer");
@@ -209,17 +206,13 @@
     const clone = lastRow.cloneNode(true);
 
     clearInputsInContainer(clone);
-
     tbody.appendChild(clone);
 
-    // Re-apply dropdown placeholder style (non-table handler exits early, but safe)
     qsa("select", clone).forEach(setSelectPlaceholderState);
   }
 
   /* -------------------------
      Support Tickets
-     - Add ticket card
-     - Move card by status dropdown
   ------------------------- */
   function getTicketContainers() {
     return {
@@ -273,22 +266,16 @@
     const { open, tierTwo, closedResolved, closedFeature } = getTicketContainers();
     if (!ticketGroup) return;
 
-    // Ensure only ONE badge at the top
     const existingBadge = qs(".ticket-badge", ticketGroup);
     if (existingBadge) existingBadge.remove();
 
     const badge = buildTicketBadge(`Status: ${ticketBadgeTextForStatus(status)}`);
     ticketGroup.insertAdjacentElement("afterbegin", badge);
 
-    if (status === "Tier Two") {
-      tierTwo?.appendChild(ticketGroup);
-    } else if (status === "Closed - Resolved") {
-      closedResolved?.appendChild(ticketGroup);
-    } else if (status === "Closed – Feature Not Supported") {
-      closedFeature?.appendChild(ticketGroup);
-    } else {
-      open?.appendChild(ticketGroup);
-    }
+    if (status === "Tier Two") tierTwo?.appendChild(ticketGroup);
+    else if (status === "Closed - Resolved") closedResolved?.appendChild(ticketGroup);
+    else if (status === "Closed – Feature Not Supported") closedFeature?.appendChild(ticketGroup);
+    else open?.appendChild(ticketGroup);
   }
 
   function autosizeTextarea(textarea) {
@@ -307,13 +294,11 @@
     const clone = baseGroup.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    // Remove + button from cloned card
     const plus = qs(".add-ticket-btn", clone);
     if (plus) plus.remove();
 
     clearInputsInContainer(clone);
 
-    // Default status to Open
     const statusSelect = qs(".ticket-status-select", clone);
     if (statusSelect) {
       statusSelect.value = "Open";
@@ -339,7 +324,22 @@
 
     clearInputsInContainer(section);
 
-    // Special: support tickets
+    // Remove additional trainers that were added (keep base line intact)
+    if (section.id === "onsite-trainers-cem") {
+      const container = qs("#additionalTrainersContainer", section);
+      if (container) container.replaceChildren();
+    }
+
+    // Remove cloned additional POC cards (keep base)
+    if (section.id === "dealership-info") {
+      const cards = qsa(".additional-poc-card", section);
+      cards.forEach((c) => {
+        if (c.dataset.base === "true") clearInputsInContainer(c);
+        else c.remove();
+      });
+    }
+
+    // Support tickets special reset
     if (section.id === "support-tickets") {
       const allGroups = qsa(".ticket-group", section);
       allGroups.forEach((g) => {
@@ -357,25 +357,79 @@
       qs("#closedFeatureTicketsContainer")?.replaceChildren();
     }
 
-    // Special: Additional POC cards — keep base, remove extras
-    if (section.id === "dealership-info") {
-      const grid = qs("#primaryContactsGrid", section);
-      if (grid) {
-        const pocCards = qsa(".additional-poc-card", grid);
-        pocCards.forEach((card) => {
-          if (card.dataset.base === "true") clearInputsInContainer(card);
-          else card.remove();
-        });
-      }
-    }
-
-    // Special: Additional Trainers — clear added rows in container if present
-    if (section.id === "onsite-trainers-cem") {
-      qs("#additionalTrainersContainer", section)?.replaceChildren();
-    }
-
     initAllSelectPlaceholders();
   }
+
+  /* =========================================================
+     GOOGLE ADDRESS AUTOCOMPLETE + MAP PREVIEW + MAP BUTTON
+     - Restores your "Dealership Address" workflow
+  ========================================================= */
+  let addressAutocomplete = null;
+
+  function updateMapPreviewFromAddress(address) {
+    const frame = qs("#dealershipMapFrame");
+    const wrapper = qs("#mapPreviewWrapper");
+    if (!frame) return;
+
+    if (!address) {
+      frame.src = "";
+      if (wrapper) wrapper.style.display = "none";
+      return;
+    }
+
+    // Use Maps embed "search" URL (no extra key required for iframe)
+    const url = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+    frame.src = url;
+    if (wrapper) wrapper.style.display = "block";
+  }
+
+  function openAddressInGoogleMaps(address) {
+    if (!address) return;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function wireMapButton() {
+    const btn = qs("#openAddressInMapsBtn");
+    const input = qs("#dealershipAddressInput");
+    if (!btn || !input) return;
+
+    btn.addEventListener("click", () => {
+      const address = input.value?.trim();
+      openAddressInGoogleMaps(address);
+    });
+  }
+
+  // Must be global for Google callback
+  window.initAddressAutocomplete = function initAddressAutocomplete() {
+    try {
+      const input = document.getElementById("dealershipAddressInput");
+      if (!input || !window.google || !google.maps || !google.maps.places) return;
+
+      addressAutocomplete = new google.maps.places.Autocomplete(input, {
+        types: ["address"],
+        fields: ["formatted_address"],
+      });
+
+      addressAutocomplete.addListener("place_changed", () => {
+        const place = addressAutocomplete.getPlace();
+        const address = place?.formatted_address || input.value?.trim() || "";
+        updateMapPreviewFromAddress(address);
+      });
+
+      // If user pastes/types without selecting a place:
+      input.addEventListener("blur", () => {
+        const address = input.value?.trim() || "";
+        updateMapPreviewFromAddress(address);
+      });
+
+      // ensure map btn works
+      wireMapButton();
+
+    } catch (err) {
+      console.warn("initAddressAutocomplete error:", err);
+    }
+  };
 
   /* -------------------------
      Global Click + Change Delegation
@@ -411,10 +465,27 @@
         return;
       }
 
-      // Integrated-plus add (+)
-      const addRowBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
-      if (addRowBtn) {
-        addIntegratedPlusRow(addRowBtn);
+      // Additional Trainer add (your Page 1 base line)
+      const addTrainerBtn = e.target.closest(
+        '#onsite-trainers-cem .checklist-row.integrated-plus .add-row'
+      );
+      if (addTrainerBtn) {
+        addAdditionalTrainerLine(addTrainerBtn);
+        return;
+      }
+
+      // Additional POC add (clone the whole card)
+      const addPocBtn = e.target.closest(".additional-poc-add");
+      if (addPocBtn) {
+        addAdditionalPocCard(addPocBtn);
+        return;
+      }
+
+      // Remove POC clone card
+      const removePocBtn = e.target.closest(".remove-poc-card-btn");
+      if (removePocBtn) {
+        const card = removePocBtn.closest(".additional-poc-card");
+        if (card) card.remove();
         return;
       }
 
@@ -427,18 +498,17 @@
     });
 
     document.addEventListener("change", (e) => {
-      const sel = e.target;
+      const el = e.target;
 
       // Placeholder styling for dropdowns
-      if (sel && sel.tagName === "SELECT") {
-        setSelectPlaceholderState(sel);
+      if (el && el.tagName === "SELECT") {
+        setSelectPlaceholderState(el);
       }
 
       // Ticket status changes → move card
-      if (sel && sel.classList && sel.classList.contains("ticket-status-select")) {
-        const group = sel.closest(".ticket-group");
-        const status = sel.value;
-        moveTicketGroupByStatus(group, status);
+      if (el && el.classList && el.classList.contains("ticket-status-select")) {
+        const group = el.closest(".ticket-group");
+        moveTicketGroupByStatus(group, el.value);
       }
     });
 
@@ -457,52 +527,28 @@
     bindDelegatedEvents();
     initAllSelectPlaceholders();
 
+    // Ensure one section is visible on load
     const activeBtn = qs("#sidebar .nav-btn.active") || qs("#sidebar .nav-btn");
     if (activeBtn) handleSidebarClick(activeBtn);
 
+    // Autosize any existing ticket summary textareas
     qsa(".ticket-summary-input").forEach(autosizeTextarea);
+
+    // Wire map button even if google hasn't loaded yet
+    wireMapButton();
   }
 
   document.addEventListener("DOMContentLoaded", init);
+
+  /* -------------------------
+     Small util
+  ------------------------- */
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 })();
-// =========================================================
-// GOOGLE MAPS – DEALERSHIP ADDRESS AUTOCOMPLETE
-// =========================================================
-let dealershipAutocomplete;
-
-function initAddressAutocomplete() {
-  const addressInput = document.getElementById("dealershipAddressInput");
-  const mapFrame = document.getElementById("dealershipMapFrame");
-  const mapWrapper = document.getElementById("mapPreviewWrapper");
-  const mapBtn = document.getElementById("openAddressInMapsBtn");
-
-  if (!addressInput || !window.google || !google.maps?.places) {
-    console.warn("Google Maps Places not ready or address input missing");
-    return;
-  }
-
-  dealershipAutocomplete = new google.maps.places.Autocomplete(addressInput, {
-    types: ["geocode"],
-  });
-
-  dealershipAutocomplete.addListener("place_changed", () => {
-    const place = dealershipAutocomplete.getPlace();
-    if (!place || !place.formatted_address) return;
-
-    const encoded = encodeURIComponent(place.formatted_address);
-    const embedUrl = `https://www.google.com/maps?q=${encoded}&output=embed`;
-
-    mapFrame.src = embedUrl;
-    mapWrapper.style.display = "block";
-  });
-
-  // Map button → open Google Maps in new tab
-  if (mapBtn) {
-    mapBtn.addEventListener("click", () => {
-      const address = addressInput.value.trim();
-      if (!address) return;
-      const encoded = encodeURIComponent(address);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
-    });
-  }
-}
