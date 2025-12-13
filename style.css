@@ -283,3 +283,134 @@ main {
   main { margin-left: 0; padding: 16px; }
   #sidebar { display: none; }
 }
+/* =======================================================
+   PATCH: Restore Sidebar Menu + Add Buttons Appearance
+   Paste at the VERY BOTTOM of style.css
+   ======================================================= */
+
+/* -----------------------------
+   1) SIDEBAR MENU BUTTONS FIX
+   (prevents generic button styles from whitening them)
+-------------------------------- */
+#sidebar #sidebar-nav .nav-btn,
+#sidebar #sidebar-nav .nav-btn:visited,
+#sidebar #sidebar-nav .nav-btn:active {
+  background: transparent !important;
+  color: #e5e7eb !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+#sidebar #sidebar-nav .nav-btn:hover {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #f9fafb !important;
+  border-color: rgba(148, 163, 184, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.7) !important;
+}
+
+#sidebar #sidebar-nav .nav-btn.active {
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: #f9fafb !important;
+  font-weight: 600 !important;
+  border-color: var(--orange) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.65) !important;
+}
+
+/* Make sure the “active” orange rail shows */
+#sidebar #sidebar-nav .nav-btn::before {
+  opacity: 0 !important;
+}
+#sidebar #sidebar-nav .nav-btn.active::before {
+  opacity: 1 !important;
+}
+
+/* -----------------------------
+   2) GLOBAL BUTTON “WHITE OUT” GUARD
+   (only touches your app buttons, not browser defaults)
+-------------------------------- */
+.section-block button,
+.ticket-section button,
+.table-footer button,
+.address-input-wrap button {
+  background: initial;
+}
+
+/* -----------------------------
+   3) ADD BUTTONS / MAP BUTTONS FIX
+   (forces orange buttons + stops them from turning white)
+-------------------------------- */
+
+/* Generic + buttons used across the app */
+.add-row,
+.add-ticket-btn,
+.small-map-btn,
+.table-footer .add-row {
+  background: var(--orange) !important;
+  color: #fff !important;
+  border: 1px solid var(--orange) !important;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Hover for orange buttons */
+.add-row:hover,
+.add-ticket-btn:hover,
+.small-map-btn:hover,
+.table-footer .add-row:hover {
+  background: #ff8b42 !important;
+  border-color: #ff8b42 !important;
+}
+
+/* Integrated + rows (textbox merged with + button) */
+.section-block .checklist-row.integrated-plus {
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+/* Input becomes flat ONLY when + exists */
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"] {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* + button stays glued to the textbox */
+.section-block .checklist-row.integrated-plus > .add-row {
+  margin-left: -1px !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+}
+
+/* If a cloned row has NO + button, restore full rounding */
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="text"],
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="tel"] {
+  border-radius: var(--radius-sm) !important;
+}
+
+/* -----------------------------
+   4) SUPPORT TICKETS: Zendesk + add button fix
+-------------------------------- */
+#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn {
+  background: var(--orange) !important;
+  color: #fff !important;
+  border: 1px solid var(--orange) !important;
+}
+#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn:hover {
+  background: #ff8b42 !important;
+  border-color: #ff8b42 !important;
+}
+
+/* -----------------------------
+   5) MAP BUTTON: keep it integrated + orange
+-------------------------------- */
+#dealership-info .address-input-wrap .small-map-btn {
+  background: var(--orange) !important;
+  color: #fff !important;
+  border: 1px solid var(--orange) !important;
+  margin-left: -1px !important;
+}
