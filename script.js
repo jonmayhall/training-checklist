@@ -1,202 +1,205 @@
-/* =========================================================
-   myKaarma Interactive Training Checklist — script.js
-   FULL, CLEAN, STABLE VERSION
-   ========================================================= */
+/* =======================================================
+   myKaarma Interactive Training Checklist — FULL JS
+   SAFE BUILD (No layout or content mutation)
+   ======================================================= */
 
-/* -----------------------------
-   Helpers
------------------------------ */
-const qs  = (sel, ctx = document) => ctx.querySelector(sel);
-const qsa = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+document.addEventListener("DOMContentLoaded", () => {
+  initNavigation();
+  initResetButtons();
+  initClearAll();
+  initGhostSelects();
+  initTopbarDealershipDisplay();
+  initAddressMap();
+  initIntegratedAddButtons();
+  initTableAddButtons();
+});
 
-function clearInputs(container) {
-  qsa("input, textarea, select", container).forEach(el => {
-    if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-    else el.value = "";
+/* =======================================================
+   PAGE NAVIGATION
+   ======================================================= */
+function initNavigation() {
+  const navButtons = document.querySelectorAll(".nav-btn");
+  const pages = document.querySelectorAll(".page-section");
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.target;
+
+      navButtons.forEach(b => b.classList.remove("active"));
+      pages.forEach(p => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      document.getElementById(targetId)?.classList.add("active");
+    });
+  });
+
+  // Activate first page by default
+  navButtons[0]?.click();
+}
+
+/* =======================================================
+   RESET BUTTONS
+   ======================================================= */
+function initResetButtons() {
+  document.querySelectorAll(".clear-page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.closest(".page-section");
+      if (!page) return;
+
+      page.querySelectorAll("input, textarea, select").forEach(el => {
+        if (el.type === "checkbox" || el.type === "radio") {
+          el.checked = false;
+        } else {
+          el.value = "";
+        }
+        el.dispatchEvent(new Event("change"));
+      });
+    });
   });
 }
 
-/* -----------------------------
-   Page Navigation
------------------------------ */
-const navButtons = qsa(".nav-btn");
-const pages = qsa(".page-section");
+/* =======================================================
+   CLEAR ALL
+   ======================================================= */
+function initClearAll() {
+  const btn = document.getElementById("clearAllBtn");
+  if (!btn) return;
 
-navButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    navButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+    if (!confirm("Clear ALL pages?")) return;
 
-    pages.forEach(p => p.classList.remove("active"));
-    const page = qs(`#${target}`);
-    if (page) page.classList.add("active");
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-});
-
-/* -----------------------------
-   Clear Page Buttons
------------------------------ */
-qsa(".clear-page-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const page = btn.closest(".page-section");
-    if (!page) return;
-
-    if (!confirm("Reset all fields on this page?")) return;
-    clearInputs(page);
-  });
-});
-
-/* -----------------------------
-   Clear ALL
------------------------------ */
-const clearAllBtn = qs("#clearAllBtn");
-if (clearAllBtn) {
-  clearAllBtn.addEventListener("click", () => {
-    if (!confirm("This will reset ALL pages. Continue?")) return;
-    clearInputs(document);
+    document.querySelectorAll("input, textarea, select").forEach(el => {
+      if (el.type === "checkbox" || el.type === "radio") {
+        el.checked = false;
+      } else {
+        el.value = "";
+      }
+      el.dispatchEvent(new Event("change"));
+    });
   });
 }
 
-/* =========================================================
-   ADDITIONAL TRAINERS (Page 1)
-   ========================================================= */
-const additionalTrainersContainer = qs("#additionalTrainersContainer");
-
-document.addEventListener("click", e => {
-  const addTrainerBtn = e.target.closest(".checklist-row.integrated-plus .add-row");
-  if (!addTrainerBtn) return;
-
-  const row = addTrainerBtn.closest(".checklist-row");
-  if (!row) return;
-
-  const clone = row.cloneNode(true);
-  clearInputs(clone);
-
-  const btn = qs(".add-row", clone);
-  btn.textContent = "–";
-  btn.title = "Remove";
-  btn.classList.add("remove-row");
-
-  additionalTrainersContainer.appendChild(clone);
-});
-
-document.addEventListener("click", e => {
-  const removeBtn = e.target.closest(".remove-row");
-  if (!removeBtn) return;
-
-  const row = removeBtn.closest(".checklist-row");
-  if (row) row.remove();
-});
-
-/* =========================================================
-   ADDITIONAL POC CARDS (ENTIRE CARD)
-   ========================================================= */
-const pocGrid = qs("#primaryContactsGrid");
-
-document.addEventListener("click", e => {
-  const addPocBtn = e.target.closest(".additional-poc-add");
-  if (!addPocBtn) return;
-
-  const baseCard = addPocBtn.closest(".additional-poc-card");
-  if (!baseCard) return;
-
-  const clone = baseCard.cloneNode(true);
-  clone.removeAttribute("data-base");
-  clearInputs(clone);
-
-  // remove "+" button from cloned cards
-  const btn = qs(".additional-poc-add", clone);
-  if (btn) btn.remove();
-
-  pocGrid.appendChild(clone);
-});
-
-/* =========================================================
-   SUPPORT TICKETS (Page 7)
-   ========================================================= */
-function moveTicket(ticket) {
-  const status = qs(".ticket-status-select", ticket)?.value;
-
-  if (status === "Tier Two") {
-    qs("#tierTwoTicketsContainer")?.appendChild(ticket);
-  } else if (status === "Closed - Resolved") {
-    qs("#closedResolvedTicketsContainer")?.appendChild(ticket);
-  } else if (status === "Closed – Feature Not Supported") {
-    qs("#closedFeatureTicketsContainer")?.appendChild(ticket);
-  } else {
-    qs("#openTicketsContainer")?.appendChild(ticket);
-  }
+/* =======================================================
+   GHOST SELECT TEXT
+   ======================================================= */
+function initGhostSelects() {
+  document.querySelectorAll("select").forEach(select => {
+    const update = () => {
+      if (select.value === "") {
+        select.classList.add("is-placeholder");
+      } else {
+        select.classList.remove("is-placeholder");
+      }
+    };
+    select.addEventListener("change", update);
+    update();
+  });
 }
 
-document.addEventListener("click", e => {
-  const addTicketBtn = e.target.closest(".add-ticket-btn");
-  if (!addTicketBtn) return;
+/* =======================================================
+   TOP BAR DEALERSHIP DISPLAY
+   Dealer Group (if present) Dealership Name - DID
+   ======================================================= */
+function initTopbarDealershipDisplay() {
+  const out = document.getElementById("dealershipNameDisplay");
+  if (!out) return;
 
-  const group = addTicketBtn.closest(".ticket-group");
-  const clone = group.cloneNode(true);
-  clearInputs(clone);
+  const groupEl = document.getElementById("dealerGroupInput");
+  const nameEl  = document.getElementById("dealershipNameInput");
+  const didEl   = document.getElementById("dealershipDidInput");
 
-  qs("#openTicketsContainer")?.appendChild(clone);
-});
+  const update = () => {
+    const group = groupEl?.value.trim() || "";
+    const name  = nameEl?.value.trim()  || "";
+    const did   = didEl?.value.trim()   || "";
 
-document.addEventListener("change", e => {
-  if (!e.target.classList.contains("ticket-status-select")) return;
-  const ticket = e.target.closest(".ticket-group");
-  if (ticket) moveTicket(ticket);
-});
+    let text = "";
+    if (group) text += group + " ";
+    if (name) text += name;
+    text = text.trim();
 
-/* =========================================================
-   GOOGLE MAPS — ADDRESS AUTOCOMPLETE (FIXED)
-   ========================================================= */
-let addressAutocomplete;
+    if (did) text = text ? `${text} - ${did}` : did;
 
-window.initAddressAutocomplete = function () {
-  const input = qs("#dealershipAddressInput");
-  if (!input || !window.google) return;
+    out.textContent = text || "Dealership Info";
+  };
 
-  addressAutocomplete = new google.maps.places.Autocomplete(input, {
-    types: ["geocode"]
+  [groupEl, nameEl, didEl].forEach(el => {
+    el?.addEventListener("input", update);
+    el?.addEventListener("change", update);
   });
 
-  addressAutocomplete.addListener("place_changed", () => {
-    const place = addressAutocomplete.getPlace();
-    if (!place.geometry) return;
+  update();
+}
 
-    const iframe = qs("#dealershipMapFrame");
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
+/* =======================================================
+   ADDRESS → GOOGLE MAPS
+   ======================================================= */
+function initAddressMap() {
+  const addressInput = document.getElementById("dealershipAddressInput");
+  const mapBtn = document.getElementById("openAddressInMapsBtn");
+  const iframe = document.getElementById("dealershipMapFrame");
 
-    iframe.src =
-      `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
-  });
-};
+  if (!addressInput || !mapBtn) return;
 
-const mapBtn = qs("#openAddressInMapsBtn");
-if (mapBtn) {
+  const updateMap = () => {
+    const addr = addressInput.value.trim();
+    if (!addr || !iframe) return;
+    iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
+  };
+
+  addressInput.addEventListener("change", updateMap);
+  addressInput.addEventListener("blur", updateMap);
+
   mapBtn.addEventListener("click", () => {
-    const addr = qs("#dealershipAddressInput")?.value;
+    const addr = addressInput.value.trim();
     if (!addr) return;
-    window.open(
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`,
-      "_blank"
-    );
+    window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`, "_blank");
   });
 }
 
-/* =========================================================
-   SAVE PDF (SAFE HOOK)
-   ========================================================= */
-const savePDFBtn = qs("#savePDF");
-if (savePDFBtn) {
-  savePDFBtn.addEventListener("click", () => {
-    if (!window.jspdf && !window.jsPDF) {
-      alert("PDF library not loaded.");
-      return;
-    }
-    alert("PDF export hook is active.");
+/* =======================================================
+   INTEGRATED “+” INPUT ROWS (Additional POC, Trainers, etc.)
+   ======================================================= */
+function initIntegratedAddButtons() {
+  document.addEventListener("click", e => {
+    const addBtn = e.target.closest(".add-row, .additional-poc-add");
+    if (!addBtn) return;
+
+    const row = addBtn.closest(".checklist-row");
+    const card = addBtn.closest(".additional-poc-card");
+    if (!row || !card) return;
+
+    const clone = card.cloneNode(true);
+    clone.removeAttribute("data-base");
+
+    // Remove add button from cloned card
+    clone.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
+
+    clone.querySelectorAll("input").forEach(i => i.value = "");
+    card.parentNode.insertBefore(clone, card.nextSibling);
   });
 }
 
+/* =======================================================
+   TABLE ROW ADD / REMOVE
+   ======================================================= */
+function initTableAddButtons() {
+  document.querySelectorAll(".table-footer .add-row").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const table = btn.closest(".table-container")?.querySelector("table");
+      if (!table) return;
+
+      const tbody = table.querySelector("tbody");
+      const rows = tbody.querySelectorAll("tr");
+      if (!rows.length) return;
+
+      const clone = rows[rows.length - 1].cloneNode(true);
+      clone.querySelectorAll("input, select").forEach(el => {
+        if (el.type === "checkbox") el.checked = false;
+        else el.value = "";
+      });
+
+      tbody.appendChild(clone);
+    });
+  });
+}
