@@ -1127,4 +1127,75 @@ main{ padding-top: 30px !important; } /* keeps your cushion */
   margin-top: 8px !important;
   border-radius: 2px !important;
 }
+/* =======================================================
+   TOP BAR / HEADER — CATCH-ALL RESTORE
+   (works even if your header uses a different id/class)
+   ======================================================= */
+
+html body #topbar,
+html body #topBar,
+html body .topbar,
+html body header#topbar,
+html body header.topbar {
+  display: flex !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  z-index: 9999 !important;
+
+  background: linear-gradient(90deg, #000 0%, var(--orange) 100%) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important;
+
+  align-items: center !important;
+  padding: 0 40px !important;
 }
+
+/* inner layout */
+html body #topbar .topbar-content,
+html body #topBar .topbar-content,
+html body .topbar .topbar-content,
+html body header#topbar .topbar-content,
+html body header.topbar .topbar-content {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* logo visible */
+html body #topbar img,
+html body #topBar img,
+html body .topbar img,
+html body header#topbar img,
+html body header.topbar img {
+  height: 42px !important;
+  width: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* push content below fixed header */
+html body #app { margin-top: 70px !important; }
+html body main { padding-top: 30px !important; }
+
+/* page title restore */
+html body .page-section h1 {
+  color: var(--orange) !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  margin: 4px 0 8px 4px !important;
+}
+html body .page-section h1::after {
+  content: "" !important;
+  display: block !important;
+  height: 4px !important;
+  background: var(--orange) !important;
+  margin-top: 8px !important;
+  width: 360px !important;
+  max-width: 80% !important;
+  border-radius: 2px !important;
+}
+
