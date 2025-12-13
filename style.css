@@ -568,11 +568,14 @@ main {
 }
 
 /* =======================================================
-   DMS INTEGRATION — RESTORED CARDS (NO DOTS, NO LEGEND)
+   DMS INTEGRATION — RESTORED CARDS
+   (NO DOTS, NO LEGEND, CORRECT COLORS)
    ======================================================= */
 
 /* Hide legend completely */
-#dms-integration .dms-legend { display: none !important; }
+#dms-integration .dms-legend {
+  display: none !important;
+}
 
 /* Grid layout for DMS cards */
 #dms-integration .dms-grid {
@@ -586,7 +589,7 @@ main {
   box-shadow: var(--shadow);
 }
 
-/* DMS card look (clean, like your prior look) */
+/* DMS card */
 #dms-integration .dms-card {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -595,13 +598,14 @@ main {
   padding: 12px 14px 10px;
 }
 
-/* Header row */
+/* Header */
 #dms-integration .dms-card-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
 }
+
 #dms-integration .dms-name {
   font-size: 16px;
   font-weight: 700;
@@ -611,7 +615,12 @@ main {
   border-bottom: 2px solid var(--orange);
 }
 
-/* Chips */
+/* =========================
+   DMS BADGES (FIXED)
+   Push = myKaarma orange
+   Pull = myKaarma green
+   ========================= */
+
 #dms-integration .dms-chip {
   font-size: 11px;
   font-weight: 700;
@@ -620,9 +629,20 @@ main {
   padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
-  border: none;
-  background: #111827;
+  border: 1px solid transparent;
   color: #fff;
+}
+
+/* Push-based */
+#dms-integration .dms-chip-push {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
+/* Pull-based */
+#dms-integration .dms-chip-pull {
+  background: #22c55e; /* myKaarma green */
+  border-color: #22c55e;
 }
 
 /* List */
@@ -631,26 +651,31 @@ main {
   margin: 0;
   padding: 0;
 }
+
 #dms-integration .dms-list li {
   padding-top: 8px;
   margin-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
+
 #dms-integration .dms-list li:first-child {
   border-top: none;
   margin-top: 0;
   padding-top: 2px;
 }
+
 #dms-integration .dms-row-top {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 2px;
 }
+
 #dms-integration .dms-field {
   font-weight: 700;
   font-size: 13px;
 }
+
 #dms-integration .dms-list p {
   margin: 0;
   font-size: 12px;
@@ -658,7 +683,7 @@ main {
   color: #4b5563;
 }
 
-/* Remove any tag/dot visuals if they still exist in HTML */
+/* Remove any leftover dot/tag visuals */
 #dms-integration .dms-tag,
 #dms-integration .dms-dot {
   display: none !important;
