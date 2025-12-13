@@ -465,3 +465,44 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+// =========================================================
+// GOOGLE MAPS – DEALERSHIP ADDRESS AUTOCOMPLETE
+// =========================================================
+let dealershipAutocomplete;
+
+function initAddressAutocomplete() {
+  const addressInput = document.getElementById("dealershipAddressInput");
+  const mapFrame = document.getElementById("dealershipMapFrame");
+  const mapWrapper = document.getElementById("mapPreviewWrapper");
+  const mapBtn = document.getElementById("openAddressInMapsBtn");
+
+  if (!addressInput || !window.google || !google.maps?.places) {
+    console.warn("Google Maps Places not ready or address input missing");
+    return;
+  }
+
+  dealershipAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+    types: ["geocode"],
+  });
+
+  dealershipAutocomplete.addListener("place_changed", () => {
+    const place = dealershipAutocomplete.getPlace();
+    if (!place || !place.formatted_address) return;
+
+    const encoded = encodeURIComponent(place.formatted_address);
+    const embedUrl = `https://www.google.com/maps?q=${encoded}&output=embed`;
+
+    mapFrame.src = embedUrl;
+    mapWrapper.style.display = "block";
+  });
+
+  // Map button → open Google Maps in new tab
+  if (mapBtn) {
+    mapBtn.addEventListener("click", () => {
+      const address = addressInput.value.trim();
+      if (!address) return;
+      const encoded = encodeURIComponent(address);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
+    });
+  }
+}
