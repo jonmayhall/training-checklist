@@ -565,45 +565,91 @@ main {
   row-gap: 18px;
 }
 
-/* --------------- GENERIC INTEGRATED “+” ROWS --------------- */
-.section-block .checklist-row.integrated-plus {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
+/* --------------- SCOPE-FREE INTEGRATED “+ / –” ROWS --------------- */
+/* Works in section-blocks AND mini-cards */
+
+.checklist-row.integrated-plus{
+  display:flex;
+  align-items:stretch;
+  gap:0 !important;                 /* kill the default 12px gap */
 }
-.section-block .checklist-row.integrated-plus label {
-  flex: 1 1 auto;
-  padding-right: 16px;
+
+/* Label rules (section rows keep flex label, mini-cards keep fixed label width) */
+.section-block .checklist-row.integrated-plus label{
+  flex:1 1 auto;
+  padding-right:16px;
 }
+.mini-card .checklist-row.integrated-plus label{
+  flex:0 0 36%;
+  padding-right:12px;
+  white-space:nowrap;
+}
+
+/* INPUT: fused to button (flat on RIGHT) */
+.checklist-row.integrated-plus input[type="text"],
+.checklist-row.integrated-plus input[type="tel"],
+.checklist-row.integrated-plus input[type="email"],
+.checklist-row.integrated-plus input[type="number"],
+.checklist-row.integrated-plus input[type="date"]{
+  margin-left:auto;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+/* Section-block integrated rows use your fixed input width system */
 .section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"] {
-  flex: 0 0 calc(var(--input-width) - 34px);
-  width: calc(var(--input-width) - 34px);
-  margin-left: auto;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+.section-block .checklist-row.integrated-plus input[type="tel"],
+.section-block .checklist-row.integrated-plus input[type="email"],
+.section-block .checklist-row.integrated-plus input[type="number"],
+.section-block .checklist-row.integrated-plus input[type="date"]{
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
 }
-.section-block .checklist-row.integrated-plus > .add-row {
-  flex: 0 0 34px;
-  margin-left: -1px;
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
+
+/* Mini-card integrated rows should fill remaining space next to fixed label */
+.mini-card .checklist-row.integrated-plus input[type="text"],
+.mini-card .checklist-row.integrated-plus input[type="tel"],
+.mini-card .checklist-row.integrated-plus input[type="email"],
+.mini-card .checklist-row.integrated-plus input[type="number"],
+.mini-card .checklist-row.integrated-plus input[type="date"]{
+  flex:1 1 auto;
+  width:auto;
+}
+
+/* Button: fused to input */
+.checklist-row.integrated-plus .add-row,
+.checklist-row.integrated-plus .remove-row{
+  flex:0 0 34px;
+  margin-left:-1px;
+  width:34px;
+  height:34px;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: .18s ease-in-out;
-  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  cursor:pointer;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
 }
-.section-block .checklist-row.integrated-plus > .add-row:hover {
+
+/* + button style */
+.checklist-row.integrated-plus .add-row{
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  font-size:18px;
+  font-weight:700;
+  box-shadow:0 1px 4px rgba(243,111,33,0.25);
+}
+.checklist-row.integrated-plus .add-row:hover{
   background:#ff8b42;
-  transform: translateY(-1px);
+}
+
+/* – button style (keep yours grey like screenshot) */
+.checklist-row.integrated-plus .remove-row{
+  background:#f7f7f7;
+  color:#222;
+  border:1px solid #777;
+  font-size:18px;
+  font-weight:700;
 }
 
 /* --------------- DMS PAGE – GRID CARDS with DOTS --------------- */
