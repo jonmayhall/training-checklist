@@ -132,200 +132,203 @@
   </div>
 </section>
 
- <!-- ========================================================= -->
+<!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
   <h1>Dealership Info</h1>
   <p class="page-subtitle">
-    Capture the dealership details, address, key contacts, and anything relevant for training.
+    Core dealership details and key contacts your team will work with.
   </p>
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- SIDE-BY-SIDE CARDS -->
-  <div class="cards-grid two-col">
+  <!-- DEALERSHIP DETAILS -->
+  <div class="section-block">
+    <h2>Dealership Details</h2>
 
-    <!-- LEFT COLUMN -->
-    <div>
-
-      <!-- Dealership Info (ABOVE Address card as requested) -->
-      <div class="section-block">
-        <h2>Dealership Info</h2>
-
-        <div class="checklist-row">
-          <label>Dealership name</label>
-          <input type="text" placeholder="Enter dealership name">
-        </div>
-
-        <div class="checklist-row">
-          <label>OEM</label>
-          <select>
-            <option value="" data-ghost="true">Select OEM</option>
-            <option>Ford</option>
-            <option>Lincoln</option>
-            <option>Chevrolet</option>
-            <option>GMC</option>
-            <option>Buick</option>
-            <option>Cadillac</option>
-            <option>Chrysler</option>
-            <option>Dodge</option>
-            <option>Jeep</option>
-            <option>Ram</option>
-            <option>Toyota</option>
-            <option>Honda</option>
-            <option>Nissan</option>
-            <option>Hyundai</option>
-            <option>Kia</option>
-            <option>Volkswagen</option>
-            <option>Audi</option>
-            <option>BMW</option>
-            <option>Mercedes-Benz</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div class="checklist-row">
-          <label>Dealer code / store number</label>
-          <input type="text" placeholder="Enter dealer code / store number">
-        </div>
-
-        <div class="checklist-row">
-          <label>DMS</label>
-          <select>
-            <option value="" data-ghost="true">Select DMS</option>
-            <option>CDK</option>
-            <option>Reynolds</option>
-            <option>Dealertrack / Arkona</option>
-            <option>Dealerbuilt / Lightyear</option>
-            <option>Tekion</option>
-            <option>Automate</option>
-            <option>PBS</option>
-            <option>Other</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Address + Map -->
-      <div class="section-block">
-        <h2>Dealership Address</h2>
-
-        <div class="checklist-row">
-          <label>Dealership Address</label>
-
-          <div class="address-input-wrap">
-            <input
-              id="dealershipAddress"
-              type="text"
-              placeholder="Start typing address (Google Places)"
-              autocomplete="off"
-            />
-            <button type="button" class="small-map-btn" id="showMapBtn" title="Show map">MAP</button>
-          </div>
-        </div>
-
-        <div class="map-wrapper" id="mapWrapper" style="display:none;">
-          <iframe
-            id="mapFrame"
-            class="map-frame"
-            src=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-          <div class="map-helper-text">
-            Tip: If the map doesn’t load, verify the address and try again.
-          </div>
-        </div>
-      </div>
-
+    <div class="checklist-row">
+      <label>Dealer Group</label>
+      <input type="text" id="dealerGroupInput" placeholder="Enter dealer group name">
     </div>
 
-    <!-- RIGHT COLUMN -->
-    <div>
+    <div class="checklist-row">
+      <label>Dealership Name</label>
+      <input type="text" id="dealershipNameInput" placeholder="Enter dealership name">
+    </div>
 
-      <!-- Primary Contacts (RESTORED — this is what disappeared) -->
-      <div class="section-block">
-        <h2>Primary Contacts</h2>
+    <div class="checklist-row">
+      <label>DID</label>
+      <input type="text" id="dealershipDidInput" placeholder="Enter dealership DID">
+    </div>
 
-        <div class="primary-contacts-grid">
+    <div class="checklist-row">
+      <label>DMS</label>
+      <select id="dealershipDmsSelect">
+        <option value="" data-ghost="true">Select DMS</option>
+        <option>CDK</option>
+        <option>Reynolds &amp; Reynolds</option>
+        <option>Dealertrack</option>
+        <option>Automate</option>
+        <option>Autosoft</option>
+        <option>DealerBuilt</option>
+        <option>PBS</option>
+        <option>Tekion</option>
+        <option>Other / Not Listed</option>
+      </select>
+    </div>
 
-          <!-- Service Manager -->
-          <div class="mini-card">
-            <div class="checklist-row">
-              <label>Service Manager</label>
-              <input type="text" placeholder="Enter name">
-            </div>
-            <div class="checklist-row">
-              <label>Phone</label>
-              <input type="tel" placeholder="Enter phone number">
-            </div>
-            <div class="checklist-row">
-              <label>Email</label>
-              <input type="email" placeholder="Enter email address">
-            </div>
-          </div>
+    <div class="checklist-row">
+      <label>Dealership Address</label>
 
-          <!-- Parts Manager -->
-          <div class="mini-card">
-            <div class="checklist-row">
-              <label>Parts Manager</label>
-              <input type="text" placeholder="Enter name">
-            </div>
-            <div class="checklist-row">
-              <label>Phone</label>
-              <input type="tel" placeholder="Enter phone number">
-            </div>
-            <div class="checklist-row">
-              <label>Email</label>
-              <input type="email" placeholder="Enter email address">
-            </div>
-          </div>
-
-          <!-- General Manager -->
-          <div class="mini-card">
-            <div class="checklist-row">
-              <label>General Manager</label>
-              <input type="text" placeholder="Enter name">
-            </div>
-            <div class="checklist-row">
-              <label>Phone</label>
-              <input type="tel" placeholder="Enter phone number">
-            </div>
-            <div class="checklist-row">
-              <label>Email</label>
-              <input type="email" placeholder="Enter email address">
-            </div>
-          </div>
-
-          <!-- IT / DMS Contact -->
-          <div class="mini-card">
-            <div class="checklist-row">
-              <label>IT / DMS Contact</label>
-              <input type="text" placeholder="Enter name">
-            </div>
-            <div class="checklist-row">
-              <label>Phone</label>
-              <input type="tel" placeholder="Enter phone number">
-            </div>
-            <div class="checklist-row">
-              <label>Email</label>
-              <input type="email" placeholder="Enter email address">
-            </div>
-          </div>
-
-        </div>
+      <div class="address-input-wrap">
+        <input
+          type="text"
+          id="dealershipAddressInput"
+          autocomplete="off"
+          placeholder="Enter dealership address"
+        >
+        <button
+          type="button"
+          id="openAddressInMapsBtn"
+          class="small-map-btn"
+        >
+          Map
+        </button>
       </div>
+    </div>
 
+    <div class="map-wrapper" id="mapPreviewWrapper">
+      <iframe
+        id="dealershipMapFrame"
+        class="map-frame"
+        src=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      <p class="map-helper-text">
+        Select an address above to update this map. Click “Map” to open directions in Google Maps.
+      </p>
     </div>
   </div>
 
-  <!-- ONLY NOTES CARD AT VERY BOTTOM (as requested) -->
+  <!-- PRIMARY CONTACTS -->
   <div class="section-block">
-    <h2>Notes — Dealership Info</h2>
-    <textarea placeholder="Notes about the dealership, expectations, risks, travel/logistics, or anything that matters for training"></textarea>
+    <h2>Primary Contacts</h2>
+
+    <div id="primaryContactsGrid" class="primary-contacts-grid">
+
+      <!-- SERVICE DIRECTOR -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Service Director</label>
+          <input type="text" placeholder="Enter Service Director name">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Enter cell phone number">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Enter email address">
+        </div>
+      </div>
+
+      <!-- SERVICE MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Service Manager</label>
+          <input type="text" placeholder="Enter Service Manager name">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Enter cell phone number">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Enter email address">
+        </div>
+      </div>
+
+      <!-- GENERAL MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>General Manager</label>
+          <input type="text" placeholder="Enter General Manager name">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Enter cell phone number">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Enter email address">
+        </div>
+      </div>
+
+      <!-- PARTS MANAGER -->
+      <div class="mini-card contact-card">
+        <div class="checklist-row">
+          <label>Parts Manager</label>
+          <input type="text" placeholder="Enter Parts Manager name">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Enter cell phone number">
+        </div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Enter email address">
+        </div>
+      </div>
+
+      <!-- ADDITIONAL POC TEMPLATE (base card) -->
+      <div class="mini-card contact-card additional-poc-card" data-base="true">
+        <div class="checklist-row integrated-plus">
+          <label>Additional POC</label>
+          <input
+            type="text"
+            class="additional-poc-name"
+            placeholder="Enter additional POC name"
+          />
+          <button
+            type="button"
+            class="add-row additional-poc-add"
+            title="Add another POC"
+          >+</button>
+        </div>
+
+        <div class="checklist-row">
+          <label>Email</label>
+          <input
+            type="email"
+            class="additional-poc-email"
+            placeholder="Enter email address"
+          >
+        </div>
+
+        <div class="checklist-row">
+          <label>Phone</label>
+          <input
+            type="tel"
+            class="additional-poc-phone"
+            placeholder="Enter phone number"
+          >
+        </div>
+
+        <div class="checklist-row">
+          <label>Role / Title</label>
+          <input
+            type="text"
+            class="additional-poc-role"
+            placeholder="Enter role or title"
+          >
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
-
 
    <!-- ========================================================= -->
 <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
