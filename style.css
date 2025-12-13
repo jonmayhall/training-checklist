@@ -86,6 +86,51 @@ select.is-placeholder {
   border-top-right-radius: 999px !important;
   border-bottom-right-radius: 999px !important;
 }
+/* =========================================================
+   FIX: integrated-plus rows when button is NOT a direct child
+   (keeps input + button truly integrated)
+   ========================================================= */
+
+/* Wrap any right-side content as a single integrated unit */
+.section-block .checklist-row.integrated-plus .integrated-wrap,
+.section-block .checklist-row.integrated-plus .ticket-number-wrap,
+.section-block .checklist-row.integrated-plus .input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 0 0 var(--input-width);
+  width: var(--input-width);
+  margin-left: auto;
+}
+
+/* Make the input take the left portion and be flat ONLY on the right */
+.section-block .checklist-row.integrated-plus .integrated-wrap input[type="text"],
+.section-block .checklist-row.integrated-plus .ticket-number-wrap input[type="text"],
+.section-block .checklist-row.integrated-plus .input-wrap input[type="text"],
+.section-block .checklist-row.integrated-plus .integrated-wrap input[type="tel"],
+.section-block .checklist-row.integrated-plus .ticket-number-wrap input[type="tel"],
+.section-block .checklist-row.integrated-plus .input-wrap input[type="tel"] {
+  flex: 1 1 auto;
+  width: auto;
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Button becomes the right “cap” and sits flush */
+.section-block .checklist-row.integrated-plus .integrated-wrap .add-row,
+.section-block .checklist-row.integrated-plus .integrated-wrap .remove-row,
+.section-block .checklist-row.integrated-plus .ticket-number-wrap .add-row,
+.section-block .checklist-row.integrated-plus .ticket-number-wrap .remove-row,
+.section-block .checklist-row.integrated-plus .input-wrap .add-row,
+.section-block .checklist-row.integrated-plus .input-wrap .remove-row {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
 
 /* --------------- BASE --------------- */
 html, body {
