@@ -1,4 +1,52 @@
-<main>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myKaarma Interactive Training Checklist</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- JS -->
+  <script defer src="script.js"></script>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="topbar-content">
+      <img class="top-logo" src="logo.png" alt="myKaarma" />
+      <div class="topbar-right">
+        <div id="dealershipNameDisplay"></div>
+      </div>
+    </div>
+  </header>
+
+  <div id="app">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+      <nav id="sidebar-nav">
+        <button class="nav-btn active" type="button" data-target="onsite-trainers-cem">Trainers / Deployment / CEM</button>
+        <button class="nav-btn" type="button" data-target="dealership-info">Dealership Info</button>
+        <button class="nav-btn" type="button" data-target="pre-training">Pre-Training</button>
+        <button class="nav-btn" type="button" data-target="monday-visit">Monday Visit</button>
+        <button class="nav-btn" type="button" data-target="training-checklist">Training Checklist</button>
+        <button class="nav-btn" type="button" data-target="opcodes-pricing">Opcodes & Pricing</button>
+        <button class="nav-btn" type="button" data-target="support-tickets">Support Tickets</button>
+        <button class="nav-btn" type="button" data-target="dms-integration">DMS Integration</button>
+        <button class="nav-btn" type="button" data-target="post-training">Post-Training Verification</button>
+        <button class="nav-btn" type="button" data-target="resources">Resources</button>
+        <button class="nav-btn" type="button" data-target="training-summary">Training Summary</button>
+      </nav>
+
+      <button id="clearAllBtn" type="button">Clear All</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
 
 <!-- =========================================
      PAGE 1 — Trainers, Deployment Manager, & CEM
