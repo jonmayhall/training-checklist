@@ -1347,3 +1347,29 @@ main {
   border-bottom-right-radius: var(--radius-sm) !important;
   }
 }
+/* Make integrated + / – buttons inside MINI-CARDS match orange style */
+.mini-card .checklist-row.integrated-plus > .add-row,
+.mini-card .checklist-row.integrated-plus > .remove-row {
+  flex: 0 0 34px;
+  margin-left: -1px;
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: .18s ease-in-out;
+  box-shadow: 0 1px 4px rgba(243,111,33,0.25);
+  padding: 0;
+}
+.mini-card .checklist-row.integrated-plus > .add-row:hover,
+.mini-card .checklist-row.integrated-plus > .remove-row:hover {
+  background:#ff8b42;
+  transform: translateY(-1px);
+}
