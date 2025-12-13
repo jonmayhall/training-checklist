@@ -414,3 +414,51 @@ main {
   border: 1px solid var(--orange) !important;
   margin-left: -1px !important;
 }
+/* =======================================================
+   PATCH: Restore DMS Integration Cards (Grid + Cards)
+   Paste at VERY BOTTOM of style.css
+   ======================================================= */
+
+#dms-integration .dms-overview-block,
+#dms-integration .dms-legend,
+#dms-integration .dms-grid,
+#dms-integration .dms-card {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Force the grid back on */
+#dms-integration .dms-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 18px !important;
+  padding: 18px !important;
+}
+
+/* Force the cards back on */
+#dms-integration .dms-card {
+  display: block !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--mk-border) !important;
+  background: #fff !important;
+  box-shadow: 0 4px 10px rgba(15,23,42,0.06) !important;
+  padding: 12px 14px 10px !important;
+}
+
+/* Make sure nothing is collapsing the section */
+#dms-integration .section-block,
+#dms-integration .dms-overview-block {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Keep legend readable */
+#dms-integration .dms-legend {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 6px 18px !important;
+  font-size: 13px !important;
+  margin-top: 8px !important;
+}
