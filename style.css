@@ -4,8 +4,9 @@
    ======================================================= */
 
 /* --------------- CSS VARIABLES --------------- */
-:root{
-  --orange:#f36f21;
+:root {
+  --orange: #f36f21;
+  --mykaarma-green: #2bb673; /* myKaarma logo green */
   --light-orange:#f8b17b;
   --gray-bg:#d7d7d7;
   --card-bg:#ffffff;
@@ -19,8 +20,13 @@
   --shadow:0 2px 8px rgba(0,0,0,0.10);
   --input-width:260px;
 
-  /* myKaarma green for Pull badges */
-  --mk-green:#22c55e;
+  /* Pull-based (myKaarma green) */
+#dms-integration .dms-chip-pull {
+  background: var(--mykaarma-green);
+  border-color: var(--mykaarma-green);
+  color: #fff;
+}
+
 }
 
 /* Global text styling */
