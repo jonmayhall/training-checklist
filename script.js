@@ -283,6 +283,22 @@ function handleAddTicket(btn){
   const base = btn.closest(".ticket-group[data-base='true']");
   if (!base) return;
 
+   function getTicketContainerByStatus(status){
+  const map = {
+    "Open": "#openTicketsContainer",
+    "Tier Two": "#tierTwoTicketsContainer",
+    "Closed - Resolved": "#closedResolvedTicketsContainer",
+    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
+  };
+  return qs(map[status] || "");
+}
+
+function moveTicketCardToStatus(card, status){
+  const dest = getTicketContainerByStatus(status);
+  if (!dest) return;
+  dest.appendChild(card);
+}
+
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
