@@ -25,6 +25,18 @@ function refreshGhostSelects(root = document){
 }
 
 /* ---------------------------
+   Date placeholder styling helper (optional)
+   NOTE: input[type="date"] doesn't support true placeholder text,
+   but this lets you style empty dates if you add CSS for .is-placeholder
+--------------------------- */
+function refreshDateGhost(root = document){
+  qsa('input[type="date"]', root).forEach(inp => {
+    const ghost = !inp.value;
+    inp.classList.toggle("is-placeholder", ghost);
+  });
+}
+
+/* ---------------------------
    Autosave (localStorage)
 --------------------------- */
 const STORAGE_KEY = "myKaarmaChecklist:v1";
@@ -61,6 +73,7 @@ function loadAll(){
   });
 
   refreshGhostSelects();
+  refreshDateGhost();
 }
 
 /* ---------------------------
@@ -73,6 +86,7 @@ function clearSection(section){
     saveField(el);
   });
   refreshGhostSelects(section);
+  refreshDateGhost(section);
 }
 
 function clearAll(){
@@ -84,6 +98,7 @@ function clearAll(){
     });
   });
   refreshGhostSelects();
+  refreshDateGhost();
 }
 
 /* ---------------------------
@@ -137,59 +152,23 @@ function initNavigation(){
 /* ---------------------------
    Integrated "+" rows (non-table)
 --------------------------- */
-function refreshAfterClone(clone){
+function resetClonedFields(clone){
   qsa("input, textarea, select", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else if (el.tagName === "SELECT") el.selectedIndex = 0;
     else el.value = "";
   });
   refreshGhostSelects(clone);
+  refreshDateGhost(clone);
 }
 
 function cloneIntegratedRow(btn){
-  // ✅ SPECIAL CASE: Additional POC button should clone the ENTIRE CARD
-  if (btn.classList.contains("additional-poc-add") || btn.closest(".additional-poc-card")) {
-    const baseCard = btn.closest(".additional-poc-card");
-    const grid = qs("#primaryContactsGrid");
-    if (!baseCard || !grid) return;
-
-    const clone = baseCard.cloneNode(true);
-
-    // make it a real clone (NOT base)
-    clone.removeAttribute("data-base");
-
-    // clear fields
-    qsa("input, textarea, select", clone).forEach(el => {
-      if (el.type === "checkbox") el.checked = false;
-      else if (el.tagName === "SELECT") el.selectedIndex = 0;
-      else el.value = "";
-    });
-
-    // remove the + button so only the base has it
-    clone.querySelector(".additional-poc-add")?.remove();
-    clone.querySelector(".add-row")?.remove();
-
-    refreshGhostSelects(clone);
-
-    // append as a brand new card in the grid
-    grid.appendChild(clone);
-    return;
-  }
-
-  // ✅ DEFAULT: normal “integrated +” rows (non-table)
   const row = btn.closest(".checklist-row");
   if (!row || !row.parentElement) return;
 
   const clone = row.cloneNode(true);
-
-  qsa("input, textarea, select", clone).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else if (el.tagName === "SELECT") el.selectedIndex = 0;
-    else el.value = "";
-  });
-
+  resetClonedFields(clone);
   clone.querySelector(".add-row")?.remove();
-  refreshGhostSelects(clone);
 
   row.parentElement.insertBefore(clone, row.nextSibling);
 }
@@ -203,7 +182,7 @@ function handleTrainerAdd(btn){
   if (!row || !container) return;
 
   const clone = row.cloneNode(true);
-  refreshAfterClone(clone);
+  resetClonedFields(clone);
   clone.querySelector(".add-row")?.remove();
 
   container.appendChild(clone);
@@ -226,13 +205,21 @@ function initTrainingDates(){
   end.addEventListener("input", () => {
     end.dataset.userEdited = "1";
     saveField(end);
+    refreshDateGhost();
   });
 
   start.addEventListener("input", () => {
-    if (!start.value || end.dataset.userEdited === "1") return;
+    if (!start.value || end.dataset.userEdited === "1"){
+      refreshDateGhost();
+      return;
+    }
     end.value = addDaysISO(start.value, 2);
     saveField(end);
+    refreshDateGhost();
   });
+
+  // set initial ghost state
+  refreshDateGhost();
 }
 
 /* ---------------------------
@@ -249,44 +236,27 @@ function addTicketBadge(card){
   card.classList.add("has-badge");
 }
 
-function getTicketContainerByStatus(status){
-  const map = {
-    "Open": "#openTicketsContainer",
-    "Tier Two": "#tierTwoTicketsContainer",
-    "Closed - Resolved": "#closedResolvedTicketsContainer",
-    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
-  };
-  return qs(map[status] || "");
-}
-
-function moveTicketCardToStatus(card, status){
-  const dest = getTicketContainerByStatus(status);
-  if (!dest) return;
-  dest.appendChild(card);
-}
-
+/* ✅ NEW: Warning helpers */
 function setTicketWarning(fieldEl, msg){
-  const row = fieldEl?.closest(".ticket-row");
+  const row = fieldEl.closest(".ticket-row");
   if (!row) return;
 
-  // remove any existing warning in this row
+  // remove existing warning in this row
   row.querySelectorAll(".field-warning").forEach(n => n.remove());
-
-  if (!msg) return;
 
   const p = document.createElement("p");
   p.className = "field-warning";
   p.textContent = msg;
 
-  // ✅ must be a direct child of .ticket-row so your CSS grid-column:2 works
   row.appendChild(p);
 }
 
-function clearTicketWarnings(baseCard){
-  baseCard.querySelectorAll(".field-warning").forEach(n => n.remove());
-  baseCard.querySelectorAll(".field-error").forEach(n => n.classList.remove("field-error"));
+function clearTicketWarnings(card){
+  card.querySelectorAll(".field-warning").forEach(n => n.remove());
+  card.querySelectorAll(".field-error").forEach(n => n.classList.remove("field-error"));
 }
 
+/* ✅ REPLACED: handleAddTicket with per-field red warnings */
 function handleAddTicket(btn){
   const base = btn.closest(".ticket-group[data-base='true']");
   if (!base) return;
@@ -294,34 +264,62 @@ function handleAddTicket(btn){
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
-  if (!num?.value || !link?.value || !sum?.value) return;
 
+  clearTicketWarnings(base);
+
+  let ok = true;
+
+  if (!num.value.trim()){
+    num.classList.add("field-error");
+    setTicketWarning(num, "Ticket Number is required.");
+    ok = false;
+  }
+
+  if (!link.value.trim()){
+    link.classList.add("field-error");
+    setTicketWarning(link, "Zendesk URL is required.");
+    ok = false;
+  }
+
+  if (!sum.value.trim()){
+    sum.classList.add("field-error");
+    setTicketWarning(sum, "Short summary is required.");
+    ok = false;
+  }
+
+  if (!ok) return;
+
+  // clone AFTER validation passes
   const clone = base.cloneNode(true);
-
-  // ✅ make it a real ticket card (NOT base)
   clone.removeAttribute("data-base");
 
-  // remove base-only UI
   clone.querySelector(".add-ticket-btn")?.remove();
   clone.querySelector(".ticket-disclaimer")?.remove();
 
-  // ✅ unlock status on clones (only base stays locked)
-  const statusSel = qs(".ticket-status-select", clone);
-  if (statusSel){
-    statusSel.disabled = false;
-    statusSel.classList.remove("is-locked");
-    statusSel.value = "Open";
-  }
-
   addTicketBadge(clone);
-
-  // append to Open by default
   qs("#openTicketsContainer")?.appendChild(clone);
 
-  // clear base inputs
   num.value = "";
   link.value = "";
   sum.value = "";
+}
+
+/* ---------------------------
+   Support Ticket Status Move (optional — requires moveTicketCardToStatus)
+   If you already have a moveTicketCardToStatus implementation, keep it.
+--------------------------- */
+function moveTicketCardToStatus(card, status){
+  const map = {
+    "Open": "#openTicketsContainer",
+    "Tier Two": "#tierTwoTicketsContainer",
+    "Closed - Resolved": "#closedResolvedTicketsContainer",
+    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
+  };
+  const targetSel = map[status];
+  const target = targetSel ? qs(targetSel) : null;
+  if (!target) return;
+
+  target.appendChild(card);
 }
 
 /* ---------------------------
@@ -353,11 +351,6 @@ function updateDealershipMap(address){
     encodeURIComponent(address) +
     "&output=embed";
 }
-function refreshDateGhost(){
-  qsa(".training-dates-row input[type='date']").forEach(d => {
-    d.classList.toggle("is-placeholder", !d.value);
-  });
-}
 
 /* ---------------------------
    DOM READY
@@ -368,35 +361,35 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAll();
     initTrainingDates();
     refreshGhostSelects();
-    refreshDateGhost(); // initial sync on page load
+    refreshDateGhost();
   } catch (err){
     console.error("Init error:", err);
   }
 
-  // autosave on input
+  // autosave on input/change
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
     if (e.target.tagName === "SELECT") refreshGhostSelects();
-    if (e.target.type === "date") refreshDateGhost(); // ✅ HERE (1 of 2)
+    if (e.target.type === "date") refreshDateGhost();
   });
 
-  // autosave on change
   document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
     if (e.target.tagName === "SELECT") refreshGhostSelects();
-    if (e.target.type === "date") refreshDateGhost(); // ✅ HERE (2 of 2)
+    if (e.target.type === "date") refreshDateGhost();
 
-    // Support ticket status move
+    // ✅ Support ticket status move (ONLY non-base cards)
     const sel = e.target.closest(".ticket-status-select");
     if (sel){
       const card = sel.closest(".ticket-group");
       if (!card) return;
-      if (card.dataset.base === "true") return;
+      if (card.dataset.base === "true") return; // don't move base
       moveTicketCardToStatus(card, sel.value);
+      return;
     }
   });
 
@@ -416,7 +409,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // "+" buttons (integrated rows and tables)
     if (btn.classList.contains("add-row")){
+      // table add-row
       const table = btn.closest(".table-container")?.querySelector("table");
       if (table && table.tBodies?.[0]){
         const tbody = table.tBodies[0];
@@ -424,6 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!last) return;
 
         const clone = last.cloneNode(true);
+
+        // clear fields in cloned table row
         qsa("input, select, textarea", clone).forEach(el => {
           if (el.type === "checkbox") el.checked = false;
           else if (el.tagName === "SELECT") el.selectedIndex = 0;
@@ -432,9 +429,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.appendChild(clone);
         refreshGhostSelects(clone);
+        refreshDateGhost(clone);
         return;
       }
 
+      // non-table add-row
       if (btn.closest("#trainers-deployment")){
         handleTrainerAdd(btn);
       } else {
@@ -443,8 +442,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // support tickets "+"
     if (btn.classList.contains("add-ticket-btn")){
       handleAddTicket(btn);
+      return;
     }
   });
 });
