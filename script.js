@@ -346,31 +346,35 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAll();
     initTrainingDates();
     refreshGhostSelects();
+    refreshDateGhost(); // initial sync on page load
   } catch (err){
     console.error("Init error:", err);
   }
 
-  // autosave on input/change
+  // autosave on input
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
+
     if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.type === "date") refreshDateGhost(); // ✅ HERE (1 of 2)
   });
 
+  // autosave on change
   document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
     if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.type === "date") refreshDateGhost(); // ✅ HERE (2 of 2)
 
-    // ✅ Support ticket status move (ONLY non-base cards)
+    // Support ticket status move
     const sel = e.target.closest(".ticket-status-select");
     if (sel){
       const card = sel.closest(".ticket-group");
       if (!card) return;
-      if (card.dataset.base === "true") return; // don't move base
+      if (card.dataset.base === "true") return;
       moveTicketCardToStatus(card, sel.value);
-      return;
     }
   });
 
@@ -390,9 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // "+" buttons (integrated rows and tables)
     if (btn.classList.contains("add-row")){
-      // table add-row
       const table = btn.closest(".table-container")?.querySelector("table");
       if (table && table.tBodies?.[0]){
         const tbody = table.tBodies[0];
@@ -400,8 +402,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!last) return;
 
         const clone = last.cloneNode(true);
-
-        // clear fields in cloned table row
         qsa("input, select, textarea", clone).forEach(el => {
           if (el.type === "checkbox") el.checked = false;
           else if (el.tagName === "SELECT") el.selectedIndex = 0;
@@ -413,7 +413,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // non-table add-row
       if (btn.closest("#trainers-deployment")){
         handleTrainerAdd(btn);
       } else {
@@ -422,10 +421,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // support tickets "+"
     if (btn.classList.contains("add-ticket-btn")){
       handleAddTicket(btn);
-      return;
     }
   });
 });
