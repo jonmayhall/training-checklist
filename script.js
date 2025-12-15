@@ -16,12 +16,22 @@ function isField(el){
 /* ---------------------------
    Ghost / placeholder selects
 --------------------------- */
+function refreshGhostDates(root = document){
+  qsa('input[type="date"]', root).forEach(inp => {
+    const ghost = !inp.value;
+    inp.classList.toggle("is-placeholder", ghost);
+  });
+}
+
 function refreshGhostSelects(root = document){
   qsa("select", root).forEach(sel => {
     const opt = sel.options[sel.selectedIndex];
     const ghost = !sel.value && opt?.dataset?.ghost === "true";
     sel.classList.toggle("is-placeholder", ghost);
   });
+
+  // ✅ ALSO handle date "placeholder" styling
+  refreshGhostDates(root);
 }
 
 /* ---------------------------
@@ -73,11 +83,6 @@ function clearSection(section){
     saveField(el);
   });
   refreshGhostSelects(section);
-
-  // if dealership address cleared, clear map too
-  if (section.id === "dealership-info"){
-    updateDealershipMap("");
-  }
 }
 
 function clearAll(){
@@ -89,7 +94,6 @@ function clearAll(){
     });
   });
   refreshGhostSelects();
-  updateDealershipMap("");
 }
 
 /* ---------------------------
@@ -195,13 +199,21 @@ function initTrainingDates(){
   end.addEventListener("input", () => {
     end.dataset.userEdited = "1";
     saveField(end);
+    refreshGhostDates();
   });
 
   start.addEventListener("input", () => {
-    if (!start.value || end.dataset.userEdited === "1") return;
+    if (!start.value || end.dataset.userEdited === "1") {
+      refreshGhostDates();
+      return;
+    }
     end.value = addDaysISO(start.value, 2);
     saveField(end);
+    refreshGhostDates();
   });
+
+  // initial ghost style
+  refreshGhostDates();
 }
 
 /* ---------------------------
@@ -225,7 +237,7 @@ function handleAddTicket(btn){
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
-  if (!num?.value || !link?.value || !sum?.value) return;
+  if (!num.value || !link.value || !sum.value) return;
 
   const clone = base.cloneNode(true);
   clone.removeAttribute("data-base");
@@ -241,63 +253,8 @@ function handleAddTicket(btn){
 }
 
 /* ---------------------------
-   Google Maps (Autocomplete + Map Preview + Map Button)
+   Google Maps (Autocomplete + Map Preview)
 --------------------------- */
-function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame");
-  if (!frame) return;
-
-  if (!address){
-    frame.src = "";
-    return;
-  }
-
-  frame.src =
-    "https://www.google.com/maps?q=" +
-    encodeURIComponent(address) +
-    "&output=embed";
-}
-
-function openAddressInGoogleMaps(){
-  const input = qs("#dealershipAddressInput");
-  const address = (input?.value || "").trim();
-  if (!address) return;
-
-  const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-
-function initMapUI(){
-  const input = qs("#dealershipAddressInput");
-  const btn = qs("#openAddressInMapsBtn");
-  if (!input) return;
-
-  // If an address is already saved, show map on load
-  if (input.value && input.value.trim()){
-    updateDealershipMap(input.value.trim());
-  }
-
-  // Clicking Map button opens Google Maps
-  btn?.addEventListener("click", openAddressInGoogleMaps);
-
-  // If user manually types an address, update preview when they leave the field
-  input.addEventListener("blur", () => {
-    const v = (input.value || "").trim();
-    if (!v) return;
-    updateDealershipMap(v);
-  });
-
-  // Also allow Enter to update map + save
-  input.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-    const v = (input.value || "").trim();
-    if (!v) return;
-    saveField(input);
-    updateDealershipMap(v);
-  });
-}
-
 function initAddressAutocomplete(){
   const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
@@ -310,12 +267,20 @@ function initAddressAutocomplete(){
 
     input.value = place.formatted_address;
     saveField(input);
-
-    // update embedded map preview
     updateDealershipMap(place.formatted_address);
   });
 }
 window.initAddressAutocomplete = initAddressAutocomplete;
+
+function updateDealershipMap(address){
+  const frame = qs("#dealershipMapFrame");
+  if (!frame) return;
+
+  frame.src =
+    "https://www.google.com/maps?q=" +
+    encodeURIComponent(address) +
+    "&output=embed";
+}
 
 /* ---------------------------
    DOM READY
@@ -326,7 +291,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAll();
     initTrainingDates();
     refreshGhostSelects();
-    initMapUI();
   } catch (err){
     console.error("Init error:", err);
   }
@@ -334,13 +298,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
+
     if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.type === "date") refreshGhostDates();
   });
 
   document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
+
     if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.type === "date") refreshGhostDates();
   });
 
   document.addEventListener("click", (e) => {
