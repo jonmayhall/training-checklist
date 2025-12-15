@@ -3205,92 +3205,98 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <div class="two-col-grid">
-    <!-- LEFT: OPEN TICKETS -->
-    <div class="col-stack">
-      <div class="section-block ticket-section">
-        <h2>Open Support Tickets</h2>
+  <!-- ✅ STATUS SECTIONS STACKED (one under the next) -->
+  <div class="ticket-sections-stack">
 
-        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
-        <div id="openTicketsContainer">
-          <!-- Base card (entry form) -->
-          <div class="ticket-group" data-base="true">
-            <div class="ticket-group-inner">
-              <div class="ticket-row ticket-number-row">
-                <label>Support Ticket Number</label>
-                <div class="ticket-number-wrap">
-                  <input
-                    type="text"
-                    class="ticket-number-input"
-                    placeholder="Enter Zendesk ticket number"
-                  />
-                  <button
-                    type="button"
-                    class="add-ticket-btn"
-                    title="Add another support ticket"
-                  >+</button>
-                </div>
-              </div>
+    <!-- OPEN -->
+    <div class="section-block ticket-section">
+      <h2>Open Support Tickets</h2>
 
-              <div class="ticket-row">
-                <label>Status</label>
-                <!-- Base card status is locked/disabled by JS and forced to Open -->
-                <select class="ticket-status-select">
-                  <option value="Open" selected>Open</option>
-                  <option value="Tier Two">Tier Two</option>
-                  <option value="Closed - Resolved">Closed - Resolved</option>
-                  <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
-                </select>
-              </div>
+      <!-- ✅ 2x2 GRID FOR INDIVIDUAL TICKETS -->
+      <div id="openTicketsContainer" class="ticket-grid">
+        <!-- Base (entry) card -->
+        <div class="ticket-group" data-base="true">
+          <!-- Badge exists but CSS/JS should hide/disable it for base -->
+          <div class="ticket-badge" aria-hidden="true"></div>
 
-              <div class="ticket-row">
-                <label>Zendesk Link</label>
-                <!-- ✅ Change: add class so JS finds it reliably -->
+          <div class="ticket-group-inner">
+            <div class="ticket-row ticket-number-row">
+              <label>Support Ticket Number</label>
+              <div class="ticket-number-wrap">
                 <input
                   type="text"
-                  class="ticket-zendesk-input"
-                  placeholder="Paste full Zendesk ticket URL"
+                  class="ticket-number-input"
+                  placeholder="Enter Zendesk ticket number"
                 />
+                <button
+                  type="button"
+                  class="add-ticket-btn"
+                  title="Add another support ticket"
+                >+</button>
               </div>
+            </div>
 
-              <div class="ticket-row ticket-summary-row">
-                <label>Short Summary of the Issue</label>
-                <textarea
-                  class="ticket-summary-input"
-                  rows="2"
-                  placeholder="High-level description of the issue"
-                ></textarea>
-                <!-- ✅ Change: disclaimer removed (base-only disclaimer no longer shown) -->
-              </div>
+            <div class="ticket-row">
+              <label>Status</label>
+              <!-- Base card stays Open (JS will lock/force) -->
+              <select class="ticket-status-select">
+                <option value="Open" selected>Open</option>
+                <option value="Tier Two">Tier Two</option>
+                <option value="Closed - Resolved">Closed - Resolved</option>
+                <option value="Closed – Feature Not Supported">
+                  Closed – Feature Not Supported
+                </option>
+              </select>
+            </div>
+
+            <div class="ticket-row">
+              <label>Zendesk Link</label>
+              <!-- IMPORTANT: keep this class so JS can validate/target this field -->
+              <input
+                type="text"
+                class="ticket-zendesk-input"
+                placeholder="Paste full Zendesk ticket URL"
+              />
+            </div>
+
+            <div class="ticket-row ticket-summary-row">
+              <label>Short Summary of the Issue</label>
+              <textarea
+                class="ticket-summary-input"
+                rows="2"
+                placeholder="High-level description of the issue"
+              ></textarea>
+              <!-- ✅ Disclaimer removed (per your request) -->
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: ESCALATED + CLOSED STACKED -->
-    <div class="col-stack">
-      <div class="section-block ticket-section">
-        <h2>Tier Two / Escalated Tickets</h2>
+    <!-- TIER TWO / ESCALATED -->
+    <div class="section-block ticket-section">
+      <h2>Tier Two / Escalated Tickets</h2>
 
-        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
-        <div id="tierTwoTicketsContainer"></div>
-      </div>
-
-      <div class="section-block ticket-section">
-        <h2>Closed - Resolved Support Tickets</h2>
-
-        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
-        <div id="closedResolvedTicketsContainer"></div>
-      </div>
-
-      <div class="section-block ticket-section">
-        <h2>Closed - Feature Not Supported</h2>
-
-        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
-        <div id="closedFeatureTicketsContainer"></div>
-      </div>
+      <!-- ✅ 2x2 GRID FOR INDIVIDUAL TICKETS -->
+      <div id="tierTwoTicketsContainer" class="ticket-grid"></div>
     </div>
+
+    <!-- CLOSED - RESOLVED -->
+    <div class="section-block ticket-section">
+      <h2>Closed - Resolved Support Tickets</h2>
+
+      <!-- ✅ 2x2 GRID FOR INDIVIDUAL TICKETS -->
+      <div id="closedResolvedTicketsContainer" class="ticket-grid"></div>
+    </div>
+
+    <!-- CLOSED - FEATURE NOT SUPPORTED -->
+    <div class="section-block ticket-section">
+      <h2>Closed - Feature Not Supported</h2>
+
+      <!-- ✅ 2x2 GRID FOR INDIVIDUAL TICKETS -->
+      <div id="closedFeatureTicketsContainer" class="ticket-grid"></div>
+    </div>
+
   </div>
 </section>
 
