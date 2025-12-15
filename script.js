@@ -541,12 +541,16 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => setActivePage(btn.dataset.target));
   });
 
+ // ...all your other functions above...
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ...all your startup code (menu buttons, add-row wiring, etc)...
+
   // Support tickets: ensure base card disclaimer warning cleanup as user types
   document.addEventListener("input", (e) => {
     const el = e.target;
     if (!el.closest("#support-tickets")) return;
 
-    // If user starts fixing a field, remove its warning immediately
     if (el.classList.contains("ticket-number-input")){
       el.classList.remove("field-error");
       const wrap = qs(".ticket-number-wrap", el.closest(".ticket-group"));
@@ -564,7 +568,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   refreshGhostSelects();
-});
+}); // ✅ THIS closes DOMContentLoaded
 
-/* Needed for Google Maps callback */
+// ✅ Must be OUTSIDE DOMContentLoaded (global)
 window.initAddressAutocomplete = initAddressAutocomplete;
+
