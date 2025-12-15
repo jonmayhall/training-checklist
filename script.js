@@ -268,16 +268,36 @@ function handleAddTicket(btn){
 }
 
 /* ---------------------------
-   Google Maps (safe)
+   Google Maps (Autocomplete + Map Preview)
 --------------------------- */
 function initAddressAutocomplete(){
-  const input = qs(".address-input");
+  const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
 
   const ac = new google.maps.places.Autocomplete(input, { types:["address"] });
-  ac.addListener("place_changed", () => {});
+
+  ac.addListener("place_changed", () => {
+    const place = ac.getPlace();
+    if (!place?.formatted_address) return;
+
+    input.value = place.formatted_address;
+    saveField(input);
+
+    // update embedded map preview
+    updateDealershipMap(place.formatted_address);
+  });
 }
 window.initAddressAutocomplete = initAddressAutocomplete;
+
+function updateDealershipMap(address){
+  const frame = qs("#dealershipMapFrame");
+  if (!frame) return;
+
+  frame.src =
+    "https://www.google.com/maps?q=" +
+    encodeURIComponent(address) +
+    "&output=embed";
+}
 
 /* ---------------------------
    DOM READY (single init)
