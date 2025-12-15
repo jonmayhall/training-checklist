@@ -3,6 +3,51 @@
    GLOBAL + SAFE FOR ALL PAGES
    ========================================================= */
 
+function bindNavigation() {
+  const sections = Array.from(document.querySelectorAll(".page-section"));
+  const navButtons = Array.from(document.querySelectorAll(".nav-btn"));
+
+  function showSection(id) {
+    const target = document.getElementById(id);
+    if (!target) {
+      console.warn("No section found for id:", id);
+      return;
+    }
+
+    sections.forEach(s => s.classList.remove("active"));
+    target.classList.add("active");
+
+    navButtons.forEach(b => b.classList.remove("active"));
+    const activeBtn = navButtons.find(b => b.dataset.target === id);
+    if (activeBtn) activeBtn.classList.add("active");
+  }
+
+  // Bind buttons that use data-target
+  navButtons.forEach(btn => {
+    btn.type = "button"; // prevents form-submit issues
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.target;
+      if (id) showSection(id);
+    });
+  });
+
+  // Ensure something shows on load
+  const alreadyActive = document.querySelector(".page-section.active");
+  if (!alreadyActive && sections[0]) {
+    sections[0].classList.add("active");
+  }
+
+  // Optional: if you want first nav button to match on load
+  const activeSection = document.querySelector(".page-section.active");
+  if (activeSection) {
+    navButtons.forEach(b => b.classList.toggle("active", b.dataset.target === activeSection.id));
+  }
+}
+
+document.addEventListener("DOMContentLoaded", bindNavigation);
+
 /* ---------------------------
    Helpers
 --------------------------- */
