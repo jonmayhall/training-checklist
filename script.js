@@ -265,7 +265,7 @@ function validateBaseTicketCard(baseCard){
   clearTicketErrors(baseCard);
 
   const ticketNumberInput = qs(".ticket-number-input", baseCard);
-  const zendeskInput = qsa('input[type="text"]', baseCard)
+const zendeskInput = qs(".ticket-zendesk-input", baseCard);
     .find(i => (i.placeholder || "").toLowerCase().includes("zendesk ticket url")) || null;
   const summary = qs(".ticket-summary-input", baseCard);
 
