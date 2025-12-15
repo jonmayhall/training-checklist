@@ -181,13 +181,19 @@ function lockOnlyBaseTicketStatus(){
 
 function moveTicketCardToStatus(card, status){
   const map = {
-    "Open":"#openTicketsContainer",
-    "Tier 2":"#tierTwoTicketsContainer",
-    "Closed - Resolved":"#closedResolvedTicketsContainer",
-    "Closed - Feature":"#closedFeatureTicketsContainer"
+    "Open": "#openTicketsContainer",
+    "Tier Two": "#tierTwoTicketsContainer",
+    "Closed - Resolved": "#closedResolvedTicketsContainer",
+    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
   };
-  qs(map[status])?.appendChild(card);
+
+  const targetSel = map[status];
+  if (!targetSel) return;
+
+  const target = document.querySelector(targetSel);
+  if (target) target.appendChild(card);
 }
+
 
 function addTicketBadge(card){
   const badge = document.createElement("div");
@@ -280,11 +286,14 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshGhostSelects();
     if (e.target.type === "date") refreshDateGhost();
 
-    const sel = e.target.closest(".ticket-status-select");
-    if (sel){
-      const card = sel.closest(".ticket-group");
-      if (card?.dataset.base !== "true") moveTicketCardToStatus(card, sel.value);
-    }
+     const sel = e.target.closest(".ticket-status-select");
+if (sel){
+  const card = sel.closest(".ticket-group");
+  if (!card) return;
+  if (card.dataset.base === "true") return; // base stays in Open
+  moveTicketCardToStatus(card, sel.value);
+  return;
+}
   });
 
   document.addEventListener("click", e => {
