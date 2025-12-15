@@ -595,5 +595,13 @@ document.addEventListener("DOMContentLoaded", () => {
       handleAddTicket(btn);
       return;
     }
+
+     // MAP button (forces map refresh from whatever is typed)
+if (btn.id === "showDealershipMapBtn"){
+  const input = qs("#dealershipAddressInput");
+  if (input?.value) updateDealershipMap(input.value);
+  return;
+}
+
   });
 });
