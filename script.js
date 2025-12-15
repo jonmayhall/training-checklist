@@ -73,6 +73,11 @@ function clearSection(section){
     saveField(el);
   });
   refreshGhostSelects(section);
+
+  // if dealership address cleared, clear map too
+  if (section.id === "dealership-info"){
+    updateDealershipMap("");
+  }
 }
 
 function clearAll(){
@@ -84,6 +89,7 @@ function clearAll(){
     });
   });
   refreshGhostSelects();
+  updateDealershipMap("");
 }
 
 /* ---------------------------
@@ -219,7 +225,7 @@ function handleAddTicket(btn){
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
-  if (!num.value || !link.value || !sum.value) return;
+  if (!num?.value || !link?.value || !sum?.value) return;
 
   const clone = base.cloneNode(true);
   clone.removeAttribute("data-base");
@@ -235,8 +241,63 @@ function handleAddTicket(btn){
 }
 
 /* ---------------------------
-   Google Maps (Autocomplete + Map Preview)
+   Google Maps (Autocomplete + Map Preview + Map Button)
 --------------------------- */
+function updateDealershipMap(address){
+  const frame = qs("#dealershipMapFrame");
+  if (!frame) return;
+
+  if (!address){
+    frame.src = "";
+    return;
+  }
+
+  frame.src =
+    "https://www.google.com/maps?q=" +
+    encodeURIComponent(address) +
+    "&output=embed";
+}
+
+function openAddressInGoogleMaps(){
+  const input = qs("#dealershipAddressInput");
+  const address = (input?.value || "").trim();
+  if (!address) return;
+
+  const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function initMapUI(){
+  const input = qs("#dealershipAddressInput");
+  const btn = qs("#openAddressInMapsBtn");
+  if (!input) return;
+
+  // If an address is already saved, show map on load
+  if (input.value && input.value.trim()){
+    updateDealershipMap(input.value.trim());
+  }
+
+  // Clicking Map button opens Google Maps
+  btn?.addEventListener("click", openAddressInGoogleMaps);
+
+  // If user manually types an address, update preview when they leave the field
+  input.addEventListener("blur", () => {
+    const v = (input.value || "").trim();
+    if (!v) return;
+    updateDealershipMap(v);
+  });
+
+  // Also allow Enter to update map + save
+  input.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const v = (input.value || "").trim();
+    if (!v) return;
+    saveField(input);
+    updateDealershipMap(v);
+  });
+}
+
 function initAddressAutocomplete(){
   const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
@@ -249,20 +310,12 @@ function initAddressAutocomplete(){
 
     input.value = place.formatted_address;
     saveField(input);
+
+    // update embedded map preview
     updateDealershipMap(place.formatted_address);
   });
 }
 window.initAddressAutocomplete = initAddressAutocomplete;
-
-function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame");
-  if (!frame) return;
-
-  frame.src =
-    "https://www.google.com/maps?q=" +
-    encodeURIComponent(address) +
-    "&output=embed";
-}
 
 /* ---------------------------
    DOM READY
@@ -273,6 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAll();
     initTrainingDates();
     refreshGhostSelects();
+    initMapUI();
   } catch (err){
     console.error("Init error:", err);
   }
