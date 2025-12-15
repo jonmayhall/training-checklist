@@ -938,16 +938,15 @@ main{
   margin:0;
 }
 
-/* Badge (added tickets only) — smaller so it never crowds text */
+/* Badge — compact and clean */
 #support-tickets .ticket-count-badge{
   position:absolute;
   top:-1px;
   left:-1px;
 
-  width:28px;          /* smaller */
-  height:28px;         /* smaller */
-  font-size:12px;      /* smaller text */
-  line-height:1;
+  width:26px;
+  height:26px;
+  font-size:11px;
 
   background:var(--orange);
   color:#fff;
@@ -959,14 +958,14 @@ main{
 
   border:1px solid var(--orange);
   border-top-left-radius:var(--radius-md);
-  border-bottom-right-radius:14px; /* tighter corner */
+  border-bottom-right-radius:14px;
   border-top-right-radius:0;
   border-bottom-left-radius:0;
 }
 
-/* Less top padding needed now that badge is smaller */
-#support-tickets .ticket-group.has-badge{
-  padding-top:18px;  /* was 22px */
+/* 🔑 Push ALL content down when badge exists */
+#support-tickets .ticket-group.has-badge .ticket-group-inner{
+  margin-top:10px;
 }
 
 /* rows use grid so warning can sit directly under the field */
