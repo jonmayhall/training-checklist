@@ -913,56 +913,72 @@ main{
   margin-bottom:24px;
 }
 
-/* ===== Layout ===== */
-
-/* Each status section stacked */
-#support-tickets .col-stack{
-  display:flex;
-  flex-direction:column;
+/* Layout: left column (Open) + right column stacked sections */
+#support-tickets .two-col-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
   gap:18px;
 }
 
-/* Cards inside a status: 2x2 grid */
-#support-tickets .ticket-grid,
+#support-tickets .col-stack{
+  display:flex;
+  flex-direction:column;
+  gap:18px; /* each status section stacked */
+}
+
+/* Each status section contains a 2x2 grid of cards */
 #support-tickets #openTicketsContainer,
 #support-tickets #tierTwoTicketsContainer,
 #support-tickets #closedResolvedTicketsContainer,
 #support-tickets #closedFeatureTicketsContainer{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px;
 }
 
-/* Mobile: single column */
-@media (max-width:900px){
-  #support-tickets .ticket-grid,
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
+/* Base card stays full width in Open section */
+#support-tickets #openTicketsContainer .ticket-group[data-base="true"]{
+  grid-column:1 / -1;
 }
 
-/* ===== Ticket Card ===== */
-
+/* Individual ticket card */
 #support-tickets .ticket-group{
+  position:relative;
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
   padding:16px 20px 18px;
   background:#fff;
   box-shadow:var(--shadow);
+  margin:0; /* grid handles spacing */
 }
 
 #support-tickets .ticket-group-inner{
   margin-top:4px;
 }
 
-/* ===== Rows ===== */
+/* Ticket number badge (top-left) */
+#support-tickets .ticket-badge{
+  position:absolute;
+  top:-12px;
+  left:-12px;
+  width:32px;
+  height:32px;
+  background:var(--orange);
+  color:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:800;
+  box-shadow:0 2px 6px rgba(239,109,34,0.45);
+  z-index:2;
+}
 
+/* Ticket rows */
 #support-tickets .ticket-row{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   gap:12px;
   margin-bottom:14px;
   padding-bottom:10px;
@@ -979,44 +995,48 @@ main{
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
   font-weight:600;
-  padding-right:12px;
+  font-size:14px;
+  text-align:left;
+  padding-right:16px;
 }
 
-/* ===== Inputs ===== */
-
-#support-tickets .ticket-row input[type="text"],
-#support-tickets .ticket-row select{
-  width:100%;
-  height:34px;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-}
-
-/* ===== Field wrapper (for inline errors) ===== */
-
-#support-tickets .field-wrap{
-  display:flex;
-  flex-direction:column;
+/* Inputs & selects */
+#support-tickets .ticket-row > input[type="text"],
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
 }
 
-/* Ticket number + plus button */
+#support-tickets .ticket-row input[type="text"],
+#support-tickets .ticket-row select{
+  width:100%;
+  padding:7px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  height:34px;
+}
+
+/* Ticket number + add button */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
 }
 
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
+  flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
 
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
+  flex:0 0 34px;
   width:34px;
   height:34px;
   margin-left:-1px;
@@ -1030,37 +1050,40 @@ main{
   display:flex;
   align-items:center;
   justify-content:center;
+  padding:0;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
 }
 
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{
   background:#ff8b42;
 }
 
-/* Non-base cards: full-width ticket number */
+/* Non-base: ticket number input becomes full rounded */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  width:100%;
   border-radius:var(--radius-sm);
 }
 
-/* ===== Summary ===== */
-
+/* Summary textarea row */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
 }
 
-#support-tickets .ticket-summary-row .field-wrap{
-  width:100%;
-  margin-left:0;
+#support-tickets .ticket-summary-row > label{
+  margin-bottom:4px;
 }
 
 #support-tickets .ticket-summary-input{
   width:100%;
+  padding:7px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
   resize:none;
 }
 
-/* ===== Validation ===== */
-
+/* Validation UI */
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
   outline-offset:2px;
@@ -1071,33 +1094,36 @@ main{
   font-size:11px;
   font-style:italic;
   color:#ff5a5a;
-  margin-top:4px;
-  line-height:1.25;
+  margin-top:6px;
+  line-height:1.2;
 }
 
-/* ===== Disclaimer ===== */
-
-/* Base card only */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{
-  display:none !important;
+/* Responsive */
+@media (max-width: 900px){
+  #support-tickets .two-col-grid{
+    grid-template-columns:1fr;
+  }
+  #support-tickets #openTicketsContainer,
+  #support-tickets #tierTwoTicketsContainer,
+  #support-tickets #closedResolvedTicketsContainer,
+  #support-tickets #closedFeatureTicketsContainer{
+    grid-template-columns:1fr;
+  }
 }
 
-#support-tickets .ticket-disclaimer{
-  font-size:11px;
-  font-style:italic;
-  color:#9ca3af;
-  margin-top:8px;
-  line-height:1.3;
-}
-
-/* ===== Text shift for 2x2 cards ===== */
-
-#support-tickets .ticket-row{
-  padding-left:10px;
-}
-
-#support-tickets .indent-sub{
-  padding-left:28px !important;
+@media (max-width: 600px){
+  #support-tickets .ticket-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  #support-tickets .ticket-row > label{ margin-bottom:4px; }
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap{
+    width:100%;
+    flex:0 0 auto;
+    margin-left:0;
+  }
 }
 
 /* ============== FLOATING PDF BUTTON (Summary) ============== */
