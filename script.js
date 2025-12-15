@@ -314,17 +314,22 @@ function initAddressAutocomplete(){
   const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
 
-  const ac = new google.maps.places.Autocomplete(input, { types:["address"] });
+  const ac = new google.maps.places.Autocomplete(input, {
+    types: ["address"]
+  });
 
   ac.addListener("place_changed", () => {
     const place = ac.getPlace();
-    if (!place?.formatted_address) return;
+    if (!place || !place.formatted_address) return;
 
     input.value = place.formatted_address;
     saveField(input);
+
     updateDealershipMap(place.formatted_address);
   });
 }
+
+// MUST be global for Google callback
 window.initAddressAutocomplete = initAddressAutocomplete;
 
 function updateDealershipMap(address){
