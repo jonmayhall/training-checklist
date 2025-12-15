@@ -37,7 +37,11 @@ select{
   font-size:13px;
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
-
+/* Support Tickets – required field highlight */
+.field-error {
+  outline: 2px solid #ff5a5a;
+  outline-offset: 2px;
+}
 /* Placeholder (ghost) text */
 input::placeholder,
 textarea::placeholder{
