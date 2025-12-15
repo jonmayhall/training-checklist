@@ -449,15 +449,25 @@ main{
   --input-width:150px;
 }
 
-/* ===== Trainers page: force stacked-card indentation (override grid-2 / side-by-side rules) ===== */
-#trainers-cem .checklist-row,
-#trainers-cem #additionalTrainersContainer .checklist-row{
+/* ===== Page 1 Trainers: force stacked-card indentation even inside grid-2 ===== */
+#trainers-deployment .checklist-row,
+#trainers-deployment #additionalTrainersContainer .checklist-row{
   padding-left:40px !important;
 }
 
-/* keep the “sub-indent” working too */
-#trainers-cem .indent-sub{
+#trainers-deployment .indent-sub{
   padding-left:60px !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #e0e0e0;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row:last-child{
+  border-bottom:none;
+  margin-bottom:8px;
+  padding-bottom:0;
 }
 
 /* ============== MINI-CARDS (Primary Contacts) ============== */
