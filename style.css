@@ -427,6 +427,17 @@ main{
   --input-width:150px;
 }
 
+/* ===== Trainers page: force stacked-card indentation (override grid-2 / side-by-side rules) ===== */
+#trainers-cem .checklist-row,
+#trainers-cem #additionalTrainersContainer .checklist-row{
+  padding-left:40px !important;
+}
+
+/* keep the “sub-indent” working too */
+#trainers-cem .indent-sub{
+  padding-left:60px !important;
+}
+
 /* ============== MINI-CARDS (Primary Contacts) ============== */
 .mini-card{
   border:1px solid var(--orange);
