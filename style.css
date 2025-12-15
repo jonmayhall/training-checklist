@@ -371,6 +371,28 @@ main{
   min-height:220px;
 }
 
+/* ===== Page 1 Trainers: force stacked-card indentation even inside grid-2 ===== */
+#trainers-deployment .checklist-row,
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  padding-left:40px !important;
+}
+
+#trainers-deployment .indent-sub{
+  padding-left:60px !important;
+}
+
+/* Additional Trainer cloned rows always match the normal stacked-card layout */
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #e0e0e0;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row:last-child{
+  border-bottom:none;
+  margin-bottom:8px;
+  padding-bottom:0;
+}
+
 /* focus */
 .section-block input:focus,
 .section-block select:focus,
