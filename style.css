@@ -351,8 +351,8 @@ main{
 
 /* textareas */
 .section-block textarea{
-  width:96%;
-  margin:6px auto 10px;
+  width:100%;
+  margin:6px 0 10px;
   display:block;
   padding:8px 10px;
   border-radius:var(--radius-sm);
@@ -360,6 +360,20 @@ main{
   background:#f7f7f7;
   font-size:13px;
   resize:vertical;
+  box-sizing:border-box;
+}
+
+/* Side-by-side Notes cards: let textarea grow to fill the card */
+.cards-grid .section-block,
+.two-col-grid .section-block{
+  display:flex;
+  flex-direction:column;
+}
+
+.cards-grid .section-block textarea,
+.two-col-grid .section-block textarea{
+  flex:1 1 auto;
+  min-height:220px;
 }
 
 /* focus */
