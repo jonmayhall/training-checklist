@@ -1,6 +1,6 @@
 /* =========================================================
-   myKaarma Interactive Training Checklist — script.js (FULL)
-   GLOBAL + SAFE FOR ALL PAGES
+   myKaarma Interactive Training Checklist — script.js
+   FULL / SAFE / FINAL
    ========================================================= */
 
 /* ---------------------------
@@ -14,7 +14,7 @@ function isField(el){
 }
 
 /* ---------------------------
-   Ghost / placeholder selects
+   Ghost / placeholder selects & dates
 --------------------------- */
 function refreshGhostSelects(root = document){
   qsa("select", root).forEach(sel => {
@@ -24,15 +24,9 @@ function refreshGhostSelects(root = document){
   });
 }
 
-/* ---------------------------
-   Date placeholder styling helper (optional)
-   NOTE: input[type="date"] doesn't support true placeholder text,
-   but this lets you style empty dates if you add CSS for .is-placeholder
---------------------------- */
 function refreshDateGhost(root = document){
-  qsa('input[type="date"]', root).forEach(inp => {
-    const ghost = !inp.value;
-    inp.classList.toggle("is-placeholder", ghost);
+  qsa("input[type='date']", root).forEach(inp => {
+    inp.classList.toggle("is-placeholder", !inp.value);
   });
 }
 
@@ -77,39 +71,11 @@ function loadAll(){
 }
 
 /* ---------------------------
-   Clear / Reset
---------------------------- */
-function clearSection(section){
-  qsa("input, textarea, select", section).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-    saveField(el);
-  });
-  refreshGhostSelects(section);
-  refreshDateGhost(section);
-}
-
-function clearAll(){
-  localStorage.removeItem(STORAGE_KEY);
-  qsa(".page-section").forEach(sec => {
-    qsa("input, textarea, select", sec).forEach(el => {
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-    });
-  });
-  refreshGhostSelects();
-  refreshDateGhost();
-}
-
-/* ---------------------------
-   Navigation (single source of truth)
+   Navigation
 --------------------------- */
 function setActivePage(id){
   const target = document.getElementById(id);
-  if (!target){
-    console.warn("Page not found:", id);
-    return;
-  }
+  if (!target) return;
 
   qsa(".page-section").forEach(p => p.classList.remove("active"));
   target.classList.add("active");
@@ -121,36 +87,20 @@ function setActivePage(id){
 }
 
 function initNavigation(){
-  const nav = qs("#sidebar-nav");
-  if (!nav) return;
-
-  nav.addEventListener("click", (e) => {
+  qs("#sidebar-nav")?.addEventListener("click", e => {
     const btn = e.target.closest(".nav-btn[data-target]");
     if (!btn) return;
     e.preventDefault();
     setActivePage(btn.dataset.target);
   });
 
-  const hashId = (location.hash || "").replace("#","");
-  if (hashId && document.getElementById(hashId)){
-    setActivePage(hashId);
-    return;
-  }
-
-  const alreadyActive = qs(".page-section.active");
-  if (alreadyActive){
-    setActivePage(alreadyActive.id);
-    return;
-  }
-
-  const firstBtn = qs(".nav-btn[data-target]");
-  if (firstBtn?.dataset?.target){
-    setActivePage(firstBtn.dataset.target);
-  }
+  const hash = location.hash.replace("#","");
+  if (hash && document.getElementById(hash)) setActivePage(hash);
+  else qs(".nav-btn")?.click();
 }
 
 /* ---------------------------
-   Integrated "+" rows (non-table)
+   Integrated rows
 --------------------------- */
 function resetClonedFields(clone){
   qsa("input, textarea, select", clone).forEach(el => {
@@ -164,17 +114,16 @@ function resetClonedFields(clone){
 
 function cloneIntegratedRow(btn){
   const row = btn.closest(".checklist-row");
-  if (!row || !row.parentElement) return;
+  if (!row) return;
 
   const clone = row.cloneNode(true);
   resetClonedFields(clone);
   clone.querySelector(".add-row")?.remove();
-
-  row.parentElement.insertBefore(clone, row.nextSibling);
+  row.after(clone);
 }
 
 /* ---------------------------
-   Trainers – Additional Trainers
+   Additional Trainers
 --------------------------- */
 function handleTrainerAdd(btn){
   const row = btn.closest(".checklist-row");
@@ -184,19 +133,12 @@ function handleTrainerAdd(btn){
   const clone = row.cloneNode(true);
   resetClonedFields(clone);
   clone.querySelector(".add-row")?.remove();
-
   container.appendChild(clone);
 }
 
 /* ---------------------------
-   Onsite Training Dates
+   Training Dates
 --------------------------- */
-function addDaysISO(iso, days){
-  const d = new Date(iso);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
-}
-
 function initTrainingDates(){
   const start = qs("#onsiteStartDate");
   const end = qs("#onsiteEndDate");
@@ -209,243 +151,162 @@ function initTrainingDates(){
   });
 
   start.addEventListener("input", () => {
-    if (!start.value || end.dataset.userEdited === "1"){
-      refreshDateGhost();
-      return;
-    }
-    end.value = addDaysISO(start.value, 2);
+    if (!start.value || end.dataset.userEdited) return;
+    const d = new Date(start.value);
+    d.setDate(d.getDate() + 2);
+    end.value = d.toISOString().split("T")[0];
     saveField(end);
     refreshDateGhost();
   });
-
-  // set initial ghost state
-  refreshDateGhost();
 }
 
 /* ---------------------------
    Support Tickets
 --------------------------- */
-let ticketCount = 0;
+function lockOnlyBaseTicketStatus(){
+  qsa("#support-tickets .ticket-group").forEach(card => {
+    const sel = qs(".ticket-status-select", card);
+    if (!sel) return;
+
+    if (card.dataset.base === "true"){
+      sel.value = "Open";
+      sel.disabled = true;
+      sel.classList.add("is-locked");
+    } else {
+      sel.disabled = false;
+      sel.classList.remove("is-locked");
+    }
+  });
+}
+
+function moveTicketCardToStatus(card, status){
+  const map = {
+    "Open":"#openTicketsContainer",
+    "Tier 2":"#tierTwoTicketsContainer",
+    "Closed - Resolved":"#closedResolvedTicketsContainer",
+    "Closed - Feature":"#closedFeatureTicketsContainer"
+  };
+  qs(map[status])?.appendChild(card);
+}
 
 function addTicketBadge(card){
-  ticketCount++;
   const badge = document.createElement("div");
   badge.className = "ticket-count-badge";
-  badge.textContent = ticketCount;
+  badge.textContent = qsa(".ticket-group:not([data-base='true'])").length;
   card.prepend(badge);
   card.classList.add("has-badge");
 }
 
-/* ✅ NEW: Warning helpers */
-function setTicketWarning(fieldEl, msg){
-  const row = fieldEl.closest(".ticket-row");
-  if (!row) return;
+function showTicketWarnings(base){
+  qsa(".field-warning", base).forEach(w => w.remove());
+  qsa(".field-error", base).forEach(f => f.classList.remove("field-error"));
 
-  // remove existing warning in this row
-  row.querySelectorAll(".field-warning").forEach(n => n.remove());
+  let valid = true;
 
-  const p = document.createElement("p");
-  p.className = "field-warning";
-  p.textContent = msg;
+  qsa("input, textarea", base).forEach(f => {
+    if (!f.value){
+      valid = false;
+      f.classList.add("field-error");
+      const warn = document.createElement("div");
+      warn.className = "field-warning";
+      warn.textContent = "Required";
+      f.closest(".ticket-row")?.append(warn);
+    }
+  });
 
-  row.appendChild(p);
+  return valid;
 }
 
-function clearTicketWarnings(card){
-  card.querySelectorAll(".field-warning").forEach(n => n.remove());
-  card.querySelectorAll(".field-error").forEach(n => n.classList.remove("field-error"));
-}
-
-/* ✅ REPLACED: handleAddTicket with per-field red warnings */
 function handleAddTicket(btn){
   const base = btn.closest(".ticket-group[data-base='true']");
   if (!base) return;
 
-  const num = qs(".ticket-number-input", base);
-  const link = qs(".ticket-zendesk-input", base);
-  const sum = qs(".ticket-summary-input", base);
+  if (!showTicketWarnings(base)) return;
 
-  clearTicketWarnings(base);
-
-  let ok = true;
-
-  if (!num.value.trim()){
-    num.classList.add("field-error");
-    setTicketWarning(num, "Ticket Number is required.");
-    ok = false;
-  }
-
-  if (!link.value.trim()){
-    link.classList.add("field-error");
-    setTicketWarning(link, "Zendesk URL is required.");
-    ok = false;
-  }
-
-  if (!sum.value.trim()){
-    sum.classList.add("field-error");
-    setTicketWarning(sum, "Short summary is required.");
-    ok = false;
-  }
-
-  if (!ok) return;
-
-  // clone AFTER validation passes
   const clone = base.cloneNode(true);
   clone.removeAttribute("data-base");
-
   clone.querySelector(".add-ticket-btn")?.remove();
   clone.querySelector(".ticket-disclaimer")?.remove();
 
+  qs(".ticket-status-select", clone).disabled = false;
   addTicketBadge(clone);
+
   qs("#openTicketsContainer")?.appendChild(clone);
-
-  num.value = "";
-  link.value = "";
-  sum.value = "";
+  qsa("input, textarea", base).forEach(f => f.value = "");
 }
 
 /* ---------------------------
-   Support Ticket Status Move (optional — requires moveTicketCardToStatus)
-   If you already have a moveTicketCardToStatus implementation, keep it.
---------------------------- */
-function moveTicketCardToStatus(card, status){
-  const map = {
-    "Open": "#openTicketsContainer",
-    "Tier Two": "#tierTwoTicketsContainer",
-    "Closed - Resolved": "#closedResolvedTicketsContainer",
-    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
-  };
-  const targetSel = map[status];
-  const target = targetSel ? qs(targetSel) : null;
-  if (!target) return;
-
-  target.appendChild(card);
-}
-
-/* ---------------------------
-   Google Maps (Autocomplete + Map Preview)
+   Google Maps
 --------------------------- */
 function initAddressAutocomplete(){
   const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
 
-  const ac = new google.maps.places.Autocomplete(input, { types:["address"] });
-
-  ac.addListener("place_changed", () => {
-    const place = ac.getPlace();
-    if (!place?.formatted_address) return;
-
-    input.value = place.formatted_address;
+  const ac = new google.maps.places.Autocomplete(input,{types:["address"]});
+  ac.addListener("place_changed",()=>{
+    const p = ac.getPlace();
+    if (!p?.formatted_address) return;
+    input.value = p.formatted_address;
     saveField(input);
-    updateDealershipMap(place.formatted_address);
+    updateDealershipMap(p.formatted_address);
   });
 }
 window.initAddressAutocomplete = initAddressAutocomplete;
 
-function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame");
-  if (!frame) return;
-
-  frame.src =
-    "https://www.google.com/maps?q=" +
-    encodeURIComponent(address) +
-    "&output=embed";
+function updateDealershipMap(addr){
+  const f = qs("#dealershipMapFrame");
+  if (f) f.src = "https://www.google.com/maps?q="+encodeURIComponent(addr)+"&output=embed";
 }
 
 /* ---------------------------
    DOM READY
 --------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  try{
-    initNavigation();
-    loadAll();
-    initTrainingDates();
-    refreshGhostSelects();
-    refreshDateGhost();
-  } catch (err){
-    console.error("Init error:", err);
-  }
+  initNavigation();
+  loadAll();
+  initTrainingDates();
+  lockOnlyBaseTicketStatus();
 
-  // autosave on input/change
-  document.addEventListener("input", (e) => {
+  document.addEventListener("input", e => {
     if (!isField(e.target)) return;
     saveField(e.target);
-
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
+    refreshGhostSelects();
     if (e.target.type === "date") refreshDateGhost();
   });
 
-  document.addEventListener("change", (e) => {
+  document.addEventListener("change", e => {
     if (!isField(e.target)) return;
     saveField(e.target);
-
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
+    refreshGhostSelects();
     if (e.target.type === "date") refreshDateGhost();
 
-    // ✅ Support ticket status move (ONLY non-base cards)
     const sel = e.target.closest(".ticket-status-select");
     if (sel){
       const card = sel.closest(".ticket-group");
-      if (!card) return;
-      if (card.dataset.base === "true") return; // don't move base
-      moveTicketCardToStatus(card, sel.value);
-      return;
+      if (card?.dataset.base !== "true") moveTicketCardToStatus(card, sel.value);
     }
   });
 
-  // clicks
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", e => {
     const btn = e.target.closest("button");
     if (!btn) return;
 
-    if (btn.id === "clearAllBtn"){
-      clearAll();
-      return;
-    }
+    if (btn.id === "clearAllBtn") localStorage.clear();
 
-    if (btn.classList.contains("clear-page-btn")){
-      const sec = btn.closest(".page-section");
-      if (sec) clearSection(sec);
-      return;
-    }
+    if (btn.classList.contains("clear-page-btn"))
+      clearSection(btn.closest(".page-section"));
 
-    // "+" buttons (integrated rows and tables)
     if (btn.classList.contains("add-row")){
-      // table add-row
-      const table = btn.closest(".table-container")?.querySelector("table");
-      if (table && table.tBodies?.[0]){
-        const tbody = table.tBodies[0];
-        const last = tbody.rows[tbody.rows.length - 1];
-        if (!last) return;
-
-        const clone = last.cloneNode(true);
-
-        // clear fields in cloned table row
-        qsa("input, select, textarea", clone).forEach(el => {
-          if (el.type === "checkbox") el.checked = false;
-          else if (el.tagName === "SELECT") el.selectedIndex = 0;
-          else el.value = "";
-        });
-
-        tbody.appendChild(clone);
-        refreshGhostSelects(clone);
-        refreshDateGhost(clone);
-        return;
-      }
-
-      // non-table add-row
-      if (btn.closest("#trainers-deployment")){
+      const table = btn.closest(".table-container")?.querySelector("tbody");
+      if (table){
+        const clone = table.lastElementChild.cloneNode(true);
+        resetClonedFields(clone);
+        table.appendChild(clone);
+      } else if (btn.closest("#trainers-deployment")){
         handleTrainerAdd(btn);
-      } else {
-        cloneIntegratedRow(btn);
-      }
-      return;
+      } else cloneIntegratedRow(btn);
     }
 
-    // support tickets "+"
-    if (btn.classList.contains("add-ticket-btn")){
-      handleAddTicket(btn);
-      return;
-    }
+    if (btn.classList.contains("add-ticket-btn")) handleAddTicket(btn);
   });
 });
