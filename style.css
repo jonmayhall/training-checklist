@@ -950,8 +950,8 @@ main{
 /* ===== NUMBER BADGE (NON-BASE CARDS ONLY) ===== */
 #support-tickets .ticket-count-badge{
   position:absolute;
-  top:14px;
-  left:14px;
+  top:12px;
+  left:20px;
   width:32px;
   height:32px;
   border-radius:999px;
@@ -966,9 +966,9 @@ main{
   z-index:2;
 }
 
-/* Push content away from badge so it NEVER overlaps */
-#support-tickets .ticket-group:has(.ticket-count-badge) .ticket-group-inner{
-  padding-left:48px;
+/* Push ALL card content DOWN to clear the badge */
+#support-tickets .ticket-group:has(.ticket-count-badge){
+  padding-top:64px;
 }
 
 /* ===== TICKET ROWS ===== */
