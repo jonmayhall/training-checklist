@@ -343,6 +343,17 @@ main{
   height:34px;
 }
 
+/* ✅ Force date inputs (in the stacked training dates row) to match all other inputs */
+.training-dates-row .date-stack input[type="date"]{
+  height:34px;
+  padding:7px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  box-sizing:border-box;
+}
+
 /* textareas */
 .section-block textarea{
   width:100%;
@@ -383,7 +394,6 @@ main{
 
 /* indents */
 .indent-sub{ padding-left:60px !important; }
-
 
 /* Onsite training dates (stack start/end on the right) */
 .training-dates-row .date-stack{
