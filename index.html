@@ -3194,121 +3194,91 @@
         </div>
       </section>
 
-<!-- ========================================================= -->
-<!-- PAGE 7: SUPPORT TICKETS                                  -->
-<!-- ========================================================= -->
 <section id="support-tickets" class="page-section">
+  <button class="clear-page-btn">Reset This Page</button>
+
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
     Track open issues with myKaarma Support, escalation status, and resolution details.
   </p>
 
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+  <div class="two-col-grid support-layout">
+    <!-- LEFT: OPEN SUPPORT TICKETS -->
+    <div class="section-block ticket-section">
+      <h2>Open Support Tickets</h2>
 
-  <div class="two-col-grid">
-    <!-- LEFT: OPEN TICKETS -->
-    <div class="col-stack">
-      <div class="section-block ticket-section">
-        <h2>Open Support Tickets</h2>
-
-        <div id="openTicketsContainer">
-          <!-- BASE / DEFAULT CARD -->
-          <div class="ticket-group" data-base="true">
-            <div class="ticket-group-inner">
-
-              <!-- Ticket Number -->
-              <div class="ticket-row ticket-number-row">
-                <label>Support Ticket Number</label>
-
-                <!-- field-wrap ensures error message sits directly under the input group -->
-                <div class="field-wrap">
-                  <div class="ticket-number-wrap">
-                    <input
-                      type="text"
-                      class="ticket-number-input"
-                      placeholder="Enter Zendesk ticket number"
-                    />
-                    <button
-                      type="button"
-                      class="add-ticket-btn"
-                      title="Add another support ticket"
-                    >+</button>
-                  </div>
-                  <!-- JS injects: <div class="field-warning">...</div> here -->
-                </div>
+      <div id="openTicketsContainer" class="tickets-grid">
+        <!-- BASE CARD (ONLY ONE THAT HAS + and disclaimer) -->
+        <div class="ticket-group" data-base="true">
+          <div class="ticket-group-inner">
+            <!-- Ticket # + Add -->
+            <div class="ticket-row">
+              <label>Support Ticket Number</label>
+              <div class="ticket-number-wrap">
+                <input
+                  type="text"
+                  class="ticket-number-input"
+                  placeholder="Enter Zendesk ticket number"
+                />
+                <button type="button" class="add-ticket-btn" aria-label="Add ticket">+</button>
               </div>
+            </div>
 
-              <!-- Status (base locked via JS using disabled + grey styling) -->
-              <div class="ticket-row">
-                <label>Status</label>
+            <!-- Status (LOCKED) -->
+            <div class="ticket-row">
+              <label>Status</label>
+              <select class="ticket-status-select is-locked" disabled>
+                <option>Open</option>
+                <option>Tier Two</option>
+                <option>Closed - Resolved</option>
+                <option>Closed - Feature Not Supported</option>
+              </select>
+            </div>
 
-                <div class="field-wrap">
-                  <select class="ticket-status-select" disabled>
-                    <option value="Open" selected>Open</option>
-                    <option value="Tier Two">Tier Two</option>
-                    <option value="Closed - Resolved">Closed - Resolved</option>
-                    <option value="Closed – Feature Not Supported">
-                      Closed – Feature Not Supported
-                    </option>
-                  </select>
-                </div>
-              </div>
+            <!-- Zendesk Link -->
+            <div class="ticket-row">
+              <label>Zendesk Link</label>
+              <input
+                type="text"
+                class="ticket-zendesk-input"
+                placeholder="Paste full Zendesk ticket URL"
+              />
+            </div>
 
-              <!-- Zendesk Link -->
-              <div class="ticket-row">
-                <label>Zendesk Link</label>
+            <!-- Summary -->
+            <div class="ticket-row ticket-summary-row">
+              <label>Short Summary of the Issue</label>
+              <textarea
+                class="ticket-summary-input"
+                rows="2"
+                placeholder="High-level description of the issue"
+              ></textarea>
 
-                <div class="field-wrap">
-                  <input
-                    type="text"
-                    class="ticket-zendesk-input"
-                    placeholder="Paste full Zendesk ticket URL"
-                  />
-                  <!-- JS injects: <div class="field-warning">...</div> here -->
-                </div>
-              </div>
-
-              <!-- Summary -->
-              <div class="ticket-row ticket-summary-row">
-                <label>Short Summary of the Issue</label>
-
-                <div class="field-wrap field-wrap-full">
-                  <textarea
-                    class="ticket-summary-input"
-                    rows="2"
-                    placeholder="High-level description of the issue"
-                  ></textarea>
-                  <!-- JS injects: <div class="field-warning">...</div> here -->
-                </div>
-
-                <!-- DISCLAIMER (BASE ONLY) -->
-                <p class="ticket-disclaimer">
-                  * This support ticket must be fully completed before adding another card.
-                </p>
-              </div>
-
+              <!-- ✅ BASE ONLY DISCLAIMER -->
+              <p class="ticket-disclaimer">
+                * This support ticket must be fully completed before adding another card.
+              </p>
             </div>
           </div>
-          <!-- /BASE CARD -->
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: STATUS SECTIONS STACKED -->
+    <!-- RIGHT: STACKED STATUS SECTIONS -->
     <div class="col-stack">
       <div class="section-block ticket-section">
         <h2>Tier Two / Escalated Tickets</h2>
-        <div id="tierTwoTicketsContainer"></div>
+        <div id="tierTwoTicketsContainer" class="tickets-grid"></div>
       </div>
 
       <div class="section-block ticket-section">
         <h2>Closed - Resolved Support Tickets</h2>
-        <div id="closedResolvedTicketsContainer"></div>
+        <div id="closedResolvedTicketsContainer" class="tickets-grid"></div>
       </div>
 
       <div class="section-block ticket-section">
         <h2>Closed - Feature Not Supported</h2>
-        <div id="closedFeatureTicketsContainer"></div>
+        <div id="closedFeatureTicketsContainer" class="tickets-grid"></div>
       </div>
     </div>
   </div>
