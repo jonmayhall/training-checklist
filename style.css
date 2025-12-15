@@ -906,27 +906,23 @@ main{
 }
 
 /* ============== SUPPORT TICKETS (kept clean) ============== */
+#support-tickets .ticket-section{ margin-bottom:24px; }
 
-#support-tickets .ticket-section{
-  margin-bottom:24px;
-}
-
-/* Page layout: left open tickets, right stacked statuses */
-#support-tickets .two-col-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-#support-tickets .col-stack{
+/* Each status section is its own ROW (stacked) */
+#support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:18px;
 }
 
-/* =========================
-   Ticket Card
-   ========================= */
+/* Cards inside a status section are 2-column grid (2x2, 2xN) */
+#support-tickets .ticket-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+}
+
+/* Individual ticket card */
 #support-tickets .ticket-group{
   position:relative;
   border:1px solid var(--orange);
@@ -934,55 +930,43 @@ main{
   padding:16px 20px 18px;
   background:#fff;
   box-shadow:var(--shadow);
+  margin:0; /* grid handles spacing */
 }
 
-#support-tickets .ticket-group-inner{
-  margin-top:4px;
-}
+#support-tickets .ticket-group-inner{ margin-top:4px; }
 
-/* =========================
-   Ticket Rows
-   ========================= */
+/* Ticket rows */
 #support-tickets .ticket-row{
   display:flex;
-  align-items:flex-start; /* IMPORTANT for stacked field + error */
+  align-items:center;
   gap:12px;
   margin-bottom:14px;
   padding-bottom:10px;
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
-
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
   padding-bottom:0;
 }
-
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
   font-weight:600;
   font-size:14px;
   text-align:left;
   padding-right:16px;
-  padding-top:6px;
 }
 
-/* =========================
-   Field Wrapper
-   (input + error live together)
-   ========================= */
-#support-tickets .field-wrap{
-  display:flex;
-  flex-direction:column;
+/* Right-side field sizing */
+#support-tickets .ticket-row > input[type="text"],
+#support-tickets .ticket-row > select,
+#support-tickets .ticket-row > .ticket-number-wrap{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
 }
 
-/* =========================
-   Inputs & Selects
-   ========================= */
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
@@ -994,20 +978,20 @@ main{
   height:34px;
 }
 
-/* =========================
-   Ticket Number + Add Button
-   ========================= */
+/* Ticket number wrap + add button */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
+  width:var(--input-width);
 }
-
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
   flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
-
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
   flex:0 0 34px;
   width:34px;
@@ -1025,29 +1009,20 @@ main{
   justify-content:center;
   padding:0;
 }
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{ background:#ff8b42; }
 
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{
-  background:#ff8b42;
+/* Non-base cards: full rounded ticket number (no +) */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
+  width:var(--input-width);
+  border-radius:var(--radius-sm);
 }
 
-/* =========================
-   Summary Row (full width)
-   ========================= */
+/* Summary textarea */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
 }
-
-#support-tickets .ticket-summary-row > label{
-  margin-bottom:4px;
-}
-
-#support-tickets .ticket-summary-row .field-wrap{
-  flex:1 1 auto;
-  width:100%;
-  margin-left:0;
-}
-
+#support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 #support-tickets .ticket-summary-input{
   width:100%;
   padding:7px 10px;
@@ -1058,41 +1033,36 @@ main{
   resize:none;
 }
 
-/* =========================
-   Validation UI
-   ========================= */
+/* ===== Validation UI (keeps warnings UNDER the correct field) ===== */
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
   outline-offset:2px;
   background:#fff5f5 !important;
 }
 
+/* These are inserted after the exact input/wrap element in JS */
 #support-tickets .field-warning{
+  display:block;
+  width:100%;
   font-size:11px;
   font-style:italic;
   color:#ff5a5a;
-  margin-top:4px;
-  line-height:1.25;
+  margin-top:6px;
+  line-height:1.2;
 }
 
-/* =========================
-   Base Card Disclaimer
-   ========================= */
+/* Base-card disclaimer */
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   font-style:italic;
   color:#9ca3af;
-  margin-top:8px;
+  margin-top:10px;
   line-height:1.3;
 }
 
-/* =========================
-   Responsive
-   ========================= */
+/* Responsive */
 @media (max-width:900px){
-  #support-tickets .two-col-grid{
-    grid-template-columns:1fr;
-  }
+  #support-tickets .ticket-grid{ grid-template-columns:1fr; }
 }
 
 @media (max-width:600px){
@@ -1100,10 +1070,18 @@ main{
     flex-direction:column;
     align-items:flex-start;
   }
-
-  #support-tickets .field-wrap{
+  #support-tickets .ticket-row > label{ margin-bottom:4px; }
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap{
     width:100%;
+    flex:0 0 auto;
     margin-left:0;
+  }
+  #support-tickets .ticket-number-wrap{ width:100%; }
+  #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
+    width:calc(100% - 34px);
+    flex:0 0 calc(100% - 34px);
   }
 }
 
