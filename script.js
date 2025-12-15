@@ -147,14 +147,49 @@ function refreshAfterClone(clone){
 }
 
 function cloneIntegratedRow(btn){
+  // ✅ SPECIAL CASE: Additional POC button should clone the ENTIRE CARD
+  if (btn.classList.contains("additional-poc-add") || btn.closest(".additional-poc-card")) {
+    const baseCard = btn.closest(".additional-poc-card");
+    const grid = qs("#primaryContactsGrid");
+    if (!baseCard || !grid) return;
+
+    const clone = baseCard.cloneNode(true);
+
+    // make it a real clone (NOT base)
+    clone.removeAttribute("data-base");
+
+    // clear fields
+    qsa("input, textarea, select", clone).forEach(el => {
+      if (el.type === "checkbox") el.checked = false;
+      else if (el.tagName === "SELECT") el.selectedIndex = 0;
+      else el.value = "";
+    });
+
+    // remove the + button so only the base has it
+    clone.querySelector(".additional-poc-add")?.remove();
+    clone.querySelector(".add-row")?.remove();
+
+    refreshGhostSelects(clone);
+
+    // append as a brand new card in the grid
+    grid.appendChild(clone);
+    return;
+  }
+
+  // ✅ DEFAULT: normal “integrated +” rows (non-table)
   const row = btn.closest(".checklist-row");
   if (!row || !row.parentElement) return;
 
   const clone = row.cloneNode(true);
-  refreshAfterClone(clone);
 
-  // remove the + button so only the base row has it
+  qsa("input, textarea, select", clone).forEach(el => {
+    if (el.type === "checkbox") el.checked = false;
+    else if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+
   clone.querySelector(".add-row")?.remove();
+  refreshGhostSelects(clone);
 
   row.parentElement.insertBefore(clone, row.nextSibling);
 }
@@ -295,6 +330,11 @@ function updateDealershipMap(address){
     "https://www.google.com/maps?q=" +
     encodeURIComponent(address) +
     "&output=embed";
+}
+function refreshDateGhost(){
+  qsa(".training-dates-row input[type='date']").forEach(d => {
+    d.classList.toggle("is-placeholder", !d.value);
+  });
 }
 
 /* ---------------------------
