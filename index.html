@@ -51,34 +51,35 @@
     <!-- MAIN -->
     <main>
 
-     <!-- =========================================
-     PAGE 1 — Trainers, Deployment Manager, & CEM
-     (SIDE-BY-SIDE applied)
-     ========================================= -->
-<section id="onsite-trainers-cem" class="page-section active">
+     <!-- ========================================================= -->
+<!-- PAGE 1: TRAINERS, DEPLOYMENT MANAGER, & CEM               -->
+<!-- ========================================================= -->
+<section id="trainers-deployment" class="page-section active">
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
   <h1>Trainers, Deployment Manager, &amp; CEM</h1>
   <p class="page-subtitle">
     Capture onsite trainer details and deployment/CEM context.
   </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
 
   <div class="grid-2">
-  <!-- LEAD TRAINER + ADDITIONAL TRAINER -->
-  <div class="section-block">
-    <h2>Lead &amp; Additional Trainers</h2>
 
-    <div class="checklist-row">
-      <label>Lead Trainer</label>
-      <select>
-        <option value="" data-ghost="true">Select lead trainer</option>
+    <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
+    <div class="section-block">
+      <h2>Lead &amp; Additional Trainers</h2>
 
-        <optgroup label="──────────">
+      <!-- Lead Trainer -->
+      <div class="checklist-row">
+        <label class="sr-label">Lead Trainer</label>
+        <select>
+          <option value="" data-ghost="true">Select lead trainer</option>
+
+          <option disabled>──────────</option>
           <option>Christopher Eskew</option>
           <option>Brian Button</option>
           <option>Dana Barry</option>
-        </optgroup>
 
-        <optgroup label="──────────">
+          <option disabled>──────────</option>
           <option>Adam Jeffords</option>
           <option>Alec Parker</option>
           <option>Eliud Garcia</option>
@@ -86,9 +87,8 @@
           <option>Kyle Leavitt</option>
           <option>Lauren Ramos</option>
           <option>Miles Krasic</option>
-        </optgroup>
 
-        <optgroup label="──────────">
+          <option disabled>──────────</option>
           <option>Anthony Carbone</option>
           <option>Clyde Chapman</option>
           <option>Dennitza Fernandez</option>
@@ -96,23 +96,23 @@
           <option>Kevin Mullinax</option>
           <option>Sharon Rusta</option>
           <option>Terry Hart</option>
-        </optgroup>
-      </select>
+        </select>
+      </div>
+
+      <!-- Additional Trainer (base row) -->
+      <div class="checklist-row integrated-plus indent-sub" data-base="true">
+        <label>Additional Trainer</label>
+        <input type="text" placeholder="Enter additional trainer name">
+        <button type="button" class="add-row" title="Add another trainer">+</button>
+      </div>
+
+      <!-- Additional trainers injected here -->
+      <div id="additionalTrainersContainer"></div>
     </div>
 
-    <div class="checklist-row integrated-plus">
-      <label>Additional Trainer</label>
-      <input type="text" placeholder="Enter additional trainer name">
-      <button type="button" class="add-row" title="Add another trainer">+</button>
-    </div>
-
-    <div id="additionalTrainersContainer"></div>
-  </div>
-</div>
-
-    <!-- DEPLOYMENT MANAGER + CEM -->
+    <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
-      <h2>Deployment &amp; Custom Engagement Manager</h2>
+      <h2>Deployment &amp; Customer Engagement Manager</h2>
 
       <div class="checklist-row">
         <label>Deployment Manager</label>
@@ -124,11 +124,7 @@
         <input type="text" placeholder="Enter CEM name">
       </div>
     </div>
-  </div>
 
-  <div class="section-block notes-block">
-    <h2>Notes – Trainers, Deployment, &amp; CEM</h2>
-    <textarea rows="6" placeholder="High-level notes about trainers, deployment, and CEM"></textarea>
   </div>
 </section>
 
