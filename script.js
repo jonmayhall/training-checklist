@@ -265,6 +265,28 @@ function moveTicketCardToStatus(card, status){
   dest.appendChild(card);
 }
 
+function setTicketWarning(fieldEl, msg){
+  const row = fieldEl?.closest(".ticket-row");
+  if (!row) return;
+
+  // remove any existing warning in this row
+  row.querySelectorAll(".field-warning").forEach(n => n.remove());
+
+  if (!msg) return;
+
+  const p = document.createElement("p");
+  p.className = "field-warning";
+  p.textContent = msg;
+
+  // ✅ must be a direct child of .ticket-row so your CSS grid-column:2 works
+  row.appendChild(p);
+}
+
+function clearTicketWarnings(baseCard){
+  baseCard.querySelectorAll(".field-warning").forEach(n => n.remove());
+  baseCard.querySelectorAll(".field-error").forEach(n => n.classList.remove("field-error"));
+}
+
 function handleAddTicket(btn){
   const base = btn.closest(".ticket-group[data-base='true']");
   if (!base) return;
