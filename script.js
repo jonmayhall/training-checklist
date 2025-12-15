@@ -474,14 +474,20 @@ function updateDealershipMapFromAddress(addr){
    Page navigation
 --------------------------- */
 function setActivePage(sectionId){
-  const id = sectionId.startsWith("#") ? sectionId : `#${sectionId}`;
+  const id = (sectionId || "").replace("#", "");
+  const target = document.getElementById(id);
 
-  qsa(".page-section").forEach(sec => sec.classList.remove("active"));
-  const target = qs(id);
-  if (target) target.classList.add("active");
+  // If target doesn't exist, do NOT blank the app
+  if (!target){
+    console.warn("[Nav] No page-section found with id:", id);
+    return;
+  }
 
-  qsa(".nav-btn").forEach(btn => btn.classList.remove("active"));
-  const navBtn = qs(`.nav-btn[data-target="${id.replace("#","")}"]`);
+  document.querySelectorAll(".page-section").forEach(sec => sec.classList.remove("active"));
+  target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  const navBtn = document.querySelector(`.nav-btn[data-target="${id}"]`);
   if (navBtn) navBtn.classList.add("active");
 }
 
