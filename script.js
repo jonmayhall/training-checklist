@@ -350,6 +350,33 @@ function moveTicketCardToStatusContainer(card){
   dest.appendChild(card);
 }
 
+function lockBaseTicketStatus(baseCard){
+  const status = qs(".ticket-status-select", baseCard);
+  if (!status) return;
+  status.value = "Open";
+  status.disabled = true;
+  status.classList.add("is-locked");
+}
+
+function getNextTicketBadgeNumber(){
+  // counts NON-base cards already created
+  const cards = qsa("#support-tickets .ticket-group:not([data-base='true'])");
+  return cards.length + 1;
+}
+
+function addOrUpdateTicketBadge(card, n){
+  // never badge the base card
+  if (card.dataset && card.dataset.base === "true") return;
+
+  let badge = qs(".ticket-count-badge", card);
+  if (!badge){
+    badge = document.createElement("div");
+    badge.className = "ticket-count-badge";
+    card.insertBefore(badge, card.firstChild);
+  }
+  badge.textContent = String(n);
+}
+
 function handleSupportTicketAdd(btn){
   const baseCard = btn.closest('.ticket-group[data-base="true"]');
   if (!baseCard) return;
