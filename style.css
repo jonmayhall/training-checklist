@@ -948,26 +948,41 @@ main{
   padding:18px 20px 18px;   /* normal padding */
 }
 
-/* Badge (added tickets only) */
+/* Integrated corner badge (hugging the card border) */
 #support-tickets .ticket-count-badge{
   position:absolute;
-  top:12px;
-  left:12px;
+  top:-1px;     /* sit on border */
+  left:-1px;    /* sit on border */
 
-  width:30px;
-  height:30px;
-  border-radius:999px;
+  width:42px;
+  height:42px;
+
   background:var(--orange);
   color:#fff;
 
   font-weight:900;
-  font-size:13px;
+  font-size:14px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  box-shadow:0 2px 6px rgba(239,109,34,0.35);
+  /* "corner tab" shape */
+  border-top-left-radius:var(--radius-md);
+  border-top-right-radius:0;
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:18px;
+
+  box-shadow:0 3px 10px rgba(239,109,34,0.30);
+  z-index:2;
+}
+
+/* Give the first label a little breathing room from the corner badge */
+#support-tickets .ticket-group:has(.ticket-count-badge) .ticket-group-inner{
+  padding-top:6px;
+}
+#support-tickets .ticket-group:has(.ticket-count-badge) .ticket-row:first-child > label{
+  padding-left:12px;
 }
 
 /* Push content down a bit ONLY when a badge exists (prevents overlap) */
