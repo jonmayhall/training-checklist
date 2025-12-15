@@ -349,6 +349,60 @@ main{
   font-size:13px;
   height:34px;
 }
+/* ===========================================================
+   🔒 ONSITE TRAINING DATES — FINAL OVERRIDE (DO NOT MOVE)
+   Must live AFTER generic input rules
+   =========================================================== */
+
+/* Align label with TOP date input (not vertically centered) */
+.training-dates-row,
+.onsite-training-dates-row{
+  align-items:flex-start !important;
+}
+
+.training-dates-row label,
+.onsite-training-dates-row label{
+  padding-top:7px !important;
+}
+
+/* Right column stack */
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+}
+
+/* HARD LOCK date inputs so they NEVER stretch */
+.training-dates-row input[type="date"],
+.onsite-training-dates-row input[type="date"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  font-size:13px !important;
+  line-height:1.2 !important;
+  box-sizing:border-box !important;
+
+  flex:0 0 auto !important;
+  align-self:stretch !important;
+}
+
+/* Placeholder gray to match other fields */
+input[type="date"].is-placeholder{
+  color:#9ca3af !important;
+}
+input[type="date"].is-placeholder::-webkit-datetime-edit{
+  color:#9ca3af !important;
+}
 
 /* textareas */
 .section-block textarea{
