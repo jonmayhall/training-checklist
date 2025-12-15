@@ -915,31 +915,39 @@ main{
 }
 
 /* ============== SUPPORT TICKETS (kept clean) ============== */
-#support-tickets .ticket-section{ margin-bottom:24px; }
 
+#support-tickets .ticket-section{
+  margin-bottom:24px;
+}
+
+/* Layout: status columns stacked, cards side-by-side */
+#support-tickets .two-col-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+#support-tickets .col-stack{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* Individual ticket card */
 #support-tickets .ticket-group{
   position:relative;
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
   padding:16px 20px 18px;
-  margin:14px 0;
   background:#fff;
   box-shadow:var(--shadow);
 }
-#support-tickets .ticket-group-inner{ margin-top:4px; }
 
-.ticket-badge{
-  background:var(--orange);
-  color:#fff;
-  padding:4px 10px;
-  font-size:12px;
-  font-weight:800;
-  border-radius:999px;
-  display:inline-block;
-  margin-bottom:14px;
-  margin-top:2px;
+#support-tickets .ticket-group-inner{
+  margin-top:4px;
 }
 
+/* Ticket rows */
 #support-tickets .ticket-row{
   display:flex;
   align-items:center;
@@ -949,11 +957,13 @@ main{
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
+
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
   padding-bottom:0;
 }
+
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
   font-weight:600;
@@ -962,6 +972,7 @@ main{
   padding-right:16px;
 }
 
+/* Inputs & selects */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap{
@@ -969,6 +980,7 @@ main{
   width:var(--input-width);
   margin-left:auto;
 }
+
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
@@ -980,19 +992,19 @@ main{
   height:34px;
 }
 
+/* Ticket number + add button */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
 }
+
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
   flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
 }
-#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn{
+
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
   flex:0 0 34px;
   width:34px;
   height:34px;
@@ -1007,39 +1019,56 @@ main{
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
   padding:0;
 }
-#support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn:hover{
+
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{
   background:#ff8b42;
 }
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  border-radius:var(--radius-sm);
-}
 
+/* Summary textarea */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
 }
-#support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
+
+#support-tickets .ticket-summary-row > label{
+  margin-bottom:4px;
+}
+
 #support-tickets .ticket-summary-input{
   width:100%;
-  max-width:100%;
-  box-sizing:border-box;
   padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  min-height:34px;
   resize:none;
 }
-.two-col-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+
+/* ===== Validation UI ===== */
+
+#support-tickets .field-error{
+  outline:2px solid #ff5a5a;
+  outline-offset:2px;
+  background:#fff5f5 !important;
+}
+
+#support-tickets .field-warning{
+  font-size:11px;
+  font-style:italic;
+  color:#ff5a5a;
+  margin-top:4px;
+  line-height:1.2;
+}
+
+/* Base-card disclaimer */
+#support-tickets .ticket-disclaimer{
+  font-size:11px;
+  font-style:italic;
+  color:#9ca3af;
+  margin-top:8px;
+  line-height:1.3;
 }
 
 /* =====================================================
