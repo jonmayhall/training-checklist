@@ -938,36 +938,35 @@ main{
   margin:0;
 }
 
-/* numbered badge for ADDED tickets only (JS adds .has-badge + element) */
+/* Badge (added tickets only) — smaller so it never crowds text */
 #support-tickets .ticket-count-badge{
   position:absolute;
   top:-1px;
   left:-1px;
 
-  width:32px;
-  height:32px;
+  width:28px;          /* smaller */
+  height:28px;         /* smaller */
+  font-size:12px;      /* smaller text */
+  line-height:1;
 
   background:var(--orange);
   color:#fff;
   font-weight:900;
-  font-size:12px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
   border:1px solid var(--orange);
-
-  /* fills corner, no white gap */
   border-top-left-radius:var(--radius-md);
-  border-bottom-right-radius:14px;
+  border-bottom-right-radius:14px; /* tighter corner */
   border-top-right-radius:0;
   border-bottom-left-radius:0;
 }
 
-/* give just a tiny bit of extra top room on badge cards */
+/* Less top padding needed now that badge is smaller */
 #support-tickets .ticket-group.has-badge{
-  padding-top:20px;
+  padding-top:18px;  /* was 22px */
 }
 
 /* rows use grid so warning can sit directly under the field */
