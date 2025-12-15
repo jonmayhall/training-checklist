@@ -384,8 +384,9 @@ main{
 /* indents */
 .indent-sub{ padding-left:60px !important; }
 
-/* ===== Onsite Training Dates (stacked date inputs on the right) ===== */
-.onsite-training-dates-row .date-stack{
+
+/* Onsite training dates (stack start/end on the right) */
+.training-dates-row .date-stack{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
@@ -393,6 +394,10 @@ main{
   display:flex;
   flex-direction:column;
   gap:8px;
+}
+
+.training-dates-row .date-stack input[type="date"]{
+  width:100%;
 }
 
 /* Make stacked inputs match your standard box sizing */
