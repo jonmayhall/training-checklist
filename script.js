@@ -490,6 +490,71 @@ function setActivePage(sectionId){
   const navBtn = document.querySelector(`.nav-btn[data-target="${id}"]`);
   if (navBtn) navBtn.classList.add("active");
 }
+function initOnsiteTrainingDates() {
+  const start = document.getElementById("onsiteStartDate");
+  const end = document.getElementById("onsiteEndDate");
+  if (!start || !end) return;
+
+  // Turns a text input into a date picker on focus (keeps placeholder behavior)
+  const attachPickerBehavior = (el) => {
+    el.addEventListener("focus", () => {
+      // Switch to date so browser shows calendar picker
+      if (el.type !== "date") el.type = "date";
+      // Open picker when supported (Chrome)
+      if (typeof el.showPicker === "function") {
+        try { el.showPicker(); } catch (e) {}
+      }
+    });
+
+    el.addEventListener("blur", () => {
+      // If empty, switch back to text so placeholder shows
+      if (!el.value) el.type = "text";
+      updateGhostState(el);
+    });
+
+    el.addEventListener("change", () => {
+      updateGhostState(el);
+    });
+
+    // initial state
+    if (!el.value) el.type = "text";
+    updateGhostState(el);
+  };
+
+  const updateGhostState = (el) => {
+    if (!el.value) el.classList.add("is-placeholder");
+    else el.classList.remove("is-placeholder");
+  };
+
+  const addDaysISO = (isoDateStr, days) => {
+    // isoDateStr = "YYYY-MM-DD"
+    const [y, m, d] = isoDateStr.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + days);
+    const yyyy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  attachPickerBehavior(start);
+  attachPickerBehavior(end);
+
+  // Auto-set End = Start + 2 days whenever Start changes
+  start.addEventListener("change", () => {
+    if (!start.value) return;
+
+    const autoEnd = addDaysISO(start.value, 2);
+    end.value = autoEnd;
+
+    // Keep end as a date input once it has a value
+    end.type = "date";
+    updateGhostState(end);
+  });
+
+  // End remains editable; just update ghost style when edited
+  end.addEventListener("input", () => updateGhostState(end));
+}
 
 /* ---------------------------
    Wiring / Event delegation
