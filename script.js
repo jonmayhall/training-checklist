@@ -1,7 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL JS
-   SAFE BUILD + Support Tickets status routing + add ticket
-   (No visual/layout mutation; only clones/moves ticket groups)
+   SAFE BUILD + Support Tickets routing + required ticket #
    ======================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initAddressMap();
   initIntegratedAddButtons();
   initTableAddButtons();
-  initSupportTickets(); // ✅ added
+  initSupportTickets(); // SUPPORT TICKETS
 });
 
 /* =======================================================
@@ -35,7 +34,6 @@ function initNavigation() {
     });
   });
 
-  // Activate first page by default
   navButtons[0]?.click();
 }
 
@@ -49,11 +47,8 @@ function initResetButtons() {
       if (!page) return;
 
       page.querySelectorAll("input, textarea, select").forEach(el => {
-        if (el.type === "checkbox" || el.type === "radio") {
-          el.checked = false;
-        } else {
-          el.value = "";
-        }
+        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+        else el.value = "";
         el.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
@@ -71,11 +66,8 @@ function initClearAll() {
     if (!confirm("Clear ALL pages?")) return;
 
     document.querySelectorAll("input, textarea, select").forEach(el => {
-      if (el.type === "checkbox" || el.type === "radio") {
-        el.checked = false;
-      } else {
-        el.value = "";
-      }
+      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+      else el.value = "";
       el.dispatchEvent(new Event("change", { bubbles: true }));
     });
   });
@@ -87,11 +79,7 @@ function initClearAll() {
 function initGhostSelects() {
   document.querySelectorAll("select").forEach(select => {
     const update = () => {
-      if (select.value === "") {
-        select.classList.add("is-placeholder");
-      } else {
-        select.classList.remove("is-placeholder");
-      }
+      select.classList.toggle("is-placeholder", select.value === "");
     };
     select.addEventListener("change", update);
     update();
@@ -100,7 +88,6 @@ function initGhostSelects() {
 
 /* =======================================================
    TOP BAR DEALERSHIP DISPLAY
-   Dealer Group (if present) Dealership Name - DID
    ======================================================= */
 function initTopbarDealershipDisplay() {
   const out = document.getElementById("dealershipNameDisplay");
@@ -119,7 +106,6 @@ function initTopbarDealershipDisplay() {
     if (group) text += group + " ";
     if (name) text += name;
     text = text.trim();
-
     if (did) text = text ? `${text} - ${did}` : did;
 
     out.textContent = text || "Dealership Info";
@@ -154,35 +140,25 @@ function initAddressMap() {
 
   mapBtn.addEventListener("click", () => {
     const addr = addressInput.value.trim();
-    if (!addr) return;
-    window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`, "_blank");
+    if (addr) window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`, "_blank");
   });
 }
 
 /* =======================================================
-   INTEGRATED “+” INPUT ROWS (Additional POC)
-   (Clones the entire card safely)
+   INTEGRATED “+” INPUT ROWS
    ======================================================= */
 function initIntegratedAddButtons() {
   document.addEventListener("click", e => {
     const addBtn = e.target.closest(".add-row, .additional-poc-add");
     if (!addBtn) return;
 
-    const row = addBtn.closest(".checklist-row");
     const card = addBtn.closest(".additional-poc-card");
-    if (!row || !card) return;
+    if (!card) return;
 
     const clone = card.cloneNode(true);
     clone.removeAttribute("data-base");
-
-    // Remove add button from cloned card
     clone.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
-
-    clone.querySelectorAll("input, textarea").forEach(i => (i.value = ""));
-    clone.querySelectorAll("select").forEach(s => {
-      s.value = "";
-      s.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    clone.querySelectorAll("input, textarea").forEach(i => i.value = "");
 
     card.parentNode.insertBefore(clone, card.nextSibling);
   });
@@ -195,11 +171,11 @@ function initTableAddButtons() {
   document.querySelectorAll(".table-footer .add-row").forEach(btn => {
     btn.addEventListener("click", () => {
       const table = btn.closest(".table-container")?.querySelector("table");
-      if (!table) return;
+      const tbody = table?.querySelector("tbody");
+      if (!tbody) return;
 
-      const tbody = table.querySelector("tbody");
-      const rows = tbody?.querySelectorAll("tr");
-      if (!rows || !rows.length) return;
+      const rows = tbody.querySelectorAll("tr");
+      if (!rows.length) return;
 
       const clone = rows[rows.length - 1].cloneNode(true);
       clone.querySelectorAll("input, select, textarea").forEach(el => {
@@ -215,100 +191,73 @@ function initTableAddButtons() {
 
 /* =======================================================
    SUPPORT TICKETS
-   - Add another ticket (+)
-   - Move ticket cards into correct status section
-     Open -> Tier Two -> Closed - Resolved -> Closed - Feature Not Supported
    ======================================================= */
 function initSupportTickets() {
-  const supportPage = document.getElementById("support-tickets");
-  if (!supportPage) return;
+  const page = document.getElementById("support-tickets");
+  if (!page) return;
 
-  const openWrap   = document.getElementById("openTicketsContainer");
+  const openWrap = document.getElementById("openTicketsContainer");
   const tierTwoWrap = document.getElementById("tierTwoTicketsContainer");
   const closedResolvedWrap = document.getElementById("closedResolvedTicketsContainer");
-  const closedFeatureWrap  = document.getElementById("closedFeatureTicketsContainer");
+  const closedFeatureWrap = document.getElementById("closedFeatureTicketsContainer");
 
-  if (!openWrap || !tierTwoWrap || !closedResolvedWrap || !closedFeatureWrap) return;
-
-  const getTargetContainerForStatus = (statusValue) => {
-    const v = (statusValue || "").trim();
-
-    if (v === "Tier Two") return tierTwoWrap;
-    if (v === "Closed - Resolved") return closedResolvedWrap;
-
-    // Your HTML uses an en dash in the option label; value is set exactly in markup:
-    // <option value="Closed – Feature Not Supported">
-    if (v === "Closed – Feature Not Supported") return closedFeatureWrap;
-
-    // default
+  const getTarget = status => {
+    if (status === "Tier Two") return tierTwoWrap;
+    if (status === "Closed - Resolved") return closedResolvedWrap;
+    if (status === "Closed – Feature Not Supported") return closedFeatureWrap;
     return openWrap;
   };
 
-  const moveTicketGroupIfNeeded = (group) => {
-    if (!group) return;
-    const select = group.querySelector(".ticket-status-select");
-    const status = select?.value || "Open";
-    const target = getTargetContainerForStatus(status);
-
-    // Keep base template in Open section only
-    if (group.getAttribute("data-base") === "true" && target !== openWrap) {
-      select.value = "Open";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-      return;
-    }
-
-    if (target && group.parentElement !== target) {
-      target.appendChild(group);
-    }
+  const moveGroup = group => {
+    if (!group || group.dataset.base === "true") return;
+    const status = group.querySelector(".ticket-status-select")?.value || "Open";
+    const target = getTarget(status);
+    if (target && group.parentElement !== target) target.appendChild(group);
   };
 
-  // 1) Add ticket (+) clones the base ticket-group
-  supportPage.addEventListener("click", (e) => {
-    const addBtn = e.target.closest(".add-ticket-btn");
-    if (!addBtn) return;
+  const clearBase = base => {
+    base.querySelectorAll("input, textarea").forEach(el => el.value = "");
+    const sel = base.querySelector(".ticket-status-select");
+    if (sel) sel.value = "Open";
+  };
 
-    const baseGroup = addBtn.closest(".ticket-group");
-    if (!baseGroup) return;
+  const baseIsValid = base => {
+    const num = base.querySelector(".ticket-number-input");
+    if (!num || !num.value.trim()) {
+      num?.classList.add("field-error");
+      num?.focus();
+      setTimeout(() => num?.classList.remove("field-error"), 900);
+      return false;
+    }
+    return true;
+  };
 
-    const clone = baseGroup.cloneNode(true);
-    clone.removeAttribute("data-base"); // becomes a normal ticket card
+  page.addEventListener("click", e => {
+    const btn = e.target.closest(".add-ticket-btn");
+    if (!btn) return;
 
-    // Remove the + button from cloned card
+    const base = btn.closest(".ticket-group");
+    if (!base || !baseIsValid(base)) return;
+
+    const clone = base.cloneNode(true);
+    clone.removeAttribute("data-base");
     clone.querySelectorAll(".add-ticket-btn").forEach(b => b.remove());
 
-    // Reset fields
-    clone.querySelectorAll("input[type='text'], input[type='url'], input[type='email'], input[type='tel']").forEach(i => {
-      i.value = "";
-      i.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    clone.querySelectorAll("textarea").forEach(t => {
-      t.value = "";
-      t.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    const statusSelect = clone.querySelector(".ticket-status-select");
-    if (statusSelect) {
-      statusSelect.value = "Open";
-      statusSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-
-    // Insert right after the base ticket in Open section
-    openWrap.insertBefore(clone, baseGroup.nextSibling);
+    openWrap.appendChild(clone);
+    moveGroup(clone);
+    clearBase(base);
   });
 
-  // 2) When status changes, move the card to the correct section
-  supportPage.addEventListener("change", (e) => {
+  page.addEventListener("change", e => {
     const sel = e.target.closest(".ticket-status-select");
     if (!sel) return;
 
     const group = sel.closest(".ticket-group");
-    if (!group) return;
+    if (!group || group.dataset.base === "true") {
+      sel.value = "Open";
+      return;
+    }
 
-    moveTicketGroupIfNeeded(group);
-  });
-
-  // 3) On load: ensure existing groups are in the correct section
-  supportPage.querySelectorAll(".ticket-group").forEach(group => {
-    moveTicketGroupIfNeeded(group);
+    moveGroup(group);
   });
 }
