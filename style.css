@@ -909,95 +909,70 @@ main{
 
 /* ============== SUPPORT TICKETS (kept clean) ============== */
 
-#support-tickets .ticket-section{
-  margin-bottom:28px;
-}
-
-/* === PAGE LAYOUT === */
-/* Left = Open | Right = stacked other statuses */
+/* Each status section should be stacked (one under another) */
 #support-tickets .two-col-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:22px;
+  display:block;           /* override the 2-column page layout */
 }
 
-#support-tickets .col-stack{
-  display:flex;
-  flex-direction:column;
-  gap:26px;
+/* Keep each section card spaced nicely */
+#support-tickets .ticket-section{
+  margin-bottom:24px;
 }
 
-/* === EACH STATUS SECTION USES A 2x2 GRID === */
-#support-tickets #openTicketsContainer,
-#support-tickets #tierTwoTicketsContainer,
-#support-tickets #closedResolvedTicketsContainer,
-#support-tickets #closedFeatureTicketsContainer{
+/* 2x2 layout INSIDE each ticket container */
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:18px;
 }
 
-/* Base card stays full width */
-#support-tickets #openTicketsContainer
-  .ticket-group[data-base="true"]{
-  grid-column:1 / -1;
+/* If a section has 0 cards, it won’t look weird */
+#tierTwoTicketsContainer:empty,
+#closedResolvedTicketsContainer:empty,
+#closedFeatureTicketsContainer:empty{
+  min-height:0;
 }
 
-/* === INDIVIDUAL TICKET CARD === */
+/* Individual ticket card */
 #support-tickets .ticket-group{
   position:relative;
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
+  padding:16px 20px 18px;
+  margin:0;                 /* IMPORTANT for grid */
   background:#fff;
   box-shadow:var(--shadow);
-  padding:16px 18px 18px; /* 👈 tighter right, more left */
 }
 
-/* Badge numbering */
-#support-tickets .ticket-badge{
-  position:absolute;
-  top:-12px;
-  left:-12px;
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  background:var(--orange);
-  color:#fff;
-  font-size:14px;
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 2px 6px rgba(239,109,34,0.45);
-  z-index:2;
-}
+#support-tickets .ticket-group-inner{ margin-top:4px; }
 
-/* === ROWS INSIDE CARD === */
+/* Ticket rows */
 #support-tickets .ticket-row{
   display:flex;
   align-items:center;
   gap:12px;
-  padding-left:12px;     /* 👈 SHIFT TEXT LEFT */
   margin-bottom:14px;
   padding-bottom:10px;
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
-
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
   padding-bottom:0;
 }
-
-/* Labels */
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
   font-weight:600;
-  padding-right:12px;
+  font-size:14px;
+  text-align:left;
+  padding-right:16px;
 }
 
-/* Inputs on right (unchanged width) */
+/* Inputs & selects */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap{
@@ -1006,31 +981,34 @@ main{
   margin-left:auto;
 }
 
-/* Inputs */
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
-  height:34px;
   padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
+  height:34px;
 }
 
-/* Ticket number + plus button */
+/* Ticket number + add button */
 #support-tickets .ticket-number-wrap{
   display:flex;
+  align-items:stretch;
 }
 
-#support-tickets .ticket-group[data-base="true"]
-.ticket-number-input{
+#support-tickets .ticket-group[data-base="true"] .ticket-number-input{
+  flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
 
-#support-tickets .ticket-group[data-base="true"]
-.add-ticket-btn{
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
+  flex:0 0 34px;
   width:34px;
   height:34px;
   margin-left:-1px;
@@ -1041,28 +1019,25 @@ main{
   font-size:18px;
   font-weight:900;
   cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+}
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{
+  background:#ff8b42;
 }
 
-/* Non-base cards = no plus */
-#support-tickets .ticket-group:not([data-base="true"])
-.add-ticket-btn{
-  display:none;
-}
-
-/* === SUMMARY ROW === */
+/* Summary textarea */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
-  padding-left:12px; /* 👈 MATCH LEFT SHIFT */
 }
-
-#support-tickets .ticket-summary-row label{
-  margin-bottom:4px;
-}
+#support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 
 #support-tickets .ticket-summary-input{
   width:100%;
-  min-height:48px;
   padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
@@ -1071,7 +1046,7 @@ main{
   resize:none;
 }
 
-/* === VALIDATION === */
+/* Validation UI (keep warnings where they are) */
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
   outline-offset:2px;
@@ -1082,19 +1057,21 @@ main{
   font-size:11px;
   font-style:italic;
   color:#ff5a5a;
-  margin-top:6px;
+  margin-top:6px;           /* sits cleanly under the field */
+  line-height:1.2;
 }
 
-/* === RESPONSIVE === */
-@media (max-width:900px){
-  #support-tickets .two-col-grid{
-    grid-template-columns:1fr;
-  }
+/* Disclaimer: base card only (if you keep it) */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{
+  display:none !important;
+}
 
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
+/* Responsive: collapse to 1 column */
+@media (max-width: 900px){
+  #openTicketsContainer,
+  #tierTwoTicketsContainer,
+  #closedResolvedTicketsContainer,
+  #closedFeatureTicketsContainer{
     grid-template-columns:1fr;
   }
 }
