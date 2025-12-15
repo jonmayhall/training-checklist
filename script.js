@@ -1,13 +1,14 @@
 /* =========================================================
-   myKaarma Interactive Training Checklist — FULL script.js
-   GLOBAL + SAFE FOR ALL PAGES (single-init, no duplicate nav)
+   myKaarma Interactive Training Checklist — script.js (FULL)
+   GLOBAL + SAFE FOR ALL PAGES
    ========================================================= */
 
 /* ---------------------------
    Helpers
 --------------------------- */
-function qs(sel, root = document) { return root.querySelector(sel); }
-function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+function qs(sel, root = document){ return root.querySelector(sel); }
+function qsa(sel, root = document){ return Array.from(root.querySelectorAll(sel)); }
+
 function isField(el){
   return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT");
 }
@@ -39,17 +40,17 @@ function saveField(el){
   if (!k) return;
 
   let data = {};
-  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-  catch { data = {}; }
+  try{ data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch{ data = {}; }
 
-  data[k] = (el.type === "checkbox") ? el.checked : el.value;
+  data[k] = el.type === "checkbox" ? el.checked : el.value;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 function loadAll(){
   let data = {};
-  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-  catch { data = {}; }
+  try{ data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch{ data = {}; }
 
   qsa("input, textarea, select").forEach(el => {
     const k = getKey(el);
@@ -86,7 +87,7 @@ function clearAll(){
 }
 
 /* ---------------------------
-   Navigation (ONE binding only)
+   Navigation (single source of truth)
 --------------------------- */
 function setActivePage(id){
   const target = document.getElementById(id);
@@ -100,129 +101,129 @@ function setActivePage(id){
 
   qsa(".nav-btn").forEach(b => b.classList.remove("active"));
   qs(`.nav-btn[data-target="${id}"]`)?.classList.add("active");
+
+  // optional: keep hash in URL (nice for refresh)
+  try{ history.replaceState(null, "", "#" + id); } catch {}
 }
 
-function bindNavigation(){
-  const navButtons = qsa(".nav-btn[data-target]");
-  navButtons.forEach(btn => {
-    btn.type = "button";
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      setActivePage(btn.dataset.target);
-    });
+function initNavigation(){
+  const nav = qs("#sidebar-nav");
+  if (!nav) return;
+
+  // delegated click for ALL nav buttons
+  nav.addEventListener("click", (e) => {
+    const btn = e.target.closest(".nav-btn[data-target]");
+    if (!btn) return;
+    e.preventDefault();
+    setActivePage(btn.dataset.target);
   });
 
-  // Ensure one page is visible on load
-  const active = qs(".page-section.active");
-  if (active) {
-    setActivePage(active.id);
-  } else {
-    const firstBtn = navButtons[0];
-    if (firstBtn?.dataset?.target) setActivePage(firstBtn.dataset.target);
+  // initial page
+  const hashId = (location.hash || "").replace("#","");
+  if (hashId && document.getElementById(hashId)){
+    setActivePage(hashId);
+    return;
+  }
+
+  const alreadyActive = qs(".page-section.active");
+  if (alreadyActive){
+    setActivePage(alreadyActive.id);
+    return;
+  }
+
+  const firstBtn = qs(".nav-btn[data-target]");
+  if (firstBtn?.dataset?.target){
+    setActivePage(firstBtn.dataset.target);
   }
 }
 
 /* ---------------------------
    Integrated "+" rows (non-table)
-   Default behavior: clone inline and remove +
+   (generic clone)
 --------------------------- */
-function cloneIntegratedRow(btn){
-  const row = btn.closest(".checklist-row");
-  if (!row) return;
-
-  const clone = row.cloneNode(true);
-
-  // clear common fields
+function resetClonedFields(clone){
   qsa("input, textarea, select", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
+    else if (el.tagName === "SELECT") el.selectedIndex = 0;
     else el.value = "";
   });
+  refreshGhostSelects(clone);
+}
 
-  // remove the + button in clones
+function cloneIntegratedRow(btn){
+  const row = btn.closest(".checklist-row");
+  if (!row || !row.parentElement) return;
+
+  const clone = row.cloneNode(true);
+  resetClonedFields(clone);
+
+  // remove the "+" button from the clone
   clone.querySelector(".add-row")?.remove();
 
   row.parentElement.insertBefore(clone, row.nextSibling);
-
-  // keep placeholder styling correct
-  refreshGhostSelects(clone);
 }
 
 /* ---------------------------
    Trainers – Additional Trainers
-   If the + is on the trainers page, append into #additionalTrainersContainer
+   (append into #additionalTrainersContainer)
 --------------------------- */
-function addAdditionalTrainerRow(btn){
+function handleTrainerAdd(btn){
   const row = btn.closest(".checklist-row");
   const page = btn.closest("#trainers-deployment");
   const container = qs("#additionalTrainersContainer");
-
-  if (!row || !page || !container) return false;
+  if (!row || !page || !container) return;
 
   const clone = row.cloneNode(true);
+  resetClonedFields(clone);
 
-  qsa("input, textarea, select", clone).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-  });
-
+  // remove the "+" button from the clone
   clone.querySelector(".add-row")?.remove();
-  container.appendChild(clone);
 
-  refreshGhostSelects(clone);
-  return true;
+  container.appendChild(clone);
 }
 
 /* ---------------------------
-   Onsite Training Dates (Page 2)
-   Normal-looking text boxes (type=text) with placeholder,
-   switch to type=date on focus to show calendar.
-   End auto-fills +2 days, still editable.
+   Onsite Training Dates (PAGE 2)
+   - input type="date" shows native picker
+   - end auto-fills +2 days after start
+   - end is editable (won’t get overwritten if user edits)
 --------------------------- */
-function formatYYYYMMDD(d){
+function addDaysISO(iso, days){
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function enableTextToDateBehavior(input){
-  if (!input) return;
-
-  // If empty, keep it as text so placeholder shows
-  if (!input.value) input.type = "text";
-
-  input.addEventListener("focus", () => {
-    input.type = "date";
-    // force picker on some browsers
-    try { input.showPicker?.(); } catch {}
-  });
-
-  input.addEventListener("blur", () => {
-    if (!input.value) input.type = "text";
-  });
-}
-
-function initOnsiteTrainingDates(){
+function initTrainingDates(){
   const start = qs("#onsiteStartDate");
   const end = qs("#onsiteEndDate");
-
   if (!start || !end) return;
 
-  enableTextToDateBehavior(start);
-  enableTextToDateBehavior(end);
+  // make picker pop on click where supported
+  [start, end].forEach(inp => {
+    inp.addEventListener("click", () => {
+      try{ inp.showPicker?.(); } catch {}
+    });
+  });
 
-  start.addEventListener("change", () => {
+  // mark manual edits on end date
+  end.addEventListener("input", () => {
+    end.dataset.userEdited = end.value ? "1" : "0";
+    saveField(end);
+  });
+
+  start.addEventListener("input", () => {
     if (!start.value) return;
 
-    const d = new Date(start.value);
-    if (isNaN(d.getTime())) return;
+    // Only overwrite end if user hasn't manually edited it
+    if (end.dataset.userEdited === "1") return;
 
-    d.setDate(d.getDate() + 2);
-    end.type = "date";
-    end.value = formatYYYYMMDD(d);
-
+    end.value = addDaysISO(start.value, 2);
+    end.dataset.userEdited = "0";
     saveField(end);
-    refreshGhostSelects();
   });
 }
 
@@ -248,7 +249,9 @@ function handleAddTicket(btn){
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
 
-  if (!num?.value || !link?.value || !sum?.value) return;
+  // don’t crash if markup changed
+  if (!num || !link || !sum) return;
+  if (!num.value || !link.value || !sum.value) return;
 
   const clone = base.cloneNode(true);
   clone.removeAttribute("data-base");
@@ -257,7 +260,6 @@ function handleAddTicket(btn){
 
   addTicketBadge(clone);
 
-  // Put new tickets into Open by default (same as before)
   qs("#openTicketsContainer")?.appendChild(clone);
 
   num.value = "";
@@ -266,57 +268,75 @@ function handleAddTicket(btn){
 }
 
 /* ---------------------------
+   Google Maps (safe)
+--------------------------- */
+function initAddressAutocomplete(){
+  const input = qs(".address-input");
+  if (!input || !window.google?.maps?.places) return;
+
+  const ac = new google.maps.places.Autocomplete(input, { types:["address"] });
+  ac.addListener("place_changed", () => {});
+}
+window.initAddressAutocomplete = initAddressAutocomplete;
+
+/* ---------------------------
    DOM READY (single init)
 --------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  loadAll();
-  bindNavigation();
-  initOnsiteTrainingDates();
-  refreshGhostSelects();
+  try{
+    initNavigation();
+    loadAll();
+    initTrainingDates();
+    refreshGhostSelects();
+  } catch (err){
+    console.error("Init error:", err);
+  }
 
   // autosave
-  document.addEventListener("input", e => {
+  document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
     if (e.target.tagName === "SELECT") refreshGhostSelects();
   });
 
-  document.addEventListener("change", e => {
+  document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
     if (e.target.tagName === "SELECT") refreshGhostSelects();
   });
 
-  // page reset buttons
-  qsa(".clear-page-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const sec = btn.closest(".page-section");
-      if (sec) clearSection(sec);
-    });
-  });
-
-  // clear all
-  qs("#clearAllBtn")?.addEventListener("click", clearAll);
-
-  // button clicks (+ rows, tickets)
-  document.addEventListener("click", e => {
+  // clicks (delegated)
+  document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
 
-    // support tickets +
-    if (btn.classList.contains("add-ticket-btn")){
-      e.preventDefault();
-      handleAddTicket(btn);
+    // Clear all
+    if (btn.id === "clearAllBtn"){
+      clearAll();
       return;
     }
 
-    // integrated +
-    if (btn.classList.contains("add-row")){
-      e.preventDefault();
+    // Per-page reset
+    if (btn.classList.contains("clear-page-btn")){
+      const sec = btn.closest(".page-section");
+      if (sec) clearSection(sec);
+      return;
+    }
 
-      // if it's trainers additional trainer +, append to container
-      const handled = addAdditionalTrainerRow(btn);
-      if (!handled) cloneIntegratedRow(btn);
+    // "+" rows
+    if (btn.classList.contains("add-row")){
+      // Trainers additional trainer "+" should append into container
+      if (btn.closest("#trainers-deployment") && qs("#additionalTrainersContainer")){
+        handleTrainerAdd(btn);
+      } else {
+        cloneIntegratedRow(btn);
+      }
+      return;
+    }
+
+    // Support ticket "+"
+    if (btn.classList.contains("add-ticket-btn")){
+      handleAddTicket(btn);
       return;
     }
   });
