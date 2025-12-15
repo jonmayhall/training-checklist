@@ -946,6 +946,10 @@ main{
 #support-tickets .ticket-group-inner{
   margin-top:6px;
 }
+/* Small vertical spacing between badge and first row */
+#support-tickets .ticket-group-inner{
+  margin-top:6px;
+}
 
 /* ===== INTEGRATED TICKET NUMBER CORNER BADGE ===== */
 #support-tickets .ticket-group{
