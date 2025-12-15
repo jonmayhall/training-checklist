@@ -1110,6 +1110,26 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
+
+/* ===============================
+   🔴 Support Ticket Field Warnings
+   =============================== */
+#support-tickets .field-warning{
+  grid-column:2;          /* under the input column */
+  font-size:10px;
+  font-weight:700;
+  color:#ef4444;          /* RED */
+  line-height:1;
+  margin:2px 0 0 0;       /* flush under input */
+  padding:0;
+}
+
+#support-tickets .field-error{
+  outline:2px solid #ef4444;
+  outline-offset:2px;
+  background:#fff5f5 !important;
+}
+
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
