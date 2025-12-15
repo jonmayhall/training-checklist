@@ -908,94 +908,115 @@ main{
 }
 
 /* ============== SUPPORT TICKETS (kept clean) ============== */
-#support-tickets .ticket-section{ margin-bottom:24px; }
 
-/* Each status section is its own ROW (stacked) */
-#support-tickets .ticket-sections-stack{
+#support-tickets .ticket-section{
+  margin-bottom:24px;
+}
+
+/* ===== Layout ===== */
+
+/* Each status section stacked */
+#support-tickets .col-stack{
   display:flex;
   flex-direction:column;
   gap:18px;
 }
 
-/* Cards inside a status section are 2-column grid (2x2, 2xN) */
-#support-tickets .ticket-grid{
+/* Cards inside a status: 2x2 grid */
+#support-tickets .ticket-grid,
+#support-tickets #openTicketsContainer,
+#support-tickets #tierTwoTicketsContainer,
+#support-tickets #closedResolvedTicketsContainer,
+#support-tickets #closedFeatureTicketsContainer{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:18px;
 }
 
-/* Individual ticket card */
+/* Mobile: single column */
+@media (max-width:900px){
+  #support-tickets .ticket-grid,
+  #support-tickets #openTicketsContainer,
+  #support-tickets #tierTwoTicketsContainer,
+  #support-tickets #closedResolvedTicketsContainer,
+  #support-tickets #closedFeatureTicketsContainer{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===== Ticket Card ===== */
+
 #support-tickets .ticket-group{
-  position:relative;
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
   padding:16px 20px 18px;
   background:#fff;
   box-shadow:var(--shadow);
-  margin:0; /* grid handles spacing */
 }
 
-#support-tickets .ticket-group-inner{ margin-top:4px; }
+#support-tickets .ticket-group-inner{
+  margin-top:4px;
+}
 
-/* Ticket rows */
+/* ===== Rows ===== */
+
 #support-tickets .ticket-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   gap:12px;
   margin-bottom:14px;
   padding-bottom:10px;
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
+
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
   padding-bottom:0;
 }
+
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
   font-weight:600;
-  font-size:14px;
-  text-align:left;
-  padding-right:16px;
+  padding-right:12px;
 }
 
-/* Right-side field sizing */
-#support-tickets .ticket-row > input[type="text"],
-#support-tickets .ticket-row > select,
-#support-tickets .ticket-row > .ticket-number-wrap{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-}
+/* ===== Inputs ===== */
 
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
+  height:34px;
   padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  height:34px;
 }
 
-/* Ticket number wrap + add button */
+/* ===== Field wrapper (for inline errors) ===== */
+
+#support-tickets .field-wrap{
+  display:flex;
+  flex-direction:column;
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+}
+
+/* Ticket number + plus button */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
-  width:var(--input-width);
 }
+
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
-  flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
 }
+
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
-  flex:0 0 34px;
   width:34px;
   height:34px;
   margin-left:-1px;
@@ -1009,82 +1030,74 @@ main{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:0;
 }
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{ background:#ff8b42; }
 
-/* Non-base cards: full rounded ticket number (no +) */
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn:hover{
+  background:#ff8b42;
+}
+
+/* Non-base cards: full-width ticket number */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  width:var(--input-width);
+  width:100%;
   border-radius:var(--radius-sm);
 }
 
-/* Summary textarea */
+/* ===== Summary ===== */
+
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
 }
-#support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
+
+#support-tickets .ticket-summary-row .field-wrap{
+  width:100%;
+  margin-left:0;
+}
+
 #support-tickets .ticket-summary-input{
   width:100%;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
   resize:none;
 }
 
-/* ===== Validation UI (keeps warnings UNDER the correct field) ===== */
+/* ===== Validation ===== */
+
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
   outline-offset:2px;
   background:#fff5f5 !important;
 }
 
-/* These are inserted after the exact input/wrap element in JS */
 #support-tickets .field-warning{
-  display:block;
-  width:100%;
   font-size:11px;
   font-style:italic;
   color:#ff5a5a;
-  margin-top:6px;
-  line-height:1.2;
+  margin-top:4px;
+  line-height:1.25;
 }
 
-/* Base-card disclaimer */
+/* ===== Disclaimer ===== */
+
+/* Base card only */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{
+  display:none !important;
+}
+
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   font-style:italic;
   color:#9ca3af;
-  margin-top:10px;
+  margin-top:8px;
   line-height:1.3;
 }
 
-/* Responsive */
-@media (max-width:900px){
-  #support-tickets .ticket-grid{ grid-template-columns:1fr; }
+/* ===== Text shift for 2x2 cards ===== */
+
+#support-tickets .ticket-row{
+  padding-left:10px;
 }
 
-@media (max-width:600px){
-  #support-tickets .ticket-row{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-  #support-tickets .ticket-row > label{ margin-bottom:4px; }
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap{
-    width:100%;
-    flex:0 0 auto;
-    margin-left:0;
-  }
-  #support-tickets .ticket-number-wrap{ width:100%; }
-  #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
-    width:calc(100% - 34px);
-    flex:0 0 calc(100% - 34px);
-  }
+#support-tickets .indent-sub{
+  padding-left:28px !important;
 }
 
 /* ============== FLOATING PDF BUTTON (Summary) ============== */
