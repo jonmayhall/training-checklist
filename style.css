@@ -1018,7 +1018,36 @@ main{
   min-height:34px;
   resize:none;
 }
+.two-col-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
 
+/* =====================================================
+   SUPPORT TICKETS — STACKED SECTIONS + SIDE-BY-SIDE CARDS
+   ===================================================== */
+#support-tickets .ticket-sections-stack{
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#support-tickets .ticket-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+#support-tickets .ticket-group{
+  margin: 0;
+}
+
+@media (max-width: 900px){
+  #support-tickets .ticket-grid{
+    grid-template-columns: 1fr;
+  }
+}
 /* ============== FLOATING PDF BUTTON (Summary) ============== */
 #training-summary .floating-btn{
   background:var(--orange);
