@@ -909,11 +909,13 @@ main{
 
 /* ============== SUPPORT TICKETS (kept clean) ============== */
 
-/* Overall support page spacing */
-#support-tickets .ticket-section{ margin-bottom:24px; }
+/* Section spacing */
+#support-tickets .ticket-section{
+  margin-bottom:24px;
+}
 
 /* Page layout:
-   LEFT = Open Tickets
+   LEFT = Open tickets
    RIGHT = Tier Two + Closed sections stacked */
 #support-tickets .two-col-grid{
   display:grid;
@@ -926,7 +928,7 @@ main{
   gap:18px;
 }
 
-/* Each STATUS section shows ticket cards in a 2x2 grid */
+/* Each STATUS section shows tickets in a 2x2 grid */
 #openTicketsContainer,
 #tierTwoTicketsContainer,
 #closedResolvedTicketsContainer,
@@ -944,52 +946,40 @@ main{
   border-radius:var(--radius-md);
   background:#fff;
   box-shadow:var(--shadow);
-  margin:0;                 /* grid handles spacing */
-  padding:18px 20px 18px;   /* normal padding */
+  padding:18px 20px 18px;
+  margin:0; /* grid handles spacing */
 }
 
-/* Integrated corner badge (hugging the card border) */
+/* ===== Subtle integrated ticket number badge ===== */
 #support-tickets .ticket-count-badge{
   position:absolute;
-  top:-1px;     /* sit on border */
-  left:-1px;    /* sit on border */
+  top:0;
+  left:0;
 
-  width:42px;
-  height:42px;
+  width:22px;
+  height:22px;
 
   background:var(--orange);
   color:#fff;
 
-  font-weight:900;
-  font-size:14px;
+  font-weight:700;
+  font-size:11px;
+  line-height:1;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  /* "corner tab" shape */
   border-top-left-radius:var(--radius-md);
-  border-top-right-radius:0;
-  border-bottom-left-radius:0;
-  border-bottom-right-radius:18px;
+  border-bottom-right-radius:10px;
 
-  box-shadow:0 3px 10px rgba(239,109,34,0.30);
-  z-index:2;
+  opacity:0.85;
 }
 
-/* Give the first label a little breathing room from the corner badge */
+/* Small breathing room so badge never touches text */
 #support-tickets .ticket-group:has(.ticket-count-badge) .ticket-group-inner{
-  padding-top:6px;
+  padding-top:4px;
 }
-#support-tickets .ticket-group:has(.ticket-count-badge) .ticket-row:first-child > label{
-  padding-left:12px;
-}
-
-/* Push content down a bit ONLY when a badge exists (prevents overlap) */
-#support-tickets .ticket-group:has(.ticket-count-badge) .ticket-group-inner{
-  padding-top:10px;
-}
-#support-tickets .ticket-group-inner{ margin-top:2px; }
 
 /* Ticket rows */
 #support-tickets .ticket-row{
@@ -1014,7 +1004,7 @@ main{
   padding-right:16px;
 }
 
-/* Inputs & selects align right (slightly wider to reduce crowding) */
+/* Inputs & selects */
 #support-tickets{
   --input-width:240px;
 }
@@ -1071,13 +1061,13 @@ main{
   background:#ff8b42;
 }
 
-/* Non-base: full rounded ticket number input */
+/* Non-base ticket number input */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
   width:100%;
   border-radius:var(--radius-sm);
 }
 
-/* Base status: locked/greyed */
+/* Base status locked/greyed */
 #support-tickets .ticket-group[data-base="true"] .ticket-status-select{
   background:#eeeeee !important;
   color:#6b7280 !important;
@@ -1086,26 +1076,26 @@ main{
   opacity:0.9;
 }
 
-/* Summary textarea row */
+/* Summary textarea */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
 }
-#support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
+#support-tickets .ticket-summary-row > label{
+  margin-bottom:4px;
+}
 #support-tickets .ticket-summary-input{
   width:100%;
-  max-width:100%;
   box-sizing:border-box;
   padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  min-height:34px;
   resize:none;
 }
 
-/* Disclaimer (ONLY the base card should contain this element in HTML) */
+/* Base-card disclaimer (HTML must include this ONLY on base card) */
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   font-style:italic;
@@ -1114,7 +1104,7 @@ main{
   line-height:1.3;
 }
 
-/* ===== Validation UI (inline under the exact field) ===== */
+/* ===== Validation UI ===== */
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
   outline-offset:2px;
@@ -1130,8 +1120,9 @@ main{
 
 /* Responsive */
 @media (max-width:900px){
-  #support-tickets .two-col-grid{ grid-template-columns:1fr; }
-
+  #support-tickets .two-col-grid{
+    grid-template-columns:1fr;
+  }
   #openTicketsContainer,
   #tierTwoTicketsContainer,
   #closedResolvedTicketsContainer,
@@ -1145,8 +1136,9 @@ main{
     flex-direction:column;
     align-items:flex-start;
   }
-  #support-tickets .ticket-row > label{ margin-bottom:4px; }
-
+  #support-tickets .ticket-row > label{
+    margin-bottom:4px;
+  }
   #support-tickets .ticket-row > input[type="text"],
   #support-tickets .ticket-row > select,
   #support-tickets .ticket-row > .ticket-number-wrap{
