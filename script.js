@@ -14,19 +14,13 @@ function isField(el){
 }
 
 /* ---------------------------
-   Ghost / placeholder selects + date inputs
+   Ghost / placeholder selects
 --------------------------- */
 function refreshGhostSelects(root = document){
-  // selects
   qsa("select", root).forEach(sel => {
     const opt = sel.options[sel.selectedIndex];
     const ghost = !sel.value && opt?.dataset?.ghost === "true";
     sel.classList.toggle("is-placeholder", ghost);
-  });
-
-  // date inputs (so empty dates show gray like placeholders)
-  qsa("input[type='date']", root).forEach(inp => {
-    inp.classList.toggle("is-placeholder", !inp.value);
   });
 }
 
@@ -143,7 +137,7 @@ function initNavigation(){
 /* ---------------------------
    Integrated "+" rows (non-table)
 --------------------------- */
-function resetClonedFields(clone){
+function refreshAfterClone(clone){
   qsa("input, textarea, select", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else if (el.tagName === "SELECT") el.selectedIndex = 0;
@@ -157,39 +151,12 @@ function cloneIntegratedRow(btn){
   if (!row || !row.parentElement) return;
 
   const clone = row.cloneNode(true);
-  resetClonedFields(clone);
+  refreshAfterClone(clone);
+
+  // remove the + button so only the base row has it
   clone.querySelector(".add-row")?.remove();
 
   row.parentElement.insertBefore(clone, row.nextSibling);
-}
-
-/* ---------------------------
-   ✅ TABLE "+" rows (works for all tables)
---------------------------- */
-function cloneTableRow(btn){
-  const footer = btn.closest(".table-footer");
-  if (!footer) return;
-
-  const container = btn.closest(".table-container");
-  const table = qs("table.training-table", container);
-  const tbody = qs("tbody", table);
-  if (!tbody) return;
-
-  const rows = qsa("tr", tbody);
-  const baseRow = rows[rows.length - 1];
-  if (!baseRow) return;
-
-  const clone = baseRow.cloneNode(true);
-
-  // clear inputs/selects in the cloned row
-  qsa("input, textarea, select", clone).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else if (el.tagName === "SELECT") el.selectedIndex = 0;
-    else el.value = "";
-  });
-
-  tbody.appendChild(clone);
-  refreshGhostSelects(clone);
 }
 
 /* ---------------------------
@@ -201,32 +168,10 @@ function handleTrainerAdd(btn){
   if (!row || !container) return;
 
   const clone = row.cloneNode(true);
-  resetClonedFields(clone);
+  refreshAfterClone(clone);
   clone.querySelector(".add-row")?.remove();
 
   container.appendChild(clone);
-}
-
-/* ---------------------------
-   ✅ Additional POC — ADD A NEW CARD (not a single line)
---------------------------- */
-function handleAdditionalPOCAdd(btn){
-  const baseCard = btn.closest(".mini-card.additional-poc-card");
-  if (!baseCard) return;
-
-  const parentGrid = baseCard.parentElement; // usually .primary-contacts-grid
-  if (!parentGrid) return;
-
-  const clone = baseCard.cloneNode(true);
-  clone.removeAttribute("data-base");
-
-  // remove + button in cloned card
-  clone.querySelector(".add-row")?.remove();
-  clone.querySelector(".additional-poc-add")?.remove();
-
-  resetClonedFields(clone);
-
-  parentGrid.insertBefore(clone, baseCard.nextSibling);
 }
 
 /* ---------------------------
@@ -246,14 +191,12 @@ function initTrainingDates(){
   end.addEventListener("input", () => {
     end.dataset.userEdited = "1";
     saveField(end);
-    refreshGhostSelects();
   });
 
   start.addEventListener("input", () => {
     if (!start.value || end.dataset.userEdited === "1") return;
     end.value = addDaysISO(start.value, 2);
     saveField(end);
-    refreshGhostSelects();
   });
 }
 
@@ -271,19 +214,7 @@ function addTicketBadge(card){
   card.classList.add("has-badge");
 }
 
-function unlockTicketStatus(card){
-  const sel = qs(".ticket-status-select", card);
-  if (!sel) return;
-
-  sel.disabled = false;
-  sel.classList.remove("is-locked");
-}
-
-function handleAddTicket(btn){
-  const base = btn.closest(".ticket-group[data-base='true']");
-  if (!base) return;
-
-   function getTicketContainerByStatus(status){
+function getTicketContainerByStatus(status){
   const map = {
     "Open": "#openTicketsContainer",
     "Tier Two": "#tierTwoTicketsContainer",
@@ -299,22 +230,35 @@ function moveTicketCardToStatus(card, status){
   dest.appendChild(card);
 }
 
+function handleAddTicket(btn){
+  const base = btn.closest(".ticket-group[data-base='true']");
+  if (!base) return;
+
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
   if (!num?.value || !link?.value || !sum?.value) return;
 
   const clone = base.cloneNode(true);
+
+  // ✅ make it a real ticket card (NOT base)
   clone.removeAttribute("data-base");
 
-  // remove add button + disclaimer on clones
+  // remove base-only UI
   clone.querySelector(".add-ticket-btn")?.remove();
   clone.querySelector(".ticket-disclaimer")?.remove();
 
-  // ✅ unlock status on cloned tickets
-  unlockTicketStatus(clone);
+  // ✅ unlock status on clones (only base stays locked)
+  const statusSel = qs(".ticket-status-select", clone);
+  if (statusSel){
+    statusSel.disabled = false;
+    statusSel.classList.remove("is-locked");
+    statusSel.value = "Open";
+  }
 
   addTicketBadge(clone);
+
+  // append to Open by default
   qs("#openTicketsContainer")?.appendChild(clone);
 
   // clear base inputs
@@ -330,22 +274,17 @@ function initAddressAutocomplete(){
   const input = qs("#dealershipAddressInput");
   if (!input || !window.google?.maps?.places) return;
 
-  const ac = new google.maps.places.Autocomplete(input, {
-    types: ["address"]
-  });
+  const ac = new google.maps.places.Autocomplete(input, { types:["address"] });
 
   ac.addListener("place_changed", () => {
     const place = ac.getPlace();
-    if (!place || !place.formatted_address) return;
+    if (!place?.formatted_address) return;
 
     input.value = place.formatted_address;
     saveField(input);
-
     updateDealershipMap(place.formatted_address);
   });
 }
-
-// MUST be global for Google callback
 window.initAddressAutocomplete = initAddressAutocomplete;
 
 function updateDealershipMap(address){
@@ -371,21 +310,31 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Init error:", err);
   }
 
+  // autosave on input/change
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
-
-    // keep placeholder styling live for selects + dates
-    if (e.target.tagName === "SELECT" || e.target.type === "date") refreshGhostSelects();
+    if (e.target.tagName === "SELECT") refreshGhostSelects();
   });
 
   document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
-    if (e.target.tagName === "SELECT" || e.target.type === "date") refreshGhostSelects();
+    if (e.target.tagName === "SELECT") refreshGhostSelects();
+
+    // ✅ Support ticket status move (ONLY non-base cards)
+    const sel = e.target.closest(".ticket-status-select");
+    if (sel){
+      const card = sel.closest(".ticket-group");
+      if (!card) return;
+      if (card.dataset.base === "true") return; // don't move base
+      moveTicketCardToStatus(card, sel.value);
+      return;
+    }
   });
 
+  // clicks
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
@@ -401,32 +350,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ✅ "+” buttons
+    // "+" buttons (integrated rows and tables)
     if (btn.classList.contains("add-row")){
-      // 1) table add-row
-      if (btn.closest(".table-footer")){
-        cloneTableRow(btn);
+      // table add-row
+      const table = btn.closest(".table-container")?.querySelector("table");
+      if (table && table.tBodies?.[0]){
+        const tbody = table.tBodies[0];
+        const last = tbody.rows[tbody.rows.length - 1];
+        if (!last) return;
+
+        const clone = last.cloneNode(true);
+
+        // clear fields in cloned table row
+        qsa("input, select, textarea", clone).forEach(el => {
+          if (el.type === "checkbox") el.checked = false;
+          else if (el.tagName === "SELECT") el.selectedIndex = 0;
+          else el.value = "";
+        });
+
+        tbody.appendChild(clone);
+        refreshGhostSelects(clone);
         return;
       }
 
-      // 2) additional POC card add
-      if (btn.closest(".mini-card.additional-poc-card")){
-        handleAdditionalPOCAdd(btn);
-        return;
-      }
-
-      // 3) trainers page add
+      // non-table add-row
       if (btn.closest("#trainers-deployment")){
         handleTrainerAdd(btn);
-        return;
+      } else {
+        cloneIntegratedRow(btn);
       }
-
-      // 4) default integrated row add
-      cloneIntegratedRow(btn);
       return;
     }
 
-    // support tickets
+    // support tickets "+"
     if (btn.classList.contains("add-ticket-btn")){
       handleAddTicket(btn);
       return;
