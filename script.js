@@ -14,24 +14,20 @@ function isField(el){
 }
 
 /* ---------------------------
-   Ghost / placeholder selects
+   Ghost / placeholder selects + date inputs
 --------------------------- */
-function refreshGhostDates(root = document){
-  qsa('input[type="date"]', root).forEach(inp => {
-    const ghost = !inp.value;
-    inp.classList.toggle("is-placeholder", ghost);
-  });
-}
-
 function refreshGhostSelects(root = document){
+  // selects
   qsa("select", root).forEach(sel => {
     const opt = sel.options[sel.selectedIndex];
     const ghost = !sel.value && opt?.dataset?.ghost === "true";
     sel.classList.toggle("is-placeholder", ghost);
   });
 
-  // ✅ ALSO handle date "placeholder" styling
-  refreshGhostDates(root);
+  // date inputs (so empty dates show gray like placeholders)
+  qsa("input[type='date']", root).forEach(inp => {
+    inp.classList.toggle("is-placeholder", !inp.value);
+  });
 }
 
 /* ---------------------------
@@ -168,6 +164,35 @@ function cloneIntegratedRow(btn){
 }
 
 /* ---------------------------
+   ✅ TABLE "+" rows (works for all tables)
+--------------------------- */
+function cloneTableRow(btn){
+  const footer = btn.closest(".table-footer");
+  if (!footer) return;
+
+  const container = btn.closest(".table-container");
+  const table = qs("table.training-table", container);
+  const tbody = qs("tbody", table);
+  if (!tbody) return;
+
+  const rows = qsa("tr", tbody);
+  const baseRow = rows[rows.length - 1];
+  if (!baseRow) return;
+
+  const clone = baseRow.cloneNode(true);
+
+  // clear inputs/selects in the cloned row
+  qsa("input, textarea, select", clone).forEach(el => {
+    if (el.type === "checkbox") el.checked = false;
+    else if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+
+  tbody.appendChild(clone);
+  refreshGhostSelects(clone);
+}
+
+/* ---------------------------
    Trainers – Additional Trainers
 --------------------------- */
 function handleTrainerAdd(btn){
@@ -180,6 +205,28 @@ function handleTrainerAdd(btn){
   clone.querySelector(".add-row")?.remove();
 
   container.appendChild(clone);
+}
+
+/* ---------------------------
+   ✅ Additional POC — ADD A NEW CARD (not a single line)
+--------------------------- */
+function handleAdditionalPOCAdd(btn){
+  const baseCard = btn.closest(".mini-card.additional-poc-card");
+  if (!baseCard) return;
+
+  const parentGrid = baseCard.parentElement; // usually .primary-contacts-grid
+  if (!parentGrid) return;
+
+  const clone = baseCard.cloneNode(true);
+  clone.removeAttribute("data-base");
+
+  // remove + button in cloned card
+  clone.querySelector(".add-row")?.remove();
+  clone.querySelector(".additional-poc-add")?.remove();
+
+  resetClonedFields(clone);
+
+  parentGrid.insertBefore(clone, baseCard.nextSibling);
 }
 
 /* ---------------------------
@@ -199,21 +246,15 @@ function initTrainingDates(){
   end.addEventListener("input", () => {
     end.dataset.userEdited = "1";
     saveField(end);
-    refreshGhostDates();
+    refreshGhostSelects();
   });
 
   start.addEventListener("input", () => {
-    if (!start.value || end.dataset.userEdited === "1") {
-      refreshGhostDates();
-      return;
-    }
+    if (!start.value || end.dataset.userEdited === "1") return;
     end.value = addDaysISO(start.value, 2);
     saveField(end);
-    refreshGhostDates();
+    refreshGhostSelects();
   });
-
-  // initial ghost style
-  refreshGhostDates();
 }
 
 /* ---------------------------
@@ -230,6 +271,14 @@ function addTicketBadge(card){
   card.classList.add("has-badge");
 }
 
+function unlockTicketStatus(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+
+  sel.disabled = false;
+  sel.classList.remove("is-locked");
+}
+
 function handleAddTicket(btn){
   const base = btn.closest(".ticket-group[data-base='true']");
   if (!base) return;
@@ -237,16 +286,22 @@ function handleAddTicket(btn){
   const num = qs(".ticket-number-input", base);
   const link = qs(".ticket-zendesk-input", base);
   const sum = qs(".ticket-summary-input", base);
-  if (!num.value || !link.value || !sum.value) return;
+  if (!num?.value || !link?.value || !sum?.value) return;
 
   const clone = base.cloneNode(true);
   clone.removeAttribute("data-base");
+
+  // remove add button + disclaimer on clones
   clone.querySelector(".add-ticket-btn")?.remove();
   clone.querySelector(".ticket-disclaimer")?.remove();
+
+  // ✅ unlock status on cloned tickets
+  unlockTicketStatus(clone);
 
   addTicketBadge(clone);
   qs("#openTicketsContainer")?.appendChild(clone);
 
+  // clear base inputs
   num.value = "";
   link.value = "";
   sum.value = "";
@@ -299,16 +354,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
-    if (e.target.type === "date") refreshGhostDates();
+    // keep placeholder styling live for selects + dates
+    if (e.target.tagName === "SELECT" || e.target.type === "date") refreshGhostSelects();
   });
 
   document.addEventListener("change", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
-    if (e.target.type === "date") refreshGhostDates();
+    if (e.target.tagName === "SELECT" || e.target.type === "date") refreshGhostSelects();
   });
 
   document.addEventListener("click", (e) => {
@@ -326,17 +380,35 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // ✅ "+” buttons
     if (btn.classList.contains("add-row")){
+      // 1) table add-row
+      if (btn.closest(".table-footer")){
+        cloneTableRow(btn);
+        return;
+      }
+
+      // 2) additional POC card add
+      if (btn.closest(".mini-card.additional-poc-card")){
+        handleAdditionalPOCAdd(btn);
+        return;
+      }
+
+      // 3) trainers page add
       if (btn.closest("#trainers-deployment")){
         handleTrainerAdd(btn);
-      } else {
-        cloneIntegratedRow(btn);
+        return;
       }
+
+      // 4) default integrated row add
+      cloneIntegratedRow(btn);
       return;
     }
 
+    // support tickets
     if (btn.classList.contains("add-ticket-btn")){
       handleAddTicket(btn);
+      return;
     }
   });
 });
