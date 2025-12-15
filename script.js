@@ -271,7 +271,7 @@ function validateBaseTicketCard(baseCard){
 
   let ok = true;
 
-  // Ticket number (warning should be under wrap)
+  // Ticket number
   if (!ticketNumberInput || !ticketNumberInput.value.trim()){
     ok = false;
     ticketNumberInput?.classList.add("field-error");
