@@ -911,16 +911,23 @@ main{
 
 #support-tickets .ticket-section{ margin-bottom:24px; }
 
-/* Page layout: left column (Open) + right column (stacked 3 sections) */
+/* Page layout:
+   - Left: Open Support Tickets section
+   - Right: 3 status sections stacked vertically
+*/
 #support-tickets .two-col-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:18px;
+  align-items:start;
 }
-#support-tickets .col-stack{
+
+/* ✅ Force the RIGHT column to stack sections */
+#support-tickets .two-col-grid > .col-stack{
   display:flex;
   flex-direction:column;
   gap:18px;
+  align-items:stretch;
 }
 
 /* Each status container: ticket cards in 2x2 grid */
