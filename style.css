@@ -1,12 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — CLEAN FULL CSS
-   (Stable layout + pills + ghost text + tables + DMS cards
-    + side-by-side support with smaller inputs)
+   (Your original look restored + side-by-side support)
+   Colors:
+   --orange: #EF6D22
+   --mykaarma-green: #CDDC39
    ======================================================= */
 
-/* =======================
-   CSS VARIABLES
-   ======================= */
+/* ============== CSS VARIABLES ============== */
 :root{
   --orange:#EF6D22;
   --mykaarma-green:#CDDC39;
@@ -17,28 +17,16 @@
   --border:#dcdcdc;
   --ink:#222222;
 
-  --radius-lg:18px;   /* cards */
+  --radius-lg:18px;
   --radius-md:16px;
-  --radius-sm:14px;   /* inputs/buttons */
+  --radius-sm:14px;
 
   --shadow:0 2px 8px rgba(0,0,0,0.10);
 
-  --input-width:260px; /* default input width for NON side-by-side */
+  --input-width:260px; /* default (single-column pages) */
 }
 
-/* =======================
-   BASE
-   ======================= */
-html,body{
-  margin:0;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background:var(--gray-bg);
-  color:var(--ink);
-  overflow-x:hidden;
-}
-*, em, i{ box-sizing:border-box; font-style:normal !important; }
-
-/* Global form text sizing */
+/* ============== GLOBAL INPUT TYPOGRAPHY ============== */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -50,7 +38,7 @@ select{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
-/* Placeholder (ghost) for inputs + textareas */
+/* Placeholder (ghost) text */
 input::placeholder,
 textarea::placeholder{
   font-size:13px;
@@ -58,19 +46,30 @@ textarea::placeholder{
   opacity:1;
 }
 
-/* Dropdown ghost state (you add/remove .is-placeholder in JS) */
+/* Dropdown ghost text (NON-table only) */
 select{ color:var(--ink); }
 select.is-placeholder{ color:#9ca3af; }
 
-/* NEVER ghost style inside tables */
+/* Tables: never ghost-color dropdowns */
 .training-table select,
 .training-table select.is-placeholder{
   color:var(--ink) !important;
 }
 
-/* =======================
-   TOP BAR
-   ======================= */
+/* ============== BASE ============== */
+html,body{
+  margin:0;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:var(--gray-bg);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+*, em, i{
+  font-style:normal !important;
+  box-sizing:border-box;
+}
+
+/* ============== TOP BAR ============== */
 #topbar{
   background:linear-gradient(90deg,#000 0%, var(--orange) 100%);
   height:70px;
@@ -82,18 +81,20 @@ select.is-placeholder{ color:#9ca3af; }
   top:0; left:0; right:0;
   z-index:9999;
 }
-.topbar-content{
+#topbar .topbar-content{
+  width:100%;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  width:100%;
 }
-.top-logo{
+.top-logo,
+#topbar img.top-logo{
   height:42px;
-  max-height:42px;
   width:auto;
   object-fit:contain;
   display:block;
+  opacity:1;
+  visibility:visible;
 }
 .topbar-right{
   display:flex;
@@ -105,24 +106,23 @@ select.is-placeholder{ color:#9ca3af; }
   font-size:22px;
   font-weight:600;
   letter-spacing:.5px;
+  min-height:1em;
 }
 
-/* =======================
-   LAYOUT
-   ======================= */
+/* App starts below fixed topbar */
 #app{
   display:flex;
   min-height:100vh;
-  margin-top:70px; /* push below fixed topbar */
+  margin-top:70px;
   overflow-x:hidden;
 }
 
-/* Sidebar */
+/* ============== SIDEBAR ============== */
 #sidebar{
-  background:linear-gradient(180deg,#0b1220 0%,#111827 35%,#020617 100%);
+  background:linear-gradient(180deg,#0b1220 0%, #111827 35%, #020617 100%);
   border-right:1px solid rgba(15,23,42,0.8);
   width:230px;
-  padding:20px 12px 90px; /* space for Clear All button */
+  padding:20px 12px 90px; /* space for Clear All */
   box-shadow:0 0 18px rgba(15,23,42,0.6);
   position:fixed;
   top:70px;
@@ -137,11 +137,11 @@ select.is-placeholder{ color:#9ca3af; }
 }
 .nav-icon{ display:none; }
 
-/* Menu buttons (pill) */
+/* Menu buttons (no white-out) */
 .nav-btn{
   background:transparent;
   border:1px solid transparent;
-  padding:10px 14px;
+  padding:9px 12px;
   font-size:12px;
   text-align:left;
   border-radius:999px;
@@ -149,7 +149,7 @@ select.is-placeholder{ color:#9ca3af; }
   color:#e5e7eb;
   transition:.18s;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:0.08em;
 }
 .nav-btn:hover{
   background:rgba(15,23,42,0.85);
@@ -160,41 +160,46 @@ select.is-placeholder{ color:#9ca3af; }
 .nav-btn.active{
   background:rgba(15,23,42,0.95);
   color:#f9fafb;
-  font-weight:700;
+  font-weight:600;
   border-color:var(--orange);
   box-shadow:0 4px 10px rgba(0,0,0,0.65);
 }
 
-/* Clear All (orange pill at bottom) */
+/* Clear All (orange pill at bottom of sidebar) */
 #clearAllBtn{
   position:fixed;
   left:24px;
   bottom:18px;
   width:calc(230px - 48px);
-  padding:10px 14px;
+
+  padding:8px 12px;
   font-size:11px;
   font-weight:800;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:0.08em;
+
   border-radius:999px;
   border:none;
   background:var(--orange);
   color:#fff;
+
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 4px 12px rgba(239,109,34,0.45);
+  gap:6px;
+
+  box-shadow:0 3px 10px rgba(239,109,34,0.45);
   transition:background .16s, transform .16s, box-shadow .16s;
   z-index:60;
 }
 #clearAllBtn:hover{
   background:#ff8b42;
   transform:translateY(-1px);
-  box-shadow:0 6px 16px rgba(239,109,34,0.55);
+  box-shadow:0 5px 14px rgba(239,109,34,0.55);
 }
 
-/* Main content */
+/* ============== MAIN CONTENT ============== */
 main{
   flex:1;
   margin-left:230px;
@@ -202,9 +207,7 @@ main{
   background:var(--gray-bg);
 }
 
-/* =======================
-   PAGE SECTIONS
-   ======================= */
+/* ============== PAGE SECTIONS ============== */
 .page-section{
   position:relative;
   display:none;
@@ -222,8 +225,10 @@ main{
   color:var(--orange);
   margin:4px 0 8px 4px;
   font-size:26px;
-  font-weight:800;
+  font-weight:700;
+  text-align:left;
   letter-spacing:.3px;
+  position:relative;
 }
 .page-section h1::after{
   content:"";
@@ -235,40 +240,42 @@ main{
   margin-top:8px;
   border-radius:2px;
 }
-
 .page-subtitle{
   margin:4px 0 20px 4px;
   font-size:13px;
   color:#555;
 }
 
-/* Reset This Page (orange pill top-right) */
+/* Reset This Page — orange pill on right */
 .clear-page-btn{
   position:absolute;
   top:16px;
   right:24px;
-  padding:8px 16px;
+
+  padding:6px 14px;
   font-size:11px;
   font-weight:800;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:0.08em;
+
   border-radius:999px;
   border:none;
+
   background:var(--orange);
   color:#fff;
+
   cursor:pointer;
-  box-shadow:0 3px 10px rgba(239,109,34,0.35);
+  box-shadow:0 2px 6px rgba(239,109,34,0.35);
   transition:background .18s, transform .18s, box-shadow .18s;
+  z-index:10;
 }
 .clear-page-btn:hover{
   background:#ff8b42;
   transform:translateY(-1px);
-  box-shadow:0 5px 14px rgba(239,109,34,0.45);
+  box-shadow:0 4px 10px rgba(239,109,34,0.45);
 }
 
-/* =======================
-   SECTION BLOCKS (CARDS)
-   ======================= */
+/* ============== SECTION BLOCKS (cards) ============== */
 .section-block{
   background:#fff;
   border-radius:var(--radius-lg);
@@ -280,23 +287,23 @@ main{
 }
 .section-block h2{
   margin:0 0 16px;
-  padding:12px 16px;
+  padding:10px 16px;
   background:var(--orange);
   color:#fff;
   font-size:16px;
-  font-weight:800;
+  font-weight:700;
   border-bottom:1px solid var(--border);
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
   margin-left:-22px;
   margin-right:-22px;
 }
 
-/* Notes spacing helper */
-.notes-block{ margin-bottom:32px; }
+/* optional outline card */
+.orange-outline-card{
+  border:2px solid var(--orange);
+}
 
-/* =======================
-   Q&A ROWS (NON-TABLE)
-   ======================= */
+/* ============== Q&A ROWS (non-tables) ============== */
 .checklist-row{
   display:flex;
   align-items:center;
@@ -314,13 +321,13 @@ main{
 }
 .checklist-row label{
   flex:1 1 auto;
-  font-weight:600;
+  font-weight:500;
   text-align:left;
   padding-right:16px;
   white-space:normal;
 }
 
-/* Default inputs on the right (NON table, NON mini-card) */
+/* inputs on the RIGHT */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -330,18 +337,20 @@ main{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
-  padding:8px 10px;
+  padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
+  font-size:13px;
+  height:34px;
 }
 
-/* Textareas */
+/* textareas */
 .section-block textarea{
   width:96%;
   margin:6px auto 10px;
   display:block;
-  padding:10px 10px;
+  padding:8px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
@@ -349,7 +358,7 @@ main{
   resize:vertical;
 }
 
-/* Focus */
+/* focus */
 .section-block input:focus,
 .section-block select:focus,
 .section-block textarea:focus,
@@ -361,12 +370,53 @@ main{
   background:#fff9f5;
 }
 
-/* Indented sub rows */
+/* indents */
 .indent-sub{ padding-left:60px !important; }
 
-/* =======================
-   MINI CARDS (Contacts)
-   ======================= */
+/* ============== SIDE-BY-SIDE LAYOUTS ============== */
+/* You already use these in HTML:
+   - .cards-grid.two-col / .cards-grid.three-col (general)
+   - .two-col-grid + .col-stack (Post-Training) */
+
+.cards-grid{
+  display:grid;
+  gap:18px;
+  margin-bottom:24px;
+}
+.cards-grid.two-col{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+.cards-grid.three-col{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+.cards-grid > .section-block{ margin-bottom:0; }
+
+/* Post-Training 2x2 layout helper */
+.two-col-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:24px;
+}
+.col-stack{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* Side-by-side: shift text left but keep cushion */
+.cards-grid .checklist-row,
+.two-col-grid .checklist-row{
+  padding-left:22px;
+}
+.cards-grid .indent-sub,
+.two-col-grid .indent-sub{
+  padding-left:42px !important;
+}
+
+/* Side-by-side: make inputs ~1/2 width so label gets more room */
+.cards-grid,
+.two-col-grid{
+  --input-width:150px;
+}
+
+/* ============== MINI-CARDS (Primary Contacts) ============== */
 .mini-card{
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
@@ -376,14 +426,18 @@ main{
 .mini-card .checklist-row{
   margin:0;
   border-bottom:1px solid #e5e5e5;
-  padding:10px 24px;
+  padding:8px 24px;
 }
 .mini-card .checklist-row:last-child{ border-bottom:none; }
+
 .mini-card .checklist-row label{
   flex:0 0 36%;
-  font-weight:700;
+  font-weight:500;
+  text-align:left;
   padding-right:12px;
   white-space:nowrap;
+  display:flex;
+  align-items:center;
 }
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="number"],
@@ -394,19 +448,74 @@ main{
   flex:1 1 auto;
   width:100%;
   margin-left:0;
+  height:34px;
 }
 
-/* Primary contacts grid */
+/* Page 2 contact grid */
 .primary-contacts-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   column-gap:18px;
   row-gap:18px;
 }
 
-/* =======================
-   MAP (PAGE 2)
-   ======================= */
+/* ============== Additional POC (match sizing + centered text) ============== */
+.mini-card.additional-poc-card .checklist-row.integrated-plus{
+  align-items:center;
+  padding:8px 24px;
+  gap:0; /* integrated */
+  border-bottom:1px solid #e5e5e5;
+}
+
+/* Integrated input */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  height:34px;
+  padding:6px 10px;
+  font-size:13px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
+}
+
+/* + button same height/shape */
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
+  height:34px;
+  width:34px;
+  margin-left:-1px;
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:16px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+  padding:0;
+}
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
+  background:#ff8b42;
+}
+
+/* Only base Additional POC card shows + */
+.additional-poc-card:not([data-base="true"]) .add-row,
+.additional-poc-card:not([data-base="true"]) .additional-poc-add{
+  display:none !important;
+}
+/* Non-base: restore fully rounded input (no + button present) */
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  border-radius:var(--radius-sm) !important;
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
+
+/* ============== Dealership Info Map input/button ============== */
 #dealership-info .address-input-wrap{
   display:flex;
   align-items:stretch;
@@ -416,24 +525,27 @@ main{
   margin-left:auto;
 }
 #dealership-info .address-input-wrap input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 44px);
-  width:calc(var(--input-width) - 44px);
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
+  height:34px;
   border-top-right-radius:0;
   border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
 #dealership-info .address-input-wrap .small-map-btn{
-  flex:0 0 44px;
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
   margin-left:-1px;
   background:var(--orange);
   color:#fff;
   border:1px solid var(--orange);
   border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  width:44px;
-  height:38px;
   font-size:11px;
-  font-weight:900;
+  font-weight:800;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:0.08em;
   cursor:pointer;
   display:flex;
   align-items:center;
@@ -450,12 +562,18 @@ main{
   border:1px solid var(--border);
   background:#f8f8f8;
 }
-.map-frame{ width:100%; height:220px; border:0; }
-.map-helper-text{ margin:6px 10px 10px; font-size:12px; color:#555; }
+.map-frame{
+  width:100%;
+  height:220px;
+  border:0;
+}
+.map-helper-text{
+  margin:6px 10px 10px;
+  font-size:12px;
+  color:#555;
+}
 
-/* =======================
-   INTEGRATED “+” ROWS
-   ======================= */
+/* ============== Integrated “+” rows (general, non-table) ============== */
 .section-block .checklist-row.integrated-plus{
   display:flex;
   align-items:stretch;
@@ -464,25 +582,29 @@ main{
 .section-block .checklist-row.integrated-plus label{
   flex:1 1 auto;
   padding-right:16px;
+  display:flex;
+  align-items:center;
 }
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 calc(var(--input-width) - 44px);
-  width:calc(var(--input-width) - 44px);
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
   margin-left:auto;
+  height:34px;
   border-top-right-radius:0;
   border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
-.section-block .checklist-row.integrated-plus > .add-row,
-.section-block .checklist-row.integrated-plus > .additional-poc-add{
-  flex:0 0 44px;
+.section-block .checklist-row.integrated-plus > .add-row{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
   margin-left:-1px;
   background:var(--orange);
   color:#fff;
   border:1px solid var(--orange);
   border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  width:44px;
-  height:38px;
   font-size:18px;
   font-weight:900;
   cursor:pointer;
@@ -491,115 +613,32 @@ main{
   justify-content:center;
   box-shadow:0 1px 4px rgba(239,109,34,0.25);
   padding:0;
-  transition:.18s;
 }
-.section-block .checklist-row.integrated-plus > .add-row:hover,
-.section-block .checklist-row.integrated-plus > .additional-poc-add:hover{
+.section-block .checklist-row.integrated-plus > .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
 }
 
-/* Cloned rows (no add button) keep rounded */
-.section-block .checklist-row.integrated-plus:not(:has(.add-row)):not(:has(.additional-poc-add)) input[type="text"],
-.section-block .checklist-row.integrated-plus:not(:has(.add-row)):not(:has(.additional-poc-add)) input[type="tel"]{
+/* When cloned row has no add button: full rounded */
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="text"],
+.section-block .checklist-row.integrated-plus:not(:has(.add-row)) input[type="tel"]{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   border-radius:var(--radius-sm) !important;
 }
 
-/* Additional POC cards: only base shows + */
-.additional-poc-card:not([data-base="true"]) .add-row,
-.additional-poc-card:not([data-base="true"]) .additional-poc-add{
-  display:none !important;
-}
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* =======================
-   SIDE-BY-SIDE LAYOUTS
-   ======================= */
-/* Supports either pattern:
-   1) <div class="cards-grid two-col">...</div>
-   2) <div class="two-col-grid"> <div class="col-stack">...</div> <div class="col-stack">...</div> </div>
-*/
-.cards-grid{ display:grid; gap:18px; margin-bottom:24px; }
-.cards-grid.two-col{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-.cards-grid.three-col{ grid-template-columns:repeat(3, minmax(0,1fr)); }
-.cards-grid > .section-block{ margin-bottom:0; }
-
-.two-col-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-  gap:18px;
-  margin-bottom:24px;
-}
-.col-stack > .section-block{ margin-bottom:18px; }
-.col-stack > .section-block:last-child{ margin-bottom:0; }
-
-/* ✅ Your request: on side-by-side cards, give labels more room and make inputs ~½ size */
-.two-col-grid .section-block .checklist-row,
-.cards-grid.two-col .section-block .checklist-row{
-  padding-left:28px; /* shifts content a bit left but keeps cushion */
-}
-.two-col-grid .section-block .checklist-row label,
-.cards-grid.two-col .section-block .checklist-row label{
-  flex:1 1 auto;
-  padding-right:20px;
-}
-.two-col-grid .section-block .checklist-row input[type="text"],
-.two-col-grid .section-block .checklist-row input[type="number"],
-.two-col-grid .section-block .checklist-row input[type="email"],
-.two-col-grid .section-block .checklist-row input[type="tel"],
-.two-col-grid .section-block .checklist-row input[type="date"],
-.two-col-grid .section-block .checklist-row select,
-.cards-grid.two-col .section-block .checklist-row input[type="text"],
-.cards-grid.two-col .section-block .checklist-row input[type="number"],
-.cards-grid.two-col .section-block .checklist-row input[type="email"],
-.cards-grid.two-col .section-block .checklist-row input[type="tel"],
-.cards-grid.two-col .section-block .checklist-row input[type="date"],
-.cards-grid.two-col .section-block .checklist-row select{
-  flex:0 0 140px; /* ~half of 260 */
-  width:140px;
-}
-
-/* integrated + inside side-by-side: input shrinks but button stays same */
-.two-col-grid .checklist-row.integrated-plus input[type="text"],
-.two-col-grid .checklist-row.integrated-plus input[type="tel"],
-.cards-grid.two-col .checklist-row.integrated-plus input[type="text"],
-.cards-grid.two-col .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 96px; /* 140 - 44 button */
-  width:96px;
-}
-
-@media (max-width:900px){
-  .cards-grid.two-col,
-  .cards-grid.three-col,
-  .two-col-grid{ grid-template-columns:1fr; }
-}
-
-/* =======================
-   DMS INTEGRATION (CARDS)
-   (No dots, no legend; Push/Pull badges correct)
-   ======================= */
+/* ============== DMS INTEGRATION (cards restored, no dots/legend) ============== */
 #dms-integration .dms-legend{ display:none !important; }
-#dms-integration .dms-tag,
-#dms-integration .dms-dot{ display:none !important; }
 
-#dms-integration .dms-table-container{
-  margin-top:16px;
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  background:#fff;
-}
 #dms-integration .dms-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:18px;
   padding:18px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
 }
 #dms-integration .dms-card{
   border-radius:16px;
@@ -624,26 +663,23 @@ main{
 }
 #dms-integration .dms-chip{
   font-size:11px;
-  font-weight:900;
-  letter-spacing:.08em;
+  font-weight:800;
+  letter-spacing:0.08em;
   text-transform:uppercase;
   padding:3px 10px;
   border-radius:999px;
-  color:#111;
-  border:1px solid transparent;
   white-space:nowrap;
+  border:1px solid transparent;
+  color:#fff;
 }
-/* Push-based = myKaarma orange */
 #dms-integration .dms-chip-push{
   background:var(--orange);
   border-color:var(--orange);
-  color:#fff;
 }
-/* Pull-based = myKaarma green (from logo) */
 #dms-integration .dms-chip-pull{
   background:var(--mykaarma-green);
   border-color:var(--mykaarma-green);
-  color:#111;
+  color:#111; /* readable on lime */
 }
 #dms-integration .dms-list{
   list-style:none;
@@ -676,17 +712,18 @@ main{
   line-height:1.45;
   color:#4b5563;
 }
+/* Hide any leftover dots/tags if present in HTML */
+#dms-integration .dms-tag,
+#dms-integration .dms-dot{ display:none !important; }
 
-/* =======================
-   TABLES
-   ======================= */
+/* ============== TABLES ============== */
 .section{ margin-bottom:40px; }
 
 .section-header{
   background:var(--orange);
   color:#fff;
   font-size:15px;
-  font-weight:900;
+  font-weight:800;
   padding:10px 18px;
   margin:18px 0 0;
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
@@ -726,32 +763,33 @@ main{
   padding:6px 6px;
 }
 
+/* sticky header */
 .training-table thead th{
   background:var(--light-orange);
   color:#fff;
-  font-weight:900;
+  font-weight:800;
   position:sticky;
   top:0;
   z-index:3;
 }
 
+/* sticky first column (default) */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
   left:0;
   z-index:4;
 }
-.training-table td:first-child{
-  background:#fff;
-}
+.training-table td:first-child{ background:#fff; }
 
-/* Training checklist name column sizing */
+/* Training Checklist name col width */
 #training-checklist .training-table th:first-child,
 #training-checklist .training-table td:first-child{
   width:210px;
   min-width:210px;
 }
 
+/* generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){
   width:185px;
@@ -768,9 +806,10 @@ main{
   background:#f7f7f7;
   font-size:13px;
   text-align:center;
+  height:32px;
 }
 
-/* Training checklist: checkbox + name input */
+/* Training Checklist — checkbox + input */
 #training-checklist .training-table td:first-child{
   display:flex;
   align-items:center;
@@ -786,10 +825,11 @@ main{
   min-width:0;
 }
 
+/* row striping */
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
-/* Table footer add row button */
+/* footer + add row */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -806,7 +846,7 @@ main{
   color:#fff;
   border:none;
   border-radius:999px;
-  padding:6px 12px;
+  padding:6px 10px;
   font-size:14px;
   font-weight:900;
   cursor:pointer;
@@ -819,18 +859,26 @@ main{
   transform:translateY(-1px);
 }
 
-/* Acceptance select colors */
+/* acceptance colors */
 .training-table select.accept-yes{
-  background:#dcfce7; border-color:#22c55e; color:#14532d;
+  background:#dcfce7;
+  border-color:#22c55e;
+  color:#14532d;
 }
 .training-table select.accept-neutral{
-  background:#fef9c3; border-color:#eab308; color:#854d0e;
+  background:#fef9c3;
+  border-color:#eab308;
+  color:#854d0e;
 }
 .training-table select.accept-no{
-  background:#fee2e2; border-color:#ef4444; color:#7f1d1d;
+  background:#fee2e2;
+  border-color:#ef4444;
+  color:#7f1d1d;
 }
 .training-table select.accept-na{
-  background:#e5e7eb; border-color:#9ca3af; color:#374151;
+  background:#e5e7eb;
+  border-color:#9ca3af;
+  color:#374151;
 }
 
 /* Opcodes: first column not sticky */
@@ -848,9 +896,7 @@ main{
   background:inherit;
 }
 
-/* =======================
-   SUPPORT TICKETS
-   ======================= */
+/* ============== SUPPORT TICKETS (kept clean) ============== */
 #support-tickets .ticket-section{ margin-bottom:24px; }
 
 #support-tickets .ticket-group{
@@ -862,6 +908,20 @@ main{
   background:#fff;
   box-shadow:var(--shadow);
 }
+#support-tickets .ticket-group-inner{ margin-top:4px; }
+
+.ticket-badge{
+  background:var(--orange);
+  color:#fff;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:800;
+  border-radius:999px;
+  display:inline-block;
+  margin-bottom:14px;
+  margin-top:2px;
+}
+
 #support-tickets .ticket-row{
   display:flex;
   align-items:center;
@@ -878,11 +938,12 @@ main{
 }
 #support-tickets .ticket-row > label{
   flex:1 1 auto;
-  font-weight:700;
+  font-weight:600;
   font-size:14px;
   text-align:left;
   padding-right:16px;
 }
+
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap{
@@ -893,32 +954,35 @@ main{
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
-  padding:8px 10px;
+  padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
+  font-size:13px;
+  height:34px;
 }
 
-/* Integrated ticket # + add on base */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
 }
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
-  flex:0 0 calc(var(--input-width) - 44px);
-  width:calc(var(--input-width) - 44px);
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
   border-top-right-radius:0;
   border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
 #support-tickets .ticket-group[data-base="true"] .ticket-number-wrap .add-ticket-btn{
-  flex:0 0 44px;
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
   margin-left:-1px;
   background:var(--orange);
   color:#fff;
   border:1px solid var(--orange);
   border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  width:44px;
-  height:38px;
   font-size:18px;
   font-weight:900;
   cursor:pointer;
@@ -937,7 +1001,6 @@ main{
   border-radius:var(--radius-sm);
 }
 
-/* Summary text area style row */
 #support-tickets .ticket-summary-row{
   flex-direction:column;
   align-items:stretch;
@@ -947,7 +1010,7 @@ main{
   width:100%;
   max-width:100%;
   box-sizing:border-box;
-  padding:8px 10px;
+  padding:7px 10px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
@@ -956,44 +1019,51 @@ main{
   resize:none;
 }
 
-/* =======================
-   TRAINING SUMMARY PDF BUTTON
-   ======================= */
+/* ============== FLOATING PDF BUTTON (Summary) ============== */
 #training-summary .floating-btn{
   background:var(--orange);
   color:#fff;
   border:none;
-  padding:10px 18px;
+  padding:8px 18px;
   border-radius:999px;
   box-shadow:0 2px 6px rgba(0,0,0,0.18);
   cursor:pointer;
   font-size:13px;
-  font-weight:900;
+  font-weight:800;
   position:absolute;
   top:18px;
   right:24px;
 }
 #training-summary .floating-btn:hover{ background:#ff8b42; }
 
-/* Muted note */
+/* muted note */
 .muted-note{
   font-size:.9em;
   color:#666;
   font-style:italic !important;
 }
 
-/* =======================
-   RESPONSIVE
-   ======================= */
+/* ============== RESPONSIVE ============== */
 @media (max-width:900px){
   #sidebar{ width:190px; }
   main{ margin-left:190px; padding:20px; }
+
   .primary-contacts-grid{ grid-template-columns:1fr; }
+
   #clearAllBtn{ width:calc(190px - 48px); }
+
+  .cards-grid.two-col,
+  .cards-grid.three-col,
+  .two-col-grid{
+    grid-template-columns:1fr;
+  }
 }
+
 @media (max-width:600px){
   #sidebar{ display:none; }
   main{ margin-left:0; padding:16px; }
+
+  .primary-contacts-grid{ grid-template-columns:1fr; }
 
   .checklist-row{
     flex-direction:column;
