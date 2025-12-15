@@ -934,15 +934,15 @@ main{
   align-items:start;
 }
 
-/* Ticket card */
+/* Ticket card (base + added) */
 #support-tickets .ticket-group{
   position:relative;
   border:1px solid var(--orange);
   border-radius:var(--radius-md);
-  padding:16px 20px 18px;
+  padding:28px 20px 18px; /* ✅ cushion so badge never overlaps */
   background:#fff;
   box-shadow:var(--shadow);
-  margin:0; /* IMPORTANT: grid handles spacing */
+  margin:0; /* grid handles spacing */
 }
 
 #support-tickets .ticket-group-inner{ margin-top:6px; }
@@ -995,6 +995,8 @@ main{
   display:flex;
   align-items:stretch;
 }
+
+/* Base ticket number input (with + button) */
 #support-tickets .ticket-group[data-base="true"] .ticket-number-input{
   flex:0 0 calc(var(--input-width) - 34px);
   width:calc(var(--input-width) - 34px);
@@ -1051,6 +1053,15 @@ main{
   resize:none;
 }
 
+/* Base-card disclaimer (ONLY shows if your HTML includes it in base card) */
+#support-tickets .ticket-disclaimer{
+  font-size:11px;
+  font-style:italic;
+  color:#9ca3af;
+  margin-top:8px;
+  line-height:1.3;
+}
+
 /* ===== Validation UI ===== */
 #support-tickets .field-error{
   outline:2px solid #ff5a5a;
@@ -1058,7 +1069,7 @@ main{
   background:#fff5f5 !important;
 }
 
-/* Warning text MUST sit directly under its field */
+/* Warning text sits directly under its field (JS inserts after the field/wrap) */
 #support-tickets .field-warning{
   font-size:11px;
   font-style:italic;
@@ -1077,11 +1088,11 @@ main{
   opacity:0.85;
 }
 
-/* Badge numbering (added tickets only) */
+/* Badge numbering (added tickets only — base card simply won't have this element) */
 #support-tickets .ticket-count-badge{
   position:absolute;
-  top:12px;
-  left:12px;
+  top:10px;     /* ✅ inset */
+  left:10px;    /* ✅ inset */
   width:30px;
   height:30px;
   border-radius:999px;
@@ -1095,16 +1106,10 @@ main{
   box-shadow:0 2px 6px rgba(239,109,34,0.35);
 }
 
-/* Make room so badge never crowds content */
-#support-tickets .ticket-group:not([data-base="true"]){
-  padding-top:18px;
-}
-
 /* Responsive */
 @media (max-width:900px){
-  #support-tickets .two-col-grid{
-    grid-template-columns:1fr;
-  }
+  #support-tickets .two-col-grid{ grid-template-columns:1fr; }
+
   #openTicketsContainer,
   #tierTwoTicketsContainer,
   #closedResolvedTicketsContainer,
@@ -1119,6 +1124,7 @@ main{
     align-items:flex-start;
   }
   #support-tickets .ticket-row > label{ margin-bottom:4px; }
+
   #support-tickets .ticket-row > input[type="text"],
   #support-tickets .ticket-row > select,
   #support-tickets .ticket-row > .ticket-number-wrap{
