@@ -3205,90 +3205,92 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- STACKED SECTIONS (each status is its own row) -->
-  <div class="ticket-sections-stack">
+  <div class="two-col-grid">
+    <!-- LEFT: OPEN TICKETS -->
+    <div class="col-stack">
+      <div class="section-block ticket-section">
+        <h2>Open Support Tickets</h2>
 
-    <!-- OPEN -->
-    <div class="section-block ticket-section">
-      <h2>Open Support Tickets</h2>
+        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
+        <div id="openTicketsContainer">
+          <!-- Base card (entry form) -->
+          <div class="ticket-group" data-base="true">
+            <div class="ticket-group-inner">
+              <div class="ticket-row ticket-number-row">
+                <label>Support Ticket Number</label>
+                <div class="ticket-number-wrap">
+                  <input
+                    type="text"
+                    class="ticket-number-input"
+                    placeholder="Enter Zendesk ticket number"
+                  />
+                  <button
+                    type="button"
+                    class="add-ticket-btn"
+                    title="Add another support ticket"
+                  >+</button>
+                </div>
+              </div>
 
-      <!-- 2-column grid of cards -->
-      <div id="openTicketsContainer" class="ticket-grid">
-        <div class="ticket-group" data-base="true">
-          <div class="ticket-group-inner">
+              <div class="ticket-row">
+                <label>Status</label>
+                <!-- Base card status is locked/disabled by JS and forced to Open -->
+                <select class="ticket-status-select">
+                  <option value="Open" selected>Open</option>
+                  <option value="Tier Two">Tier Two</option>
+                  <option value="Closed - Resolved">Closed - Resolved</option>
+                  <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
+                </select>
+              </div>
 
-            <div class="ticket-row ticket-number-row">
-              <label>Support Ticket Number</label>
-
-              <div class="ticket-number-wrap">
+              <div class="ticket-row">
+                <label>Zendesk Link</label>
+                <!-- ✅ Change: add class so JS finds it reliably -->
                 <input
                   type="text"
-                  class="ticket-number-input"
-                  placeholder="Enter Zendesk ticket number"
+                  class="ticket-zendesk-input"
+                  placeholder="Paste full Zendesk ticket URL"
                 />
-                <button
-                  type="button"
-                  class="add-ticket-btn"
-                  title="Add another support ticket"
-                >+</button>
               </div>
-              <!-- warning gets injected HERE (under .ticket-number-wrap) -->
+
+              <div class="ticket-row ticket-summary-row">
+                <label>Short Summary of the Issue</label>
+                <textarea
+                  class="ticket-summary-input"
+                  rows="2"
+                  placeholder="High-level description of the issue"
+                ></textarea>
+                <!-- ✅ Change: disclaimer removed (base-only disclaimer no longer shown) -->
+              </div>
             </div>
-
-            <div class="ticket-row">
-              <label>Status</label>
-              <select class="ticket-status-select">
-                <option value="Open" selected>Open</option>
-                <option value="Tier Two">Tier Two</option>
-                <option value="Closed - Resolved">Closed - Resolved</option>
-                <option value="Closed – Feature Not Supported">Closed – Feature Not Supported</option>
-              </select>
-              <!-- warning gets injected HERE (under select) -->
-            </div>
-
-            <div class="ticket-row">
-              <label>Zendesk Link</label>
-              <input type="text" class="ticket-zendesk-input" placeholder="Paste full Zendesk ticket URL" />
-              <!-- warning gets injected HERE (under input) -->
-            </div>
-
-            <div class="ticket-row ticket-summary-row">
-              <label>Short Summary of the Issue</label>
-              <textarea
-                class="ticket-summary-input"
-                rows="2"
-                placeholder="High-level description of the issue"
-              ></textarea>
-              <!-- warning gets injected HERE (under textarea) -->
-
-              <p class="ticket-disclaimer">
-                * This support ticket must be fully completed before adding another card.
-              </p>
-            </div>
-
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TIER TWO -->
-    <div class="section-block ticket-section">
-      <h2>Tier Two / Escalated Tickets</h2>
-      <div id="tierTwoTicketsContainer" class="ticket-grid"></div>
-    </div>
+    <!-- RIGHT: ESCALATED + CLOSED STACKED -->
+    <div class="col-stack">
+      <div class="section-block ticket-section">
+        <h2>Tier Two / Escalated Tickets</h2>
 
-    <!-- CLOSED RESOLVED -->
-    <div class="section-block ticket-section">
-      <h2>Closed - Resolved Support Tickets</h2>
-      <div id="closedResolvedTicketsContainer" class="ticket-grid"></div>
-    </div>
+        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
+        <div id="tierTwoTicketsContainer"></div>
+      </div>
 
-    <!-- CLOSED NOT SUPPORTED -->
-    <div class="section-block ticket-section">
-      <h2>Closed - Feature Not Supported</h2>
-      <div id="closedFeatureTicketsContainer" class="ticket-grid"></div>
-    </div>
+      <div class="section-block ticket-section">
+        <h2>Closed - Resolved Support Tickets</h2>
 
+        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
+        <div id="closedResolvedTicketsContainer"></div>
+      </div>
+
+      <div class="section-block ticket-section">
+        <h2>Closed - Feature Not Supported</h2>
+
+        <!-- NOTE: this container becomes a 2x2 grid via CSS -->
+        <div id="closedFeatureTicketsContainer"></div>
+      </div>
+    </div>
   </div>
 </section>
 
