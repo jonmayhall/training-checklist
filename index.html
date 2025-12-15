@@ -3194,60 +3194,54 @@
         </div>
       </section>
 
- <!-- ========================================================= -->
-      <!-- PAGE 7: Support Ticket                                  -->
-      <!-- ========================================================= -->
-  <section id="support-tickets" class="page-section">
+ <!<section id="support-tickets" class="page-section">
   <button class="clear-page-btn">Reset This Page</button>
 
-<section id="support-tickets" class="page-section">
-  <button class="clear-page-btn">Reset This Page</button>
+  <h1>Open Support Tickets</h1>
+  <p class="page-subtitle">Track support tickets by status. Add a new ticket only when the base card is fully completed.</p>
 
-  <h1>Support Tickets</h1>
-  <p class="page-subtitle">
-    Track open issues with myKaarma Support, escalation status, and resolution details.
-  </p>
-
+  <!-- ✅ 4 BIG STATUS SECTIONS STACKED -->
   <div class="ticket-sections-stack">
 
-    <!-- 1) OPEN -->
-    <div class="section-block ticket-section">
-      <h2>Open Support Tickets</h2>
+    <!-- ================= OPEN ================= -->
+    <div class="ticket-section section-block">
+      <h2>Open</h2>
 
-      <div id="openTicketsContainer" class="tickets-grid">
-        <!-- BASE CARD (ONLY ONE THAT HAS + and locked status + disclaimer) -->
+      <div id="openTicketsContainer">
+        <!-- ✅ BASE CARD (stays here only) -->
         <div class="ticket-group" data-base="true">
           <div class="ticket-group-inner">
 
             <div class="ticket-row">
-              <label>Support Ticket Number</label>
+              <label>Ticket Number</label>
               <div class="ticket-number-wrap">
-                <input type="text" class="ticket-number-input" placeholder="Enter Zendesk ticket number" />
-                <button type="button" class="add-ticket-btn" aria-label="Add ticket">+</button>
+                <input class="ticket-number-input" type="text" placeholder="Enter ticket number">
+                <button class="add-ticket-btn" type="button" title="Add Ticket">+</button>
               </div>
             </div>
 
             <div class="ticket-row">
               <label>Status</label>
-              <select class="ticket-status-select is-locked" disabled>
-                <option>Open</option>
-                <option>Tier Two</option>
-                <option>Closed - Resolved</option>
-                <option>Closed - Feature Not Supported</option>
+              <select class="ticket-status-select" disabled>
+                <option value="Open">Open</option>
+                <option value="Tier Two">Tier Two</option>
+                <option value="Closed - Resolved">Closed - Resolved</option>
+                <option value="Closed - Feature Not Supported">Closed - Feature Not Supported</option>
               </select>
             </div>
 
             <div class="ticket-row">
-              <label>Zendesk Link</label>
-              <input type="text" class="ticket-zendesk-input" placeholder="Paste full Zendesk ticket URL" />
+              <label>Zendesk Ticket URL</label>
+              <input class="ticket-zendesk-input" type="text" placeholder="Paste Zendesk ticket URL">
             </div>
 
             <div class="ticket-row ticket-summary-row">
               <label>Short Summary of the Issue</label>
               <textarea class="ticket-summary-input" rows="2" placeholder="High-level description of the issue"></textarea>
 
+              <!-- ✅ Disclaimer ONLY on base card -->
               <p class="ticket-disclaimer">
-                * This support ticket must be fully completed before adding another card.
+                * This ticket must be fully completed before adding another card.
               </p>
             </div>
 
@@ -3256,22 +3250,22 @@
       </div>
     </div>
 
-    <!-- 2) TIER TWO -->
-    <div class="section-block ticket-section">
-      <h2>Tier Two / Escalated Tickets</h2>
-      <div id="tierTwoTicketsContainer" class="tickets-grid"></div>
+    <!-- ================= TIER TWO ================= -->
+    <div class="ticket-section section-block">
+      <h2>Tier Two</h2>
+      <div id="tierTwoTicketsContainer"></div>
     </div>
 
-    <!-- 3) CLOSED - RESOLVED -->
-    <div class="section-block ticket-section">
-      <h2>Closed - Resolved Support Tickets</h2>
-      <div id="closedResolvedTicketsContainer" class="tickets-grid"></div>
+    <!-- ================= CLOSED - RESOLVED ================= -->
+    <div class="ticket-section section-block">
+      <h2>Closed - Resolved</h2>
+      <div id="closedResolvedTicketsContainer"></div>
     </div>
 
-    <!-- 4) CLOSED - FEATURE NOT SUPPORTED -->
-    <div class="section-block ticket-section">
+    <!-- ================= CLOSED - FEATURE NOT SUPPORTED ================= -->
+    <div class="ticket-section section-block">
       <h2>Closed - Feature Not Supported</h2>
-      <div id="closedFeatureTicketsContainer" class="tickets-grid"></div>
+      <div id="closedFeatureTicketsContainer"></div>
     </div>
 
   </div>
