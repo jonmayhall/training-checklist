@@ -1,9 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL JS
-   SAFE BUILD + FIXES
-   - Additional Trainer “+” works (clones row)
-   - Stops Google Places autocomplete searching while typing
-   - Support tickets: “Add” moves filled base ticket into correct stack
+   SAFE BUILD + Support Ticket Validation + Trainer Add Fix
    ======================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,19 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initClearAll();
   initGhostSelects();
   initTopbarDealershipDisplay();
-  initAddressMap();
-  initIntegratedAddButtons();
+  initAddressMap();                 // map preview updates only on blur/change
+  initIntegratedAddButtons();       // fixes Additional Trainer "+"
   initTableAddButtons();
-  initSupportTickets();
+  initSupportTickets();             // REQUIRED fields + move ticket into correct column
 });
-
-/* =======================================================
-   Prevent Google Places Autocomplete from attaching
-   (Your HTML loads Google Maps with callback=initAddressAutocomplete)
-   ======================================================= */
-window.initAddressAutocomplete = function () {
-  // Intentionally empty: stops “search as you type” autocomplete behavior
-};
 
 /* =======================================================
    PAGE NAVIGATION
@@ -133,7 +122,8 @@ function initTopbarDealershipDisplay() {
 }
 
 /* =======================================================
-   ADDRESS → GOOGLE MAPS (updates only on blur/change)
+   ADDRESS → GOOGLE MAPS
+   (IMPORTANT: map updates ONLY on blur/change, not while typing)
    ======================================================= */
 function initAddressMap() {
   const addressInput = document.getElementById("dealershipAddressInput");
@@ -148,6 +138,7 @@ function initAddressMap() {
     iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
   };
 
+  // Only update when user finishes (no "as you type")
   addressInput.addEventListener("change", updateMap);
   addressInput.addEventListener("blur", updateMap);
 
@@ -159,16 +150,26 @@ function initAddressMap() {
 }
 
 /* =======================================================
+   GOOGLE MAPS PLACES CALLBACK (prevents console errors)
+   You included a callback=initAddressAutocomplete in HTML.
+   We keep it "no-op" so it does NOT search as you type.
+   ======================================================= */
+function initAddressAutocomplete() {
+  // Intentionally empty to avoid "search as you type" behavior.
+  // Your map preview is handled in initAddressMap() on blur/change.
+}
+
+/* =======================================================
    INTEGRATED “+” INPUT ROWS
-   - Additional POC: clones entire card (existing behavior)
-   - Everything else (Additional Trainer, etc.): clones the row itself
+   - Additional POC: clones the whole card (existing behavior)
+   - Additional Trainer: clones ONE row into #additionalTrainersContainer
    ======================================================= */
 function initIntegratedAddButtons() {
   document.addEventListener("click", e => {
     const addBtn = e.target.closest(".add-row, .additional-poc-add");
     if (!addBtn) return;
 
-    // CASE A: Additional POC card cloning (keep your current behavior)
+    // --- CASE A: Additional POC cards (clone entire card) ---
     const pocCard = addBtn.closest(".additional-poc-card");
     if (pocCard) {
       const clone = pocCard.cloneNode(true);
@@ -177,34 +178,45 @@ function initIntegratedAddButtons() {
       // Remove add button from cloned card
       clone.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
 
-      // Clear inputs
+      // Clear cloned values
       clone.querySelectorAll("input, textarea, select").forEach(el => {
         if (el.type === "checkbox" || el.type === "radio") el.checked = false;
         else el.value = "";
-        el.dispatchEvent(new Event("change"));
       });
 
       pocCard.parentNode.insertBefore(clone, pocCard.nextSibling);
       return;
     }
 
-    // CASE B: Generic integrated-plus row cloning (Additional Trainer, etc.)
+    // --- CASE B: Generic integrated-plus row (Additional Trainer, etc.) ---
     const row = addBtn.closest(".checklist-row.integrated-plus");
     if (!row) return;
 
+    const labelText = row.querySelector("label")?.textContent?.trim().toLowerCase() || "";
+
+    // Clone the ROW (not the whole section)
     const cloneRow = row.cloneNode(true);
 
-    // Remove the button from the cloned row (only the base keeps +)
+    // Remove the + button in the clone
     cloneRow.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
 
-    // Clear inputs inside cloned row
+    // Clear the cloned input
     cloneRow.querySelectorAll("input, textarea, select").forEach(el => {
       if (el.type === "checkbox" || el.type === "radio") el.checked = false;
       else el.value = "";
       el.dispatchEvent(new Event("change"));
     });
 
-    // Insert clone directly after the base row
+    // Additional Trainer goes into your container
+    if (labelText.includes("additional trainer")) {
+      const container = document.getElementById("additionalTrainersContainer");
+      if (container) {
+        container.appendChild(cloneRow);
+        return;
+      }
+    }
+
+    // Default: insert right under the row
     row.parentNode.insertBefore(cloneRow, row.nextSibling);
   });
 }
@@ -236,97 +248,138 @@ function initTableAddButtons() {
 
 /* =======================================================
    SUPPORT TICKETS
-   - Base ticket is the only one with +
-   - If filled out, clicking + creates a NEW ticket card and
-     moves it into the correct status stack.
+   - Base card requires ALL fields before add
+   - Missing fields get .field-error + a warning message
+   - If valid: moves ticket into correct status column and clears base
    ======================================================= */
 function initSupportTickets() {
-  const supportPage = document.getElementById("support-tickets");
-  if (!supportPage) return;
+  const openWrap = document.getElementById("openTicketsContainer");
+  const tierTwoWrap = document.getElementById("tierTwoTicketsContainer");
+  const closedResolvedWrap = document.getElementById("closedResolvedTicketsContainer");
+  const closedFeatureWrap = document.getElementById("closedFeatureTicketsContainer");
+  if (!openWrap) return;
 
-  const openWrap   = document.getElementById("openTicketsContainer");
-  const tierTwoWrap= document.getElementById("tierTwoTicketsContainer");
-  const closedRes  = document.getElementById("closedResolvedTicketsContainer");
-  const closedFeat = document.getElementById("closedFeatureTicketsContainer");
+  const base = openWrap.querySelector('.ticket-group[data-base="true"]');
+  if (!base) return;
 
-  const getBucket = (status) => {
-    if (status === "Tier Two") return tierTwoWrap;
-    if (status === "Closed - Resolved") return closedRes;
-    if (status === "Closed – Feature Not Supported") return closedFeat;
-    return openWrap; // Open default
+  const addBtn = base.querySelector(".add-ticket-btn");
+  if (!addBtn) return;
+
+  const getBaseFields = () => {
+    const numberInput = base.querySelector(".ticket-number-input");
+    const statusSelect = base.querySelector(".ticket-status-select");
+    const linkInput = base.querySelector('input[type="text"][placeholder*="Zendesk"]');
+    const summaryTextarea = base.querySelector(".ticket-summary-input");
+
+    return { numberInput, statusSelect, linkInput, summaryTextarea };
   };
 
-  const clearErrors = (root) => {
-    root.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+  const clearErrors = (scopeEl) => {
+    scopeEl.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+    scopeEl.querySelectorAll(".field-warning").forEach(el => el.remove());
   };
 
-  const markError = (el) => {
-    el.classList.add("field-error");
+  const markError = (fieldEl, message) => {
+    if (!fieldEl) return;
+    fieldEl.classList.add("field-error");
+
+    const warn = document.createElement("div");
+    warn.className = "field-warning";
+    warn.textContent = message;
+
+    // Put warning right after the input/select/textarea
+    fieldEl.insertAdjacentElement("afterend", warn);
   };
 
-  const baseGroup = openWrap?.querySelector('.ticket-group[data-base="true"]');
-  if (!baseGroup) return;
+  const getTargetContainer = (statusValue) => {
+    const v = (statusValue || "").trim();
 
-  // Handle Add Ticket (+)
-  supportPage.addEventListener("click", (e) => {
-    const addBtn = e.target.closest(".add-ticket-btn");
-    if (!addBtn) return;
+    if (v === "Tier Two") return tierTwoWrap || openWrap;
+    if (v === "Closed - Resolved") return closedResolvedWrap || openWrap;
+    if (v.includes("Feature Not Supported")) return closedFeatureWrap || openWrap;
 
-    const group = addBtn.closest(".ticket-group");
-    if (!group) return;
+    // Default "Open"
+    return openWrap;
+  };
 
-    clearErrors(group);
-
-    const ticketNum = group.querySelector(".ticket-number-input");
-    const statusSel = group.querySelector(".ticket-status-select");
-    const linkInput = group.querySelector('input[placeholder*="Zendesk ticket URL"]');
-    const summaryTx = group.querySelector(".ticket-summary-input");
-
-    // Required: ticket number + summary (you can add more if you want)
-    let ok = true;
-    if (!ticketNum?.value.trim()) { markError(ticketNum); ok = false; }
-    if (!summaryTx?.value.trim()) { markError(summaryTx); ok = false; }
-
-    if (!ok) return;
-
-    // Clone filled ticket
-    const clone = group.cloneNode(true);
+  const createTicketCardFromBase = () => {
+    // Clone the base group
+    const clone = base.cloneNode(true);
     clone.removeAttribute("data-base");
 
-    // Remove + from clone
+    // Remove add button from clone (this is a finalized ticket card)
     clone.querySelectorAll(".add-ticket-btn").forEach(b => b.remove());
 
-    // Move clone to correct bucket based on selected status
-    const status = statusSel?.value || "Open";
-    const bucket = getBucket(status);
-    bucket?.appendChild(clone);
+    // Remove disclaimer on cloned tickets (base-only)
+    clone.querySelectorAll(".ticket-disclaimer").forEach(p => p.remove());
 
-    // Reset base ticket fields
-    group.querySelectorAll("input, textarea, select").forEach(el => {
-      if (el.classList.contains("ticket-status-select")) {
-        el.value = "Open";
-      } else {
-        el.value = "";
-      }
+    // Remove any validation artifacts if present
+    clearErrors(clone);
+
+    return clone;
+  };
+
+  const resetBase = () => {
+    const { numberInput, statusSelect, linkInput, summaryTextarea } = getBaseFields();
+    if (numberInput) numberInput.value = "";
+    if (linkInput) linkInput.value = "";
+    if (summaryTextarea) summaryTextarea.value = "";
+    if (statusSelect) statusSelect.value = "Open";
+
+    base.querySelectorAll("input, textarea, select").forEach(el => {
       el.dispatchEvent(new Event("change"));
     });
-  });
+  };
 
-  // If status changes on any ticket card, move it to correct bucket
-  supportPage.addEventListener("change", (e) => {
-    const sel = e.target.closest(".ticket-status-select");
-    if (!sel) return;
+  addBtn.addEventListener("click", () => {
+    clearErrors(base);
 
-    const card = sel.closest(".ticket-group");
-    if (!card) return;
+    const { numberInput, statusSelect, linkInput, summaryTextarea } = getBaseFields();
 
-    // Never move the base template out of Open
-    if (card.getAttribute("data-base") === "true") {
-      sel.value = "Open";
+    const missing = [];
+
+    if (!numberInput || !numberInput.value.trim()) {
+      missing.push(() => markError(numberInput, "Ticket number is required."));
+    }
+    if (!statusSelect || !statusSelect.value.trim()) {
+      missing.push(() => markError(statusSelect, "Status is required."));
+    }
+    if (!linkInput || !linkInput.value.trim()) {
+      missing.push(() => markError(linkInput, "Zendesk link is required."));
+    } else {
+      // Light URL sanity check (not strict)
+      const val = linkInput.value.trim();
+      if (!/^https?:\/\//i.test(val)) {
+        missing.push(() => markError(linkInput, "Please paste a full URL (starts with http:// or https://)."));
+      }
+    }
+    if (!summaryTextarea || !summaryTextarea.value.trim()) {
+      missing.push(() => markError(summaryTextarea, "Short summary is required."));
+    }
+
+    if (missing.length) {
+      missing.forEach(fn => fn());
+      // Optional: jump to first error field for “credit card form” feel
+      const firstErr = base.querySelector(".field-error");
+      firstErr?.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstErr?.focus?.();
       return;
     }
 
-    const bucket = getBucket(sel.value);
-    bucket?.appendChild(card);
+    // Valid: create new card, move it into correct column based on status
+    const statusValue = statusSelect.value;
+    const target = getTargetContainer(statusValue);
+
+    const card = createTicketCardFromBase();
+
+    // Append to target container (keeps base in Open container)
+    if (target === openWrap) {
+      // Insert after base so base stays first
+      base.parentNode.insertBefore(card, base.nextSibling);
+    } else {
+      target.appendChild(card);
+    }
+
+    resetBase();
   });
 }
