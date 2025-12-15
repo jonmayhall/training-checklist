@@ -384,6 +384,33 @@ main{
 /* indents */
 .indent-sub{ padding-left:60px !important; }
 
+/* ===== Onsite Training Dates (stacked date inputs on the right) ===== */
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* Make stacked inputs match your standard box sizing */
+.onsite-training-dates-row .date-stack .date-input{
+  width:100%;
+  height:34px;
+  padding:7px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+}
+
+/* Ghost/placeholder color matches your other boxes */
+.onsite-training-dates-row .date-stack .date-input.is-placeholder{
+  color:#9ca3af;
+}
+
 /* ============== SIDE-BY-SIDE LAYOUTS ============== */
 .cards-grid{
   display:grid;
