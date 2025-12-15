@@ -409,14 +409,16 @@ main{
   gap:18px;
 }
 
-/* Side-by-side: shift text left but keep cushion */
+/* Side-by-side (2x2 cards): move labels/text LEFT for more verbiage room */
 .cards-grid .checklist-row,
 .two-col-grid .checklist-row{
-  padding-left:22px;
+  padding-left:10px;  /* was 22px */
 }
+
+/* Keep indented lines indented, but move them left too */
 .cards-grid .indent-sub,
 .two-col-grid .indent-sub{
-  padding-left:42px !important;
+  padding-left:28px !important; /* was 42px */
 }
 
 /* Side-by-side: make inputs ~1/2 width so label gets more room */
