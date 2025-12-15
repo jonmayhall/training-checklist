@@ -56,6 +56,14 @@ input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
+/* Date inputs: make empty (ghost) text match other placeholder grey */
+.training-dates-row input[type="date"].is-placeholder{
+  color:#9ca3af;
+}
+.training-dates-row input[type="date"]:not(.is-placeholder){
+  color:var(--ink);
+}
+
 /* Tables: never ghost-color dropdowns */
 .training-table select,
 .training-table select.is-placeholder{
