@@ -1,17 +1,5 @@
 /* =========================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   - Autosave (localStorage)
-   - Reset Page / Clear All
-   - Add Row buttons (tables + integrated-plus)
-   - Support Tickets:
-       * base card stays in Open and is locked/disabled
-       * + button only on base card
-       * base must be complete to add
-       * inline errors directly under their fields
-       * added tickets move by status
-       * numbered orange badge 1,2,3...
-   - Google Maps Places Autocomplete (no map update while typing)
-   - Menu navigation buttons
    ========================================================= */
 
 /* ---------------------------
@@ -124,12 +112,12 @@ function clearAll(){
 }
 
 /* ---------------------------
-   Select “ghost” text styling
-   (only for non-table selects)
+   Select “ghost” styling (non-table)
 --------------------------- */
 function refreshGhostSelects(root = document){
   qsa("select", root).forEach(sel => {
     if (sel.closest(".training-table")) return;
+
     const opt = sel.options[sel.selectedIndex];
     const isGhost = !sel.value && opt && opt.dataset && opt.dataset.ghost === "true";
     sel.classList.toggle("is-placeholder", !!isGhost);
@@ -149,13 +137,13 @@ function cloneTableRow(btn){
   if (!tbody || !lastRow) return;
 
   const clone = lastRow.cloneNode(true);
+
   qsa("input, textarea, select", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
   });
 
   tbody.appendChild(clone);
-  refreshGhostSelects(clone);
 }
 
 function cloneIntegratedRow(btn){
@@ -196,14 +184,39 @@ function cloneIntegratedRow(btn){
 /* ---------------------------
    Support Tickets (dynamic)
 --------------------------- */
-function getZendeskInput(card){
-  // Prefer a dedicated class if you add it in HTML
-  const byClass = qs(".ticket-zendesk-input", card);
-  if (byClass) return byClass;
+function resetSupportTicketsUI(){
+  const openWrap = qs("#openTicketsContainer");
+  const tierWrap = qs("#tierTwoTicketsContainer");
+  const resolvedWrap = qs("#closedResolvedTicketsContainer");
+  const featureWrap = qs("#closedFeatureTicketsContainer");
+  if (!openWrap) return;
 
-  // Fallback: find by placeholder text
-  return qsa('input[type="text"]', card)
-    .find(i => ((i.placeholder || "").toLowerCase().includes("zendesk") || (i.placeholder || "").toLowerCase().includes("ticket url"))) || null;
+  const base = openWrap.querySelector('.ticket-group[data-base="true"]');
+  openWrap.innerHTML = "";
+
+  if (base){
+    // Clear base fields
+    qsa("input, textarea, select", base).forEach(el => {
+      if (!isTextLike(el)) return;
+
+      if (el.tagName === "SELECT" && el.classList.contains("ticket-status-select")){
+        el.value = "Open";
+        el.disabled = true;
+        el.classList.add("is-locked");
+      } else {
+        el.value = "";
+      }
+    });
+
+    clearTicketErrors(base);
+    openWrap.appendChild(base);
+  }
+
+  if (tierWrap) tierWrap.innerHTML = "";
+  if (resolvedWrap) resolvedWrap.innerHTML = "";
+  if (featureWrap) featureWrap.innerHTML = "";
+
+  renumberAllTickets();
 }
 
 function clearTicketErrors(card){
@@ -223,36 +236,11 @@ function ensureWarningUnder(targetEl, msg){
   targetEl.insertAdjacentElement("afterend", warn);
 }
 
-function lockBaseTicketStatus(baseCard){
-  const status = qs(".ticket-status-select", baseCard);
-  if (!status) return;
-  status.value = "Open";
-  status.disabled = true;
-  status.classList.add("is-locked");
-}
-
-function getNextTicketBadgeNumber(){
-  const cards = qsa("#support-tickets .ticket-group:not([data-base='true'])");
-  return cards.length + 1;
-}
-
-function addOrUpdateTicketBadge(card, n){
-  if (card.dataset && card.dataset.base === "true") return;
-
-  let badge = qs(".ticket-count-badge", card);
-  if (!badge){
-    badge = document.createElement("div");
-    badge.className = "ticket-count-badge";
-    card.insertBefore(badge, card.firstChild);
-  }
-  badge.textContent = String(n);
-}
-
 function validateBaseTicketCard(baseCard){
   clearTicketErrors(baseCard);
 
   const ticketNumberInput = qs(".ticket-number-input", baseCard);
-  const zendeskInput = getZendeskInput(baseCard);
+  const zendeskInput = qs(".ticket-zendesk-input", baseCard);
   const summary = qs(".ticket-summary-input", baseCard);
 
   let ok = true;
@@ -282,7 +270,7 @@ function validateBaseTicketCard(baseCard){
 function readTicketCardData(card){
   const ticketNumberInput = qs(".ticket-number-input", card);
   const statusSelect = qs(".ticket-status-select", card);
-  const zendeskInput = getZendeskInput(card);
+  const zendeskInput = qs(".ticket-zendesk-input", card);
   const summary = qs(".ticket-summary-input", card);
 
   return {
@@ -296,7 +284,7 @@ function readTicketCardData(card){
 function writeTicketCardData(card, data){
   const ticketNumberInput = qs(".ticket-number-input", card);
   const statusSelect = qs(".ticket-status-select", card);
-  const zendeskInput = getZendeskInput(card);
+  const zendeskInput = qs(".ticket-zendesk-input", card);
   const summary = qs(".ticket-summary-input", card);
 
   if (ticketNumberInput) ticketNumberInput.value = data.ticketNumber || "";
@@ -309,14 +297,20 @@ function writeTicketCardData(card, data){
 
 function setTicketCardNonBase(card){
   card.removeAttribute("data-base");
+
+  // remove + button
   const addBtn = qs(".add-ticket-btn", card);
   if (addBtn) addBtn.remove();
 
-  // Non-base status MUST be changeable
-  const status = qs(".ticket-status-select", card);
-  if (status){
-    status.disabled = false;
-    status.classList.remove("is-locked");
+  // remove disclaimer from added cards
+  const disclaimer = qs(".ticket-disclaimer", card);
+  if (disclaimer) disclaimer.remove();
+
+  // base-only lock should NOT apply
+  const statusSel = qs(".ticket-status-select", card);
+  if (statusSel){
+    statusSel.disabled = false;
+    statusSel.classList.remove("is-locked");
   }
 }
 
@@ -338,6 +332,38 @@ function moveTicketCardToStatusContainer(card){
   const dest = getTicketsContainerForStatus(status);
   if (!dest) return;
   dest.appendChild(card);
+  renumberAllTickets();
+}
+
+function ensureTicketBadge(card){
+  if (!card || card.dataset.base === "true") return;
+
+  let badge = qs(".ticket-count-badge", card);
+  if (!badge){
+    badge = document.createElement("div");
+    badge.className = "ticket-count-badge";
+    card.insertBefore(badge, card.firstChild);
+  }
+}
+
+function renumberAllTickets(){
+  const allContainers = [
+    qs("#openTicketsContainer"),
+    qs("#tierTwoTicketsContainer"),
+    qs("#closedResolvedTicketsContainer"),
+    qs("#closedFeatureTicketsContainer")
+  ].filter(Boolean);
+
+  // global sequence across all statuses
+  let n = 1;
+  allContainers.forEach(container => {
+    qsa(".ticket-group", container).forEach(card => {
+      if (card.dataset.base === "true") return;
+      ensureTicketBadge(card);
+      const badge = qs(".ticket-count-badge", card);
+      if (badge) badge.textContent = String(n++);
+    });
+  });
 }
 
 function handleSupportTicketAdd(btn){
@@ -354,69 +380,40 @@ function handleSupportTicketAdd(btn){
   clearTicketErrors(newCard);
   writeTicketCardData(newCard, data);
 
-  const n = getNextTicketBadgeNumber();
-  addOrUpdateTicketBadge(newCard, n);
-
   moveTicketCardToStatusContainer(newCard);
 
-  // Clear base for next entry (status remains locked Open)
+  // Clear base for next entry
   qsa("input, textarea", baseCard).forEach(el => { el.value = ""; });
+  const status = qs(".ticket-status-select", baseCard);
+  if (status){
+    status.value = "Open";
+    status.disabled = true;
+    status.classList.add("is-locked");
+  }
   clearTicketErrors(baseCard);
-  lockBaseTicketStatus(baseCard);
   refreshGhostSelects(baseCard);
+
+  renumberAllTickets();
 }
 
 function handleSupportTicketStatusChange(selectEl){
   const card = selectEl.closest(".ticket-group");
   if (!card) return;
 
-  const isBase = card.dataset && card.dataset.base === "true";
-  if (isBase){
+  // base never moves
+  if (card.dataset.base === "true"){
     selectEl.value = "Open";
-    lockBaseTicketStatus(card);
+    selectEl.disabled = true;
+    selectEl.classList.add("is-locked");
     return;
   }
 
   moveTicketCardToStatusContainer(card);
 }
 
-function resetSupportTicketsUI(){
-  const openWrap = qs("#openTicketsContainer");
-  const tierWrap = qs("#tierTwoTicketsContainer");
-  const resolvedWrap = qs("#closedResolvedTicketsContainer");
-  const featureWrap = qs("#closedFeatureTicketsContainer");
-  if (!openWrap) return;
-
-  const base = openWrap.querySelector('.ticket-group[data-base="true"]');
-
-  openWrap.innerHTML = "";
-  if (base){
-    qsa("input, textarea, select", base).forEach(el => {
-      if (!isTextLike(el)) return;
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-    });
-
-    // status back to locked Open
-    const status = qs(".ticket-status-select", base);
-    if (status) status.value = "Open";
-
-    clearTicketErrors(base);
-    openWrap.appendChild(base);
-    lockBaseTicketStatus(base);
-    refreshGhostSelects(base);
-  }
-
-  if (tierWrap) tierWrap.innerHTML = "";
-  if (resolvedWrap) resolvedWrap.innerHTML = "";
-  if (featureWrap) featureWrap.innerHTML = "";
-}
-
 /* ---------------------------
    Google Maps Places Autocomplete
 --------------------------- */
-let __selectedPlace = null;
-
 function initAddressAutocomplete(){
   const addressInput = qs("#dealership-info input[type='text']");
   if (!addressInput || !window.google || !google.maps || !google.maps.places) return;
@@ -426,11 +423,7 @@ function initAddressAutocomplete(){
     types: ["address"]
   });
 
-  autocomplete.addListener("place_changed", () => {
-    __selectedPlace = autocomplete.getPlace();
-    // Do NOT update map here
-  });
-
+  // Do NOT update map on typing/place_changed. Only on Enter or Map button.
   addressInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter"){
       e.preventDefault();
@@ -444,6 +437,10 @@ function initAddressAutocomplete(){
       updateDealershipMapFromAddress(addressInput.value);
     });
   }
+
+  autocomplete.addListener("place_changed", () => {
+    // Intentionally no auto-map update
+  });
 }
 
 function updateDealershipMapFromAddress(addr){
@@ -470,39 +467,42 @@ function setActivePage(sectionId){
 }
 
 /* ---------------------------
-   Wiring / Event delegation
+   Wiring
 --------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
   loadAll();
 
-  // Lock base support ticket status immediately
-  const baseSupportCard = qs("#openTicketsContainer .ticket-group[data-base='true']");
-  if (baseSupportCard) lockBaseTicketStatus(baseSupportCard);
+  // Ensure base status is locked open on load
+  const base = qs('#openTicketsContainer .ticket-group[data-base="true"]');
+  if (base){
+    const s = qs(".ticket-status-select", base);
+    if (s){
+      s.value = "Open";
+      s.disabled = true;
+      s.classList.add("is-locked");
+    }
+  }
 
-  // Autosave + ghost-select styling
+  // Autosave
   document.addEventListener("input", (e) => {
     const t = e.target;
     if (!isTextLike(t)) return;
-
     saveField(t);
 
+    // ghost selects
     if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
 
-    // Support Tickets: as user fixes fields, remove error + warning directly under that field
+    // Support: remove inline warning under the specific field as user fixes it
     if (t.closest("#support-tickets")){
-      // Ticket number (warning sits under .ticket-number-wrap)
-      if (t.classList.contains("ticket-number-input")){
-        t.classList.remove("field-error");
-        const wrap = qs(".ticket-number-wrap", t.closest(".ticket-group"));
-        const next = wrap ? wrap.nextElementSibling : null;
-        if (next && next.classList.contains("field-warning")) next.remove();
-      }
+      t.classList.remove("field-error");
+      const next = t.nextElementSibling;
+      if (next && next.classList.contains("field-warning")) next.remove();
 
-      // Any input/textarea warning sits immediately after the field itself
-      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA"){
-        t.classList.remove("field-error");
-        const next = t.nextElementSibling;
-        if (next && next.classList.contains("field-warning")) next.remove();
+      // If ticket number is edited, warning is attached to .ticket-number-wrap
+      if (t.classList.contains("ticket-number-input")){
+        const wrap = qs(".ticket-number-wrap", t.closest(".ticket-group"));
+        const wNext = wrap ? wrap.nextElementSibling : null;
+        if (wNext && wNext.classList.contains("field-warning")) wNext.remove();
       }
     }
   });
@@ -510,7 +510,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!isTextLike(t)) return;
-
     saveField(t);
 
     if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
@@ -520,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Reset This Page buttons
+  // Reset This Page
   qsa(".clear-page-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const sec = btn.closest(".page-section");
@@ -528,11 +527,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Clear All button
+  // Clear All
   const clearAllBtn = qs("#clearAllBtn");
   if (clearAllBtn) clearAllBtn.addEventListener("click", clearAll);
 
-  // Add row buttons (tables + integrated-plus + support tickets)
+  // Click handling
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
@@ -556,13 +555,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Menu nav buttons
+  // Nav buttons
   qsa(".nav-btn[data-target]").forEach(btn => {
     btn.addEventListener("click", () => setActivePage(btn.dataset.target));
   });
 
+  renumberAllTickets();
   refreshGhostSelects();
 });
 
-/* Needed for Google Maps callback */
+// Needed for Google Maps callback
 window.initAddressAutocomplete = initAddressAutocomplete;
