@@ -638,6 +638,35 @@ main{
   border-radius:var(--radius-sm) !important;
 }
 
+/* ============== Additional Trainer rows (match stacked-card indentation) ============== */
+#additionalTrainersContainer .checklist-row{
+  padding-left:40px;              /* same as standard stacked-card rows */
+  padding-bottom:10px;
+  border-bottom:1px solid #e0e0e0;
+  margin-bottom:14px;
+}
+
+#additionalTrainersContainer .checklist-row label{
+  flex:1 1 auto;
+  font-weight:500;
+  text-align:left;
+  padding-right:16px;
+  white-space:normal;
+}
+
+#additionalTrainersContainer .checklist-row input[type="text"]{
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+}
+
+/* optional: remove the border on the last added row */
+#additionalTrainersContainer .checklist-row:last-child{
+  border-bottom:none;
+  margin-bottom:8px;
+  padding-bottom:0;
+}
+
 /* ============== DMS INTEGRATION (cards restored, no dots/legend) ============== */
 #dms-integration .dms-legend{ display:none !important; }
 
