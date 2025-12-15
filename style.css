@@ -947,29 +947,36 @@ main{
   margin-top:6px;
 }
 
-/* ===== NUMBER BADGE (NON-BASE CARDS ONLY) ===== */
+/* ===== INTEGRATED TICKET NUMBER CORNER BADGE ===== */
+#support-tickets .ticket-group{
+  position:relative;
+}
+
 #support-tickets .ticket-count-badge{
   position:absolute;
-  top:12px;
-  left:20px;
-  width:32px;
-  height:32px;
-  border-radius:999px;
+  top:-1px;
+  left:-1px;
+
+  padding:6px 10px;
+  min-width:28px;
+  height:28px;
+
   background:var(--orange);
   color:#fff;
+
   font-weight:900;
   font-size:13px;
+  line-height:1;
+
+  border-radius:14px 0 14px 0; /* integrated corner shape */
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 2px 6px rgba(239,109,34,.35);
-  z-index:2;
+
+  box-shadow:0 2px 6px rgba(239,109,34,0.35);
 }
 
-/* Push ALL card content DOWN to clear the badge */
-#support-tickets .ticket-group:has(.ticket-count-badge){
-  padding-top:64px;
-}
+/* No extra spacing needed — badge lives in the corner */
 
 /* ===== TICKET ROWS ===== */
 #support-tickets .ticket-row{
