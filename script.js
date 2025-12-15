@@ -1,9 +1,17 @@
 /* =========================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   (autosave, Reset Page, Clear All, Add Row buttons,
-    Support Tickets: add card only when complete + inline errors
-    + status-based moving, ticket numbering badges,
-    Google Maps Places Autocomplete + map update)
+   CLEAN + FIXED
+   Includes:
+   - Autosave (localStorage)
+   - Reset This Page + Clear All
+   - Add Row buttons (tables + integrated-plus)
+   - Support Tickets:
+       * Base card stays in Open, status locked to Open
+       * Add card ONLY when all fields complete
+       * Inline errors snug under correct field
+       * Added cards get numbered badge (1,2,3...) and can move by status
+   - Google Maps Places Autocomplete + map update (no “search as you type”)
+   - Nav buttons (menu)
    ========================================================= */
 
 /* ---------------------------
@@ -50,17 +58,21 @@ function getFieldKey(el){
 const STORAGE_KEY = "myKaarmaChecklist:v1";
 
 /* ---------------------------
-   Autosave
+   Select “ghost” text styling
+   (only for non-table selects)
 --------------------------- */
 function refreshGhostSelects(root = document){
   qsa("select", root).forEach(sel => {
-    if (sel.closest(".training-table")) return;
+    if (sel.closest(".training-table")) return; // never ghost-color in tables
     const opt = sel.options[sel.selectedIndex];
     const isGhost = !sel.value && opt && opt.dataset && opt.dataset.ghost === "true";
     sel.classList.toggle("is-placeholder", !!isGhost);
   });
 }
 
+/* ---------------------------
+   Autosave (localStorage)
+--------------------------- */
 function loadAll(){
   let data = {};
   try { data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
@@ -72,6 +84,9 @@ function loadAll(){
     if (!k) return;
     if (data[k] !== undefined) setFieldValue(el, data[k]);
   });
+
+  // Force base support ticket status locked to Open (always)
+  lockBaseSupportTicketStatus();
 
   refreshGhostSelects();
 }
@@ -106,7 +121,7 @@ function clearSection(sectionEl){
     resetSupportTicketsUI();
   }
 
-  refreshGhostSelects();
+  refreshGhostSelects(sectionEl);
 }
 
 function clearAll(){
@@ -126,6 +141,8 @@ function clearAll(){
 
 /* ---------------------------
    Add Row buttons
+   - table footer "+" duplicates last row
+   - integrated-plus "+" duplicates that row (non-table)
 --------------------------- */
 function cloneTableRow(btn){
   const footer = btn.closest(".table-footer");
@@ -133,16 +150,20 @@ function cloneTableRow(btn){
   if (!table) return;
 
   const tbody = table.querySelector("tbody");
-  const lastRow = tbody?.querySelector("tr:last-child");
-  if (!tbody || !lastRow) return;
+  if (!tbody) return;
+
+  const lastRow = tbody.querySelector("tr:last-child");
+  if (!lastRow) return;
 
   const clone = lastRow.cloneNode(true);
+
   qsa("input, textarea, select", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
   });
 
   tbody.appendChild(clone);
+  refreshGhostSelects(clone);
 }
 
 function cloneIntegratedRow(btn){
@@ -157,6 +178,7 @@ function cloneIntegratedRow(btn){
     const clone = baseCard.cloneNode(true);
 
     clone.removeAttribute("data-base");
+
     qsa("input, textarea, select", clone).forEach(el => {
       if (el.type === "checkbox") el.checked = false;
       else el.value = "";
@@ -185,6 +207,18 @@ function cloneIntegratedRow(btn){
 --------------------------- */
 let __ticketCounter = 0;
 
+function lockBaseSupportTicketStatus(){
+  const base = qs('#support-tickets .ticket-group[data-base="true"]');
+  if (!base) return;
+
+  const sel = qs(".ticket-status-select", base);
+  if (sel){
+    sel.value = "Open";
+    sel.disabled = true;
+    sel.classList.add("is-locked");
+  }
+}
+
 function resetSupportTicketsUI(){
   const openWrap = qs("#openTicketsContainer");
   const tierWrap = qs("#tierTwoTicketsContainer");
@@ -192,36 +226,22 @@ function resetSupportTicketsUI(){
   const featureWrap = qs("#closedFeatureTicketsContainer");
   if (!openWrap) return;
 
-  __ticketCounter = 0;
-
+  // Keep ONLY the base card in Open container
   const base = openWrap.querySelector('.ticket-group[data-base="true"]');
   openWrap.innerHTML = "";
   if (base){
-    qsa("input, textarea, select", base).forEach(el => {
-      if (!isTextLike(el)) return;
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-    });
-
-    // base status locked to Open
-    const status = qs(".ticket-status-select", base);
-    if (status){
-      status.value = "Open";
-      status.disabled = true;
-      status.classList.add("is-locked");
-    }
-
+    // Clear base fields (ticket #, zendesk, summary) — keep status Open locked
+    qsa("input, textarea", base).forEach(el => { el.value = ""; });
     clearTicketErrors(base);
-    // remove accidental badge if any
-    qs(".ticket-count-badge", base)?.remove();
-    base.classList.remove("has-badge");
-
     openWrap.appendChild(base);
+    lockBaseSupportTicketStatus();
   }
 
   if (tierWrap) tierWrap.innerHTML = "";
   if (resolvedWrap) resolvedWrap.innerHTML = "";
   if (featureWrap) featureWrap.innerHTML = "";
+
+  __ticketCounter = 0;
 }
 
 function clearTicketErrors(card){
@@ -238,6 +258,7 @@ function ensureWarningUnder(targetEl, msg){
   const warn = document.createElement("div");
   warn.className = "field-warning";
   warn.textContent = msg;
+
   targetEl.insertAdjacentElement("afterend", warn);
 }
 
@@ -250,6 +271,7 @@ function validateBaseTicketCard(baseCard){
 
   let ok = true;
 
+  // Ticket number (warning should be under wrap)
   if (!ticketNumberInput || !ticketNumberInput.value.trim()){
     ok = false;
     ticketNumberInput?.classList.add("field-error");
@@ -257,12 +279,14 @@ function validateBaseTicketCard(baseCard){
     ensureWarningUnder(wrap || ticketNumberInput, "Ticket number is required.");
   }
 
+  // Zendesk link
   if (!zendeskInput || !zendeskInput.value.trim()){
     ok = false;
     zendeskInput?.classList.add("field-error");
     ensureWarningUnder(zendeskInput, "Zendesk link is required.");
   }
 
+  // Summary
   if (!summary || !summary.value.trim()){
     ok = false;
     summary?.classList.add("field-error");
@@ -273,48 +297,50 @@ function validateBaseTicketCard(baseCard){
 }
 
 function readTicketCardData(card){
-  const ticketNumberInput = qs(".ticket-number-input", card);
-  const statusSelect = qs(".ticket-status-select", card);
-  const zendeskInput = qs(".ticket-zendesk-input", card);
-  const summary = qs(".ticket-summary-input", card);
-
   return {
-    ticketNumber: ticketNumberInput ? ticketNumberInput.value.trim() : "",
-    status: statusSelect ? statusSelect.value : "Open",
-    zendeskLink: zendeskInput ? zendeskInput.value.trim() : "",
-    summary: summary ? summary.value.trim() : ""
+    ticketNumber: (qs(".ticket-number-input", card)?.value || "").trim(),
+    status: (qs(".ticket-status-select", card)?.value || "Open"),
+    zendeskLink: (qs(".ticket-zendesk-input", card)?.value || "").trim(),
+    summary: (qs(".ticket-summary-input", card)?.value || "").trim()
   };
 }
 
 function writeTicketCardData(card, data){
-  const ticketNumberInput = qs(".ticket-number-input", card);
-  const statusSelect = qs(".ticket-status-select", card);
-  const zendeskInput = qs(".ticket-zendesk-input", card);
-  const summary = qs(".ticket-summary-input", card);
+  const num = qs(".ticket-number-input", card);
+  const status = qs(".ticket-status-select", card);
+  const link = qs(".ticket-zendesk-input", card);
+  const sum = qs(".ticket-summary-input", card);
 
-  if (ticketNumberInput) ticketNumberInput.value = data.ticketNumber || "";
-  if (statusSelect) statusSelect.value = data.status || "Open";
-  if (zendeskInput) zendeskInput.value = data.zendeskLink || "";
-  if (summary) summary.value = data.summary || "";
-
-  refreshGhostSelects(card);
+  if (num) num.value = data.ticketNumber || "";
+  if (status) status.value = data.status || "Open";
+  if (link) link.value = data.zendeskLink || "";
+  if (sum) sum.value = data.summary || "";
 }
 
 function setTicketCardNonBase(card){
   card.removeAttribute("data-base");
 
-  // remove + button
+  // Remove + button (added cards should not have it)
   qs(".add-ticket-btn", card)?.remove();
 
-  // remove disclaimer from added cards
+  // Remove disclaimer on added cards
   qs(".ticket-disclaimer", card)?.remove();
 
-  // enable status select on non-base cards
+  // Enable status on non-base cards
   const status = qs(".ticket-status-select", card);
   if (status){
     status.disabled = false;
     status.classList.remove("is-locked");
   }
+}
+
+function addTicketBadge(card){
+  __ticketCounter += 1;
+  const badge = document.createElement("div");
+  badge.className = "ticket-count-badge";
+  badge.textContent = String(__ticketCounter);
+  card.insertAdjacentElement("afterbegin", badge);
+  card.classList.add("has-badge");
 }
 
 function getTicketsContainerForStatus(status){
@@ -333,57 +359,34 @@ function moveTicketCardToStatusContainer(card){
   const statusSelect = qs(".ticket-status-select", card);
   const status = statusSelect ? statusSelect.value : "Open";
   const dest = getTicketsContainerForStatus(status);
-  if (!dest) return;
-  dest.appendChild(card);
-}
-
-function addTicketBadge(card){
-  // Only for added tickets
-  __ticketCounter += 1;
-
-  const badge = document.createElement("div");
-  badge.className = "ticket-count-badge";
-  badge.textContent = String(__ticketCounter);
-
-  card.insertAdjacentElement("afterbegin", badge);
-  card.classList.add("has-badge");
+  if (dest) dest.appendChild(card);
 }
 
 function handleSupportTicketAdd(btn){
   const baseCard = btn.closest('.ticket-group[data-base="true"]');
   if (!baseCard) return;
 
-  const ok = validateBaseTicketCard(baseCard);
-  if (!ok) return;
+  if (!validateBaseTicketCard(baseCard)) return;
 
   const data = readTicketCardData(baseCard);
 
+  // Clone, convert to non-base, badge, move
   const newCard = baseCard.cloneNode(true);
   setTicketCardNonBase(newCard);
   clearTicketErrors(newCard);
+  addTicketBadge(newCard);
 
-  // Set status default for new card (Open)
-  const status = qs(".ticket-status-select", newCard);
-  if (status) status.value = "Open";
+  // New cards start in Open by default
+  const statusSel = qs(".ticket-status-select", newCard);
+  if (statusSel) statusSel.value = "Open";
 
   writeTicketCardData(newCard, data);
-
-  addTicketBadge(newCard);
   moveTicketCardToStatusContainer(newCard);
 
-  // Clear base fields
+  // Clear base for next entry (keep locked status Open)
   qsa("input, textarea", baseCard).forEach(el => { el.value = ""; });
   clearTicketErrors(baseCard);
-
-  // Keep base status locked to Open
-  const baseStatus = qs(".ticket-status-select", baseCard);
-  if (baseStatus){
-    baseStatus.value = "Open";
-    baseStatus.disabled = true;
-    baseStatus.classList.add("is-locked");
-  }
-
-  refreshGhostSelects(baseCard);
+  lockBaseSupportTicketStatus();
 }
 
 function handleSupportTicketStatusChange(selectEl){
@@ -391,13 +394,31 @@ function handleSupportTicketStatusChange(selectEl){
   if (!card) return;
 
   // Base never moves
-  const isBase = card.dataset && card.dataset.base === "true";
-  if (isBase){
+  if (card.dataset && card.dataset.base === "true"){
     selectEl.value = "Open";
+    lockBaseSupportTicketStatus();
     return;
   }
 
   moveTicketCardToStatusContainer(card);
+}
+
+function supportTicketLiveCleanup(el){
+  if (!el.closest("#support-tickets")) return;
+
+  // Clear field error
+  el.classList.remove("field-error");
+
+  // Remove warning directly after the input/textarea
+  const next = el.nextElementSibling;
+  if (next && next.classList.contains("field-warning")) next.remove();
+
+  // Ticket number warning lives after the wrap
+  if (el.classList.contains("ticket-number-input")){
+    const wrap = qs(".ticket-number-wrap", el.closest(".ticket-group"));
+    const w = wrap?.nextElementSibling;
+    if (w && w.classList.contains("field-warning")) w.remove();
+  }
 }
 
 /* ---------------------------
@@ -406,7 +427,10 @@ function handleSupportTicketStatusChange(selectEl){
 let __selectedPlace = null;
 
 function initAddressAutocomplete(){
-  const addressInput = qs("#dealership-info input[type='text']");
+  const addressInput =
+    qs("#dealership-info input.address-input") ||
+    qs("#dealership-info input[type='text']");
+
   if (!addressInput || !window.google || !google.maps || !google.maps.places) return;
 
   const autocomplete = new google.maps.places.Autocomplete(addressInput, {
@@ -416,9 +440,10 @@ function initAddressAutocomplete(){
 
   autocomplete.addListener("place_changed", () => {
     __selectedPlace = autocomplete.getPlace();
-    // do not auto-update map while typing
+    // DO NOT update map here (prevents “searching as you type”)
   });
 
+  // Enter updates map
   addressInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter"){
       e.preventDefault();
@@ -426,6 +451,7 @@ function initAddressAutocomplete(){
     }
   });
 
+  // Map button updates map
   const mapBtn = qs("#dealership-info .small-map-btn");
   if (mapBtn){
     mapBtn.addEventListener("click", () => {
@@ -445,62 +471,52 @@ function updateDealershipMapFromAddress(addr){
 }
 
 /* ---------------------------
-   Navigation
+   Page navigation
 --------------------------- */
 function setActivePage(sectionId){
+  const id = sectionId.startsWith("#") ? sectionId : `#${sectionId}`;
+
   qsa(".page-section").forEach(sec => sec.classList.remove("active"));
-  const target = qs(sectionId.startsWith("#") ? sectionId : `#${sectionId}`);
+  const target = qs(id);
   if (target) target.classList.add("active");
 
   qsa(".nav-btn").forEach(btn => btn.classList.remove("active"));
-  const navBtn = qs(`.nav-btn[data-target="${sectionId.replace("#","")}"]`);
+  const navBtn = qs(`.nav-btn[data-target="${id.replace("#","")}"]`);
   if (navBtn) navBtn.classList.add("active");
 }
 
 /* ---------------------------
-   Wiring
+   Wiring / Event delegation
 --------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
   loadAll();
-  resetSupportTicketsUI();
 
-  // Autosave
+  /* Autosave + ghost selects + support ticket live cleanup */
   document.addEventListener("input", (e) => {
     const t = e.target;
     if (!isTextLike(t)) return;
+
     saveField(t);
 
-    // live ghost select styling
+    if (t.closest("#support-tickets")) supportTicketLiveCleanup(t);
     if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
-
-    // Support tickets: remove inline error as user types
-    if (t.closest("#support-tickets")){
-      t.classList.remove("field-error");
-      const next = t.nextElementSibling;
-      if (next && next.classList.contains("field-warning")) next.remove();
-
-      // ticket-number-wrap warning sits after wrap
-      if (t.classList.contains("ticket-number-input")){
-        const wrap = qs(".ticket-number-wrap", t.closest(".ticket-group"));
-        const wrapNext = wrap?.nextElementSibling;
-        if (wrapNext && wrapNext.classList.contains("field-warning")) wrapNext.remove();
-      }
-    }
   });
 
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!isTextLike(t)) return;
+
     saveField(t);
 
     if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
 
+    // Support ticket status change
     if (t.classList.contains("ticket-status-select")){
       handleSupportTicketStatusChange(t);
     }
   });
 
-  // Reset This Page buttons
+  /* Reset This Page buttons */
   qsa(".clear-page-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const sec = btn.closest(".page-section");
@@ -508,27 +524,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Clear All
+  /* Clear All button */
   const clearAllBtn = qs("#clearAllBtn");
   if (clearAllBtn) clearAllBtn.addEventListener("click", clearAll);
 
-  // Add row buttons + support ticket add
+  /* Click delegation: support ticket add + row add */
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
 
+    // Support ticket add (+)
     if (btn.classList.contains("add-ticket-btn")){
       e.preventDefault();
       handleSupportTicketAdd(btn);
       return;
     }
 
+    // Table footer add-row
     if (btn.classList.contains("add-row") && btn.closest(".table-footer")){
       e.preventDefault();
       cloneTableRow(btn);
       return;
     }
 
+    // Integrated-plus add-row (non-table)
     if (btn.classList.contains("add-row") && btn.closest(".checklist-row.integrated-plus")){
       e.preventDefault();
       cloneIntegratedRow(btn);
@@ -536,13 +555,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Menu buttons
+  /* Nav buttons */
   qsa(".nav-btn[data-target]").forEach(btn => {
     btn.addEventListener("click", () => setActivePage(btn.dataset.target));
   });
 
+  // Ensure base support ticket status stays locked Open
+  lockBaseSupportTicketStatus();
+
   refreshGhostSelects();
 });
 
-// Needed for Google Maps callback
+/* Needed for Google Maps callback */
 window.initAddressAutocomplete = initAddressAutocomplete;
