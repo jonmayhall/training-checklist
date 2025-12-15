@@ -1,385 +1,570 @@
-/* =======================================================
-   myKaarma Interactive Training Checklist — FULL JS
-   SAFE BUILD + Support Ticket Validation + Trainer Add Fix
-   ======================================================= */
+/* =========================================================
+   myKaarma Interactive Training Checklist — FULL script.js
+   (Includes: autosave, Reset Page, Clear All, Add Row buttons,
+    Support Tickets: add card only when complete + inline errors
+    + status-based moving, Google Maps Places Autocomplete + map update)
+   ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  initNavigation();
-  initResetButtons();
-  initClearAll();
-  initGhostSelects();
-  initTopbarDealershipDisplay();
-  initAddressMap();                 // map preview updates only on blur/change
-  initIntegratedAddButtons();       // fixes Additional Trainer "+"
-  initTableAddButtons();
-  initSupportTickets();             // REQUIRED fields + move ticket into correct column
-});
+/* ---------------------------
+   Helpers
+--------------------------- */
+function qs(sel, root = document) { return root.querySelector(sel); }
+function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 
-/* =======================================================
-   PAGE NAVIGATION
-   ======================================================= */
-function initNavigation() {
-  const navButtons = document.querySelectorAll(".nav-btn");
-  const pages = document.querySelectorAll(".page-section");
-
-  navButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const targetId = btn.dataset.target;
-
-      navButtons.forEach(b => b.classList.remove("active"));
-      pages.forEach(p => p.classList.remove("active"));
-
-      btn.classList.add("active");
-      document.getElementById(targetId)?.classList.add("active");
-    });
-  });
-
-  navButtons[0]?.click();
+function isTextLike(el){
+  return el && (
+    el.tagName === "INPUT" ||
+    el.tagName === "TEXTAREA" ||
+    el.tagName === "SELECT"
+  );
 }
 
-/* =======================================================
-   RESET BUTTONS
-   ======================================================= */
-function initResetButtons() {
-  document.querySelectorAll(".clear-page-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const page = btn.closest(".page-section");
-      if (!page) return;
-
-      page.querySelectorAll("input, textarea, select").forEach(el => {
-        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-        else el.value = "";
-        el.dispatchEvent(new Event("change"));
-      });
-    });
-  });
+function getFieldValue(el){
+  if (!el) return "";
+  if (el.type === "checkbox") return el.checked ? "1" : "0";
+  return (el.value ?? "").toString();
 }
 
-/* =======================================================
-   CLEAR ALL
-   ======================================================= */
-function initClearAll() {
-  const btn = document.getElementById("clearAllBtn");
-  if (!btn) return;
+function setFieldValue(el, val){
+  if (!el) return;
+  if (el.type === "checkbox") el.checked = (val === "1" || val === true);
+  else el.value = val ?? "";
+}
 
-  btn.addEventListener("click", () => {
-    if (!confirm("Clear ALL pages?")) return;
+/* A stable-ish key for autosave */
+function getFieldKey(el){
+  if (!el) return null;
+  if (el.id) return `id:${el.id}`;
+  if (el.name) return `name:${el.name}`;
 
-    document.querySelectorAll("input, textarea, select").forEach(el => {
-      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+  // Fallback: use a DOM path (good enough for your static layout)
+  const parts = [];
+  let node = el;
+  while (node && node !== document.body){
+    if (node.id) { parts.unshift(`#${node.id}`); break; }
+    let idx = 0;
+    let sib = node;
+    while ((sib = sib.previousElementSibling)) idx++;
+    parts.unshift(`${node.tagName.toLowerCase()}:nth-child(${idx + 1})`);
+    node = node.parentElement;
+  }
+  return `path:${parts.join(">")}`;
+}
+
+const STORAGE_KEY = "myKaarmaChecklist:v1";
+
+/* ---------------------------
+   Autosave (localStorage)
+--------------------------- */
+function loadAll(){
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch(e){ data = {}; }
+
+  qsa("input, textarea, select").forEach(el => {
+    // ignore buttons
+    if (!isTextLike(el)) return;
+    const k = getFieldKey(el);
+    if (!k) return;
+    if (data[k] !== undefined) setFieldValue(el, data[k]);
+  });
+
+  // After load: apply placeholder styling for selects (non-table)
+  refreshGhostSelects();
+}
+
+function saveField(el){
+  if (!isTextLike(el)) return;
+  const k = getFieldKey(el);
+  if (!k) return;
+
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch(e){ data = {}; }
+
+  data[k] = getFieldValue(el);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+/* ---------------------------
+   Reset / Clear
+--------------------------- */
+function clearSection(sectionEl){
+  if (!sectionEl) return;
+  qsa("input, textarea, select", sectionEl).forEach(el => {
+    if (!isTextLike(el)) return;
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+    saveField(el);
+  });
+
+  // Also clear support ticket dynamic cards if the section is support-tickets
+  if (sectionEl.id === "support-tickets"){
+    resetSupportTicketsUI();
+  }
+
+  refreshGhostSelects();
+}
+
+function clearAll(){
+  localStorage.removeItem(STORAGE_KEY);
+
+  qsa(".page-section").forEach(sec => {
+    qsa("input, textarea, select", sec).forEach(el => {
+      if (!isTextLike(el)) return;
+      if (el.type === "checkbox") el.checked = false;
       else el.value = "";
-      el.dispatchEvent(new Event("change"));
     });
   });
+
+  resetSupportTicketsUI();
+  refreshGhostSelects();
 }
 
-/* =======================================================
-   GHOST SELECT TEXT
-   ======================================================= */
-function initGhostSelects() {
-  document.querySelectorAll("select").forEach(select => {
-    const update = () => {
-      if (select.value === "") select.classList.add("is-placeholder");
-      else select.classList.remove("is-placeholder");
-    };
-    select.addEventListener("change", update);
-    update();
+/* ---------------------------
+   Select “ghost” text styling
+   (only for non-table selects)
+--------------------------- */
+function refreshGhostSelects(root = document){
+  qsa("select", root).forEach(sel => {
+    // Never ghost-color in tables
+    if (sel.closest(".training-table")) return;
+
+    const opt = sel.options[sel.selectedIndex];
+    const isGhost = !sel.value && opt && opt.dataset && opt.dataset.ghost === "true";
+    sel.classList.toggle("is-placeholder", !!isGhost);
   });
 }
 
-/* =======================================================
-   TOP BAR DEALERSHIP DISPLAY
-   ======================================================= */
-function initTopbarDealershipDisplay() {
-  const out = document.getElementById("dealershipNameDisplay");
-  if (!out) return;
+/* ---------------------------
+   Add Row buttons
+   - table footer "+" duplicates last row
+   - integrated-plus "+" duplicates that row (non-table)
+--------------------------- */
+function cloneTableRow(btn){
+  const footer = btn.closest(".table-footer");
+  const table = footer ? footer.previousElementSibling?.querySelector("table") : null;
+  if (!table) return;
 
-  const groupEl = document.getElementById("dealerGroupInput");
-  const nameEl  = document.getElementById("dealershipNameInput");
-  const didEl   = document.getElementById("dealershipDidInput");
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return;
 
-  const update = () => {
-    const group = groupEl?.value.trim() || "";
-    const name  = nameEl?.value.trim()  || "";
-    const did   = didEl?.value.trim()   || "";
+  const lastRow = tbody.querySelector("tr:last-child");
+  if (!lastRow) return;
 
-    let text = "";
-    if (group) text += group + " ";
-    if (name) text += name;
-    text = text.trim();
+  const clone = lastRow.cloneNode(true);
 
-    if (did) text = text ? `${text} - ${did}` : did;
-
-    out.textContent = text || "Dealership Info";
-  };
-
-  [groupEl, nameEl, didEl].forEach(el => {
-    el?.addEventListener("input", update);
-    el?.addEventListener("change", update);
+  // clear inputs/selects/checkboxes in clone
+  qsa("input, textarea, select", clone).forEach(el => {
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
   });
 
-  update();
+  tbody.appendChild(clone);
+
+  // Autosave keys change because DOM path changes; save will happen on next input.
 }
 
-/* =======================================================
-   ADDRESS → GOOGLE MAPS
-   (IMPORTANT: map updates ONLY on blur/change, not while typing)
-   ======================================================= */
-function initAddressMap() {
-  const addressInput = document.getElementById("dealershipAddressInput");
-  const mapBtn = document.getElementById("openAddressInMapsBtn");
-  const iframe = document.getElementById("dealershipMapFrame");
+function cloneIntegratedRow(btn){
+  const row = btn.closest(".checklist-row.integrated-plus");
+  if (!row) return;
 
-  if (!addressInput || !mapBtn) return;
+  // If this row is inside an "Additional POC" mini-card system or similar,
+  // you probably want to clone the whole mini-card. We'll detect that:
+  const miniCard = row.closest(".mini-card");
+  const isAdditionalPOC = miniCard && miniCard.classList.contains("additional-poc-card");
 
-  const updateMap = () => {
-    const addr = addressInput.value.trim();
-    if (!addr || !iframe) return;
-    iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
-  };
+  if (isAdditionalPOC){
+    const baseCard = miniCard;
+    const clone = baseCard.cloneNode(true);
 
-  // Only update when user finishes (no "as you type")
-  addressInput.addEventListener("change", updateMap);
-  addressInput.addEventListener("blur", updateMap);
-
-  mapBtn.addEventListener("click", () => {
-    const addr = addressInput.value.trim();
-    if (!addr) return;
-    window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`, "_blank");
-  });
-}
-
-/* =======================================================
-   GOOGLE MAPS PLACES CALLBACK (prevents console errors)
-   You included a callback=initAddressAutocomplete in HTML.
-   We keep it "no-op" so it does NOT search as you type.
-   ======================================================= */
-function initAddressAutocomplete() {
-  // Intentionally empty to avoid "search as you type" behavior.
-  // Your map preview is handled in initAddressMap() on blur/change.
-}
-
-/* =======================================================
-   INTEGRATED “+” INPUT ROWS
-   - Additional POC: clones the whole card (existing behavior)
-   - Additional Trainer: clones ONE row into #additionalTrainersContainer
-   ======================================================= */
-function initIntegratedAddButtons() {
-  document.addEventListener("click", e => {
-    const addBtn = e.target.closest(".add-row, .additional-poc-add");
-    if (!addBtn) return;
-
-    // --- CASE A: Additional POC cards (clone entire card) ---
-    const pocCard = addBtn.closest(".additional-poc-card");
-    if (pocCard) {
-      const clone = pocCard.cloneNode(true);
-      clone.removeAttribute("data-base");
-
-      // Remove add button from cloned card
-      clone.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
-
-      // Clear cloned values
-      clone.querySelectorAll("input, textarea, select").forEach(el => {
-        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-        else el.value = "";
-      });
-
-      pocCard.parentNode.insertBefore(clone, pocCard.nextSibling);
-      return;
-    }
-
-    // --- CASE B: Generic integrated-plus row (Additional Trainer, etc.) ---
-    const row = addBtn.closest(".checklist-row.integrated-plus");
-    if (!row) return;
-
-    const labelText = row.querySelector("label")?.textContent?.trim().toLowerCase() || "";
-
-    // Clone the ROW (not the whole section)
-    const cloneRow = row.cloneNode(true);
-
-    // Remove the + button in the clone
-    cloneRow.querySelectorAll(".add-row, .additional-poc-add").forEach(b => b.remove());
-
-    // Clear the cloned input
-    cloneRow.querySelectorAll("input, textarea, select").forEach(el => {
-      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-      else el.value = "";
-      el.dispatchEvent(new Event("change"));
-    });
-
-    // Additional Trainer goes into your container
-    if (labelText.includes("additional trainer")) {
-      const container = document.getElementById("additionalTrainersContainer");
-      if (container) {
-        container.appendChild(cloneRow);
-        return;
-      }
-    }
-
-    // Default: insert right under the row
-    row.parentNode.insertBefore(cloneRow, row.nextSibling);
-  });
-}
-
-/* =======================================================
-   TABLE ROW ADD
-   ======================================================= */
-function initTableAddButtons() {
-  document.querySelectorAll(".table-footer .add-row").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const table = btn.closest(".table-container")?.querySelector("table");
-      if (!table) return;
-
-      const tbody = table.querySelector("tbody");
-      const rows = tbody.querySelectorAll("tr");
-      if (!rows.length) return;
-
-      const clone = rows[rows.length - 1].cloneNode(true);
-      clone.querySelectorAll("input, select, textarea").forEach(el => {
-        if (el.type === "checkbox") el.checked = false;
-        else el.value = "";
-        el.dispatchEvent(new Event("change"));
-      });
-
-      tbody.appendChild(clone);
-    });
-  });
-}
-
-/* =======================================================
-   SUPPORT TICKETS
-   - Base card requires ALL fields before add
-   - Missing fields get .field-error + a warning message
-   - If valid: moves ticket into correct status column and clears base
-   ======================================================= */
-function initSupportTickets() {
-  const openWrap = document.getElementById("openTicketsContainer");
-  const tierTwoWrap = document.getElementById("tierTwoTicketsContainer");
-  const closedResolvedWrap = document.getElementById("closedResolvedTicketsContainer");
-  const closedFeatureWrap = document.getElementById("closedFeatureTicketsContainer");
-  if (!openWrap) return;
-
-  const base = openWrap.querySelector('.ticket-group[data-base="true"]');
-  if (!base) return;
-
-  const addBtn = base.querySelector(".add-ticket-btn");
-  if (!addBtn) return;
-
-  const getBaseFields = () => {
-    const numberInput = base.querySelector(".ticket-number-input");
-    const statusSelect = base.querySelector(".ticket-status-select");
-    const linkInput = base.querySelector('input[type="text"][placeholder*="Zendesk"]');
-    const summaryTextarea = base.querySelector(".ticket-summary-input");
-
-    return { numberInput, statusSelect, linkInput, summaryTextarea };
-  };
-
-  const clearErrors = (scopeEl) => {
-    scopeEl.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
-    scopeEl.querySelectorAll(".field-warning").forEach(el => el.remove());
-  };
-
-  const markError = (fieldEl, message) => {
-    if (!fieldEl) return;
-    fieldEl.classList.add("field-error");
-
-    const warn = document.createElement("div");
-    warn.className = "field-warning";
-    warn.textContent = message;
-
-    // Put warning right after the input/select/textarea
-    fieldEl.insertAdjacentElement("afterend", warn);
-  };
-
-  const getTargetContainer = (statusValue) => {
-    const v = (statusValue || "").trim();
-
-    if (v === "Tier Two") return tierTwoWrap || openWrap;
-    if (v === "Closed - Resolved") return closedResolvedWrap || openWrap;
-    if (v.includes("Feature Not Supported")) return closedFeatureWrap || openWrap;
-
-    // Default "Open"
-    return openWrap;
-  };
-
-  const createTicketCardFromBase = () => {
-    // Clone the base group
-    const clone = base.cloneNode(true);
+    // New card should NOT be base
     clone.removeAttribute("data-base");
 
-    // Remove add button from clone (this is a finalized ticket card)
-    clone.querySelectorAll(".add-ticket-btn").forEach(b => b.remove());
-
-    // Remove disclaimer on cloned tickets (base-only)
-    clone.querySelectorAll(".ticket-disclaimer").forEach(p => p.remove());
-
-    // Remove any validation artifacts if present
-    clearErrors(clone);
-
-    return clone;
-  };
-
-  const resetBase = () => {
-    const { numberInput, statusSelect, linkInput, summaryTextarea } = getBaseFields();
-    if (numberInput) numberInput.value = "";
-    if (linkInput) linkInput.value = "";
-    if (summaryTextarea) summaryTextarea.value = "";
-    if (statusSelect) statusSelect.value = "Open";
-
-    base.querySelectorAll("input, textarea, select").forEach(el => {
-      el.dispatchEvent(new Event("change"));
+    // clear fields in clone
+    qsa("input, textarea, select", clone).forEach(el => {
+      if (el.type === "checkbox") el.checked = false;
+      else el.value = "";
     });
-  };
 
-  addBtn.addEventListener("click", () => {
-    clearErrors(base);
+    // insert after base card
+    baseCard.parentElement.insertBefore(clone, baseCard.nextElementSibling);
+    refreshGhostSelects(clone);
+    return;
+  }
 
-    const { numberInput, statusSelect, linkInput, summaryTextarea } = getBaseFields();
+  // Default: clone just the row and remove the "+" button in the clone
+  const clone = row.cloneNode(true);
+  const addBtn = qs(".add-row", clone);
+  if (addBtn) addBtn.remove();
 
-    const missing = [];
+  qsa("input, textarea, select", clone).forEach(el => {
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+  });
 
-    if (!numberInput || !numberInput.value.trim()) {
-      missing.push(() => markError(numberInput, "Ticket number is required."));
-    }
-    if (!statusSelect || !statusSelect.value.trim()) {
-      missing.push(() => markError(statusSelect, "Status is required."));
-    }
-    if (!linkInput || !linkInput.value.trim()) {
-      missing.push(() => markError(linkInput, "Zendesk link is required."));
-    } else {
-      // Light URL sanity check (not strict)
-      const val = linkInput.value.trim();
-      if (!/^https?:\/\//i.test(val)) {
-        missing.push(() => markError(linkInput, "Please paste a full URL (starts with http:// or https://)."));
+  row.parentElement.insertBefore(clone, row.nextElementSibling);
+  refreshGhostSelects(clone);
+}
+
+/* ---------------------------
+   Support Tickets (dynamic)
+--------------------------- */
+function resetSupportTicketsUI(){
+  const openWrap = qs("#openTicketsContainer");
+  const tierWrap = qs("#tierTwoTicketsContainer");
+  const resolvedWrap = qs("#closedResolvedTicketsContainer");
+  const featureWrap = qs("#closedFeatureTicketsContainer");
+  if (!openWrap) return;
+
+  // Keep ONLY the base card in Open container
+  const base = openWrap.querySelector('.ticket-group[data-base="true"]');
+  openWrap.innerHTML = "";
+  if (base){
+    // Clear base fields
+    qsa("input, textarea, select", base).forEach(el => {
+      if (!isTextLike(el)) return;
+      if (el.type === "checkbox") el.checked = false;
+      else {
+        // reset status to Open if present
+        if (el.classList.contains("ticket-status-select")) el.value = "Open";
+        else el.value = "";
       }
-    }
-    if (!summaryTextarea || !summaryTextarea.value.trim()) {
-      missing.push(() => markError(summaryTextarea, "Short summary is required."));
-    }
+    });
+    // Remove any warnings/errors
+    clearTicketErrors(base);
+    openWrap.appendChild(base);
+  }
 
-    if (missing.length) {
-      missing.forEach(fn => fn());
-      // Optional: jump to first error field for “credit card form” feel
-      const firstErr = base.querySelector(".field-error");
-      firstErr?.scrollIntoView({ behavior: "smooth", block: "center" });
-      firstErr?.focus?.();
+  if (tierWrap) tierWrap.innerHTML = "";
+  if (resolvedWrap) resolvedWrap.innerHTML = "";
+  if (featureWrap) featureWrap.innerHTML = "";
+}
+
+function clearTicketErrors(card){
+  qsa(".field-error", card).forEach(el => el.classList.remove("field-error"));
+  qsa(".field-warning", card).forEach(w => w.remove());
+}
+
+function ensureWarningUnder(targetEl, msg){
+  // targetEl: input OR wrapper like .ticket-number-wrap
+  if (!targetEl) return;
+
+  // Remove existing warning right after this element (if present)
+  const next = targetEl.nextElementSibling;
+  if (next && next.classList.contains("field-warning")) next.remove();
+
+  const warn = document.createElement("div");
+  warn.className = "field-warning";
+  warn.textContent = msg;
+  targetEl.insertAdjacentElement("afterend", warn);
+}
+
+function validateBaseTicketCard(baseCard){
+  // Required fields: ticket number, zendesk link, summary
+  clearTicketErrors(baseCard);
+
+  const ticketNumberInput = qs(".ticket-number-input", baseCard);
+  const zendeskInput = qsa('input[type="text"]', baseCard)
+    .find(i => (i.placeholder || "").toLowerCase().includes("zendesk ticket url")) || null;
+  const summary = qs(".ticket-summary-input", baseCard);
+
+  let ok = true;
+
+  // Ticket number
+  if (!ticketNumberInput || !ticketNumberInput.value.trim()){
+    ok = false;
+    ticketNumberInput?.classList.add("field-error");
+    // Put warning directly under the textbox area (.ticket-number-wrap is the visible group)
+    const wrap = qs(".ticket-number-wrap", baseCard);
+    ensureWarningUnder(wrap || ticketNumberInput, "Ticket number is required.");
+  }
+
+  // Zendesk link
+  if (!zendeskInput || !zendeskInput.value.trim()){
+    ok = false;
+    zendeskInput?.classList.add("field-error");
+    ensureWarningUnder(zendeskInput, "Zendesk link is required.");
+  }
+
+  // Summary
+  if (!summary || !summary.value.trim()){
+    ok = false;
+    summary?.classList.add("field-error");
+    ensureWarningUnder(summary, "Short summary is required.");
+  }
+
+  return ok;
+}
+
+function readTicketCardData(card){
+  const ticketNumberInput = qs(".ticket-number-input", card);
+  const statusSelect = qs(".ticket-status-select", card);
+  const zendeskInput = qsa('input[type="text"]', card)
+    .find(i => (i.placeholder || "").toLowerCase().includes("zendesk ticket url")) || null;
+  const summary = qs(".ticket-summary-input", card);
+
+  return {
+    ticketNumber: ticketNumberInput ? ticketNumberInput.value.trim() : "",
+    status: statusSelect ? statusSelect.value : "Open",
+    zendeskLink: zendeskInput ? zendeskInput.value.trim() : "",
+    summary: summary ? summary.value.trim() : ""
+  };
+}
+
+function writeTicketCardData(card, data){
+  const ticketNumberInput = qs(".ticket-number-input", card);
+  const statusSelect = qs(".ticket-status-select", card);
+  const zendeskInput = qsa('input[type="text"]', card)
+    .find(i => (i.placeholder || "").toLowerCase().includes("zendesk ticket url")) || null;
+  const summary = qs(".ticket-summary-input", card);
+
+  if (ticketNumberInput) ticketNumberInput.value = data.ticketNumber || "";
+  if (statusSelect) statusSelect.value = data.status || "Open";
+  if (zendeskInput) zendeskInput.value = data.zendeskLink || "";
+  if (summary) summary.value = data.summary || "";
+
+  refreshGhostSelects(card);
+}
+
+function setTicketCardNonBase(card){
+  card.removeAttribute("data-base");
+  // Remove the + button from non-base cards (if present)
+  const addBtn = qs(".add-ticket-btn", card);
+  if (addBtn) addBtn.remove();
+
+  // Ticket number input should become full width if your CSS expects it;
+  // your CSS already handles non-base by selector, so just keep the class.
+}
+
+function getTicketsContainerForStatus(status){
+  // Match your exact option values
+  const openWrap = qs("#openTicketsContainer");
+  const tierWrap = qs("#tierTwoTicketsContainer");
+  const resolvedWrap = qs("#closedResolvedTicketsContainer");
+  const featureWrap = qs("#closedFeatureTicketsContainer");
+
+  if (status === "Tier Two") return tierWrap || openWrap;
+  if (status === "Closed - Resolved") return resolvedWrap || openWrap;
+  if (status === "Closed – Feature Not Supported") return featureWrap || openWrap;
+  return openWrap;
+}
+
+function moveTicketCardToStatusContainer(card){
+  const statusSelect = qs(".ticket-status-select", card);
+  const status = statusSelect ? statusSelect.value : "Open";
+  const dest = getTicketsContainerForStatus(status);
+  if (!dest) return;
+  dest.appendChild(card);
+}
+
+function handleSupportTicketAdd(btn){
+  const baseCard = btn.closest('.ticket-group[data-base="true"]');
+  if (!baseCard) return;
+
+  // Validate base card complete
+  const ok = validateBaseTicketCard(baseCard);
+  if (!ok) return;
+
+  // Capture data from base
+  const data = readTicketCardData(baseCard);
+
+  // Create a NEW card with this data
+  const newCard = baseCard.cloneNode(true);
+  setTicketCardNonBase(newCard);
+  clearTicketErrors(newCard);
+  writeTicketCardData(newCard, data);
+
+  // Place new card into the correct status column
+  moveTicketCardToStatusContainer(newCard);
+
+  // Clear base card for next entry
+  qsa("input, textarea", baseCard).forEach(el => { el.value = ""; });
+  const status = qs(".ticket-status-select", baseCard);
+  if (status) status.value = "Open";
+  clearTicketErrors(baseCard);
+  refreshGhostSelects(baseCard);
+}
+
+/* When a ticket status changes, move that card to the correct column */
+function handleSupportTicketStatusChange(selectEl){
+  const card = selectEl.closest(".ticket-group");
+  if (!card) return;
+
+  // Base card always stays in Open
+  const isBase = card.dataset && card.dataset.base === "true";
+  if (isBase){
+    // Force base status back to Open so it doesn't jump columns
+    selectEl.value = "Open";
+    return;
+  }
+
+  moveTicketCardToStatusContainer(card);
+}
+
+/* ---------------------------
+   Google Maps Places Autocomplete
+   - Autocomplete suggestions can show as you type,
+     but we do NOT update your map while typing.
+   - Map updates only on:
+       1) clicking the small MAP button, or
+       2) pressing Enter in the address field
+--------------------------- */
+let __selectedPlace = null;
+
+function initAddressAutocomplete(){
+  const addressInput = qs("#dealership-info input[type='text']"); // best-effort
+  if (!addressInput || !window.google || !google.maps || !google.maps.places) return;
+
+  const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+    fields: ["formatted_address", "geometry", "name"],
+    types: ["address"]
+  });
+
+  autocomplete.addListener("place_changed", () => {
+    __selectedPlace = autocomplete.getPlace();
+    // Do NOT update map here (prevents “searching as you type” effect)
+  });
+
+  // Enter key updates map
+  addressInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter"){
+      e.preventDefault();
+      updateDealershipMapFromAddress(addressInput.value);
+    }
+  });
+
+  // Map button updates map
+  const mapBtn = qs("#dealership-info .small-map-btn");
+  if (mapBtn){
+    mapBtn.addEventListener("click", () => {
+      updateDealershipMapFromAddress(addressInput.value);
+    });
+  }
+}
+
+function updateDealershipMapFromAddress(addr){
+  const iframe = qs("#dealership-info iframe.map-frame") || qs("#dealership-info .map-frame");
+  if (!iframe) return;
+
+  const q = encodeURIComponent((addr || "").trim());
+  if (!q) return;
+
+  // Simple Google Maps embed search (no geocoding request needed)
+  iframe.src = `https://www.google.com/maps?q=${q}&output=embed`;
+}
+
+/* ---------------------------
+   Page navigation (if you use nav buttons)
+   - Keeps “active” section in view
+--------------------------- */
+function setActivePage(sectionId){
+  qsa(".page-section").forEach(sec => sec.classList.remove("active"));
+  const target = qs(sectionId.startsWith("#") ? sectionId : `#${sectionId}`);
+  if (target) target.classList.add("active");
+
+  qsa(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  const navBtn = qs(`.nav-btn[data-target="${sectionId.replace("#","")}"]`);
+  if (navBtn) navBtn.classList.add("active");
+}
+
+/* ---------------------------
+   Wiring / Event delegation
+--------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  loadAll();
+
+  // Autosave
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (!isTextLike(t)) return;
+    saveField(t);
+
+    // live ghost-select styling
+    if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
+  });
+
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!isTextLike(t)) return;
+    saveField(t);
+
+    if (t.tagName === "SELECT") refreshGhostSelects(t.closest(".page-section") || document);
+
+    // Support ticket status change
+    if (t.classList.contains("ticket-status-select")){
+      handleSupportTicketStatusChange(t);
+    }
+  });
+
+  // Reset This Page buttons
+  qsa(".clear-page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sec = btn.closest(".page-section");
+      clearSection(sec);
+    });
+  });
+
+  // Clear All button (sidebar)
+  const clearAllBtn = qs("#clearAllBtn");
+  if (clearAllBtn) clearAllBtn.addEventListener("click", clearAll);
+
+  // Add row buttons (tables + integrated-plus + support tickets)
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    // Support ticket add (+)
+    if (btn.classList.contains("add-ticket-btn")){
+      e.preventDefault();
+      handleSupportTicketAdd(btn);
       return;
     }
 
-    // Valid: create new card, move it into correct column based on status
-    const statusValue = statusSelect.value;
-    const target = getTargetContainer(statusValue);
-
-    const card = createTicketCardFromBase();
-
-    // Append to target container (keeps base in Open container)
-    if (target === openWrap) {
-      // Insert after base so base stays first
-      base.parentNode.insertBefore(card, base.nextSibling);
-    } else {
-      target.appendChild(card);
+    // Table footer add-row
+    if (btn.classList.contains("add-row") && btn.closest(".table-footer")){
+      e.preventDefault();
+      cloneTableRow(btn);
+      return;
     }
 
-    resetBase();
+    // Integrated-plus add-row (non-table)
+    if (btn.classList.contains("add-row") && btn.closest(".checklist-row.integrated-plus")){
+      e.preventDefault();
+      cloneIntegratedRow(btn);
+      return;
+    }
   });
-}
+
+  // Optional: nav buttons (if you use data-target)
+  qsa(".nav-btn[data-target]").forEach(btn => {
+    btn.addEventListener("click", () => setActivePage(btn.dataset.target));
+  });
+
+  // Support tickets: ensure base card disclaimer warning cleanup as user types
+  document.addEventListener("input", (e) => {
+    const el = e.target;
+    if (!el.closest("#support-tickets")) return;
+
+    // If user starts fixing a field, remove its warning immediately
+    if (el.classList.contains("ticket-number-input")){
+      el.classList.remove("field-error");
+      const wrap = qs(".ticket-number-wrap", el.closest(".ticket-group"));
+      if (wrap){
+        const next = wrap.nextElementSibling;
+        if (next && next.classList.contains("field-warning")) next.remove();
+      }
+    }
+
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA"){
+      el.classList.remove("field-error");
+      const next = el.nextElementSibling;
+      if (next && next.classList.contains("field-warning")) next.remove();
+    }
+  });
+
+  refreshGhostSelects();
+});
+
+/* Needed for Google Maps callback */
+window.initAddressAutocomplete = initAddressAutocomplete;
