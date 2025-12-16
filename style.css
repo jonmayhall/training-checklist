@@ -1337,4 +1337,71 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   #support-tickets .field-warning{
     grid-column:1;
   }
+
+   /* ===========================================================
+   GLOBAL: MAKE EVERYTHING WIDER (ALL PAGES)
+   =========================================================== */
+
+/* 1) Widen the main content area */
+main{
+  max-width: 1600px;     /* increase/decrease as you like */
+  width: 100%;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* If your layout uses a content wrapper instead of main,
+   add these too (safe even if they don't exist) */
+.main-content,
+.content,
+.page-content,
+.container{
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* 2) Make ALL white cards able to stretch */
+.section-block,
+.section,
+.table-container,
+.ticket-section{
+  width: 100%;
+  max-width: none;
+}
+
+/* 3) Make 2x2 / side-by-side layouts use more width */
+.cards-grid.two-col,
+.two-col-grid,
+.grid-2{
+  width: 100%;
+  max-width: none;
+  gap: 24px;
+}
+
+/* Slightly favor the question column when you have Q-left / Notes-right */
+.cards-grid.two-col{
+  grid-template-columns: 1.25fr 1fr;
+}
+
+/* 4) Make DMS and ticket stacks expand too */
+.dms-overview-block,
+.dms-grid,
+.ticket-sections-stack,
+.ticket-section{
+  width: 100%;
+  max-width: none;
+}
+
+/* 5) Tables: make the wrapper actually use the available width */
+.scroll-wrapper{
+  width: 100%;
+}
+.training-table{
+  width: 100%;
+}
+
 }
