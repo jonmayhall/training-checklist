@@ -1406,5 +1406,28 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   flex:0 0 34px !important;
   width:34px !important;
 }
+/* ===========================================================
+   Dealership Address textbox — force true 75% width
+   Paste at VERY BOTTOM of style.css
+   =========================================================== */
+
+#dealership-info .checklist-row .address-input-wrap{
+  flex:0 0 75% !important;
+  width:75% !important;
+  margin-left:auto !important;
+}
+
+/* ✅ override the calc(var(--input-width) - 34px) lock */
+#dealership-info .checklist-row .address-input-wrap input#dealershipAddressInput{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+
+/* keep Map button fixed */
+#dealership-info .checklist-row .address-input-wrap .small-map-btn{
+  flex:0 0 34px !important;
+  width:34px !important;
+}
 
 }
