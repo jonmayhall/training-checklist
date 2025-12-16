@@ -1407,50 +1407,28 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   width:34px !important;
 }
 /* ===========================================================
-   Dealership Address textbox — force true 75% width
-   Paste at VERY BOTTOM of style.css
+   Dealership Address Card — 75% width address field
+   (Option B: uses #dealership-address-card)
    =========================================================== */
 
-#dealership-info .checklist-row .address-input-wrap{
+#dealership-address-card .address-input-wrap{
   flex:0 0 75% !important;
   width:75% !important;
   margin-left:auto !important;
 }
 
-/* ✅ override the calc(var(--input-width) - 34px) lock */
-#dealership-info .checklist-row .address-input-wrap input#dealershipAddressInput{
+/* override earlier input-width lock */
+#dealership-address-card input#dealershipAddressInput{
   flex:1 1 auto !important;
   width:100% !important;
   min-width:0 !important;
 }
 
 /* keep Map button fixed */
-#dealership-info .checklist-row .address-input-wrap .small-map-btn{
+#dealership-address-card .small-map-btn{
   flex:0 0 34px !important;
   width:34px !important;
 }
-/* ===========================================================
-   Dealership Address textbox — FORCE true 75% width
-   (override existing input-width locks)
-   =========================================================== */
 
-#dealership-info .checklist-row .address-input-wrap{
-  flex:0 0 75% !important;
-  width:75% !important;
-  margin-left:auto !important;
-}
-
-/* override earlier calc(var(--input-width) - 34px) rule */
-#dealership-info .checklist-row .address-input-wrap input#dealershipAddressInput{
-  flex:1 1 auto !important;
-  width:100% !important;
-  min-width:0 !important;
-}
-
-/* keep Map button fixed */
-#dealership-info .checklist-row .address-input-wrap .small-map-btn{
-  flex:0 0 34px !important;
-  width:34px !important;
-}
 
 }
