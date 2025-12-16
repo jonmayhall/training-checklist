@@ -1384,4 +1384,27 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
     width:100%;
     flex:0 0 auto;
   }
+   /* ===========================================================
+   Dealership Address / Map — FORCE 3/4 width (override)
+   Put this at the VERY BOTTOM of style.css
+   =========================================================== */
+
+/* If the address row still lives on #dealership-info */
+#dealership-info .address-input-wrap{
+  flex:0 0 75% !important;
+  width:75% !important;
+}
+
+/* Override the earlier calc(var(--input-width) - 34px) lock */
+#dealership-info .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+}
+
+/* Keep button fixed */
+#dealership-info .address-input-wrap .small-map-btn{
+  flex:0 0 34px !important;
+  width:34px !important;
+}
+
 }
