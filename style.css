@@ -669,7 +669,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 }
 .map-frame{
   width:100%;
-  height:220px;
+   height:440px;
   border:0;
 }
 .map-helper-text{
