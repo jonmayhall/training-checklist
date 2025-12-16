@@ -1198,4 +1198,38 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   #support-tickets .ticket-row > .ticket-number-wrap{
     grid-column:1;
   }
+
+   /* ===========================================================
+   STACKED CARDS — COMPACT TOGGLE
+   Turn on by adding: <body class="stacked-compact">
+   Affects ONLY single-column (non 2x2) cards.
+   =========================================================== */
+
+body.stacked-compact{
+  /* tighten the right-side controls only on stacked pages */
+  --input-width:260px;
+}
+
+/* Only rows that are NOT inside side-by-side grids */
+body.stacked-compact .page-section .section-block .checklist-row{
+  padding-left:22px;     /* less left padding */
+  gap:10px;              /* tighten label/input spacing */
+}
+
+/* Optional: slightly tighter label spacing */
+body.stacked-compact .page-section .section-block .checklist-row label{
+  padding-right:10px;
+}
+
+/* Optional: slightly tighter row height */
+body.stacked-compact .page-section .section-block .checklist-row{
+  margin-bottom:12px;
+  padding-bottom:8px;
+}
+
+/* ✅ Do NOT affect 2x2 / side-by-side layouts */
+body.stacked-compact .cards-grid,
+body.stacked-compact .two-col-grid{
+  --input-width:150px;   /* keep your existing 2x2 sizing */
+}
 }
