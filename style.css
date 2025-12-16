@@ -617,6 +617,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   box-shadow:0 1px 4px rgba(239,109,34,0.25);
   padding:0;
 }
+
+/* ===========================================================
+   FIX: Additional POC name input width (match other name fields)
+   =========================================================== */
+
+/* Force Additional POC name field to match mini-card inputs */
+.mini-card.additional-poc-card
+.checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  margin-left:0 !important;
+}
+
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42;
