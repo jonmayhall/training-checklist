@@ -1026,4 +1026,57 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
     width:100%;
     flex:0 0 auto;
   }
+
+   /* ===========================================================
+   WIDTH PATCH (SAFE)
+   - keeps tables + support tickets working
+   - widens pages/cards to reduce gray space
+   - forces DMS cards: 2 per row on desktop
+   =========================================================== */
+
+/* 1) Make the overall content area wider */
+main{
+  max-width:1500px;   /* change to 1600px if you want even wider */
+  width:100%;
+  margin:0 auto;
+}
+
+/* 2) Make each PAGE card wider (this removes the 960px cap) */
+.page-section{
+  max-width:1500px !important;  /* match main */
+  width:100%;
+}
+
+/* 3) Make white section cards expand inside the page */
+.section-block{
+  width:100%;
+  max-width:none;
+}
+
+/* 4) Give side-by-side grids more room (does NOT affect tables) */
+.cards-grid.two-col,
+.two-col-grid,
+.grid-2{
+  width:100%;
+  max-width:none;
+  gap:24px;
+}
+
+/* 5) DMS integration: FORCE 2 cards per row on desktop */
+#dms-integration .dms-grid{
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+}
+
+/* Optional: if you want the DMS area itself to use full width */
+#dms-integration .dms-overview-block{
+  max-width:none;
+}
+
+/* 6) Responsive: DMS becomes 1 column on smaller screens */
+@media (max-width:900px){
+  #dms-integration .dms-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
 }
