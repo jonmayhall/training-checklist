@@ -236,10 +236,11 @@ function initNavigation(){
     return;
   }
 
-  const firstBtn = qs(".nav-btn[data-target]");
-  if (firstBtn?.dataset?.target){
-    setActivePage(firstBtn.dataset.target);
-  }
+  // Force Page One as default
+if (document.getElementById("page-1")){
+  setActivePage("page-1");
+  return;
+}
 }
 
 /* ---------------------------
