@@ -1217,6 +1217,44 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   outline:none;
 }
 
+/* =========================================
+   Support Tickets — normalize field text
+   (match rest of app)
+   ========================================= */
+
+/* Labels like "Ticket Number", "Status", etc */
+#support-tickets .ticket-row label{
+  font-weight:500;
+  font-size:14px;
+}
+
+/* Input + textarea text */
+#support-tickets input,
+#support-tickets textarea,
+#support-tickets select{
+  font-weight:400;
+  font-size:13px;
+}
+
+/* Placeholder text */
+#support-tickets input::placeholder,
+#support-tickets textarea::placeholder{
+  font-weight:400;
+  font-size:13px;
+  color:#9ca3af;
+}
+
+/* "+" button text */
+#support-tickets .add-ticket-btn{
+  font-weight:800;
+}
+
+/* Status dropdown text */
+#support-tickets .ticket-status-select{
+  font-weight:400;
+  font-size:13px;
+}
+
 /* ============== FLOATING PDF BUTTON (Summary) ============== */
 #training-summary .floating-btn{
   background:var(--orange);
