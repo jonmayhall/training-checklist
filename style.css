@@ -56,14 +56,6 @@ input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
-/* Date inputs: make empty (ghost) text match other placeholder grey */
-.training-dates-row input[type="date"].is-placeholder{
-  color:#9ca3af;
-}
-.training-dates-row input[type="date"]:not(.is-placeholder){
-  color:var(--ink);
-}
-
 /* Tables: never ghost-color dropdowns */
 .training-table select,
 .training-table select.is-placeholder{
@@ -151,7 +143,7 @@ html,body{
 }
 .nav-icon{ display:none; }
 
-/* Menu buttons (no white-out) */
+/* Menu buttons */
 .nav-btn{
   background:transparent;
   border:1px solid transparent;
@@ -179,7 +171,7 @@ html,body{
   box-shadow:0 4px 10px rgba(0,0,0,0.65);
 }
 
-/* Clear All (orange pill at bottom of sidebar) */
+/* Clear All */
 #clearAllBtn{
   position:fixed;
   left:24px;
@@ -312,8 +304,6 @@ main{
   margin-left:-22px;
   margin-right:-22px;
 }
-
-/* optional outline card */
 .orange-outline-card{ border:2px solid var(--orange); }
 
 /* ============== Q&A ROWS (non-tables) ============== */
@@ -357,60 +347,6 @@ main{
   font-size:13px;
   height:34px;
 }
-/* ===========================================================
-   🔒 ONSITE TRAINING DATES — FINAL OVERRIDE (DO NOT MOVE)
-   Must live AFTER generic input rules
-   =========================================================== */
-
-/* Align label with TOP date input (not vertically centered) */
-.training-dates-row,
-.onsite-training-dates-row{
-  align-items:flex-start !important;
-}
-
-.training-dates-row label,
-.onsite-training-dates-row label{
-  padding-top:7px !important;
-}
-
-/* Right column stack */
-.training-dates-row .date-stack,
-.onsite-training-dates-row .date-stack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-}
-
-/* HARD LOCK date inputs so they NEVER stretch */
-.training-dates-row input[type="date"],
-.onsite-training-dates-row input[type="date"]{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-
-  font-size:13px !important;
-  line-height:1.2 !important;
-  box-sizing:border-box !important;
-
-  flex:0 0 auto !important;
-  align-self:stretch !important;
-}
-
-/* Placeholder gray to match other fields */
-input[type="date"].is-placeholder{
-  color:#9ca3af !important;
-}
-input[type="date"].is-placeholder::-webkit-datetime-edit{
-  color:#9ca3af !important;
-}
 
 /* textareas */
 .section-block textarea{
@@ -426,7 +362,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   box-sizing:border-box;
 }
 
-/* Side-by-side Notes cards: let textarea grow to fill the card */
+/* Side-by-side Notes cards: let textarea grow */
 .cards-grid .section-block,
 .two-col-grid .section-block{
   display:flex;
@@ -453,36 +389,54 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 /* indents */
 .indent-sub{ padding-left:60px !important; }
 
-/* ============================
-   ✅ ONSITE TRAINING DATES FIX
-   - label aligns with top field
-   - inputs match other inputs
+/* ===========================================================
+   🔒 ONSITE TRAINING DATES — CANONICAL (keep ONE)
+   - label aligns with top input
+   - stack right column
+   - inputs match other fields
    - placeholder stays gray
-============================ */
-.training-dates-row{
-  align-items:flex-start;            /* label aligns to top input */
+   =========================================================== */
+.training-dates-row,
+.onsite-training-dates-row{
+  align-items:flex-start !important;
 }
-.training-dates-row label{
-  padding-top:6px;                   /* slight nudge to align perfectly */
+.training-dates-row label,
+.onsite-training-dates-row label{
+  padding-top:7px !important;
 }
-.training-dates-row .date-stack{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
 
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
 }
-.training-dates-row .date-stack input[type="date"]{
-  width:100%;
-  height:34px;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  box-sizing:border-box;
+.training-dates-row input[type="date"],
+.onsite-training-dates-row input[type="date"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  font-size:13px !important;
+  line-height:1.2 !important;
+  box-sizing:border-box !important;
+
+  flex:0 0 auto !important;
+  align-self:stretch !important;
+}
+input[type="date"].is-placeholder{
+  color:#9ca3af !important;
+}
+input[type="date"].is-placeholder::-webkit-datetime-edit{
+  color:#9ca3af !important;
 }
 
 /* ============== SIDE-BY-SIDE LAYOUTS ============== */
@@ -495,7 +449,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 .cards-grid.three-col{ grid-template-columns:repeat(3,minmax(0,1fr)); }
 .cards-grid > .section-block{ margin-bottom:0; }
 
-/* Post-Training 2x2 layout helper */
+/* Post-Training layout helper */
 .two-col-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -508,36 +462,26 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   gap:18px;
 }
 
-/* Side-by-side (2x2 cards): move labels/text LEFT for more verbiage room */
+/* Side-by-side: move labels left + shrink inputs */
 .cards-grid .checklist-row,
 .two-col-grid .checklist-row{
   padding-left:10px;
 }
-/* Keep indented lines indented, but move them left too */
 .cards-grid .indent-sub,
 .two-col-grid .indent-sub{
   padding-left:28px !important;
 }
-/* Side-by-side: make inputs ~1/2 width so label gets more room */
 .cards-grid,
 .two-col-grid{
   --input-width:150px;
 }
 
 /* ===========================================================
-   ✅ TRAINERS PAGE FIX (YOUR REAL ID: #trainers-deployment)
-   Forces “stacked-card” indentation for rows inside that page,
-   INCLUDING dynamically-added rows in #additionalTrainersContainer.
+   ✅ TRAINERS PAGE FIX (#trainers-deployment)
    =========================================================== */
-#trainers-deployment .checklist-row{
-  padding-left:40px !important;
-}
-#trainers-deployment .indent-sub{
-  padding-left:60px !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  padding-left:40px !important;
-}
+#trainers-deployment .checklist-row{ padding-left:40px !important; }
+#trainers-deployment .indent-sub{ padding-left:60px !important; }
+#trainers-deployment #additionalTrainersContainer .checklist-row{ padding-left:40px !important; }
 
 /* ============== MINI-CARDS (Primary Contacts) ============== */
 .mini-card{
@@ -582,7 +526,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   row-gap:18px;
 }
 
-/* ============== Additional POC (match sizing + centered text) ============== */
+/* ============== Additional POC (integrated +) ============== */
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
   align-items:center;
   padding:8px 24px;
@@ -597,6 +541,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   border-bottom-right-radius:0;
   border-top-left-radius:var(--radius-sm);
   border-bottom-left-radius:var(--radius-sm);
+  flex:1 1 auto !important;
+  width:100% !important;
+  margin-left:0 !important;
 }
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
@@ -617,19 +564,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   box-shadow:0 1px 4px rgba(239,109,34,0.25);
   padding:0;
 }
-
-/* ===========================================================
-   FIX: Additional POC name input width (match other name fields)
-   =========================================================== */
-
-/* Force Additional POC name field to match mini-card inputs */
-.mini-card.additional-poc-card
-.checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  margin-left:0 !important;
-}
-
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42;
@@ -644,46 +578,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   border-bottom-right-radius:var(--radius-sm) !important;
 }
 
-/* ============== Dealership Info Map input/button ============== */
-#dealership-info .address-input-wrap{
-  display:flex;
-  align-items:stretch;
-  gap:0;
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-}
-#dealership-info .address-input-wrap input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px);
-  width:calc(var(--input-width) - 34px);
-  height:34px;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
-}
-#dealership-info .address-input-wrap .small-map-btn{
-  flex:0 0 34px;
-  width:34px;
-  height:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
-  padding:0;
-}
-#dealership-info .address-input-wrap .small-map-btn:hover{ background:#ff8b42; }
-
+/* ============== Map wrapper (shared) ============== */
 .map-wrapper{
   margin:16px 0 8px;
   border-radius:var(--radius-lg);
@@ -700,31 +595,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   margin:6px 10px 10px;
   font-size:12px;
   color:#555;
-}
-/* ===========================================================
-   Dealership Address – make address input 3/4 width
-   =========================================================== */
-
-#dealership-address-card .checklist-row{
-  align-items:center;
-}
-
-#dealership-address-card .address-input-wrap{
-  flex:0 0 75%;
-  width:75%;
-  margin-left:auto;
-}
-
-/* Address text field */
-#dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto;
-  width:100%;
-}
-
-/* Keep map button fixed size */
-#dealership-address-card .address-input-wrap .small-map-btn{
-  flex:0 0 34px;
-  width:34px;
 }
 
 /* ============== Integrated “+” rows (general, non-table) ============== */
@@ -1076,17 +946,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   background:inherit;
 }
 
-/* ============== SUPPORT TICKETS (CLEAN + CORRECT) ============== */
-#support-tickets .ticket-section { margin-bottom: 0; }
+/* ============== SUPPORT TICKETS ============== */
+#support-tickets .ticket-section{ margin-bottom:0; }
 
-/* Four big sections stacked */
 #support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
   gap:18px;
 }
 
-/* Each container shows ticket cards in a 2-column grid */
 #openTicketsContainer,
 #tierTwoTicketsContainer,
 #closedResolvedTicketsContainer,
@@ -1097,7 +965,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   align-items:start;
 }
 
-/* Ticket card */
 #support-tickets .ticket-group{
   position:relative;
   border:1px solid var(--orange);
@@ -1108,7 +975,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   margin:0;
 }
 
-/* Badge (added tickets only) — compact */
 #support-tickets .ticket-count-badge{
   position:absolute;
   top:-1px;
@@ -1129,13 +995,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   border-bottom-left-radius:0;
 }
 
-/* Make room so badge never crowds the first label */
-#support-tickets .ticket-group.has-badge{
-  padding-top:22px;
-}
+#support-tickets .ticket-group.has-badge{ padding-top:22px; }
 #support-tickets .ticket-group-inner{ margin-top:6px; }
 
-/* Rows use grid so warning can be placed under the field */
 #support-tickets .ticket-row{
   display:grid;
   grid-template-columns:1fr var(--input-width);
@@ -1148,48 +1010,23 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   border-bottom:1px solid #e0e0e0;
   font-size:14px;
 }
-
-/* ===============================
-   🔴 Support Ticket Field Warnings
-   =============================== */
-#support-tickets .field-warning{
-  grid-column:2;          /* under the input column */
-  font-size:10px;
-  font-weight:700;
-  color:#ef4444;          /* RED */
-  line-height:1;
-  margin:2px 0 0 0;       /* flush under input */
-  padding:0;
-}
-
-#support-tickets .field-error{
-  outline:2px solid #ef4444;
-  outline-offset:2px;
-  background:#fff5f5 !important;
-}
-
 #support-tickets .ticket-row:last-child{
   border-bottom:none;
   margin-bottom:0;
   padding-bottom:0;
 }
-
 #support-tickets .ticket-row > label{
   font-weight:700;
   font-size:14px;
   text-align:left;
   padding-right:12px;
 }
-
-/* Fields in column 2 */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select,
 #support-tickets .ticket-row > .ticket-number-wrap{
   grid-column:2;
   width:100%;
 }
-
-/* Inputs/selects */
 #support-tickets .ticket-row input[type="text"],
 #support-tickets .ticket-row select{
   width:100%;
@@ -1199,6 +1036,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   background:#f7f7f7;
   font-size:13px;
   height:36px;
+}
+
+/* Field warnings */
+#support-tickets .field-warning{
+  grid-column:2;
+  font-size:10px;
+  font-weight:700;
+  color:#ef4444;
+  line-height:1;
+  margin:2px 0 0 0;
+  padding:0;
+}
+#support-tickets .field-error{
+  outline:2px solid #ef4444;
+  outline-offset:2px;
+  background:#fff5f5 !important;
 }
 
 /* Ticket number wrap with + */
@@ -1234,9 +1087,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 }
 
 /* Summary row */
-#support-tickets .ticket-summary-row{
-  grid-template-columns:1fr;
-}
+#support-tickets .ticket-summary-row{ grid-template-columns:1fr; }
 #support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 
 #support-tickets .ticket-summary-input{
@@ -1270,47 +1121,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   opacity:0.9;
 }
 
-/* =====================================================
-   Support Ticket Status — NORMAL (non-base cards)
-   Matches all other dropdowns/textboxes
-   ===================================================== */
-
-#support-tickets .ticket-group:not([data-base="true"])
-.ticket-status-select{
+/* Non-base cards: status looks normal */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-status-select{
   background:#f7f7f7 !important;
   color:var(--ink) !important;
   border:1px solid var(--border) !important;
   cursor:pointer !important;
   opacity:1 !important;
 }
-
-/* Focus state (same as other fields) */
-#support-tickets .ticket-group:not([data-base="true"])
-.ticket-status-select:focus{
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-status-select:focus{
   border-color:var(--orange) !important;
   box-shadow:0 0 4px rgba(239,109,34,0.35);
   background:#fff9f5 !important;
   outline:none;
-}
-
-/* Responsive */
-@media (max-width:900px){
-  #openTicketsContainer,
-  #tierTwoTicketsContainer,
-  #closedResolvedTicketsContainer,
-  #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
-}
-@media (max-width:600px){
-  #support-tickets .ticket-row{
-    grid-template-columns:1fr;
-  }
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap{
-    grid-column:1;
-  }
 }
 
 /* ============== FLOATING PDF BUTTON (Summary) ============== */
@@ -1330,7 +1153,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 }
 #training-summary .floating-btn:hover{ background:#ff8b42; }
 
-/* muted note */
 .muted-note{
   font-size:.9em;
   color:#666;
@@ -1384,51 +1206,91 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
     width:100%;
     flex:0 0 auto;
   }
-   /* ===========================================================
-   Dealership Address / Map — FORCE 3/4 width (override)
-   Put this at the VERY BOTTOM of style.css
+
+  #support-tickets .ticket-row{
+    grid-template-columns:1fr;
+  }
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap{
+    grid-column:1;
+  }
+  #support-tickets .field-warning{
+    grid-column:1;
+  }
+}
+
+/* ===========================================================
+   Dealership Address Input/Map — 75% width overrides
+   (kept for BOTH possible layouts)
    =========================================================== */
 
-/* If the address row still lives on #dealership-info */
+/* If address row still lives under #dealership-info */
+#dealership-info .address-input-wrap{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+}
+#dealership-info .address-input-wrap input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
+  height:34px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
+}
+#dealership-info .address-input-wrap .small-map-btn{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  margin-left:-1px;
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+  padding:0;
+}
+#dealership-info .address-input-wrap .small-map-btn:hover{ background:#ff8b42; }
+
+/* FORCE 75% width (override the input-width lock) */
 #dealership-info .address-input-wrap{
   flex:0 0 75% !important;
   width:75% !important;
 }
-
-/* Override the earlier calc(var(--input-width) - 34px) lock */
 #dealership-info .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
 }
-
-/* Keep button fixed */
 #dealership-info .address-input-wrap .small-map-btn{
   flex:0 0 34px !important;
   width:34px !important;
 }
-/* ===========================================================
-   Dealership Address Card — 75% width address field
-   (Option B: uses #dealership-address-card)
-   =========================================================== */
 
+/* If address lives under the NEW dedicated card */
 #dealership-address-card .address-input-wrap{
   flex:0 0 75% !important;
   width:75% !important;
   margin-left:auto !important;
 }
-
-/* override earlier input-width lock */
 #dealership-address-card input#dealershipAddressInput{
   flex:1 1 auto !important;
   width:100% !important;
   min-width:0 !important;
 }
-
-/* keep Map button fixed */
 #dealership-address-card .small-map-btn{
   flex:0 0 34px !important;
   width:34px !important;
-}
-
-
 }
