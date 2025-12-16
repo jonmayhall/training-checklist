@@ -701,6 +701,31 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   font-size:12px;
   color:#555;
 }
+/* ===========================================================
+   Dealership Address – make address input 3/4 width
+   =========================================================== */
+
+#dealership-address-card .checklist-row{
+  align-items:center;
+}
+
+#dealership-address-card .address-input-wrap{
+  flex:0 0 75%;
+  width:75%;
+  margin-left:auto;
+}
+
+/* Address text field */
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto;
+  width:100%;
+}
+
+/* Keep map button fixed size */
+#dealership-address-card .address-input-wrap .small-map-btn{
+  flex:0 0 34px;
+  width:34px;
+}
 
 /* ============== Integrated “+” rows (general, non-table) ============== */
 .section-block .checklist-row.integrated-plus{
