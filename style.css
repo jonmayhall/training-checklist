@@ -416,6 +416,10 @@ main{
 
 /* indents */
 .indent-sub{ padding-left:60px !important; }
+/* Ensure cloned integrated rows stay indented */
+.checklist-row.integrated-plus{
+  padding-left:60px;
+}
 
 /* ===========================================================
    🔒 ONSITE TRAINING DATES — CANONICAL (keep ONE)
