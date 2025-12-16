@@ -38,6 +38,34 @@ select{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
+/* ===========================================================
+   Dealership Address — override fixed input width
+   =========================================================== */
+
+#dealership-address-card .checklist-row{
+  align-items:center;
+}
+
+/* Allow wrapper to be wide */
+#dealership-address-card .address-input-wrap{
+  flex:0 0 75%;
+  width:75%;
+  margin-left:auto;
+  display:flex;
+}
+
+/* OVERRIDE global input width lock */
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+}
+
+/* Keep map button fixed */
+#dealership-address-card .address-input-wrap .small-map-btn{
+  flex:0 0 34px;
+  width:34px;
+}
+
 /* Placeholder (ghost) text */
 input::placeholder,
 textarea::placeholder{
