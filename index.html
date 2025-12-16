@@ -142,23 +142,35 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ================= DEALERSHIP DETAILS (ORIGINAL QUESTIONS) ================= -->
+  <!-- ================= DEALERSHIP DETAILS ================= -->
   <div class="section-block">
     <h2>Dealership Details</h2>
 
     <div class="checklist-row">
       <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput" placeholder="Enter dealer group name">
+      <input
+        type="text"
+        id="dealerGroupInput"
+        placeholder="Enter dealer group name"
+      >
     </div>
 
     <div class="checklist-row">
       <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Enter dealership name">
+      <input
+        type="text"
+        id="dealershipNameInput"
+        placeholder="Enter dealership name"
+      >
     </div>
 
     <div class="checklist-row">
       <label>DID</label>
-      <input type="text" id="dealershipDidInput" placeholder="Enter dealership DID">
+      <input
+        type="text"
+        id="dealershipDidInput"
+        placeholder="Enter dealership DID"
+      >
     </div>
 
     <div class="checklist-row">
@@ -177,128 +189,160 @@
       </select>
     </div>
 
-    <!-- ✅ ONSITE TRAINING DATES (UNCHANGED) -->
+    <!-- Onsite Training Dates -->
     <div class="checklist-row training-dates-row">
       <label>Onsite training dates</label>
-
       <div class="date-stack">
-        <input id="onsiteStartDate" class="date-input" type="date">
-        <input id="onsiteEndDate" class="date-input" type="date">
+        <input
+          type="date"
+          id="onsiteStartDate"
+          class="date-input is-placeholder"
+        >
+        <input
+          type="date"
+          id="onsiteEndDate"
+          class="date-input is-placeholder"
+        >
       </div>
     </div>
-
   </div>
 
-  <!-- ================= PRIMARY CONTACTS (UNCHANGED) ================= -->
+  <!-- ================= PRIMARY CONTACTS ================= -->
   <div class="section-block">
     <h2>Primary Contacts</h2>
 
-    <div id="primaryContactsGrid" class="primary-contacts-grid">
+    <div class="primary-contacts-grid">
 
-      <!-- SERVICE DIRECTOR -->
+      <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Service Director</label>
-          <input type="text" placeholder="Enter Service Director name">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email" placeholder="Enter email address">
+          <input type="email">
         </div>
       </div>
 
-      <!-- SERVICE MANAGER -->
+      <!-- Service Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Service Manager</label>
-          <input type="text" placeholder="Enter Service Manager name">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email" placeholder="Enter email address">
+          <input type="email">
         </div>
       </div>
 
-      <!-- GENERAL MANAGER -->
+      <!-- General Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>General Manager</label>
-          <input type="text" placeholder="Enter General Manager name">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email" placeholder="Enter email address">
+          <input type="email">
         </div>
       </div>
 
-      <!-- PARTS MANAGER -->
+      <!-- Parts Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
           <label>Parts Manager</label>
-          <input type="text" placeholder="Enter Parts Manager name">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Enter cell phone number">
+          <input type="text">
         </div>
         <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email" placeholder="Enter email address">
+          <input type="email">
+        </div>
+      </div>
+
+      <!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
+      <div
+        class="mini-card additional-poc-card"
+        data-base="true"
+      >
+        <div class="checklist-row integrated-plus">
+          <label>Additional Contact</label>
+          <input type="text" placeholder="Name">
+          <button
+            type="button"
+            class="add-row additional-poc-add"
+          >+</button>
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text">
+        </div>
+
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email">
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ================= NEW: DEALERSHIP ADDRESS CARD ================= -->
+  <!-- ================= DEALERSHIP ADDRESS ================= -->
   <div class="section-block">
     <h2>Dealership Address</h2>
 
     <div class="checklist-row">
       <label>Dealership Address</label>
 
-      <div class="address-input-wrap">
-        <!-- 🔒 KEEP THIS ID EXACT -->
+      <!-- 75% width address field -->
+      <div
+        class="address-input-wrap"
+        style="flex:0 0 75%;"
+      >
         <input
           type="text"
           id="dealershipAddressInput"
-          autocomplete="off"
+          class="address-input"
           placeholder="Enter dealership address"
+          autocomplete="off"
         >
         <button
           type="button"
-          id="openAddressInMapsBtn"
           class="small-map-btn"
+          id="openAddressInMapsBtn"
         >
           Map
         </button>
       </div>
     </div>
 
-    <div class="map-wrapper" id="mapPreviewWrapper">
-      <!-- 🔒 KEEP THIS ID EXACT -->
+    <div class="map-wrapper">
       <iframe
         id="dealershipMapFrame"
         class="map-frame"
-        src=""
         loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
 
       <p class="map-helper-text">
-        Select an address above to update this map. Click “Map” to open directions in Google Maps.
+        Select an address above to update this map.
       </p>
     </div>
   </div>
