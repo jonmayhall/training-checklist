@@ -38,34 +38,6 @@ select{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
-/* ===========================================================
-   Dealership Address — override fixed input width
-   =========================================================== */
-
-#dealership-address-card .checklist-row{
-  align-items:center;
-}
-
-/* Allow wrapper to be wide */
-#dealership-address-card .address-input-wrap{
-  flex:0 0 75%;
-  width:75%;
-  margin-left:auto;
-  display:flex;
-}
-
-/* OVERRIDE global input width lock */
-#dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-}
-
-/* Keep map button fixed */
-#dealership-address-card .address-input-wrap .small-map-btn{
-  flex:0 0 34px;
-  width:34px;
-}
-
 /* Placeholder (ghost) text */
 input::placeholder,
 textarea::placeholder{
@@ -374,6 +346,34 @@ main{
   background:#f7f7f7;
   font-size:13px;
   height:34px;
+}
+
+/* ===========================================================
+   Dealership Address — override fixed input width
+   =========================================================== */
+
+#dealership-address-card .checklist-row{
+  align-items:center;
+}
+
+/* Allow wrapper to be wide */
+#dealership-address-card .address-input-wrap{
+  flex:0 0 75%;
+  width:75%;
+  margin-left:auto;
+  display:flex;
+}
+
+/* OVERRIDE global input width lock */
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+}
+
+/* Keep map button fixed */
+#dealership-address-card .address-input-wrap .small-map-btn{
+  flex:0 0 34px;
+  width:34px;
 }
 
 /* textareas */
@@ -1246,79 +1246,4 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
   #support-tickets .field-warning{
     grid-column:1;
   }
-}
-
-/* ===========================================================
-   Dealership Address Input/Map — 75% width overrides
-   (kept for BOTH possible layouts)
-   =========================================================== */
-
-/* If address row still lives under #dealership-info */
-#dealership-info .address-input-wrap{
-  display:flex;
-  align-items:stretch;
-  gap:0;
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-}
-#dealership-info .address-input-wrap input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px);
-  width:calc(var(--input-width) - 34px);
-  height:34px;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
-}
-#dealership-info .address-input-wrap .small-map-btn{
-  flex:0 0 34px;
-  width:34px;
-  height:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
-  padding:0;
-}
-#dealership-info .address-input-wrap .small-map-btn:hover{ background:#ff8b42; }
-
-/* FORCE 75% width (override the input-width lock) */
-#dealership-info .address-input-wrap{
-  flex:0 0 75% !important;
-  width:75% !important;
-}
-#dealership-info .address-input-wrap input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-}
-#dealership-info .address-input-wrap .small-map-btn{
-  flex:0 0 34px !important;
-  width:34px !important;
-}
-
-/* If address lives under the NEW dedicated card */
-#dealership-address-card .address-input-wrap{
-  flex:0 0 75% !important;
-  width:75% !important;
-  margin-left:auto !important;
-}
-#dealership-address-card input#dealershipAddressInput{
-  flex:1 1 auto !important;
-  width:100% !important;
-  min-width:0 !important;
-}
-#dealership-address-card .small-map-btn{
-  flex:0 0 34px !important;
-  width:34px !important;
 }
