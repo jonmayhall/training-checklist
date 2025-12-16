@@ -55,7 +55,7 @@
     <main>
 
      <!-- ========================================================= -->
-<!-- PAGE 1: TRAINERS, DEPLOYMENT MANAGER, & CEM               -->
+<!-- PAGE 1: TRAINERS, DM, ASC, & CEM               -->
 <!-- ========================================================= -->
 <section id="trainers-deployment" class="page-section active">
   <button class="clear-page-btn" type="button">Reset This Page</button>
@@ -126,6 +126,11 @@
         <label>CEM</label>
         <input type="text" placeholder="Enter CEM name">
       </div>
+
+       <div class="checklist-row">
+        <label>ServiceCart ASC</label>
+        <input type="text" placeholder="Enter ASC name">
+      </div>
     </div>
 
   </div>
@@ -173,6 +178,15 @@
       >
     </div>
 
+     <div class="checklist-row">
+      <label>Salseforce Order</label>
+      <input
+        type="text"
+        id="SForderInput"
+        placeholder="Enter SF order link"
+      >
+    </div>
+
     <div class="checklist-row">
       <label>DMS</label>
       <select id="dealershipDmsSelect">
@@ -217,7 +231,7 @@
     <div class="mini-card contact-card">
       <div class="checklist-row">
         <label>Service Director</label>
-        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Enter name">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
@@ -233,7 +247,7 @@
     <div class="mini-card contact-card">
       <div class="checklist-row">
         <label>Service Manager</label>
-        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Enter name">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
@@ -249,7 +263,7 @@
     <div class="mini-card contact-card">
       <div class="checklist-row">
         <label>General Manager</label>
-        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Enter name">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
@@ -265,7 +279,7 @@
     <div class="mini-card contact-card">
       <div class="checklist-row">
         <label>Parts Manager</label>
-        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Enter name">
       </div>
       <div class="checklist-row indent-sub">
         <label>Cell</label>
@@ -284,8 +298,8 @@
     >
       <!-- Name + Add -->
       <div class="checklist-row integrated-plus">
-        <label>Additional Contact</label>
-        <input type="text" placeholder="Name">
+        <label>Additional POC</label>
+        <input type="text" placeholder="Enter name">
         <button
           type="button"
           class="add-row additional-poc-add"
@@ -366,7 +380,7 @@
 <section id="pre-training" class="page-section">
   <h1>Pre-Training Checklist</h1>
   <p class="page-subtitle">
-    Validate products, integrations, Salesforce notes, and readiness two weeks before onsite training.
+    Validate products, integrations, Salesforce notes, and readiness one weeks before onsite training.
   </p>
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
@@ -381,62 +395,62 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>ServiceCart Notes</label>
+        <label>ServiceCart</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+           <option>Not Available</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Scheduler Notes</label>
+        <label>Scheduler</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+           <option>Not Available</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Deployment Notes</label>
+        <label>Deployment</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+           <option>Not Available</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Remote Training Note</label>
+        <label>Remote Training</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+           <option>Not Available</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Sales Notes</label>
+        <label>Sales</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+           <option>Not Available</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Dealership contract / listed Salesforce products</label>
+        <label>Dealership contract/listed Salesforce products</label>
         <select>
-          <option value="" data-ghost="true">Select review status</option>
+          <option value="" data-ghost="true">Reviewed</option>
           <option>Yes</option>
           <option>No</option>
-          <option>N/A</option>
+          <option>Not Available</option>
         </select>
       </div>
     </div>
@@ -455,36 +469,36 @@
       <h2>Communications</h2>
 
       <div class="checklist-row">
-        <label>Is customer information appearing? <span class="muted-note">(historical pull)</span></label>
+        <label>Customer information present? <span class="muted-note">(historical pull)</span></label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Customer info</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row">
-        <label>Are texts, email, and calls reaching the end user?</label>
+        <label>Texting, email, & calls errors?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Errors</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row">
-        <label>Are text and email signatures turned on?</label>
+        <label>Text & email signatures activated?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Signature</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row">
-        <label>Does the area code match the local area?</label>
+        <label>Area code match the local area?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Area code</option>
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -505,28 +519,21 @@
       <h2>Payments</h2>
 
       <div class="checklist-row">
-        <label>If purchased, is payments set up and activated?</label>
+        <label>Payments activated?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Are they using online payment, retail, or both?</label>
-        <select>
-          <option value="" data-ghost="true">Select payment type</option>
+          <option value="" data-ghost="true">Payment types</option>
           <option>Online</option>
           <option>Retail</option>
-          <option>Both</option>
+          <option>Online & Retail</option>
+          <option>N/A</option>
+          
         </select>
       </div>
 
       <div class="checklist-row">
-        <label>Do customer invoices appear correctly?</label>
+        <label>Customer invoices appear correctly?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Invoices</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -534,11 +541,13 @@
       </div>
 
       <div class="checklist-row">
-  <label>Are payment requests being sent without error?</label>
+  <label>Payment requests errors?</label>
   <select>
-    <option value="" data-ghost="true">Select answer</option>
+    <option value="" data-ghost="true">Errors</option>
     <option>Yes</option>
     <option>No</option>
+    <option>N/A</option>
+    
   </select>
 </div>
 
@@ -558,18 +567,18 @@
       <h2>Opcodes</h2>
 
       <div class="checklist-row">
-        <label>Review opcodes that are flagged for Mobile Check-in and ServiceCart.</label>
+        <label>Review flagged opcode for MCI, ServiceCart, & scheduler.</label>
         <select>
-          <option value="" data-ghost="true">Select status</option>
+          <option value="" data-ghost="true">Opcodes reviewed</option>
           <option>Completed</option>
           <option>Not Completed</option>
         </select>
       </div>
 
        <div class="checklist-row">
-        <label>Are the correct opcodes added to the MPI to correspond with the inspection?</label>
+        <label>Correct opcodes correspond with the inspection?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Corresponding opcodes</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -577,11 +586,12 @@
       </div>
 
       <div class="checklist-row">
-        <label>Are they using parts/labor pricing? If so, is pricing showing in opcodes?</label>
+        <label>Parts/labor pricing showing in opcodes?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Pricing present</option>
           <option>Yes</option>
           <option>No</option>
+          <option>N/A</option>
         </select>
       </div>
     </div>
@@ -600,9 +610,19 @@
       <h2>ServiceCart</h2>
 
       <div class="checklist-row">
-        <label>Do user authorities align with the SC Handoff Notes?</label>
+        <label>User authoritie align with SC notes?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">UAs align</option>
+          <option>Yes</option>
+          <option>No</option>
+          <option>N/A</option>
+        </select>
+      </div>
+
+        <div class="checklist-row">
+        <label>User authorities consistent and accurate across users?</label>
+        <select>
+          <option value="" data-ghost="true">UAs align</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -610,9 +630,9 @@
       </div>
 
       <div class="checklist-row">
-        <label>Have manager emails been added to ServiceCart Reporting?</label>
+        <label>Manager emails added to ServiceCart Reporting?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Emails added</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -622,7 +642,7 @@
       <div class="checklist-row">
         <label>Is the dealer logo present?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Logo appears</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -630,9 +650,9 @@
       </div>
 
       <div class="checklist-row">
-        <label>Was tech video access removed from all techs?</label>
+        <label>Tech video access removed from all techs?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Tech video removed</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -642,7 +662,7 @@
       <div class="checklist-row">
         <label>Are notifications set up on each status?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Correct notifications</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -650,9 +670,9 @@
       </div>
 
       <div class="checklist-row">
-        <label>Was the "Add Lines To DMS" button removed for Non-ROWB stores?</label>
+        <label>"Add Lines To DMS" button removed for Non-ROWB stores?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">ROWB removed</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -674,9 +694,9 @@
       <h2>Scheduler</h2>
 
       <div class="checklist-row">
-        <label>Are appointments pulling over correctly?</label>
+        <label>Appointments pull correctly?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Appointments pulling</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -686,7 +706,7 @@
       <div class="checklist-row">
         <label>Is the shop divided by teams?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Divided teams</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -694,32 +714,22 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Are assignment rules in place for each team?</label>
+        <label>Assignment rules in place?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Asignment rules</option>
           <option>Yes</option>
+           <option>Yes, team assignmet rules</option>
           <option>No</option>
           <option>N/A</option>
         </select>
       </div>
 
       <div class="checklist-row">
-        <label>Are assignment rules in place?</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>
-          Does the scheduler setup look correct?
+        <label>Scheduler setup correct?
           <span class="muted-note">(time slots, hours, capacity, opcodes, labor codes, etc.)</span>
         </label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Scheduler setup</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -729,7 +739,7 @@
       <div class="checklist-row">
         <label>Are transportation options set up?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Transportation options</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -751,9 +761,9 @@
       <h2>Mobile Check-in (MCI)</h2>
 
       <div class="checklist-row">
-        <label>Is Mobile Check-in (MCI) configured and enabled?</label>
+        <label>Is MCI configured and enabled?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">MCI setup</option>
           <option>Yes</option>
           <option>No</option>
           <option>In Progress</option>
@@ -761,12 +771,13 @@
       </div>
 
       <div class="checklist-row">
-        <label>Are the correct MPI forms and opcodes tied to MCI workflows?</label>
+        <label>Correct MPI forms & opcodes tied to MCI?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">MPI/MCI setup</option>
           <option>Yes</option>
           <option>No</option>
           <option>Partial</option>
+          <option>N/A</option>
         </select>
       </div>
     </div>
@@ -778,16 +789,76 @@
     </div>
   </div>
 
-  <!-- ROW 8 (Side-by-side): PU&D + Notes -->
+   <!-- ROW 8 (Side-by-side): ServiceConnect/Declined Services + Notes -->
+  <div class="cards-grid two-col">
+    <!-- ServiceConnect & Declined Services -->
+    <div class="section-block">
+      <h2>ServiceConnect &amp; Declined Services</h2>
+
+      <div class="checklist-row">
+        <label>Automation Rules setup?;</label>
+        <select>
+          <option value="" data-ghost="true">Automation rules</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="checklist-row">
+        <label>CSV files uploaded?;</label>
+        <select>
+          <option value="" data-ghost="true">CSV files</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="checklist-row">
+        <label>Automations activated?;</label>
+        <select>
+          <option value="" data-ghost="true">Automations</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Notes — PU&D -->
+    <div class="section-block">
+      <h2>Notes — ServiceConnect &amp; Declined Services</h2>
+      <textarea placeholder="Notes for ServiceConnect &amp; Declined Services configuration and expectations"></textarea>
+    </div>
+  </div>
+</section>
+
+  <!-- ROW 9 (Side-by-side): PU&D + Notes -->
   <div class="cards-grid two-col">
     <!-- Pickup & Delivery -->
     <div class="section-block">
       <h2>Pickup &amp; Delivery</h2>
 
       <div class="checklist-row">
-        <label>Is the DSO for scheduler integration with Pickup &amp; Delivery (PU&amp;D) activated?</label>
+        <label>DSOs activated for correct users?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">PU&D DSO</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="checklist-row">
+        <label>Dispactcher & drivers setup?;</label>
+        <select>
+          <option value="" data-ghost="true">PU&D users</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="checklist-row">
+        <label>scheduler integration DSO activated for PU&ampD?;</label>
+        <select>
+          <option value="" data-ghost="true">PU&D DSO</option>
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -825,7 +896,7 @@
       <div class="checklist-row indent-sub">
         <label>On-site training agenda</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Training agenda</option>
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -834,61 +905,50 @@
       <div class="checklist-row indent-sub">
         <label>Settings tab</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Settings</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Workflow</label>
+        <label>Workflow setup</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Workflow</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>MPI</label>
+        <label>MPI setup</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">MPI</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>Parts and labor pricing</label>
+        <label>Parts &amp; labor pricing</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Pricing</option>
           <option>Yes</option>
           <option>No</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>If purchased, does the dealership plan on using MCI?</label>
+        <label>Dealership using MCI?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Unsure</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Who is involved in the MCI process?</label>
-        <select>
-          <option value="" data-ghost="true">Select MCI users</option>
+          option value="" data-ghost="true">MCI users</option>
           <option>Advisors</option>
           <option>Porters</option>
           <option>Advisors &amp; Porters</option>
+          <option>no</option>
           <option>Other</option>
         </select>
       </div>
-    </div>
 
     <!-- Notes — Service Manager Review -->
     <div class="section-block notes-block">
@@ -904,39 +964,32 @@
       <h2>Service Manager Alignment</h2>
 
       <div class="checklist-row">
-        <label>Did you and the Service Manager agree to the following?</label>
+        <label>Did you &amp; the Service Manager agree to the following?</label>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>myKaarma arrival time each day</label>
+        <label>myKaarma daily arrival</label>
         <select>
           <option value="" data-ghost="true">Select arrival time</option>
           <option>7:00 am</option>
           <option>8:00 am</option>
-          <option>Other</option>
-          <option>No agreement</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>myKaarma departure time each day (5:00 pm)</label>
+        <label>myKaarma daily departure (5:00 pm)</label>
         <select>
-          <option value="" data-ghost="true">Select departure plan</option>
+          <option value="" data-ghost="true">Select departure time</option>
           <option>Yes, 5:00 pm</option>
           <option>Different time</option>
-          <option>No agreement</option>
         </select>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>
-          Plan for daily morning meetings with techs and advisors,
-          plus a Tuesday visit to Parts.
-        </label>
+        <label> Daily morning meetings with managers, techs, &amp; advisors</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">Morning meetings</option>
           <option>Yes</option>
-          <option>Partially</option>
           <option>No</option>
         </select>
       </div>
@@ -956,9 +1009,9 @@
       <h2>Devices &amp; Access</h2>
 
       <div class="checklist-row">
-        <label>Do all technicians have iOS devices?</label>
+        <label>All technicians have iOS devices?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">iOS devices</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -966,19 +1019,19 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>If no, how many iOS devices are they short?</label>
+        <label>If no, how many iOS devices short?</label>
         <input type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices">
       </div>
 
       <div class="checklist-row indent-sub">
         <label>How many techs are using Android devices?</label>
-        <input type="number" min="0" max="50" placeholder="Enter number of techs on Android">
+        <input type="number" min="0" max="-50" placeholder="Enter number of techs on Android">
       </div>
 
       <div class="checklist-row">
-        <label>Do all advisors have iOS devices?</label>
+        <label>All advisors have iOS devices?</label>
         <select>
-          <option value="" data-ghost="true">Select answer</option>
+          <option value="" data-ghost="true">iOS devices</option>
           <option>Yes</option>
           <option>No</option>
           <option>N/A</option>
@@ -986,8 +1039,8 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>If no, how many advisor iOS devices are they short?</label>
-        <input type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices">
+        <label>If no, how many iOS devices short?</label>
+        <input type="number" min="00" max="-50" placeholder="Enter number of missing advisor iOS devices">
       </div>
 
       <div class="checklist-row">
@@ -1021,7 +1074,7 @@
   <div class="checklist-row">
     <label>Tuesday morning meeting</label>
     <select>
-      <option value="" data-ghost="true">Select who attended</option>
+      <option value="" data-ghost="true">Who attended</option>
       <option>Managers, Techs &amp; Advisors</option>
       <option>Managers &amp; Techs Only</option>
       <option>Managers &amp; Advisors Only</option>
@@ -1032,7 +1085,7 @@
   <div class="checklist-row">
     <label>Wednesday morning meeting</label>
     <select>
-      <option value="" data-ghost="true">Select who attended</option>
+      <option value="" data-ghost="true">Who attended</option>
       <option>Managers</option>
       <option>Techs &amp; Advisors</option>
       <option>Managers &amp; Techs Only</option>
@@ -1044,7 +1097,7 @@
   <div class="checklist-row">
     <label>Thursday morning meeting</label>
     <select>
-      <option value="" data-ghost="true">Select who attended</option>
+      <option value="" data-ghost="true">Who attended</option>
       <option>Managers</option>
       <option>Techs &amp; Advisors</option>
       <option>Managers &amp; Techs Only</option>
@@ -3152,7 +3205,7 @@
       <section id="opcodes-pricing" class="page-section">
         <h1>Opcodes &amp; Pricing</h1>
         <p class="page-subtitle">
-          Verify opcodes, pricing, and parts margins support accurate inspections and MPIs.
+          Assistance in updating opcodes, pricing, and parts to support accurate inspections and MPIs.
         </p>
         <button class="clear-page-btn" type="button">Reset This Page</button>
 
@@ -3229,7 +3282,7 @@
 
   <h1>Support Tickets</h1>
   <p class="page-subtitle">
-    Track support tickets by status. Add a new ticket only when the base card is fully completed.
+    Track support tickets by status while onsite to ensure a coherent approach while onsite. 
   </p>
 
   <!-- ✅ 4 BIG STATUS SECTIONS STACKED -->
@@ -4242,35 +4295,35 @@
         <h2>Training Completion by Role</h2>
 
         <div class="checklist-row">
-          <label>Are all Service Advisors trained and able to use myKaarma independently?</label>
+          <label>Advisors using myKaarma independently?</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes — Fully Trained</option>
-            <option>Partially Trained</option>
-            <option>No</option>
-            <option>N/A</option>
+            <option value="" data-ghost="true">Usage</option>
+            <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
           </select>
         </div>
 
         <div class="checklist-row">
-          <label>Are all Technicians trained and using myKaarma from start to finish?</label>
+          <label>Technicians using myKaarma independently?</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes — Fully Trained</option>
-            <option>Partially Trained</option>
-            <option>No</option>
-            <option>N/A</option>
+            <option value="" data-ghost="true">Usage</option>
+            <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
           </select>
         </div>
 
         <div class="checklist-row">
-          <label>Are all Parts Representatives trained and sending out quotes promptly?</label>
+          <label>Parts representatives using myKaarma independently?</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes — Fully Trained</option>
-            <option>Partially Trained</option>
-            <option>No</option>
-            <option>N/A</option>
+            <option value="" data-ghost="true">Usage</option>
+             <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
           </select>
         </div>
       </div>
@@ -4291,25 +4344,27 @@
         <h2>Final Sign-Off</h2>
 
         <div class="checklist-row">
-          <label>Did you conduct a tech and advisors walkthrough with the Service Manager?</label>
+          <label>Tech and advisors walkthrough with Service Manager?</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes</option>
-            <option>No</option>
+            <option value="" data-ghost="true">walkthorugh</option>
+            <option>Yes, manager signs off</option>
+            <option>Yes, manager has reservations</option>
+            <option>No, manager didn't find time</option>
           </select>
         </div>
 
         <div class="checklist-row">
-          <label>Did you conduct a parts rep walkthrough with the Parts Manager?</label>
+          <label>Parts rep walkthrough with Parts Manager?</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes</option>
-            <option>No</option>
+            <option value="" data-ghost="true">walkthorugh</option>
+            <option>Yes, manager signs off</option>
+            <option>Yes, manager has reservations</option>
+            <option>No, manager didn't find time</option>
           </select>
         </div>
 
         <div class="checklist-row">
-          <label>Post-training CEM follow-up call.</label>
+          <label>Post-training CEM call.</label>
           <input type="date" placeholder="Select follow-up date">
         </div>
       </div>
@@ -4323,38 +4378,41 @@
     </div>
   </div>
 
-  <!-- ROW 3: DMS Validation + Automations -->
+  <!-- ROW 3: Management Buy-in -->
   <div class="two-col-grid">
     <div class="col-stack">
       <div class="section-block">
-        <h2>DMS &amp; Data Validation</h2>
+        <h2>Management Buy-in</h2>
 
-        <div class="checklist-row">
-          <label>Customer &amp; vehicle data appears correctly for new and existing ROs.</label>
+       <div class="checklist-row">
+          <label>Service manager buy-in</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes</option>
-            <option>Inconsistent</option>
-            <option>No</option>
-            <option>N/A</option>
+            <option value="" data-ghost="true">buy-in</option>
+            <option>Fully Engaged</option>
+            <option>Supportive</option>
+            <option>Developing</option>
+            <option>Lackinge</option>
+            <option>Not present</option>
+            
           </select>
         </div>
 
-        <div class="checklist-row">
-          <label>Opcodes and pricing align between myKaarma and the DMS.</label>
+         <div class="checklist-row">
+          <label>Parts manager buy-in</label>
           <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes — Correct</option>
-            <option>Some Issues</option>
-            <option>Major Issues</option>
-            <option>N/A</option>
+            <option value="" data-ghost="true">buy-in</option>
+            <option>Fully Engaged</option>
+            <option>Supportive</option>
+            <option>Developing</option>
+            <option>Lackinge</option>
+            <option>Not present</option>
+            
           </select>
         </div>
-      </div>
-
+        
       <div class="section-block">
-        <h2>Notes — DMS &amp; Automations</h2>
-        <textarea placeholder="Specific findings, mismatches, or items that require follow-up"></textarea>
+        <h2>Notes — Management Buy-in</h2>
+        <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
       </div>
     </div>
 
@@ -4413,16 +4471,6 @@
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
-          </select>
-        </div>
-
-        <!-- ✅ NEW QUESTION (under Payments) -->
-        <div class="checklist-row indent-sub">
-          <label>Are payment requests being sent without error?</label>
-          <select>
-            <option value="" data-ghost="true">Select answer</option>
-            <option>Yes</option>
-            <option>No</option>
           </select>
         </div>
 
