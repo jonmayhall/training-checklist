@@ -416,10 +416,6 @@ main{
 
 /* indents */
 .indent-sub{ padding-left:60px !important; }
-/* Ensure cloned integrated rows stay indented */
-.checklist-row.integrated-plus{
-  padding-left:60px;
-}
 
 /* ===========================================================
    🔒 ONSITE TRAINING DATES — CANONICAL (keep ONE)
@@ -514,6 +510,16 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{
 #trainers-deployment .checklist-row{ padding-left:40px !important; }
 #trainers-deployment .indent-sub{ padding-left:60px !important; }
 #trainers-deployment #additionalTrainersContainer .checklist-row{ padding-left:40px !important; }
+
+/* Trainers page — force indent for cloned "Additional Trainer" rows */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  padding-left:60px !important;
+}
+
+/* (optional) keep the base row matching too */
+#trainers-deployment .checklist-row.integrated-plus.indent-sub{
+  padding-left:60px !important;
+}
 
 /* ============== MINI-CARDS (Primary Contacts) ============== */
 .mini-card{
