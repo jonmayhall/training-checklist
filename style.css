@@ -1,6 +1,3 @@
-Replace your **entire** `style.css` with the clean version below (this fixes the right-side overflow, restores table dropdown styling, keeps **DMS cards 2-per-row**, keeps support tickets styling, and widens pages/cards without breaking tables).
-
-```css
 /* =======================================================
    myKaarma Interactive Training Checklist — CLEAN FULL CSS
    (Wider pages/cards + tables/support/DMS preserved)
