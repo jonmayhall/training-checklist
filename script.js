@@ -6,6 +6,7 @@
    - Removes/neutralizes compact toggle dependency (no init crash)
    - Ticket clones: status select is NOT disabled/locked
    - Ticket numbering badge stays consistent
+   - ✅ Ticket add: copies base values -> new card, then clears base inputs
    ======================================================= */
 
 /* ---------------------------
@@ -303,38 +304,76 @@ function moveTicketCardToStatus(card, statusValue){
   refreshTicketBadges();
 }
 
+/* ✅ UPDATED: copy base values -> clone, then clear base */
 function handleAddTicket(btn){
-  const card = btn.closest(".ticket-group");
-  if (!card) return;
+  const baseCard = btn.closest(".ticket-group");
+  if (!baseCard) return;
 
-  const clone = card.cloneNode(true);
+  // Read values from base card (current user-entered data)
+  const baseNumber  = qs(".ticket-number-input", baseCard)?.value ?? "";
+  const baseUrl     = qs(".ticket-zendesk-input", baseCard)?.value ?? "";
+  const baseSummary = qs(".ticket-summary-input", baseCard)?.value ?? "";
+  const baseStatus  = qs(".ticket-status-select", baseCard)?.value ?? "Open";
+
+  // Clone structure
+  const clone = baseCard.cloneNode(true);
   clone.dataset.clone = "true";
   clone.dataset.base = "false";
 
-  // remove "+" on clone
+  // Remove "+" button on clone and remove the disclaimer (base-only)
   qsa(".add-ticket-btn", clone).forEach(b => b.remove());
+  qsa(".ticket-disclaimer", clone).forEach(p => p.remove());
 
-  // clear + IMPORTANT: unlock status dropdown on clones
+  // Ensure clone status select is enabled/unlocked and set values back in
+  const cloneNumber  = qs(".ticket-number-input", clone);
+  const cloneUrl     = qs(".ticket-zendesk-input", clone);
+  const cloneSummary = qs(".ticket-summary-input", clone);
+  const cloneStatus  = qs(".ticket-status-select", clone);
+
+  if (cloneNumber)  cloneNumber.value = baseNumber;
+  if (cloneUrl)     cloneUrl.value = baseUrl;
+  if (cloneSummary) cloneSummary.value = baseSummary;
+
+  if (cloneStatus){
+    cloneStatus.disabled = false;
+    cloneStatus.classList.remove("is-locked");
+    setSelectByValue(cloneStatus, baseStatus || "Open");
+    if (!cloneStatus.value) setSelectByValue(cloneStatus, "Open");
+  }
+
+  // Remove IDs/names so autosave keys don't collide
   qsa("input, select, textarea", clone).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else if (el.tagName === "SELECT") el.selectedIndex = 0;
-    else el.value = "";
-
-    // ✅ if base had disabled status, remove it on clone
-    if (el.classList?.contains("ticket-status-select")){
-      el.disabled = false;
-      el.classList.remove("is-locked");
-    }
-
     if (el.id) el.removeAttribute("id");
     if (el.name) el.removeAttribute("name");
   });
 
-  // place it in Open by default
+  // Place clone into Open by default (it can move via status dropdown afterward)
   const open = qs("#openTicketsContainer");
-  (open || card.parentElement)?.appendChild(clone);
+  (open || baseCard.parentElement)?.appendChild(clone);
 
+  // ✅ Now clear the BASE card fields + storage so it resets cleanly
+  const baseFieldsToClear = [
+    qs(".ticket-number-input", baseCard),
+    qs(".ticket-zendesk-input", baseCard),
+    qs(".ticket-summary-input", baseCard)
+  ].filter(Boolean);
+
+  baseFieldsToClear.forEach(el => {
+    try{ localStorage.removeItem(getFieldKey(el)); } catch(_){}
+    el.value = "";
+    // also persist cleared value immediately
+    try{ saveField(el); } catch(_){}
+  });
+
+  // Keep base status locked/open (HTML already has disabled + Open selected)
+  const baseStatusEl = qs(".ticket-status-select", baseCard);
+  if (baseStatusEl){
+    setSelectByValue(baseStatusEl, "Open");
+  }
+
+  refreshGhostSelects(baseCard);
   refreshGhostSelects(clone);
+  refreshDateGhost(baseCard);
   refreshDateGhost(clone);
   refreshTicketBadges();
 }
