@@ -909,6 +909,17 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:6px 6px;
 }
 
+/* Center the Name column (header + cells) */
+#training-checklist .training-table th:first-child,
+#training-checklist .training-table td:first-child{
+  text-align:center !important;
+}
+
+/* Center the checkbox+name row content as a group */
+#training-checklist .training-table td:first-child{
+  justify-content:center !important;
+}
+
 /* ============== SUPPORT TICKETS ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
 #support-tickets .ticket-sections-stack{
