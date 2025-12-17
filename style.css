@@ -801,6 +801,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-left:10px;
 }
 
+/* ✅ Keep FIRST HEADER cell light-orange (even though first column is sticky) */
+.training-table thead th:first-child{
+  background:var(--light-orange) !important;
+  color:#fff !important;
+}
+
 /* make header cell stay above sticky col */
 .training-table thead th:first-child{ z-index:5; }
 
