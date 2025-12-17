@@ -20,19 +20,28 @@
 
 <body class="stacked-compact">
 
- <!-- TOP BAR -->
+<!-- TOP BAR -->
 <header id="topbar">
   <div class="topbar-content">
     <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma" />
+
     <div class="topbar-right">
       <div id="dealershipNameDisplay"></div>
+
+      <!-- 🔽 STACKED CARDS COMPACT TOGGLE -->
+      <label class="compact-toggle">
+        <span>Compact</span>
+        <input type="checkbox" id="stackedCompactToggle">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
   </div>
 </header>
 
-  <div id="app">
+<div id="app">
+  
+  <!-- SIDEBAR -->
 
-    <!-- SIDEBAR -->
     <aside id="sidebar">
       <nav id="sidebar-nav">
         <button class="nav-btn active" type="button" data-target="trainers-deployment">Trainers $ mK Team</button>
