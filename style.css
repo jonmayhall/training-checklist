@@ -738,163 +738,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-radius:var(--radius-sm) !important;
 }
 
-/* ============== DMS INTEGRATION — MATRIX WRAPPER + CARD CLEANUP ============== */
-
-/* Big “Matrix” wrapper card that sits behind the grid (matches other section-block cards) */
-#dms-integration .dms-overview-block{
-  padding:0 22px 18px;                 /* same feel as other cards */
-}
-
-/* Remove the “plank/white card” look: the grid should NOT be its own card */
-#dms-integration .dms-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:36px;                            /* 2x bigger space between DMS cards */
-  padding:6px 0 0;                     /* no big inner white panel */
-  background:transparent;
-  border:none;
-  border-radius:0;
-  box-shadow:none;
-}
-
-/* Individual DMS cards */
-#dms-integration .dms-card{
-  position:relative;
-  background:#fff;
-  border:1px solid #e5e7eb;
-  border-radius:16px;
-  box-shadow:0 4px 10px rgba(15,23,42,0.06);
-  padding:22px 26px 20px;              /* bring content inward */
-}
-
-/* Header row (title + chip) */
-#dms-integration .dms-card-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:18px;                  /* 2x bigger gap below title */
-}
-
-/* Title */
-#dms-integration .dms-name{
-  font-size:20px;                      /* larger title */
-  font-weight:800;
-  color:var(--orange);
-  display:inline-block;
-  position:relative;
-  padding-bottom:10px;
-  line-height:1.1;
-}
-
-/* Longer rounded underline that extends past title */
-#dms-integration .dms-name::after{
-  content:"";
-  display:block;
-  height:4px;
-  width:calc(100% + 18px);             /* extends past the text */
-  background:var(--orange);
-  border-radius:999px;                 /* rounded ends */
-  margin-top:8px;
-}
-
-/* Chip (right side badge) */
-#dms-integration .dms-chip{
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  padding:4px 12px;
-  border-radius:999px;
-  white-space:nowrap;
-  border:1px solid transparent;
-  color:#fff;
-}
-#dms-integration .dms-chip-push{
-  background:var(--orange);
-  border-color:var(--orange);
-}
-#dms-integration .dms-chip-pull{
-  background:var(--mykaarma-green);
-  border-color:var(--mykaarma-green);
-  color:#111;
-}
-
-/* List formatting */
-#dms-integration .dms-list{
-  list-style:none;
-  margin:0;
-  padding:0;
-}
-
-/* Each row item */
-#dms-integration .dms-list li{
-  padding:0 6px;                       /* bring all text inward a bit */
-  padding-top:10px;
-  margin-top:10px;
-  border-top:1px solid #e5e7eb;
-}
-#dms-integration .dms-list li:first-child{
-  border-top:none;
-  margin-top:0;
-  padding-top:4px;
-}
-
-/* Top line (left label + right tag) */
-#dms-integration .dms-row-top{
-  display:grid;
-  grid-template-columns: 1fr auto;     /* keeps right side aligned clean */
-  align-items:center;
-  column-gap:12px;
-  margin-bottom:4px;
-}
-
-/* Left top label (make larger) */
-#dms-integration .dms-field{
-  font-weight:700;
-  font-size:14px;
-  color:#111827;
-}
-
-/* Right side tag alignment: centered vertically within the row */
-#dms-integration .dms-tag{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:22px;
-  padding:0 10px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:0.06em;
-  text-transform:uppercase;
-  line-height:1;
-  white-space:nowrap;
-}
-
-/* Optional tag colors (safe defaults; keep if you already have these classes) */
-#dms-integration .dms-tag-auto{ background:#e0f2fe; color:#075985; border:1px solid #7dd3fc; }
-#dms-integration .dms-tag-ondemand{ background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
-#dms-integration .dms-tag-withro{ background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
-#dms-integration .dms-tag-planned{ background:#e5e7eb; color:#374151; border:1px solid #d1d5db; }
-#dms-integration .dms-tag-na{ background:#fee2e2; color:#7f1d1d; border:1px solid #fecaca; }
-
-/* Secondary text under each row (smaller, lighter) */
-#dms-integration .dms-list p{
-  margin:0;
-  font-size:11.5px;                    /* smaller secondary text */
-  line-height:1.45;
-  color:#6b7280;
-  font-style:italic;
-}
-
-/* Responsive: single column on small screens */
-@media (max-width:900px){
-  #dms-integration .dms-grid{
-    grid-template-columns:1fr;
-    gap:24px;
-  }
-}
-
 /* ============== DMS STATUS TEXT — LIGHT & NEUTRAL ============== */
 #dms-integration .dms-tag{
   font-family: system-ui, -apple-system, BlinkMacSystemFont,
@@ -1187,5 +1030,150 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   #support-tickets .ticket-row > select,
   #support-tickets .ticket-row > .ticket-number-wrap{
     grid-column:1;
+  }
+
+   /* ============== DMS INTEGRATION — MATRIX WRAPPER + ORANGE CARD HEADERS ============== */
+
+/* Wrapper card (uses your existing .section-block look) */
+#dms-integration .dms-overview-block{
+  padding:0 22px 18px;
+}
+
+/* Grid: NO extra white “plank” panel */
+#dms-integration .dms-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:36px;                 /* 2x bigger space between cards */
+  padding:0;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+}
+
+/* DMS cards */
+#dms-integration .dms-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  box-shadow:0 4px 10px rgba(15,23,42,0.06);
+  overflow:hidden;          /* makes header corners clean */
+  padding:0;                /* header owns the top; body gets padding below */
+}
+
+/* ORANGE header bar on each DMS card (matches your other orange headers) */
+#dms-integration .dms-card-header{
+  background:var(--orange) !important;
+  color:#fff !important;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  margin:0 !important;
+}
+
+/* Title inside orange header */
+#dms-integration .dms-name{
+  color:#fff !important;
+  font-size:18px !important;
+  font-weight:800 !important;
+  line-height:1.1;
+  padding:0 !important;
+  border-bottom:none !important;
+}
+
+/* Remove underline behavior (not needed with orange header) */
+#dms-integration .dms-name::after{
+  content:none !important;
+}
+
+/* Push/Pull badge in the header (right side) */
+#dms-integration .dms-chip{
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:4px 12px;
+  border-radius:999px;
+  white-space:nowrap;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.18);
+  color:#fff !important;
+}
+#dms-integration .dms-chip-push{ background:rgba(255,255,255,0.18) !important; }
+#dms-integration .dms-chip-pull{ background:rgba(255,255,255,0.22) !important; }
+
+/* Card body padding (content pulled inward) */
+#dms-integration .dms-list{
+  list-style:none;
+  margin:0;
+  padding:18px 18px 16px;   /* body padding */
+}
+
+/* Each row */
+#dms-integration .dms-list li{
+  padding:10px 6px 0;
+  margin-top:10px;
+  border-top:1px solid #e5e7eb;
+}
+#dms-integration .dms-list li:first-child{
+  border-top:none;
+  margin-top:0;
+  padding-top:0;
+}
+
+/* Top line: left label + right tag */
+#dms-integration .dms-row-top{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  column-gap:14px;
+  margin-bottom:6px;        /* bigger gap under the “top line” */
+}
+
+/* Left label larger */
+#dms-integration .dms-field{
+  font-weight:800;
+  font-size:14px;
+  color:#111827;
+}
+
+/* Right tag “centered” within each row */
+#dms-integration .dms-tag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:24px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;          /* thinner, not shouty */
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  line-height:1;
+  white-space:nowrap;
+}
+
+/* Tag colors (safe defaults) */
+#dms-integration .dms-tag-auto{ background:#e0f2fe; color:#075985; border:1px solid #7dd3fc; }
+#dms-integration .dms-tag-ondemand{ background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+#dms-integration .dms-tag-withro{ background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
+#dms-integration .dms-tag-planned{ background:#e5e7eb; color:#374151; border:1px solid #d1d5db; }
+#dms-integration .dms-tag-na{ background:#fee2e2; color:#7f1d1d; border:1px solid #fecaca; }
+
+/* Secondary text smaller */
+#dms-integration .dms-list p{
+  margin:0;
+  font-size:11.5px;
+  line-height:1.45;
+  color:#6b7280;
+  font-style:italic;
+}
+
+/* Responsive */
+@media (max-width:900px){
+  #dms-integration .dms-grid{
+    grid-template-columns:1fr;
+    gap:24px;
   }
 }
