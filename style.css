@@ -1570,35 +1570,30 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
   .training-table{ min-width:760px; }
 
-   /* ===========================================================
-   TRAINERS — Additional Trainer rows
-   Make ADDED rows full width like other textboxes
-   Keep ONLY the first/base row sized for the + button
+ /* ===========================================================
+   TRAINERS — FIX CLONED "ADDITIONAL TRAINER" ROW WIDTH/ALIGN
+   Put this at the VERY END of your CSS (after @media)
    =========================================================== */
 
-/* Default: any additional trainer row input = full width */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="tel"],
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="email"]{
+/* Force Additional Trainers rows back to the standard flex layout */
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+}
+
+/* Label takes remaining space */
+#trainers-deployment #additionalTrainersContainer .checklist-row > label{
+  flex:1 1 auto !important;
+}
+
+/* Input matches other right-side fields (same as var(--input-width)) */
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
   margin-left:auto !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* Base row (the one WITH the + button) = shrink input so button fits */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus:first-of-type input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus:first-of-type input[type="tel"],
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus:first-of-type input[type="email"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-
-/* Base row + button keeps the right rounded end */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus:first-of-type > .add-row{
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  border-radius:var(--radius-sm) !important; /* restores right-rounded edge */
 }
 
 }
