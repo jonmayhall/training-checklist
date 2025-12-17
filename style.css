@@ -719,189 +719,184 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   TABLE SECTIONS (Training tables / Opcodes) — RESTORED (v2)
-   FIXES:
-   - NO framed/rounded table “inside a card” (wrapper owns border/radius)
-   - Orange header
-   - Sticky header + sticky first column (Name + checkbox)
-   - Light gridlines
-   - Add (+) button LEFT
-   - Columns wide enough for longest dropdowns
+   TABLES — FIX (NO NESTED CARD, LIGHT-ORANGE TABLE HEADER,
+   BETTER COLUMN WIDTHS, STICKY NAME/CHECKBOX)
    =========================================================== */
 
+/* If your tables are wrapped in .section inside a .section-block,
+   DON'T let .section become its own card */
 .section{
-  background:#fff;
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  margin-bottom:24px;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+  margin:0 0 18px !important;
+  padding:0 !important;
 }
 
+/* Kill the extra “DMS Integration Matrix / section header” style bars
+   (your orange card header already exists) */
 .section-header{
-  background:var(--orange);
-  color:#fff;
-  font-size:16px;
-  font-weight:700;
-  padding:10px 16px;
-  border-bottom:1px solid var(--border);
+  display:none !important;
 }
 
+/* Remove the “inner framed box” look */
 .table-container{
-  padding:12px 12px 10px;
+  padding:0 !important;              /* was adding a second layer */
+  margin-top:0 !important;
 }
 
-/* ✅ Wrapper owns the “card” border + radius */
+/* Keep horizontal scrolling, but NO border/radius/background panel */
 .scroll-wrapper{
   overflow:auto;
   width:100%;
-  border-radius:14px;
-  border:1px solid #e5e7eb;
-  background:#fff;
+  border:none !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  padding:0 !important;
 }
 
-/* ✅ Table should be FLAT (no border/radius) */
-.training-table{
+/* ================= TABLE BASE ================= */
+.training-table,
+.opcodes-table{
   width:100%;
-  min-width:1400px;          /* ✅ gives room for long dropdown columns */
   border-collapse:separate;
   border-spacing:0;
-  table-layout:auto;         /* ✅ lets columns expand for content */
-  background:transparent;
+  background:#fff;
+  min-width:1200px;                  /* gives columns room + allows scroll */
+  table-layout:auto;                 /* let columns size to content */
 }
 
-/* Light gridlines */
+/* light grid lines */
 .training-table th,
-.training-table td{
+.training-table td,
+.opcodes-table th,
+.opcodes-table td{
   border-bottom:1px solid #e5e7eb;
   border-right:1px solid #eef2f7;
 }
+
 .training-table th:last-child,
-.training-table td:last-child{
+.training-table td:last-child,
+.opcodes-table th:last-child,
+.opcodes-table td:last-child{
   border-right:none;
 }
 
-/* ===== HEADER (ORANGE) ===== */
-.training-table thead th{
+/* ================= HEADER ROW (LIGHT ORANGE) ================= */
+.training-table thead th,
+.opcodes-table thead th{
   position:sticky;
   top:0;
   z-index:5;
-  background:var(--orange);
-  color:#fff;
+
+  background:var(--light-orange) !important;
+  color:#111827 !important;
+
   font-size:12px;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.06em;
-  padding:10px 10px;
-  white-space:nowrap;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.18);
-  border-right:1px solid rgba(255,255,255,0.18);
-}
-.training-table thead th:last-child{
-  border-right:none;
+
+  padding:10px 12px;
+  white-space:nowrap;               /* keep header readable */
 }
 
-/* ===== BODY ===== */
-.training-table tbody td{
-  padding:8px 10px;
+/* Give columns enough width for long dropdown values */
+.training-table thead th,
+.opcodes-table thead th{
+  min-width:150px;
+}
+.training-table thead th:first-child,
+.opcodes-table thead th:first-child{
+  min-width:280px;                  /* NAME + checkbox column */
+}
+
+/* ================= BODY ================= */
+.training-table tbody td,
+.opcodes-table tbody td{
+  padding:10px 12px;
   vertical-align:middle;
   background:#fff;
 }
-.training-table tbody tr:nth-child(even) td{
+
+.training-table tbody tr:nth-child(even) td,
+.opcodes-table tbody tr:nth-child(even) td{
   background:#fafafa;
 }
 
-/* ===== Inputs/selects (restore your normal look) ===== */
+/* ================= INPUTS (restore original look) ================= */
 .training-table input[type="text"],
 .training-table input[type="number"],
 .training-table input[type="email"],
 .training-table input[type="tel"],
-.training-table select{
+.training-table select,
+.opcodes-table input[type="text"],
+.opcodes-table input[type="number"],
+.opcodes-table input[type="email"],
+.opcodes-table input[type="tel"],
+.opcodes-table select{
   width:100%;
   height:34px;
   padding:6px 10px;
-  border-radius:var(--radius-sm);
+  border-radius:var(--radius-sm);   /* NOT pill */
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  box-sizing:border-box;
 }
 
-/* Checkbox */
-.training-table input[type="checkbox"]{
+/* ================= STICKY NAME/CHECKBOX COLUMN ================= */
+/* header cell */
+.training-table thead th:first-child,
+.opcodes-table thead th:first-child{
+  position:sticky;
+  left:0;
+  z-index:7;                        /* above other header cells */
+}
+
+/* body cells */
+.training-table tbody td:first-child,
+.opcodes-table tbody td:first-child{
+  position:sticky;
+  left:0;
+  z-index:3;
+  background:inherit;               /* keeps zebra striping */
+}
+
+/* make the sticky column look clean over gridlines */
+.training-table thead th:first-child,
+.opcodes-table thead th:first-child{
+  box-shadow:1px 0 0 #eef2f7;
+}
+.training-table tbody td:first-child,
+.opcodes-table tbody td:first-child{
+  box-shadow:1px 0 0 #eef2f7;
+}
+
+/* Name cell content: checkbox + name input */
+.training-table td:first-child,
+.opcodes-table td:first-child{
+  min-width:280px;
+}
+.training-table td:first-child input[type="checkbox"],
+.opcodes-table td:first-child input[type="checkbox"]{
   transform:scale(1.1);
-}
-
-/* ===========================================================
-   STICKY FIRST COLUMN (Name + checkbox)
-   =========================================================== */
-.training-table thead th:first-child{
-  position:sticky;
-  left:0;
-  z-index:6;
-  text-align:left;
-  padding-left:16px;
-}
-
-.training-table tbody td:first-child{
-  position:sticky;
-  left:0;
-  z-index:4;
-  background:inherit; /* keeps striping */
-}
-
-/* Name cell layout */
-.training-table tbody td:first-child{
-  min-width:300px;   /* ✅ wider name column */
-  width:300px;
-}
-.training-table tbody td:first-child input[type="checkbox"]{
   margin-right:10px;
 }
-.training-table tbody td:first-child input[type="text"]{
+.training-table td:first-child input[type="text"],
+.opcodes-table td:first-child input[type="text"]{
   width:calc(100% - 34px);
   display:inline-block;
   vertical-align:middle;
 }
 
-/* ===========================================================
-   WIDEN COMMON “LONG DROPDOWN” COLUMNS
-   Tweak these if your column order differs.
-   =========================================================== */
-
-/* User Acceptance */
-.training-table th:nth-child(2),
-.training-table td:nth-child(2){ min-width:240px; }
-
-/* DMS ID */
-.training-table th:nth-child(3),
-.training-table td:nth-child(3){ min-width:140px; }
-
-/* Logged In */
-.training-table th:nth-child(4),
-.training-table td:nth-child(4){ min-width:160px; }
-
-/* Workflow Order (often long) */
-.training-table th:nth-child(5),
-.training-table td:nth-child(5){ min-width:260px; }
-
-/* Any “action” dropdown columns */
-.training-table th:nth-child(8),
-.training-table td:nth-child(8){ min-width:230px; }
-
-.training-table th:nth-child(9),
-.training-table td:nth-child(9){ min-width:210px; }
-
-/* ===========================================================
-   FOOTER + ADD ROW BUTTON — LEFT
-   =========================================================== */
+/* ================= ADD ROW BUTTON (LEFT) ================= */
 .table-footer{
   display:flex;
-  justify-content:flex-start;
-  padding:10px 4px 2px;
+  justify-content:flex-start !important; /* LEFT */
+  padding:12px 0 0 !important;
 }
-
 .table-footer .add-row{
   width:38px;
   height:38px;
