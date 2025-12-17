@@ -365,35 +365,6 @@ function handleAddTicket(btn){
   refreshTicketBadges();
 }
 
-/* ---------------------------
-   Stacked Cards — Compact Toggle
---------------------------- */
-function initStackedCompactToggle(){
-  const toggle = document.getElementById("stackedCompactToggle");
-  if (!toggle) return;
-
-  // Tag ONLY stacked cards (not inside grids/tables/support/DMS)
-  document.querySelectorAll(".page-section .section-block").forEach(card => {
-    if (card.closest(".cards-grid")) return;
-    if (card.closest(".two-col-grid")) return;
-    if (card.closest(".table-container")) return;
-    if (card.closest("#support-tickets")) return;
-    if (card.closest("#dms-integration")) return;
-    card.classList.add("stacked-card");
-  });
-
-  // restore saved state
-  const saved = localStorage.getItem("stackedCompact") === "1";
-  document.body.classList.toggle("stacked-compact", saved);
-  toggle.checked = saved;
-
-  toggle.addEventListener("change", () => {
-    const on = toggle.checked;
-    document.body.classList.toggle("stacked-compact", on);
-    localStorage.setItem("stackedCompact", on ? "1" : "0");
-  });
-}
-
 /* ===========================================================
    DOM READY
 =========================================================== */
