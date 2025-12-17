@@ -269,13 +269,27 @@ function refreshTicketBadges(){
     if (!wrap) return;
 
     const cards = qsa(".ticket-group", wrap);
-    cards.forEach((card, i) => {
+
+    // Only number NON-base cards
+    const numberMe = cards.filter(c => c.dataset.base !== "true");
+
+    // Remove badges from base cards (if any exist)
+    cards
+      .filter(c => c.dataset.base === "true")
+      .forEach(baseCard => {
+        const b = qs(".ticket-count-badge", baseCard);
+        if (b) b.remove();
+        baseCard.classList.remove("has-badge");
+      });
+
+    numberMe.forEach((card, i) => {
       let badge = qs(".ticket-count-badge", card);
       if (!badge){
         badge = document.createElement("div");
         badge.className = "ticket-count-badge";
         card.prepend(badge);
       }
+      card.classList.add("has-badge");
       badge.textContent = String(i + 1);
     });
   });
