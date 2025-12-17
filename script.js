@@ -1,205 +1,231 @@
-/* ===========================================================
-   myKaarma Interactive Training Checklist — script.js
-   Includes: autosave/load, navigation, ghost selects/dates,
-   support tickets, integrated + rows, map, and:
-   ✅ Stacked Cards Compact Toggle (SAFE)
-   =========================================================== */
+/* =======================================================
+   myKaarma Interactive Training Checklist — FULL script.js
+   (Autosave + nav + ghost placeholders + cloning + support tickets
+    + dealership map + stacked-cards compact toggle)
+   ======================================================= */
 
 /* ---------------------------
-   Helpers
+   Tiny helpers
 --------------------------- */
 const qs  = (sel, root=document) => root.querySelector(sel);
 const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
+function safeId(el){
+  return el?.id ? `#${el.id}` : "";
+}
+
 function isField(el){
   if (!el) return false;
   const tag = el.tagName;
-  return (
-    tag === "INPUT" ||
-    tag === "SELECT" ||
-    tag === "TEXTAREA"
-  );
+  if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return true;
+  return false;
 }
 
-function fieldKey(el){
-  // stable-ish key: prefer id, else name, else data-key, else fallback to DOM path
-  if (el.id) return `id:${el.id}`;
-  if (el.name) return `name:${el.name}`;
-  if (el.dataset && el.dataset.key) return `data:${el.dataset.key}`;
+function getFieldKey(el){
+  // Prefer stable keys: id > name > data-key > fallback path-ish
+  if (el.id) return `mkc:${el.id}`;
+  if (el.name) return `mkc:${el.name}`;
+  const dk = el.getAttribute("data-key");
+  if (dk) return `mkc:${dk}`;
 
-  // fallback: index within page
+  // fallback: try to include section id + index
   const sec = el.closest(".page-section");
   const secId = sec?.id || "unknown";
-  const all = qsa("input,select,textarea", sec || document);
-  const idx = all.indexOf(el);
-  return `sec:${secId}:idx:${idx}`;
+  const all = qsa("input, select, textarea", sec || document);
+  const idx = Math.max(0, all.indexOf(el));
+  return `mkc:${secId}:field:${idx}`;
 }
 
+function setSelectByValue(selectEl, val){
+  if (!selectEl) return;
+  const opt = Array.from(selectEl.options).find(o => o.value === val || o.text === val);
+  if (opt) selectEl.value = opt.value;
+  else selectEl.value = "";
+}
+
+/* ---------------------------
+   Save / Load
+--------------------------- */
 function saveField(el){
   try{
-    const key = fieldKey(el);
-    let val;
-
-    if (el.type === "checkbox") val = el.checked ? "1" : "0";
-    else val = el.value ?? "";
-
-    localStorage.setItem(`mk:${key}`, val);
-  }catch(e){}
+    const key = getFieldKey(el);
+    if (el.type === "checkbox") {
+      localStorage.setItem(key, el.checked ? "1" : "0");
+      return;
+    }
+    localStorage.setItem(key, el.value ?? "");
+  } catch (e){
+    // ignore storage errors
+  }
 }
 
 function loadField(el){
   try{
-    const key = fieldKey(el);
-    const saved = localStorage.getItem(`mk:${key}`);
-    if (saved == null) return;
+    const key = getFieldKey(el);
+    const val = localStorage.getItem(key);
+    if (val === null) return;
 
-    if (el.type === "checkbox") el.checked = saved === "1";
-    else el.value = saved;
-  }catch(e){}
+    if (el.type === "checkbox"){
+      el.checked = val === "1";
+      return;
+    }
+
+    if (el.tagName === "SELECT"){
+      setSelectByValue(el, val);
+      return;
+    }
+
+    el.value = val;
+  } catch (e){
+    // ignore
+  }
 }
 
 function loadAll(root=document){
-  qsa("input,select,textarea", root).forEach(loadField);
+  qsa("input, select, textarea", root).forEach(loadField);
+  refreshGhostSelects(root);
+  refreshDateGhost(root);
+  refreshTicketBadges();
+}
+
+function clearAll(){
+  if (!confirm("Clear ALL saved data for this checklist?")) return;
+  // Only wipe keys we own
+  Object.keys(localStorage).forEach(k => {
+    if (k.startsWith("mkc:")) localStorage.removeItem(k);
+    if (k === "stackedCompact") localStorage.removeItem(k);
+  });
+  // reset UI
+  qsa(".page-section").forEach(clearSection);
+  refreshGhostSelects(document);
+  refreshDateGhost(document);
+  refreshTicketBadges();
+}
+
+function clearSection(sectionEl){
+  if (!sectionEl) return;
+
+  // Remove cloned rows/cards first
+  // Tables: remove cloned rows
+  qsa("tr[data-clone='true'], tr[data-clone='1'], tr[data-clone='yes'], tr[data-clone='true']", sectionEl)
+    .forEach(tr => tr.remove());
+
+  // Non-table cloned blocks (support tickets, trainers, etc.)
+  qsa("[data-clone='true'], [data-clone='1']", sectionEl).forEach(node => node.remove());
+
+  // Reset fields
+  qsa("input, select, textarea", sectionEl).forEach(el => {
+    const key = getFieldKey(el);
+    try{ localStorage.removeItem(key); } catch(e){}
+
+    if (el.type === "checkbox") el.checked = false;
+    else if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+
+  refreshGhostSelects(sectionEl);
+  refreshDateGhost(sectionEl);
+  refreshTicketBadges();
 }
 
 /* ---------------------------
    Navigation
 --------------------------- */
+function showSectionById(id){
+  const target = qs(`#${CSS.escape(id)}`);
+  if (!target) return;
+
+  qsa(".page-section").forEach(sec => sec.classList.remove("active"));
+  target.classList.add("active");
+
+  // mark active nav
+  qsa(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  const activeBtn = qsa(".nav-btn").find(b => (b.dataset.target || b.getAttribute("data-target")) === id);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  // scroll to top of main
+  try{
+    const main = qs("main");
+    (main || window).scrollTo({ top: 0, behavior: "smooth" });
+  } catch(e){}
+}
+
 function initNavigation(){
-  const btns = qsa(".nav-btn");
-  const sections = qsa(".page-section");
-
-  function show(id){
-    sections.forEach(s => s.classList.toggle("active", s.id === id));
-    btns.forEach(b => b.classList.toggle("active", b.dataset.target === id));
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }
-
-  btns.forEach(b => {
-    b.addEventListener("click", () => show(b.dataset.target));
+  // click handlers
+  qsa(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.target || btn.getAttribute("data-target");
+      if (!id) return;
+      showSectionById(id);
+      history.replaceState(null, "", `#${id}`);
+    });
   });
 
-  // default first section
-  const first = btns[0]?.dataset?.target || sections[0]?.id;
-  if (first) show(first);
+  // initial section: hash > first nav btn
+  const hash = (location.hash || "").replace("#", "");
+  if (hash && qs(`#${CSS.escape(hash)}`)){
+    showSectionById(hash);
+  } else {
+    const first = qs(".nav-btn");
+    const id = first?.dataset.target || first?.getAttribute("data-target");
+    if (id) showSectionById(id);
+    else {
+      const firstSec = qs(".page-section");
+      if (firstSec) firstSec.classList.add("active");
+    }
+  }
+
+  // back/forward hash
+  window.addEventListener("hashchange", () => {
+    const h = (location.hash || "").replace("#", "");
+    if (h) showSectionById(h);
+  });
 }
 
 /* ---------------------------
-   Ghost Selects
+   Ghost placeholders
 --------------------------- */
 function refreshGhostSelects(root=document){
   qsa("select", root).forEach(sel => {
-    const opt = sel.options?.[sel.selectedIndex];
-    const isGhost = opt && opt.dataset && opt.dataset.ghost === "true";
-    sel.classList.toggle("is-placeholder", !!isGhost);
+    // tables never get ghost styling
+    if (sel.closest(".training-table")) {
+      sel.classList.remove("is-placeholder");
+      return;
+    }
+    const first = sel.options?.[0];
+    const isGhost = first?.dataset?.ghost === "true";
+    const empty = (sel.value === "" || sel.selectedIndex === 0 && isGhost);
+    if (isGhost && empty) sel.classList.add("is-placeholder");
+    else sel.classList.remove("is-placeholder");
   });
 }
 
-/* ---------------------------
-   Ghost Dates
---------------------------- */
 function refreshDateGhost(root=document){
-  const scope = root?.querySelectorAll ? root : document;
-  qsa('input[type="date"]', scope).forEach(inp => {
-    const empty = !inp.value;
-    inp.classList.toggle("is-placeholder", empty);
+  qsa("input[type='date']", root).forEach(inp => {
+    if (!inp.value) inp.classList.add("is-placeholder");
+    else inp.classList.remove("is-placeholder");
   });
 }
 
 function initTrainingDates(){
-  // if you have special date stack logic elsewhere, keep it there.
-  // This just ensures ghost styling is correct on load.
+  // no-op placeholder: your CSS handles stacking via .date-stack
   refreshDateGhost(document);
 }
 
 /* ---------------------------
-   Clear
+   Dealership map
 --------------------------- */
-function clearAll(){
-  if (!confirm("Clear all saved fields?")) return;
-  Object.keys(localStorage).forEach(k => {
-    if (k.startsWith("mk:")) localStorage.removeItem(k);
-  });
-  location.reload();
-}
+function updateDealershipMap(address){
+  const frame = qs("#dealershipMapFrame") || qs("#dealership-address-card .map-frame") || qs(".map-frame");
+  if (!frame) return;
 
-function clearSection(section){
-  if (!section) return;
-  qsa("input,select,textarea", section).forEach(el => {
-    if (el.type === "checkbox") el.checked = false;
-    else if (el.tagName === "SELECT") el.selectedIndex = 0;
-    else el.value = "";
-    saveField(el);
-  });
-  refreshGhostSelects(section);
-  refreshDateGhost(section);
-}
-
-/* ===========================================================
-   ✅ STACKED CARDS COMPACT TOGGLE (SAFE)
-   - Adds a switch to topbar
-   - Adds body class "stacked-compact"
-   - Marks ONLY stacked cards with .stacked-card
-   =========================================================== */
-const STACKED_COMPACT_LS_KEY = "mk:stackedCompact";
-
-function injectCompactToggle(){
-  const topbarRight = qs("#topbar .topbar-right");
-  if (!topbarRight) return;
-
-  // prevent duplicates
-  if (qs("#stackedCompactToggle")) return;
-
-  const wrap = document.createElement("div");
-  wrap.className = "compact-toggle";
-  wrap.innerHTML = `
-    <div class="compact-toggle-label">Compact</div>
-    <label class="switch" title="Toggle compact spacing for stacked cards only">
-      <input id="stackedCompactToggle" type="checkbox" />
-      <span class="slider"></span>
-    </label>
-  `;
-
-  // put it BEFORE dealership name (feel free to change)
-  topbarRight.prepend(wrap);
-
-  const toggle = qs("#stackedCompactToggle");
-  const saved = localStorage.getItem(STACKED_COMPACT_LS_KEY);
-  const on = saved === "1";
-
-  toggle.checked = on;
-  document.body.classList.toggle("stacked-compact", on);
-
-  toggle.addEventListener("change", () => {
-    const enabled = toggle.checked;
-    document.body.classList.toggle("stacked-compact", enabled);
-    localStorage.setItem(STACKED_COMPACT_LS_KEY, enabled ? "1" : "0");
-  });
-}
-
-function markStackedCards(){
-  // remove old tags first
-  qsa(".section-block.stacked-card").forEach(c => c.classList.remove("stacked-card"));
-
-  qsa(".section-block").forEach(card => {
-    // ❌ Exclusions — NEVER compact these
-    if (
-      card.closest(".cards-grid") ||
-      card.closest(".two-col-grid") ||
-      card.closest(".primary-contacts-grid") || // mini cards / POC grid
-      card.closest(".table-container") ||
-      card.closest(".training-table") ||
-      card.closest("#support-tickets") ||
-      card.closest("#dms-integration")
-    ) return;
-
-    // ✅ Only stacked cards
-    card.classList.add("stacked-card");
-  });
+  const q = encodeURIComponent(address.trim());
+  // Embed-style URL (no API key required)
+  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
 }
 
 /* ---------------------------
-   Integrated “+” row cloning
+   Integrated “+” row cloning (non-table)
 --------------------------- */
 function cloneIntegratedRow(btn){
   const row = btn.closest(".checklist-row");
@@ -208,128 +234,164 @@ function cloneIntegratedRow(btn){
   const clone = row.cloneNode(true);
   clone.dataset.clone = "true";
 
-  // remove the + button from cloned rows
-  qsa(".add-row, .additional-poc-add, .add-ticket-btn", clone).forEach(b => b.remove());
+  // remove the "+" on clones
+  const plus = qs(".add-row", clone);
+  if (plus) plus.remove();
 
-  // clear fields
-  qsa("input,select,textarea", clone).forEach(el => {
+  // clear values
+  qsa("input, select, textarea", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else if (el.tagName === "SELECT") el.selectedIndex = 0;
     else el.value = "";
+    // prevent duplicate IDs
+    if (el.id) el.removeAttribute("id");
+    if (el.name) el.removeAttribute("name");
   });
 
-  row.parentElement.insertBefore(clone, row.nextSibling);
-
+  row.insertAdjacentElement("afterend", clone);
   refreshGhostSelects(clone);
   refreshDateGhost(clone);
-  markStackedCards();
 }
 
 /* ---------------------------
-   Trainers page add (stub)
-   If you already have a real version, keep yours.
+   Trainers — add row (if used)
 --------------------------- */
 function handleTrainerAdd(btn){
-  // If your current project has a dedicated function already,
-  // you can replace this with your existing one.
+  // Works like cloneIntegratedRow but keeps indent rules as your CSS expects
   cloneIntegratedRow(btn);
 }
 
 /* ---------------------------
-   Additional POC add (stub)
-   If you already have a real version, keep yours.
+   Additional POC — add ENTIRE new card (if used)
 --------------------------- */
 function handleAdditionalPOCAdd(btn){
-  // Your current project likely clones a whole .mini-card.
-  // This is a safe fallback if you don’t:
-  const card = btn.closest(".mini-card");
-  const grid = btn.closest(".primary-contacts-grid") || card?.parentElement;
-  if (!card || !grid) return;
+  const card = btn.closest(".mini-card") || btn.closest(".section-block");
+  if (!card) return;
 
   const clone = card.cloneNode(true);
   clone.dataset.clone = "true";
+  clone.dataset.base = "false";
 
-  // remove + button on clones
+  // Remove any add button on cloned cards
   qsa(".additional-poc-add, .add-row", clone).forEach(b => b.remove());
 
-  // clear fields
-  qsa("input,select,textarea", clone).forEach(el => {
+  // Clear fields + strip IDs/names
+  qsa("input, select, textarea", clone).forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else if (el.tagName === "SELECT") el.selectedIndex = 0;
     else el.value = "";
+    if (el.id) el.removeAttribute("id");
+    if (el.name) el.removeAttribute("name");
   });
 
-  grid.appendChild(clone);
-
+  card.insertAdjacentElement("afterend", clone);
   refreshGhostSelects(clone);
   refreshDateGhost(clone);
-  markStackedCards();
 }
 
 /* ---------------------------
-   Support Tickets (stubs)
-   Keep your existing versions if you already have them.
+   Support tickets
 --------------------------- */
-function handleAddTicket(btn){
-  const baseCard = btn.closest(".ticket-group");
-  if (!baseCard) return;
+function getStatusContainerId(status){
+  const s = (status || "").toLowerCase();
+  if (s.includes("tier") || s.includes("t2") || s.includes("tier 2")) return "tierTwoTicketsContainer";
+  if (s.includes("feature")) return "closedFeatureTicketsContainer";
+  if (s.includes("closed") || s.includes("resolved")) return "closedResolvedTicketsContainer";
+  // default open
+  return "openTicketsContainer";
+}
 
-  // simple validation: require ticket # and URL and summary
-  const num = qs(".ticket-number-input", baseCard)?.value?.trim();
-  const url = qs(".ticket-zendesk-input", baseCard)?.value?.trim();
-  const sum = qs(".ticket-summary-input", baseCard)?.value?.trim();
-  if (!num || !url || !sum){
-    alert("Complete Ticket Number, URL, and Summary before adding a new ticket.");
-    return;
-  }
+function refreshTicketBadges(){
+  const sections = [
+    "openTicketsContainer",
+    "tierTwoTicketsContainer",
+    "closedResolvedTicketsContainer",
+    "closedFeatureTicketsContainer"
+  ];
 
-  const clone = baseCard.cloneNode(true);
-  clone.dataset.base = "false";
-  clone.dataset.clone = "true";
+  sections.forEach(id => {
+    const wrap = qs(`#${id}`);
+    if (!wrap) return;
 
-  // remove + button from cloned cards
-  qsa(".add-ticket-btn", clone).forEach(b => b.remove());
-
-  // status should be enabled on clones
-  const status = qs(".ticket-status-select", clone);
-  if (status){
-    status.disabled = false;
-    status.classList.remove("is-locked");
-  }
-
-  // clear base fields for next entry (optional)
-  qsa("input,textarea", baseCard).forEach(el => el.value = "");
-  refreshGhostSelects(baseCard);
-  refreshDateGhost(baseCard);
-
-  // default destination: Open container
-  const openWrap = qs("#openTicketsContainer");
-  openWrap?.appendChild(clone);
-
-  refreshGhostSelects(clone);
-  refreshDateGhost(clone);
+    const cards = qsa(".ticket-group", wrap);
+    cards.forEach((card, i) => {
+      let badge = qs(".ticket-count-badge", card);
+      if (!badge){
+        badge = document.createElement("div");
+        badge.className = "ticket-count-badge";
+        card.prepend(badge);
+        card.classList.add("has-badge");
+      }
+      badge.textContent = String(i + 1);
+    });
+  });
 }
 
 function moveTicketCardToStatus(card, statusValue){
-  const map = {
-    "Open": "#openTicketsContainer",
-    "Tier Two": "#tierTwoTicketsContainer",
-    "Closed - Resolved": "#closedResolvedTicketsContainer",
-    "Closed - Feature Not Supported": "#closedFeatureTicketsContainer"
-  };
-  const targetSel = map[statusValue] || "#openTicketsContainer";
-  const target = qs(targetSel);
-  if (!target) return;
-  target.appendChild(card);
+  const containerId = getStatusContainerId(statusValue);
+  const dest = qs(`#${containerId}`);
+  if (!dest) return;
+
+  dest.appendChild(card);
+  refreshTicketBadges();
+}
+
+function handleAddTicket(btn){
+  const card = btn.closest(".ticket-group");
+  if (!card) return;
+
+  const clone = card.cloneNode(true);
+  clone.dataset.clone = "true";
+  clone.dataset.base = "false";
+
+  // remove "+" on clone
+  qsa(".add-ticket-btn", clone).forEach(b => b.remove());
+
+  // clear fields
+  qsa("input, select, textarea", clone).forEach(el => {
+    if (el.type === "checkbox") el.checked = false;
+    else if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+    if (el.id) el.removeAttribute("id");
+    if (el.name) el.removeAttribute("name");
+  });
+
+  // place it in Open by default
+  const open = qs("#openTicketsContainer");
+  (open || card.parentElement)?.appendChild(clone);
+
+  refreshGhostSelects(clone);
+  refreshDateGhost(clone);
+  refreshTicketBadges();
 }
 
 /* ---------------------------
-   Map (stub)
+   Stacked Cards — Compact Toggle
 --------------------------- */
-function updateDealershipMap(address){
-  // If you already have real map logic, keep it.
-  // This stub avoids breaking the click handler.
-  console.log("Update map address:", address);
+function initStackedCompactToggle(){
+  const toggle = document.getElementById("stackedCompactToggle");
+  if (!toggle) return;
+
+  // Tag ONLY stacked cards (not inside grids/tables/support/DMS)
+  document.querySelectorAll(".page-section .section-block").forEach(card => {
+    if (card.closest(".cards-grid")) return;
+    if (card.closest(".two-col-grid")) return;
+    if (card.closest(".table-container")) return;
+    if (card.closest("#support-tickets")) return;
+    if (card.closest("#dms-integration")) return;
+    card.classList.add("stacked-card");
+  });
+
+  // restore saved state
+  const saved = localStorage.getItem("stackedCompact") === "1";
+  document.body.classList.toggle("stacked-compact", saved);
+  toggle.checked = saved;
+
+  toggle.addEventListener("change", () => {
+    const on = toggle.checked;
+    document.body.classList.toggle("stacked-compact", on);
+    localStorage.setItem("stackedCompact", on ? "1" : "0");
+  });
 }
 
 /* ===========================================================
@@ -338,15 +400,12 @@ function updateDealershipMap(address){
 document.addEventListener("DOMContentLoaded", () => {
   try{
     initNavigation();
+    initStackedCompactToggle();
     loadAll();
-
-    // ✅ add switch + mark stacked cards
-    injectCompactToggle();
-    markStackedCards();
-
     initTrainingDates();
     refreshGhostSelects();
     refreshDateGhost(); // ✅ make empty dates look like placeholders on load
+    refreshTicketBadges();
   } catch (err){
     console.error("Init error:", err);
   }
@@ -356,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.tagName === "SELECT") refreshGhostSelects(e.target.closest(".page-section") || document);
     if (e.target.type === "date") refreshDateGhost(e.target.closest(".page-section") || document);
   });
 
@@ -364,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isField(e.target)) return;
     saveField(e.target);
 
-    if (e.target.tagName === "SELECT") refreshGhostSelects();
+    if (e.target.tagName === "SELECT") refreshGhostSelects(e.target.closest(".page-section") || document);
     if (e.target.type === "date") refreshDateGhost(e.target.closest(".page-section") || document);
 
     // ✅ Support ticket status move (ONLY non-base cards)
@@ -417,12 +476,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (el.type === "checkbox") el.checked = false;
           else if (el.tagName === "SELECT") el.selectedIndex = 0;
           else el.value = "";
+          if (el.id) el.removeAttribute("id");
+          if (el.name) el.removeAttribute("name");
         });
 
         tbody.appendChild(clone);
         refreshGhostSelects(clone);
         refreshDateGhost(clone);
-        // DO NOT mark stacked cards for table rows
         return;
       }
 
@@ -448,4 +508,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
   });
+
+  // Live update map when address changes (optional, safe)
+  const addr = qs("#dealershipAddressInput");
+  if (addr){
+    addr.addEventListener("change", () => {
+      if (addr.value) updateDealershipMap(addr.value);
+    });
+  }
 });
