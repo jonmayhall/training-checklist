@@ -508,6 +508,21 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Init error:", err);
   }
 
+  /* ===========================
+     STACKED CARDS COMPACT TOGGLE
+     =========================== */
+  const compactToggle = document.getElementById("stackedCompactToggle");
+  if (compactToggle){
+    const isCompact = localStorage.getItem("stackedCompact") === "true";
+    document.body.classList.toggle("stacked-compact", isCompact);
+    compactToggle.checked = isCompact;
+
+    compactToggle.addEventListener("change", () => {
+      document.body.classList.toggle("stacked-compact", compactToggle.checked);
+      localStorage.setItem("stackedCompact", compactToggle.checked ? "true" : "false");
+    });
+  }
+
   // autosave on input/change
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
@@ -597,12 +612,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-     // MAP button (forces map refresh from whatever is typed)
-if (btn.id === "showDealershipMapBtn"){
-  const input = qs("#dealershipAddressInput");
-  if (input?.value) updateDealershipMap(input.value);
-  return;
-}
-
+    // MAP button (forces map refresh from whatever is typed)
+    if (btn.id === "showDealershipMapBtn"){
+      const input = qs("#dealershipAddressInput");
+      if (input?.value) updateDealershipMap(input.value);
+      return;
+    }
   });
 });
+
