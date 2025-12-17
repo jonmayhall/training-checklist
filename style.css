@@ -1298,17 +1298,15 @@ body.stacked-compact .two-col-grid{
 
 /* ===========================================================
    COMPACT RULES — STACKED CARDS ONLY
+   Targets ONLY .section-block that are DIRECT children of .page-section
+   (excludes .cards-grid, .two-col-grid, tables, support, DMS)
    =========================================================== */
 
-/* Target ONLY section-blocks that are
-   direct children of .page-section
-   (this excludes grids, tables, support, DMS) */
 body.stacked-compact .page-section > .section-block{
   margin-bottom:14px;
   padding:0 18px 10px;
 }
 
-/* Compact card headers */
 body.stacked-compact .page-section > .section-block h2{
   padding:8px 14px;
   margin-bottom:10px;
@@ -1317,30 +1315,12 @@ body.stacked-compact .page-section > .section-block h2{
   font-size:15px;
 }
 
-/* Reduce question spacing */
-body.stacked-compact
-.page-section > .section-block
-.checklist-row{
+body.stacked-compact .page-section > .section-block .checklist-row{
   margin-bottom:10px;
   padding-bottom:8px;
 }
 
-/* Textareas slightly tighter */
-body.stacked-compact
-.page-section > .section-block textarea{
+body.stacked-compact .page-section > .section-block textarea{
   min-height:120px;
-}
-
-/* ===========================================================
-   HARD EXCLUSIONS (DO NOT TOUCH)
-   =========================================================== */
-
-body.stacked-compact .cards-grid .section-block,
-body.stacked-compact .two-col-grid .section-block,
-body.stacked-compact #support-tickets .section-block,
-body.stacked-compact #dms-integration .section-block,
-body.stacked-compact .table-container,
-body.stacked-compact .table-container *{
-  all: unset revert;
 }
 }
