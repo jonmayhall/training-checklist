@@ -560,6 +560,29 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-left:60px !important;
 }
 
+/* ===========================================================
+   TRAINERS — make added "Additional Trainer" rows match width
+   =========================================================== */
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  display:flex !important;
+  align-items:center;
+  gap:12px;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row label{
+  flex:1 1 auto;
+}
+
+/* Force same width as all other right-side fields */
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="tel"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="email"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  max-width:var(--input-width) !important;
+}
+
 /* ============== MINI-CARDS (Primary Contacts) ============== */
 .mini-card{
   border:1px solid var(--orange);
