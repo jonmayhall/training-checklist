@@ -1200,52 +1200,14 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   }
 
    /* ===========================================================
-   STACKED CARDS — COMPACT TOGGLE
-   Turn on by adding: <body class="stacked-compact">
-   Affects ONLY single-column (non 2x2) cards.
+   STACKED CARDS — COMPACT MODE (SAFE via .stacked-card class)
    =========================================================== */
 
-body.stacked-compact{
-  /* tighten the right-side controls only on stacked pages */
-  --input-width:260px;
-}
-
-/* Only rows that are NOT inside side-by-side grids */
-body.stacked-compact .page-section .section-block .checklist-row{
-  padding-left:22px;     /* less left padding */
-  gap:10px;              /* tighten label/input spacing */
-}
-
-/* Optional: slightly tighter label spacing */
-body.stacked-compact .page-section .section-block .checklist-row label{
-  padding-right:10px;
-}
-
-/* Optional: slightly tighter row height */
-body.stacked-compact .page-section .section-block .checklist-row{
-  margin-bottom:12px;
-  padding-bottom:8px;
-}
-
-/* ✅ Do NOT affect 2x2 / side-by-side layouts */
-body.stacked-compact .cards-grid,
-body.stacked-compact .two-col-grid{
-  --input-width:150px;   /* keep your existing 2x2 sizing */
-}
-
-/* ===========================================================
-   STACKED CARDS — COMPACT MODE (SAFE)
-   Affects ONLY stacked section-blocks
-   =========================================================== */
-
-/* Toggle container (top bar) */
 .compact-toggle{
   display:flex;
   align-items:center;
   gap:10px;
 }
-
-/* Toggle label */
 .compact-toggle-label{
   color:#fff;
   font-size:12px;
@@ -1255,19 +1217,11 @@ body.stacked-compact .two-col-grid{
   opacity:.95;
 }
 
-/* iOS-style switch */
-.switch{
-  position:relative;
-  display:inline-block;
-  width:46px;
-  height:26px;
-}
+/* switch */
+.switch{ position:relative; display:inline-block; width:46px; height:26px; }
 .switch input{ display:none; }
-
 .slider{
-  position:absolute;
-  inset:0;
-  cursor:pointer;
+  position:absolute; inset:0; cursor:pointer;
   background:rgba(255,255,255,0.35);
   border:1px solid rgba(255,255,255,0.45);
   border-radius:999px;
@@ -1277,37 +1231,27 @@ body.stacked-compact .two-col-grid{
 .slider:before{
   content:"";
   position:absolute;
-  height:20px;
-  width:20px;
-  left:3px;
-  top:50%;
+  width:20px; height:20px;
+  left:3px; top:50%;
   transform:translateY(-50%);
   background:#fff;
   border-radius:999px;
   transition:.2s;
   box-shadow:0 2px 6px rgba(0,0,0,0.25);
 }
-
-.switch input:checked + .slider{
-  background:var(--orange);
-  border-color:var(--orange);
-}
-.switch input:checked + .slider:before{
-  transform:translate(20px,-50%);
-}
+.switch input:checked + .slider{ background:var(--orange); border-color:var(--orange); }
+.switch input:checked + .slider:before{ transform:translate(20px,-50%); }
 
 /* ===========================================================
-   COMPACT RULES — STACKED CARDS ONLY
-   Targets ONLY .section-block that are DIRECT children of .page-section
-   (excludes .cards-grid, .two-col-grid, tables, support, DMS)
+   COMPACT RULES — ONLY cards JS marks as .stacked-card
    =========================================================== */
 
-body.stacked-compact .page-section > .section-block{
+body.stacked-compact .stacked-card{
   margin-bottom:14px;
   padding:0 18px 10px;
 }
 
-body.stacked-compact .page-section > .section-block h2{
+body.stacked-compact .stacked-card h2{
   padding:8px 14px;
   margin-bottom:10px;
   margin-left:-18px;
@@ -1315,12 +1259,12 @@ body.stacked-compact .page-section > .section-block h2{
   font-size:15px;
 }
 
-body.stacked-compact .page-section > .section-block .checklist-row{
+body.stacked-compact .stacked-card .checklist-row{
   margin-bottom:10px;
   padding-bottom:8px;
 }
 
-body.stacked-compact .page-section > .section-block textarea{
+body.stacked-compact .stacked-card textarea{
   min-height:120px;
 }
 }
