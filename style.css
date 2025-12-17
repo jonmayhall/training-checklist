@@ -44,7 +44,7 @@ textarea::placeholder{
   opacity:1;
 }
 
-/* Dropdown ghost text (NON-table only) */
+/* Dropdown ghost text (NON- only) */
 select{ color:var(--ink); }
 select.is-placeholder{ color:#9ca3af; }
 
@@ -54,9 +54,9 @@ input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
-/* Tables: never ghost-color dropdowns */
-.training-table select,
-.training-table select.is-placeholder{
+/* s: never ghost-color dropdowns */
+.training- select,
+.training- select.is-placeholder{
   color:var(--ink) !important;
 }
 
@@ -305,7 +305,7 @@ main{
 /* Hide truly empty “plank” cards */
 .section-block:empty{ display:none !important; }
 
-/* ============== Q&A ROWS (non-tables) ============== */
+/* ============== Q&A ROWS (non-s) ============== */
 .checklist-row{
   display:flex;
   align-items:center;
@@ -412,8 +412,8 @@ main{
 .section-block input:focus,
 .section-block select:focus,
 .section-block textarea:focus,
-.training-table input:focus,
-.training-table select:focus{
+.training- input:focus,
+.training- select:focus{
   border-color:var(--orange);
   box-shadow:0 0 4px rgba(239,109,34,0.35);
   outline:none;
@@ -672,7 +672,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   color:#555;
 }
 
-/* ============== Integrated “+” rows (general, non-table) ============== */
+/* ============== Integrated “+” rows (general, non-) ============== */
 .section-block .checklist-row.integrated-plus{
   display:flex;
   align-items:stretch;
@@ -718,204 +718,173 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-/* ===========================================================
-   TABLES — FIX (NO NESTED CARD, LIGHT-ORANGE TABLE HEADER,
-   BETTER COLUMN WIDTHS, STICKY NAME/CHECKBOX)
-   =========================================================== */
+/* ============== TABLES (RESTORED) ============== */
+.section{ margin-bottom:40px; }
 
-/* If your tables are wrapped in .section inside a .section-block,
-   DON'T let .section become its own card */
-.section{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
-  border-radius:0 !important;
-  overflow:visible !important;
-  margin:0 0 18px !important;
-  padding:0 !important;
-}
-
-/* Kill the extra “DMS Integration Matrix / section header” style bars
-   (your orange card header already exists) */
 .section-header{
-  display:none !important;
+  background:var(--orange);
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  padding:10px 18px;
+  margin:18px 0 0;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom:1px solid var(--border);
 }
 
-/* Remove the “inner framed box” look */
 .table-container{
-  padding:0 !important;              /* was adding a second layer */
-  margin-top:0 !important;
-}
-
-/* Keep horizontal scrolling, but NO border/radius/background panel */
-.scroll-wrapper{
-  overflow:auto;
   width:100%;
-  border:none !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  padding:0 !important;
-}
-
-/* ================= TABLE BASE ================= */
-.training-table,
-.opcodes-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
   background:#fff;
-  min-width:1200px;                  /* gives columns room + allows scroll */
-  table-layout:auto;                 /* let columns size to content */
+  border:1px solid var(--border);
+  border-top:none;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow:var(--shadow);
+  margin-bottom:32px;
+  padding:0;
+  max-width:100%;
 }
 
-/* light grid lines */
+.scroll-wrapper{
+  display:block;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  background:#fff;
+  padding-bottom:4px;
+  -webkit-overflow-scrolling:touch;
+}
+
+.training-table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:900px;
+}
 .training-table th,
-.training-table td,
-.opcodes-table th,
-.opcodes-table td{
-  border-bottom:1px solid #e5e7eb;
-  border-right:1px solid #eef2f7;
+.training-table td{
+  white-space:nowrap;
+  text-align:center;
+  font-size:13px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:6px 6px;
 }
 
-.training-table th:last-child,
-.training-table td:last-child,
-.opcodes-table th:last-child,
-.opcodes-table td:last-child{
-  border-right:none;
-}
-
-/* ================= HEADER ROW (LIGHT ORANGE) ================= */
-.training-table thead th,
-.opcodes-table thead th{
+/* sticky header */
+.training-table thead th{
+  background:var(--light-orange);
+  color:#fff;
+  font-weight:800;
   position:sticky;
   top:0;
-  z-index:5;
-
-  background:var(--light-orange) !important;
-  color:#111827 !important;
-
-  font-size:12px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-
-  padding:10px 12px;
-  white-space:nowrap;               /* keep header readable */
+  z-index:3;
 }
 
-/* Give columns enough width for long dropdown values */
-.training-table thead th,
-.opcodes-table thead th{
-  min-width:150px;
+/* sticky first column (default) */
+.training-table th:first-child,
+.training-table td:first-child{
+  position:sticky;
+  left:0;
+  z-index:4;
 }
-.training-table thead th:first-child,
-.opcodes-table thead th:first-child{
-  min-width:280px;                  /* NAME + checkbox column */
+.training-table td:first-child{ background:#fff; }
+
+/* Training Checklist name col width */
+#training-checklist .training-table th:first-child,
+#training-checklist .training-table td:first-child{
+  width:210px;
+  min-width:210px;
 }
 
-/* ================= BODY ================= */
-.training-table tbody td,
-.opcodes-table tbody td{
-  padding:10px 12px;
-  vertical-align:middle;
-  background:#fff;
+/* generic second column width */
+.training-table th:nth-child(2),
+.training-table td:nth-child(2){
+  width:185px;
+  min-width:185px;
 }
 
-.training-table tbody tr:nth-child(even) td,
-.opcodes-table tbody tr:nth-child(even) td{
-  background:#fafafa;
-}
-
-/* ================= INPUTS (restore original look) ================= */
+/* table input/select styling */
 .training-table input[type="text"],
-.training-table input[type="number"],
-.training-table input[type="email"],
-.training-table input[type="tel"],
-.training-table select,
-.opcodes-table input[type="text"],
-.opcodes-table input[type="number"],
-.opcodes-table input[type="email"],
-.opcodes-table input[type="tel"],
-.opcodes-table select{
+.training-table select{
   width:100%;
-  height:34px;
-  padding:6px 10px;
-  border-radius:var(--radius-sm);   /* NOT pill */
+  min-width:130px;
+  padding:5px 6px;
+  border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
+  text-align:center;
+  height:32px;
 }
 
-/* ================= STICKY NAME/CHECKBOX COLUMN ================= */
-/* header cell */
-.training-table thead th:first-child,
-.opcodes-table thead th:first-child{
-  position:sticky;
-  left:0;
-  z-index:7;                        /* above other header cells */
-}
-
-/* body cells */
-.training-table tbody td:first-child,
-.opcodes-table tbody td:first-child{
-  position:sticky;
-  left:0;
-  z-index:3;
-  background:inherit;               /* keeps zebra striping */
-}
-
-/* make the sticky column look clean over gridlines */
-.training-table thead th:first-child,
-.opcodes-table thead th:first-child{
-  box-shadow:1px 0 0 #eef2f7;
-}
-.training-table tbody td:first-child,
-.opcodes-table tbody td:first-child{
-  box-shadow:1px 0 0 #eef2f7;
-}
-
-/* Name cell content: checkbox + name input */
-.training-table td:first-child,
-.opcodes-table td:first-child{
-  min-width:280px;
-}
-.training-table td:first-child input[type="checkbox"],
-.opcodes-table td:first-child input[type="checkbox"]{
-  transform:scale(1.1);
-  margin-right:10px;
-}
-.training-table td:first-child input[type="text"],
-.opcodes-table td:first-child input[type="text"]{
-  width:calc(100% - 34px);
-  display:inline-block;
-  vertical-align:middle;
-}
-
-/* ================= ADD ROW BUTTON (LEFT) ================= */
-.table-footer{
-  display:flex;
-  justify-content:flex-start !important; /* LEFT */
-  padding:12px 0 0 !important;
-}
-.table-footer .add-row{
-  width:38px;
-  height:38px;
-  border-radius:999px;
-  border:none;
-  background:var(--orange);
-  color:#fff;
-  font-size:20px;
-  font-weight:900;
-  cursor:pointer;
+/* Training Checklist — checkbox + input */
+#training-checklist .training-table td:first-child{
   display:flex;
   align-items:center;
-  justify-content:center;
-  box-shadow:0 2px 6px rgba(239,109,34,0.30);
-  transition:background .16s, transform .16s;
+  gap:6px;
+}
+#training-checklist .training-table td:first-child input[type="checkbox"]{
+  flex:0 0 auto;
+  margin:0;
+}
+#training-checklist .training-table td:first-child input[type="text"]{
+  flex:1 1 auto;
+  width:auto;
+  min-width:0;
+}
+
+/* row striping */
+.training-table tr:nth-child(odd){ background:#fff; }
+.training-table tr:nth-child(even){ background:#fafafa; }
+
+/* footer + add row */
+.table-footer{
+  width:100%;
+  background:#f5f5f5;
+  border-top:1px solid var(--border);
+  padding:6px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  border-bottom-left-radius:var(--radius-lg);
+  border-bottom-right-radius:var(--radius-lg);
+}
+.table-footer .add-row{
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition:.2s;
+  box-shadow:0 1px 3px rgba(239,109,34,0.25);
+  line-height:1;
 }
 .table-footer .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
+}
+
+/* acceptance colors */
+.training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
+.training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
+.training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
+.training-table select.accept-na{ background:#e5e7eb; border-color:#9ca3af; color:#374151; }
+
+/* Opcodes: first column not sticky */
+#opcodes-pricing .training-table th:first-child,
+#opcodes-pricing .training-table td:first-child{
+  position:static;
+  left:auto;
+  z-index:1;
+  width:60px;
+  min-width:60px;
+}
+#opcodes-pricing .training-table td:first-child{
+  display:table-cell;
+  padding:6px 6px;
+  background:inherit;
 }
 
 /* ============== SUPPORT TICKETS ============== */
