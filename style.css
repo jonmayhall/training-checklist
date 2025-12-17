@@ -653,6 +653,34 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-radius:var(--radius-sm) !important;
 }
 
+/* ===========================================================
+   PRIMARY CONTACTS — FIX INPUT OVERFLOW
+   =========================================================== */
+
+/* Force rows to behave like form rows, not stacked cards */
+.mini-card .checklist-row{
+  display:flex !important;
+  align-items:center;
+  gap:12px;
+}
+
+/* Labels stay left */
+.mini-card .checklist-row label{
+  flex:0 0 36%;
+  max-width:36%;
+}
+
+/* Inputs MUST stay inside the card */
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="tel"],
+.mini-card .checklist-row input[type="email"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  box-sizing:border-box;
+}
+
 /* ============== Map wrapper (shared) ============== */
 .map-wrapper{
   margin:16px 0 8px;
