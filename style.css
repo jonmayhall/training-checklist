@@ -718,7 +718,16 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-/* ============== TABLE SECTIONS (Training tables / Opcodes) ============== */
+/* ===========================================================
+   TABLE SECTIONS (Training tables / Opcodes) — RESTORED
+   - Orange header row
+   - Sticky header + sticky first column (Name + checkbox)
+   - Light gridlines
+   - Add (+) button on LEFT
+   - Inputs/selects back to normal (NOT pills)
+   - Better column sizing for large dropdown text
+   =========================================================== */
+
 .section{
   background:#fff;
   border-radius:var(--radius-lg);
@@ -727,6 +736,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   overflow:hidden;
   margin-bottom:24px;
 }
+
 .section-header{
   background:var(--orange);
   color:#fff;
@@ -735,9 +745,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:10px 16px;
   border-bottom:1px solid var(--border);
 }
+
 .table-container{
   padding:12px 12px 10px;
 }
+
+/* Scroll wrapper owns radius/border so sticky works clean */
 .scroll-wrapper{
   overflow:auto;
   width:100%;
@@ -745,174 +758,64 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border:1px solid #e5e7eb;
   background:#fff;
 }
+
+/* ===== TABLE ===== */
 .training-table{
   width:100%;
+  min-width:980px;
   border-collapse:separate;
   border-spacing:0;
-  min-width:900px;
+  table-layout:fixed; /* ✅ helps even column behavior */
+  background:#fff;
 }
-.training-table th{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:#111827;
-  color:#fff;
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  padding:10px 10px;
-  border-bottom:1px solid rgba(255,255,255,0.12);
-  white-space:nowrap;
-}
+
+/* Light gridlines */
+.training-table th,
 .training-table td{
-  padding:8px 10px;
   border-bottom:1px solid #e5e7eb;
-  vertical-align:middle;
-  background:#fff;
+  border-right:1px solid #eef2f7;
 }
-.training-table tbody tr:nth-child(even) td{
-  background:#fafafa;
-}
-.training-table input[type="text"],
-.training-table input[type="number"],
-.training-table input[type="email"],
-.training-table input[type="tel"]{
-  width:100%;
-  height:34px;
-  padding:6px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-}
-.training-table select{
-  width:100%;
-  height:34px;
-  padding:6px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-}
-.training-table input[type="checkbox"]{
-  transform:scale(1.1);
+.training-table th:last-child,
+.training-table td:last-child{
+  border-right:none;
 }
 
-/* Name cell that has checkbox + input */
-.training-table td:first-child{
-  min-width:220px;
-}
-.training-table td:first-child input[type="checkbox"]{
-  margin-right:10px;
-}
-.training-table td:first-child input[type="text"]{
-  width:calc(100% - 34px);
-  display:inline-block;
-  vertical-align:middle;
-}
-
-/* Table footer + add row button */
-.table-footer{
-  display:flex;
-  justify-content:flex-end;
-  padding:10px 4px 2px;
-}
-.table-footer .add-row{
-  width:38px;
-  height:38px;
-  border-radius:999px;
-  border:none;
-  background:var(--orange);
-  color:#fff;
-  font-size:20px;
-  font-weight:900;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 2px 6px rgba(239,109,34,0.30);
-  transition:background .16s, transform .16s;
-}
-.table-footer .add-row:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-}
-
-/* ============== TABLE SECTIONS (Training tables / Opcodes) ============== */
-.section{
-  background:#fff;
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  margin-bottom:24px;
-}
-.section-header{
-  background:var(--orange);
-  color:#fff;
-  font-size:16px;
-  font-weight:700;
-  padding:10px 16px;
-  border-bottom:1px solid var(--border);
-}
-
-.table-container{ padding:12px 12px 10px; }
-
-/* Scroll box owns the border + radius (NOT the table) */
-.scroll-wrapper{
-  overflow:auto;
-  width:100%;
-  border-radius:14px;
-  border:1px solid #e5e7eb;
-  background:#fff;
-}
-
-/* Table */
-.training-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  min-width:900px;
-  background:#fff;
-}
-
-/* Header: BLACK + grid line separators */
+/* ===== HEADER (ORANGE) ===== */
 .training-table thead th{
   position:sticky;
   top:0;
-  z-index:2;
+  z-index:5;
 
-  background:#0f172a; /* black header */
+  background:var(--orange);
   color:#fff;
 
   font-size:12px;
-  font-weight:700;
+  font-weight:800;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:.06em;
 
-  padding:12px 10px;
+  padding:10px 10px;
   white-space:nowrap;
+  text-align:center;
 
   border-bottom:1px solid rgba(255,255,255,0.18);
-  border-right:1px solid rgba(255,255,255,0.14);
+  border-right:1px solid rgba(255,255,255,0.18);
 }
-.training-table thead th:last-child{ border-right:none; }
+.training-table thead th:last-child{
+  border-right:none;
+}
 
-/* Body grid lines (light) */
+/* ===== BODY CELLS ===== */
 .training-table tbody td{
   padding:8px 10px;
   vertical-align:middle;
   background:#fff;
-
-  border-bottom:1px solid #e5e7eb;
-  border-right:1px solid #f1f5f9;
 }
-.training-table tbody td:last-child{ border-right:none; }
-
-/* Striping */
 .training-table tbody tr:nth-child(even) td{
   background:#fafafa;
 }
 
-/* Inputs inside table (keep your normal rounded, NOT pills) */
+/* ===== INPUTS / SELECTS (restore normal look) ===== */
 .training-table input[type="text"],
 .training-table input[type="number"],
 .training-table input[type="email"],
@@ -921,31 +824,94 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:100%;
   height:34px;
   padding:6px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid #d1d5db;
+  border-radius:var(--radius-sm);   /* ✅ not pills */
+  border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
+  box-sizing:border-box;
 }
 
+/* Let selects show bigger text better */
+.training-table select{
+  white-space:normal; /* allows wrapping if the browser supports it */
+}
+
+/* ===== CHECKBOX ===== */
 .training-table input[type="checkbox"]{
   transform:scale(1.1);
 }
 
-/* Name cell: checkbox + name input */
-.training-table td:first-child{ min-width:220px; }
-.training-table td:first-child input[type="checkbox"]{ margin-right:10px; }
-.training-table td:first-child input[type="text"]{
+/* ===========================================================
+   STICKY FIRST COLUMN (Name + checkbox)
+   IMPORTANT: applies to BOTH header and body first column
+   =========================================================== */
+
+/* First column width baseline */
+.training-table th:first-child,
+.training-table td:first-child{
+  width:260px;         /* adjust if you want wider name column */
+  min-width:260px;
+}
+
+/* Sticky left column */
+.training-table thead th:first-child{
+  position:sticky;
+  left:0;
+  z-index:6; /* above header cells */
+  text-align:left;
+  padding-left:16px;
+  border-right:1px solid rgba(255,255,255,0.18);
+}
+
+.training-table tbody td:first-child{
+  position:sticky;
+  left:0;
+  z-index:4; /* above normal cells */
+  background:inherit; /* keeps striping consistent */
+  border-right:1px solid #e5e7eb;
+}
+
+/* Name cell layout: checkbox + input */
+.training-table tbody td:first-child input[type="checkbox"]{
+  margin-right:10px;
+}
+.training-table tbody td:first-child input[type="text"]{
   width:calc(100% - 34px);
   display:inline-block;
   vertical-align:middle;
 }
 
-/* Table footer + add row button */
+/* ===========================================================
+   COLUMN SIZING HELPERS (improves dropdown fit)
+   - Give certain common columns a minimum width.
+   - Works best if your HTML has th/td order consistent.
+   =========================================================== */
+
+/* Default cell min widths so long dropdowns don’t crush */
+.training-table th,
+.training-table td{
+  min-width:120px;
+}
+
+/* Some columns typically need more room (tweak as needed) */
+.training-table th:nth-child(2),
+.training-table td:nth-child(2){
+  min-width:190px; /* User Acceptance / long dropdowns */
+}
+.training-table th:nth-child(5),
+.training-table td:nth-child(5){
+  min-width:190px; /* Workflow Order / long dropdowns */
+}
+
+/* ===========================================================
+   TABLE FOOTER + ADD ROW BUTTON — LEFT
+   =========================================================== */
 .table-footer{
   display:flex;
-  justify-content:flex-end;
+  justify-content:flex-start; /* ✅ LEFT */
   padding:10px 4px 2px;
 }
+
 .table-footer .add-row{
   width:38px;
   height:38px;
@@ -966,6 +932,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42;
   transform:translateY(-1px);
 }
+
 
 /* ============== SUPPORT TICKETS ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
