@@ -882,6 +882,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 2px 6px rgba(239,109,34,0.35);
   z-index:2;
 }
+/* =========================================
+   SUPPORT TICKETS — FIX BADGE OVERLAP
+   (badge covering "Ticket Number" text)
+   ========================================= */
+
+/* Only the first row label needs to move right */
+#support-tickets .ticket-group.has-badge .ticket-row:first-child > label{
+  padding-left:46px !important;  /* adjust 40–60 if you want */
+}
+
+/* (optional) nudge badge slightly so it feels centered */
+#support-tickets .ticket-group.has-badge .ticket-count-badge{
+  top:12px !important;
+  left:12px !important;
+}
+
 
 /* labels */
 #support-tickets .ticket-row label{
