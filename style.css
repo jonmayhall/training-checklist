@@ -738,24 +738,24 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-radius:var(--radius-sm) !important;
 }
 
-/* ============== DMS INTEGRATION — TIGHT + CLEAN ============== */
+/* ============== DMS INTEGRATION — SPACED + STRONG HIERARCHY ============== */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:26px; /* wider center + horizontal gap */
-  padding:0; /* remove white plank wrapper */
+  gap:52px; /* ⬅️ 2x vertical + horizontal spacing */
+  padding:0;
   background:transparent;
   border:none;
   box-shadow:none;
 }
 
-/* individual DMS card */
+/* individual card */
 #dms-integration .dms-card{
   background:#fff;
   border:1px solid #e5e7eb;
   border-radius:16px;
-  box-shadow:0 3px 8px rgba(15,23,42,0.06);
-  padding:10px 12px 8px; /* TIGHTER */
+  box-shadow:0 4px 10px rgba(15,23,42,0.06);
+  padding:12px 14px 10px;
 }
 
 /* header row */
@@ -763,17 +763,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:14px; /* BIGGER gap below title */
+  margin-bottom:28px; /* ⬅️ 2x gap under title */
 }
 
 /* DMS title */
 #dms-integration .dms-name{
-  font-size:18px;       /* BIGGER title */
+  font-size:22px; /* ⬅️ larger title */
   font-weight:900;
   color:var(--orange);
-  padding-bottom:3px;
-  border-bottom:3px solid var(--orange);
-  line-height:1.1;
+  line-height:1.15;
+  display:block;
+  width:100%; /* ⬅️ underline spans wider like page titles */
+  padding-bottom:6px;
+  border-bottom:4px solid var(--orange);
 }
 
 /* pull / push chip */
@@ -782,7 +784,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-weight:900;
   letter-spacing:0.08em;
   text-transform:uppercase;
-  padding:3px 10px;
+  padding:4px 12px;
   border-radius:999px;
   white-space:nowrap;
   border:1px solid transparent;
@@ -807,10 +809,10 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:0;
 }
 
-/* list rows — tighter */
+/* list rows */
 #dms-integration .dms-list li{
-  padding-top:6px;
-  margin-top:6px;
+  padding-top:8px;
+  margin-top:8px;
   border-top:1px solid #e5e7eb;
 }
 
@@ -822,16 +824,18 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
 /* row top line */
 #dms-integration .dms-row-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:1px;
+  display:grid;
+  grid-template-columns:1fr auto; /* ⬅️ right side independent */
+  align-items:center;            /* ⬅️ vertical centering */
+  column-gap:12px;
+  margin-bottom:2px;
 }
 
-/* field label */
+/* left label (bigger + stronger) */
 #dms-integration .dms-field{
-  font-weight:600;
-  font-size:13px;
+  font-weight:700;
+  font-size:14px; /* ⬅️ larger left text */
+  color:#111827;
 }
 
 /* description text */
