@@ -1,9 +1,13 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — CLEAN FULL CSS
    (Wider pages/cards + tables/support/DMS preserved)
-   Colors:
-   --orange: #EF6D22
-   --mykaarma-green: #CDDC39
+   FIXES:
+   - Stacked cards no “dead middle space” (grid layout)
+   - DOES NOT break 2x2 grids
+   - Support ticket corner badge restored
+   - Textareas full width again (stacked + grids)
+   - Integrated “+” rows stay FLEX (so buttons don’t break)
+   - Hide truly empty “plank” cards
    ======================================================= */
 
 /* ============== CSS VARIABLES ============== */
@@ -23,8 +27,8 @@
 
   --shadow:0 2px 8px rgba(0,0,0,0.10);
 
-  /* Wider stacked cards + less empty space between label/input */
-  --input-width:340px; /* default (single-column pages) */
+  /* default (single-column pages) */
+  --input-width:340px;
 }
 
 /* ============== GLOBAL INPUT TYPOGRAPHY ============== */
@@ -118,7 +122,7 @@ html,body{
   display:flex;
   min-height:100vh;
   margin-top:70px;
-  overflow-x:hidden; /* prevent page overflow */
+  overflow-x:hidden;
 }
 
 /* ============== SIDEBAR ============== */
@@ -126,7 +130,7 @@ html,body{
   background:linear-gradient(180deg,#0b1220 0%, #111827 35%, #020617 100%);
   border-right:1px solid rgba(15,23,42,0.8);
   width:230px;
-  padding:20px 12px 90px; /* space for Clear All */
+  padding:20px 12px 90px;
   box-shadow:0 0 18px rgba(15,23,42,0.6);
   position:fixed;
   top:70px;
@@ -209,7 +213,7 @@ main{
   margin-left:230px;
   padding:30px 32px;
   background:var(--gray-bg);
-  overflow-x:hidden; /* prevents table pages from pushing body width */
+  overflow-x:hidden;
 }
 
 /* ============== PAGE SECTIONS ============== */
@@ -222,8 +226,6 @@ main{
   padding:22px 32px 28px;
   margin:0 auto 40px;
   width:100%;
-
-  /* Wider pages/cards without breaking tables/support */
   max-width:1320px;
 }
 .page-section.active{ display:block; }
@@ -307,6 +309,9 @@ main{
 }
 .orange-outline-card{ border:2px solid var(--orange); }
 
+/* Hide truly empty “plank” cards (prevents random blank section-blocks) */
+.section-block:empty{ display:none !important; }
+
 /* ============== Q&A ROWS (non-tables) ============== */
 .checklist-row{
   display:flex;
@@ -314,10 +319,7 @@ main{
   gap:12px;
   margin-bottom:14px;
   font-size:14px;
-
-  /* Slightly tighter so wide cards don’t feel empty */
   padding-left:32px;
-
   padding-bottom:10px;
   border-bottom:1px solid #e0e0e0;
 }
@@ -354,13 +356,11 @@ main{
 
 /* ===========================================================
    STACKED CARDS — TIGHTEN LEFT↔RIGHT SPACE (SAFE)
-   Only affects normal stacked cards (NOT grids, NOT mini-cards,
-   NOT support tickets, NOT DMS, NOT tables)
+   - Only affects section-blocks that are DIRECT children of page-section
+   - Does NOT touch .cards-grid/.two-col-grid
+   - Does NOT touch integrated-plus rows (keep flex for + button)
    =========================================================== */
-
-/* ✅ Only stacked section-blocks directly inside a page-section,
-      excluding mini-cards and known special areas */
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row{
+.page-section > .section-block .checklist-row:not(.integrated-plus){
   display:grid;
   grid-template-columns: minmax(260px, 1fr) var(--input-width);
   column-gap:18px;
@@ -368,18 +368,24 @@ main{
   align-items:center;
 }
 
-/* ✅ Grid alignment: don’t push inputs with margin-left:auto */
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="text"],
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="number"],
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="email"],
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="tel"],
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="date"],
-.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row select{
+/* grid alignment: remove margin-left:auto for stacked (non +) rows */
+.page-section > .section-block .checklist-row:not(.integrated-plus) input[type="text"],
+.page-section > .section-block .checklist-row:not(.integrated-plus) input[type="number"],
+.page-section > .section-block .checklist-row:not(.integrated-plus) input[type="email"],
+.page-section > .section-block .checklist-row:not(.integrated-plus) input[type="tel"],
+.page-section > .section-block .checklist-row:not(.integrated-plus) input[type="date"],
+.page-section > .section-block .checklist-row:not(.integrated-plus) select{
   width:100%;
   margin-left:0;
 }
 
-/* ✅ Do NOT affect 2x2 grids (keep them flex) */
+/* textareas inside rows should span full width */
+.page-section > .section-block .checklist-row textarea{
+  grid-column:1 / -1;
+  width:100% !important;
+}
+
+/* Do NOT affect 2x2 grids (keep them flex) */
 .cards-grid .checklist-row,
 .two-col-grid .checklist-row{
   display:flex;
@@ -401,13 +407,40 @@ main{
   margin-left:auto;
 }
 
-/* ===========================================================
-   Dealership Address — override fixed input width
-   + integrated Map button (matches + buttons)
-   =========================================================== */
-#dealership-address-card .checklist-row{
-  align-items:center;
+/* textareas */
+.section-block textarea{
+  width:100% !important;
+  max-width:100% !important;
+  margin:6px 0 10px;
+  display:block;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  resize:vertical;
+  box-sizing:border-box;
 }
+
+/* focus */
+.section-block input:focus,
+.section-block select:focus,
+.section-block textarea:focus,
+.training-table input:focus,
+.training-table select:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 4px rgba(239,109,34,0.35);
+  outline:none;
+  background:#fff9f5;
+}
+
+/* indents */
+.indent-sub{ padding-left:60px !important; }
+
+/* ===========================================================
+   Dealership Address — override fixed input width + Map btn
+   =========================================================== */
+#dealership-address-card .checklist-row{ align-items:center; }
 #dealership-address-card .address-input-wrap{
   flex:0 0 75%;
   width:75%;
@@ -537,8 +570,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
    =========================================================== */
 #trainers-deployment .checklist-row{ padding-left:32px !important; }
 #trainers-deployment .indent-sub{ padding-left:60px !important; }
-
-/* Trainers page — force indent for cloned "Additional Trainer" rows */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
   padding-left:60px !important;
 }
@@ -646,7 +677,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 .map-frame{
   width:100%;
-  height:440px; /* twice as tall */
+  height:440px;
   border:0;
 }
 .map-helper-text{
@@ -750,40 +781,23 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border:1px solid transparent;
   color:#fff;
 }
-#dms-integration .dms-chip-push{
-  background:var(--orange);
-  border-color:var(--orange);
-}
-#dms-integration .dms-chip-pull{
-  background:var(--mykaarma-green);
-  border-color:var(--mykaarma-green);
-  color:#111;
-}
-#dms-integration .dms-list{
-  list-style:none;
-  margin:0;
-  padding:0;
-}
+#dms-integration .dms-chip-push{ background:var(--orange); border-color:var(--orange); }
+#dms-integration .dms-chip-pull{ background:var(--mykaarma-green); border-color:var(--mykaarma-green); color:#111; }
+
+#dms-integration .dms-list{ list-style:none; margin:0; padding:0; }
 #dms-integration .dms-list li{
   padding-top:8px;
   margin-top:8px;
   border-top:1px solid #e5e7eb;
 }
-#dms-integration .dms-list li:first-child{
-  border-top:none;
-  margin-top:0;
-  padding-top:2px;
-}
+#dms-integration .dms-list li:first-child{ border-top:none; margin-top:0; padding-top:2px; }
 #dms-integration .dms-row-top{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:2px;
 }
-#dms-integration .dms-field{
-  font-weight:500;
-  font-size:13px;
-}
+#dms-integration .dms-field{ font-weight:500; font-size:13px; }
 #dms-integration .dms-list p{
   margin:0;
   font-size:12px;
@@ -843,6 +857,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:6px 6px;
 }
 
+/* sticky header */
 .training-table thead th{
   background:var(--light-orange);
   color:#fff;
@@ -852,6 +867,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   z-index:3;
 }
 
+/* sticky first column (default) */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -860,18 +876,21 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 .training-table td:first-child{ background:#fff; }
 
+/* Training Checklist name col width */
 #training-checklist .training-table th:first-child,
 #training-checklist .training-table td:first-child{
   width:210px;
   min-width:210px;
 }
 
+/* generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){
   width:185px;
   min-width:185px;
 }
 
+/* table input/select styling */
 .training-table input[type="text"],
 .training-table select{
   width:100%;
@@ -885,6 +904,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   height:32px;
 }
 
+/* Training Checklist — checkbox + input */
 #training-checklist .training-table td:first-child{
   display:flex;
   align-items:center;
@@ -900,9 +920,11 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   min-width:0;
 }
 
+/* row striping */
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
+/* footer + add row */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -932,27 +954,13 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-.training-table select.accept-yes{
-  background:#dcfce7;
-  border-color:#22c55e;
-  color:#14532d;
-}
-.training-table select.accept-neutral{
-  background:#fef9c3;
-  border-color:#eab308;
-  color:#854d0e;
-}
-.training-table select.accept-no{
-  background:#fee2e2;
-  border-color:#ef4444;
-  color:#7f1d1d;
-}
-.training-table select.accept-na{
-  background:#e5e7eb;
-  border-color:#9ca3af;
-  color:#374151;
-}
+/* acceptance colors */
+.training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
+.training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
+.training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
+.training-table select.accept-na{ background:#e5e7eb; border-color:#9ca3af; color:#374151; }
 
+/* Opcodes: first column not sticky */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child{
   position:static;
@@ -969,7 +977,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
 /* ============== SUPPORT TICKETS (RESTORED) ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
-
 #support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
@@ -996,6 +1003,26 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   margin:0;
 }
 
+/* ✅ corner badge restored */
+#support-tickets .ticket-count-badge{
+  position:absolute;
+  top:12px;
+  left:12px;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:var(--orange);
+  color:#fff;
+  font-weight:900;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(239,109,34,0.35);
+  z-index:2;
+}
+
+/* labels like “Ticket Number”, “Status”, etc */
 #support-tickets .ticket-row label{
   font-weight:500;
   font-size:14px;
@@ -1035,6 +1062,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   height:36px;
 }
 
+/* Ticket number wrap with + */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
@@ -1066,6 +1094,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42;
 }
 
+/* Summary row */
 #support-tickets .ticket-summary-row{ grid-template-columns:1fr; }
 #support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 
@@ -1081,6 +1110,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   resize:none;
 }
 
+/* Base disclaimer */
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   color:#9ca3af;
@@ -1089,6 +1119,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
+/* Locked base status look */
 #support-tickets .ticket-status-select.is-locked,
 #support-tickets .ticket-status-select:disabled{
   background:#eeeeee !important;
@@ -1098,6 +1129,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   opacity:0.9;
 }
 
+/* Non-base cards: status looks normal */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-status-select{
   background:#f7f7f7 !important;
   color:var(--ink) !important;
