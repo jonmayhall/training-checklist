@@ -1159,6 +1159,20 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
+/* ================================
+   DMS INTEGRATION — REMOVE MATRIX HEADER
+   ================================ */
+
+/* hides the "DMS Integration Matrix" line entirely */
+#dms-integration .section-header{
+  display:none !important;
+}
+
+/* removes the extra top padding that was spacing for that header */
+#dms-integration .dms-grid{
+  padding-top:0 !important;
+}
+
 /* ============== RESPONSIVE ============== */
 @media (max-width:900px){
   #sidebar{ width:190px; }
