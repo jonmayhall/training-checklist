@@ -73,9 +73,6 @@ html,body{
 }
 *{ box-sizing:border-box; }
 
-/* (You previously had a global “no italics ever” rule.
-   Removing it prevents breaking table/support/DMS typography.) */
-
 /* ============== TOP BAR ============== */
 #topbar{
   background:linear-gradient(90deg,#000 0%, var(--orange) 100%);
@@ -226,7 +223,7 @@ main{
   margin:0 auto 40px;
   width:100%;
 
-  /* ✅ Wider pages/cards without breaking tables/support */
+  /* Wider pages/cards without breaking tables/support */
   max-width:1320px;
 }
 .page-section.active{ display:block; }
@@ -354,42 +351,40 @@ main{
   font-size:13px;
   height:34px;
 }
+
 /* ===========================================================
-   STACKED CARDS — REDUCE LEFT↔RIGHT EMPTY SPACE
-   (Affects only stacked section-blocks, NOT 2x2 grids)
+   STACKED CARDS — TIGHTEN LEFT↔RIGHT SPACE (SAFE)
+   Only affects normal stacked cards (NOT grids, NOT mini-cards,
+   NOT support tickets, NOT DMS, NOT tables)
    =========================================================== */
 
-/* stacked only: direct section-block children of a page-section */
-.page-section > .section-block .checklist-row{
-  gap:14px;
+/* ✅ Only stacked section-blocks directly inside a page-section,
+      excluding mini-cards and known special areas */
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row{
+  display:grid;
+  grid-template-columns: minmax(260px, 1fr) var(--input-width);
+  column-gap:18px;
+  padding-left:18px; /* overrides 32px */
+  align-items:center;
 }
 
-/* stacked only: keep label from stretching too wide */
-.page-section > .section-block .checklist-row label{
-  flex:0 0 46%;
-  max-width:46%;
-}
-
-/* stacked only: let inputs use remaining space (no huge “dead band”) */
-.page-section > .section-block .checklist-row input[type="text"],
-.page-section > .section-block .checklist-row input[type="number"],
-.page-section > .section-block .checklist-row input[type="email"],
-.page-section > .section-block .checklist-row input[type="tel"],
-.page-section > .section-block .checklist-row input[type="date"],
-.page-section > .section-block .checklist-row select{
-  flex:1 1 auto;
-  width:auto;
-  max-width:420px;
+/* ✅ Grid alignment: don’t push inputs with margin-left:auto */
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="text"],
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="number"],
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="email"],
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="tel"],
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row input[type="date"],
+.page-section > .section-block:not(.mini-card):not(.ticket-group):not(.dms-card) .checklist-row select{
+  width:100%;
   margin-left:0;
 }
 
-/* KEEP 2x2 cards the same (grids still control their own sizing) */
-.cards-grid .checklist-row label,
-.two-col-grid .checklist-row label{
-  flex:1 1 auto;
-  max-width:none;
+/* ✅ Do NOT affect 2x2 grids (keep them flex) */
+.cards-grid .checklist-row,
+.two-col-grid .checklist-row{
+  display:flex;
+  padding-left:10px;
 }
-
 .cards-grid .checklist-row input[type="text"],
 .cards-grid .checklist-row input[type="number"],
 .cards-grid .checklist-row input[type="email"],
@@ -402,39 +397,9 @@ main{
 .two-col-grid .checklist-row input[type="tel"],
 .two-col-grid .checklist-row input[type="date"],
 .two-col-grid .checklist-row select{
-  flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
 }
-
-/* textareas */
-.section-block textarea{
-  width:100%;
-  margin:6px 0 10px;
-  display:block;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  resize:vertical;
-  box-sizing:border-box;
-}
-
-/* focus */
-.section-block input:focus,
-.section-block select:focus,
-.section-block textarea:focus,
-.training-table input:focus,
-.training-table select:focus{
-  border-color:var(--orange);
-  box-shadow:0 0 4px rgba(239,109,34,0.35);
-  outline:none;
-  background:#fff9f5;
-}
-
-/* indents */
-.indent-sub{ padding-left:60px !important; }
 
 /* ===========================================================
    Dealership Address — override fixed input width
@@ -745,10 +710,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* ============== DMS INTEGRATION (2 PER ROW) ============== */
 #dms-integration .dms-grid{
   display:grid;
-
-  /* ✅ Always 2-per-row on desktop */
   grid-template-columns:repeat(2,minmax(0,1fr));
-
   gap:18px;
   padding:18px;
   background:#fff;
@@ -818,12 +780,10 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   justify-content:space-between;
   margin-bottom:2px;
 }
-/* ✅ remove “bold” feel */
 #dms-integration .dms-field{
   font-weight:500;
   font-size:13px;
 }
-/* ✅ secondary text smaller + italic */
 #dms-integration .dms-list p{
   margin:0;
   font-size:12px;
@@ -861,7 +821,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .scroll-wrapper{
   display:block;
   width:100%;
-  overflow-x:auto;     /* ✅ table scrolls instead of page */
+  overflow-x:auto;
   overflow-y:hidden;
   background:#fff;
   padding-bottom:4px;
@@ -871,7 +831,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .training-table{
   border-collapse:collapse;
   width:100%;
-  min-width:900px;     /* ✅ keeps table readable; scroll wrapper handles overflow */
+  min-width:900px;
 }
 .training-table th,
 .training-table td{
@@ -883,7 +843,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:6px 6px;
 }
 
-/* sticky header */
 .training-table thead th{
   background:var(--light-orange);
   color:#fff;
@@ -893,7 +852,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   z-index:3;
 }
 
-/* sticky first column (default) */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -902,21 +860,18 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 .training-table td:first-child{ background:#fff; }
 
-/* Training Checklist name col width */
 #training-checklist .training-table th:first-child,
 #training-checklist .training-table td:first-child{
   width:210px;
   min-width:210px;
 }
 
-/* generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){
   width:185px;
   min-width:185px;
 }
 
-/* ✅ restore table input/select styling */
 .training-table input[type="text"],
 .training-table select{
   width:100%;
@@ -930,7 +885,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   height:32px;
 }
 
-/* Training Checklist — checkbox + input */
 #training-checklist .training-table td:first-child{
   display:flex;
   align-items:center;
@@ -946,11 +900,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   min-width:0;
 }
 
-/* row striping */
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
-/* footer + add row */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -980,7 +932,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-/* acceptance colors */
 .training-table select.accept-yes{
   background:#dcfce7;
   border-color:#22c55e;
@@ -1002,7 +953,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   color:#374151;
 }
 
-/* Opcodes: first column not sticky */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child{
   position:static;
@@ -1046,7 +996,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   margin:0;
 }
 
-/* labels like “Ticket Number”, “Status”, etc */
 #support-tickets .ticket-row label{
   font-weight:500;
   font-size:14px;
@@ -1086,7 +1035,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   height:36px;
 }
 
-/* Ticket number wrap with + */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
@@ -1118,7 +1066,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42;
 }
 
-/* Summary row */
 #support-tickets .ticket-summary-row{ grid-template-columns:1fr; }
 #support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 
@@ -1134,7 +1081,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   resize:none;
 }
 
-/* Base disclaimer */
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   color:#9ca3af;
@@ -1143,7 +1089,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
-/* Locked base status look */
 #support-tickets .ticket-status-select.is-locked,
 #support-tickets .ticket-status-select:disabled{
   background:#eeeeee !important;
@@ -1153,7 +1098,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   opacity:0.9;
 }
 
-/* Non-base cards: status looks normal */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-status-select{
   background:#f7f7f7 !important;
   color:var(--ink) !important;
@@ -1205,7 +1149,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     grid-template-columns:1fr;
   }
 
-  /* DMS becomes single column on smaller screens */
   #dms-integration .dms-grid{
     grid-template-columns:1fr;
   }
