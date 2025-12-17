@@ -741,14 +741,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* ============== DMS INTEGRATION (2 PER ROW) ============== */
 #dms-integration .dms-grid{
   display:grid;
+
+  /* ✅ Always 2-per-row on desktop */
   grid-template-columns:repeat(2,minmax(0,1fr));
+
   gap:18px;
-  padding:18px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
+
+  /* ✅ REMOVE the extra “white rounded wrapper” so it flows under the orange H2 */
+  background:transparent;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+
+  /* ✅ keep spacing inside the section-block without creating a new card */
+  padding:18px 0 6px;
 }
+
 #dms-integration .dms-card{
   border-radius:16px;
   border:1px solid #e5e7eb;
@@ -756,12 +764,14 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 4px 10px rgba(15,23,42,0.06);
   padding:12px 14px 10px;
 }
+
 #dms-integration .dms-card-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:8px;
 }
+
 #dms-integration .dms-name{
   font-size:16px;
   font-weight:800;
@@ -770,6 +780,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-bottom:2px;
   border-bottom:2px solid var(--orange);
 }
+
 #dms-integration .dms-chip{
   font-size:11px;
   font-weight:800;
@@ -781,198 +792,53 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border:1px solid transparent;
   color:#fff;
 }
-#dms-integration .dms-chip-push{ background:var(--orange); border-color:var(--orange); }
-#dms-integration .dms-chip-pull{ background:var(--mykaarma-green); border-color:var(--mykaarma-green); color:#111; }
 
-#dms-integration .dms-list{ list-style:none; margin:0; padding:0; }
+#dms-integration .dms-chip-push{
+  background:var(--orange);
+  border-color:var(--orange);
+}
+#dms-integration .dms-chip-pull{
+  background:var(--mykaarma-green);
+  border-color:var(--mykaarma-green);
+  color:#111;
+}
+
+#dms-integration .dms-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
 #dms-integration .dms-list li{
   padding-top:8px;
   margin-top:8px;
   border-top:1px solid #e5e7eb;
 }
-#dms-integration .dms-list li:first-child{ border-top:none; margin-top:0; padding-top:2px; }
+
+#dms-integration .dms-list li:first-child{
+  border-top:none;
+  margin-top:0;
+  padding-top:2px;
+}
+
 #dms-integration .dms-row-top{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:2px;
 }
-#dms-integration .dms-field{ font-weight:500; font-size:13px; }
+
+#dms-integration .dms-field{
+  font-weight:500;
+  font-size:13px;
+}
+
 #dms-integration .dms-list p{
   margin:0;
   font-size:12px;
   line-height:1.45;
   color:#4b5563;
   font-style:italic;
-}
-
-/* ============== TABLES (RESTORED) ============== */
-.section{ margin-bottom:40px; }
-
-.section-header{
-  background:var(--orange);
-  color:#fff;
-  font-size:15px;
-  font-weight:800;
-  padding:10px 18px;
-  margin:18px 0 0;
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-  border-bottom:1px solid var(--border);
-}
-
-.table-container{
-  width:100%;
-  background:#fff;
-  border:1px solid var(--border);
-  border-top:none;
-  border-radius:0 0 var(--radius-lg) var(--radius-lg);
-  box-shadow:var(--shadow);
-  margin-bottom:32px;
-  padding:0;
-  max-width:100%;
-}
-
-.scroll-wrapper{
-  display:block;
-  width:100%;
-  overflow-x:auto;
-  overflow-y:hidden;
-  background:#fff;
-  padding-bottom:4px;
-  -webkit-overflow-scrolling:touch;
-}
-
-.training-table{
-  border-collapse:collapse;
-  width:100%;
-  min-width:900px;
-}
-.training-table th,
-.training-table td{
-  white-space:nowrap;
-  text-align:center;
-  font-size:13px;
-  border-right:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  padding:6px 6px;
-}
-
-/* sticky header */
-.training-table thead th{
-  background:var(--light-orange);
-  color:#fff;
-  font-weight:800;
-  position:sticky;
-  top:0;
-  z-index:3;
-}
-
-/* sticky first column (default) */
-.training-table th:first-child,
-.training-table td:first-child{
-  position:sticky;
-  left:0;
-  z-index:4;
-}
-.training-table td:first-child{ background:#fff; }
-
-/* Training Checklist name col width */
-#training-checklist .training-table th:first-child,
-#training-checklist .training-table td:first-child{
-  width:210px;
-  min-width:210px;
-}
-
-/* generic second column width */
-.training-table th:nth-child(2),
-.training-table td:nth-child(2){
-  width:185px;
-  min-width:185px;
-}
-
-/* table input/select styling */
-.training-table input[type="text"],
-.training-table select{
-  width:100%;
-  min-width:130px;
-  padding:5px 6px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  text-align:center;
-  height:32px;
-}
-
-/* Training Checklist — checkbox + input */
-#training-checklist .training-table td:first-child{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-#training-checklist .training-table td:first-child input[type="checkbox"]{
-  flex:0 0 auto;
-  margin:0;
-}
-#training-checklist .training-table td:first-child input[type="text"]{
-  flex:1 1 auto;
-  width:auto;
-  min-width:0;
-}
-
-/* row striping */
-.training-table tr:nth-child(odd){ background:#fff; }
-.training-table tr:nth-child(even){ background:#fafafa; }
-
-/* footer + add row */
-.table-footer{
-  width:100%;
-  background:#f5f5f5;
-  border-top:1px solid var(--border);
-  padding:6px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  border-bottom-left-radius:var(--radius-lg);
-  border-bottom-right-radius:var(--radius-lg);
-}
-.table-footer .add-row{
-  background:var(--orange);
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:14px;
-  font-weight:900;
-  cursor:pointer;
-  transition:.2s;
-  box-shadow:0 1px 3px rgba(239,109,34,0.25);
-  line-height:1;
-}
-.table-footer .add-row:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-}
-
-/* acceptance colors */
-.training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
-.training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
-.training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
-.training-table select.accept-na{ background:#e5e7eb; border-color:#9ca3af; color:#374151; }
-
-/* Opcodes: first column not sticky */
-#opcodes-pricing .training-table th:first-child,
-#opcodes-pricing .training-table td:first-child{
-  position:static;
-  left:auto;
-  z-index:1;
-  width:60px;
-  min-width:60px;
-}
-#opcodes-pricing .training-table td:first-child{
-  display:table-cell;
-  padding:6px 6px;
-  background:inherit;
 }
 
 /* ============== SUPPORT TICKETS (RESTORED) ============== */
