@@ -1139,68 +1139,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
-/* ============== RESPONSIVE ============== */
-@media (max-width:900px){
-  #sidebar{ width:190px; }
-  main{ margin-left:190px; padding:20px; }
-
-  .primary-contacts-grid{ grid-template-columns:1fr; }
-  #clearAllBtn{ width:calc(190px - 48px); }
-
-  .cards-grid.two-col,
-  .cards-grid.three-col,
-  .two-col-grid{
-    grid-template-columns:1fr;
-  }
-
-  /* DMS becomes single column on smaller screens */
-  #dms-integration .dms-grid{
-    grid-template-columns:1fr;
-  }
-
-  #openTicketsContainer,
-  #tierTwoTicketsContainer,
-  #closedResolvedTicketsContainer,
-  #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
-}
-
-@media (max-width:600px){
-  #sidebar{ display:none; }
-  main{ margin-left:0; padding:16px; }
-
-  .checklist-row{
-    flex-direction:column;
-    align-items:flex-start;
-    padding-left:20px;
-  }
-  .checklist-row label{
-    padding-right:0;
-    margin-bottom:4px;
-  }
-  .section-block .checklist-row input[type="text"],
-  .section-block .checklist-row input[type="number"],
-  .section-block .checklist-row input[type="email"],
-  .section-block .checklist-row input[type="tel"],
-  .section-block .checklist-row input[type="date"],
-  .section-block .checklist-row select{
-    margin-left:0;
-    width:100%;
-    flex:0 0 auto;
-  }
-
-  #support-tickets .ticket-row{
-    grid-template-columns:1fr;
-  }
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap{
-    grid-column:1;
-  }
-
-   /* ===========================================================
+/* ===========================================================
    STACKED CARDS — COMPACT MODE (SAFE via .stacked-card class)
+   (PLACE OUTSIDE OF ANY @media QUERY)
    =========================================================== */
 
 .compact-toggle{
@@ -1267,4 +1208,64 @@ body.stacked-compact .stacked-card .checklist-row{
 body.stacked-compact .stacked-card textarea{
   min-height:120px;
 }
+
+/* ============== RESPONSIVE ============== */
+@media (max-width:900px){
+  #sidebar{ width:190px; }
+  main{ margin-left:190px; padding:20px; }
+
+  .primary-contacts-grid{ grid-template-columns:1fr; }
+  #clearAllBtn{ width:calc(190px - 48px); }
+
+  .cards-grid.two-col,
+  .cards-grid.three-col,
+  .two-col-grid{
+    grid-template-columns:1fr;
+  }
+
+  /* DMS becomes single column on smaller screens */
+  #dms-integration .dms-grid{
+    grid-template-columns:1fr;
+  }
+
+  #openTicketsContainer,
+  #tierTwoTicketsContainer,
+  #closedResolvedTicketsContainer,
+  #closedFeatureTicketsContainer{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:600px){
+  #sidebar{ display:none; }
+  main{ margin-left:0; padding:16px; }
+
+  .checklist-row{
+    flex-direction:column;
+    align-items:flex-start;
+    padding-left:20px;
+  }
+  .checklist-row label{
+    padding-right:0;
+    margin-bottom:4px;
+  }
+  .section-block .checklist-row input[type="text"],
+  .section-block .checklist-row input[type="number"],
+  .section-block .checklist-row input[type="email"],
+  .section-block .checklist-row input[type="tel"],
+  .section-block .checklist-row input[type="date"],
+  .section-block .checklist-row select{
+    margin-left:0;
+    width:100%;
+    flex:0 0 auto;
+  }
+
+  #support-tickets .ticket-row{
+    grid-template-columns:1fr;
+  }
+  #support-tickets .ticket-row > input[type="text"],
+  #support-tickets .ticket-row > select,
+  #support-tickets .ticket-row > .ticket-number-wrap{
+    grid-column:1;
+  }
 }
