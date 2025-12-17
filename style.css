@@ -836,6 +836,120 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
+/* ===========================================================
+   TRAINING TABLES — HARD RESET (HEADERS + GRIDLINES)
+   Applies to ALL training + opcodes tables
+   =========================================================== */
+
+.training-table,
+.opcodes-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#fff;
+  border:1px solid #e5e7eb; /* outer frame */
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/* ================= HEADER ================= */
+.training-table thead th,
+.opcodes-table thead th{
+  background:#0f172a; /* BLACK header */
+  color:#ffffff;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  padding:12px 10px;
+  text-align:center;
+  border-right:1px solid rgba(255,255,255,0.12);
+}
+
+.training-table thead th:first-child,
+.opcodes-table thead th:first-child{
+  text-align:left;
+  padding-left:16px;
+}
+
+.training-table thead th:last-child,
+.opcodes-table thead th:last-child{
+  border-right:none;
+}
+
+/* ================= BODY GRIDLINES ================= */
+.training-table tbody td,
+.opcodes-table tbody td{
+  padding:10px 8px;
+  border-top:1px solid #e5e7eb;   /* horizontal lines */
+  border-right:1px solid #f1f5f9;/* vertical lines */
+  vertical-align:middle;
+  background:#fff;
+}
+
+.training-table tbody td:last-child,
+.opcodes-table tbody td:last-child{
+  border-right:none;
+}
+
+/* alternating row subtle contrast */
+.training-table tbody tr:nth-child(even),
+.opcodes-table tbody tr:nth-child(even){
+  background:#fafafa;
+}
+
+/* ================= INPUTS INSIDE TABLE ================= */
+.training-table input,
+.training-table select,
+.opcodes-table input,
+.opcodes-table select{
+  width:100%;
+  height:34px;
+  padding:6px 10px;
+  font-size:13px;
+  border-radius:999px;
+  border:1px solid #d1d5db;
+  background:#f9fafb;
+}
+
+.training-table input:focus,
+.training-table select:focus,
+.opcodes-table input:focus,
+.opcodes-table select:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 0 2px rgba(239,109,34,0.18);
+  outline:none;
+  background:#fff;
+}
+
+/* ================= CHECKBOX COLUMN ================= */
+.training-table .checkbox-cell,
+.opcodes-table .checkbox-cell{
+  width:36px;
+  text-align:center;
+}
+
+/* ================= ADD ROW BUTTON ================= */
+.training-table .add-row-btn,
+.opcodes-table .add-row-btn{
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(239,109,34,0.35);
+}
+
+.training-table .add-row-btn:hover,
+.opcodes-table .add-row-btn:hover{
+  background:#ff8b42;
+  transform:translateY(-1px);
+}
+
 /* ============== SUPPORT TICKETS ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
 #support-tickets .ticket-sections-stack{
