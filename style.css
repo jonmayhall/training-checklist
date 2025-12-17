@@ -1095,6 +1095,25 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
+/* ============== DMS CARD HEADER — RIGHT-SIDE TEXT (NO BADGE) ============== */
+
+#dms-integration .dms-card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* Right-side Push / Pull text */
+#dms-integration .dms-direction{
+  font-size:14px;              /* slightly smaller than title */
+  font-weight:600;
+  color:#fff;
+  opacity:0.9;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
 /* ============== RESPONSIVE ============== */
 @media (max-width:900px){
   #sidebar{ width:190px; }
