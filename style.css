@@ -719,13 +719,14 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   TABLE SECTIONS (Training tables / Opcodes) — RESTORED
-   - Orange header row
+   TABLE SECTIONS (Training tables / Opcodes) — RESTORED (v2)
+   FIXES:
+   - NO framed/rounded table “inside a card” (wrapper owns border/radius)
+   - Orange header
    - Sticky header + sticky first column (Name + checkbox)
    - Light gridlines
-   - Add (+) button on LEFT
-   - Inputs/selects back to normal (NOT pills)
-   - Better column sizing for large dropdown text
+   - Add (+) button LEFT
+   - Columns wide enough for longest dropdowns
    =========================================================== */
 
 .section{
@@ -750,7 +751,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:12px 12px 10px;
 }
 
-/* Scroll wrapper owns radius/border so sticky works clean */
+/* ✅ Wrapper owns the “card” border + radius */
 .scroll-wrapper{
   overflow:auto;
   width:100%;
@@ -759,14 +760,14 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#fff;
 }
 
-/* ===== TABLE ===== */
+/* ✅ Table should be FLAT (no border/radius) */
 .training-table{
   width:100%;
-  min-width:980px;
+  min-width:1400px;          /* ✅ gives room for long dropdown columns */
   border-collapse:separate;
   border-spacing:0;
-  table-layout:fixed; /* ✅ helps even column behavior */
-  background:#fff;
+  table-layout:auto;         /* ✅ lets columns expand for content */
+  background:transparent;
 }
 
 /* Light gridlines */
@@ -785,19 +786,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   position:sticky;
   top:0;
   z-index:5;
-
   background:var(--orange);
   color:#fff;
-
   font-size:12px;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.06em;
-
   padding:10px 10px;
   white-space:nowrap;
   text-align:center;
-
   border-bottom:1px solid rgba(255,255,255,0.18);
   border-right:1px solid rgba(255,255,255,0.18);
 }
@@ -805,7 +802,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-right:none;
 }
 
-/* ===== BODY CELLS ===== */
+/* ===== BODY ===== */
 .training-table tbody td{
   padding:8px 10px;
   vertical-align:middle;
@@ -815,7 +812,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#fafafa;
 }
 
-/* ===== INPUTS / SELECTS (restore normal look) ===== */
+/* ===== Inputs/selects (restore your normal look) ===== */
 .training-table input[type="text"],
 .training-table input[type="number"],
 .training-table input[type="email"],
@@ -824,54 +821,41 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:100%;
   height:34px;
   padding:6px 10px;
-  border-radius:var(--radius-sm);   /* ✅ not pills */
+  border-radius:var(--radius-sm);
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
   box-sizing:border-box;
 }
 
-/* Let selects show bigger text better */
-.training-table select{
-  white-space:normal; /* allows wrapping if the browser supports it */
-}
-
-/* ===== CHECKBOX ===== */
+/* Checkbox */
 .training-table input[type="checkbox"]{
   transform:scale(1.1);
 }
 
 /* ===========================================================
    STICKY FIRST COLUMN (Name + checkbox)
-   IMPORTANT: applies to BOTH header and body first column
    =========================================================== */
-
-/* First column width baseline */
-.training-table th:first-child,
-.training-table td:first-child{
-  width:260px;         /* adjust if you want wider name column */
-  min-width:260px;
-}
-
-/* Sticky left column */
 .training-table thead th:first-child{
   position:sticky;
   left:0;
-  z-index:6; /* above header cells */
+  z-index:6;
   text-align:left;
   padding-left:16px;
-  border-right:1px solid rgba(255,255,255,0.18);
 }
 
 .training-table tbody td:first-child{
   position:sticky;
   left:0;
-  z-index:4; /* above normal cells */
-  background:inherit; /* keeps striping consistent */
-  border-right:1px solid #e5e7eb;
+  z-index:4;
+  background:inherit; /* keeps striping */
 }
 
-/* Name cell layout: checkbox + input */
+/* Name cell layout */
+.training-table tbody td:first-child{
+  min-width:300px;   /* ✅ wider name column */
+  width:300px;
+}
 .training-table tbody td:first-child input[type="checkbox"]{
   margin-right:10px;
 }
@@ -882,33 +866,39 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   COLUMN SIZING HELPERS (improves dropdown fit)
-   - Give certain common columns a minimum width.
-   - Works best if your HTML has th/td order consistent.
+   WIDEN COMMON “LONG DROPDOWN” COLUMNS
+   Tweak these if your column order differs.
    =========================================================== */
 
-/* Default cell min widths so long dropdowns don’t crush */
-.training-table th,
-.training-table td{
-  min-width:120px;
-}
-
-/* Some columns typically need more room (tweak as needed) */
+/* User Acceptance */
 .training-table th:nth-child(2),
-.training-table td:nth-child(2){
-  min-width:190px; /* User Acceptance / long dropdowns */
-}
+.training-table td:nth-child(2){ min-width:240px; }
+
+/* DMS ID */
+.training-table th:nth-child(3),
+.training-table td:nth-child(3){ min-width:140px; }
+
+/* Logged In */
+.training-table th:nth-child(4),
+.training-table td:nth-child(4){ min-width:160px; }
+
+/* Workflow Order (often long) */
 .training-table th:nth-child(5),
-.training-table td:nth-child(5){
-  min-width:190px; /* Workflow Order / long dropdowns */
-}
+.training-table td:nth-child(5){ min-width:260px; }
+
+/* Any “action” dropdown columns */
+.training-table th:nth-child(8),
+.training-table td:nth-child(8){ min-width:230px; }
+
+.training-table th:nth-child(9),
+.training-table td:nth-child(9){ min-width:210px; }
 
 /* ===========================================================
-   TABLE FOOTER + ADD ROW BUTTON — LEFT
+   FOOTER + ADD ROW BUTTON — LEFT
    =========================================================== */
 .table-footer{
   display:flex;
-  justify-content:flex-start; /* ✅ LEFT */
+  justify-content:flex-start;
   padding:10px 4px 2px;
 }
 
@@ -932,7 +922,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42;
   transform:translateY(-1px);
 }
-
 
 /* ============== SUPPORT TICKETS ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
