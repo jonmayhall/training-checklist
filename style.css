@@ -836,116 +836,133 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-/* ===========================================================
-   TRAINING TABLES — HARD RESET (HEADERS + GRIDLINES)
-   Applies to ALL training + opcodes tables
-   =========================================================== */
+/* ============== TABLE SECTIONS (Training tables / Opcodes) ============== */
+.section{
+  background:#fff;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:24px;
+}
+.section-header{
+  background:var(--orange);
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+}
 
-.training-table,
-.opcodes-table{
+.table-container{ padding:12px 12px 10px; }
+
+/* Scroll box owns the border + radius (NOT the table) */
+.scroll-wrapper{
+  overflow:auto;
+  width:100%;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+}
+
+/* Table */
+.training-table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
+  min-width:900px;
   background:#fff;
-  border:1px solid #e5e7eb; /* outer frame */
-  border-radius:14px;
-  overflow:hidden;
 }
 
-/* ================= HEADER ================= */
-.training-table thead th,
-.opcodes-table thead th{
-  background:#0f172a; /* BLACK header */
-  color:#ffffff;
+/* Header: BLACK + grid line separators */
+.training-table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+
+  background:#0f172a; /* black header */
+  color:#fff;
+
   font-size:12px;
   font-weight:700;
   text-transform:uppercase;
-  letter-spacing:0.08em;
+  letter-spacing:.08em;
+
   padding:12px 10px;
-  text-align:center;
-  border-right:1px solid rgba(255,255,255,0.12);
-}
+  white-space:nowrap;
 
-.training-table thead th:first-child,
-.opcodes-table thead th:first-child{
-  text-align:left;
-  padding-left:16px;
+  border-bottom:1px solid rgba(255,255,255,0.18);
+  border-right:1px solid rgba(255,255,255,0.14);
 }
+.training-table thead th:last-child{ border-right:none; }
 
-.training-table thead th:last-child,
-.opcodes-table thead th:last-child{
-  border-right:none;
-}
-
-/* ================= BODY GRIDLINES ================= */
-.training-table tbody td,
-.opcodes-table tbody td{
-  padding:10px 8px;
-  border-top:1px solid #e5e7eb;   /* horizontal lines */
-  border-right:1px solid #f1f5f9;/* vertical lines */
+/* Body grid lines (light) */
+.training-table tbody td{
+  padding:8px 10px;
   vertical-align:middle;
   background:#fff;
-}
 
-.training-table tbody td:last-child,
-.opcodes-table tbody td:last-child{
-  border-right:none;
+  border-bottom:1px solid #e5e7eb;
+  border-right:1px solid #f1f5f9;
 }
+.training-table tbody td:last-child{ border-right:none; }
 
-/* alternating row subtle contrast */
-.training-table tbody tr:nth-child(even),
-.opcodes-table tbody tr:nth-child(even){
+/* Striping */
+.training-table tbody tr:nth-child(even) td{
   background:#fafafa;
 }
 
-/* ================= INPUTS INSIDE TABLE ================= */
-.training-table input,
-.training-table select,
-.opcodes-table input,
-.opcodes-table select{
+/* Inputs inside table (keep your normal rounded, NOT pills) */
+.training-table input[type="text"],
+.training-table input[type="number"],
+.training-table input[type="email"],
+.training-table input[type="tel"],
+.training-table select{
   width:100%;
   height:34px;
   padding:6px 10px;
-  font-size:13px;
-  border-radius:999px;
+  border-radius:var(--radius-sm);
   border:1px solid #d1d5db;
-  background:#f9fafb;
+  background:#f7f7f7;
+  font-size:13px;
 }
 
-.training-table input:focus,
-.training-table select:focus,
-.opcodes-table input:focus,
-.opcodes-table select:focus{
-  border-color:var(--orange);
-  box-shadow:0 0 0 2px rgba(239,109,34,0.18);
-  outline:none;
-  background:#fff;
+.training-table input[type="checkbox"]{
+  transform:scale(1.1);
 }
 
-/* ================= CHECKBOX COLUMN ================= */
-.training-table .checkbox-cell,
-.opcodes-table .checkbox-cell{
-  width:36px;
-  text-align:center;
+/* Name cell: checkbox + name input */
+.training-table td:first-child{ min-width:220px; }
+.training-table td:first-child input[type="checkbox"]{ margin-right:10px; }
+.training-table td:first-child input[type="text"]{
+  width:calc(100% - 34px);
+  display:inline-block;
+  vertical-align:middle;
 }
 
-/* ================= ADD ROW BUTTON ================= */
-.training-table .add-row-btn,
-.opcodes-table .add-row-btn{
+/* Table footer + add row button */
+.table-footer{
+  display:flex;
+  justify-content:flex-end;
+  padding:10px 4px 2px;
+}
+.table-footer .add-row{
+  width:38px;
+  height:38px;
+  border-radius:999px;
+  border:none;
   background:var(--orange);
   color:#fff;
-  border:none;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  font-size:18px;
+  font-size:20px;
   font-weight:900;
   cursor:pointer;
-  box-shadow:0 2px 6px rgba(239,109,34,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(239,109,34,0.30);
+  transition:background .16s, transform .16s;
 }
-
-.training-table .add-row-btn:hover,
-.opcodes-table .add-row-btn:hover{
+.table-footer .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
 }
