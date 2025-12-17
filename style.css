@@ -654,18 +654,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ADDITIONAL TRAINER — FIX RIGHT ROUNDED EDGE
-   =========================================================== */
-
-/* When the + button is NOT present, fully round the input */
-#additionalTrainersContainer
-.checklist-row.integrated-plus:not(:has(.add-row))
-input[type="text"]{
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
-}
-
-/* ===========================================================
    PRIMARY CONTACTS — FIX INPUT OVERFLOW
    =========================================================== */
 
@@ -756,6 +744,17 @@ input[type="text"]{
 .section-block .checklist-row.integrated-plus > .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
+}
+
+/* ===========================================================
+   ADDITIONAL TRAINERS — FIX RIGHT ROUNDED EDGE ON ADDED ROWS
+   (Rows that do NOT have the + button)
+   =========================================================== */
+#additionalTrainersContainer
+.checklist-row.integrated-plus:not(:has(.add-row))
+input[type="text"]{
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
 }
 
 /* ===========================================================
