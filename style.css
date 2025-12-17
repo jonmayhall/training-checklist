@@ -738,42 +738,46 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-radius:var(--radius-sm) !important;
 }
 
-/* ============== DMS INTEGRATION (2 PER ROW) ============== */
+/* ============== DMS INTEGRATION (RESTORED LOOK) ============== */
 #dms-integration .dms-grid{
   display:grid;
-
-  /* ✅ Always 2-per-row on desktop */
   grid-template-columns:repeat(2,minmax(0,1fr));
 
-  gap:18px;
+  /* ✅ more space BETWEEN cards (center + horizontal gap) */
+  column-gap:28px;
+  row-gap:26px;
 
-  /* ✅ REMOVE the extra “white rounded wrapper” so it flows under the orange H2 */
+  /* ✅ no wrapper card */
   background:transparent;
   border:none;
   border-radius:0;
   box-shadow:none;
 
-  /* ✅ keep spacing inside the section-block without creating a new card */
-  padding:18px 0 6px;
+  /* keep spacing under the orange header */
+  padding:16px 0 8px;
 }
 
 #dms-integration .dms-card{
-  border-radius:16px;
-  border:1px solid #e5e7eb;
+  /* ✅ slightly tighter card */
+  padding:10px 12px 8px;
+
   background:#fff;
-  box-shadow:0 4px 10px rgba(15,23,42,0.06);
-  padding:12px 14px 10px;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+
+  /* lighter shadow = flatter “board” look */
+  box-shadow:0 3px 8px rgba(15,23,42,0.05);
 }
 
 #dms-integration .dms-card-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:8px;
+  margin-bottom:6px; /* tighter */
 }
 
 #dms-integration .dms-name{
-  font-size:16px;
+  font-size:15px;
   font-weight:800;
   color:var(--orange);
   display:inline-block;
@@ -786,16 +790,16 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-weight:800;
   letter-spacing:0.08em;
   text-transform:uppercase;
-  padding:3px 10px;
+  padding:3px 9px;
   border-radius:999px;
   white-space:nowrap;
   border:1px solid transparent;
-  color:#fff;
 }
 
 #dms-integration .dms-chip-push{
   background:var(--orange);
   border-color:var(--orange);
+  color:#fff;
 }
 #dms-integration .dms-chip-pull{
   background:var(--mykaarma-green);
@@ -810,8 +814,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 #dms-integration .dms-list li{
-  padding-top:8px;
-  margin-top:8px;
+  /* ✅ tighter rows */
+  padding-top:6px;
+  margin-top:6px;
   border-top:1px solid #e5e7eb;
 }
 
@@ -825,7 +830,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:2px;
+  margin-bottom:1px;
 }
 
 #dms-integration .dms-field{
@@ -836,7 +841,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 #dms-integration .dms-list p{
   margin:0;
   font-size:12px;
-  line-height:1.45;
+  line-height:1.4;
   color:#4b5563;
   font-style:italic;
 }
