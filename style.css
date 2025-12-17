@@ -891,6 +891,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
+/* ============== DMS STATUS TAG — DISTINCT FONT ============== */
+#dms-integration .dms-tag{
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  line-height:1;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
 /* ============== SUPPORT TICKETS (RESTORED) ============== */
 #support-tickets .ticket-section{ margin-bottom:0; }
 #support-tickets .ticket-sections-stack{
