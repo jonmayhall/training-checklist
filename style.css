@@ -3169,6 +3169,3 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-radius:var(--radius-sm) !important; /* restores right-rounded edge */
 }
 
-}
-
-}
