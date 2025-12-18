@@ -144,12 +144,19 @@ function showSectionById(id){
 
 function initNavigation(){
   qsa(".nav-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+    // ✅ Prevent form-submit behavior
+    btn.type = "button";
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       const id = btn.dataset.target || btn.getAttribute("data-target");
       if (!id) return;
+
       showSectionById(id);
       history.replaceState(null, "", `#${id}`);
-    });
+    }, true); // capture helps if something else is interfering
   });
 
   const hash = (location.hash || "").replace("#", "");
