@@ -528,3 +528,26 @@ if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")
     });
   }
 });
+
+  /* ============================
+     Onsite Training Dates
+     Auto-populate End Date (+2 days)
+     ============================ */
+  const onsiteStart = document.getElementById("onsiteStartDate");
+  const onsiteEnd   = document.getElementById("onsiteEndDate");
+
+  if (onsiteStart && onsiteEnd){
+    onsiteStart.addEventListener("change", () => {
+      if (!onsiteStart.value) return;
+
+      const d = new Date(onsiteStart.value);
+      d.setDate(d.getDate() + 2);
+
+      onsiteEnd.value = d.toISOString().slice(0,10);
+      onsiteEnd.classList.remove("is-placeholder");
+
+      // persist value (matches your autosave system)
+      saveField(onsiteEnd);
+    });
+  }
+
