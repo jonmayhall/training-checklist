@@ -192,13 +192,18 @@ function refreshDateGhost(root=document){
   });
 }
 
-/* ---------------------------
-   Dealership map
---------------------------- */
 function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame") || qs("#dealership-address-card .map-frame") || qs(".map-frame");
+  const frame =
+    qs("#dealershipMapFrame") ||
+    qs("#dealership-address-card .map-frame") ||
+    qs("#dealership-address-card iframe.map-frame") ||
+    qs(".map-frame");
+
   if (!frame) return;
-  const q = encodeURIComponent(address.trim());
+
+  const q = encodeURIComponent((address || "").trim());
+  if (!q) return;
+
   frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
 }
 
@@ -507,11 +512,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (btn.id === "showDealershipMapBtn"){
-      const input = qs("#dealershipAddressInput");
-      if (input?.value) updateDealershipMap(input.value);
-      return;
-    }
+   // Dealership map button (supports old + new button styles)
+if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")){
+  const input = qs("#dealershipAddressInput");
+  if (input?.value) updateDealershipMap(input.value);
+  return;
+}
   });
 
   // Live update map when address changes
