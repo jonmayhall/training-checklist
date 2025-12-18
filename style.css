@@ -725,16 +725,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   align-items:center;
 }
 
-/* ✅ DEFAULT: inputs are fully rounded (this fixes added rows) */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  height:34px;
-  border-radius:var(--radius-sm) !important;   /* full pill by default */
-}
-
 /* ✅ ONLY when a + button is actually next to the input, flatten the right side */
 .section-block .checklist-row.integrated-plus input[type="text"]:has(+ .add-row),
 .section-block .checklist-row.integrated-plus input[type="tel"]:has(+ .add-row){
@@ -3145,25 +3135,32 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   TRAINERS — FIX CLONED "ADDITIONAL TRAINER" ROW WIDTH/ALIGN
-   (MUST be outside @media blocks)
+   INTEGRATED "+" ROWS — correct width for clones (no + button)
    =========================================================== */
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  display:flex !important;
-  align-items:center !important;
-  gap:12px !important;
-}
 
-#trainers-deployment #additionalTrainersContainer .checklist-row > label{
-  flex:1 1 auto !important;
-}
-
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="tel"],
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="email"]{
+/* Default: integrated row input is FULL normal width */
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"],
+.section-block .checklist-row.integrated-plus input[type="email"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
   margin-left:auto !important;
   border-radius:var(--radius-sm) !important;
+}
+
+/* Only shrink input when a + button actually exists next to it */
+.section-block .checklist-row.integrated-plus input[type="text"] + .add-row,
+.section-block .checklist-row.integrated-plus input[type="tel"] + .add-row,
+.section-block .checklist-row.integrated-plus input[type="email"] + .add-row{
+  /* this selector targets the BUTTON, so we size the input using :has on the ROW */
+}
+
+.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="text"],
+.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="tel"],
+.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="email"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
 }
