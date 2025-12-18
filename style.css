@@ -3120,6 +3120,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     padding-right:0;
     margin-bottom:4px;
   }
+
   .section-block .checklist-row input[type="text"],
   .section-block .checklist-row input[type="number"],
   .section-block .checklist-row input[type="email"],
@@ -3143,29 +3144,26 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   .training-table{ min-width:760px; }
 }
 
- /* ===========================================================
+/* ===========================================================
    TRAINERS — FIX CLONED "ADDITIONAL TRAINER" ROW WIDTH/ALIGN
-   Put this at the VERY END of your CSS (after @media)
+   (MUST be outside @media blocks)
    =========================================================== */
-
-/* Force Additional Trainers rows back to the standard flex layout */
 #trainers-deployment #additionalTrainersContainer .checklist-row{
   display:flex !important;
   align-items:center !important;
   gap:12px !important;
 }
 
-/* Label takes remaining space */
 #trainers-deployment #additionalTrainersContainer .checklist-row > label{
   flex:1 1 auto !important;
 }
 
-/* Input matches other right-side fields (same as var(--input-width)) */
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="tel"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="email"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
   margin-left:auto !important;
-  border-radius:var(--radius-sm) !important; /* restores right-rounded edge */
+  border-radius:var(--radius-sm) !important;
 }
-
