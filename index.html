@@ -4683,6 +4683,43 @@
 </main>
 </div>
 
+<script>
+  // Google calls this after it loads:
+  function initAutocomplete() {
+    const input = document.getElementById("dealershipAddressInput");
+    if (!input || !window.google?.maps?.places) return;
+
+    const ac = new google.maps.places.Autocomplete(input, {
+      fields: ["formatted_address", "geometry", "name"],
+      types: ["geocode"], // addresses
+    });
+
+    // When user selects a suggestion:
+    ac.addListener("place_changed", () => {
+      const place = ac.getPlace();
+      const addr = place?.formatted_address || input.value || "";
+      if (addr) updateDealershipMap(addr);
+    });
+
+    // ✅ Prevent Enter from submitting/reloading the page
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        // If user hits Enter without clicking a suggestion, still update map
+        if (input.value) updateDealershipMap(input.value);
+      }
+    });
+  }
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfmoXwnKiPnyekG7yuAEGBTga5oenpq5c&libraries=places&callback=initAutocomplete"
+  async
+  defer>
+</script>
+
+      
 </body>
 </html>
 
