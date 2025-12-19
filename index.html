@@ -344,52 +344,40 @@
   </div>
 </div>
 
-  <!-- ================= DEALERSHIP ADDRESS ================= -->
+<!-- ================= DEALERSHIP ADDRESS ================= -->
 <div class="section-block" id="dealership-address-card">
-    <h2>Dealership Address</h2>
+  <h2>Dealership Address</h2>
 
-    <div class="checklist-row">
-      <label>Dealership Address</label>
+  <div class="checklist-row">
+    <label>Dealership Address</label>
 
-      <!-- 75% width address field -->
-      <div
-        class="address-input-wrap"
-      >
-        <input
-          type="text"
-          id="dealershipAddressInput"
-          class="address-input"
-          placeholder="Enter dealership address"
-          autocomplete="off"
-        >
-        <button
-          type="button"
-          class="small-map-btn"
-          id="openAddressInMapsBtn"
-        >
-          Map
-        </button>
-      </div>
+    <div class="address-input-wrap">
+      <input
+        type="text"
+        id="dealershipAddressInput"
+        class="address-input"
+        placeholder="Enter dealership address"
+        autocomplete="off"
+      />
+      <button type="button" class="small-map-btn" id="showDealershipMapBtn">
+        Map
+      </button>
     </div>
 
   <div class="map-wrapper">
-  <iframe
-    id="dealershipMapFrame"
-    class="map-frame"
-    src="https://www.google.com/maps?q=United%20States&z=4&output=embed"
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade">
-  </iframe>
-</div>
-
-
-      <p class="map-helper-text">
-        Select an address above to update this map.
-      </p>
-    </div>
+    <iframe
+      id="dealershipMapFrame"
+      class="map-frame"
+      src="https://www.google.com/maps?q=United%20States&z=4&output=embed"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
   </div>
 
-</section>
+  <p class="map-helper-text">
+    Select an address above to update this map.
+  </p>
+</div>
 
 <!-- ========================================================= -->
 <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
