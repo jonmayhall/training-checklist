@@ -7,6 +7,7 @@
    - Add Ticket copies base card values into new card, then clears base inputs
    - Ticket ID counter stored in localStorage for persistence across reloads
    - Reset This Page on Support Tickets resets ticket counter
+   - FIX: Onsite Training Dates listener runs after DOM is ready
    ======================================================= */
 
 /* ---------------------------
@@ -199,6 +200,9 @@ function refreshDateGhost(root=document){
   });
 }
 
+/* ---------------------------
+   Dealership map
+--------------------------- */
 function updateDealershipMap(address){
   const frame =
     qs("#dealershipMapFrame") ||
@@ -353,7 +357,6 @@ function handleAddTicket(btn){
   const baseSummary      = qs(".ticket-summary-input", baseCard)?.value || "";
 
   // Optional: enforce base completion before allowing add
-  // (You had a disclaimer; uncomment if you want to hard-block)
   /*
   if (!baseTicketNumber.trim() || !baseSummary.trim()){
     alert("Complete the ticket number and summary before adding another card.");
@@ -519,12 +522,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-   // Dealership map button (supports old + new button styles)
-if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")){
-  const input = qs("#dealershipAddressInput");
-  if (input?.value) updateDealershipMap(input.value);
-  return;
-}
+    // Dealership map button (supports old + new button styles)
+    if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")){
+      const input = qs("#dealershipAddressInput");
+      if (input?.value) updateDealershipMap(input.value);
+      return;
+    }
   });
 
   // Live update map when address changes
@@ -534,7 +537,6 @@ if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")
       if (addr.value) updateDealershipMap(addr.value);
     });
   }
-});
 
   /* ============================
      Onsite Training Dates
@@ -557,4 +559,4 @@ if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")
       saveField(onsiteEnd);
     });
   }
-
+});
