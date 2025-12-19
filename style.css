@@ -424,56 +424,62 @@ main{
 .indent-sub{ padding-left:60px !important; }
 
 /* ===========================================================
-   Dealership Address — wide input + attached Map button
+   Dealership Address — FORCE FULL-WIDTH in the grid row
+   (Overrides the page-section grid rule that locks to --input-width)
    =========================================================== */
 
 #dealership-address-card .checklist-row{
-  align-items: center;
+  display:grid !important;
+  grid-template-columns: minmax(260px, 1fr) minmax(520px, 2fr) !important;
+  column-gap:18px !important;
+  align-items:center !important;
 }
 
-/* Address + Map wrapper */
+/* Address + Map wrapper fills right column */
 #dealership-address-card .address-input-wrap{
-  display: flex;
-  align-items: stretch;
-  width: 100%;
-  max-width: 100%;
-  gap: 0;
+  grid-column:2 !important;
+  width:100% !important;
+  max-width:100% !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
 }
 
-/* Address input — takes almost all space */
+/* Address input expands */
 #dealership-address-card .address-input-wrap input[type="text"]{
-  flex: 1 1 auto;
-  width: 100%;
-  font-size: 14px;
-  padding: 10px 12px;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  font-size:14px !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
 }
 
-/* Map button — fixed width, attached */
+/* Map button attached */
 #dealership-address-card .address-input-wrap .small-map-btn{
-  flex: 0 0 44px;
-  width: 44px;
-  height: auto;
-  margin-left: -1px; /* visually connects borders */
-  background: var(--orange);
-  color: #fff;
-  border: 1px solid var(--orange);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  box-shadow: 0 1px 4px rgba(239,109,34,0.25);
+  flex:0 0 44px !important;
+  width:44px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  padding:0 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
-
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
-  background: #ff8b42;
+  background:#ff8b42 !important;
 }
 
 /* ===========================================================
@@ -1294,6 +1300,17 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   #closedResolvedTicketsContainer,
   #closedFeatureTicketsContainer{
     grid-template-columns:1fr;
+  }
+
+  /* On smaller screens, let the address row stack naturally */
+  #dealership-address-card .checklist-row{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+  }
+  #dealership-address-card .address-input-wrap{
+    grid-column:auto !important;
+    width:100% !important;
   }
 }
 
