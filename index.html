@@ -157,44 +157,96 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-<!-- ================= DEALERSHIP ADDRESS ================= -->
-<div class="section-block" id="dealership-address-card">
-  <h2>Dealership Address</h2>
+  <!-- ================= BASIC DEALERSHIP DETAILS (BEFORE ADDRESS) ================= -->
+  <div class="grid-2">
 
-  <div class="checklist-row">
-    <label>Dealership Address</label>
+    <div class="section-block">
+      <h2>Dealership Details</h2>
 
-    <div class="address-input-wrap">
-      <input
-        type="text"
-        id="dealershipAddressInput"
-        class="address-input"
-        placeholder="Enter dealership address"
-        autocomplete="off"
-      />
-      <button type="button" class="small-map-btn" id="showDealershipMapBtn">
-        Map
-      </button>
+      <div class="checklist-row">
+        <label>Dealership Name</label>
+        <input id="dealershipNameInput" type="text" placeholder="Enter dealership name">
+      </div>
+
+      <div class="checklist-row">
+        <label>OEM / Brand</label>
+        <input type="text" placeholder="Ford, Toyota, Honda, etc.">
+      </div>
+
+      <div class="checklist-row">
+        <label>Dealer Code (if applicable)</label>
+        <input type="text" placeholder="Enter dealer code">
+      </div>
+
+      <div class="checklist-row">
+        <label>Primary DMS</label>
+        <input type="text" placeholder="CDK, Reynolds, Tekion, etc.">
+      </div>
     </div>
-  </div> <!-- ✅ CLOSE checklist-row -->
 
-  <div class="map-wrapper">
-    <iframe
-      id="dealershipMapFrame"
-      class="map-frame"
-      src="https://www.google.com/maps?q=United%20States&z=4&output=embed"
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
+    <div class="section-block">
+      <h2>Key Contacts</h2>
+
+      <div class="checklist-row">
+        <label>Service Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Parts Manager</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Fixed Ops / GM Contact</label>
+        <input type="text" placeholder="Name">
+      </div>
+
+      <div class="checklist-row">
+        <label>Best Onsite Point of Contact</label>
+        <input type="text" placeholder="Name + role">
+      </div>
+    </div>
+
   </div>
 
-  <p class="map-helper-text">
-    Select an address above to update this map.
-  </p>
-</div> <!-- ✅ CLOSE section-block -->
+  <!-- ================= DEALERSHIP ADDRESS ================= -->
+  <div class="section-block" id="dealership-address-card">
+    <h2>Dealership Address</h2>
 
-  </section> <!-- ✅ end PAGE 2: DEALERSHIP INFO -->
+    <div class="checklist-row">
+      <label>Dealership Address</label>
 
+      <div class="address-input-wrap">
+        <input
+          type="text"
+          id="dealershipAddressInput"
+          class="address-input"
+          placeholder="Enter dealership address"
+          autocomplete="off"
+        />
+        <button type="button" class="small-map-btn" id="showDealershipMapBtn">
+          Map
+        </button>
+      </div>
+    </div>
+
+    <div class="map-wrapper">
+      <iframe
+        id="dealershipMapFrame"
+        class="map-frame"
+        src="https://www.google.com/maps?q=United%20States&z=4&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+
+    <p class="map-helper-text">
+      Select an address above to update this map.
+    </p>
+  </div>
+
+</section> <!-- ✅ end PAGE 2 -->
 
 <!-- ========================================================= -->
 <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
