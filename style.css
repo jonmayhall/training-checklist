@@ -54,7 +54,7 @@ input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
-/* ✅ Tables: never ghost-color dropdowns (FIXED selector) */
+/* ✅ Tables: never ghost-color dropdowns */
 .training-table select,
 .training-table select.is-placeholder{
   color:var(--ink) !important;
@@ -408,7 +408,7 @@ main{
   box-sizing:border-box;
 }
 
-/* ✅ focus (FIXED selectors for training-table) */
+/* ✅ focus */
 .section-block input:focus,
 .section-block select:focus,
 .section-block textarea:focus,
@@ -656,21 +656,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* ===========================================================
    PRIMARY CONTACTS — FIX INPUT OVERFLOW
    =========================================================== */
-
-/* Force rows to behave like form rows, not stacked cards */
 .mini-card .checklist-row{
   display:flex !important;
   align-items:center;
   gap:12px;
 }
-
-/* Labels stay left */
 .mini-card .checklist-row label{
   flex:0 0 36%;
   max-width:36%;
 }
-
-/* Inputs MUST stay inside the card */
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="tel"],
 .mini-card .checklist-row input[type="email"]{
@@ -713,14 +707,14 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   align-items:center;
 }
 
-/* ✅ DEFAULT: inputs are fully rounded (this fixes added rows) */
+/* ✅ DEFAULT: inputs are fully rounded (fixes added rows) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
   flex:0 0 var(--input-width);
   width:var(--input-width);
   margin-left:auto;
   height:34px;
-  border-radius:var(--radius-sm) !important;   /* full pill by default */
+  border-radius:var(--radius-sm) !important;
 }
 
 /* ✅ ONLY when a + button is actually next to the input, flatten the right side */
@@ -730,7 +724,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-bottom-right-radius:0 !important;
 }
 
-/* + button (single definition) */
+/* + button */
 .section-block .checklist-row.integrated-plus > .add-row{
   flex:0 0 34px;
   width:34px;
@@ -755,11 +749,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ TABLES (RESTORED TO YOUR REFERENCE LOOK)
-   - Light orange header
-   - Sticky first column
-   - Add button LEFT
-   - No “second card” inside (scroll wrapper is clean)
+   ✅ TABLES
    =========================================================== */
 .section{ margin-bottom:40px; }
 
@@ -802,8 +792,8 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
 .training-table{
   border-collapse:collapse;
-  width:max-content;   /* lets columns grow */
-  min-width:1200px;    /* wider by default */
+  width:max-content;
+  min-width:1200px;
 }
 
 .training-table th,
@@ -837,23 +827,18 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-left:10px;
 }
 
-/* ✅ Keep FIRST HEADER cell light-orange (even though first column is sticky) */
+/* ✅ Keep FIRST HEADER cell light-orange */
 .training-table thead th:first-child{
   background:var(--light-orange) !important;
   color:#fff !important;
 }
-
-/* make header cell stay above sticky col */
 .training-table thead th:first-child{ z-index:5; }
 
-/* Default width for sticky name column */
 .training-table th:first-child,
 .training-table td:first-child{
   width:240px;
   min-width:240px;
 }
-
-/* generic second column width */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){
   width:210px;
@@ -864,7 +849,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .training-table input[type="text"],
 .training-table select{
   width:100%;
-  min-width:180px; /* wider so dropdown options aren’t cut */
+  min-width:180px;
   padding:5px 5px;
   border-radius:var(--radius-sm);
   border:1px solid var(--border);
@@ -950,8 +935,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 #training-checklist .training-table td:first-child{
   text-align:center !important;
 }
-
-/* Center the checkbox+name row content as a group */
 #training-checklist .training-table td:first-child{
   justify-content:center !important;
 }
@@ -1004,7 +987,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 #support-tickets .ticket-group.has-badge{ padding-top:16px; }
 
-/* labels */
 #support-tickets .ticket-row label{
   font-weight:500;
   font-size:14px;
@@ -1357,12 +1339,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* Only shrink input when a + button actually exists next to it */
-.section-block .checklist-row.integrated-plus input[type="text"] + .add-row,
-.section-block .checklist-row.integrated-plus input[type="tel"] + .add-row,
-.section-block .checklist-row.integrated-plus input[type="email"] + .add-row{
-  /* this selector targets the BUTTON, so we size the input using :has on the ROW */
-}
-
 .section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="text"],
 .section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="tel"],
 .section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="email"]{
