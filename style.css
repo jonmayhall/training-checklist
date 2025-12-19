@@ -424,18 +424,18 @@ main{
 .indent-sub{ padding-left:60px !important; }
 
 /* ===========================================================
-   Dealership Address — FORCE FULL-WIDTH in the grid row
-   (Overrides the page-section grid rule that locks to --input-width)
+   Dealership Address — 25% SMALLER than the full-width version
+   (keeps it wider than normal inputs, but not huge)
+   Replace your current Dealership Address block with this one.
    =========================================================== */
 
 #dealership-address-card .checklist-row{
   display:grid !important;
-  grid-template-columns: minmax(260px, 1fr) minmax(520px, 2fr) !important;
+  grid-template-columns: minmax(260px, 1fr) minmax(390px, 1.5fr) !important; /* was 520px / 2fr */
   column-gap:18px !important;
   align-items:center !important;
 }
 
-/* Address + Map wrapper fills right column */
 #dealership-address-card .address-input-wrap{
   grid-column:2 !important;
   width:100% !important;
@@ -445,7 +445,6 @@ main{
   gap:0 !important;
 }
 
-/* Address input expands */
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
@@ -457,7 +456,6 @@ main{
   border-bottom-right-radius:0 !important;
 }
 
-/* Map button attached */
 #dealership-address-card .address-input-wrap .small-map-btn{
   flex:0 0 44px !important;
   width:44px !important;
@@ -481,6 +479,8 @@ main{
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
   background:#ff8b42 !important;
 }
+
+/* keep your existing responsive rules (900px/600px) */
 
 /* ===========================================================
    ONSITE TRAINING DATES — canonical
