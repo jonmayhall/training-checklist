@@ -424,22 +424,23 @@ main{
 .indent-sub{ padding-left:60px !important; }
 
 /* ===========================================================
-   Dealership Address — 25% SMALLER than the full-width version
-   (keeps it wider than normal inputs, but not huge)
-   Replace your current Dealership Address block with this one.
+   Dealership Address — FIXED SMALLER WIDTH (works)
+   - This forces the address wrapper to a fixed width so it
+     cannot stretch full screen.
+   - Change 420px if you want it smaller/larger.
    =========================================================== */
-
 #dealership-address-card .checklist-row{
   display:grid !important;
-  grid-template-columns: minmax(260px, 1fr) minmax(390px, 1.5fr) !important; /* was 520px / 2fr */
+  grid-template-columns: minmax(260px, 1fr) auto !important; /* 2nd column won't stretch */
   column-gap:18px !important;
   align-items:center !important;
 }
 
 #dealership-address-card .address-input-wrap{
-  grid-column:2 !important;
-  width:100% !important;
-  max-width:100% !important;
+  width:420px !important;      /* ✅ adjust this: 380px = smaller, 460px = bigger */
+  max-width:420px !important;
+  margin-left:auto !important;
+
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
@@ -449,9 +450,7 @@ main{
   flex:1 1 auto !important;
   width:100% !important;
   min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  font-size:14px !important;
+
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
 }
@@ -461,26 +460,29 @@ main{
   width:44px !important;
   height:34px !important;
   margin-left:-1px !important;
+
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
   font-size:11px !important;
   font-weight:800 !important;
   letter-spacing:0.08em !important;
   text-transform:uppercase !important;
+
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
+
   cursor:pointer !important;
   padding:0 !important;
+
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
   background:#ff8b42 !important;
 }
-
-/* keep your existing responsive rules (900px/600px) */
 
 /* ===========================================================
    ONSITE TRAINING DATES — canonical
@@ -1302,15 +1304,16 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     grid-template-columns:1fr;
   }
 
-  /* On smaller screens, let the address row stack naturally */
+  /* Address row stacks + becomes full width */
   #dealership-address-card .checklist-row{
     display:flex !important;
     flex-direction:column !important;
     align-items:flex-start !important;
   }
   #dealership-address-card .address-input-wrap{
-    grid-column:auto !important;
     width:100% !important;
+    max-width:100% !important;
+    margin-left:0 !important;
   }
 }
 
