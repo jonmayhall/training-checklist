@@ -157,188 +157,6 @@
 
   <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ================= DEALERSHIP DETAILS ================= -->
-  <div class="section-block">
-    <h2>Dealership Details</h2>
-
-    <div class="checklist-row">
-      <label>Dealer Group</label>
-      <input
-        type="text"
-        id="dealerGroupInput"
-        placeholder="Enter dealer group name"
-      >
-    </div>
-
-    <div class="checklist-row">
-      <label>Dealership Name</label>
-      <input
-        type="text"
-        id="dealershipNameInput"
-        placeholder="Enter dealership name"
-      >
-    </div>
-
-    <div class="checklist-row">
-      <label>DID</label>
-      <input
-        type="text"
-        id="dealershipDidInput"
-        placeholder="Enter dealership DID"
-      >
-    </div>
-
-     <div class="checklist-row">
-      <label>Salseforce Order</label>
-      <input
-        type="text"
-        id="SForderInput"
-        placeholder="Enter SF order link"
-      >
-    </div>
-
-    <div class="checklist-row">
-      <label>DMS</label>
-      <select id="dealershipDmsSelect">
-        <option value="" data-ghost="true">Select DMS</option>
-        <option>CDK</option>
-        <option>Reynolds &amp; Reynolds</option>
-        <option>Dealertrack</option>
-        <option>Automate</option>
-        <option>Autosoft</option>
-        <option>DealerBuilt</option>
-        <option>PBS</option>
-        <option>Tekion</option>
-        <option>Other / Not Listed</option>
-      </select>
-    </div>
-
-    <!-- Onsite Training Dates -->
-    <div class="checklist-row training-dates-row">
-      <label>Onsite Training Dates</label>
-      <div class="date-stack">
-        <input
-          type="date"
-          id="onsiteStartDate"
-          class="date-input is-placeholder"
-        >
-        <input
-          type="date"
-          id="onsiteEndDate"
-          class="date-input is-placeholder"
-        >
-      </div>
-    </div>
-  </div>
-
-      <!-- ================= PRIMARY CONTACTS ================= -->
-<div class="section-block">
-  <h2>Primary Contacts</h2>
-
-  <div class="primary-contacts-grid">
-
-    <!-- Service Director -->
-    <div class="mini-card contact-card">
-      <div class="checklist-row">
-        <label>Service Director</label>
-        <input type="text" placeholder="Enter name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email">
-      </div>
-    </div>
-
-    <!-- Service Manager -->
-    <div class="mini-card contact-card">
-      <div class="checklist-row">
-        <label>Service Manager</label>
-        <input type="text" placeholder="Enter name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email">
-      </div>
-    </div>
-
-    <!-- General Manager -->
-    <div class="mini-card contact-card">
-      <div class="checklist-row">
-        <label>General Manager</label>
-        <input type="text" placeholder="Enter name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email">
-      </div>
-    </div>
-
-    <!-- Parts Manager -->
-    <div class="mini-card contact-card">
-      <div class="checklist-row">
-        <label>Parts Manager</label>
-        <input type="text" placeholder="Enter name">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell">
-      </div>
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email">
-      </div>
-    </div>
-
-    <!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
-    <div
-      class="mini-card additional-poc-card"
-      data-base="true"
-    >
-      <!-- Name + Add -->
-      <div class="checklist-row integrated-plus">
-        <label>Additional POC</label>
-        <input type="text" placeholder="Enter name">
-        <button
-          type="button"
-          class="add-row additional-poc-add"
-          title="Add another contact"
-        >+</button>
-      </div>
-
-      <!-- Role -->
-      <div class="checklist-row indent-sub">
-        <label>Role</label>
-        <input type="text" placeholder="Enter role">
-      </div>
-
-      <!-- Cell -->
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell">
-      </div>
-
-      <!-- Email -->
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email">
-      </div>
-    </div>
-
-  </div>
-</div>
-
 <!-- ================= DEALERSHIP ADDRESS ================= -->
 <div class="section-block" id="dealership-address-card">
   <h2>Dealership Address</h2>
@@ -358,6 +176,7 @@
         Map
       </button>
     </div>
+  </div> <!-- ✅ CLOSE checklist-row -->
 
   <div class="map-wrapper">
     <iframe
@@ -372,7 +191,7 @@
   <p class="map-helper-text">
     Select an address above to update this map.
   </p>
-</div>
+</div> <!-- ✅ CLOSE section-block -->
 
 <!-- ========================================================= -->
 <!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
