@@ -424,45 +424,56 @@ main{
 .indent-sub{ padding-left:60px !important; }
 
 /* ===========================================================
-   Dealership Address — override fixed input width + Map btn
+   Dealership Address — wide input + attached Map button
    =========================================================== */
-#dealership-address-card .checklist-row{ align-items:center; }
+
+#dealership-address-card .checklist-row{
+  align-items: center;
+}
+
+/* Address + Map wrapper */
 #dealership-address-card .address-input-wrap{
-  flex:0 0 75%;
-  width:75%;
-  margin-left:auto;
-  display:flex;
-  align-items:stretch;
-  gap:0;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  gap: 0;
 }
+
+/* Address input — takes almost all space */
 #dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
+  flex: 1 1 auto;
+  width: 100%;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
+
+/* Map button — fixed width, attached */
 #dealership-address-card .address-input-wrap .small-map-btn{
-  flex:0 0 36px;
-  width:36px;
-  height:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  padding:0;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+  flex: 0 0 44px;
+  width: 44px;
+  height: auto;
+  margin-left: -1px; /* visually connects borders */
+  background: var(--orange);
+  color: #fff;
+  border: 1px solid var(--orange);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(239,109,34,0.25);
 }
+
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
-  background:#ff8b42;
+  background: #ff8b42;
 }
 
 /* ===========================================================
