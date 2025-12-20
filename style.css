@@ -1,6 +1,11 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — CLEAN FULL CSS
    (Wider pages/cards + tables/support/DMS preserved)
+
+   ✅ FIXES INCLUDED:
+   - Post-training Notes cards start at SAME height as left cards (JS-driven).
+     CSS is adjusted to NOT fight the JS.
+   - Additional POC clones: name input no longer becomes too wide.
    ======================================================= */
 
 /* ============== CSS VARIABLES ============== */
@@ -553,6 +558,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:18px;
   margin-bottom:24px;
+  align-items:start; /* ✅ important: don't stretch rows */
 }
 .col-stack{
   display:flex;
@@ -574,16 +580,13 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   --input-width:150px;
 }
 
-/* Side-by-side Notes cards: default structure */
+/* ✅ IMPORTANT:
+   Remove “textarea flex-fill” behavior that fought your matching heights.
+   JS now controls the starting height to match the left card. */
 .cards-grid .section-block,
 .two-col-grid .section-block{
-  display:flex;
-  flex-direction:column;
-}
-.cards-grid .section-block textarea,
-.two-col-grid .section-block textarea{
-  flex:1 1 auto;
-  min-height:220px;
+  /* leave as normal block so JS min-height works naturally */
+  display:block;
 }
 
 /* ===========================================================
@@ -653,57 +656,59 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .mini-card .checklist-row input[type="text"],
 .mini-card .checklist-row input[type="tel"],
 .mini-card .checklist-row input[type="email"]{
-  flex:1 1 auto !important;
-  width:100% !important;
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
   max-width:100% !important;
   margin-left:0 !important;
   box-sizing:border-box;
 }
 
-/* ===========================================================
-   Additional POC (integrated +) — FIX OVERFLOW + ALIGN
-   - base + added cards stay inside
-   - input touches + button
-   =========================================================== */
-.mini-card.additional-poc-card{
-  overflow:hidden; /* ✅ safety: never spill outside the card border */
-}
-
+/* ============== Additional POC (integrated +) ============== */
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
+  gap:0 !important;                 /* ✅ input touches + */
   padding:8px 24px !important;
-  gap:0 !important;                         /* ✅ connect input to button */
   border-bottom:1px solid #e5e5e5 !important;
-  overflow:hidden;                           /* ✅ safety */
 }
 
 /* label spacing restored */
 .mini-card.additional-poc-card .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
-  margin-right:12px !important;
+  padding-right:12px !important;
   white-space:nowrap !important;
   display:flex !important;
   align-items:center !important;
+  margin-right:12px !important;     /* ✅ spacing between label and field */
 }
 
-/* KEY: allow shrink so it never pushes outside */
+/* ✅ BASE + CLONES: input always allowed to shrink (prevents “too wide” again) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 0 !important;
-  width:0 !important;                        /* ✅ prevents overflow in flex */
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
+  width:0 !important;                  /* ✅ key */
+  min-width:0 !important;              /* ✅ key */
+  margin-left:0 !important;
 
   height:34px !important;
   padding:7px 10px !important;
   font-size:13px !important;
 
+  box-sizing:border-box !important;
+}
+
+/* Base card: flatten right edge because + exists */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
   border-top-left-radius:var(--radius-sm) !important;
   border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
+}
+
+/* Clone cards (no +): full rounding */
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  border-radius:var(--radius-sm) !important;
 }
 
 /* + button */
@@ -731,6 +736,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
   padding:0 !important;
 }
+
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42 !important;
@@ -740,14 +746,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .additional-poc-card:not([data-base="true"]) .add-row,
 .additional-poc-card:not([data-base="true"]) .additional-poc-add{
   display:none !important;
-}
-
-/* When + is hidden (clones), restore full rounding */
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  width:100% !important;
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  border-radius:var(--radius-sm) !important;
 }
 
 /* ===========================================================
@@ -765,7 +763,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   align-items:center;
 }
 
-/* ✅ DEFAULT: inputs are fully rounded (fixes added rows) */
+/* ✅ DEFAULT: inputs are fully rounded */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
   flex:0 0 var(--input-width);
@@ -1391,57 +1389,4 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   }
 
   .training-table{ min-width:760px; }
-}
-
-/* ===========================================================
-   INTEGRATED "+" ROWS — correct width for clones (no + button)
-   =========================================================== */
-
-/* Default: integrated row input is FULL normal width */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"],
-.section-block .checklist-row.integrated-plus input[type="email"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  margin-left:auto !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* Only shrink input when a + button actually exists next to it */
-.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="text"],
-.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="tel"],
-.section-block .checklist-row.integrated-plus:has(> input + .add-row) > input[type="email"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-
-/* ===========================================================
-   POST-TRAINING — SAFE STYLING (NO DOM FLATTENING)
-   - Keeps the page looking like your other similar pages
-   - Does NOT break the 2-column layout
-   - Notes cards start at a consistent, normal height
-   =========================================================== */
-
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid{
-  align-items:start !important; /* don’t stretch columns */
-}
-
-/* Keep cards normal (like other pages) */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid .section-block{
-  display:flex !important;
-  flex-direction:column !important;
-  height:auto !important;
-}
-
-/* Notes textarea: normal-looking default size (not tiny, not massive) */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid .section-block textarea{
-  flex:0 0 auto !important;
-  height:auto !important;
-  min-height:220px !important; /* starting height */
 }
