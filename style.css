@@ -1473,3 +1473,44 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
   margin-left:-1px !important;      /* clean border join */
 }
+
+/* ===========================================================
+   2x2 CARDS GRID — make all cards equal height
+   Notes cards match Question cards (no extra dead space)
+   =========================================================== */
+
+/* Make rows equal-height in the 2-col grids */
+.cards-grid.two-col,
+.two-col-grid{
+  align-items: stretch;          /* stretch items to row height */
+}
+
+/* Force each card to fill the row height */
+.cards-grid.two-col > .section-block,
+.two-col-grid > .section-block{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Keep the last row from leaving extra "gap" space */
+.cards-grid.two-col > .section-block,
+.two-col-grid > .section-block{
+  padding-bottom: 14px;          /* same “nice padding” feel */
+}
+
+/* NOTES cards: textarea should grow to fill remaining height */
+.cards-grid.two-col .section-block textarea,
+.two-col-grid .section-block textarea{
+  flex: 1 1 auto;
+  min-height: 0 !important;      /* overrides your 220px rule in grids */
+  height: 100%;
+}
+
+/* QUESTION cards: remove bottom “empty” feel by tightening last row spacing */
+.cards-grid.two-col .section-block .checklist-row:last-of-type,
+.two-col-grid .section-block .checklist-row:last-of-type{
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
