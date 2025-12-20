@@ -575,21 +575,37 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ 2x2 GRIDS — MATCH RIGHT "NOTES" CARDS TO LEFT SMALL CARDS
-   (This is the real fix: remove the "tall notes" forcing rule)
+   2-COLUMN CARDS (Questions + Notes) — MATCH HEIGHT PER ROW
+   - Make both cards in each row the same height
+   - Let the Notes textarea fill that card (no tiny notes boxes)
    =========================================================== */
 
-/* In 2-col grids, do NOT force the textarea to make the card tall */
-.cards-grid.two-col .section-block textarea,
-.two-col-grid .section-block textarea{
-  flex:0 0 auto !important;
-  min-height:120px !important;   /* adjust to 120–160 if you want a bit taller */
-}
-
-/* Keep cards from stretching based on the taller neighbor */
+/* Make grid rows stretch so both cards match height */
 .cards-grid.two-col,
 .two-col-grid{
-  align-items:start !important;
+  align-items: stretch !important;
+}
+
+/* Ensure each card can stretch cleanly */
+.cards-grid.two-col > .section-block,
+.two-col-grid > .section-block{
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Notes textareas fill remaining space of the card */
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid > .section-block textarea{
+  flex: 1 1 auto !important;
+  min-height: 220px !important;   /* keeps them from becoming tiny */
+  height: auto !important;
+}
+
+/* If a Notes card has ONLY a textarea, keep it snug */
+.cards-grid.two-col > .section-block textarea:last-child,
+.two-col-grid > .section-block textarea:last-child{
+  margin-bottom: 0 !important;
 }
 
 /* ===========================================================
@@ -666,92 +682,50 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-sizing:border-box;
 }
 
-/* ===========================================================
-   Additional POC (integrated +) — BASE + CLONES
-   (keeps + inside, and makes input TOUCH the button)
+//* ===========================================================
+   Additional POC (BASE) — input + button attached, no overflow
    =========================================================== */
-.mini-card.additional-poc-card .checklist-row.integrated-plus{
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
+  gap:0 !important;                 /* attach input to + */
   padding:8px 24px !important;
-  border-bottom:1px solid #e5e5e5 !important;
-
-  gap:0 !important;                 /* ✅ no gap between input and + */
 }
 
-/* label spacing only (so layout matches other rows) */
-.mini-card.additional-poc-card .checklist-row.integrated-plus label{
+/* Keep label spacing like other mini-card rows */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
-  padding-right:12px !important;
+  margin-right:12px !important;     /* spacing between label and field group */
   white-space:nowrap !important;
-  display:flex !important;
-  align-items:center !important;
-  margin-right:12px !important;     /* ✅ spacing between label and field group */
 }
 
-/* input shrinks correctly so + never overflows */
-.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;
+/* ✅ Key: input flexes BUT always leaves room for the + button */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
   min-width:0 !important;
-  margin-left:0 !important;
+
+  /* leave room for the + button */
+  max-width:calc(100% - 34px) !important;
 
   height:34px !important;
   padding:7px 10px !important;
-  font-size:13px !important;
 
   border-top-left-radius:var(--radius-sm) !important;
   border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
-
-  box-sizing:border-box !important;
 }
 
-/* + button */
-.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
+/* + button stays inside and connected */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
   flex:0 0 34px !important;
   width:34px !important;
   height:34px !important;
   margin-left:-1px !important;
-
-  background:var(--orange) !important;
-  color:#fff !important;
-  border:1px solid var(--orange) !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-
-  font-size:16px !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
-  padding:0 !important;
-}
-.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
-.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
-  background:#ff8b42 !important;
-}
-
-/* Hide + button on clones */
-.additional-poc-card:not([data-base="true"]) .add-row,
-.additional-poc-card:not([data-base="true"]) .additional-poc-add{
-  display:none !important;
-}
-
-/* When + is hidden (clones), restore full rounding */
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  width:100% !important;
-  flex:1 1 auto !important;
-  border-radius:var(--radius-sm) !important;
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
 }
 
 /* ===========================================================
