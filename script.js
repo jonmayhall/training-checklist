@@ -8,6 +8,11 @@
    - Ticket ID counter stored in localStorage for persistence across reloads
    - Reset This Page on Support Tickets resets ticket counter
    - FIX: Onsite Training Dates listener runs after DOM is ready
+
+   ✅ NEW FIX (Post-Training):
+   - Notes cards in two-col stacks start at SAME height as the card directly left
+   - Notes textareas get a computed min-height so the right card matches the left
+   - Cards can still grow if user types a lot (no forced fixed height)
    ======================================================= */
 
 /* ---------------------------
@@ -39,6 +44,85 @@ function setSelectByValue(selectEl, val){
   if (!selectEl) return;
   const opt = Array.from(selectEl.options).find(o => o.value === val || o.text === val);
   selectEl.value = opt ? opt.value : "";
+}
+
+/* ---------------------------
+   ✅ Post-Training Notes height matching (two stacks)
+   - Works when layout is:
+     .two-col-grid
+       .col-stack (LEFT cards)
+       .col-stack (RIGHT cards / Notes)
+--------------------------- */
+function matchPostTrainingNotesHeights(){
+  // If responsive collapses to 1 column, remove inline sizing
+  const isSingleColumn = window.matchMedia("(max-width: 900px)").matches;
+
+  qsa(".two-col-grid").forEach(grid => {
+    const stacks = qsa(":scope > .col-stack", grid);
+    if (stacks.length < 2) return;
+
+    const leftStack  = stacks[0];
+    const rightStack = stacks[1];
+
+    const leftCards  = qsa(":scope > .section-block", leftStack);
+    const rightCards = qsa(":scope > .section-block", rightStack);
+
+    // Clear previous sizing first (so measurements are correct)
+    rightCards.forEach(card => {
+      card.style.minHeight = "";
+      const ta = qs("textarea", card);
+      if (ta){
+        ta.style.minHeight = "";
+      }
+    });
+
+    if (isSingleColumn){
+      // On mobile/stacked view, don't force matching heights
+      return;
+    }
+
+    const count = Math.min(leftCards.length, rightCards.length);
+
+    for (let i = 0; i < count; i++){
+      const leftCard  = leftCards[i];
+      const rightCard = rightCards[i];
+
+      // Only apply to Notes-type cards (safe)
+      // If you ever want ALL right cards, remove this check.
+      const rightHeader = qs("h2", rightCard)?.textContent?.toLowerCase() || "";
+      const isNotesCard = rightHeader.includes("notes");
+
+      if (!isNotesCard) continue;
+
+      // Measure left card height
+      const leftH = Math.ceil(leftCard.getBoundingClientRect().height);
+
+      // Apply min-height to right card so it starts equal height
+      rightCard.style.minHeight = `${leftH}px`;
+
+      // Now size the textarea so it "fills" the body area nicely
+      const ta = qs("textarea", rightCard);
+      if (ta){
+        const header = qs("h2", rightCard);
+        const headerH = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+
+        // card has padding: 0 22px 14px; and header has margin hacks
+        // We'll compute available space based on actual rendered sizes.
+        const cardStyles = window.getComputedStyle(rightCard);
+        const padTop = parseFloat(cardStyles.paddingTop || "0");
+        const padBottom = parseFloat(cardStyles.paddingBottom || "0");
+
+        // Space available for textarea inside the card:
+        // leftH (target) - headerH - padding - a little breathing room
+        const targetTextareaMin = Math.max(
+          110,
+          leftH - headerH - padTop - padBottom - 18
+        );
+
+        ta.style.minHeight = `${Math.floor(targetTextareaMin)}px`;
+      }
+    }
+  });
 }
 
 /* ---------------------------
@@ -79,6 +163,9 @@ function loadAll(root=document){
   refreshDateGhost(root);
   ensureTicketIds();          // ✅ make sure all existing cards have permanent IDs
   refreshTicketBadges();      // ✅ show those IDs
+
+  // ✅ after content loads / restores, match Notes heights
+  matchPostTrainingNotesHeights();
 }
 
 /* ---------------------------
@@ -111,6 +198,7 @@ function clearSection(sectionEl){
   refreshGhostSelects(sectionEl);
   refreshDateGhost(sectionEl);
   refreshTicketBadges();
+  matchPostTrainingNotesHeights();
 }
 
 function clearAll(){
@@ -121,6 +209,7 @@ function clearAll(){
   });
 
   qsa(".page-section").forEach(clearSection);
+  matchPostTrainingNotesHeights();
 }
 
 /* ---------------------------
@@ -141,6 +230,10 @@ function showSectionById(id){
     const main = qs("main");
     (main || window).scrollTo({ top: 0, behavior: "smooth" });
   } catch(_) {}
+
+  // ✅ when switching pages, re-match heights after layout paint
+  requestAnimationFrame(() => matchPostTrainingNotesHeights());
+  setTimeout(matchPostTrainingNotesHeights, 60);
 }
 
 function initNavigation(){
@@ -242,6 +335,9 @@ function cloneIntegratedRow(btn){
   row.insertAdjacentElement("afterend", clone);
   refreshGhostSelects(clone);
   refreshDateGhost(clone);
+
+  // ✅ clones can change layout height
+  matchPostTrainingNotesHeights();
 }
 
 function handleTrainerAdd(btn){
@@ -356,14 +452,6 @@ function handleAddTicket(btn){
   const baseZendeskUrl   = qs(".ticket-zendesk-input", baseCard)?.value || "";
   const baseSummary      = qs(".ticket-summary-input", baseCard)?.value || "";
 
-  // Optional: enforce base completion before allowing add
-  /*
-  if (!baseTicketNumber.trim() || !baseSummary.trim()){
-    alert("Complete the ticket number and summary before adding another card.");
-    return;
-  }
-  */
-
   // Clone the base card
   const clone = baseCard.cloneNode(true);
   clone.dataset.clone = "true";
@@ -438,6 +526,13 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshDateGhost();
   refreshTicketBadges();
 
+  // ✅ Match Notes heights on load + after layout paints
+  matchPostTrainingNotesHeights();
+  setTimeout(matchPostTrainingNotesHeights, 80);
+  window.addEventListener("resize", () => {
+    matchPostTrainingNotesHeights();
+  });
+
   // autosave on input/change
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
@@ -445,6 +540,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (e.target.tagName === "SELECT") refreshGhostSelects(e.target.closest(".page-section") || document);
     if (e.target.type === "date") refreshDateGhost(e.target.closest(".page-section") || document);
+
+    // ✅ Notes typing can change heights
+    if (e.target.tagName === "TEXTAREA"){
+      matchPostTrainingNotesHeights();
+    }
   });
 
   document.addEventListener("change", (e) => {
@@ -462,6 +562,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (card.dataset.base === "true") return;
       moveTicketCardToStatus(card, sel.value);
     }
+
+    matchPostTrainingNotesHeights();
   });
 
   // clicks
@@ -507,12 +609,14 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(clone);
         refreshGhostSelects(clone);
         refreshDateGhost(clone);
+        matchPostTrainingNotesHeights();
         return;
       }
 
       if (btn.closest("#trainers-deployment")) handleTrainerAdd(btn);
       else cloneIntegratedRow(btn);
 
+      matchPostTrainingNotesHeights();
       return;
     }
 
