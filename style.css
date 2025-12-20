@@ -1419,65 +1419,29 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ FIX: POST-TRAINING "Questions + Notes" alignment
-   Your layout uses: .two-col-grid > .col-stack (left list + right list)
-   So we make the stacks behave like ONE grid of pairs:
-   - flatten the stacks
-   - force 2 columns
-   - force N rows so column-flow can split left vs right
-   - stretch row height so right Notes card matches left card
+   POST-TRAINING — SAFE STYLING (NO DOM FLATTENING)
+   - Keeps the page looking like your other similar pages
+   - Does NOT break the 2-column layout
+   - Notes cards start at a consistent, normal height
    =========================================================== */
 
-/* Scope this to Post-Training pages ONLY (covers common ids) */
 :is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
 .two-col-grid{
-  /* keep your 2 columns */
-  grid-template-columns:repeat(2, minmax(0,1fr)) !important;
-
-  /* IMPORTANT: this is what makes matching row heights possible */
-  grid-auto-flow:column !important;
-
-  /* set a safe row count (increase if you have more pairs than this) */
-  grid-template-rows:repeat(24, auto) !important;
-
-  align-items:stretch !important;
+  align-items:start !important; /* don’t stretch columns */
 }
 
-/* Flatten the column wrappers so the cards become grid children */
+/* Keep cards normal (like other pages) */
 :is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid > .col-stack{
-  display:contents !important;
-}
-
-/* Each card stretches to the row height */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid > .section-block{
-  height:100% !important;
+.two-col-grid .section-block{
   display:flex !important;
   flex-direction:column !important;
-}
-
-/* Notes textarea fills the card but DOES NOT force the row taller */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.two-col-grid > .section-block textarea{
-  flex:1 1 auto !important;
-  min-height:0 !important;     /* ✅ key: prevents tiny left/right mismatch */
   height:auto !important;
 }
 
-/* Also apply equal-height pairing for any direct 2-col grids that already use cards as children */
+/* Notes textarea: normal-looking default size (not tiny, not massive) */
 :is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.cards-grid.two-col{
-  align-items:stretch !important;
-}
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.cards-grid.two-col > .section-block{
-  height:100% !important;
-  display:flex !important;
-  flex-direction:column !important;
-}
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary, #post-training-notes)
-.cards-grid.two-col > .section-block textarea{
-  flex:1 1 auto !important;
-  min-height:0 !important;
+.two-col-grid .section-block textarea{
+  flex:0 0 auto !important;
+  height:auto !important;
+  min-height:220px !important; /* starting height */
 }
