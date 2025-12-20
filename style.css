@@ -1475,43 +1475,40 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   2x2 CARDS GRID — make all cards equal height
-   Notes cards match Question cards (no extra dead space)
+   POST-TRAINING — keep Notes cards looking like other pages
+   (undo equal-height grid behavior for this page/section)
    =========================================================== */
 
-/* Make rows equal-height in the 2-col grids */
-.cards-grid.two-col,
-.two-col-grid{
-  align-items: stretch;          /* stretch items to row height */
+/* Add your actual Post-Training section id(s) here.
+   I included common possibilities so it works even if the id differs. */
+#post-training,
+#post-training-verification,
+#post-training-checklist,
+#post-training-summary{
+  /* nothing needed here — just grouping for the selectors below */
 }
 
-/* Force each card to fill the row height */
-.cards-grid.two-col > .section-block,
-.two-col-grid > .section-block{
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+/* Post-Training grids should NOT stretch cards to equal height */
+:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
+.two-col-grid,
+:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
+.cards-grid.two-col{
+  align-items: start !important;
 }
 
-/* Keep the last row from leaving extra "gap" space */
-.cards-grid.two-col > .section-block,
-.two-col-grid > .section-block{
-  padding-bottom: 14px;          /* same “nice padding” feel */
+/* Let Post-Training cards size naturally (like your other pages) */
+:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
+.two-col-grid > .section-block,
+:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
+.cards-grid.two-col > .section-block{
+  height: auto !important;
+  display: block !important;
 }
 
-/* NOTES cards: textarea should grow to fill remaining height */
-.cards-grid.two-col .section-block textarea,
-.two-col-grid .section-block textarea{
-  flex: 1 1 auto;
-  min-height: 0 !important;      /* overrides your 220px rule in grids */
-  height: 100%;
+/* Textareas in Post-Training Notes cards behave normally */
+:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
+.section-block textarea{
+  height: auto !important;
+  min-height: 220px;       /* keep your familiar Notes size */
+  flex: 0 0 auto !important;
 }
-
-/* QUESTION cards: remove bottom “empty” feel by tightening last row spacing */
-.cards-grid.two-col .section-block .checklist-row:last-of-type,
-.two-col-grid .section-block .checklist-row:last-of-type{
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-  border-bottom: none !important;
-}
-
