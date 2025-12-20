@@ -663,21 +663,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-sizing:border-box;
 }
 
-/* ===========================================================
-   PRIMARY CONTACTS — Additional POC NAME row (final fix)
-   - Keeps input right edge aligned with other "Enter name" inputs
-   - + button does NOT add width (it floats inside the input area)
-   =========================================================== */
+/* ============== Additional POC (integrated +) — ALIGNED ============== */
+/* Goal:
+   - Input + (+) button total width == same as other name inputs
+   - Button matches other + buttons (34px pill)
+   - Right edge of the + button aligns with the right edge of other name inputs
+*/
+
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
-  position:relative !important;
   display:flex !important;
   align-items:center !important;
-  gap:12px !important;
   padding:8px 24px !important;
+  gap:12px !important; /* match other rows */
   border-bottom:1px solid #e5e5e5 !important;
 }
 
-/* Label matches other mini-card rows */
+/* Match other mini-card label sizing */
 .mini-card.additional-poc-card .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
@@ -687,49 +688,54 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   align-items:center !important;
 }
 
-/* Input matches other name inputs; add right padding for + button */
+/* KEY FIX:
+   Make the input leave room for the 34px button so the combo
+   stays the same overall width as a normal input row. */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  min-width:0 !important;
-  margin-left:0 !important;
-
   height:34px !important;
-  padding:7px 44px 7px 10px !important; /* room for + button */
+  padding:7px 10px !important;
   font-size:13px !important;
 
-  border-radius:999px !important;       /* SAME as other mini-card inputs */
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+
+  /* This makes (input + button) == full available input width */
+  max-width:calc(100% - 34px) !important;
+
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+  border-top-left-radius:999px !important;
+  border-bottom-left-radius:999px !important;
   box-sizing:border-box !important;
 }
 
-/* + button floats INSIDE input width, so right edge stays aligned */
+/* + button */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
-  position:absolute !important;
-  right:24px !important;               /* matches row padding */
-  top:50% !important;
-  transform:translateY(-50%) !important;
-
+  flex:0 0 34px !important;
   width:34px !important;
   height:34px !important;
+  margin-left:-1px !important;
 
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
-  border-radius:999px !important;
+  border-radius:0 999px 999px 0 !important;
 
   font-size:18px !important;
   font-weight:900 !important;
   line-height:1 !important;
 
+  cursor:pointer !important;
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
 
-  cursor:pointer !important;
-  padding:0 !important;
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+  padding:0 !important;
 }
+
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42 !important;
@@ -739,6 +745,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .additional-poc-card:not([data-base="true"]) .add-row,
 .additional-poc-card:not([data-base="true"]) .additional-poc-add{
   display:none !important;
+}
+
+/* When + is hidden (clones), restore full rounding */
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  max-width:100% !important;
+  border-radius:999px !important;
 }
 
 /* ===========================================================
