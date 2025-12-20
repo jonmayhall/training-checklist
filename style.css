@@ -673,47 +673,74 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   FIX: Additional POC name field should match other name fields
-   (overlay the + button so it doesn't shrink the input)
-   Add at VERY BOTTOM of CSS
+   FIX — Additional POC name row: attached + button like others
+   Keeps full row width aligned with other inputs in mini-cards
    =========================================================== */
 
+/* Make the row a positioning container */
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
   position:relative !important;
+  display:flex !important;
   align-items:center !important;
-  gap:12px !important;          /* match other rows */
+  gap:12px !important;
 }
 
-/* Make the input full width like other inputs */
+/* Match label sizing to other mini-card rows */
+.mini-card.additional-poc-card .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+}
+
+/* Input stays full width, but leaves room for the + button */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
   max-width:100% !important;
   margin-left:0 !important;
-  border-radius:999px !important;     /* match the pill style */
-  padding-right:54px !important;      /* room for the + button overlay */
+
+  height:34px !important;
+  padding:7px 44px 7px 10px !important; /* room for + button */
+
+  border-radius:999px !important;
+  border-top-right-radius:0 !important;   /* flat edge to attach */
+  border-bottom-right-radius:0 !important;/* flat edge to attach */
 }
 
-/* Put the + button on top, not beside (so it doesn't steal width) */
+/* + Button: attached to the input (not floating) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
   position:absolute !important;
-  right:24px !important;              /* matches your row padding */
+  right:0 !important;
   top:50% !important;
   transform:translateY(-50%) !important;
 
-  width:40px !important;
+  width:34px !important;
   height:34px !important;
+  margin:0 !important;
 
-  margin-left:0 !important;
-  border-radius:999px !important;     /* matches your UI */
-  z-index:3 !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-left:none !important;              /* clean join */
+  border-radius:0 999px 999px 0 !important; /* match other attached buttons */
+
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 
-/* OPTIONAL: keep the orange button look consistent */
+/* Hover (no jumping) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
-  transform:translateY(-50%) !important; /* prevent hover "jump" */
+  background:#ff8b42 !important;
+  transform:translateY(-50%) !important;
 }
 
 /* ===========================================================
