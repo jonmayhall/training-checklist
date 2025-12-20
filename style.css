@@ -1451,3 +1451,25 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
 }
+
+/* ===========================================================
+   Additional POC (BASE) — make input TOUCH the + button
+   =========================================================== */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
+  gap:0 !important;                 /* removes the space between input and button */
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
+  margin-right:12px !important;     /* puts spacing back ONLY between label and field */
+}
+
+/* ensure the input and + button are visually "attached" */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
+  margin-left:-1px !important;      /* clean border join */
+}
