@@ -425,19 +425,16 @@ main{
 
 /* ===========================================================
    Dealership Address — FIXED SMALLER WIDTH (works)
-   - Forces the address wrapper to a fixed width so it cannot
-     stretch full screen.
-   - Change 420px if you want it smaller/larger.
    =========================================================== */
 #dealership-address-card .checklist-row{
   display:grid !important;
-  grid-template-columns: minmax(260px, 1fr) auto !important; /* 2nd column won't stretch */
+  grid-template-columns: minmax(260px, 1fr) auto !important;
   column-gap:18px !important;
   align-items:center !important;
 }
 
 #dealership-address-card .address-input-wrap{
-  width:420px !important;      /* ✅ adjust this: 380px = smaller, 460px = bigger */
+  width:420px !important;
   max-width:420px !important;
   margin-left:auto !important;
 
@@ -577,16 +574,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   --input-width:150px;
 }
 
-/* Side-by-side Notes cards: let textarea grow */
-.cards-grid .section-block,
-.two-col-grid .section-block{
-  display:flex;
-  flex-direction:column;
-}
-.cards-grid .section-block textarea,
+/* ===========================================================
+   ✅ 2x2 GRIDS — MATCH RIGHT "NOTES" CARDS TO LEFT SMALL CARDS
+   (This is the real fix: remove the "tall notes" forcing rule)
+   =========================================================== */
+
+/* In 2-col grids, do NOT force the textarea to make the card tall */
+.cards-grid.two-col .section-block textarea,
 .two-col-grid .section-block textarea{
-  flex:1 1 auto;
-  min-height:220px;
+  flex:0 0 auto !important;
+  min-height:120px !important;   /* adjust to 120–160 if you want a bit taller */
+}
+
+/* Keep cards from stretching based on the taller neighbor */
+.cards-grid.two-col,
+.two-col-grid{
+  align-items:start !important;
 }
 
 /* ===========================================================
@@ -663,16 +666,20 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-sizing:border-box;
 }
 
-/* ============== Additional POC (integrated +) — FIX OVERFLOW + ALIGN ============== */
+/* ===========================================================
+   Additional POC (integrated +) — BASE + CLONES
+   (keeps + inside, and makes input TOUCH the button)
+   =========================================================== */
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
-  gap:12px !important;                 /* match other mini-card rows */
   padding:8px 24px !important;
   border-bottom:1px solid #e5e5e5 !important;
+
+  gap:0 !important;                 /* ✅ no gap between input and + */
 }
 
-/* Match other mini-card labels */
+/* label spacing only (so layout matches other rows) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
@@ -680,13 +687,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   white-space:nowrap !important;
   display:flex !important;
   align-items:center !important;
+  margin-right:12px !important;     /* ✅ spacing between label and field group */
 }
 
-/* CRITICAL: allow the input to SHRINK so the + stays inside the card */
+/* input shrinks correctly so + never overflows */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 0 !important;
-  width:0 !important;                  /* ✅ prevents overflow */
-  min-width:0 !important;              /* ✅ prevents overflow */
+  width:0 !important;
+  min-width:0 !important;
+  margin-left:0 !important;
 
   height:34px !important;
   padding:7px 10px !important;
@@ -696,10 +705,11 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
+
   box-sizing:border-box !important;
 }
 
-/* + button — same look as your other + buttons */
+/* + button */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
   flex:0 0 34px !important;
@@ -724,7 +734,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
   padding:0 !important;
 }
-
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42 !important;
@@ -741,6 +750,8 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:100% !important;
   flex:1 1 auto !important;
   border-radius:var(--radius-sm) !important;
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
 }
 
 /* ===========================================================
@@ -1389,8 +1400,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* ===========================================================
    INTEGRATED "+" ROWS — correct width for clones (no + button)
    =========================================================== */
-
-/* Default: integrated row input is FULL normal width */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row.integrated-plus input[type="email"]{
@@ -1410,125 +1419,3 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
 }
-
-/* ===========================================================
-   Additional POC — BASE card (default) fix
-   Forces the input to shrink so + stays inside the card
-   =========================================================== */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
-  display:flex !important;
-  align-items:center !important;
-  gap:12px !important;
-}
-
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
-  flex:0 0 36% !important;
-  max-width:36% !important;
-  white-space:nowrap !important;
-}
-
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;        /* KEY: prevents overflow */
-  min-width:0 !important;    /* KEY: prevents overflow */
-  margin-left:0 !important;
-
-  height:34px !important;
-  padding:7px 10px !important;
-
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-  border-top-left-radius:var(--radius-sm) !important;
-  border-bottom-left-radius:var(--radius-sm) !important;
-}
-
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
-  flex:0 0 34px !important;
-  width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-}
-
-/* ===========================================================
-   Additional POC (BASE) — make input TOUCH the + button
-   =========================================================== */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
-  gap:0 !important;                 /* removes the space between input and button */
-}
-
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
-  margin-right:12px !important;     /* puts spacing back ONLY between label and field */
-}
-
-/* ensure the input and + button are visually "attached" */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
-  margin-left:-1px !important;      /* clean border join */
-}
-
-/* ===========================================================
-   POST-TRAINING — keep Notes cards looking like other pages
-   (undo equal-height grid behavior for this page/section)
-   =========================================================== */
-
-/* Add your actual Post-Training section id(s) here.
-   I included common possibilities so it works even if the id differs. */
-#post-training,
-#post-training-verification,
-#post-training-checklist,
-#post-training-summary{
-  /* nothing needed here — just grouping for the selectors below */
-}
-
-/* Post-Training grids should NOT stretch cards to equal height */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
-.two-col-grid,
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
-.cards-grid.two-col{
-  align-items: start !important;
-}
-
-/* Let Post-Training cards size naturally (like your other pages) */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
-.two-col-grid > .section-block,
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
-.cards-grid.two-col > .section-block{
-  height: auto !important;
-  display: block !important;
-}
-
-/* Textareas in Post-Training Notes cards behave normally */
-:is(#post-training, #post-training-verification, #post-training-checklist, #post-training-summary)
-.section-block textarea{
-  height: auto !important;
-  min-height: 220px;       /* keep your familiar Notes size */
-  flex: 0 0 auto !important;
-}
-
-//* ===========================================================
-   FIX: 2-COLUMN "Questions + Notes" rows
-   - Stop Notes textarea from forcing tall cards
-   - Make Notes cards match the smaller left cards
-   =========================================================== */
-
-/* In 2-col grids, do NOT force Notes textareas to grow huge */
-.cards-grid.two-col .section-block textarea,
-.two-col-grid .section-block textarea{
-  flex: 0 0 auto !important;     /* disables the "fill the whole card" behavior */
-  min-height: 120px !important;  /* ✅ adjust: 100–160 if you want */
-}
-
-/* Keep both cards aligned cleanly in the same row */
-.cards-grid.two-col,
-.two-col-grid{
-  align-items: start !important; /* prevents the tall Notes card from stretching the row */
-}
-
