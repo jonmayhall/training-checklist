@@ -432,49 +432,39 @@ main{
   column-gap:18px !important;
   align-items:center !important;
 }
-
 #dealership-address-card .address-input-wrap{
   width:420px !important;
   max-width:420px !important;
   margin-left:auto !important;
-
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
 }
-
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
   min-width:0 !important;
-
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
 }
-
 #dealership-address-card .address-input-wrap .small-map-btn{
   flex:0 0 44px !important;
   width:44px !important;
   height:34px !important;
   margin-left:-1px !important;
-
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-
   font-size:11px !important;
   font-weight:800 !important;
   letter-spacing:0.08em !important;
   text-transform:uppercase !important;
-
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
-
   cursor:pointer !important;
   padding:0 !important;
-
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
@@ -516,7 +506,6 @@ main{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   margin-left:auto !important;
-
   display:flex !important;
   flex-direction:column !important;
   gap:8px !important;
@@ -574,28 +563,16 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   --input-width:150px;
 }
 
-/* ===========================================================
-   ✅ 2-COLUMN CARDS — MATCH HEIGHT PER ROW (Questions + Notes)
-   - Notes cards line up with the card beside them
-   - Notes textareas fill the card (no tiny notes boxes)
-   =========================================================== */
-.cards-grid.two-col,
-.two-col-grid{
-  align-items:stretch !important;
+/* Default Notes cards (general): let textarea grow */
+.cards-grid .section-block,
+.two-col-grid .section-block{
+  display:flex;
+  flex-direction:column;
 }
-
-.cards-grid.two-col > .section-block,
-.two-col-grid > .section-block{
-  height:100% !important;
-  display:flex !important;
-  flex-direction:column !important;
-}
-
-.cards-grid.two-col > .section-block textarea,
-.two-col-grid > .section-block textarea{
-  flex:1 1 auto !important;
-  min-height:220px !important;
-  height:auto !important;
+.cards-grid .section-block textarea,
+.two-col-grid .section-block textarea{
+  flex:1 1 auto;
+  min-height:220px; /* your normal Notes size outside of the paired equal-height rules below */
 }
 
 /* ===========================================================
@@ -673,46 +650,37 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   Additional POC (integrated +) — CLONES
+   Additional POC (integrated +) — BASE + CLONES (correct)
+   - Button stays inside
+   - Input touches button
+   - No overflow (base + added cards)
    =========================================================== */
-.additional-poc-card:not([data-base="true"]) .add-row,
-.additional-poc-card:not([data-base="true"]) .additional-poc-add{
-  display:none !important;
-}
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  width:100% !important;
-  flex:1 1 auto !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* ===========================================================
-   Additional POC (BASE) — input + button attached, no overflow
-   =========================================================== */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
+.mini-card.additional-poc-card .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
-  gap:0 !important;                 /* attach input to + */
   padding:8px 24px !important;
+  gap:0 !important;                       /* ✅ input touches button */
   border-bottom:1px solid #e5e5e5 !important;
 }
 
-/* Keep label spacing like other mini-card rows */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
+/* label spacing restored */
+.mini-card.additional-poc-card .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
-  margin-right:12px !important;     /* spacing between label and input+button */
+  padding-right:0 !important;
+  margin-right:12px !important;           /* ✅ space only between label and field */
   white-space:nowrap !important;
   display:flex !important;
   align-items:center !important;
 }
 
-/* ✅ Key: input flexes BUT always leaves room for the + button */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
+/* KEY: shrinkable input so it never pushes outside */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;                     /* ✅ prevents overflow in flex */
   min-width:0 !important;
-
-  /* leave room for the + button */
-  max-width:calc(100% - 34px) !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
 
   height:34px !important;
   padding:7px 10px !important;
@@ -722,12 +690,11 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
-  box-sizing:border-box !important;
 }
 
-/* + button stays inside and connected */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
+/* + button */
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
   flex:0 0 34px !important;
   width:34px !important;
   height:34px !important;
@@ -750,9 +717,23 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
   padding:0 !important;
 }
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row:hover,
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add:hover{
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42 !important;
+}
+
+/* Hide + on clones */
+.additional-poc-card:not([data-base="true"]) .add-row,
+.additional-poc-card:not([data-base="true"]) .additional-poc-add{
+  display:none !important;
+}
+
+/* When + is hidden (clones), restore full rounding */
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  border-radius:var(--radius-sm) !important;
 }
 
 /* ===========================================================
@@ -1223,7 +1204,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   color:#fff;
   padding:10px 16px;
   border-bottom:1px solid var(--border);
-
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -1244,14 +1224,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   display:inline-flex;
   align-items:center;
   justify-content:flex-end;
-
   background:transparent;
   border:none;
   box-shadow:none;
   padding:0;
   margin:0;
   border-radius:0;
-
   color:#fff;
   font-size:14px;
   font-weight:600;
@@ -1401,6 +1379,8 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* ===========================================================
    INTEGRATED "+" ROWS — correct width for clones (no + button)
    =========================================================== */
+
+/* Default: integrated row input is FULL normal width */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"],
 .section-block .checklist-row.integrated-plus input[type="email"]{
@@ -1422,70 +1402,35 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   FIX 1: Additional POC (ADDED cards) name input too wide
-   - Forces the input to be shrinkable so it never overflows
+   FIX: 2-COLUMN "Questions + Notes" rows
+   Notes cards should START same height as left card.
+   Textarea fills remaining space, user can expand if needed.
    =========================================================== */
 
-/* Apply to ALL additional POC cards (base + clones) */
-.mini-card.additional-poc-card .checklist-row.integrated-plus{
+/* 1) Stretch both columns to the same row height */
+.cards-grid.two-col,
+.two-col-grid{
+  align-items:stretch !important;
+}
+
+/* 2) Cards become flex columns so textarea can fill */
+.cards-grid.two-col > .section-block,
+.two-col-grid > .section-block{
+  height:100% !important;
   display:flex !important;
-  align-items:center !important;
+  flex-direction:column !important;
 }
 
-/* Label stays consistent */
-.mini-card.additional-poc-card .checklist-row.integrated-plus label{
-  flex:0 0 36% !important;
-  max-width:36% !important;
-  white-space:nowrap !important;
-}
-
-/* KEY: allow the input to shrink inside flex (prevents "too wide") */
-.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;       /* ✅ this is the magic that stops overflow */
-  min-width:0 !important;   /* ✅ required in flex rows */
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-
-/* If it's the BASE card (has + button), keep input attached to + */
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
-  gap:0 !important;                 /* attach input to button */
-}
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
-  margin-right:12px !important;     /* spacing only between label and field */
-}
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
-  margin-left:-1px !important;      /* clean join */
-}
-
-/* If it's an ADDED card (no + button), keep a normal fully-rounded input */
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus{
-  gap:12px !important;              /* normal spacing */
-}
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  width:100% !important;
-  flex:1 1 auto !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-
-/* ===========================================================
-   FIX 2: Notes cards "alignment" in 2-column layouts
-   - Make Notes textarea start at the same left indent as
-     the left-side checklist rows (padding-left:32px)
-   =========================================================== */
-
-/* In 2-col grids only, indent textarea so content aligns with left cards */
+/* 3) Override the default Notes min-height inside paired 2-col rows */
 .cards-grid.two-col .section-block textarea,
 .two-col-grid .section-block textarea{
-  margin-left:32px !important;         /* match .checklist-row padding-left */
-  margin-right:22px !important;        /* keep right padding consistent */
-  width:auto !important;               /* let margins control width */
-  max-width:none !important;
+  flex:1 1 auto !important;
+  min-height:0 !important;      /* ✅ prevents forcing the row taller */
+  height:auto !important;
+
+  width:100% !important;
+  max-width:100% !important;
+
+  margin:10px 0 10px !important;
+  resize:vertical !important;
 }
