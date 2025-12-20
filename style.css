@@ -425,8 +425,8 @@ main{
 
 /* ===========================================================
    Dealership Address — FIXED SMALLER WIDTH (works)
-   - This forces the address wrapper to a fixed width so it
-     cannot stretch full screen.
+   - Forces the address wrapper to a fixed width so it cannot
+     stretch full screen.
    - Change 420px if you want it smaller/larger.
    =========================================================== */
 #dealership-address-card .checklist-row{
@@ -482,6 +482,25 @@ main{
 }
 #dealership-address-card .address-input-wrap .small-map-btn:hover{
   background:#ff8b42 !important;
+}
+
+/* ============== Map wrapper (shared) ============== */
+.map-wrapper{
+  margin:16px 0 8px;
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#f8f8f8;
+}
+.map-frame{
+  width:100%;
+  height:440px;
+  border:0;
+}
+.map-helper-text{
+  margin:6px 10px 10px;
+  font-size:12px;
+  color:#555;
 }
 
 /* ===========================================================
@@ -622,65 +641,40 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   row-gap:18px;
 }
 
-/* ============== Additional POC (integrated +) ============== */
-.mini-card.additional-poc-card .checklist-row.integrated-plus{
+/* ===========================================================
+   PRIMARY CONTACTS — FIX INPUT OVERFLOW
+   =========================================================== */
+.mini-card .checklist-row{
+  display:flex !important;
   align-items:center;
-  padding:8px 24px;
-  gap:0;
-  border-bottom:1px solid #e5e5e5;
+  gap:12px;
 }
-.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  height:34px;
-  padding:6px 10px;
-  font-size:13px;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
+.mini-card .checklist-row label{
+  flex:0 0 36%;
+  max-width:36%;
+}
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="tel"],
+.mini-card .checklist-row input[type="email"]{
   flex:1 1 auto !important;
   width:100% !important;
+  max-width:100% !important;
   margin-left:0 !important;
-}
-.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
-.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
-  height:34px;
-  width:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:16px;
-  font-weight:900;
-  line-height:1;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
-  padding:0;
-}
-.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
-.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
-  background:#ff8b42;
-}
-.additional-poc-card:not([data-base="true"]) .add-row,
-.additional-poc-card:not([data-base="true"]) .additional-poc-add{
-  display:none !important;
-}
-.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  border-radius:var(--radius-sm) !important;
+  box-sizing:border-box;
 }
 
 /* ===========================================================
-   FIX — Additional POC name row aligns with other name inputs
-   (input + button share the SAME width as a normal input)
+   PRIMARY CONTACTS — Additional POC NAME row (final fix)
+   - Keeps input right edge aligned with other "Enter name" inputs
+   - + button does NOT add width (it floats inside the input area)
    =========================================================== */
-
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
+  position:relative !important;
   display:flex !important;
   align-items:center !important;
-  gap:12px !important;                 /* same spacing as other rows */
+  gap:12px !important;
+  padding:8px 24px !important;
+  border-bottom:1px solid #e5e5e5 !important;
 }
 
 /* Label matches other mini-card rows */
@@ -689,72 +683,67 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   max-width:36% !important;
   padding-right:12px !important;
   white-space:nowrap !important;
+  display:flex !important;
+  align-items:center !important;
 }
 
-/* The NAME input should stretch just like the other name inputs */
+/* Input matches other name inputs; add right padding for + button */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;            /* <-- this is the key */
-  width:auto !important;
+  flex:1 1 auto !important;
+  width:100% !important;
   min-width:0 !important;
   margin-left:0 !important;
 
   height:34px !important;
-  padding:7px 10px !important;
+  padding:7px 44px 7px 10px !important; /* room for + button */
+  font-size:13px !important;
 
-  border-radius:999px 0 0 999px !important;  /* attach to button */
+  border-radius:999px !important;       /* SAME as other mini-card inputs */
+  box-sizing:border-box !important;
 }
 
-/* The + button sits immediately after the input (NOT floating) */
+/* + button floats INSIDE input width, so right edge stays aligned */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
-  flex:0 0 34px !important;
+  position:absolute !important;
+  right:24px !important;               /* matches row padding */
+  top:50% !important;
+  transform:translateY(-50%) !important;
+
   width:34px !important;
   height:34px !important;
-  margin-left:-1px !important;         /* clean border join */
 
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
-  border-radius:0 999px 999px 0 !important;
+  border-radius:999px !important;
 
   font-size:18px !important;
   font-weight:900 !important;
   line-height:1 !important;
-  cursor:pointer !important;
 
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
 
-  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+  cursor:pointer !important;
   padding:0 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
-
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
   background:#ff8b42 !important;
 }
 
-/* ============== Map wrapper (shared) ============== */
-.map-wrapper{
-  margin:16px 0 8px;
-  border-radius:var(--radius-lg);
-  overflow:hidden;
-  border:1px solid var(--border);
-  background:#f8f8f8;
-}
-.map-frame{
-  width:100%;
-  height:440px;
-  border:0;
-}
-.map-helper-text{
-  margin:6px 10px 10px;
-  font-size:12px;
-  color:#555;
+/* Hide + button on clones */
+.additional-poc-card:not([data-base="true"]) .add-row,
+.additional-poc-card:not([data-base="true"]) .additional-poc-add{
+  display:none !important;
 }
 
-/* ============== Integrated “+” rows (general, non-tables) ============== */
+/* ===========================================================
+   Integrated “+” rows (general, non-tables)
+   =========================================================== */
 .section-block .checklist-row.integrated-plus{
   display:flex;
   align-items:stretch;
