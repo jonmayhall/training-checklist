@@ -673,35 +673,47 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   Additional POC — make NAME input match other contact name inputs
-   (same label width, input width, height, padding)
+   FIX: Additional POC name field should match other name fields
+   (overlay the + button so it doesn't shrink the input)
+   Add at VERY BOTTOM of CSS
    =========================================================== */
 
-/* Make the label in the integrated row match other mini-card labels */
-.mini-card.additional-poc-card .checklist-row.integrated-plus label{
-  flex:0 0 36% !important;
-  max-width:36% !important;
-  padding-right:12px !important;
-  white-space:nowrap !important;
+.mini-card.additional-poc-card .checklist-row.integrated-plus{
+  position:relative !important;
+  align-items:center !important;
+  gap:12px !important;          /* match other rows */
 }
 
-/* Make the name input match the other inputs in the mini-card */
+/* Make the input full width like other inputs */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
   max-width:100% !important;
   margin-left:0 !important;
-
-  height:34px !important;
-  padding:7px 10px !important;   /* matches your standard row inputs */
-  font-size:13px !important;
-  box-sizing:border-box !important;
+  border-radius:999px !important;     /* match the pill style */
+  padding-right:54px !important;      /* room for the + button overlay */
 }
 
-/* Keep the + button aligned to the same height */
+/* Put the + button on top, not beside (so it doesn't steal width) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
+  position:absolute !important;
+  right:24px !important;              /* matches your row padding */
+  top:50% !important;
+  transform:translateY(-50%) !important;
+
+  width:40px !important;
   height:34px !important;
+
+  margin-left:0 !important;
+  border-radius:999px !important;     /* matches your UI */
+  z-index:3 !important;
+}
+
+/* OPTIONAL: keep the orange button look consistent */
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
+  transform:translateY(-50%) !important; /* prevent hover "jump" */
 }
 
 /* ===========================================================
