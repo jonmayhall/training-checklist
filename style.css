@@ -673,6 +673,38 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
+   Additional POC — make NAME input match other contact name inputs
+   (same label width, input width, height, padding)
+   =========================================================== */
+
+/* Make the label in the integrated row match other mini-card labels */
+.mini-card.additional-poc-card .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  padding-right:12px !important;
+  white-space:nowrap !important;
+}
+
+/* Make the name input match the other inputs in the mini-card */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;   /* matches your standard row inputs */
+  font-size:13px !important;
+  box-sizing:border-box !important;
+}
+
+/* Keep the + button aligned to the same height */
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
+  height:34px !important;
+}
+
+/* ===========================================================
    PRIMARY CONTACTS — FIX INPUT OVERFLOW
    =========================================================== */
 .mini-card .checklist-row{
