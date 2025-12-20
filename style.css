@@ -1513,32 +1513,22 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   flex: 0 0 auto !important;
 }
 
-/* ===========================================================
-   2-COL PAIRED CARDS — make left Questions match right Notes height
-   (Use on the page/sections that have "Notes — ..." paired cards)
+//* ===========================================================
+   FIX: 2-COLUMN "Questions + Notes" rows
+   - Stop Notes textarea from forcing tall cards
+   - Make Notes cards match the smaller left cards
    =========================================================== */
 
-/* Add any page ids you use for this layout (safe list) */
-:is(#pre-training, #pretraining, #pre-training-checklist, #pre-training-setup, #management-buyin, #automations)
+/* In 2-col grids, do NOT force Notes textareas to grow huge */
+.cards-grid.two-col .section-block textarea,
+.two-col-grid .section-block textarea{
+  flex: 0 0 auto !important;     /* disables the "fill the whole card" behavior */
+  min-height: 120px !important;  /* ✅ adjust: 100–160 if you want */
+}
+
+/* Keep both cards aligned cleanly in the same row */
 .cards-grid.two-col,
-:is(#pre-training, #pretraining, #pre-training-checklist, #pre-training-setup, #management-buyin, #automations)
 .two-col-grid{
-  align-items: stretch !important; /* ✅ makes both columns same height per row */
+  align-items: start !important; /* prevents the tall Notes card from stretching the row */
 }
 
-/* Make each card a flex column so the textarea can fill height */
-:is(#pre-training, #pretraining, #pre-training-checklist, #pre-training-setup, #management-buyin, #automations)
-.cards-grid.two-col > .section-block,
-:is(#pre-training, #pretraining, #pre-training-checklist, #pre-training-setup, #management-buyin, #automations)
-.two-col-grid > .section-block{
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* Notes textarea expands to use extra vertical space */
-:is(#pre-training, #pretraining, #pre-training-checklist, #pre-training-setup, #management-buyin, #automations)
-.section-block textarea{
-  flex: 1 1 auto !important;   /* ✅ fills the card */
-  min-height: 220px;           /* keeps a nice minimum */
-}
