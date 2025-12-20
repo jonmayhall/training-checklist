@@ -1390,3 +1390,30 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
   .training-table{ min-width:760px; }
 }
+
+/* ===========================================================
+   ✅ NOTES TEXTAREA MUST FILL CARD (2×2 layouts)
+   Works for BOTH: .cards-grid.two-col and .two-col-grid
+   =========================================================== */
+
+/* Make side-by-side cards flex columns so textarea can stretch */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block{
+  display:flex;
+  flex-direction:column;
+}
+
+/* Give the notes textarea the remaining height inside the card */
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea{
+  flex:1 1 auto;
+  width:100% !important;
+  max-width:100% !important;
+
+  /* starting height (fills card area) */
+  min-height:160px;
+
+  /* we handle growth in JS */
+  resize:none;
+  overflow:hidden;
+}
