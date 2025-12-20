@@ -1410,3 +1410,44 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
 }
+
+/* ===========================================================
+   Additional POC — BASE card (default) fix
+   Forces the input to shrink so + stays inside the card
+   =========================================================== */
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  white-space:nowrap !important;
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;        /* KEY: prevents overflow */
+  min-width:0 !important;    /* KEY: prevents overflow */
+  margin-left:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus .additional-poc-add{
+  flex:0 0 34px !important;
+  width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
