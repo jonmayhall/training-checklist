@@ -1348,4 +1348,30 @@ main{
   margin:0 !important;
 }
 
+/* ===========================================================
+   SUPPORT TICKETS — FORCE GAP under "Short Summary of Issue"
+   Put this at the VERY END of the CSS file
+   =========================================================== */
+
+/* Give the SUMMARY row extra bottom space */
+#support-tickets .ticket-row.ticket-summary-row{
+  padding:10px 0 18px !important;      /* <-- creates the gap */
+  border-bottom:1px solid #ececec !important;
+}
+
+/* Add bottom margin to the actual field (works whether it's textarea OR input) */
+#support-tickets .ticket-row.ticket-summary-row textarea,
+#support-tickets .ticket-row.ticket-summary-row input{
+  margin:0 0 18px 0 !important;        /* <-- gap below the box */
+}
+
+/* Ensure the next line (disclaimer text) doesn’t collapse margins */
+#support-tickets .ticket-row.ticket-summary-row + *{
+  margin-top:18px !important;
+}
+#support-tickets .ticket-disclaimer{
+  margin-top:18px !important;
+}
+
+
 
