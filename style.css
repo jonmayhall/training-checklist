@@ -1313,3 +1313,20 @@ main{
   padding-left:30px !important;   /* was 42 */
 }
 
+/* ===========================================================
+   SUPPORT TICKETS — FORCE spacing under "Short Summary..." textarea
+   (adds space between textarea and the "* This ticket..." line)
+   =========================================================== */
+
+#support-tickets .ticket-group-inner textarea{
+  display:block !important;
+  margin-bottom:14px !important;  /* <-- the missing space */
+}
+
+/* The disclaimer line in your screenshot */
+#support-tickets .ticket-group-inner .ticket-disclaimer,
+#support-tickets .ticket-group-inner p.ticket-disclaimer,
+#support-tickets .ticket-group-inner p{
+  margin-top:14px !important;     /* ensure it can’t sit tight to textarea */
+}
+
