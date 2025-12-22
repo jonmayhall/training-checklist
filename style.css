@@ -1,6 +1,8 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS
-   Stable "single source of truth" stylesheet
+   ✅ Clean "single source of truth" stylesheet
+   ✅ Includes: Support Tickets + DMS Integration + Primary Contacts patches
+   ✅ Fixes: spacing under “Short Summary of the Issue”
    ======================================================= */
 
 /* =======================
@@ -851,6 +853,16 @@ main{
   padding:16px 18px 14px;
 }
 
+/* normalize bold */
+#support-tickets .ticket-group-inner,
+#support-tickets .ticket-group-inner *{
+  font-weight:400;
+}
+#support-tickets .ticket-group-inner label,
+#support-tickets .ticket-row label{
+  font-weight:500 !important;
+}
+
 #support-tickets .ticket-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -862,7 +874,6 @@ main{
 #support-tickets .ticket-row:last-child{ border-bottom:none; }
 
 #support-tickets .ticket-row label{
-  font-weight:700;
   color:#222;
   margin:0;
 }
@@ -932,10 +943,11 @@ main{
   grid-template-columns:1fr;
   align-items:start;
   border-bottom:none;
-  padding-bottom:0;
+  padding:10px 0 18px;            /* ✅ creates extra room under the field */
 }
 #support-tickets .ticket-row.ticket-summary-row label{
-  margin-bottom:8px;
+  display:block;
+  margin:0 0 8px 0;               /* ✅ space between label and box */
 }
 #support-tickets .ticket-row.ticket-summary-row textarea{
   width:100%;
@@ -947,14 +959,17 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
   resize:vertical;
-  margin:0;
+  margin:0 0 18px 0 !important;   /* ✅ space UNDER the box */
 }
 
+/* Disclaimer spacing (this was the “no gap” problem) */
 #support-tickets .ticket-disclaimer{
-  margin:8px 0 0;
+  margin:18px 0 0 !important;     /* ✅ clearly separated from the textarea */
   font-size:12px;
   color:#6b7280;
 }
+
+/* Locked status look */
 #support-tickets .ticket-status-select[disabled]{
   opacity:0.9;
   background:#f3f4f6;
@@ -1077,6 +1092,80 @@ main{
 }
 
 /* =======================
+   PATCH — Primary Contacts sizing + Additional POC input shape
+   - Make all contact-card inputs less wide
+   - Base "Additional POC" name input same width as other name lines
+   - Clone "Additional POC" name input rounded on right + same width
+======================= */
+
+/* 1) Reduce input width ONLY inside Primary Contacts area */
+#dealership-info .primary-contacts-grid{
+  --input-width:240px; /* adjust 220–260 if you want tighter/looser */
+}
+
+/* 2) Ensure all inputs inside the contact cards use that smaller width */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row input,
+#dealership-info .primary-contacts-grid .mini-card .checklist-row select{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+}
+
+/* 3) Base Additional POC row: input + plus button total matches others */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  max-width:calc(var(--input-width) - 34px) !important;
+  height:34px !important;
+}
+
+/* Keep the + button consistent */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus .add-row{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+}
+
+/* 4) Cloned Additional POC cards: hide + button; full width; rounded right restored */
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus .add-row{
+  display:none !important;
+}
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
+
+/* =======================
+   STRONG LEFT SHIFT — side-by-side cards ONLY
+======================= */
+.cards-grid.two-col .checklist-row,
+.two-col-grid .checklist-row,
+.primary-contacts-grid .checklist-row{
+  padding-left:12px !important; /* was 32px */
+}
+.cards-grid.two-col .checklist-row.indent-sub,
+.two-col-grid .checklist-row.indent-sub,
+.primary-contacts-grid .checklist-row.indent-sub{
+  padding-left:36px !important; /* was 60px */
+}
+
+/* Primary contacts: shift labels left even more */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row{
+  padding-left:10px !important;   /* was 18 */
+  padding-right:10px !important;
+}
+#dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
+  padding-left:30px !important;   /* was 60+ */
+}
+
+/* =======================
    RESPONSIVE
 ======================= */
 @media (max-width:900px){
@@ -1149,229 +1238,3 @@ main{
 
   .training-table{ min-width:760px; }
 }
-
-/* ===========================================================
-   PATCH — Primary Contacts sizing + Additional POC input shape
-   - Make all contact-card inputs less wide
-   - Base "Additional POC" name input same width as other name lines
-   - Clone "Additional POC" name input rounded on right + same width
-   =========================================================== */
-
-/* 1) Reduce input width ONLY inside Primary Contacts area */
-#dealership-info .primary-contacts-grid{
-  --input-width:240px; /* <- adjust 220–260 if you want tighter/looser */
-}
-
-/* 2) Ensure all inputs inside the contact cards use that smaller width */
-#dealership-info .primary-contacts-grid .mini-card .checklist-row input,
-#dealership-info .primary-contacts-grid .mini-card .checklist-row select{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-/* 3) Base Additional POC row: input + plus button total matches others */
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  max-width:calc(var(--input-width) - 34px) !important;
-
-  /* keeps it matching the other name lines */
-  height:34px !important;
-}
-
-/* Keep the + button consistent */
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus .add-row{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-}
-
-/* 4) Cloned Additional POC cards:
-      - hide the + button
-      - make the name input same width as other name lines
-      - rounded RIGHT side restored (since no button) */
-#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
-  .checklist-row.integrated-plus .add-row{
-  display:none !important;
-}
-
-#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
-}
-
-/* ===========================================================
-   STRONG LEFT SHIFT — side-by-side cards ONLY
-   =========================================================== */
-
-/* Target cards that live in 2-column layouts */
-.cards-grid.two-col .checklist-row,
-.two-col-grid .checklist-row,
-.primary-contacts-grid .checklist-row{
-  padding-left:12px !important; /* was 32px */
-}
-
-/* Keep sub-indent, but also shift it left */
-.cards-grid.two-col .checklist-row.indent-sub,
-.two-col-grid .checklist-row.indent-sub,
-.primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:36px !important; /* was 60px */
-}
-
-/* ===========================================================
-   Support Tickets — remove bold labels
-   =========================================================== */
-
-#support-tickets .ticket-row label{
-  font-weight:500; /* match normal checklist labels */
-}
-
-/* ===========================================================
-   ✅ FORCE-FIX PATCH (bottom of file)
-   - Support Tickets: remove bold, fix Summary spacing + disclaimer spacing
-   - Primary Contacts: shift labels further left in side-by-side cards
-   =========================================================== */
-
-/* ---------------------------
-   SUPPORT TICKETS — remove bold everywhere
---------------------------- */
-#support-tickets .ticket-group-inner,
-#support-tickets .ticket-group-inner *{
-  font-weight:400;
-}
-
-#support-tickets .ticket-group-inner label,
-#support-tickets .ticket-row label{
-  font-weight:500 !important; /* readable, not bold */
-}
-
-#support-tickets .ticket-group-inner strong,
-#support-tickets .ticket-group-inner b{
-  font-weight:500 !important; /* kill heavy bold if any markup uses <b>/<strong> */
-}
-
-/* ---------------------------
-   SUPPORT TICKETS — normalize row rhythm
-   (even if markup doesn't use .ticket-row for Summary)
---------------------------- */
-
-/* Make each “line” feel consistent */
-#support-tickets .ticket-group-inner .ticket-row{
-  padding:10px 0 !important;
-  border-bottom:1px solid #ececec !important;
-}
-#support-tickets .ticket-group-inner .ticket-row:last-child{
-  border-bottom:none !important;
-}
-
-/* ✅ SUMMARY SPACING FIX (matches your screenshot)
-   If there is a label followed by a textarea (anywhere after), give it proper spacing */
-@supports selector(label:has(~ textarea)){
-  #support-tickets .ticket-group-inner label:has(~ textarea){
-    display:block !important;
-    margin:0 !important;
-    padding:10px 0 8px !important;  /* same top/bottom rhythm as other rows */
-  }
-}
-
-/* textarea block spacing */
-#support-tickets .ticket-group-inner textarea{
-  display:block !important;
-  margin:0 !important;
-}
-
-/* add breathing room under the textarea (this is what your screenshot is missing) */
-#support-tickets .ticket-group-inner textarea{
-  margin-bottom:10px !important;
-}
-
-/* disclaimer spacing to match the rest of the card rhythm */
-#support-tickets .ticket-disclaimer{
-  margin-top:10px !important;
-  padding-top:0 !important;
-}
-
-/* ---------------------------
-   PRIMARY CONTACTS — shift left MORE (side-by-side cards)
-   (your screenshot shows labels still too far right)
---------------------------- */
-#dealership-info .primary-contacts-grid .mini-card .checklist-row{
-  padding-left:10px !important;   /* was 18 */
-  padding-right:10px !important;
-}
-
-/* keep indent, but move it left too */
-#dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
-  padding-left:30px !important;   /* was 42 */
-}
-
-//* ===========================================================
-   SUPPORT TICKETS — REAL FIX (works for input OR textarea)
-   Put at VERY BOTTOM. Removes the “no space under Short Summary” problem.
-   =========================================================== */
-
-/* Give the Short Summary control bottom space no matter what element it is */
-#support-tickets .ticket-summary-input,
-#support-tickets textarea.ticket-summary-input,
-#support-tickets .ticket-row.ticket-summary-row textarea,
-#support-tickets .ticket-row.ticket-summary-row input{
-  display:block !important;
-  margin:0 !important;
-  margin-bottom:16px !important;   /* <-- the gap you want */
-}
-
-/* Whatever text comes after the Short Summary control gets top space */
-#support-tickets .ticket-summary-input + *,
-#support-tickets .ticket-row.ticket-summary-row textarea + *,
-#support-tickets .ticket-row.ticket-summary-row input + *{
-  margin-top:16px !important;
-}
-
-/* If there’s a wrapper between them (not adjacent), force spacing anyway */
-#support-tickets .ticket-row.ticket-summary-row *:has(.ticket-summary-input) + *{
-  margin-top:16px !important;
-}
-
-/* Normalize the disclaimer text so it doesn’t “eat” spacing with weird margins */
-#support-tickets .ticket-disclaimer,
-#support-tickets .ticket-group-inner p,
-#support-tickets .ticket-group-inner small,
-#support-tickets .ticket-group-inner .disclaimer{
-  margin:0 !important;
-}
-
-/* ===========================================================
-   SUPPORT TICKETS — FORCE GAP under "Short Summary of Issue"
-   Put this at the VERY END of the CSS file
-   =========================================================== */
-
-/* Give the SUMMARY row extra bottom space */
-#support-tickets .ticket-row.ticket-summary-row{
-  padding:10px 0 18px !important;      /* <-- creates the gap */
-  border-bottom:1px solid #ececec !important;
-}
-
-/* Add bottom margin to the actual field (works whether it's textarea OR input) */
-#support-tickets .ticket-row.ticket-summary-row textarea,
-#support-tickets .ticket-row.ticket-summary-row input{
-  margin:0 0 18px 0 !important;        /* <-- gap below the box */
-}
-
-/* Ensure the next line (disclaimer text) doesn’t collapse margins */
-#support-tickets .ticket-row.ticket-summary-row + *{
-  margin-top:18px !important;
-}
-#support-tickets .ticket-disclaimer{
-  margin-top:18px !important;
-}
-
-
-
