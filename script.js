@@ -423,30 +423,44 @@ function createAdditionalTrainerRow(){
 }
 
 function initAdditionalTrainers(){
-  const page = qs("#trainers-deployment");
-  if (!page) return;
-
-  // Mark base row (so your CSS locks it)
-  const baseRow = qs(".checklist-row.integrated-plus[data-base='true']", page);
-  if (baseRow) baseRow.classList.add("trainer-base");
-
-  page.addEventListener("click", (e)=>{
-    const addBtn = e.target.closest(".checklist-row.integrated-plus[data-base='true'] .add-row");
+  // Use document-level delegation so it works even if the section is re-rendered
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(
+      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+    );
     if (!addBtn) return;
 
-    const container = qs("#additionalTrainersContainer", page);
-    if (!container) return;
+    const page = qs("#trainers-deployment");
+    if (!page) return;
 
-    const baseInput = qs("input[type='text']", baseRow);
-    // Optional: require base input filled before allowing clone
-    if (baseInput && !safeTrim(baseInput.value)){
-      baseInput.focus();
-      return;
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
+    if (baseRow) baseRow.classList.add("trainer-base"); // for your CSS sizing
+
+    // Find the container; if missing, fallback to inserting after the base row
+    let container = qs("#additionalTrainersContainer", page);
+
+    const newRow = document.createElement("div");
+    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
+    newRow.dataset.clone = "true";
+    newRow.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" placeholder="Enter additional trainer name">
+    `;
+
+    // storage + ghost handling
+    const input = qs("input", newRow);
+    if (input){
+      ensureUID(input);
+      loadField(input);
     }
 
-    const newRow = createAdditionalTrainerRow();
-    container.appendChild(newRow);
-    const input = qs("input", newRow);
+    if (container){
+      container.appendChild(newRow);
+    } else if (baseRow && baseRow.parentNode){
+      baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+    }
+
+    // focus
     if (input) input.focus();
   });
 }
