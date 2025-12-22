@@ -1235,51 +1235,81 @@ main{
 }
 
 /* ===========================================================
-   Support Tickets — FORCE Summary block to match row spacing
-   (works even if summary isn't using .ticket-summary-row)
+   DEALERSHIP INFO — Primary Contacts (FIX)
+   - Force cards 2x2 (desktop)
+   - Make inputs smaller (not too wide)
+   - Shift left-side text closer to left border (keep indentation)
+   - Fix Additional POC name input size + rounded right on clones
    =========================================================== */
 
-/* Remove bold look across ticket labels (you asked for this too) */
-#support-tickets .ticket-row label,
-#support-tickets .ticket-row .ticket-label,
-#support-tickets .ticket-group label{
-  font-weight:500 !important;
+/* 1) FORCE the Primary Contacts wrapper into a 2-col grid */
+#dealership-info .primary-contacts-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+  align-items:start !important;
 }
 
-/* Make the Summary label area behave like the other rows */
-#support-tickets .ticket-summary-input{
-  display:block !important;
-  width:100% !important;
-  margin:0 !important;
+/* Mobile: stack */
+@media (max-width:900px){
+  #dealership-info .primary-contacts-grid{
+    grid-template-columns:1fr !important;
+  }
 }
 
-/* If Summary is inside any row/container, give it the same vertical rhythm */
-#support-tickets .ticket-summary-input{
-  margin-top:0 !important;
+/* 2) Make the mini-cards look like your other cards (if needed) */
+#dealership-info .primary-contacts-grid .mini-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:12px 14px 10px; /* tighter so labels don’t feel pushed right */
+  min-width:0;
 }
 
-/* ✅ The key: pad the container that HOLDS the summary label + textarea */
-#support-tickets .ticket-summary-input{
-  /* textarea itself is fine; spacing comes from the wrapper */
+/* 3) Smaller inputs ONLY inside these side-by-side contact cards */
+#dealership-info .primary-contacts-grid .mini-card{
+  --input-width:240px; /* smaller than 340 (adjust if you want tighter) */
 }
 
-/* Try common wrappers (one of these WILL hit) */
-#support-tickets .ticket-summary-row,
-#support-tickets .ticket-row:has(.ticket-summary-input),
-#support-tickets .ticket-group-inner:has(.ticket-summary-input) > *:has(.ticket-summary-input){
-  padding:10px 0 !important;                 /* same as other rows */
-  border-bottom:1px solid #ececec !important;/* keep row rhythm */
+/* 4) Shift the LEFT-side label text closer to the left border (but keep indentation) */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row{
+  padding-left:18px !important;  /* was 32px globally */
 }
 
-/* Space between "Short Summary..." text and the textarea */
-#support-tickets :is(label, .ticket-label, .summary-label):has(+ .ticket-summary-input){
-  display:block !important;
-  margin:0 0 8px 0 !important;
-  font-weight:500 !important;
+/* Keep indentation, just less extreme than 60px */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
+  padding-left:42px !important;  /* was 60px */
 }
 
-/* If your "Short Summary..." is NOT a label (often it's a <div> or <p>) */
-#support-tickets :is(p, div, span):has(+ .ticket-summary-input){
-  margin:0 0 8px 0 !important;
-  font-weight:500 !important;
+/* 5) Ensure ALL input types used here obey the smaller width */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row input[type="text"],
+#dealership-info .primary-contacts-grid .mini-card .checklist-row input[type="email"],
+#dealership-info .primary-contacts-grid .mini-card .checklist-row input[type="tel"],
+#dealership-info .primary-contacts-grid .mini-card .checklist-row select{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+}
+
+/* 6) Additional POC base row: input + button should equal the other name widths */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus > input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+}
+
+/* 7) Additional POC CLONES (no + button):
+      make name input same size AND rounded on the right */
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus > input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
+
+/* If a clone still contains a button for some reason, hide it */
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .additional-poc-add{
+  display:none !important;
 }
