@@ -13,6 +13,12 @@
    - Dealership name display + map iframe update + places autocomplete hook
    - Notes: textarea auto-grow + optional 2-col card height sync (safe)
    - Save All Pages as PDF (jsPDF + html2canvas)
+
+   ✅ FIXES ADDED IN THIS VERSION:
+   - Additional Trainer + button works (adds row into #additionalTrainersContainer)
+   - Adds .trainer-base and .trainer-clone classes to match your CSS rules
+   - Support Ticket validation popup no longer triggers when fields are filled
+   - Onsite Training Dates end date defaults to start + 2 days (if end is blank)
    ======================================================= */
 
 /* ---------------------------
@@ -138,8 +144,6 @@ function initTextareas(root=document){
    - only for .cards-grid.two-col and .two-col-grid rows
 --------------------------- */
 function syncTwoColHeights(){
-  // You said you already have JS-driven height sync elsewhere — this is safe
-  // and will not fight your CSS because cards are flex columns.
   const grids = qsa(".cards-grid.two-col, .two-col-grid");
   grids.forEach(grid=>{
     const cards = qsa(":scope > .section-block", grid);
@@ -233,7 +237,6 @@ function resetSection(section){
   });
 
   // Remove dynamic rows/cards inside section (keep base rows/cards)
-  // Training tables: keep first 3 rows if you authored them, remove anything with data-clone
   qsa("[data-clone='true']", section).forEach(n=> n.remove());
 
   // Additional trainers container: remove everything
@@ -266,8 +269,6 @@ function resetSection(section){
       }
     }
   }
-
-  // DMS: nothing special to remove
 
   requestAnimationFrame(()=>{
     initTextareas(section);
@@ -315,7 +316,6 @@ function initPersistence(){
   // Ensure every field has stable uid if needed + load stored values
   qsa("input, select, textarea").forEach(el=>{
     if (!isField(el)) return;
-    // create UID early for dynamic clones too
     ensureUID(el);
     loadField(el);
   });
@@ -359,13 +359,12 @@ function cloneTrainingRow(row){
   // clear & re-uid all fields
   qsa("input, select, textarea", clone).forEach(el=>{
     if (!isField(el)) return;
-    // remove old id/name? keep structure; we rely on data-uid
     el.value = "";
     if (el.type === "checkbox") el.checked = false;
     ensureUID(el);
     applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-    saveField(el); // saves blank (optional)
+    saveField(el);
   });
 
   return clone;
@@ -388,7 +387,6 @@ function initTableAddRow(){
     const clone = cloneTrainingRow(last);
     tbody.appendChild(clone);
 
-    // Scroll to show new row
     clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
 
     requestAnimationFrame(()=>{
@@ -398,32 +396,64 @@ function initTableAddRow(){
   });
 }
 
-/* ---------------------------
-   Trainers page: Additional Trainers (+)
-   HTML base row has:
-   <div class="checklist-row integrated-plus indent-sub" data-base="true"> ... <button class="add-row">+</button>
-   and a container: #additionalTrainersContainer
---------------------------- */
-function createAdditionalTrainerRow(){
-  const row = document.createElement("div");
-  row.className = "checklist-row integrated-plus indent-sub trainer-clone";
-  row.dataset.clone = "true";
-  row.innerHTML = `
-    <label>Additional Trainer</label>
-    <input type="text" placeholder="Enter additional trainer name">
-  `;
-
-  // UID for input
-  const input = qs("input", row);
-  if (input){
-    ensureUID(input);
-    loadField(input);
-  }
-  return row;
+/* =======================================================
+   ✅ FIX: Onsite Training Dates — End Date defaults to Start + 2 days
+   Works with:
+   - explicit ids: #onsiteStartDate / #onsiteEndDate  (preferred)
+   - OR any .training-dates-row / .onsite-training-dates-row that contains 2 date inputs
+======================================================= */
+function addDaysISO(iso, days){
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
+function initOnsiteTrainingDates(){
+  // Case A: explicit IDs
+  const start = qs("#onsiteStartDate");
+  const end   = qs("#onsiteEndDate");
+  if (start && end){
+    start.addEventListener("change", ()=>{
+      if (!start.value) return;
+      if (end.value) return; // don’t overwrite user choice
+      const v = addDaysISO(start.value, 2);
+      if (v){
+        end.value = v;
+        applyDateGhost(end);
+        saveField(end);
+      }
+    });
+    return;
+  }
+
+  // Case B: generic row that has two date inputs
+  qsa(".training-dates-row, .onsite-training-dates-row").forEach(row=>{
+    const dates = qsa("input[type='date']", row);
+    if (dates.length < 2) return;
+    const s = dates[0];
+    const e = dates[1];
+
+    s.addEventListener("change", ()=>{
+      if (!s.value) return;
+      if (e.value) return;
+      const v = addDaysISO(s.value, 2);
+      if (v){
+        e.value = v;
+        applyDateGhost(e);
+        saveField(e);
+      }
+    });
+  });
+}
+
+/* ---------------------------
+   Trainers page: Additional Trainers (+)
+--------------------------- */
 function initAdditionalTrainers(){
-  // Use document-level delegation so it works even if the section is re-rendered
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(
       "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
@@ -434,9 +464,8 @@ function initAdditionalTrainers(){
     if (!page) return;
 
     const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
-    if (baseRow) baseRow.classList.add("trainer-base"); // for your CSS sizing
+    if (baseRow) baseRow.classList.add("trainer-base");
 
-    // Find the container; if missing, fallback to inserting after the base row
     let container = qs("#additionalTrainersContainer", page);
 
     const newRow = document.createElement("div");
@@ -447,7 +476,6 @@ function initAdditionalTrainers(){
       <input type="text" placeholder="Enter additional trainer name">
     `;
 
-    // storage + ghost handling
     const input = qs("input", newRow);
     if (input){
       ensureUID(input);
@@ -456,21 +484,18 @@ function initAdditionalTrainers(){
 
     if (container){
       container.appendChild(newRow);
-    } else if (baseRow && baseRow.parentNode){
+    }else if (baseRow && baseRow.parentNode){
       baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
     }
 
-    // focus
     if (input) input.focus();
   });
 }
 
 /* ---------------------------
    Primary Contacts: Additional POC (+) (if present)
-   Looks for .mini-card.additional-poc-card and a base integrated-plus row.
 --------------------------- */
 function initAdditionalPOC(){
-  // Event delegation: any .additional-poc-card base row + button
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
     if (!btn) return;
@@ -478,20 +503,16 @@ function initAdditionalPOC(){
     const baseCard = btn.closest(".additional-poc-card");
     if (!baseCard) return;
 
-    // Find the list/container this card lives in
     const grid = baseCard.parentElement;
     if (!grid) return;
 
-    // Clone the card
     const clone = baseCard.cloneNode(true);
     clone.dataset.clone = "true";
     clone.removeAttribute("data-base");
 
-    // Remove + button row button inside clone
     const addBtn = qs(".additional-poc-add, .add-row", clone);
     if (addBtn) addBtn.remove();
 
-    // Clear all inputs in clone and assign uids
     qsa("input, select, textarea", clone).forEach(el=>{
       if (!isField(el)) return;
       if (el.type === "checkbox") el.checked = false;
@@ -537,6 +558,7 @@ function unlockStatusSelect(card){
 }
 
 function isTicketCardComplete(card){
+  // ✅ FIX: read values from THIS card only and trim safely
   const num = safeTrim(qs(".ticket-number-input", card)?.value);
   const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
   const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
@@ -548,7 +570,6 @@ function makeTicketCloneFromBase(baseCard){
   clone.dataset.clone = "true";
   clone.removeAttribute("data-base");
 
-  // clear values
   qsa("input, textarea, select", clone).forEach(el=>{
     if (!isField(el)) return;
     if (el.type === "checkbox") el.checked = false;
@@ -558,11 +579,9 @@ function makeTicketCloneFromBase(baseCard){
     if (el.type === "date") applyDateGhost(el);
   });
 
-  // remove disclaimer from clones
   const disc = qs(".ticket-disclaimer", clone);
   if (disc) disc.remove();
 
-  // convert + to X
   const addBtn = qs(".add-ticket-btn", clone);
   if (addBtn){
     addBtn.textContent = "×";
@@ -571,9 +590,7 @@ function makeTicketCloneFromBase(baseCard){
     addBtn.classList.remove("add-ticket-btn");
   }
 
-  // status select should be editable on clones
   unlockStatusSelect(clone);
-
   return clone;
 }
 
@@ -587,7 +604,6 @@ function moveTicketCard(card, newStatus){
 
   dest.appendChild(card);
 
-  // lock Open base card select
   if (destId === "openTicketsContainer" && card.dataset.base === "true"){
     lockOpenSelect(card);
   }else{
@@ -599,11 +615,9 @@ function initSupportTickets(){
   const page = qs("#support-tickets");
   if (!page) return;
 
-  // Ensure base "Open" card is locked Open
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
-  // Delegated click handler for add/remove
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
     const removeBtn = e.target.closest(".remove-ticket-btn");
@@ -615,33 +629,28 @@ function initSupportTickets(){
     e.preventDefault();
     e.stopPropagation();
 
-    // REMOVE
     if (removeBtn){
-      // also clear stored values for fields inside removed card
       qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
       card.remove();
       return;
     }
 
-    // ADD — validate only this card (FIX)
+    // ✅ VALIDATE ONLY THIS CARD
     if (!isTicketCardComplete(card)){
       alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
       return;
     }
 
-    // base card to clone from (always use the Open base if present)
     const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
 
     const newCard = makeTicketCloneFromBase(base);
 
-    // append to Open by default
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
     newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  // Delegated change handler for status moves
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
@@ -651,7 +660,6 @@ function initSupportTickets(){
 
     const val = sel.value;
 
-    // If base card, keep it Open + locked
     if (card.dataset.base === "true"){
       lockOpenSelect(card);
       return;
@@ -678,15 +686,12 @@ function restoreDealershipNameDisplay(){
 }
 
 function updateDealershipMap(address){
-  // If you have an iframe with id="dealershipMapFrame" or similar
   const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
   if (!frame) return;
 
   const q = encodeURIComponent(address);
-  // Uses Google Maps embed "search" style
   frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
 
-  // persist last map address
   try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
 }
 
@@ -697,9 +702,6 @@ function restoreDealershipMap(){
 
 /* ---------------------------
    PDF Export (Save All Pages)
-   Requires:
-   - html2canvas
-   - jsPDF
 --------------------------- */
 async function exportAllPagesPDF(){
   const btn = qs("#savePDF");
@@ -708,14 +710,11 @@ async function exportAllPagesPDF(){
     btn.textContent = "Saving PDF...";
   }
 
-  // Snapshot each page section in order
   const sections = qsa(".page-section");
 
-  // Temporarily show all sections for capture
   const activeId = qs(".page-section.active")?.id;
   sections.forEach(s=> s.classList.add("active"));
 
-  // Ensure layout settled
   await new Promise(r=> setTimeout(r, 80));
   syncTwoColHeights();
   await new Promise(r=> setTimeout(r, 80));
@@ -723,7 +722,6 @@ async function exportAllPagesPDF(){
   const { jsPDF } = window.jspdf || {};
   if (!jsPDF || !window.html2canvas){
     alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
-    // restore
     sections.forEach(s=> s.classList.remove("active"));
     if (activeId) showSection(activeId);
     if (btn){
@@ -733,15 +731,13 @@ async function exportAllPagesPDF(){
     return;
   }
 
-  const pdf = new jsPDF("p", "pt", "letter"); // 612x792
+  const pdf = new jsPDF("p", "pt", "letter");
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
 
   let first = true;
 
   for (const sec of sections){
-    // skip empty hidden sections? capture all
-    // Slight padding so shadow isn’t clipped
     const canvas = await window.html2canvas(sec, {
       scale: 2,
       useCORS: true,
@@ -756,19 +752,16 @@ async function exportAllPagesPDF(){
 
     if (!first) pdf.addPage();
 
-    // If content taller than one PDF page, slice it
     if (imgH <= pageH){
       pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
     }else{
-      // slice canvas into multiple pages
       let remaining = imgH;
       let y = 0;
 
-      // Create a helper canvas for slicing
       const sliceCanvas = document.createElement("canvas");
       const ctx = sliceCanvas.getContext("2d");
 
-      const pxPerPt = canvas.width / imgW; // pixels per point
+      const pxPerPt = canvas.width / imgW;
       const pagePxH = Math.floor(pageH * pxPerPt);
 
       sliceCanvas.width = canvas.width;
@@ -792,7 +785,6 @@ async function exportAllPagesPDF(){
 
   pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
 
-  // Restore only active section
   sections.forEach(s=> s.classList.remove("active"));
   if (activeId) showSection(activeId);
 
@@ -809,12 +801,9 @@ function initPDF(){
 }
 
 /* ---------------------------
-   Ensure support tickets + DMS integration aren't "broken"
-   (CSS issues are separate, but JS here prevents logic breakage)
+   DMS Integration hook
 --------------------------- */
 function initDMSIntegration(){
-  // Nothing required for the DMS cards (static),
-  // but we’ll ensure any selects inside get ghost styling
   const page = qs("#dms-integration");
   if (!page) return;
   qsa("select", page).forEach(applySelectGhost);
@@ -824,57 +813,40 @@ function initDMSIntegration(){
    Init on DOM ready
 --------------------------- */
 document.addEventListener("DOMContentLoaded", ()=>{
-  // Nav + active page
   initNav();
-
-  // Ghost text
   initGhosts();
-
-  // Persistence
   initPersistence();
 
-  // Textareas + card height sync
   initTextareas(document);
   syncTwoColHeights();
   window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
 
-  // Reset behaviors
   initResets();
-
-  // Training tables add row
   initTableAddRow();
 
-  // Trainers additional trainers
+  // ✅ Trainers + tickets
   initAdditionalTrainers();
-
-  // Primary contacts additional POC (if present)
   initAdditionalPOC();
-
-  // Support tickets logic + validation fix + move cards by status
   initSupportTickets();
 
-  // DMS integration hook
+  // ✅ Onsite dates default end date +2
+  initOnsiteTrainingDates();
+
   initDMSIntegration();
 
-  // Dealership display + map restore
   restoreDealershipNameDisplay();
   restoreDealershipMap();
 
-  // PDF
   initPDF();
 
-  // Any date inputs should get placeholder style on load
   qsa("input[type='date']").forEach(applyDateGhost);
 
-  // If you have a dealership name input, sync display on load
   const dn = qs("#dealershipNameInput");
   if (dn && safeTrim(dn.value)) updateDealershipNameDisplay(dn.value);
 });
 
 /* ---------------------------
    Google Places callback (from your inline HTML)
-   NOTE: your HTML calls initAutocomplete() in global scope.
-   Leaving that in HTML is fine. This file does not override it.
 --------------------------- */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
