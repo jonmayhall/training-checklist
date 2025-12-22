@@ -1280,3 +1280,56 @@ main{
     min-height:380px; /* adjust if you want more/less blank space */
   }
 }
+
+/* ===========================================================
+   EQUAL-HEIGHT 2-COL ROWS (Pre-Training + Monday Visit + Post-Training)
+   Put at VERY BOTTOM of CSS
+   =========================================================== */
+
+/* Add your page IDs here (edit if your actual IDs differ) */
+#pre-training .cards-grid.two-col,
+#monday-visit .cards-grid.two-col,
+#post-training .cards-grid.two-col{
+  align-items:stretch !important;
+}
+
+/* Cards stretch full height in the row */
+#pre-training .cards-grid.two-col > .section-block,
+#monday-visit .cards-grid.two-col > .section-block,
+#post-training .cards-grid.two-col > .section-block{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0;
+}
+
+/* Notes cards: textarea fills remaining space */
+#pre-training .cards-grid.two-col > .section-block textarea,
+#monday-visit .cards-grid.two-col > .section-block textarea,
+#post-training .cards-grid.two-col > .section-block textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  resize:none !important;
+}
+
+/* Left cards (no textarea): create empty space below last question */
+@supports selector(.x:has(textarea)){
+  #pre-training .cards-grid.two-col > .section-block:not(:has(textarea))::after,
+  #monday-visit .cards-grid.two-col > .section-block:not(:has(textarea))::after,
+  #post-training .cards-grid.two-col > .section-block:not(:has(textarea))::after{
+    content:"";
+    display:block;
+    flex:1 1 auto;
+  }
+}
+
+/* Fallback if :has isn't supported */
+@supports not selector(.x:has(textarea)){
+  #pre-training .cards-grid.two-col > .section-block,
+  #monday-visit .cards-grid.two-col > .section-block,
+  #post-training .cards-grid.two-col > .section-block{
+    min-height:380px; /* adjust if needed */
+  }
+}
+
