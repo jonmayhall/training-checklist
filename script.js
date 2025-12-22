@@ -773,8 +773,8 @@ function initPDF(){
 
 /* ===========================================================
    NOTES LINKING — Option 2 ONLY (single 📝 icon)
-   - Adds ONE 📝 button per .checklist-row (non-notes cards)
-   - Places icon to the RIGHT of the field (inside .row-actions)
+   - ONE icon per checklist row
+   - Icon placed to the RIGHT of the field
    - Click inserts a bullet into the paired Notes textarea
    - Icon turns orange when note exists
    =========================================================== */
@@ -799,17 +799,17 @@ function findNotesTextareaForRow(row){
 function getCardTitleForRow(row){
   const h2 = row.closest(".section-block")?.querySelector("h2");
   if (!h2) return "";
-  const t = (h2.textContent || "").trim();
-  return t.replace(/^Notes\s*[—-]\s*/i, "").trim();
+  return (h2.textContent || "")
+    .replace(/^Notes\s*[—-]\s*/i, "")
+    .trim();
 }
 
 function getCleanQuestionText(row){
   const label = row.querySelector("label");
   if (!label) return "";
   const clone = label.cloneNode(true);
-  // remove any accidental embedded buttons/icons
   clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
-  return (clone.textContent || "").replace(/\s+/g," ").trim();
+  return (clone.textContent || "").replace(/\s+/g, " ").trim();
 }
 
 function makeNoteLine(row){
@@ -821,8 +821,7 @@ function makeNoteLine(row){
 
 function isInNotesCard(row){
   const h2 = row.closest(".section-block")?.querySelector("h2");
-  const t = (h2?.textContent || "").trim().toLowerCase();
-  return t.startsWith("notes");
+  return (h2?.textContent || "").toLowerCase().startsWith("notes");
 }
 
 function ensureRowActions(row){
@@ -832,8 +831,8 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // Move the existing field into the actions container
-  const field = row.querySelector("input, select");
+  // Only move a direct-child field (prevents breaking integrated rows)
+  const field = row.querySelector(":scope > input, :scope > select");
   if (field) actions.appendChild(field);
 
   row.appendChild(actions);
@@ -841,21 +840,20 @@ function ensureRowActions(row){
 }
 
 function initNotesLinkingOption2Only(root=document){
-  // Safety: remove any old Option 1 icons if present
+  // 🔥 Remove ALL old note icons first (prevents doubles)
   qsa(".note-btn", root).forEach(n => n.remove());
-
-  // ✅ Also remove any previously injected Option 2 icons (prevents doubles)
   qsa(".note-link-btn", root).forEach(n => n.remove());
 
-  const rows = qsa(".checklist-row", root);
-
-  rows.forEach(row=>{
+  qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
 
-    const ta = findNotesTextareaForRow(row);
-    if (!ta) return;
+    const textarea = findNotesTextareaForRow(row);
+    if (!textarea) return;
 
     const actions = ensureRowActions(row);
+
+    // Safety: do not duplicate
+    if (actions.querySelector(".note-link-btn")) return;
 
     const btn = document.createElement("button");
     btn.type = "button";
@@ -864,20 +862,15 @@ function initNotesLinkingOption2Only(root=document){
     btn.textContent = "📝";
 
     btn.addEventListener("click", ()=>{
-      const textarea = findNotesTextareaForRow(row);
-      if (!textarea) return;
-
       const line = makeNoteLine(row);
       if (!line) return;
 
       const existing = textarea.value || "";
-      if (existing.includes(line.trim())){
-        textarea.focus();
-        updateNoteIconStates(root);
-        return;
+      if (!existing.includes(line.trim())){
+        textarea.value =
+          (existing.trim() ? existing.trim() + "\n" : "") + line;
       }
 
-      textarea.value = (existing.trim() ? existing.trim() + "\n" : "") + line;
       textarea.focus();
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 
@@ -886,11 +879,10 @@ function initNotesLinkingOption2Only(root=document){
       requestAnimationFrame(syncTwoColHeights);
     });
 
-    // Put icon just LEFT of the field
-    actions.prepend(btn);
+    // ✅ RIGHT side of the field
+    actions.appendChild(btn);
   });
 
-  // After injecting, update orange state
   updateNoteIconStates(root);
 }
 
@@ -903,8 +895,10 @@ function updateNoteIconStates(root=document){
     if (!ta) return;
 
     const line = makeNoteLine(row).trim();
-    const has = line && (ta.value || "").includes(line);
-    btn.classList.toggle("has-note", !!has);
+    btn.classList.toggle(
+      "has-note",
+      !!line && (ta.value || "").includes(line)
+    );
   });
 }
 
