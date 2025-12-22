@@ -1,8 +1,11 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
    ✅ Includes:
-   - 2x2 Notes: card height sync + textarea fill-remaining-space + auto-grow
-   - HARD JS-injected CSS patch for the two “inputs too wide” issues
+   - Autosave + nav + ghost placeholders + cloning + support tickets
+   - Dealership map
+   - ✅ 2x2 Notes: card height sync + textarea fill + auto-grow
+   - ✅ Trainers fix: base row (has +) vs cloned rows (no +) tagging
+   - ✅ HARD JS-injected CSS patch (beats caching/file-order)
    ======================================================= */
 
 /* ---------------------------
@@ -74,6 +77,9 @@ function loadAll(root=document){
   refreshDateGhost(root);
   ensureTicketIds();
   refreshTicketBadges();
+
+  // ✅ after restore, re-tag trainer rows for correct styling
+  markTrainerRows();
 }
 
 /* ---------------------------
@@ -82,11 +88,14 @@ function loadAll(root=document){
 function clearSection(sectionEl){
   if (!sectionEl) return;
 
+  // Remove cloned table rows
   qsa("tr[data-clone='true'], tr[data-clone='1'], tr[data-clone='yes']", sectionEl)
     .forEach(tr => tr.remove());
 
+  // Remove cloned blocks/cards
   qsa("[data-clone='true'], [data-clone='1']", sectionEl).forEach(node => node.remove());
 
+  // Reset fields + storage
   qsa("input, select, textarea", sectionEl).forEach(el => {
     try{ localStorage.removeItem(getFieldKey(el)); } catch(_){}
 
@@ -95,6 +104,7 @@ function clearSection(sectionEl){
     else el.value = "";
   });
 
+  // ✅ If clearing Support Tickets page, reset ticket counter too
   if (sectionEl.id === "support-tickets"){
     try{ localStorage.removeItem("mkc:ticketCounter"); } catch(_){}
   }
@@ -103,7 +113,11 @@ function clearSection(sectionEl){
   refreshDateGhost(sectionEl);
   refreshTicketBadges();
 
+  // ✅ re-sync paired cards after clearing
   scheduleSideBySideSync(sectionEl);
+
+  // ✅ re-tag trainers in case clones were removed
+  markTrainerRows();
 }
 
 function clearAll(){
@@ -135,12 +149,17 @@ function showSectionById(id){
     (main || window).scrollTo({ top: 0, behavior: "smooth" });
   } catch(_) {}
 
+  // ✅ After page renders, sync paired cards + textarea baselines in THIS section
   scheduleSideBySideSync(target);
+
+  // ✅ if trainers page is shown, ensure base row gets tagged
+  markTrainerRows();
 }
 
 function initNavigation(){
   qsa(".nav-btn").forEach(btn => {
-    btn.type = "button";
+    btn.type = "button"; // prevent accidental submits
+
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -174,6 +193,7 @@ function initNavigation(){
 --------------------------- */
 function refreshGhostSelects(root=document){
   qsa("select", root).forEach(sel => {
+    // tables never ghost
     if (sel.closest(".training-table")) {
       sel.classList.remove("is-placeholder");
       return;
@@ -212,6 +232,19 @@ function updateDealershipMap(address){
 }
 
 /* ---------------------------
+   ✅ TRAINERS tagging helper
+   - Base row (contains + button) => .trainer-base
+   - Cloned rows (created on click) => .trainer-clone
+--------------------------- */
+function markTrainerRows(){
+  qsa("#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus").forEach(row => {
+    row.classList.remove("trainer-base");
+    // keep trainer-clone if it was explicitly set at clone time
+    if (qs(".add-row", row)) row.classList.add("trainer-base");
+  });
+}
+
+/* ---------------------------
    Integrated “+” row cloning (non-table)
 --------------------------- */
 function cloneIntegratedRow(btn){
@@ -220,6 +253,12 @@ function cloneIntegratedRow(btn){
 
   const clone = row.cloneNode(true);
   clone.dataset.clone = "true";
+
+  // ✅ If this is the Additional Trainers area, tag clones so CSS can style them
+  if (row.closest("#additionalTrainersContainer")){
+    clone.classList.add("trainer-clone");
+    clone.classList.remove("trainer-base");
+  }
 
   const plus = qs(".add-row", clone);
   if (plus) plus.remove();
@@ -236,8 +275,12 @@ function cloneIntegratedRow(btn){
   refreshGhostSelects(clone);
   refreshDateGhost(clone);
 
+  // ✅ if any textarea got cloned, bind grow + sync
   bindAutoGrowTextareas(clone.closest(".page-section") || document);
   scheduleSideBySideSync(clone.closest(".page-section") || document);
+
+  // ✅ re-tag base row (still has +) after insertion
+  markTrainerRows();
 }
 
 function handleTrainerAdd(btn){
@@ -273,6 +316,7 @@ function handleAdditionalPOCAdd(btn){
 /* ===========================================================
    ✅ HARD JS-INJECTED CSS PATCH
    (beats caching / file-order problems)
+   - Includes Trainers base/clone styling hooks
 =========================================================== */
 function injectHardLayoutPatch(){
   if (qs("#mkc-hard-layout-patch")) return;
@@ -293,41 +337,7 @@ function injectHardLayoutPatch(){
   overflow:hidden !important;
 }
 
-/* ✅ Trainers: keep + working AND (input+btn)=var(--input-width) */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  overflow:visible !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  padding-right:16px !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  margin-left:auto !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  cursor:pointer !important;
-  z-index:1 !important;
-}
-
-/* Additional POC safety */
+/* ✅ Additional POC safety */
 .primary-contacts-grid .mini-card,
 .primary-contacts-grid .additional-poc-card,
 .primary-contacts-grid .mini-card *{
@@ -341,6 +351,55 @@ function injectHardLayoutPatch(){
   max-width:100% !important;
   margin-left:0 !important;
   box-sizing:border-box !important;
+}
+
+/* ✅ Trainers (deterministic):
+   - .trainer-base: input+btn combined = var(--input-width)
+   - .trainer-clone: input alone = var(--input-width) + rounded right
+*/
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  overflow:visible !important;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  padding-right:16px !important;
+}
+
+/* base (has +) */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+  box-sizing:border-box !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  z-index:1 !important;
+}
+
+/* clone (no +) */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  border-radius:14px !important;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone .add-row{
+  display:none !important;
 }
 `;
 
@@ -357,6 +416,7 @@ function injectHardLayoutPatch(){
 let _syncTimer = null;
 
 function scheduleSideBySideSync(root=document){
+  // Debounce to avoid thrashing during typing/resizes
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(() => {
     syncSideBySideCardHeights(root);
@@ -365,6 +425,9 @@ function scheduleSideBySideSync(root=document){
 }
 
 function getRowCards(rowEl){
+  // Supports BOTH structures:
+  // - .cards-grid.two-col direct children section-blocks
+  // - .two-col-grid nested section-blocks
   if (!rowEl) return [];
   if (rowEl.classList.contains("cards-grid")){
     return qsa(":scope > .section-block", rowEl);
@@ -374,6 +437,7 @@ function getRowCards(rowEl){
 
 function syncSideBySideCardHeights(root=document){
   const scope = root || document;
+
   const rows = [
     ...qsa(".cards-grid.two-col", scope),
     ...qsa(".two-col-grid", scope),
@@ -383,16 +447,20 @@ function syncSideBySideCardHeights(root=document){
     const cards = getRowCards(row);
     if (cards.length < 2) return;
 
+    // reset minHeight before measuring
     cards.forEach(c => { c.style.minHeight = ""; });
 
+    // measure
     const heights = cards.map(c => c.getBoundingClientRect().height || 0);
     const maxH = Math.max(...heights);
 
+    // set both to same starting height
     cards.forEach(c => { c.style.minHeight = `${maxH}px`; });
   });
 }
 
 function isNotesTextarea(t){
+  // Limit to the side-by-side rows only
   return !!t?.closest(".cards-grid.two-col, .two-col-grid");
 }
 
@@ -407,9 +475,11 @@ function computeFillHeightForTextarea(t){
   const padTop = parseFloat(cs.paddingTop || "0") || 0;
   const padBot = parseFloat(cs.paddingBottom || "0") || 0;
 
+  // distance from top of content area to textarea top
   const contentTopY = cardRect.top + padTop;
   const dist = Math.max(0, tRect.top - contentTopY);
 
+  // remaining height inside card
   const available = Math.max(60, (cardRect.height - padTop - padBot - dist));
   return Math.floor(available);
 }
@@ -417,6 +487,7 @@ function computeFillHeightForTextarea(t){
 function autoGrowTextarea(t){
   if (!t) return;
 
+  // Base height is the "fill the card" height
   const fill = computeFillHeightForTextarea(t);
   if (fill > 0) t.dataset.baseHeight = String(fill);
 
@@ -424,21 +495,26 @@ function autoGrowTextarea(t){
 
   t.style.height = "auto";
   const needed = t.scrollHeight || 0;
-  t.style.height = Math.max(base, needed) + "px";
 
+  // Never shrink below the base (card-fill) height
+  t.style.height = Math.max(base, needed) + "px";
   t.style.maxWidth = "100%";
   t.style.boxSizing = "border-box";
 }
 
 function bindAutoGrowTextareas(root=document){
   const scope = root || document;
+
   qsa("textarea", scope).forEach(t => {
     if (!isNotesTextarea(t)) return;
+
+    // bind once
     if (t.dataset.autogrowBound === "1") return;
     t.dataset.autogrowBound = "1";
 
     t.addEventListener("input", () => {
       autoGrowTextarea(t);
+      // if it grows, row height might change; re-sync cards
       scheduleSideBySideSync(t.closest(".page-section") || document);
     });
   });
@@ -446,6 +522,8 @@ function bindAutoGrowTextareas(root=document){
 
 function refreshNotesTextareaBaselines(root=document){
   const scope = root || document;
+
+  // After we sync card heights, recalc textarea base heights & set its height.
   qsa(".cards-grid.two-col textarea, .two-col-grid textarea", scope).forEach(t => {
     t.dataset.baseHeight = "0";
     autoGrowTextarea(t);
@@ -577,14 +655,15 @@ function handleAddTicket(btn){
 }
 
 /* ---------------------------
-   No-op
+   No-op (prevents old init crashes)
 --------------------------- */
-function initStackedCompactToggle(){}
+function initStackedCompactToggle(){ /* intentionally disabled */ }
 
 /* ===========================================================
    DOM READY
 =========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ inject hard patch early (beats caching/order)
   injectHardLayoutPatch();
 
   initNavigation();
@@ -595,9 +674,14 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshDateGhost();
   refreshTicketBadges();
 
+  // ✅ bind + initial sync for side-by-side Notes
   bindAutoGrowTextareas(document);
   scheduleSideBySideSync(document);
 
+  // ✅ tag base trainer row (has +)
+  markTrainerRows();
+
+  // autosave on input/change
   document.addEventListener("input", (e) => {
     if (!isField(e.target)) return;
     saveField(e.target);
@@ -605,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target.tagName === "SELECT") refreshGhostSelects(e.target.closest(".page-section") || document);
     if (e.target.type === "date") refreshDateGhost(e.target.closest(".page-section") || document);
 
+    // ✅ if typing in a notes textarea, grow + keep pairs aligned
     if (e.target.tagName === "TEXTAREA" && isNotesTextarea(e.target)){
       autoGrowTextarea(e.target);
       scheduleSideBySideSync(e.target.closest(".page-section") || document);
@@ -618,6 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target.tagName === "SELECT") refreshGhostSelects(e.target.closest(".page-section") || document);
     if (e.target.type === "date") refreshDateGhost(e.target.closest(".page-section") || document);
 
+    // Support ticket status move (ONLY non-base cards)
     const sel = e.target.closest(".ticket-status-select");
     if (sel){
       const card = sel.closest(".ticket-group");
@@ -626,9 +712,11 @@ document.addEventListener("DOMContentLoaded", () => {
       moveTicketCardToStatus(card, sel.value);
     }
 
+    // keep alignment stable
     scheduleSideBySideSync(e.target.closest(".page-section") || document);
   });
 
+  // clicks
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
@@ -649,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // "+" buttons (integrated rows and tables)
     if (btn.classList.contains("add-row")){
       const table = btn.closest(".table-container")?.querySelector("table");
       if (table && table.tBodies?.[0]){
@@ -679,14 +768,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btn.closest("#trainers-deployment")) handleTrainerAdd(btn);
       else cloneIntegratedRow(btn);
 
+      // ✅ after any +, keep trainer tagging correct
+      markTrainerRows();
       return;
     }
 
+    // Support ticket + button
     if (btn.classList.contains("add-ticket-btn")){
       handleAddTicket(btn);
       return;
     }
 
+    // Dealership map button
     if (btn.id === "showDealershipMapBtn" || btn.classList.contains("small-map-btn")){
       const input = qs("#dealershipAddressInput");
       if (input?.value) updateDealershipMap(input.value);
@@ -694,6 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Live update map when address changes
   const addr = qs("#dealershipAddressInput");
   if (addr){
     addr.addEventListener("change", () => {
@@ -701,6 +795,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ============================
+     Onsite Training Dates
+     Auto-populate End Date (+2 days)
+     ============================ */
   const onsiteStart = document.getElementById("onsiteStartDate");
   const onsiteEnd   = document.getElementById("onsiteEndDate");
 
@@ -719,6 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ✅ Keep paired rows aligned on resize
   window.addEventListener("resize", () => {
     const active = qs(".page-section.active") || document;
     scheduleSideBySideSync(active);
