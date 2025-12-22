@@ -785,3 +785,92 @@ document.addEventListener("DOMContentLoaded", ()=>{
 --------------------------- */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
+
+/* ===========================================================
+   Linked Notes (Option 1)
+   - Injects 📝 buttons on left-card questions
+   - Click 📝 focuses the Notes textarea on the right and appends a bullet
+   =========================================================== */
+
+(function initLinkedNotes(){
+  function cleanLabelText(labelEl){
+    if (!labelEl) return "";
+    // Clone label so we can remove the note button text safely
+    const clone = labelEl.cloneNode(true);
+    clone.querySelectorAll(".note-link").forEach(b => b.remove());
+    return (clone.textContent || "").replace(/\s+/g," ").trim();
+  }
+
+  function isNotesCard(card){
+    const h2 = card.querySelector("h2");
+    const title = (h2?.textContent || "").toLowerCase();
+    // your Notes cards typically have "Notes — ..." or "Notes" in header
+    return title.includes("notes");
+  }
+
+  function addNoteLinksForGrid(grid){
+    const cards = Array.from(grid.querySelectorAll(":scope > .section-block"));
+    if (cards.length < 2) return;
+
+    const notesCard = cards.find(isNotesCard);
+    if (!notesCard) return;
+
+    const notesTextarea = notesCard.querySelector("textarea");
+    if (!notesTextarea) return;
+
+    // Everything except notesCard is "source"
+    const sourceCards = cards.filter(c => c !== notesCard);
+
+    // Prevent duplicates if this runs again
+    sourceCards.forEach(card => {
+      if (card.dataset.noteLinked === "true") return;
+      card.dataset.noteLinked = "true";
+
+      const cardTitle = (card.querySelector("h2")?.textContent || "").trim();
+
+      card.querySelectorAll(".checklist-row").forEach(row => {
+        const label = row.querySelector("label");
+        if (!label) return;
+
+        // don't add twice
+        if (label.querySelector(".note-link")) return;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "note-link";
+        btn.title = "Add linked note";
+        btn.textContent = "📝";
+
+        btn.addEventListener("click", () => {
+          const qText = cleanLabelText(label);
+          const prefix = cardTitle ? `${cardTitle}: ` : "";
+          const line = `• ${prefix}${qText}`;
+
+          // scroll notes card into view and focus
+          notesCard.scrollIntoView({ behavior:"smooth", block:"start" });
+
+          // Append nicely (no duplicates back-to-back)
+          const existing = (notesTextarea.value || "").trimEnd();
+          const needsGap = existing.length ? "\n" : "";
+          notesTextarea.value = existing + needsGap + line + "\n";
+          notesTextarea.focus();
+          notesTextarea.scrollTop = notesTextarea.scrollHeight;
+        });
+
+        label.appendChild(btn);
+      });
+    });
+  }
+
+  function run(){
+    // Targets your common two-column layouts
+    document.querySelectorAll(".cards-grid.two-col, .two-col-grid, .grid-2").forEach(addNoteLinksForGrid);
+  }
+
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+})();
+
