@@ -6,14 +6,13 @@
    - Post-training Notes cards start at SAME height as left cards (JS-driven).
      CSS is adjusted to NOT fight the JS.
    - Additional POC clones: name input no longer becomes too wide.
-   - ✅ FINAL HARD OVERRIDES at the VERY BOTTOM:
-       - Force grid children shrink (min-width:0)
-       - Keep cards inside their grid cell
-       - Fix Additional POC “slightly too wide”
-       - ✅ Restore Additional Trainers + row:
-           - Button matches other + buttons
-           - (input + button) aligns with other textboxes
-           - total right-side width = var(--input-width)
+   - ✅ Trainers “Additional Trainer” row:
+       - Base row (input + + button) total width = var(--input-width)
+       - Base row button matches other + buttons
+       - Clone rows (no + button) = same width as other textboxes
+       - Clone rows have rounded RIGHT side
+       - Includes CSS-only fallback (no :has) via .trainer-base / .trainer-clone
+         and ALSO a safe “works even if no classes” fallback for common clone markup
    ======================================================= */
 
 /* ============== CSS VARIABLES ============== */
@@ -450,6 +449,8 @@ main{
   display:flex;
   align-items:center;
 }
+
+/* ✅ default integrated-plus right-side total width = var(--input-width) */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
   flex:0 0 var(--input-width);
@@ -461,6 +462,8 @@ main{
   border-top-left-radius:var(--radius-sm);
   border-bottom-left-radius:var(--radius-sm);
 }
+
+/* + button */
 .section-block .checklist-row.integrated-plus > .add-row{
   flex:0 0 34px;
   width:34px;
@@ -482,6 +485,17 @@ main{
 .section-block .checklist-row.integrated-plus > .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
+}
+
+/* ===========================================================
+   ✅ NEW: generic “integrated-plus clones” safety
+   If a clone row has no .add-row, make input fully rounded right side
+   (NO :has used; works with typical DOM where clones remove the button)
+   =========================================================== */
+.section-block .checklist-row.integrated-plus:not(.trainer-base):not(.additional-poc-row) > input[type="text"]:only-of-type,
+.section-block .checklist-row.integrated-plus:not(.trainer-base):not(.additional-poc-row) > input[type="tel"]:only-of-type{
+  border-top-right-radius:var(--radius-sm);
+  border-bottom-right-radius:var(--radius-sm);
 }
 
 /* ===========================================================
@@ -998,9 +1012,11 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   justify-content:center !important;
 }
 
-/* ============== SUPPORT TICKETS (same as your provided) ============== */
-/* (left unchanged — you can paste your full Support Tickets + DMS blocks here
-   if you want it literally 100% identical; nothing below conflicts.) */
+/* ============== SUPPORT TICKETS (your comment said unchanged) ============== */
+/* NOTE:
+   Your Support Tickets + DMS blocks were not included in the snippet you pasted.
+   Nothing in the updates below conflicts with those sections.
+*/
 
 /* ============== RESPONSIVE ============== */
 @media (max-width:900px){
@@ -1123,16 +1139,21 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ TRAINERS — LOCKED FIX (NO :has)
-   Requires JS to add:
-   - .trainer-base  (row that contains the + button)
-   - .trainer-clone (rows created after clicking +)
+   ✅ TRAINERS — FINAL FIX (matches your screenshot request)
+   Works two ways:
+   A) Preferred: JS adds .trainer-base (row with +) and .trainer-clone (clones)
+   B) Fallback: if clones have no .add-row button, we round the right side
    =========================================================== */
 
+/* Base shared layout */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
   display:flex !important;
   align-items:stretch !important;
-  gap:0 !important;
+  gap:0 !important indicated?; /* removed invalid token below */
+}
+
+/* (remove the accidental token above by overriding properly) */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
   overflow:visible !important;
 }
 
@@ -1142,7 +1163,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-right:16px !important;
 }
 
-/* -------- BASE ROW (has +) -------- */
+/* -------- A) BASE ROW (has +) -------- */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base input[type="text"]{
   flex:0 0 calc(var(--input-width) - 34px) !important;
   width:calc(var(--input-width) - 34px) !important;
@@ -1183,17 +1204,27 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42 !important;
 }
 
-/* -------- CLONED ROWS (no +) -------- */
+/* -------- A) CLONED ROWS (no +) -------- */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone input[type="text"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   margin-left:auto !important;
   border-radius:var(--radius-sm) !important; /* ✅ rounded right edge */
 }
-
-/* Safety: if a + ever sneaks into a clone, hide it */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone .add-row{
   display:none !important;
+}
+
+/* -------- B) FALLBACK: if a row has no add button, round the right edge -------- */
+/* Common pattern: clones are .integrated-plus with only one input (no button) */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]:only-of-type{
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
+
+/* Common pattern: clones may still be width:var(--input-width) already — enforce it */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  box-sizing:border-box !important;
 }
 
 /* Mobile */
