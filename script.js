@@ -837,7 +837,6 @@ window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "note-link";
         btn.title = "Add linked note";
         btn.textContent = "📝";
 
