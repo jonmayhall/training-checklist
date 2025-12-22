@@ -773,9 +773,9 @@ function initPDF(){
 
 /* ===========================================================
    NOTES LINKING — Option 2 ONLY (single 📝 icon)
-   - ONE icon per checklist row
-   - Icon placed to the RIGHT of the field
-   - Click inserts a bullet into the paired Notes textarea
+   - ONE icon per checklist-row (non-notes cards)
+   - Icon sits to the RIGHT of the input/select
+   - Click inserts bullet into paired Notes textarea
    - Icon turns orange when note exists
    =========================================================== */
 
@@ -809,7 +809,7 @@ function getCleanQuestionText(row){
   if (!label) return "";
   const clone = label.cloneNode(true);
   clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
-  return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
 }
 
 function makeNoteLine(row){
@@ -831,7 +831,7 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // Only move a direct-child field (prevents breaking integrated rows)
+  // ONLY move a direct child input/select (prevents layout breakage)
   const field = row.querySelector(":scope > input, :scope > select");
   if (field) actions.appendChild(field);
 
@@ -840,19 +840,16 @@ function ensureRowActions(row){
 }
 
 function initNotesLinkingOption2Only(root=document){
-  // 🔥 Remove ALL old note icons first (prevents doubles)
-  qsa(".note-btn", root).forEach(n => n.remove());
-  qsa(".note-link-btn", root).forEach(n => n.remove());
+  // Hard cleanup: remove any old icons
+  qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
 
   qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
 
-    const textarea = findNotesTextareaForRow(row);
-    if (!textarea) return;
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
 
     const actions = ensureRowActions(row);
-
-    // Safety: do not duplicate
     if (actions.querySelector(".note-link-btn")) return;
 
     const btn = document.createElement("button");
@@ -862,14 +859,21 @@ function initNotesLinkingOption2Only(root=document){
     btn.textContent = "📝";
 
     btn.addEventListener("click", ()=>{
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
+
       const line = makeNoteLine(row);
       if (!line) return;
 
       const existing = textarea.value || "";
-      if (!existing.includes(line.trim())){
-        textarea.value =
-          (existing.trim() ? existing.trim() + "\n" : "") + line;
+      if (existing.includes(line.trim())){
+        textarea.focus();
+        updateNoteIconStates(root);
+        return;
       }
+
+      textarea.value =
+        (existing.trim() ? existing.trim() + "\n" : "") + line;
 
       textarea.focus();
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
