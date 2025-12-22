@@ -1149,3 +1149,61 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* ===========================================================
+   PATCH — Primary Contacts sizing + Additional POC input shape
+   - Make all contact-card inputs less wide
+   - Base "Additional POC" name input same width as other name lines
+   - Clone "Additional POC" name input rounded on right + same width
+   =========================================================== */
+
+/* 1) Reduce input width ONLY inside Primary Contacts area */
+#dealership-info .primary-contacts-grid{
+  --input-width:240px; /* <- adjust 220–260 if you want tighter/looser */
+}
+
+/* 2) Ensure all inputs inside the contact cards use that smaller width */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row input,
+#dealership-info .primary-contacts-grid .mini-card .checklist-row select{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+}
+
+/* 3) Base Additional POC row: input + plus button total matches others */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  max-width:calc(var(--input-width) - 34px) !important;
+
+  /* keeps it matching the other name lines */
+  height:34px !important;
+}
+
+/* Keep the + button consistent */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus .add-row{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+}
+
+/* 4) Cloned Additional POC cards:
+      - hide the + button
+      - make the name input same width as other name lines
+      - rounded RIGHT side restored (since no button) */
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus .add-row{
+  display:none !important;
+}
+
+#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
