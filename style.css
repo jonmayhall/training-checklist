@@ -1225,3 +1225,12 @@ main{
 .primary-contacts-grid .checklist-row.indent-sub{
   padding-left:36px !important; /* was 60px */
 }
+
+/* ===========================================================
+   Support Tickets — remove bold labels
+   =========================================================== */
+
+#support-tickets .ticket-row label{
+  font-weight:500; /* match normal checklist labels */
+}
+
