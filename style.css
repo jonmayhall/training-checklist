@@ -1313,30 +1313,39 @@ main{
   padding-left:30px !important;   /* was 42 */
 }
 
-/* ===========================================================
-   SUPPORT TICKETS — GUARANTEED GAP under Summary textarea
-   Paste at VERY BOTTOM of CSS (and delete older summary patches)
+//* ===========================================================
+   SUPPORT TICKETS — REAL FIX (works for input OR textarea)
+   Put at VERY BOTTOM. Removes the “no space under Short Summary” problem.
    =========================================================== */
 
-/* 1) Force the textarea to be a block with real bottom spacing */
-#support-tickets .ticket-group-inner textarea{
+/* Give the Short Summary control bottom space no matter what element it is */
+#support-tickets .ticket-summary-input,
+#support-tickets textarea.ticket-summary-input,
+#support-tickets .ticket-row.ticket-summary-row textarea,
+#support-tickets .ticket-row.ticket-summary-row input{
   display:block !important;
   margin:0 !important;
-  margin-bottom:16px !important;   /* <-- this is the gap you want */
+  margin-bottom:16px !important;   /* <-- the gap you want */
 }
 
-/* 2) If the text below is a disclaimer OR any element after the textarea,
-      force spacing ABOVE it too (covers your screenshot case) */
-#support-tickets .ticket-group-inner textarea + *{
+/* Whatever text comes after the Short Summary control gets top space */
+#support-tickets .ticket-summary-input + *,
+#support-tickets .ticket-row.ticket-summary-row textarea + *,
+#support-tickets .ticket-row.ticket-summary-row input + *{
   margin-top:16px !important;
 }
 
-/* 3) If it is NOT the immediate next element (there’s a wrapper), still force it */
-#support-tickets .ticket-group-inner textarea ~ *{
+/* If there’s a wrapper between them (not adjacent), force spacing anyway */
+#support-tickets .ticket-row.ticket-summary-row *:has(.ticket-summary-input) + *{
   margin-top:16px !important;
 }
 
-/* 4) If your “text below” is specifically a <p> (common), normalize it */
-#support-tickets .ticket-group-inner p{
+/* Normalize the disclaimer text so it doesn’t “eat” spacing with weird margins */
+#support-tickets .ticket-disclaimer,
+#support-tickets .ticket-group-inner p,
+#support-tickets .ticket-group-inner small,
+#support-tickets .ticket-group-inner .disclaimer{
   margin:0 !important;
 }
+
+
