@@ -6,6 +6,10 @@
    - Post-training Notes cards start at SAME height as left cards (JS-driven).
      CSS is adjusted to NOT fight the JS.
    - Additional POC clones: name input no longer becomes too wide.
+   - ✅ HARD OVERRIDES at the VERY BOTTOM:
+       - Fix Additional Trainer input too wide
+       - Fix Additional POC cards slightly too wide
+       - Force grid children shrink (min-width:0)
    ======================================================= */
 
 /* ============== CSS VARIABLES ============== */
@@ -63,97 +67,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 .training-table select,
 .training-table select.is-placeholder{
   color:var(--ink) !important;
-}
-
-/* ===========================================================
-   FIX: Default "Additional Trainer" input too wide
-   =========================================================== */
-
-/* Make sure trainer mini-cards never overflow their column */
-#trainers-deployment .mini-card{
-  width:100% !important;
-  max-width:100% !important;
-}
-
-/* The integrated + row (Name + input + plus) must allow shrinking */
-#trainers-deployment .mini-card .checklist-row.integrated-plus{
-  display:flex !important;
-  align-items:center !important;
-  gap:0 !important;
-}
-
-/* Label width consistent + doesn't force overflow */
-#trainers-deployment .mini-card .checklist-row.integrated-plus label{
-  flex:0 0 36% !important;
-  max-width:36% !important;
-  min-width:0 !important;
-  padding-right:12px !important;
-}
-
-/* ✅ KEY: input is allowed to shrink inside the row (prevents "too wide") */
-#trainers-deployment .mini-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  margin-left:0 !important;
-  box-sizing:border-box !important;
-}
-
-/* If + button exists, flatten input edge (optional but matches your style) */
-#trainers-deployment .mini-card .checklist-row.integrated-plus input[type="text"]{
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-
-/* Plus button fixed size (prevents pushing layout wider) */
-#trainers-deployment .mini-card .checklist-row.integrated-plus .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-}
-
-
-/* ===========================================================
-   FIX: All Additional POC cards slightly too wide
-   =========================================================== */
-
-/* Cards in the primary contacts grid must not exceed grid cell */
-.primary-contacts-grid > .mini-card,
-.primary-contacts-grid > .additional-poc-card{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-}
-
-/* If a wrapper is forcing extra width, this prevents it */
-.primary-contacts-grid{
-  overflow-x:hidden;
-}
-
-/* Ensure POC integrated row can shrink properly */
-.mini-card.additional-poc-card .checklist-row{
-  min-width:0 !important;
-}
-
-.mini-card.additional-poc-card .checklist-row label{
-  min-width:0 !important;
-}
-
-/* ✅ KEY: POC name field shrink-proofing (prevents “slightly too wide”) */
-.mini-card.additional-poc-card .checklist-row input[type="text"]{
-  min-width:0 !important;
-}
-
-/* (keeps your existing integrated-plus behavior intact) */
-.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
 }
 
 /* ============== BASE ============== */
@@ -649,7 +562,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:18px;
   margin-bottom:24px;
-  align-items:start; /* ✅ important: don't stretch rows */
+  align-items:start;
 }
 .col-stack{
   display:flex;
@@ -669,15 +582,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .cards-grid,
 .two-col-grid{
   --input-width:150px;
-}
-
-/* ✅ IMPORTANT:
-   Remove “textarea flex-fill” behavior that fought your matching heights.
-   JS now controls the starting height to match the left card. */
-.cards-grid .section-block,
-.two-col-grid .section-block{
-  /* leave as normal block so JS min-height works naturally */
-  display:block;
 }
 
 /* ===========================================================
@@ -722,6 +626,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:100%;
   margin-left:0;
   height:34px;
+  max-width:100%;
 }
 
 /* Page 2 contact grid */
@@ -759,12 +664,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
-  gap:0 !important;                 /* ✅ input touches + */
+  gap:0 !important;
   padding:8px 24px !important;
   border-bottom:1px solid #e5e5e5 !important;
+  min-width:0 !important;
 }
 
-/* label spacing restored */
 .mini-card.additional-poc-card .checklist-row.integrated-plus label{
   flex:0 0 36% !important;
   max-width:36% !important;
@@ -772,14 +677,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   white-space:nowrap !important;
   display:flex !important;
   align-items:center !important;
-  margin-right:12px !important;     /* ✅ spacing between label and field */
+  margin-right:12px !important;
+  min-width:0 !important;
 }
 
-/* ✅ BASE + CLONES: input always allowed to shrink (prevents “too wide” again) */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 0 !important;
-  width:0 !important;                  /* ✅ key */
-  min-width:0 !important;              /* ✅ key */
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
   margin-left:0 !important;
 
   height:34px !important;
@@ -789,7 +695,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-sizing:border-box !important;
 }
 
-/* Base card: flatten right edge because + exists */
 .mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
   border-top-left-radius:var(--radius-sm) !important;
   border-bottom-left-radius:var(--radius-sm) !important;
@@ -797,12 +702,10 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   border-bottom-right-radius:0 !important;
 }
 
-/* Clone cards (no +): full rounding */
 .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
   border-radius:var(--radius-sm) !important;
 }
 
-/* + button */
 .mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
 .mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
   flex:0 0 34px !important;
@@ -833,66 +736,31 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42 !important;
 }
 
-/* Hide + button on clones */
 .additional-poc-card:not([data-base="true"]) .add-row,
 .additional-poc-card:not([data-base="true"]) .additional-poc-add{
   display:none !important;
 }
 
 /* ===========================================================
-   Integrated “+” rows (general, non-tables)
+   ✅ NOTES TEXTAREA MUST FILL CARD (2×2 layouts)
+   Works for BOTH: .cards-grid.two-col and .two-col-grid
    =========================================================== */
-.section-block .checklist-row.integrated-plus{
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block{
   display:flex;
-  align-items:stretch;
-  gap:0;
+  flex-direction:column;
+  min-width:0;
 }
-.section-block .checklist-row.integrated-plus label{
+
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea{
   flex:1 1 auto;
-  padding-right:16px;
-  display:flex;
-  align-items:center;
-}
-
-/* ✅ DEFAULT: inputs are fully rounded */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  height:34px;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* ✅ ONLY when a + button is actually next to the input, flatten the right side */
-.section-block .checklist-row.integrated-plus input[type="text"]:has(+ .add-row),
-.section-block .checklist-row.integrated-plus input[type="tel"]:has(+ .add-row){
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-
-/* + button */
-.section-block .checklist-row.integrated-plus > .add-row{
-  flex:0 0 34px;
-  width:34px;
-  height:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
-  padding:0;
-}
-.section-block .checklist-row.integrated-plus > .add-row:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
+  width:100% !important;
+  max-width:100% !important;
+  min-height:160px;
+  resize:none;
+  overflow:hidden;
+  box-sizing:border-box;
 }
 
 /* ===========================================================
@@ -923,7 +791,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   max-width:100%;
 }
 
-/* ✅ NO border/radius here (prevents “second card”) */
 .scroll-wrapper{
   display:block;
   width:100%;
@@ -953,7 +820,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding:6px 6px;
 }
 
-/* sticky header */
 .training-table thead th{
   background:var(--light-orange);
   color:#fff;
@@ -963,7 +829,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   z-index:3;
 }
 
-/* sticky first column (default) */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -974,7 +839,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-left:10px;
 }
 
-/* ✅ Keep FIRST HEADER cell light-orange */
 .training-table thead th:first-child{
   background:var(--light-orange) !important;
   color:#fff !important;
@@ -992,7 +856,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   min-width:210px;
 }
 
-/* Inputs */
 .training-table input[type="text"],
 .training-table select{
   width:100%;
@@ -1022,11 +885,9 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   min-width:0;
 }
 
-/* row striping */
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
-/* footer + add row (LEFT) */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -1056,7 +917,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   transform:translateY(-1px);
 }
 
-/* acceptance colors */
 .training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
 .training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
 .training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
@@ -1114,7 +974,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   margin:0;
 }
 
-/* Badge: top-right, attached to border */
 #support-tickets .ticket-count-badge{
   position:absolute;
   top:-12px;
@@ -1173,7 +1032,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   height:36px;
 }
 
-/* Ticket number wrap with + */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
@@ -1205,7 +1063,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   background:#ff8b42;
 }
 
-/* Summary row */
 #support-tickets .ticket-summary-row{ grid-template-columns:1fr; }
 #support-tickets .ticket-summary-row > label{ margin-bottom:4px; }
 
@@ -1221,7 +1078,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   resize:none;
 }
 
-/* Base disclaimer */
 #support-tickets .ticket-disclaimer{
   font-size:11px;
   color:#9ca3af;
@@ -1230,7 +1086,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
-/* Locked base status look */
 #support-tickets .ticket-status-select.is-locked,
 #support-tickets .ticket-status-select:disabled{
   background:#eeeeee !important;
@@ -1240,7 +1095,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   opacity:0.9;
 }
 
-/* Non-base cards: status looks normal */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-status-select{
   background:#f7f7f7 !important;
   color:var(--ink) !important;
@@ -1279,8 +1133,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ============== DMS INTEGRATION ============== */
-
-/* Grid: 2 columns desktop */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -1292,7 +1144,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:none;
 }
 
-/* Individual DMS cards */
 #dms-integration .dms-card{
   background:#fff;
   border:1px solid #e5e7eb;
@@ -1301,7 +1152,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   overflow:hidden;
 }
 
-/* Header: name left, Push/Pull right (plain text) */
 #dms-integration .dms-card-header{
   background:var(--orange);
   color:#fff;
@@ -1345,7 +1195,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   opacity:0.9;
 }
 
-/* Body */
 #dms-integration .dms-list{
   list-style:none;
   margin:0;
@@ -1402,7 +1251,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   font-style:italic;
 }
 
-/* Remove matrix header */
 #dms-integration .section-header{ display:none !important; }
 #dms-integration .dms-grid{ padding-top:0 !important; }
 
@@ -1432,7 +1280,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     grid-template-columns:1fr;
   }
 
-  /* Address row stacks + becomes full width */
   #dealership-address-card .checklist-row{
     display:flex !important;
     flex-direction:column !important;
@@ -1483,53 +1330,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ NOTES TEXTAREA MUST FILL CARD (2×2 layouts)
-   Works for BOTH: .cards-grid.two-col and .two-col-grid
+   ✅ FINAL HARD OVERRIDE (DO NOT MOVE ABOVE THIS LINE)
+   This is the “make it stop overflowing no matter what” block
    =========================================================== */
 
-/* Make side-by-side cards flex columns so textarea can stretch */
-.cards-grid.two-col > .section-block,
-.two-col-grid .section-block{
-  display:flex;
-  flex-direction:column;
-}
-
-/* Give the notes textarea the remaining height inside the card */
-.cards-grid.two-col > .section-block textarea,
-.two-col-grid .section-block textarea{
-  flex:1 1 auto;
-  width:100% !important;
-  max-width:100% !important;
-
-  /* starting height (fills card area) */
-  min-height:160px;
-
-  /* we handle growth in JS */
-  resize:none;
-  overflow:hidden;
-}
-
-/* ===========================================================
-   HARD FIX: Grid/Flex overflow causing "slightly too wide" cards
-   + Trainer / Additional POC input too wide
-   Put at VERY BOTTOM of style.css
-   =========================================================== */
-
-/* 1) Critical: allow 2-col grid children to shrink (prevents overflow) */
-.cards-grid.two-col,
-.two-col-grid,
-.primary-contacts-grid{
-  overflow-x:hidden !important;
-}
-
+/* 1) Allow grid children to shrink */
 .cards-grid.two-col > * ,
 .two-col-grid > * ,
 .primary-contacts-grid > *{
-  min-width:0 !important;   /* ✅ KEY FIX */
+  min-width:0 !important;
   max-width:100% !important;
 }
 
-/* Ensure cards never exceed their grid cell */
+/* 2) Cards must stay inside their grid cell */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
 .primary-contacts-grid > .mini-card,
@@ -1537,18 +1350,21 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:100% !important;
   max-width:100% !important;
   min-width:0 !important;
+  overflow:hidden !important;
 }
 
-/* 2) Trainer additional row: force shrink behavior inside flex */
+/* 3) Additional Trainers: force shrink (beats fixed widths) */
 #trainers-deployment #additionalTrainersContainer,
 #trainers-deployment #additionalTrainersContainer *{
   min-width:0 !important;
+  max-width:100% !important;
 }
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
   display:flex !important;
   align-items:center !important;
   gap:0 !important;
+  min-width:0 !important;
 }
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
@@ -1558,17 +1374,15 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-right:12px !important;
 }
 
-/* ✅ KEY: this stops the "too wide" default trainer input */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
   flex:1 1 0 !important;
-  width:0 !important;
+  width:0 !important;           /* ✅ kills “too wide” overflow */
   min-width:0 !important;
   max-width:100% !important;
-  box-sizing:border-box !important;
   margin-left:0 !important;
+  box-sizing:border-box !important;
 }
 
-/* + button must NOT stretch the row */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
   flex:0 0 34px !important;
   width:34px !important;
@@ -1577,118 +1391,29 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   margin-left:-1px !important;
 }
 
-/* 3) Additional POC cards: same shrink rules (fix “slightly too wide”) */
+/* 4) Additional POC: force shrink + prevent spill */
 .primary-contacts-grid .mini-card,
 .primary-contacts-grid .additional-poc-card,
 .primary-contacts-grid .mini-card *{
   min-width:0 !important;
+  max-width:100% !important;
 }
 
 .mini-card.additional-poc-card{
   width:100% !important;
   max-width:100% !important;
   min-width:0 !important;
-}
-
-.mini-card.additional-poc-card .checklist-row{
-  min-width:0 !important;
-}
-
-.mini-card.additional-poc-card .checklist-row label{
-  min-width:0 !important;
-}
-
-.mini-card.additional-poc-card .checklist-row input[type="text"],
-.mini-card.additional-poc-card .checklist-row input[type="tel"],
-.mini-card.additional-poc-card .checklist-row input[type="email"]{
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-
-/* Integrated + row inside POC cards must allow shrink */
-.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important;
-  width:0 !important;
-  min-width:0 !important;
-  max-width:100% !important;
-}
-
-/* ===========================================================
-   HARD OVERRIDE: Fix the TWO inputs still too wide
-   (Additional Trainers + Additional POC)
-   Put at VERY BOTTOM of style.css
-   =========================================================== */
-
-/* --------- Additional Trainers (default row + clones) --------- */
-#trainers-deployment #additionalTrainersContainer .mini-card,
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  max-width:100% !important;
-  min-width:0 !important;
-  overflow:hidden !important;              /* ✅ prevents spill */
-}
-
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
-  display:flex !important;
-  align-items:center !important;
-  gap:0 !important;
-  min-width:0 !important;
-}
-
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
-  flex:0 0 36% !important;
-  max-width:36% !important;
-  min-width:0 !important;
-  padding-right:12px !important;
-}
-
-/* ✅ THIS is the real fix: kill the forced var(--input-width) */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;                   /* ✅ overrides width: var(--input-width) */
-  max-width:100% !important;
-  min-width:0 !important;
-  margin-left:0 !important;
-  box-sizing:border-box !important;
-}
-
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-}
-
-
-/* --------- Additional POC cards (ALL slightly too wide) --------- */
-.primary-contacts-grid > .mini-card,
-.primary-contacts-grid > .additional-poc-card{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  overflow:hidden !important;              /* ✅ prevents spill */
-}
-
-.mini-card.additional-poc-card .checklist-row{
-  max-width:100% !important;
-  min-width:0 !important;
+  overflow:hidden !important;
 }
 
 .mini-card.additional-poc-card .checklist-row.integrated-plus{
-  display:flex !important;
-  align-items:center !important;
-  gap:0 !important;
   min-width:0 !important;
 }
 
-/* ✅ Also kill the forced fixed-width input */
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;                   /* ✅ overrides width: var(--input-width) */
-  max-width:100% !important;
+  flex:1 1 0 !important;
+  width:0 !important;           /* ✅ kills “slightly too wide” */
   min-width:0 !important;
-  margin-left:0 !important;
+  max-width:100% !important;
   box-sizing:border-box !important;
 }
-
