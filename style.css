@@ -1235,6 +1235,27 @@ main{
 }
 
 /* ===========================================================
+   Support Tickets — FIX Summary spacing (works even if markup differs)
+   =========================================================== */
+
+/* Add the same vertical spacing around the Summary block */
+#support-tickets .ticket-group-inner .ticket-summary-input{
+  margin-top:8px !important;
+}
+
+/* If your Summary label is a label, give it the same row padding rhythm */
+#support-tickets .ticket-group-inner label:has(+ .ticket-summary-input){
+  display:block !important;
+  padding:10px 0 0 !important;   /* top spacing like other rows */
+  margin:0 !important;
+}
+
+/* Give the whole summary area bottom padding like other rows */
+#support-tickets .ticket-group-inner .ticket-summary-input{
+  margin-bottom:10px !important; /* bottom spacing like other rows */
+}
+
+/* ===========================================================
    Support Tickets — Normalize Summary row spacing
    =========================================================== */
 
