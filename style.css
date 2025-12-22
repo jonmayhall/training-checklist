@@ -65,6 +65,97 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   color:var(--ink) !important;
 }
 
+/* ===========================================================
+   FIX: Default "Additional Trainer" input too wide
+   =========================================================== */
+
+/* Make sure trainer mini-cards never overflow their column */
+#trainers-deployment .mini-card{
+  width:100% !important;
+  max-width:100% !important;
+}
+
+/* The integrated + row (Name + input + plus) must allow shrinking */
+#trainers-deployment .mini-card .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+}
+
+/* Label width consistent + doesn't force overflow */
+#trainers-deployment .mini-card .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  min-width:0 !important;
+  padding-right:12px !important;
+}
+
+/* ✅ KEY: input is allowed to shrink inside the row (prevents "too wide") */
+#trainers-deployment .mini-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* If + button exists, flatten input edge (optional but matches your style) */
+#trainers-deployment .mini-card .checklist-row.integrated-plus input[type="text"]{
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+/* Plus button fixed size (prevents pushing layout wider) */
+#trainers-deployment .mini-card .checklist-row.integrated-plus .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+}
+
+
+/* ===========================================================
+   FIX: All Additional POC cards slightly too wide
+   =========================================================== */
+
+/* Cards in the primary contacts grid must not exceed grid cell */
+.primary-contacts-grid > .mini-card,
+.primary-contacts-grid > .additional-poc-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+/* If a wrapper is forcing extra width, this prevents it */
+.primary-contacts-grid{
+  overflow-x:hidden;
+}
+
+/* Ensure POC integrated row can shrink properly */
+.mini-card.additional-poc-card .checklist-row{
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row label{
+  min-width:0 !important;
+}
+
+/* ✅ KEY: POC name field shrink-proofing (prevents “slightly too wide”) */
+.mini-card.additional-poc-card .checklist-row input[type="text"]{
+  min-width:0 !important;
+}
+
+/* (keeps your existing integrated-plus behavior intact) */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
 /* ============== BASE ============== */
 html,body{
   margin:0;
