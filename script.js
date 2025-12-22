@@ -772,8 +772,12 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING ...
-=========================================================== */
+   NOTES LINKING — Option 2 ONLY (single 📝 icon)
+   - Adds ONE 📝 button per .checklist-row (non-notes cards)
+   - Places icon to the RIGHT of the field (inside .row-actions)
+   - Click inserts a bullet into the paired Notes textarea
+   - Icon turns orange when note exists
+   =========================================================== */
 
 function findNotesTextareaForRow(row){
   const wrap =
@@ -817,7 +821,7 @@ function makeNoteLine(row){
 
 function isInNotesCard(row){
   const h2 = row.closest(".section-block")?.querySelector("h2");
-  return (h2?.textContent || "").toLowerCase().startsWith("notes");
+  return (h2?.textContent || "").trim().toLowerCase().startsWith("notes");
 }
 
 function ensureRowActions(row){
@@ -827,7 +831,14 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // ONLY move a direct child input/select (prevents layout breakage)
+  // ✅ DO NOT restructure integrated-plus rows (Trainer +, Additional POC +, etc.)
+  // Those rely on their existing input/button layout.
+  if (row.classList.contains("integrated-plus")){
+    row.appendChild(actions);
+    return actions;
+  }
+
+  // ✅ Only move a DIRECT child input/select (avoids breaking other layouts)
   const field = row.querySelector(":scope > input, :scope > select");
   if (field) actions.appendChild(field);
 
@@ -854,7 +865,10 @@ function initNotesLinkingOption2Only(root=document){
     btn.title = "Add this question to Notes";
     btn.textContent = "📝";
 
-    btn.addEventListener("click", ()=>{
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+
       const textarea = findNotesTextareaForRow(row);
       if (!textarea) return;
 
@@ -868,9 +882,7 @@ function initNotesLinkingOption2Only(root=document){
         return;
       }
 
-      textarea.value =
-        (existing.trim() ? existing.trim() + "\n" : "") + line;
-
+      textarea.value = (existing.trim() ? existing.trim() + "\n" : "") + line;
       textarea.focus();
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 
@@ -879,7 +891,7 @@ function initNotesLinkingOption2Only(root=document){
       requestAnimationFrame(syncTwoColHeights);
     });
 
-    // ✅ RIGHT side of the field
+    // ✅ Put icon on RIGHT side of the field
     actions.appendChild(btn);
   });
 
@@ -895,15 +907,38 @@ function updateNoteIconStates(root=document){
     if (!ta) return;
 
     const line = makeNoteLine(row).trim();
-    btn.classList.toggle(
-      "has-note",
-      !!line && (ta.value || "").includes(line)
-    );
+    btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
   });
 }
 
-/* ---------------------------
-   Google Places callback (from your inline HTML)
---------------------------- */
+document.addEventListener("DOMContentLoaded", ()=>{
+  initNav();
+  initGhosts();
+  initPersistence();
+
+  initTextareas(document);
+  syncTwoColHeights();
+  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
+
+  initResets();
+  initTableAddRow();
+
+  initAdditionalTrainers();
+  initAdditionalPOC();
+  initSupportTickets();
+
+  initOnsiteTrainingDates();
+
+  restoreDealershipNameDisplay();
+  restoreDealershipMap();
+
+  initPDF();
+
+  // ✅ Notes linking
+  initNotesLinkingOption2Only(document);
+  updateNoteIconStates(document);
+});
+
+/* Google Places callback */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
