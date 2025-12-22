@@ -403,7 +403,8 @@ function initTableAddRow(){
    - OR any .training-dates-row / .onsite-training-dates-row that contains 2 date inputs
 ======================================================= */
 function addDaysISO(iso, days){
-  const d = new Date(iso);
+  // ✅ Parse at local midday to avoid timezone shifting (-1/+1 day bugs)
+  const d = new Date(`${iso}T12:00:00`);
   if (Number.isNaN(d.getTime())) return "";
   d.setDate(d.getDate() + days);
   const yyyy = d.getFullYear();
@@ -411,6 +412,7 @@ function addDaysISO(iso, days){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
 
 function initOnsiteTrainingDates(){
   // Case A: explicit IDs
