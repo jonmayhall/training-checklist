@@ -1498,3 +1498,21 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   max-width:100% !important;
   box-sizing:border-box !important;
 }
+
+/* ===========================================================
+   FORCE Page 1 (Trainers) cards to STACK (override grid-2)
+   Paste at VERY BOTTOM of CSS
+   =========================================================== */
+body #app main #trainers-deployment .grid-2{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:18px !important;
+  align-items:start !important;
+}
+
+/* Safety: make sure the section blocks fill the single column */
+body #app main #trainers-deployment .grid-2 > .section-block{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
