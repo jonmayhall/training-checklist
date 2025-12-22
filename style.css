@@ -1202,4 +1202,47 @@ main{
   #primaryContactsGrid{
     grid-template-columns:1fr !important;
   }
+
+/* ===========================================================
+   PATCH — Force POC cards to render 2x2 (desktop)
+   Looks for the "Additional POC" add button/card and grids its container
+   =========================================================== */
+
+/* Any container that contains the Additional POC add control becomes a 2-col grid */
+.page-section:not(#trainers-deployment)
+  :is(.grid-2, .cards-grid, .two-col-grid, .section-block, div)
+  :has(.additional-poc-add, .additional-poc-card){
+  /* nothing here — this line just ensures :has() matches for scoping */
+}
+
+/* Set the *actual* parent wrapper to grid */
+.page-section:not(#trainers-deployment)
+  :is(.grid-2, .cards-grid, .two-col-grid, div)
+  :has(> .additional-poc-card),
+.page-section:not(#trainers-deployment)
+  :is(.grid-2, .cards-grid, .two-col-grid, div)
+  :has(.additional-poc-add){
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+  align-items:start !important;
+}
+
+/* Make each POC card behave nicely inside the grid */
+.additional-poc-card{
+  width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
+/* Mobile: 1 column */
+@media (max-width:900px){
+  .page-section:not(#trainers-deployment)
+    :is(.grid-2, .cards-grid, .two-col-grid, div)
+    :has(> .additional-poc-card),
+  .page-section:not(#trainers-deployment)
+    :is(.grid-2, .cards-grid, .two-col-grid, div)
+    :has(.additional-poc-add){
+    grid-template-columns:1fr !important;
+  }
 }
