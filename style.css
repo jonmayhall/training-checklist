@@ -1,24 +1,11 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN FULL CSS
-   ✅ Single source of truth (no conflicting “hard overrides”)
-   ✅ Includes:
-   - Global layout / sidebar / topbar
-   - Cards, grids, Q&A rows, integrated + rows
-   - Notes textareas fill available space in 2×2 layouts + Resources
-   - Trainers page: cards stacked + Additional Trainers (+) works visually
-   - Dealership Address: fixed narrower input + map button integrated
-   - Onsite Training Dates: stacked date inputs (CSS only)
-   - Tables preserved (Training tables, Opcodes, etc.)
-   - Support Tickets restored + correct:
-       • Status sections stacked
-       • Ticket cards 2-up within each status
-       • Inside each card: first 3 fields half-card answers
-       • Summary textarea full width
-       • Ticket # input + + button matches other integrated-plus rows
-   - DMS Integration restored (2-up grid)
+   myKaarma Interactive Training Checklist — FULL PROJECT CSS
+   Stable "single source of truth" stylesheet
    ======================================================= */
 
-/* ============== CSS VARIABLES ============== */
+/* =======================
+   CSS VARIABLES
+======================= */
 :root{
   --orange:#EF6D22;
   --mykaarma-green:#CDDC39;
@@ -35,11 +22,22 @@
 
   --shadow:0 2px 8px rgba(0,0,0,0.10);
 
-  /* default (single-column pages) */
+  /* Default (single-column pages) */
   --input-width:340px;
 }
 
-/* ============== GLOBAL INPUT TYPOGRAPHY ============== */
+/* =======================
+   GLOBAL TYPOGRAPHY
+======================= */
+html,body{
+  margin:0;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:var(--gray-bg);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+*{ box-sizing:border-box; }
+
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -51,7 +49,7 @@ select{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 
-/* Placeholder (ghost) text */
+/* Placeholders */
 input::placeholder,
 textarea::placeholder{
   font-size:13px;
@@ -59,33 +57,24 @@ textarea::placeholder{
   opacity:1;
 }
 
-/* Dropdown ghost text (NON-table only) */
+/* Ghost placeholders */
 select{ color:var(--ink); }
 select.is-placeholder{ color:#9ca3af; }
 
-/* Date placeholder support */
 input[type="date"]{ color:var(--ink); }
 input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
-/* ✅ Tables: never ghost-color dropdowns */
+/* Tables should never look "ghosted" */
 .training-table select,
 .training-table select.is-placeholder{
   color:var(--ink) !important;
 }
 
-/* ============== BASE ============== */
-html,body{
-  margin:0;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background:var(--gray-bg);
-  color:var(--ink);
-  overflow-x:hidden;
-}
-*{ box-sizing:border-box; }
-
-/* ============== TOP BAR ============== */
+/* =======================
+   TOP BAR
+======================= */
 #topbar{
   background:linear-gradient(90deg,#000 0%, var(--orange) 100%);
   height:70px;
@@ -109,8 +98,6 @@ html,body{
   width:auto;
   object-fit:contain;
   display:block;
-  opacity:1;
-  visibility:visible;
 }
 .topbar-right{
   display:flex;
@@ -125,15 +112,19 @@ html,body{
   min-height:1em;
 }
 
-/* App starts below fixed topbar */
+/* =======================
+   APP WRAPPER
+======================= */
 #app{
   display:flex;
   min-height:100vh;
-  margin-top:70px;
+  margin-top:70px; /* below fixed topbar */
   overflow-x:hidden;
 }
 
-/* ============== SIDEBAR ============== */
+/* =======================
+   SIDEBAR
+======================= */
 #sidebar{
   background:linear-gradient(180deg,#0b1220 0%, #111827 35%, #020617 100%);
   border-right:1px solid rgba(15,23,42,0.8);
@@ -175,7 +166,7 @@ html,body{
 .nav-btn.active{
   background:rgba(15,23,42,0.95);
   color:#f9fafb;
-  font-weight:600;
+  font-weight:700;
   border-color:var(--orange);
   box-shadow:0 4px 10px rgba(0,0,0,0.65);
 }
@@ -186,24 +177,20 @@ html,body{
   left:24px;
   bottom:18px;
   width:calc(230px - 48px);
-
   padding:8px 12px;
   font-size:11px;
-  font-weight:800;
+  font-weight:900;
   text-transform:uppercase;
   letter-spacing:0.08em;
-
   border-radius:999px;
   border:none;
   background:var(--orange);
   color:#fff;
-
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:6px;
-
   box-shadow:0 3px 10px rgba(239,109,34,0.45);
   transition:background .16s, transform .16s, box-shadow .16s;
   z-index:60;
@@ -214,7 +201,9 @@ html,body{
   box-shadow:0 5px 14px rgba(239,109,34,0.55);
 }
 
-/* ============== MAIN CONTENT ============== */
+/* =======================
+   MAIN CONTENT
+======================= */
 main{
   flex:1;
   margin-left:230px;
@@ -223,7 +212,9 @@ main{
   overflow-x:hidden;
 }
 
-/* ============== PAGE SECTIONS ============== */
+/* =======================
+   PAGE SECTIONS
+======================= */
 .page-section{
   position:relative;
   display:none;
@@ -241,10 +232,9 @@ main{
   color:var(--orange);
   margin:4px 0 8px 4px;
   font-size:26px;
-  font-weight:700;
+  font-weight:800;
   text-align:left;
   letter-spacing:.3px;
-  position:relative;
 }
 .page-section h1::after{
   content:"";
@@ -262,25 +252,21 @@ main{
   color:#555;
 }
 
-/* Reset This Page — top-right orange pill */
+/* Reset This Page (top-right) */
 .page-section .clear-page-btn{
   position:absolute !important;
   top:16px !important;
   right:24px !important;
   left:auto !important;
-
   padding:6px 14px;
   font-size:11px;
-  font-weight:800;
+  font-weight:900;
   text-transform:uppercase;
   letter-spacing:0.08em;
-
   border-radius:999px;
   border:none;
-
   background:var(--orange);
   color:#fff;
-
   cursor:pointer;
   box-shadow:0 2px 6px rgba(239,109,34,0.35);
   transition:background .18s, transform .18s, box-shadow .18s;
@@ -292,7 +278,9 @@ main{
   box-shadow:0 4px 10px rgba(239,109,34,0.45);
 }
 
-/* ============== SECTION BLOCKS (cards) ============== */
+/* =======================
+   SECTION BLOCKS (BIG CARDS)
+======================= */
 .section-block{
   background:#fff;
   border-radius:var(--radius-lg);
@@ -308,7 +296,7 @@ main{
   background:var(--orange);
   color:#fff;
   font-size:16px;
-  font-weight:700;
+  font-weight:800;
   border-bottom:1px solid var(--border);
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
   margin-left:-22px;
@@ -316,7 +304,9 @@ main{
 }
 .orange-outline-card{ border:2px solid var(--orange); }
 
-/* ============== LAYOUT HELPERS ============== */
+/* =======================
+   LAYOUT HELPERS
+======================= */
 .grid-2{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -345,13 +335,15 @@ main{
   gap:18px;
 }
 
-/* Side-by-side pages shrink inputs a bit */
+/* On side-by-side layouts, shrink default right-side input width */
 .cards-grid,
 .two-col-grid{
   --input-width:150px;
 }
 
-/* ============== Q&A ROWS (non-tables) ============== */
+/* =======================
+   Q&A ROWS (NON-TABLE)
+======================= */
 .checklist-row{
   display:flex;
   align-items:center;
@@ -375,7 +367,7 @@ main{
   white-space:normal;
 }
 
-/* inputs on the RIGHT */
+/* Inputs on the right */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -393,7 +385,7 @@ main{
   height:34px;
 }
 
-/* textareas */
+/* Textareas */
 .section-block textarea{
   width:100% !important;
   max-width:100% !important;
@@ -407,7 +399,7 @@ main{
   resize:vertical;
 }
 
-/* focus */
+/* Focus */
 .section-block input:focus,
 .section-block select:focus,
 .section-block textarea:focus,
@@ -419,10 +411,12 @@ main{
   background:#fff9f5;
 }
 
-/* indents */
+/* Indents */
 .indent-sub{ padding-left:60px !important; }
 
-/* ============== Integrated “+” rows (general) ============== */
+/* =======================
+   Integrated “+” rows (general)
+======================= */
 .section-block .checklist-row.integrated-plus{
   display:flex;
   align-items:stretch;
@@ -468,46 +462,69 @@ main{
   transform:translateY(-1px);
 }
 
-/* ===========================================================
-   TRAINERS PAGE
-   - Force Page 1 cards STACKED (override .grid-2)
-   =========================================================== */
-#trainers-deployment .grid-2{
-  grid-template-columns:1fr !important;
+/* =======================
+   DEALERSHIP INFO PAGE FIXES
+======================= */
+
+/* Onsite Training Dates: date stack stays normal sized */
+.training-dates-row,
+.onsite-training-dates-row{
+  align-items:flex-start !important;
 }
-#trainers-deployment .grid-2 > .section-block{
+.training-dates-row label,
+.onsite-training-dates-row label{
+  padding-top:7px !important;
+}
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  padding:7px 10px !important;
+}
+
+/* Primary Contacts grid (YOUR HTML uses .primary-contacts-grid) */
+.primary-contacts-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+  margin-top:10px;
+}
+
+/* mini cards inside Primary Contacts */
+.mini-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  background:#fff;
+  overflow:hidden;
+  padding:14px 14px 6px;
+}
+.mini-card .checklist-row{
+  padding-left:18px;
+  padding-right:18px;
+}
+
+/* Make sure these cards don't collapse */
+.contact-card,
+.additional-poc-card{
   width:100%;
-  max-width:100%;
   min-width:0;
 }
 
-/* Additional Trainers base row: input+button total = --input-width */
-#trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  margin-left:auto !important;
-}
-#trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-}
-
-/* Clones in container: full input width, rounded right edge, no button */
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  padding-left:60px !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
-  width:var(--input-width) !important;
-  border-radius:var(--radius-sm) !important;
-}
-#trainers-deployment #additionalTrainersContainer .add-row{
-  display:none !important;
-}
-
-/* ===========================================================
-   Dealership Address — integrated input + small map button
-   =========================================================== */
+/* =======================
+   Dealership Address card
+======================= */
 #dealership-address-card .checklist-row{
   display:grid !important;
   grid-template-columns:minmax(260px, 1fr) auto !important;
@@ -539,7 +556,7 @@ main{
   border:1px solid var(--orange) !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
   font-size:11px !important;
-  font-weight:800 !important;
+  font-weight:900 !important;
   letter-spacing:0.08em !important;
   text-transform:uppercase !important;
   display:flex !important;
@@ -553,7 +570,6 @@ main{
   background:#ff8b42 !important;
 }
 
-/* Map wrapper */
 .map-wrapper{
   margin:16px 0 8px;
   border-radius:var(--radius-lg);
@@ -572,39 +588,9 @@ main{
   color:#555;
 }
 
-/* ===========================================================
-   ONSITE TRAINING DATES — stacked dates (CSS)
-   =========================================================== */
-.training-dates-row,
-.onsite-training-dates-row{
-  align-items:flex-start !important;
-}
-.training-dates-row label,
-.onsite-training-dates-row label{
-  padding-top:7px !important;
-}
-.training-dates-row .date-stack,
-.onsite-training-dates-row .date-stack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-}
-.training-dates-row input[type="date"],
-.onsite-training-dates-row input[type="date"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  font-size:13px !important;
-}
-
-/* ===========================================================
-   ✅ NOTES — textareas fill available card space (2×2 layouts + Resources)
-   =========================================================== */
+/* =======================
+   NOTES: 2x2 textarea fill
+======================= */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
 .grid-2 > .section-block{
@@ -623,16 +609,53 @@ main{
   overflow:auto;
 }
 
-/* ===========================================================
-   ✅ TABLES
-   =========================================================== */
+/* =======================
+   TRAINERS PAGE
+======================= */
+/* Trainers page wants stacked cards (override .grid-2) */
+#trainers-deployment .grid-2{
+  grid-template-columns:1fr !important;
+}
+#trainers-deployment .grid-2 > .section-block{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+/* Base row input+button total equals --input-width */
+#trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+}
+#trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+}
+
+/* Clones: full input width, no plus button */
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  padding-left:60px !important;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
+  width:var(--input-width) !important;
+  border-radius:var(--radius-sm) !important;
+}
+#trainers-deployment #additionalTrainersContainer .add-row{
+  display:none !important;
+}
+
+/* =======================
+   TABLES
+======================= */
 .section{ margin-bottom:40px; }
 
 .section-header{
   background:var(--orange);
   color:#fff;
   font-size:15px;
-  font-weight:800;
+  font-weight:900;
   padding:10px 18px;
   margin:18px 0 0;
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
@@ -680,7 +703,7 @@ main{
 .training-table thead th{
   background:var(--light-orange);
   color:#fff;
-  font-weight:800;
+  font-weight:900;
   position:sticky;
   top:0;
   z-index:3;
@@ -757,7 +780,7 @@ main{
   transform:translateY(-1px);
 }
 
-/* acceptance color helpers */
+/* acceptance helper colors */
 .training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
 .training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
 .training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
@@ -795,18 +818,15 @@ main{
   min-width:0;
 }
 
-/* ===========================================================
-   ✅ SUPPORT TICKETS (single clean implementation)
-   =========================================================== */
-
-/* Status sections stacked vertically */
+/* =======================
+   SUPPORT TICKETS
+======================= */
 #support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
   gap:24px;
 }
 
-/* Each status container holds cards 2-up */
 #support-tickets #openTicketsContainer,
 #support-tickets #tierTwoTicketsContainer,
 #support-tickets #closedResolvedTicketsContainer,
@@ -817,17 +837,6 @@ main{
   align-items:start;
 }
 
-/* Mobile: cards 1-up */
-@media (max-width:900px){
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
-}
-
-/* Ticket card */
 #support-tickets .ticket-group{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
@@ -842,7 +851,6 @@ main{
   padding:16px 18px 14px;
 }
 
-/* Each field row: label | answer (answer is HALF card) */
 #support-tickets .ticket-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -851,17 +859,14 @@ main{
   padding:10px 0;
   border-bottom:1px solid #ececec;
 }
-#support-tickets .ticket-row:last-child{
-  border-bottom:none;
-}
+#support-tickets .ticket-row:last-child{ border-bottom:none; }
 
 #support-tickets .ticket-row label{
-  font-weight:600;
+  font-weight:700;
   color:#222;
   margin:0;
 }
 
-/* All answer controls fill right half */
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select{
   width:100%;
@@ -875,7 +880,6 @@ main{
   background:#f7f7f7;
 }
 
-/* Ticket number wrap (input + + button) matches integrated-plus look */
 #support-tickets .ticket-number-wrap{
   width:100%;
   display:flex;
@@ -896,6 +900,7 @@ main{
   border-top-right-radius:0;
   border-bottom-right-radius:0;
 }
+
 #support-tickets .add-ticket-btn,
 #support-tickets .remove-ticket-btn{
   flex:0 0 34px;
@@ -922,12 +927,15 @@ main{
   transform:translateY(-1px);
 }
 
-/* Summary row spans FULL width */
+/* Summary row: full width + spacing between label and textarea */
 #support-tickets .ticket-row.ticket-summary-row{
   grid-template-columns:1fr;
   align-items:start;
   border-bottom:none;
   padding-bottom:0;
+}
+#support-tickets .ticket-row.ticket-summary-row label{
+  margin-bottom:8px;
 }
 #support-tickets .ticket-row.ticket-summary-row textarea{
   width:100%;
@@ -942,43 +950,26 @@ main{
   margin:0;
 }
 
-/* Disclaimer */
 #support-tickets .ticket-disclaimer{
   margin:8px 0 0;
   font-size:12px;
   color:#6b7280;
 }
-
-/* Disabled status select */
 #support-tickets .ticket-status-select[disabled]{
   opacity:0.9;
   background:#f3f4f6;
   cursor:not-allowed;
 }
 
-/* Small padding between Summary label and textarea */
-#support-tickets .ticket-row.ticket-summary-row label{
-  margin-bottom:8px;
-}
-
-#support-tickets .ticket-row.ticket-summary-row textarea{
-  margin-top:0; /* label margin handles spacing */
-}
-
-
-/* ===========================================================
-   ✅ DMS INTEGRATION — RESTORED
-   =========================================================== */
+/* =======================
+   DMS INTEGRATION
+======================= */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:18px;
   margin-top:14px;
 }
-@media (max-width:900px){
-  #dms-integration .dms-grid{ grid-template-columns:1fr; }
-}
-
 #dms-integration .dms-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
@@ -986,7 +977,6 @@ main{
   box-shadow:var(--shadow);
   overflow:hidden;
 }
-
 #dms-integration .dms-card-header{
   display:flex;
   align-items:center;
@@ -996,16 +986,14 @@ main{
   background:#fff;
   border-bottom:1px solid #ececec;
 }
-
 #dms-integration .dms-name{
-  font-weight:800;
+  font-weight:900;
   font-size:16px;
   color:#111827;
 }
-
 #dms-integration .dms-chip{
   font-size:11px;
-  font-weight:800;
+  font-weight:900;
   letter-spacing:0.06em;
   text-transform:uppercase;
   padding:6px 10px;
@@ -1032,9 +1020,7 @@ main{
   padding:10px 10px;
   border-bottom:1px solid #efefef;
 }
-#dms-integration .dms-list li:last-child{
-  border-bottom:none;
-}
+#dms-integration .dms-list li:last-child{ border-bottom:none; }
 
 #dms-integration .dms-row-top{
   display:flex;
@@ -1044,7 +1030,7 @@ main{
   margin-bottom:4px;
 }
 #dms-integration .dms-field{
-  font-weight:700;
+  font-weight:800;
   color:#111827;
   font-size:13px;
 }
@@ -1053,10 +1039,9 @@ main{
   font-size:12px;
   color:#6b7280;
 }
-
 #dms-integration .dms-tag{
   font-size:11px;
-  font-weight:800;
+  font-weight:900;
   letter-spacing:0.04em;
   text-transform:uppercase;
   padding:4px 8px;
@@ -1091,9 +1076,9 @@ main{
   color:#374151;
 }
 
-/* ===========================================================
+/* =======================
    RESPONSIVE
-   =========================================================== */
+======================= */
 @media (max-width:900px){
   #sidebar{ width:190px; }
   main{ margin-left:190px; padding:20px; }
@@ -1106,6 +1091,25 @@ main{
     grid-template-columns:1fr;
   }
 
+  /* Dealership info: primary contacts go 1-col on mobile */
+  .primary-contacts-grid{
+    grid-template-columns:1fr;
+  }
+
+  /* DMS becomes 1-col */
+  #dms-integration .dms-grid{
+    grid-template-columns:1fr;
+  }
+
+  /* Support tickets become 1-col */
+  #support-tickets #openTicketsContainer,
+  #support-tickets #tierTwoTicketsContainer,
+  #support-tickets #closedResolvedTicketsContainer,
+  #support-tickets #closedFeatureTicketsContainer{
+    grid-template-columns:1fr;
+  }
+
+  /* Address card stacks */
   #dealership-address-card .checklist-row{
     display:flex !important;
     flex-direction:column !important;
@@ -1145,189 +1149,3 @@ main{
 
   .training-table{ min-width:760px; }
 }
-
-/* ===========================================================
-   PATCH — Dealership Info
-   1) Onsite Training Dates inputs got giant again
-   2) Primary/Additional POC cards back to 2x2
-   =========================================================== */
-
-/* 1) Force date inputs to NEVER stretch tall */
-.training-dates-row input[type="date"],
-.onsite-training-dates-row input[type="date"]{
-  height:34px !important;
-  max-height:34px !important;
-  min-height:34px !important;
-  line-height:normal !important;
-  flex:0 0 auto !important;
-  align-self:stretch;
-}
-
-/* If you’re using a wrapper like .date-stack, ensure it doesn't stretch weird */
-.training-dates-row .date-stack,
-.onsite-training-dates-row .date-stack{
-  align-self:flex-start !important;
-}
-
-/* 2) POC cards back to a 2x2 grid
-   (This targets the container that holds your .additional-poc-card cards.) */
-.additional-poc-card{
-  width:100%;
-  min-width:0;
-}
-
-/* Most builds have these cards inside a .cards-grid — force 2 columns when POC cards exist */
-.cards-grid:has(.additional-poc-card){
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:18px !important;
-}
-
-/* Responsive: keep 1 column on smaller screens */
-@media (max-width:900px){
-  .cards-grid:has(.additional-poc-card){
-    grid-template-columns:1fr !important;
-  }
-
-/* Fallback if :has() isn't supported — apply to the known wrapper if you have it */
-.additional-poc-grid,
-#additionalPocGrid,
-#primaryContactsGrid{
-  display:grid !important;
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:18px !important;
-}
-@media (max-width:900px){
-  .additional-poc-grid,
-  #additionalPocGrid,
-  #primaryContactsGrid{
-    grid-template-columns:1fr !important;
-  }
-
-/* ===========================================================
-   PATCH — Force POC cards to render 2x2 (desktop)
-   Looks for the "Additional POC" add button/card and grids its container
-   =========================================================== */
-
-/* Any container that contains the Additional POC add control becomes a 2-col grid */
-.page-section:not(#trainers-deployment)
-  :is(.grid-2, .cards-grid, .two-col-grid, .section-block, div)
-  :has(.additional-poc-add, .additional-poc-card){
-  /* nothing here — this line just ensures :has() matches for scoping */
-}
-
-/* Set the *actual* parent wrapper to grid */
-.page-section:not(#trainers-deployment)
-  :is(.grid-2, .cards-grid, .two-col-grid, div)
-  :has(> .additional-poc-card),
-.page-section:not(#trainers-deployment)
-  :is(.grid-2, .cards-grid, .two-col-grid, div)
-  :has(.additional-poc-add){
-  display:grid !important;
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:18px !important;
-  align-items:start !important;
-}
-
-/* Make each POC card behave nicely inside the grid */
-.additional-poc-card{
-  width:100% !important;
-  min-width:0 !important;
-  margin:0 !important;
-}
-
-/* Mobile: 1 column */
-@media (max-width:900px){
-  .page-section:not(#trainers-deployment)
-    :is(.grid-2, .cards-grid, .two-col-grid, div)
-    :has(> .additional-poc-card),
-  .page-section:not(#trainers-deployment)
-    :is(.grid-2, .cards-grid, .two-col-grid, div)
-    :has(.additional-poc-add){
-    grid-template-columns:1fr !important;
-  }
-
-   /* ===========================================================
-   ✅ Primary Contacts — force POC cards 2-up (side-by-side)
-   Works for:
-   - .additional-poc-card (your clone cards)
-   - any parent wrapper that contains them
-   =========================================================== */
-
-/* If you already have a wrapper, this will hit it automatically */
-#primary-contacts .additional-poc-grid,
-#dealership-info .additional-poc-grid,
-.additional-poc-grid{
-  display:grid !important;
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:18px !important;
-  align-items:start !important;
-}
-
-/* 🔥 Auto-detect: parent of the cards becomes a 2-col grid */
-.additional-poc-card{
-  width:100%;
-  min-width:0;
-}
-.additional-poc-card{
-  /* nothing else here—keep card styling as-is */
-}
-
-.additional-poc-card{
-  /* make sure the container can size them properly */
-  box-sizing:border-box;
-}
-
-/* This is the key: turn the parent into a grid */
-.additional-poc-card{
-  /* no-op for parent targeting */
-}
-.additional-poc-card{
-  /* no-op */
-}
-
-/* Target the parent element that directly contains the cards */
-.additional-poc-card{
-  /* no-op */
-}
-.additional-poc-card{
-  /* no-op */
-}
-
-/* ✅ Actual parent grid rule */
-.additional-poc-card{
-  /* no-op */
-}
-.additional-poc-card{
-  /* no-op */
-}
-.additional-poc-card{
-  /* no-op */
-}
-
-/* Parent selector (supported in modern Chrome/Safari) */
-@supports selector(:has(*)){
-  .additional-poc-card:has(*){ /* keep parser happy */ }
-
-  /* Any element that contains POC cards becomes the grid */
-  *:has(> .additional-poc-card){
-    display:grid !important;
-    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-    gap:18px !important;
-    align-items:start !important;
-  }
-}
-
-/* Mobile */
-@media (max-width:900px){
-  @supports selector(:has(*)){
-    *:has(> .additional-poc-card){
-      grid-template-columns:1fr !important;
-    }
-  }
-  #primary-contacts .additional-poc-grid,
-  #dealership-info .additional-poc-grid,
-  .additional-poc-grid{
-    grid-template-columns:1fr !important;
-  }
-}
-
