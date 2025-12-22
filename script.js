@@ -772,12 +772,8 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING — Option 2 ONLY (single 📝 icon)
-   - ONE icon per checklist-row (non-notes cards)
-   - Icon sits to the RIGHT of the input/select
-   - Click inserts bullet into paired Notes textarea
-   - Icon turns orange when note exists
-   =========================================================== */
+   NOTES LINKING ...
+=========================================================== */
 
 function findNotesTextareaForRow(row){
   const wrap =
