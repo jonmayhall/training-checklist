@@ -835,11 +835,6 @@ window.updateDealershipNameDisplay = updateDealershipNameDisplay;
         // don't add twice
         if (label.querySelector(".note-link")) return;
 
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.title = "Add linked note";
-        btn.textContent = "📝";
-
         btn.addEventListener("click", () => {
           const qText = cleanLabelText(label);
           const prefix = cardTitle ? `${cardTitle}: ` : "";
