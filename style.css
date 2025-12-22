@@ -1516,3 +1516,96 @@ body #app main #trainers-deployment .grid-2 > .section-block{
   max-width:100% !important;
   min-width:0 !important;
 }
+
+/* ===========================================================
+   ✅ SUPPORT TICKETS — Ticket Number + button match integrated-plus
+   (same look/size as other input + add button rows)
+   =========================================================== */
+
+#support-tickets .ticket-row{
+  display:grid;
+  grid-template-columns: minmax(260px, 1fr) var(--input-width);
+  column-gap:18px;
+  align-items:center;
+}
+
+#support-tickets .ticket-row label{
+  margin:0;
+}
+
+/* Wrap acts like the right-side input area */
+#support-tickets .ticket-number-wrap{
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  min-width:0 !important;
+}
+
+/* Ticket number input = same as other right-side inputs */
+#support-tickets .ticket-number-wrap .ticket-number-input{
+  flex:1 1 auto !important;
+  width:0 !important;
+  min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+
+  box-sizing:border-box !important;
+}
+
+/* + button = identical style to other + buttons */
+#support-tickets .ticket-number-wrap .add-ticket-btn{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+
+  margin-left:-1px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+
+  cursor:pointer !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  padding:0 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+}
+
+#support-tickets .ticket-number-wrap .add-ticket-btn:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px);
+}
+
+/* When it's turned into an X remove button, keep SAME styling */
+#support-tickets .ticket-number-wrap .remove-ticket-btn{
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+}
+
