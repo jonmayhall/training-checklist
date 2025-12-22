@@ -1295,9 +1295,7 @@ main{
   gap:8px;
 }
 
-/* ONE notes link button */
 .note-link-btn{
-  flex:0 0 auto;
   width:22px;
   height:22px;
   border-radius:999px;
@@ -1311,13 +1309,40 @@ main{
   font-size:12px;
   line-height:1;
   font-weight:900;
-  transition:transform .12s, background .12s, border-color .12s, color .12s;
+  padding:0;
+  transition:background .12s, border-color .12s, color .12s, transform .12s;
 }
-.note-link-btn:hover{ transform:translateY(-1px); }
+.note-link-btn:hover{
+  transform:translateY(-1px);
+}
 
-/* ✅ orange when a note exists for that question */
 .note-link-btn.has-note{
   background:var(--orange);
   border-color:var(--orange);
   color:#fff;
+}
+
+/* ===========================================================
+   NOTES ICON — Position on RIGHT near inputs
+   =========================================================== */
+
+.checklist-row{
+  align-items:center;
+}
+
+/* Wrap right-side controls cleanly */
+.checklist-row .row-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+
+/* Make sure inputs don't fight the layout */
+.checklist-row select,
+.checklist-row input[type="text"],
+.checklist-row input[type="date"],
+.checklist-row input[type="email"],
+.checklist-row input[type="tel"]{
+  margin-left:0 !important;
 }
