@@ -5,6 +5,7 @@
    - Add Trainer (+) works
    - Support Tickets: add/remove, status move, validation scoped, base clears after add
    - Autosave + reset/clear + PDF + dates end defaults
+   - ✅ NOTES LINKING: Option 2 ONLY (single 📝 icon)
    ======================================================= */
 
 /* ---------------------------
@@ -109,6 +110,8 @@ function initTextareas(root=document){
       autoGrowTA(ta);
       saveField(ta);
       requestAnimationFrame(syncTwoColHeights);
+      // keep note icons updated if user types into notes
+      requestAnimationFrame(()=> updateNoteIconStates());
     });
   });
 }
@@ -152,6 +155,9 @@ function showSection(id){
   requestAnimationFrame(()=>{
     initTextareas(target || document);
     syncTwoColHeights();
+    // ✅ ensure note icons exist on newly shown page
+    initNotesLinkingOption2Only(target || document);
+    updateNoteIconStates(target || document);
   });
 
   try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
@@ -231,6 +237,7 @@ function resetSection(section){
   requestAnimationFrame(()=>{
     initTextareas(section);
     syncTwoColHeights();
+    updateNoteIconStates(section);
   });
 }
 
@@ -282,6 +289,9 @@ function initPersistence(){
     if (el.id === "dealershipNameInput"){
       updateDealershipNameDisplay(el.value);
     }
+
+    // notes icon state
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
 
   document.addEventListener("change", (e)=>{
@@ -290,6 +300,8 @@ function initPersistence(){
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
     saveField(el);
+
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
 }
 
@@ -339,6 +351,9 @@ function initTableAddRow(){
     requestAnimationFrame(()=>{
       initTextareas(container);
       syncTwoColHeights();
+      // notes linking only applies to checklist rows, but safe:
+      initNotesLinkingOption2Only(document);
+      updateNoteIconStates(document);
     });
   });
 }
@@ -412,6 +427,12 @@ function initAdditionalTrainers(){
     }
 
     if (input) input.focus();
+
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(page);
+      updateNoteIconStates(page);
+      syncTwoColHeights();
+    });
   });
 }
 
@@ -426,7 +447,7 @@ function initAdditionalPOC(){
     const baseCard = btn.closest(".additional-poc-card");
     if (!baseCard) return;
 
-    const grid = baseCard.parentElement; // <-- this is .primary-contacts-grid in your HTML
+    const grid = baseCard.parentElement; // <-- .primary-contacts-grid
     if (!grid) return;
 
     const clone = baseCard.cloneNode(true);
@@ -450,6 +471,12 @@ function initAdditionalPOC(){
 
     const firstInput = qs("input, select, textarea", clone);
     if (firstInput) firstInput.focus();
+
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(document);
+      updateNoteIconStates(document);
+      syncTwoColHeights();
+    });
   });
 }
 
@@ -515,7 +542,6 @@ function makeTicketCloneFromBase(baseCard){
     addBtn.classList.remove("add-ticket-btn");
   }
 
-  // default status for new cards = Open
   const sel = qs(".ticket-status-select", clone);
   if (sel){
     sel.value = "Open";
@@ -551,7 +577,6 @@ function initSupportTickets(){
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
-  // Add/remove ticket cards
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
     const removeBtn = e.target.closest(".remove-ticket-btn");
@@ -580,7 +605,6 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // ✅ Clear base card fields after add (only if base was used)
     if (card.dataset.base === "true"){
       const num = qs(".ticket-number-input", card);
       const url = qs(".ticket-zendesk-input", card);
@@ -599,7 +623,6 @@ function initSupportTickets(){
     newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  // Status changes move cards
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
@@ -748,6 +771,124 @@ function initPDF(){
   btn.addEventListener("click", exportAllPagesPDF);
 }
 
+/* ===========================================================
+   NOTES LINKING — Option 2 ONLY (single 📝 icon)
+   - Adds ONE 📝 button per .checklist-row label (non-notes cards)
+   - Click inserts bullet into the Notes textarea in the paired grid
+   - Icon turns orange when a note exists for that question
+   =========================================================== */
+
+function findNotesTextareaForRow(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
+
+  if (!wrap) return null;
+
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
+    .find(card => {
+      const h2 = card.querySelector("h2");
+      return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
+    });
+
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+
+function getCardTitleForRow(row){
+  const h2 = row.closest(".section-block")?.querySelector("h2");
+  if (!h2) return "";
+  const t = (h2.textContent || "").trim();
+  // Don't prefix with "Notes — ..."
+  return t.replace(/^Notes\s*[—-]\s*/i, "").trim();
+}
+
+function getCleanQuestionText(row){
+  const label = row.querySelector("label");
+  if (!label) return "";
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll(".note-link-btn").forEach(n=> n.remove());
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
+}
+
+function makeNoteLine(row){
+  const q = getCleanQuestionText(row);
+  const header = getCardTitleForRow(row);
+  if (!q) return "";
+  return header ? `• ${header}: ${q}: ` : `• ${q}: `;
+}
+
+function initNotesLinkingOption2Only(root=document){
+  // Remove any old Option-1 buttons if they exist (safety)
+  qsa(".note-btn", root).forEach(n => n.remove());
+
+  const rows = qsa(".checklist-row", root);
+
+  rows.forEach(row=>{
+    const label = row.querySelector("label");
+    if (!label) return;
+
+    // Don't put icons inside Notes cards (right side)
+    const inNotesCard = (() => {
+      const h2 = row.closest(".section-block")?.querySelector("h2");
+      const t = (h2?.textContent || "").trim().toLowerCase();
+      return t.startsWith("notes");
+    })();
+    if (inNotesCard) return;
+
+    // If there's no paired notes textarea, don't add icon
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    // Prevent duplicates
+    if (label.querySelector(".note-link-btn")) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-link-btn";
+    btn.title = "Add this question to Notes";
+    btn.textContent = "📝";
+
+    btn.addEventListener("click", ()=>{
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
+
+      const line = makeNoteLine(row);
+      if (!line) return;
+
+      // If exists, just focus notes
+      if ((textarea.value || "").includes(line.trim())){
+        textarea.focus();
+        updateNoteIconStates();
+        return;
+      }
+
+      textarea.value = (textarea.value.trim() ? textarea.value.trim() + "\n" : "") + line;
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+      saveField(textarea);
+      updateNoteIconStates();
+      requestAnimationFrame(syncTwoColHeights);
+    });
+
+    label.appendChild(btn);
+  });
+}
+
+function updateNoteIconStates(root=document){
+  qsa(".checklist-row", root).forEach(row=>{
+    const btn = row.querySelector(".note-link-btn");
+    if (!btn) return;
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const line = makeNoteLine(row).trim();
+    const has = line && (ta.value || "").includes(line);
+    btn.classList.toggle("has-note", !!has);
+  });
+}
+
 /* ---------------------------
    Init on DOM ready
 --------------------------- */
@@ -778,6 +919,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   const dn = qs("#dealershipNameInput");
   if (dn && safeTrim(dn.value)) updateDealershipNameDisplay(dn.value);
+
+  // ✅ Notes linking: Option 2 ONLY
+  initNotesLinkingOption2Only(document);
+  updateNoteIconStates(document);
 });
 
 /* ---------------------------
@@ -785,164 +930,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
 --------------------------- */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
-
-/* ===========================================================
-   Linked Notes (Option 1)
-   - Injects 📝 buttons on left-card questions
-   - Click 📝 focuses the Notes textarea on the right and appends a bullet
-   =========================================================== */
-
-(function initLinkedNotes(){
-  function cleanLabelText(labelEl){
-    if (!labelEl) return "";
-    // Clone label so we can remove the note button text safely
-    const clone = labelEl.cloneNode(true);
-    clone.querySelectorAll(".note-link").forEach(b => b.remove());
-    return (clone.textContent || "").replace(/\s+/g," ").trim();
-  }
-
-  function isNotesCard(card){
-    const h2 = card.querySelector("h2");
-    const title = (h2?.textContent || "").toLowerCase();
-    // your Notes cards typically have "Notes — ..." or "Notes" in header
-    return title.includes("notes");
-  }
-
-  function addNoteLinksForGrid(grid){
-    const cards = Array.from(grid.querySelectorAll(":scope > .section-block"));
-    if (cards.length < 2) return;
-
-    const notesCard = cards.find(isNotesCard);
-    if (!notesCard) return;
-
-    const notesTextarea = notesCard.querySelector("textarea");
-    if (!notesTextarea) return;
-
-    // Everything except notesCard is "source"
-    const sourceCards = cards.filter(c => c !== notesCard);
-
-    // Prevent duplicates if this runs again
-    sourceCards.forEach(card => {
-      if (card.dataset.noteLinked === "true") return;
-      card.dataset.noteLinked = "true";
-
-      const cardTitle = (card.querySelector("h2")?.textContent || "").trim();
-
-      card.querySelectorAll(".checklist-row").forEach(row => {
-        const label = row.querySelector("label");
-        if (!label) return;
-
-        // don't add twice
-        if (label.querySelector(".note-link")) return;
-
-        btn.addEventListener("click", () => {
-          const qText = cleanLabelText(label);
-          const prefix = cardTitle ? `${cardTitle}: ` : "";
-          const line = `• ${prefix}${qText}`;
-
-          // scroll notes card into view and focus
-          notesCard.scrollIntoView({ behavior:"smooth", block:"start" });
-
-          // Append nicely (no duplicates back-to-back)
-          const existing = (notesTextarea.value || "").trimEnd();
-          const needsGap = existing.length ? "\n" : "";
-          notesTextarea.value = existing + needsGap + line + "\n";
-          notesTextarea.focus();
-          notesTextarea.scrollTop = notesTextarea.scrollHeight;
-        });
-
-        label.appendChild(btn);
-      });
-    });
-  }
-
-  function run(){
-    // Targets your common two-column layouts
-    document.querySelectorAll(".cards-grid.two-col, .two-col-grid, .grid-2").forEach(addNoteLinksForGrid);
-  }
-
-  if (document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", run);
-  } else {
-    run();
-  }
-})();
-
-/* ===========================================================
-   NOTES LINKING — Option 2 ONLY (single icon)
-   - Adds ONE 📝 button per .checklist-row
-   - Clicking injects a bullet into the Notes textarea on the right
-   =========================================================== */
-
-(function initNotesLinkingOption2Only(){
-  const rows = Array.from(document.querySelectorAll(".checklist-row"));
-
-  function findNotesTextareaForRow(row){
-    // Look for a paired layout container (your common patterns)
-    const wrap =
-      row.closest(".cards-grid.two-col") ||
-      row.closest(".two-col-grid") ||
-      row.closest(".grid-2");
-
-    if (!wrap) return null;
-
-    // Prefer a Notes card textarea within the same layout row
-    const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
-      .find(card => {
-        const h2 = card.querySelector("h2");
-        return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
-      });
-
-    return notesCard ? notesCard.querySelector("textarea") : null;
-  }
-
-  function getQuestionText(row){
-    const label = row.querySelector("label");
-    if (!label) return "";
-    // label text without the icon
-    return label.childNodes[0]?.textContent?.trim() || label.textContent.trim();
-  }
-
-  rows.forEach(row => {
-    const label = row.querySelector("label");
-    if (!label) return;
-
-    // ✅ prevent duplicates (important if you re-run init on page changes)
-    if (label.querySelector(".note-link-btn")) return;
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "note-link-btn";
-    btn.title = "Add this question to Notes";
-    btn.textContent = "📝";
-
-    btn.addEventListener("click", () => {
-      const ta = findNotesTextareaForRow(row);
-      if (!ta) return;
-
-      const q = getQuestionText(row);
-      if (!q) return;
-
-      const header =
-        (row.closest(".section-block")?.querySelector("h2")?.textContent || "")
-          .replace(/^Notes\s*[—-]\s*/i, "")
-          .trim();
-
-      const line = header ? `• ${header}: ${q}: ` : `• ${q}: `;
-
-      // If it already exists, just jump to it
-      if (ta.value.includes(line.trim())) {
-        ta.focus();
-        return;
-      }
-
-      ta.value = (ta.value.trim() ? ta.value.trim() + "\n" : "") + line;
-      ta.focus();
-      ta.setSelectionRange(ta.value.length, ta.value.length);
-
-      btn.classList.add("active");
-    });
-
-    label.appendChild(btn);
-  });
-})();
