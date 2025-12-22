@@ -1314,30 +1314,29 @@ main{
 }
 
 /* ===========================================================
-   SUPPORT TICKETS — BRUTE FORCE Summary spacing
-   (works even if the disclaimer isn’t .ticket-disclaimer)
+   SUPPORT TICKETS — GUARANTEED GAP under Summary textarea
+   Paste at VERY BOTTOM of CSS (and delete older summary patches)
    =========================================================== */
 
-/* 1) Give the entire “summary row” real bottom padding */
-#support-tickets .ticket-row.ticket-summary-row{
-  padding:10px 0 14px !important;   /* <-- adds bottom spacing */
-  border-bottom:1px solid #ececec !important; /* keeps same divider rhythm */
+/* 1) Force the textarea to be a block with real bottom spacing */
+#support-tickets .ticket-group-inner textarea{
+  display:block !important;
+  margin:0 !important;
+  margin-bottom:16px !important;   /* <-- this is the gap you want */
 }
 
-/* 2) If there is ANY element immediately after the summary row,
-      force it to breathe (this catches your "* This ticket..." line) */
-#support-tickets .ticket-row.ticket-summary-row + *{
-  margin-top:14px !important;
+/* 2) If the text below is a disclaimer OR any element after the textarea,
+      force spacing ABOVE it too (covers your screenshot case) */
+#support-tickets .ticket-group-inner textarea + *{
+  margin-top:16px !important;
 }
 
-/* 3) Backup: if disclaimer uses your class, enforce it too */
-#support-tickets .ticket-disclaimer{
-  margin-top:14px !important;
+/* 3) If it is NOT the immediate next element (there’s a wrapper), still force it */
+#support-tickets .ticket-group-inner textarea ~ *{
+  margin-top:16px !important;
 }
 
-/* 4) Backup for unknown wrappers: add padding to any parent that contains the textarea */
-@supports selector(:has(*)){
-  #support-tickets .ticket-group-inner *:has(> textarea){
-    padding-bottom:14px !important;
-  }
+/* 4) If your “text below” is specifically a <p> (common), normalize it */
+#support-tickets .ticket-group-inner p{
+  margin:0 !important;
 }
