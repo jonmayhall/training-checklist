@@ -1,29 +1,9 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js
-   ✅ Includes:
-   - Sidebar navigation (show/hide page sections + active button)
-   - LocalStorage autosave for inputs/selects/textarea (incl. dynamic rows)
-   - “Reset This Page” + “Clear All” behaviors
-   - Ghost placeholder styling for selects + date placeholders
-   - Training tables: Add Row (+) clones for all .training-table tables
-   - Additional Trainers (+) row: clones into #additionalTrainersContainer
-   - Primary Contacts: Additional POC (+) clone support (if present)
-   - Support Tickets:
-       • Add/Remove cards
-       • Validation scoped to clicked card
-       • New cards default Status = Open
-       • Base card clears when you click Add (+)
-       • Status change moves card between columns
-   - Dealership name display + map iframe update + places autocomplete hook
-   - Notes: textarea auto-grow + optional 2-col card height sync (safe)
-   - Save All Pages as PDF (jsPDF + html2canvas)
-
-   ✅ FIXES IN THIS VERSION:
-   - Fixes broken JS (missing braces / nested listener) that stopped menu clicks
-   - Add Trainer button works again
-   - Added ticket cards show “Open” in dropdown by default
-   - Base ticket card clears after Add (+)
-   - Onsite Training Dates end date defaults to start + 2 days (if end is blank)
+   myKaarma Interactive Training Checklist — FULL script.js (FIXED)
+   ✅ Fixes broken JS (sidebar + buttons work again)
+   ✅ Support Tickets: add/remove, default Open, inject Open option, clear base after add
+   ✅ Trainers: Add Trainer (+) works with broader selector
+   ✅ Keeps: nav, autosave, resets, tables add-row, notes autogrow, PDF export, map/name
    ======================================================= */
 
 /* ---------------------------
@@ -46,8 +26,6 @@ function safeTrim(v){ return (v ?? "").toString().trim(); }
 
 /* ---------------------------
    Storage keying
-   - stable if element has id/name/data-key
-   - otherwise assign persistent data-uid
 --------------------------- */
 function ensureUID(el){
   if (!el) return null;
@@ -135,7 +113,7 @@ function initTextareas(root=document){
 }
 
 /* ---------------------------
-   Optional 2-col height sync (safe)
+   Optional 2-col height sync
 --------------------------- */
 function syncTwoColHeights(){
   const grids = qsa(".cards-grid.two-col, .two-col-grid");
@@ -246,7 +224,6 @@ function resetSection(section){
           if (el.type === "checkbox") el.checked = false;
           else el.value = "";
           if (el.tagName === "SELECT") applySelectGhost(el);
-          if (el.type === "date") applyDateGhost(el);
         });
       }
     }
@@ -262,8 +239,7 @@ function initResets(){
   qsa(".clear-page-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const sec = btn.closest(".page-section");
-      if (!sec) return;
-      resetSection(sec);
+      if (sec) resetSection(sec);
     });
   });
 
@@ -286,7 +262,7 @@ function initResets(){
 }
 
 /* ---------------------------
-   Load/save all fields
+   Persistence
 --------------------------- */
 function initPersistence(){
   qsa("input, select, textarea").forEach(el=>{
@@ -302,7 +278,6 @@ function initPersistence(){
     if (el.tagName === "TEXTAREA") autoGrowTA(el);
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-
     saveField(el);
 
     if (el.id === "dealershipNameInput"){
@@ -313,10 +288,8 @@ function initPersistence(){
   document.addEventListener("change", (e)=>{
     const el = e.target;
     if (!isField(el)) return;
-
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-
     saveField(el);
   });
 }
@@ -335,8 +308,8 @@ function cloneTrainingRow(row){
 
   qsa("input, select, textarea", clone).forEach(el=>{
     if (!isField(el)) return;
-    el.value = "";
     if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
     ensureUID(el);
     applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
@@ -353,8 +326,6 @@ function initTableAddRow(){
 
     const container = btn.closest(".table-container");
     const table = qs("table.training-table", container);
-    if (!table) return;
-
     const tbody = qs("tbody", table);
     if (!tbody) return;
 
@@ -373,9 +344,9 @@ function initTableAddRow(){
   });
 }
 
-/* =======================================================
+/* ---------------------------
    Onsite Training Dates — End Date defaults to Start + 2 days
-======================================================= */
+--------------------------- */
 function addDaysISO(iso, days){
   const d = new Date(`${iso}T12:00:00`);
   if (Number.isNaN(d.getTime())) return "";
@@ -389,7 +360,6 @@ function addDaysISO(iso, days){
 function initOnsiteTrainingDates(){
   const start = qs("#onsiteStartDate");
   const end   = qs("#onsiteEndDate");
-
   if (start && end){
     start.addEventListener("change", ()=>{
       if (!start.value) return;
@@ -407,7 +377,6 @@ function initOnsiteTrainingDates(){
   qsa(".training-dates-row, .onsite-training-dates-row").forEach(row=>{
     const dates = qsa("input[type='date']", row);
     if (dates.length < 2) return;
-
     const s = dates[0];
     const e = dates[1];
 
@@ -426,24 +395,25 @@ function initOnsiteTrainingDates(){
 
 /* ---------------------------
    Trainers page: Additional Trainers (+)
+   (Broader selector so it works even if markup changed)
 --------------------------- */
 function initAdditionalTrainers(){
   document.addEventListener("click", (e)=>{
-    const addBtn = e.target.closest(
-      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
-    );
-    if (!addBtn) return;
+    const btn = e.target.closest("#trainers-deployment .add-row");
+    if (!btn) return;
 
     const page = qs("#trainers-deployment");
     if (!page) return;
 
-    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
-    if (baseRow) baseRow.classList.add("trainer-base");
+    const baseRow = btn.closest(".checklist-row");
+    // Only run for the Additional Trainer base row (avoid catching other + buttons)
+    const labelText = safeTrim(qs("label", baseRow)?.textContent).toLowerCase();
+    if (!labelText.includes("additional trainer")) return;
 
-    const container = qs("#additionalTrainersContainer", page);
+    let container = qs("#additionalTrainersContainer", page);
 
     const newRow = document.createElement("div");
-    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
+    newRow.className = "checklist-row indent-sub trainer-clone";
     newRow.dataset.clone = "true";
     newRow.innerHTML = `
       <label>Additional Trainer</label>
@@ -456,11 +426,8 @@ function initAdditionalTrainers(){
       loadField(input);
     }
 
-    if (container){
-      container.appendChild(newRow);
-    }else if (baseRow && baseRow.parentNode){
-      baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
-    }
+    if (container) container.appendChild(newRow);
+    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
 
     if (input) input.focus();
   });
@@ -471,9 +438,7 @@ function initAdditionalTrainers(){
 --------------------------- */
 function initAdditionalPOC(){
   document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(
-      ".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row"
-    );
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
     if (!btn) return;
 
     const baseCard = btn.closest(".additional-poc-card");
@@ -505,7 +470,7 @@ function initAdditionalPOC(){
 }
 
 /* ---------------------------
-   Support Tickets
+   Support Tickets helpers
 --------------------------- */
 function statusToContainerId(status){
   switch(status){
@@ -517,9 +482,20 @@ function statusToContainerId(status){
   }
 }
 
+function ensureSelectOption(sel, value, label=value){
+  if (!sel) return;
+  const exists = Array.from(sel.options || []).some(o => o.value === value);
+  if (exists) return;
+  const opt = document.createElement("option");
+  opt.value = value;
+  opt.textContent = label;
+  sel.appendChild(opt);
+}
+
 function lockOpenSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
+  ensureSelectOption(sel, "Open", "Open");
   sel.value = "Open";
   sel.disabled = true;
   applySelectGhost(sel);
@@ -529,8 +505,8 @@ function lockOpenSelect(card){
 function unlockStatusSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
+  ensureSelectOption(sel, "Open", "Open");
   sel.disabled = false;
-
   if (!sel.value) sel.value = "Open";
   applySelectGhost(sel);
   saveField(sel);
@@ -548,21 +524,21 @@ function makeTicketCloneFromBase(baseCard){
   clone.dataset.clone = "true";
   clone.removeAttribute("data-base");
 
-  // Clear & re-uid fields
   qsa("input, textarea, select", clone).forEach(el=>{
     if (!isField(el)) return;
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
     ensureUID(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
+    applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
+    saveField(el);
   });
 
-  // Remove disclaimer on clones
+  // remove disclaimer
   const disc = qs(".ticket-disclaimer", clone);
   if (disc) disc.remove();
 
-  // Convert + button into remove (×)
+  // swap + to ×
   const addBtn = qs(".add-ticket-btn", clone);
   if (addBtn){
     addBtn.textContent = "×";
@@ -571,14 +547,8 @@ function makeTicketCloneFromBase(baseCard){
     addBtn.classList.remove("add-ticket-btn");
   }
 
-  // ✅ New cards default status = Open
-  const sel = qs(".ticket-status-select", clone);
-  if (sel){
-    sel.disabled = false;
-    sel.value = "Open";
-    applySelectGhost(sel);
-    saveField(sel);
-  }
+  // default Open + make sure option exists
+  unlockStatusSelect(clone);
 
   return clone;
 }
@@ -593,27 +563,32 @@ function moveTicketCard(card, newStatus){
 
   dest.appendChild(card);
 
-  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
-    lockOpenSelect(card);
-  }else{
-    unlockStatusSelect(card);
-  }
+  if (destId === "openTicketsContainer" && card.dataset.base === "true") lockOpenSelect(card);
+  else unlockStatusSelect(card);
 }
 
+/* ---------------------------
+   Support Tickets init
+--------------------------- */
 function initSupportTickets(){
   const page = qs("#support-tickets");
   if (!page) return;
 
+  // Make sure every status select has Open option at startup
+  qsa(".ticket-status-select", page).forEach(sel=>{
+    ensureSelectOption(sel, "Open", "Open");
+    applySelectGhost(sel);
+  });
+
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
-  // Add/Remove cards
   document.addEventListener("click", (e)=>{
-    const addBtn = e.target.closest("#support-tickets .add-ticket-btn");
-    const removeBtn = e.target.closest("#support-tickets .remove-ticket-btn");
+    const addBtn = e.target.closest(".add-ticket-btn");
+    const removeBtn = e.target.closest(".remove-ticket-btn");
     if (!addBtn && !removeBtn) return;
 
-    const card = e.target.closest("#support-tickets .ticket-group");
+    const card = e.target.closest(".ticket-group");
     if (!card) return;
 
     e.preventDefault();
@@ -626,7 +601,7 @@ function initSupportTickets(){
       return;
     }
 
-    // Validate only this card
+    // Add new ticket card (validate current)
     if (!isTicketCardComplete(card)){
       alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
       return;
@@ -638,31 +613,30 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // ✅ Clear BASE card after adding (only if + clicked on base)
+    // Clear BASE card after add
     if (card.dataset.base === "true"){
-      const num = qs(".ticket-number-input", card);
-      const url = qs(".ticket-zendesk-input", card);
-      const sum = qs(".ticket-summary-input", card);
-
-      [num, url, sum].forEach(el=>{
+      const fields = [
+        qs(".ticket-number-input", card),
+        qs(".ticket-zendesk-input", card),
+        qs(".ticket-summary-input", card)
+      ];
+      fields.forEach(el=>{
         if (!el) return;
         clearFieldStorage(el);
         el.value = "";
         saveField(el);
       });
-
       lockOpenSelect(card);
     }
 
     newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  // Status change moves cards between columns
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
 
-    const card = e.target.closest("#support-tickets .ticket-group");
+    const card = e.target.closest(".ticket-group");
     if (!card) return;
 
     if (card.dataset.base === "true"){
@@ -829,14 +803,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initResets();
   initTableAddRow();
 
-  // ✅ Trainers + tickets
   initAdditionalTrainers();
   initAdditionalPOC();
   initSupportTickets();
 
-  // ✅ Onsite dates default end date +2
   initOnsiteTrainingDates();
-
   initDMSIntegration();
 
   restoreDealershipNameDisplay();
@@ -851,7 +822,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 /* ---------------------------
-   Google Places callback (from your inline HTML)
+   Google Places callback
 --------------------------- */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
