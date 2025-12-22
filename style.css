@@ -1413,9 +1413,9 @@ main{
 }
 
 /* ===========================================================
-   NOTES LINKING (Option 1 + 2)
-   - Adds a 📝 button per checklist-row
-   - Turns orange when a note exists
+   NOTES LINKING — Option 2 ONLY
+   - Adds ONE 📝 button per checklist-row (no second icon)
+   - Clicking injects the question into the Notes textarea on the right
    =========================================================== */
 
 .checklist-row label{
@@ -1424,8 +1424,8 @@ main{
   gap:8px;
 }
 
-/* small note button */
-.note-btn{
+/* ONE notes link button */
+.note-link-btn{
   flex:0 0 auto;
   width:22px;
   height:22px;
@@ -1442,10 +1442,9 @@ main{
   font-weight:900;
   transition:transform .12s, background .12s, border-color .12s, color .12s;
 }
-.note-btn:hover{ transform:translateY(-1px); }
+.note-link-btn:hover{ transform:translateY(-1px); }
 
-/* ✅ turns orange when note exists */
-.note-btn.has-note{
+.note-link-btn.active{
   background:var(--orange);
   border-color:var(--orange);
   color:#fff;
