@@ -1209,16 +1209,19 @@ main{
 }
 
 /* ===========================================================
-   PATCH — Actually shift LEFT text in side-by-side cards
-   (Works for .section-block cards AND .mini-card/contact-card)
+   STRONG LEFT SHIFT — side-by-side cards ONLY
    =========================================================== */
 
-/* Any checklist rows inside grid-based card layouts */
-:is(.grid-2, .two-col-grid, .cards-grid, .primary-contacts-grid) :is(.section-block, .mini-card, .contact-card) .checklist-row{
-  padding-left:18px !important;   /* tighter than 32px */
+/* Target cards that live in 2-column layouts */
+.cards-grid.two-col .checklist-row,
+.two-col-grid .checklist-row,
+.primary-contacts-grid .checklist-row{
+  padding-left:12px !important; /* was 32px */
 }
 
-/* Keep the indent “step”, just move it left too */
-:is(.grid-2, .two-col-grid, .cards-grid, .primary-contacts-grid) :is(.section-block, .mini-card, .contact-card) .checklist-row.indent-sub{
-  padding-left:42px !important;   /* was ~60px */
+/* Keep sub-indent, but also shift it left */
+.cards-grid.two-col .checklist-row.indent-sub,
+.two-col-grid .checklist-row.indent-sub,
+.primary-contacts-grid .checklist-row.indent-sub{
+  padding-left:36px !important; /* was 60px */
 }
