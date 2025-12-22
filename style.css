@@ -1168,19 +1168,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   color:#222;
 }
 
-/* Inputs in tickets */
-#support-tickets input[type="text"],
-#support-tickets select,
-#support-tickets textarea{
-  width:100%;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  box-sizing:border-box;
-}
-
 /* Ticket number wrap (input + + button) */
 #support-tickets .ticket-number-wrap{
   display:flex;
@@ -1902,3 +1889,108 @@ body #app main #trainers-deployment .grid-2 > .section-block{
   min-width:0 !important;
   display:block !important;
 }
+
+/* ===========================================================
+   ✅ SUPPORT TICKETS — HARD OVERRIDE (PASTE AT VERY BOTTOM)
+   Goal:
+   - Ticket Number / Status / Zendesk inputs all share same left+right edges
+   - Summary textarea starts where Zendesk starts, ends where Status ends
+   - Forces inputs to FILL the answer column (kills fixed widths/max-width)
+   =========================================================== */
+
+#support-tickets .ticket-group,
+#support-tickets .ticket-group *{
+  box-sizing:border-box !important;
+}
+
+/* Make every row: label | answer */
+#support-tickets .ticket-group .ticket-row{
+  display:grid !important;
+  grid-template-columns: 300px minmax(0, 1fr) !important; /* label | answer */
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+/* Labels */
+#support-tickets .ticket-group .ticket-row > label{
+  margin:0 !important;
+  text-align:left !important;
+  justify-self:start !important;
+}
+
+/* FORCE all answer controls to fill the answer column */
+#support-tickets .ticket-group .ticket-row > input,
+#support-tickets .ticket-group .ticket-row > select,
+#support-tickets .ticket-group .ticket-row > textarea{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  margin-left:0 !important;   /* kills old “push right” behavior */
+  justify-self:stretch !important;
+}
+
+/* Ticket Number (input + button) should also fill the answer column */
+#support-tickets .ticket-group .ticket-number-wrap{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  justify-self:stretch !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+/* Ticket number input grows, button fixed */
+#support-tickets .ticket-group .ticket-number-wrap .ticket-number-input{
+  flex:1 1 auto !important;
+  width:0 !important;        /* lets flex control width */
+  min-width:0 !important;
+  max-width:none !important;
+
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+/* Add/remove button matches integrated + style */
+#support-tickets .ticket-group .ticket-number-wrap .add-ticket-btn,
+#support-tickets .ticket-group .ticket-number-wrap .remove-ticket-btn{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+
+  margin-left:-1px !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
+/* ✅ Summary row: keep same label|answer grid, textarea fills answer column */
+#support-tickets .ticket-group .ticket-row.ticket-summary-row{
+  align-items:start !important;
+}
+
+#support-tickets .ticket-group .ticket-row.ticket-summary-row > textarea{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  justify-self:stretch !important;
+}
+
+/* Disclaimer under the textarea column (not under the label) */
+#support-tickets .ticket-group .ticket-row.ticket-summary-row .ticket-disclaimer{
+  grid-column:2 !important;
+  margin:8px 0 0 !important;
+}
+
+/* Mobile: stack label over answer */
+@media (max-width:600px){
+  #support-tickets .ticket-group .ticket-row{
+    grid-template-columns:1fr !important;
+    row-gap:6px !important;
+  }
+  #support-tickets .ticket-group .ticket-row.ticket-summary-row .ticket-disclaimer{
+    grid-column:1 !important;
+  }
+}
+
