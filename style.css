@@ -956,6 +956,16 @@ main{
   cursor:not-allowed;
 }
 
+/* Small padding between Summary label and textarea */
+#support-tickets .ticket-row.ticket-summary-row label{
+  margin-bottom:8px;
+}
+
+#support-tickets .ticket-row.ticket-summary-row textarea{
+  margin-top:0; /* label margin handles spacing */
+}
+
+
 /* ===========================================================
    ✅ DMS INTEGRATION — RESTORED
    =========================================================== */
