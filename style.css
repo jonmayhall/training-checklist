@@ -1238,3 +1238,45 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* ===========================================================
+   POST-TRAINING — Equal-height cards + empty space under last Q
+   Put at VERY BOTTOM of CSS
+   =========================================================== */
+
+/* Make each 2-col row stretch cards to the same height */
+#post-training .cards-grid.two-col{
+  align-items:stretch !important;
+}
+
+/* Ensure each card can stretch full height */
+#post-training .cards-grid.two-col > .section-block{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0;
+}
+
+/* Notes cards: textarea fills remaining space so card matches left height */
+#post-training .cards-grid.two-col > .section-block textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  resize:none !important;
+}
+
+/* Left cards (no textarea): create “empty space” below last question */
+@supports selector(.x:has(textarea)){
+  #post-training .cards-grid.two-col > .section-block:not(:has(textarea))::after{
+    content:"";
+    display:block;
+    flex:1 1 auto; /* <-- this is the empty space */
+  }
+}
+
+/* Fallback (if :has isn't supported for any reason): give left cards a floor height */
+@supports not selector(.x:has(textarea)){
+  #post-training .cards-grid.two-col > .section-block{
+    min-height:380px; /* adjust if you want more/less blank space */
+  }
+}
