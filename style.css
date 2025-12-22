@@ -1123,10 +1123,10 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ TRAINERS — FINAL FIX (Base row w/ + vs Clone rows w/o +)
-   - Base row (has +): input + button combined = var(--input-width)
-   - Clone rows (no +): input alone = var(--input-width) + rounded right
-   Put at VERY BOTTOM of style.css
+   ✅ TRAINERS — LOCKED FIX (NO :has)
+   Requires JS to add:
+   - .trainer-base  (row that contains the + button)
+   - .trainer-clone (rows created after clicking +)
    =========================================================== */
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
@@ -1134,7 +1134,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   align-items:stretch !important;
   gap:0 !important;
   overflow:visible !important;
-  min-width:0 !important;
 }
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
@@ -1143,27 +1142,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   padding-right:16px !important;
 }
 
-/* ✅ DEFAULT (CLONES): full width textbox + rounded right */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* ✅ BASE ONLY: if the + button exists right after input */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]:has(+ .add-row){
+/* -------- BASE ROW (has +) -------- */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base input[type="text"]{
   flex:0 0 calc(var(--input-width) - 34px) !important;
   width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
 }
 
-/* + button */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base .add-row{
   flex:0 0 34px !important;
   width:34px !important;
   min-width:34px !important;
@@ -1188,8 +1179,21 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row:hover{
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base .add-row:hover{
   background:#ff8b42 !important;
+}
+
+/* -------- CLONED ROWS (no +) -------- */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  border-radius:var(--radius-sm) !important; /* ✅ rounded right edge */
+}
+
+/* Safety: if a + ever sneaks into a clone, hide it */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone .add-row{
+  display:none !important;
 }
 
 /* Mobile */
@@ -1200,18 +1204,17 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     align-items:stretch !important;
   }
 
-  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base input[type="text"],
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-clone input[type="text"]{
     width:100% !important;
     flex:0 0 auto !important;
     border-radius:var(--radius-sm) !important;
   }
 
-  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus.trainer-base .add-row{
     width:100% !important;
     min-width:0 !important;
     border-radius:var(--radius-sm) !important;
     margin-left:0 !important;
   }
 }
-
-
