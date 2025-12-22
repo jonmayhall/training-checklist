@@ -1313,3 +1313,6 @@ main{
   .additional-poc-add{
   display:none !important;
 }
+
+/* ✅ DEBUG — if you do NOT see a hot pink outline, your CSS is not loading */
+#topbar{ outline:8px solid hotpink !important; }
