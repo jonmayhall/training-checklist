@@ -1043,3 +1043,29 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   max-width:100% !important;
   box-sizing:border-box !important;
 }
+
+/* ===========================================================
+   ✅ NOTES TEXTAREAS — FILL THE CARD (grid-2 pages like Resources)
+   Paste at VERY BOTTOM
+   =========================================================== */
+
+/* Any 2-column page section using .grid-2: let cards grow and allow textarea to fill */
+.grid-2 > .section-block{
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0 !important;
+}
+
+/* Make the textarea take remaining height in the card */
+.grid-2 > .section-block textarea{
+  flex:1 1 auto !important;
+  width:100% !important;
+  max-width:100% !important;
+
+  /* big enough to look “full” even on taller cards */
+  min-height:220px !important;
+
+  resize:none !important;
+  overflow:auto !important;
+  box-sizing:border-box !important;
+}
