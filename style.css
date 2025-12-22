@@ -1609,3 +1609,134 @@ body #app main #trainers-deployment .grid-2 > .section-block{
   height:34px !important;
 }
 
+/* ===========================================================
+   ✅ SUPPORT TICKETS — 2×2 layout inside each ticket card
+   + Restore font sizing to the original feel
+   =========================================================== */
+
+/* Restore Support Tickets typography (scoped) */
+#support-tickets{
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+  color:var(--ink) !important;
+}
+
+#support-tickets .ticket-section h2{
+  font-size:16px !important;
+  font-weight:700 !important;
+}
+
+#support-tickets label{
+  font-size:14px !important;
+  font-weight:500 !important;
+}
+
+#support-tickets input[type="text"],
+#support-tickets select,
+#support-tickets textarea{
+  font-size:13px !important;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+}
+
+/* Each ticket card = 2×2 grid */
+#support-tickets .ticket-group-inner{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:14px 18px !important;
+  align-items:start !important;
+}
+
+/* Each row becomes a “cell” (label stacked above field like before) */
+#support-tickets .ticket-row{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:6px !important;
+  margin:0 !important;
+}
+
+/* 2×2 placement:
+   - Ticket Number (col 1)
+   - Status (col 2)
+   - Zendesk URL (col 1)
+   - Summary spans full width (row 2, both cols)
+*/
+#support-tickets .ticket-row:nth-child(1){ grid-column:1; }
+#support-tickets .ticket-row:nth-child(2){ grid-column:2; }
+#support-tickets .ticket-row:nth-child(3){ grid-column:1; }
+
+#support-tickets .ticket-summary-row{
+  grid-column:1 / -1 !important;
+}
+
+/* Keep inputs consistent height */
+#support-tickets input[type="text"],
+#support-tickets select{
+  height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  box-sizing:border-box !important;
+}
+
+/* Summary textarea: full width + normal sizing */
+#support-tickets .ticket-summary-input{
+  width:100% !important;
+  min-height:70px !important;
+  resize:vertical !important;
+  padding:8px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  box-sizing:border-box !important;
+}
+
+/* Ticket Number input + button stays integrated & matches your other + rows */
+#support-tickets .ticket-number-wrap{
+  width:100% !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  min-width:0 !important;
+}
+
+#support-tickets .ticket-number-wrap .ticket-number-input{
+  flex:1 1 auto !important;
+  width:0 !important;
+  min-width:0 !important;
+
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+#support-tickets .ticket-number-wrap .add-ticket-btn,
+#support-tickets .ticket-number-wrap .remove-ticket-btn{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  cursor:pointer !important;
+  padding:0 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+}
+
+#support-tickets .ticket-number-wrap .add-ticket-btn:hover,
+#support-tickets .ticket-number-wrap .remove-ticket-btn:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px);
+}
