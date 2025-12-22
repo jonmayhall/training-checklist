@@ -1,8 +1,9 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS
-   ✅ Clean "single source of truth" stylesheet
+   ✅ Clean "single source of truth" stylesheet (UPDATED)
    ✅ Includes: Support Tickets + DMS Integration + Primary Contacts patches
-   ✅ Fixes: spacing under “Short Summary of the Issue”
+   ✅ Includes: Equal-height 2-col cards (Pre-Training / Monday Visit / Post-Training)
+   ✅ Includes: Notes Linking Option 2 ONLY (single 📝 icon)
    ======================================================= */
 
 /* =======================
@@ -591,7 +592,7 @@ main{
 }
 
 /* =======================
-   NOTES: 2x2 textarea fill
+   NOTES: 2x2 textarea fill (general)
 ======================= */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
@@ -938,16 +939,16 @@ main{
   transform:translateY(-1px);
 }
 
-/* Summary row: full width + spacing between label and textarea */
+/* Summary row: full width + correct spacing */
 #support-tickets .ticket-row.ticket-summary-row{
   grid-template-columns:1fr;
   align-items:start;
   border-bottom:none;
-  padding:10px 0 18px;            /* ✅ creates extra room under the field */
+  padding:10px 0 18px;            /* extra room under the field */
 }
 #support-tickets .ticket-row.ticket-summary-row label{
   display:block;
-  margin:0 0 8px 0;               /* ✅ space between label and box */
+  margin:0 0 8px 0;               /* space between label and box */
 }
 #support-tickets .ticket-row.ticket-summary-row textarea{
   width:100%;
@@ -959,12 +960,12 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
   resize:vertical;
-  margin:0 0 18px 0 !important;   /* ✅ space UNDER the box */
+  margin:0 0 18px 0 !important;   /* space UNDER the box */
 }
 
-/* Disclaimer spacing (this was the “no gap” problem) */
+/* Disclaimer spacing */
 #support-tickets .ticket-disclaimer{
-  margin:18px 0 0 !important;     /* ✅ clearly separated from the textarea */
+  margin:18px 0 0 !important;
   font-size:12px;
   color:#6b7280;
 }
@@ -992,40 +993,42 @@ main{
   box-shadow:var(--shadow);
   overflow:hidden;
 }
+
+/* ✅ ORANGE HEADER per card */
 #dms-integration .dms-card-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 16px;
-  background:#fff;
-  border-bottom:1px solid #ececec;
+  background:var(--orange) !important;
+  color:#fff !important;
+  padding:10px 16px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  border-bottom:1px solid var(--border) !important;
 }
 #dms-integration .dms-name{
-  font-weight:900;
-  font-size:16px;
-  color:#111827;
+  font-weight:900 !important;
+  font-size:16px !important;
+  color:#fff !important;
+  letter-spacing:.3px;
 }
 #dms-integration .dms-chip{
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:0.06em;
-  text-transform:uppercase;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  color:#111827;
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.06em !important;
+  text-transform:uppercase !important;
+  padding:6px 10px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,0.18) !important;
+  border:1px solid rgba(255,255,255,0.35) !important;
+  color:#fff !important;
 }
-#dms-integration .dms-chip-pull{
-  border-color:rgba(34,197,94,0.35);
-  background:rgba(34,197,94,0.10);
-}
+#dms-integration .dms-chip-pull,
 #dms-integration .dms-chip-push{
-  border-color:rgba(59,130,246,0.35);
-  background:rgba(59,130,246,0.10);
+  background:rgba(255,255,255,0.18) !important;
+  border-color:rgba(255,255,255,0.35) !important;
 }
 
+/* List body */
 #dms-integration .dms-list{
   list-style:none;
   padding:10px 12px 14px;
@@ -1092,18 +1095,15 @@ main{
 }
 
 /* =======================
-   PATCH — Primary Contacts sizing + Additional POC input shape
-   - Make all contact-card inputs less wide
-   - Base "Additional POC" name input same width as other name lines
-   - Clone "Additional POC" name input rounded on right + same width
+   PRIMARY CONTACTS PATCHES
 ======================= */
 
-/* 1) Reduce input width ONLY inside Primary Contacts area */
+/* Reduce input width ONLY inside Primary Contacts area */
 #dealership-info .primary-contacts-grid{
-  --input-width:240px; /* adjust 220–260 if you want tighter/looser */
+  --input-width:240px;
 }
 
-/* 2) Ensure all inputs inside the contact cards use that smaller width */
+/* Ensure all inputs inside the contact cards use that smaller width */
 #dealership-info .primary-contacts-grid .mini-card .checklist-row input,
 #dealership-info .primary-contacts-grid .mini-card .checklist-row select{
   flex:0 0 var(--input-width) !important;
@@ -1111,7 +1111,7 @@ main{
   max-width:var(--input-width) !important;
 }
 
-/* 3) Base Additional POC row: input + plus button total matches others */
+/* Base Additional POC row: input + plus button total matches others */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus input[type="text"]{
   flex:0 0 calc(var(--input-width) - 34px) !important;
@@ -1119,8 +1119,6 @@ main{
   max-width:calc(var(--input-width) - 34px) !important;
   height:34px !important;
 }
-
-/* Keep the + button consistent */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus .add-row{
   width:34px !important;
@@ -1128,7 +1126,7 @@ main{
   height:34px !important;
 }
 
-/* 4) Cloned Additional POC cards: hide + button; full width; rounded right restored */
+/* Cloned Additional POC cards: hide + button; full width; rounded right restored */
 #dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
   .checklist-row.integrated-plus .add-row{
   display:none !important;
@@ -1142,27 +1140,25 @@ main{
   border-bottom-right-radius:var(--radius-sm) !important;
 }
 
-/* =======================
-   STRONG LEFT SHIFT — side-by-side cards ONLY
-======================= */
+/* Strong left shift (side-by-side cards only) */
 .cards-grid.two-col .checklist-row,
 .two-col-grid .checklist-row,
 .primary-contacts-grid .checklist-row{
-  padding-left:12px !important; /* was 32px */
+  padding-left:12px !important;
 }
 .cards-grid.two-col .checklist-row.indent-sub,
 .two-col-grid .checklist-row.indent-sub,
 .primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:36px !important; /* was 60px */
+  padding-left:36px !important;
 }
 
 /* Primary contacts: shift labels left even more */
 #dealership-info .primary-contacts-grid .mini-card .checklist-row{
-  padding-left:10px !important;   /* was 18 */
+  padding-left:10px !important;
   padding-right:10px !important;
 }
 #dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
-  padding-left:30px !important;   /* was 60+ */
+  padding-left:30px !important;
 }
 
 /* =======================
@@ -1180,17 +1176,14 @@ main{
     grid-template-columns:1fr;
   }
 
-  /* Dealership info: primary contacts go 1-col on mobile */
   .primary-contacts-grid{
     grid-template-columns:1fr;
   }
 
-  /* DMS becomes 1-col */
   #dms-integration .dms-grid{
     grid-template-columns:1fr;
   }
 
-  /* Support tickets become 1-col */
   #support-tickets #openTicketsContainer,
   #support-tickets #tierTwoTicketsContainer,
   #support-tickets #closedResolvedTicketsContainer,
@@ -1198,7 +1191,6 @@ main{
     grid-template-columns:1fr;
   }
 
-  /* Address card stacks */
   #dealership-address-card .checklist-row{
     display:flex !important;
     flex-direction:column !important;
@@ -1240,60 +1232,18 @@ main{
 }
 
 /* ===========================================================
-   POST-TRAINING — Equal-height cards + empty space under last Q
-   Put at VERY BOTTOM of CSS
+   EQUAL-HEIGHT 2-COL ROWS
+   Pre-Training + Monday Visit + Post-Training
+   (Right Notes card matches left height; left gets blank space)
    =========================================================== */
 
-/* Make each 2-col row stretch cards to the same height */
-#post-training .cards-grid.two-col{
-  align-items:stretch !important;
-}
-
-/* Ensure each card can stretch full height */
-#post-training .cards-grid.two-col > .section-block{
-  height:100% !important;
-  display:flex !important;
-  flex-direction:column !important;
-  min-width:0;
-}
-
-/* Notes cards: textarea fills remaining space so card matches left height */
-#post-training .cards-grid.two-col > .section-block textarea{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  height:auto !important;
-  resize:none !important;
-}
-
-/* Left cards (no textarea): create “empty space” below last question */
-@supports selector(.x:has(textarea)){
-  #post-training .cards-grid.two-col > .section-block:not(:has(textarea))::after{
-    content:"";
-    display:block;
-    flex:1 1 auto; /* <-- this is the empty space */
-  }
-}
-
-/* Fallback (if :has isn't supported for any reason): give left cards a floor height */
-@supports not selector(.x:has(textarea)){
-  #post-training .cards-grid.two-col > .section-block{
-    min-height:380px; /* adjust if you want more/less blank space */
-  }
-}
-
-/* ===========================================================
-   EQUAL-HEIGHT 2-COL ROWS (Pre-Training + Monday Visit + Post-Training)
-   Put at VERY BOTTOM of CSS
-   =========================================================== */
-
-/* Add your page IDs here (edit if your actual IDs differ) */
+/* ⚠️ If your page IDs differ, update these three selectors */
 #pre-training .cards-grid.two-col,
 #monday-visit .cards-grid.two-col,
 #post-training .cards-grid.two-col{
   align-items:stretch !important;
 }
 
-/* Cards stretch full height in the row */
 #pre-training .cards-grid.two-col > .section-block,
 #monday-visit .cards-grid.two-col > .section-block,
 #post-training .cards-grid.two-col > .section-block{
@@ -1313,7 +1263,7 @@ main{
   resize:none !important;
 }
 
-/* Left cards (no textarea): create empty space below last question */
+/* Left cards (no textarea): add “empty space” under last question */
 @supports selector(.x:has(textarea)){
   #pre-training .cards-grid.two-col > .section-block:not(:has(textarea))::after,
   #monday-visit .cards-grid.two-col > .section-block:not(:has(textarea))::after,
@@ -1329,62 +1279,16 @@ main{
   #pre-training .cards-grid.two-col > .section-block,
   #monday-visit .cards-grid.two-col > .section-block,
   #post-training .cards-grid.two-col > .section-block{
-    min-height:380px; /* adjust if needed */
+    min-height:380px;
   }
 }
 
 /* ===========================================================
-   DMS INTEGRATION — Use myKaarma orange headers per card
+   NOTES LINKING — Option 2 ONLY (single 📝 button)
+   (This matches your updated JS: .note-link-btn + .has-note)
    =========================================================== */
 
-/* Treat each DMS card like a standard section block */
-#dms-integration .dms-card{
-  border-radius:var(--radius-lg);
-  overflow:hidden;
-}
-
-/* Orange header (matches all other cards) */
-#dms-integration .dms-card-header{
-  background:var(--orange) !important;
-  color:#fff !important;
-  padding:10px 16px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  border-bottom:1px solid var(--border) !important;
-}
-
-/* Left: DMS name */
-#dms-integration .dms-name{
-  font-size:16px !important;
-  font-weight:900 !important;
-  color:#fff !important;
-  letter-spacing:.3px;
-}
-
-/* Right: Push / Pull chip */
-#dms-integration .dms-chip{
-  background:rgba(255,255,255,0.18) !important;
-  border:1px solid rgba(255,255,255,0.35) !important;
-  color:#fff !important;
-  font-size:11px !important;
-  font-weight:900 !important;
-  letter-spacing:0.06em;
-}
-
-/* Remove old light styles that clash */
-#dms-integration .dms-chip-pull,
-#dms-integration .dms-chip-push{
-  background:rgba(255,255,255,0.18) !important;
-  border-color:rgba(255,255,255,0.35) !important;
-}
-
-/* ===========================================================
-   NOTES LINKING — Option 2 ONLY
-   - Adds ONE 📝 button per checklist-row (no second icon)
-   - Clicking injects the question into the Notes textarea on the right
-   =========================================================== */
-
+/* label becomes a flex row so icon sits beside text */
 .checklist-row label{
   display:flex;
   align-items:center;
@@ -1411,7 +1315,8 @@ main{
 }
 .note-link-btn:hover{ transform:translateY(-1px); }
 
-.note-link-btn.active{
+/* ✅ orange when a note exists for that question */
+.note-link-btn.has-note{
   background:var(--orange);
   border-color:var(--orange);
   color:#fff;
