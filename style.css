@@ -1333,3 +1333,48 @@ main{
   }
 }
 
+/* ===========================================================
+   DMS INTEGRATION — Use myKaarma orange headers per card
+   =========================================================== */
+
+/* Treat each DMS card like a standard section block */
+#dms-integration .dms-card{
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+
+/* Orange header (matches all other cards) */
+#dms-integration .dms-card-header{
+  background:var(--orange) !important;
+  color:#fff !important;
+  padding:10px 16px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  border-bottom:1px solid var(--border) !important;
+}
+
+/* Left: DMS name */
+#dms-integration .dms-name{
+  font-size:16px !important;
+  font-weight:900 !important;
+  color:#fff !important;
+  letter-spacing:.3px;
+}
+
+/* Right: Push / Pull chip */
+#dms-integration .dms-chip{
+  background:rgba(255,255,255,0.18) !important;
+  border:1px solid rgba(255,255,255,0.35) !important;
+  color:#fff !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.06em;
+}
+
+/* Remove old light styles that clash */
+#dms-integration .dms-chip-pull,
+#dms-integration .dms-chip-push{
+  background:rgba(255,255,255,0.18) !important;
+  border-color:rgba(255,255,255,0.35) !important;
+}
