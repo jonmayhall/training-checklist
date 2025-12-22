@@ -773,9 +773,10 @@ function initPDF(){
 
 /* ===========================================================
    NOTES LINKING — Option 2 ONLY (single 📝 icon)
-   - Adds ONE 📝 button per .checklist-row label (non-notes cards)
-   - Click inserts bullet into the Notes textarea in the paired grid
-   - Icon turns orange when a note exists for that question
+   - Adds ONE 📝 button per .checklist-row (non-notes cards)
+   - Places icon to the RIGHT of the field (inside .row-actions)
+   - Click inserts a bullet into the paired Notes textarea
+   - Icon turns orange when note exists
    =========================================================== */
 
 function findNotesTextareaForRow(row){
@@ -799,7 +800,6 @@ function getCardTitleForRow(row){
   const h2 = row.closest(".section-block")?.querySelector("h2");
   if (!h2) return "";
   const t = (h2.textContent || "").trim();
-  // Don't prefix with "Notes — ..."
   return t.replace(/^Notes\s*[—-]\s*/i, "").trim();
 }
 
@@ -807,7 +807,8 @@ function getCleanQuestionText(row){
   const label = row.querySelector("label");
   if (!label) return "";
   const clone = label.cloneNode(true);
-  clone.querySelectorAll(".note-link-btn").forEach(n=> n.remove());
+  // remove any accidental embedded buttons/icons
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
   return (clone.textContent || "").replace(/\s+/g," ").trim();
 }
 
@@ -818,30 +819,43 @@ function makeNoteLine(row){
   return header ? `• ${header}: ${q}: ` : `• ${q}: `;
 }
 
+function isInNotesCard(row){
+  const h2 = row.closest(".section-block")?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+
+function ensureRowActions(row){
+  let actions = row.querySelector(":scope > .row-actions");
+  if (actions) return actions;
+
+  actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  // Move the existing field into the actions container
+  const field = row.querySelector("input, select");
+  if (field) actions.appendChild(field);
+
+  row.appendChild(actions);
+  return actions;
+}
+
 function initNotesLinkingOption2Only(root=document){
-  // Remove any old Option-1 buttons if they exist (safety)
+  // Safety: remove any old Option 1 icons if present
   qsa(".note-btn", root).forEach(n => n.remove());
+
+  // ✅ Also remove any previously injected Option 2 icons (prevents doubles)
+  qsa(".note-link-btn", root).forEach(n => n.remove());
 
   const rows = qsa(".checklist-row", root);
 
   rows.forEach(row=>{
-    const label = row.querySelector("label");
-    if (!label) return;
+    if (isInNotesCard(row)) return;
 
-    // Don't put icons inside Notes cards (right side)
-    const inNotesCard = (() => {
-      const h2 = row.closest(".section-block")?.querySelector("h2");
-      const t = (h2?.textContent || "").trim().toLowerCase();
-      return t.startsWith("notes");
-    })();
-    if (inNotesCard) return;
-
-    // If there's no paired notes textarea, don't add icon
     const ta = findNotesTextareaForRow(row);
     if (!ta) return;
 
-    // Prevent duplicates
-    if (label.querySelector(".note-link-btn")) return;
+    const actions = ensureRowActions(row);
 
     const btn = document.createElement("button");
     btn.type = "button";
@@ -856,42 +870,35 @@ function initNotesLinkingOption2Only(root=document){
       const line = makeNoteLine(row);
       if (!line) return;
 
-      // If exists, just focus notes
-      if ((textarea.value || "").includes(line.trim())){
+      const existing = textarea.value || "";
+      if (existing.includes(line.trim())){
         textarea.focus();
-        updateNoteIconStates();
+        updateNoteIconStates(root);
         return;
       }
 
-      textarea.value = (textarea.value.trim() ? textarea.value.trim() + "\n" : "") + line;
+      textarea.value = (existing.trim() ? existing.trim() + "\n" : "") + line;
       textarea.focus();
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 
       saveField(textarea);
-      updateNoteIconStates();
+      updateNoteIconStates(root);
       requestAnimationFrame(syncTwoColHeights);
     });
 
-let actions = row.querySelector(".row-actions");
-if (!actions) {
-  actions = document.createElement("div");
-  actions.className = "row-actions";
-
-  // Move the existing input/select into the action area
-  const field = row.querySelector("input, select");
-  if (field) actions.appendChild(field);
-
-  row.appendChild(actions);
-}
-
-actions.prepend(btn);
+    // Put icon just LEFT of the field
+    actions.prepend(btn);
   });
+
+  // After injecting, update orange state
+  updateNoteIconStates(root);
 }
 
 function updateNoteIconStates(root=document){
   qsa(".checklist-row", root).forEach(row=>{
     const btn = row.querySelector(".note-link-btn");
     if (!btn) return;
+
     const ta = findNotesTextareaForRow(row);
     if (!ta) return;
 
@@ -900,42 +907,6 @@ function updateNoteIconStates(root=document){
     btn.classList.toggle("has-note", !!has);
   });
 }
-
-/* ---------------------------
-   Init on DOM ready
---------------------------- */
-document.addEventListener("DOMContentLoaded", ()=>{
-  initNav();
-  initGhosts();
-  initPersistence();
-
-  initTextareas(document);
-  syncTwoColHeights();
-  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
-
-  initResets();
-  initTableAddRow();
-
-  initAdditionalTrainers();
-  initAdditionalPOC();
-  initSupportTickets();
-
-  initOnsiteTrainingDates();
-
-  restoreDealershipNameDisplay();
-  restoreDealershipMap();
-
-  initPDF();
-
-  qsa("input[type='date']").forEach(applyDateGhost);
-
-  const dn = qs("#dealershipNameInput");
-  if (dn && safeTrim(dn.value)) updateDealershipNameDisplay(dn.value);
-
-  // ✅ Notes linking: Option 2 ONLY
-  initNotesLinkingOption2Only(document);
-  updateNoteIconStates(document);
-});
 
 /* ---------------------------
    Google Places callback (from your inline HTML)
