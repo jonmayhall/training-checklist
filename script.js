@@ -872,7 +872,19 @@ function initNotesLinkingOption2Only(root=document){
       requestAnimationFrame(syncTwoColHeights);
     });
 
-    label.appendChild(btn);
+let actions = row.querySelector(".row-actions");
+if (!actions) {
+  actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  // Move the existing input/select into the action area
+  const field = row.querySelector("input, select");
+  if (field) actions.appendChild(field);
+
+  row.appendChild(actions);
+}
+
+actions.prepend(btn);
   });
 }
 
