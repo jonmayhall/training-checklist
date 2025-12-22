@@ -1815,3 +1815,46 @@ body #app main #trainers-deployment .grid-2 > .section-block{
   }
 }
 
+/* ===========================================================
+   ✅ SUPPORT TICKETS — FIELD WIDTH FIX (fill the card)
+   =========================================================== */
+
+/* Make the card rows use 2 equal columns, not the global --input-width */
+#support-tickets .ticket-row{
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1fr) !important;
+}
+
+/* Force inputs/selects to fill the right column */
+#support-tickets .ticket-row > input[type="text"],
+#support-tickets .ticket-row > select{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+}
+
+/* Ticket number integrated input+button should fill the right column too */
+#support-tickets .ticket-number-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+}
+
+#support-tickets .ticket-number-wrap .ticket-number-input{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+
+/* ✅ Summary should be full width of the card */
+#support-tickets .ticket-summary-row{
+  grid-column:1 / -1 !important;
+  grid-template-columns:1fr !important;
+}
+
+#support-tickets .ticket-summary-row textarea{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  display:block !important;
+}
