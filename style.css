@@ -1187,4 +1187,19 @@ main{
   .cards-grid:has(.additional-poc-card){
     grid-template-columns:1fr !important;
   }
+
+/* Fallback if :has() isn't supported — apply to the known wrapper if you have it */
+.additional-poc-grid,
+#additionalPocGrid,
+#primaryContactsGrid{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+}
+@media (max-width:900px){
+  .additional-poc-grid,
+  #additionalPocGrid,
+  #primaryContactsGrid{
+    grid-template-columns:1fr !important;
+  }
 }
