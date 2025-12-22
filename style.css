@@ -1613,3 +1613,82 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   min-width:0 !important;
   max-width:100% !important;
 }
+
+/* ===========================================================
+   HARD OVERRIDE: Fix the TWO inputs still too wide
+   (Additional Trainers + Additional POC)
+   Put at VERY BOTTOM of style.css
+   =========================================================== */
+
+/* --------- Additional Trainers (default row + clones) --------- */
+#trainers-deployment #additionalTrainersContainer .mini-card,
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;              /* ✅ prevents spill */
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+  min-width:0 !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  min-width:0 !important;
+  padding-right:12px !important;
+}
+
+/* ✅ THIS is the real fix: kill the forced var(--input-width) */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:auto !important;                   /* ✅ overrides width: var(--input-width) */
+  max-width:100% !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  box-sizing:border-box !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+}
+
+
+/* --------- Additional POC cards (ALL slightly too wide) --------- */
+.primary-contacts-grid > .mini-card,
+.primary-contacts-grid > .additional-poc-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;              /* ✅ prevents spill */
+}
+
+.mini-card.additional-poc-card .checklist-row{
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+  min-width:0 !important;
+}
+
+/* ✅ Also kill the forced fixed-width input */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:auto !important;                   /* ✅ overrides width: var(--input-width) */
+  max-width:100% !important;
+  min-width:0 !important;
+  margin-left:0 !important;
+  box-sizing:border-box !important;
+}
+
