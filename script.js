@@ -874,3 +874,155 @@ window.updateDealershipNameDisplay = updateDealershipNameDisplay;
   }
 })();
 
+/* ===========================================================
+   NOTES LINKING (Option 1 + 2)
+   - Finds paired 2-col blocks (left questions + right notes)
+   - Injects 📝 buttons next to each checklist-row label
+   - Click 📝 => inserts a unique “Question: ” line in notes box
+   - Button turns orange if that question already has a note
+   =========================================================== */
+
+function escapeRegExp(str){
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getLabelTextFromRow(row){
+  const label = row.querySelector("label");
+  if (!label) return "";
+  // Ignore the injected button text
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll("button.note-btn").forEach(b => b.remove());
+  return clone.textContent.replace(/\s+/g, " ").trim();
+}
+
+/** Identify "Notes — ..." blocks (has textarea + h2 starting with Notes) */
+function findNotesTextarea(sectionBlock){
+  const h2 = sectionBlock.querySelector("h2");
+  const ta = sectionBlock.querySelector("textarea");
+  if (!h2 || !ta) return null;
+  const title = h2.textContent.trim();
+  if (!/^Notes\b/i.test(title)) return null;
+  return ta;
+}
+
+/** Returns true if notes textarea contains a line for this label */
+function notesHasLine(notesText, labelText){
+  if (!notesText || !labelText) return false;
+  const re = new RegExp(`(^|\\n)\\s*[-•]\\s*${escapeRegExp(labelText)}\\s*:\\s*\\S`, "i");
+  return re.test(notesText);
+}
+
+/** Insert (or find) a unique bullet for this label in textarea */
+function upsertNoteLine(notesTa, labelText){
+  const bulletLine = `• ${labelText}: `;
+  const current = notesTa.value || "";
+
+  // If line exists, just jump the cursor near it
+  const findRe = new RegExp(`(^|\\n)\\s*[-•]\\s*${escapeRegExp(labelText)}\\s*:\\s*`, "i");
+  const m = current.match(findRe);
+  if (m){
+    // Move cursor to end of the matching prefix
+    const idx = current.toLowerCase().indexOf(m[0].toLowerCase());
+    const caret = Math.max(0, idx + m[0].length);
+    notesTa.focus();
+    notesTa.setSelectionRange(caret, caret);
+    return;
+  }
+
+  // Otherwise, append with spacing
+  const needsNewline = current.length && !current.endsWith("\n");
+  const spacer = current.trim().length ? "\n" : "";
+  notesTa.value = current + (needsNewline ? "\n" : "") + spacer + bulletLine;
+
+  // Put cursor at end
+  notesTa.focus();
+  const pos = notesTa.value.length;
+  notesTa.setSelectionRange(pos, pos);
+
+  // Trigger any listeners
+  notesTa.dispatchEvent(new Event("input", { bubbles:true }));
+}
+
+function wireNotesOption1and2(){
+  const pageSections = document.querySelectorAll(".page-section");
+
+  pageSections.forEach(page => {
+    const pageId = page.id || "page";
+
+    // We’ll look for common 2-col containers that hold pairs:
+    // .cards-grid.two-col, .two-col-grid, .grid-2
+    const pairContainers = page.querySelectorAll(".cards-grid.two-col, .two-col-grid, .grid-2");
+
+    pairContainers.forEach(container => {
+      // grab section-block children in DOM order
+      const blocks = Array.from(container.querySelectorAll(":scope > .section-block"));
+      if (blocks.length < 2) return;
+
+      // process in pairs
+      for (let i = 0; i < blocks.length - 1; i += 2){
+        const a = blocks[i];
+        const b = blocks[i+1];
+
+        const notesA = findNotesTextarea(a);
+        const notesB = findNotesTextarea(b);
+
+        // We expect one to be questions, the other to be Notes
+        const notesTa = notesA || notesB;
+        const questionsBlock = notesA ? b : (notesB ? a : null);
+        if (!notesTa || !questionsBlock) continue;
+
+        // For every checklist row in the questions block, inject 📝 button
+        const rows = questionsBlock.querySelectorAll(".checklist-row");
+        rows.forEach((row, idx) => {
+          const labelEl = row.querySelector("label");
+          if (!labelEl) return;
+
+          const labelText = getLabelTextFromRow(row);
+          if (!labelText) return;
+
+          // If button already exists, skip
+          if (labelEl.querySelector("button.note-btn")) return;
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "note-btn";
+          btn.title = "Add note for this question";
+          btn.textContent = "📝";
+
+          // key is stable enough for color state & de-dup checking
+          btn.dataset.noteKey = `${pageId}::${labelText}`;
+
+          btn.addEventListener("click", () => {
+            upsertNoteLine(notesTa, labelText);
+          });
+
+          labelEl.appendChild(btn);
+
+          // initial orange state
+          const has = notesHasLine(notesTa.value, labelText);
+          btn.classList.toggle("has-note", has);
+        });
+
+        // When notes change, refresh the orange state for all buttons in this block
+        const refresh = () => {
+          const allBtns = questionsBlock.querySelectorAll("button.note-btn");
+          allBtns.forEach(btn => {
+            const key = btn.dataset.noteKey || "";
+            const labelText = key.split("::").slice(1).join("::"); // everything after pageId::
+            const has = notesHasLine(notesTa.value, labelText);
+            btn.classList.toggle("has-note", has);
+          });
+        };
+
+        notesTa.addEventListener("input", refresh);
+        notesTa.addEventListener("change", refresh);
+        refresh();
+      }
+    });
+  });
+}
+
+// Run after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  try { wireNotesOption1and2(); } catch (e) { console.warn("Notes linking failed:", e); }
+});
