@@ -1740,3 +1740,78 @@ body #app main #trainers-deployment .grid-2 > .section-block{
   background:#ff8b42 !important;
   transform:translateY(-1px);
 }
+
+/* ===========================================================
+   ✅ SUPPORT TICKETS — CORRECT LAYOUT
+   - Status sections stacked
+   - Ticket cards side-by-side (2-up)
+   - Card internals single-column (original behavior)
+   =========================================================== */
+
+/* Each STATUS section stacks vertically */
+#support-tickets .ticket-sections-stack{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+/* Each STATUS container holds cards in a 2-up grid */
+#support-tickets #openTicketsContainer,
+#support-tickets #tierTwoTicketsContainer,
+#support-tickets #closedResolvedTicketsContainer,
+#support-tickets #closedFeatureTicketsContainer{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+  align-items:start;
+}
+
+/* Ticket card itself */
+#support-tickets .ticket-group{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+/* ✅ RESTORE ORIGINAL CARD INTERNAL FLOW */
+#support-tickets .ticket-group-inner{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+}
+
+/* Ticket rows go back to label + field layout */
+#support-tickets .ticket-row{
+  display:grid !important;
+  grid-template-columns: minmax(220px, 1fr) var(--input-width) !important;
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+/* Summary row spans full width */
+#support-tickets .ticket-summary-row{
+  grid-template-columns:1fr !important;
+}
+
+#support-tickets .ticket-summary-row textarea{
+  width:100% !important;
+}
+
+/* Ticket Number input + add button stays integrated */
+#support-tickets .ticket-number-wrap{
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  align-items:stretch !important;
+}
+
+/* Mobile: cards stack */
+@media (max-width:900px){
+  #support-tickets #openTicketsContainer,
+  #support-tickets #tierTwoTicketsContainer,
+  #support-tickets #closedResolvedTicketsContainer,
+  #support-tickets #closedFeatureTicketsContainer{
+    grid-template-columns:1fr !important;
+  }
+}
+
