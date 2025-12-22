@@ -292,34 +292,55 @@ function injectHardLayoutPatch(){
   min-width:0 !important;
   overflow:hidden !important;
 }
-#trainers-deployment #additionalTrainersContainer *{
-  min-width:0 !important;
-  max-width:100% !important;
-}
+
+/* ✅ Trainers: keep + working AND (input+btn)=var(--input-width) */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
-  display:flex !important; align-items:center !important; gap:0 !important; min-width:0 !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  overflow:visible !important;
 }
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
-  flex:0 0 36% !important; max-width:36% !important; min-width:0 !important;
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  padding-right:16px !important;
 }
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important; width:0 !important; min-width:0 !important; max-width:100% !important;
-  margin-left:0 !important; box-sizing:border-box !important;
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
 }
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
-  flex:0 0 34px !important; width:34px !important; min-width:34px !important;
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  z-index:1 !important;
 }
+
+/* Additional POC safety */
 .primary-contacts-grid .mini-card,
 .primary-contacts-grid .additional-poc-card,
 .primary-contacts-grid .mini-card *{
-  min-width:0 !important; max-width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
 }
 .mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
-  flex:1 1 0 !important; width:0 !important; min-width:0 !important; max-width:100% !important;
-  margin-left:0 !important; box-sizing:border-box !important;
-}
-.cards-grid.two-col textarea, .two-col-grid textarea{
-  width:100% !important; max-width:100% !important; box-sizing:border-box !important;
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  box-sizing:border-box !important;
 }
 `;
 
