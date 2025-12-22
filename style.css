@@ -1123,41 +1123,46 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 }
 
 /* ===========================================================
-   ✅ FIX: Additional Trainers "+” row (RESTORED + ALIGNED)
-   - Button matches other + buttons
-   - (input + button) aligns with other textboxes
-   - total right-side width = var(--input-width)
+   ✅ TRAINERS — FINAL FIX (Base row w/ + vs Clone rows w/o +)
+   - Base row (has +): input + button combined = var(--input-width)
+   - Clone rows (no +): input alone = var(--input-width) + rounded right
+   Put at VERY BOTTOM of style.css
    =========================================================== */
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
-  overflow:visible !important;  /* ✅ don’t clip the + */
+  overflow:visible !important;
+  min-width:0 !important;
 }
 
-/* Label behaves like other rows */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
   flex:1 1 auto !important;
   min-width:0 !important;
   padding-right:16px !important;
 }
 
-/* ✅ Combined width = var(--input-width) (matches other right-side fields) */
+/* ✅ DEFAULT (CLONES): full width textbox + rounded right */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
   margin-left:auto !important;
   min-width:0 !important;
   max-width:100% !important;
   box-sizing:border-box !important;
-
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-  border-top-left-radius:var(--radius-sm) !important;
-  border-bottom-left-radius:var(--radius-sm) !important;
+  border-radius:var(--radius-sm) !important;
 }
 
+/* ✅ BASE ONLY: if the + button exists right after input */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]:has(+ .add-row){
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+/* + button */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
   flex:0 0 34px !important;
   width:34px !important;
@@ -1172,33 +1177,35 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 
   font-size:18px !important;
   font-weight:900 !important;
-  cursor:pointer !important;
+  line-height:1 !important;
 
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
 
-  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+  cursor:pointer !important;
   padding:0 !important;
-  z-index:1 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row:hover{
   background:#ff8b42 !important;
 }
 
-/* Mobile: stack + full width */
+/* Mobile */
 @media (max-width:600px){
   #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
     flex-direction:column !important;
     gap:8px !important;
     align-items:stretch !important;
   }
+
   #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
     width:100% !important;
     flex:0 0 auto !important;
     border-radius:var(--radius-sm) !important;
   }
+
   #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
     width:100% !important;
     min-width:0 !important;
@@ -1206,3 +1213,5 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     margin-left:0 !important;
   }
 }
+
+
