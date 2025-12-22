@@ -3,13 +3,11 @@
    (Wider pages/cards + tables/support/DMS preserved)
 
    ✅ FIXES INCLUDED:
-   - Post-training Notes cards start at SAME height as left cards (JS-driven).
-     CSS is adjusted to NOT fight the JS.
-   - Additional POC clones: name input no longer becomes too wide.
-   - ✅ TRAINERS “Additional Trainer” row (your exact HTML):
-       - Base row = input + (+) button equals SAME width as other right-side inputs
-       - Added trainer rows (in #additionalTrainersContainer) = full textbox width
-       - Added trainer rows have rounded RIGHT edge
+   - Notes textareas fill available card space (grid-2 / cards-grid / two-col-grid)
+   - Additional Trainers row: input + plus matches other inputs width
+   - Additional Trainers clones: rounded right edge + same width as other inputs
+   - Support Tickets page styles restored
+   - DMS Integration page styles restored
    ======================================================= */
 
 /* ============== CSS VARIABLES ============== */
@@ -239,7 +237,6 @@ main{
   font-weight:700;
   text-align:left;
   letter-spacing:.3px;
-  position:relative triggering?; /* keep as original? remove invalid */
   position:relative;
 }
 .page-section h1::after{
@@ -315,14 +312,6 @@ main{
 /* Hide truly empty “plank” cards */
 .section-block:empty{ display:none !important; }
 
-/* ============== GRID HELPERS ============== */
-.grid-2{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
-}
-.grid-2 > .section-block{ margin-bottom:0; }
-
 /* ============== Q&A ROWS (non-tables) ============== */
 .checklist-row{
   display:flex;
@@ -391,7 +380,8 @@ main{
 
 /* Do NOT affect 2-col grids */
 .cards-grid .checklist-row,
-.two-col-grid .checklist-row{
+.two-col-grid .checklist-row,
+.grid-2 .checklist-row{
   display:flex;
   padding-left:10px;
 }
@@ -406,7 +396,13 @@ main{
 .two-col-grid .checklist-row input[type="email"],
 .two-col-grid .checklist-row input[type="tel"],
 .two-col-grid .checklist-row input[type="date"],
-.two-col-grid .checklist-row select{
+.two-col-grid .checklist-row select,
+.grid-2 .checklist-row input[type="text"],
+.grid-2 .checklist-row input[type="number"],
+.grid-2 .checklist-row input[type="email"],
+.grid-2 .checklist-row input[type="tel"],
+.grid-2 .checklist-row input[type="date"],
+.grid-2 .checklist-row select{
   width:var(--input-width);
   margin-left:auto;
 }
@@ -455,36 +451,70 @@ main{
   display:flex;
   align-items:center;
 }
-
-/* ===========================================================
-   ✅ TRAINERS (YOUR EXACT HTML)
-   Base row is the ONE with data-base="true"
-   Clones are appended inside #additionalTrainersContainer
-   =========================================================== */
-
-/* ensure base integrated-plus row aligns like other right-side inputs */
-#trainers-deployment .checklist-row.integrated-plus{
-  align-items:stretch !important;
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"]{
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+  height:34px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
+}
+.section-block .checklist-row.integrated-plus > .add-row{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  margin-left:-1px;
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+  padding:0;
+}
+.section-block .checklist-row.integrated-plus > .add-row:hover{
+  background:#ff8b42;
+  transform:translateY(-1px);
 }
 
-/* ---------- BASE: (input + button) total width = var(--input-width) ---------- */
+/* ===========================================================
+   ✅ TRAINERS — FIX (CSS-only using data-base + container)
+   - Base row: input + button total width = var(--input-width)
+   - Clones: full input width, rounded right edge
+   =========================================================== */
+
+#trainers-deployment .checklist-row.integrated-plus{
+  overflow:visible !important;
+}
+
+/* Base row is the one with data-base="true" */
+#trainers-deployment .checklist-row.integrated-plus[data-base="true"]{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+/* Base row input = input-width minus button */
 #trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
   flex:0 0 calc(var(--input-width) - 34px) !important;
   width:calc(var(--input-width) - 34px) !important;
   margin-left:auto !important;
 
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-
-  border-top-left-radius:var(--radius-sm) !important;
-  border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
-  box-sizing:border-box !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
 }
 
+/* Base row button matches other widths/heights */
 #trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
   flex:0 0 34px !important;
   width:34px !important;
@@ -495,56 +525,68 @@ main{
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
-
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
   font-size:18px !important;
   font-weight:900 !important;
   line-height:1 !important;
 
-  cursor:pointer !important;
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
 
-  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+  cursor:pointer !important;
   padding:0 !important;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 #trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row:hover{
   background:#ff8b42 !important;
-  transform:translateY(-1px);
 }
 
-/* ---------- CLONES: full textbox width, rounded right edge ---------- */
-/* Expect your JS to append plain .checklist-row (usually NOT integrated-plus) */
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  padding-left:60px !important; /* match indent-sub */
+/* Cloned rows live inside #additionalTrainersContainer */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+  padding-left:60px !important;
 }
 
-/* If clones are plain rows with input only */
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  height:34px !important;
-
-  border-radius:var(--radius-sm) !important; /* ✅ rounded right side */
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  box-sizing:border-box !important;
-}
-
-/* If clones are integrated-plus but WITHOUT a button, still round the right side */
+/* Clone input should be full width and rounded on right */
 #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   margin-left:auto !important;
-  height:34px !important;
-  border-radius:var(--radius-sm) !important;
+  border-radius:var(--radius-sm) !important; /* ✅ rounded right edge */
 }
 
-/* Hide any accidental + buttons inside clones */
-#trainers-deployment #additionalTrainersContainer .add-row{
+/* Hide any + button inside clones if it ever appears */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
   display:none !important;
+}
+
+/* Mobile behavior */
+@media (max-width:600px){
+  #trainers-deployment .checklist-row.integrated-plus[data-base="true"],
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+    flex-direction:column !important;
+    gap:8px !important;
+    align-items:stretch !important;
+    padding-left:20px !important;
+  }
+
+  #trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"],
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+    width:100% !important;
+    flex:0 0 auto !important;
+    border-radius:var(--radius-sm) !important;
+  }
+
+  #trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
+    width:100% !important;
+    min-width:0 !important;
+    border-radius:var(--radius-sm) !important;
+    margin-left:0 !important;
+  }
 }
 
 /* ===========================================================
@@ -699,25 +741,188 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   --input-width:150px;
 }
 
+/* Simple 2-col wrapper used on some pages */
+.grid-2{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:24px;
+}
+
 /* ===========================================================
-   ✅ NOTES TEXTAREA MUST FILL CARD (2×2 layouts)
-   Works for BOTH: .cards-grid.two-col and .two-col-grid
+   TRAINERS PAGE spacing
+   =========================================================== */
+#trainers-deployment .checklist-row{ padding-left:32px !important; }
+#trainers-deployment .indent-sub{ padding-left:60px !important; }
+
+/* ============== MINI-CARDS (Primary Contacts) ============== */
+.mini-card{
+  border:1px solid var(--orange);
+  border-radius:var(--radius-md);
+  background:#fff;
+  padding:6px 0 4px;
+}
+.mini-card .checklist-row{
+  margin:0;
+  border-bottom:1px solid #e5e5e5;
+  padding:8px 24px;
+}
+.mini-card .checklist-row:last-child{ border-bottom:none; }
+
+.mini-card .checklist-row label{
+  flex:0 0 36%;
+  font-weight:500;
+  text-align:left;
+  padding-right:12px;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+}
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="number"],
+.mini-card .checklist-row input[type="email"],
+.mini-card .checklist-row input[type="tel"],
+.mini-card .checklist-row input[type="date"],
+.mini-card .checklist-row select{
+  flex:1 1 auto;
+  width:100%;
+  margin-left:0;
+  height:34px;
+  max-width:100%;
+}
+
+/* Page 2 contact grid */
+.primary-contacts-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:18px;
+  row-gap:18px;
+}
+
+/* ===========================================================
+   PRIMARY CONTACTS — FIX INPUT OVERFLOW
+   =========================================================== */
+.mini-card .checklist-row{
+  display:flex !important;
+  align-items:center;
+  gap:12px;
+}
+.mini-card .checklist-row label{
+  flex:0 0 36%;
+  max-width:36%;
+}
+.mini-card .checklist-row input[type="text"],
+.mini-card .checklist-row input[type="tel"],
+.mini-card .checklist-row input[type="email"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  box-sizing:border-box;
+}
+
+/* ============== Additional POC (integrated +) ============== */
+.mini-card.additional-poc-card .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+  padding:8px 24px !important;
+  border-bottom:1px solid #e5e5e5 !important;
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  padding-right:12px !important;
+  white-space:nowrap !important;
+  display:flex !important;
+  align-items:center !important;
+  margin-right:12px !important;
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+  font-size:13px !important;
+
+  box-sizing:border-box !important;
+}
+
+.mini-card.additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+.additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  border-radius:var(--radius-sm) !important;
+}
+
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add{
+  flex:0 0 34px !important;
+  width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:16px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+  padding:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row.integrated-plus .add-row:hover,
+.mini-card.additional-poc-card .checklist-row.integrated-plus .additional-poc-add:hover{
+  background:#ff8b42 !important;
+}
+
+.additional-poc-card:not([data-base="true"]) .add-row,
+.additional-poc-card:not([data-base="true"]) .additional-poc-add{
+  display:none !important;
+}
+
+/* ===========================================================
+   ✅ NOTES TEXTAREA MUST FILL CARD (2×2 layouts + Resources grid-2)
    =========================================================== */
 .cards-grid.two-col > .section-block,
-.two-col-grid .section-block{
+.two-col-grid .section-block,
+.grid-2 > .section-block{
   display:flex;
   flex-direction:column;
   min-width:0;
 }
 
 .cards-grid.two-col > .section-block textarea,
-.two-col-grid .section-block textarea{
+.two-col-grid .section-block textarea,
+.grid-2 > .section-block textarea{
   flex:1 1 auto;
   width:100% !important;
   max-width:100% !important;
-  min-height:160px;
+  min-height:220px;
   resize:none;
-  overflow:hidden;
+  overflow:auto;
   box-sizing:border-box;
 }
 
@@ -904,26 +1109,301 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   justify-content:center !important;
 }
 
-/* ============== RESPONSIVE ============== */
+/* ===========================================================
+   ✅ SUPPORT TICKETS — RESTORED (PAGE 7)
+   =========================================================== */
+
+#support-tickets .ticket-sections-stack{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+#support-tickets .ticket-section{
+  padding-bottom:18px;
+}
+
+#support-tickets .ticket-section h2{
+  margin-bottom:14px;
+}
+
+/* Containers: allow many ticket cards stacked */
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* Ticket card */
+#support-tickets .ticket-group{
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+#support-tickets .ticket-group-inner{
+  padding:14px 18px 12px;
+}
+
+/* Each row inside the ticket card */
+#support-tickets .ticket-row{
+  display:grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(280px, 420px);
+  gap:16px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid #ececec;
+}
+#support-tickets .ticket-row:last-child{
+  border-bottom:none;
+}
+
+#support-tickets .ticket-row label{
+  font-weight:600;
+  color:#222;
+}
+
+/* Inputs in tickets */
+#support-tickets input[type="text"],
+#support-tickets select,
+#support-tickets textarea{
+  width:100%;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  box-sizing:border-box;
+}
+
+/* Ticket number wrap (input + + button) */
+#support-tickets .ticket-number-wrap{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  width:100%;
+}
+
+#support-tickets .ticket-number-input{
+  flex:1 1 auto;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+#support-tickets .add-ticket-btn{
+  flex:0 0 42px;
+  width:42px;
+  height:auto;
+  margin-left:-1px;
+
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+}
+#support-tickets .add-ticket-btn:hover{
+  background:#ff8b42;
+}
+
+/* Summary row (textarea + disclaimer) */
+#support-tickets .ticket-summary-row{
+  align-items:start;
+}
+#support-tickets .ticket-summary-row textarea{
+  min-height:80px;
+  resize:vertical;
+}
+#support-tickets .ticket-disclaimer{
+  grid-column:1 / -1;
+  margin:6px 0 0;
+  font-size:12px;
+  color:#6b7280;
+}
+
+/* Disable locked status select look */
+#support-tickets .ticket-status-select[disabled]{
+  opacity:0.9;
+  background:#f3f4f6;
+  cursor:not-allowed;
+}
+
+/* Mobile for tickets */
+@media (max-width:900px){
+  #support-tickets .ticket-row{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===========================================================
+   ✅ DMS INTEGRATION — RESTORED (PAGE 8)
+   =========================================================== */
+
+#dms-integration .section-header{
+  margin-top:0;
+}
+
+/* Grid of DMS cards */
+#dms-integration .dms-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+  margin-top:14px;
+}
+
+@media (max-width:900px){
+  #dms-integration .dms-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+#dms-integration .dms-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+#dms-integration .dms-card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 16px;
+  background:#fff;
+  border-bottom:1px solid #ececec;
+}
+
+#dms-integration .dms-name{
+  font-weight:800;
+  font-size:16px;
+  color:#111827;
+}
+
+#dms-integration .dms-chip{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  color:#111827;
+}
+#dms-integration .dms-chip-pull{
+  border-color:rgba(34,197,94,0.35);
+  background:rgba(34,197,94,0.10);
+}
+#dms-integration .dms-chip-push{
+  border-color:rgba(59,130,246,0.35);
+  background:rgba(59,130,246,0.10);
+}
+
+/* List formatting */
+#dms-integration .dms-list{
+  list-style:none;
+  padding:10px 12px 14px;
+  margin:0;
+}
+
+#dms-integration .dms-list li{
+  padding:10px 10px;
+  border-bottom:1px solid #efefef;
+}
+#dms-integration .dms-list li:last-child{
+  border-bottom:none;
+}
+
+#dms-integration .dms-row-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:4px;
+}
+
+#dms-integration .dms-field{
+  font-weight:700;
+  color:#111827;
+  font-size:13px;
+}
+
+#dms-integration .dms-list p{
+  margin:0;
+  font-size:12px;
+  color:#6b7280;
+}
+
+/* Tags */
+#dms-integration .dms-tag{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  color:#111827;
+}
+
+#dms-integration .dms-tag-auto{
+  border-color:rgba(34,197,94,0.35);
+  background:rgba(34,197,94,0.12);
+  color:#14532d;
+}
+#dms-integration .dms-tag-ondemand{
+  border-color:rgba(245,158,11,0.35);
+  background:rgba(245,158,11,0.14);
+  color:#78350f;
+}
+#dms-integration .dms-tag-withro{
+  border-color:rgba(59,130,246,0.35);
+  background:rgba(59,130,246,0.12);
+  color:#1e3a8a;
+}
+#dms-integration .dms-tag-planned{
+  border-color:rgba(99,102,241,0.35);
+  background:rgba(99,102,241,0.12);
+  color:#312e81;
+}
+#dms-integration .dms-tag-na{
+  border-color:rgba(156,163,175,0.55);
+  background:rgba(156,163,175,0.18);
+  color:#374151;
+}
+
+/* ===========================================================
+   ============== RESPONSIVE ==============
+   =========================================================== */
 @media (max-width:900px){
   #sidebar{ width:190px; }
   main{ margin-left:190px; padding:20px; }
   #clearAllBtn{ width:calc(190px - 48px); }
 
-  .grid-2{ grid-template-columns:1fr; }
-
   .primary-contacts-grid{ grid-template-columns:1fr; }
 
   .cards-grid.two-col,
   .cards-grid.three-col,
-  .two-col-grid{
-    grid-template-columns:1fr;
-  }
-
-  #openTicketsContainer,
-  #tierTwoTicketsContainer,
-  #closedResolvedTicketsContainer,
-  #closedFeatureTicketsContainer{
+  .two-col-grid,
+  .grid-2{
     grid-template-columns:1fr;
   }
 
@@ -964,31 +1444,6 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
     flex:0 0 auto;
   }
 
-  /* Trainers base row: stack input + button nicely */
-  #trainers-deployment .checklist-row.integrated-plus[data-base="true"]{
-    gap:8px !important;
-  }
-  #trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
-    width:100% !important;
-    flex:0 0 auto !important;
-    border-radius:var(--radius-sm) !important;
-  }
-  #trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
-    width:100% !important;
-    min-width:0 !important;
-    border-radius:var(--radius-sm) !important;
-    margin-left:0 !important;
-  }
-
-  #support-tickets .ticket-row{
-    grid-template-columns:1fr;
-  }
-  #support-tickets .ticket-row > input[type="text"],
-  #support-tickets .ticket-row > select,
-  #support-tickets .ticket-row > .ticket-number-wrap{
-    grid-column:1;
-  }
-
   .training-table{ min-width:760px; }
 }
 
@@ -999,7 +1454,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
 /* 1) Allow grid children to shrink */
 .cards-grid.two-col > * ,
 .two-col-grid > * ,
-.primary-contacts-grid > * ,
+.primary-contacts-grid > *,
 .grid-2 > *{
   min-width:0 !important;
   max-width:100% !important;
@@ -1041,31 +1496,5 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   width:0 !important;
   min-width:0 !important;
   max-width:100% !important;
-  box-sizing:border-box !important;
-}
-
-/* ===========================================================
-   ✅ NOTES TEXTAREAS — FILL THE CARD (grid-2 pages like Resources)
-   Paste at VERY BOTTOM
-   =========================================================== */
-
-/* Any 2-column page section using .grid-2: let cards grow and allow textarea to fill */
-.grid-2 > .section-block{
-  display:flex !important;
-  flex-direction:column !important;
-  min-width:0 !important;
-}
-
-/* Make the textarea take remaining height in the card */
-.grid-2 > .section-block textarea{
-  flex:1 1 auto !important;
-  width:100% !important;
-  max-width:100% !important;
-
-  /* big enough to look “full” even on taller cards */
-  min-height:220px !important;
-
-  resize:none !important;
-  overflow:auto !important;
   box-sizing:border-box !important;
 }
