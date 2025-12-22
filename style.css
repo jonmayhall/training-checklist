@@ -1234,3 +1234,12 @@ main{
   font-weight:500; /* match normal checklist labels */
 }
 
+/* ===========================================================
+   Support Tickets — normalize Summary row padding
+   =========================================================== */
+
+#support-tickets .ticket-row.ticket-summary-row{
+  padding-top:10px;    /* match normal rows */
+  padding-bottom:10px; /* match normal rows */
+}
+
