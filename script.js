@@ -557,6 +557,11 @@ function unlockStatusSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
   sel.disabled = false;
+
+  // ✅ Ensure newly-added cards default to Open
+  if (!sel.value) sel.value = "Open";
+  applySelectGhost(sel);
+  saveField(sel);
 }
 
 function isTicketCardComplete(card){
@@ -571,6 +576,12 @@ function makeTicketCloneFromBase(baseCard){
   const clone = baseCard.cloneNode(true);
   clone.dataset.clone = "true";
   clone.removeAttribute("data-base");
+   const sel = qs(".ticket-status-select", clone);
+if (sel){
+  sel.value = "Open";
+  applySelectGhost(sel);
+  saveField(sel);
+}
 
   qsa("input, textarea, select", clone).forEach(el=>{
     if (!isField(el)) return;
@@ -647,11 +658,28 @@ function initSupportTickets(){
 
     const newCard = makeTicketCloneFromBase(base);
 
-    const openContainer = qs("#openTicketsContainer", page);
-    if (openContainer) openContainer.appendChild(newCard);
+  const openContainer = qs("#openTicketsContainer", page);
+if (openContainer) openContainer.appendChild(newCard);
 
-    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
+/* ✅ Clear base card after adding a new card */
+if (card.dataset.base === "true"){
+  const num = qs(".ticket-number-input", card);
+  const url = qs(".ticket-zendesk-input", card);
+  const sum = qs(".ticket-summary-input", card);
+
+  [num, url, sum].forEach(el=>{
+    if (!el) return;
+    clearFieldStorage(el);
+    el.value = "";
+    saveField(el);
   });
+
+  // keep base status locked to Open
+  lockOpenSelect(card);
+}
+
+newCard.scrollIntoView({ behavior:"smooth", block:"center" });
+
 
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
