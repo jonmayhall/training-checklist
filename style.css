@@ -1378,3 +1378,36 @@ main{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
 }
+
+/* ===========================================================
+   Linked Notes (Option 1) — 📝 button beside questions
+   =========================================================== */
+
+.note-link{
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-size:14px;
+  line-height:1;
+  padding:2px 6px;
+  border-radius:10px;
+  margin-left:8px;
+  color:var(--orange);
+  opacity:0.9;
+}
+
+.note-link:hover{
+  background:rgba(239,109,34,0.10);
+  opacity:1;
+}
+
+.note-link:active{
+  transform:translateY(1px);
+}
+
+/* keep label + icon aligned nicely */
+.checklist-row label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
