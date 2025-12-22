@@ -1314,16 +1314,23 @@ main{
 }
 
 /* ===========================================================
-   SUPPORT TICKETS — FIX spacing under Summary textarea
-   (overrides the existing "margin:0" rule)
+   SUPPORT TICKETS — FORCE spacing under Summary area
+   Works even if your markup/classes differ
    =========================================================== */
 
-#support-tickets .ticket-row.ticket-summary-row textarea{
-  margin:0 !important;
-  margin-bottom:14px !important; /* <- space between textarea and disclaimer */
+/* Add bottom breathing room under ANY textarea inside a ticket card */
+#support-tickets .ticket-group-inner textarea{
+  margin: 0 !important;
+  margin-bottom: 14px !important;
 }
 
-/* Give the disclaimer line breathing room too */
-#support-tickets .ticket-disclaimer{
-  margin-top:14px !important;
+/* Add spacing above the first line of text AFTER the textarea
+   (covers the "* This ticket must..." line even if it isn't .ticket-disclaimer) */
+#support-tickets .ticket-group-inner textarea + *{
+  margin-top: 14px !important;
+}
+
+/* Optional: make ticket labels NOT bold (you asked for this earlier) */
+#support-tickets .ticket-group-inner label{
+  font-weight: 500 !important;
 }
