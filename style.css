@@ -1207,3 +1207,27 @@ main{
   border-top-right-radius:var(--radius-sm) !important;
   border-bottom-right-radius:var(--radius-sm) !important;
 }
+
+/* ===========================================================
+   PATCH — Side-by-side cards: shift left-column text closer
+   Keeps indent spacing, just reduces the base left padding.
+   Applies to cards inside grids (2-up / 3-up layouts).
+   =========================================================== */
+
+/* base padding inside side-by-side cards */
+.cards-grid.two-col .section-block .checklist-row,
+.cards-grid.three-col .section-block .checklist-row,
+.two-col-grid .section-block .checklist-row,
+.grid-2 .section-block .checklist-row,
+#dealership-info .primary-contacts-grid .mini-card .checklist-row{
+  padding-left:18px !important;  /* was ~32px */
+}
+
+/* keep the indent "step" but shift it left too */
+.cards-grid.two-col .section-block .checklist-row.indent-sub,
+.cards-grid.three-col .section-block .checklist-row.indent-sub,
+.two-col-grid .section-block .checklist-row.indent-sub,
+.grid-2 .section-block .checklist-row.indent-sub,
+#dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
+  padding-left:42px !important;  /* was ~60px */
+}
