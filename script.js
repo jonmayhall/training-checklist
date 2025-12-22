@@ -1,9 +1,10 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js (FIXED)
-   ✅ Fixes broken JS (sidebar + buttons work again)
-   ✅ Support Tickets: add/remove, default Open, inject Open option, clear base after add
-   ✅ Trainers: Add Trainer (+) works with broader selector
-   ✅ Keeps: nav, autosave, resets, tables add-row, notes autogrow, PDF export, map/name
+   myKaarma Interactive Training Checklist — FULL script.js
+   ✅ Fixes:
+   - Nav clicks work
+   - Add Trainer (+) works
+   - Support Tickets: add/remove, status move, validation scoped, base clears after add
+   - Autosave + reset/clear + PDF + dates end defaults
    ======================================================= */
 
 /* ---------------------------
@@ -140,7 +141,6 @@ function syncTwoColHeights(){
 function showSection(id){
   const sections = qsa(".page-section");
   sections.forEach(s=> s.classList.remove("active"));
-
   const target = qs(`#${id}`);
   if (target) target.classList.add("active");
 
@@ -194,7 +194,6 @@ function resetSection(section){
       if (el.options && el.options.length) el.selectedIndex = 0;
       applySelectGhost(el);
     }
-
     if (el.type === "date") applyDateGhost(el);
     if (el.tagName === "TEXTAREA") autoGrowTA(el);
   });
@@ -239,7 +238,8 @@ function initResets(){
   qsa(".clear-page-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const sec = btn.closest(".page-section");
-      if (sec) resetSection(sec);
+      if (!sec) return;
+      resetSection(sec);
     });
   });
 
@@ -274,7 +274,6 @@ function initPersistence(){
   document.addEventListener("input", (e)=>{
     const el = e.target;
     if (!isField(el)) return;
-
     if (el.tagName === "TEXTAREA") autoGrowTA(el);
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
@@ -308,8 +307,8 @@ function cloneTrainingRow(row){
 
   qsa("input, select, textarea", clone).forEach(el=>{
     if (!isField(el)) return;
+    el.value = "";
     if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
     ensureUID(el);
     applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
@@ -345,7 +344,7 @@ function initTableAddRow(){
 }
 
 /* ---------------------------
-   Onsite Training Dates — End Date defaults to Start + 2 days
+   Onsite Training Dates: end defaults to start + 2
 --------------------------- */
 function addDaysISO(iso, days){
   const d = new Date(`${iso}T12:00:00`);
@@ -371,49 +370,29 @@ function initOnsiteTrainingDates(){
         saveField(end);
       }
     });
-    return;
   }
-
-  qsa(".training-dates-row, .onsite-training-dates-row").forEach(row=>{
-    const dates = qsa("input[type='date']", row);
-    if (dates.length < 2) return;
-    const s = dates[0];
-    const e = dates[1];
-
-    s.addEventListener("change", ()=>{
-      if (!s.value) return;
-      if (e.value) return;
-      const v = addDaysISO(s.value, 2);
-      if (v){
-        e.value = v;
-        applyDateGhost(e);
-        saveField(e);
-      }
-    });
-  });
 }
 
 /* ---------------------------
    Trainers page: Additional Trainers (+)
-   (Broader selector so it works even if markup changed)
 --------------------------- */
 function initAdditionalTrainers(){
   document.addEventListener("click", (e)=>{
-    const btn = e.target.closest("#trainers-deployment .add-row");
-    if (!btn) return;
+    const addBtn = e.target.closest(
+      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+    );
+    if (!addBtn) return;
 
     const page = qs("#trainers-deployment");
     if (!page) return;
 
-    const baseRow = btn.closest(".checklist-row");
-    // Only run for the Additional Trainer base row (avoid catching other + buttons)
-    const labelText = safeTrim(qs("label", baseRow)?.textContent).toLowerCase();
-    if (!labelText.includes("additional trainer")) return;
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
+    if (baseRow) baseRow.classList.add("trainer-base");
 
-    let container = qs("#additionalTrainersContainer", page);
+    const container = qs("#additionalTrainersContainer", page);
 
     const newRow = document.createElement("div");
-    newRow.className = "checklist-row indent-sub trainer-clone";
+    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
     newRow.dataset.clone = "true";
     newRow.innerHTML = `
       <label>Additional Trainer</label>
@@ -426,15 +405,18 @@ function initAdditionalTrainers(){
       loadField(input);
     }
 
-    if (container) container.appendChild(newRow);
-    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+    if (container){
+      container.appendChild(newRow);
+    }else if (baseRow && baseRow.parentNode){
+      baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+    }
 
     if (input) input.focus();
   });
 }
 
 /* ---------------------------
-   Primary Contacts: Additional POC (+) (if present)
+   Primary Contacts: Additional POC (+)
 --------------------------- */
 function initAdditionalPOC(){
   document.addEventListener("click", (e)=>{
@@ -444,7 +426,7 @@ function initAdditionalPOC(){
     const baseCard = btn.closest(".additional-poc-card");
     if (!baseCard) return;
 
-    const grid = baseCard.parentElement;
+    const grid = baseCard.parentElement; // <-- this is .primary-contacts-grid in your HTML
     if (!grid) return;
 
     const clone = baseCard.cloneNode(true);
@@ -461,16 +443,18 @@ function initAdditionalPOC(){
       ensureUID(el);
       applySelectGhost(el);
       if (el.type === "date") applyDateGhost(el);
+      saveField(el);
     });
 
     grid.appendChild(clone);
+
     const firstInput = qs("input, select, textarea", clone);
     if (firstInput) firstInput.focus();
   });
 }
 
 /* ---------------------------
-   Support Tickets helpers
+   Support Tickets
 --------------------------- */
 function statusToContainerId(status){
   switch(status){
@@ -482,30 +466,16 @@ function statusToContainerId(status){
   }
 }
 
-function ensureSelectOption(sel, value, label=value){
-  if (!sel) return;
-  const exists = Array.from(sel.options || []).some(o => o.value === value);
-  if (exists) return;
-  const opt = document.createElement("option");
-  opt.value = value;
-  opt.textContent = label;
-  sel.appendChild(opt);
-}
-
 function lockOpenSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
-  ensureSelectOption(sel, "Open", "Open");
   sel.value = "Open";
   sel.disabled = true;
-  applySelectGhost(sel);
-  saveField(sel);
 }
 
 function unlockStatusSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
-  ensureSelectOption(sel, "Open", "Open");
   sel.disabled = false;
   if (!sel.value) sel.value = "Open";
   applySelectGhost(sel);
@@ -534,11 +504,9 @@ function makeTicketCloneFromBase(baseCard){
     saveField(el);
   });
 
-  // remove disclaimer
   const disc = qs(".ticket-disclaimer", clone);
   if (disc) disc.remove();
 
-  // swap + to ×
   const addBtn = qs(".add-ticket-btn", clone);
   if (addBtn){
     addBtn.textContent = "×";
@@ -547,9 +515,15 @@ function makeTicketCloneFromBase(baseCard){
     addBtn.classList.remove("add-ticket-btn");
   }
 
-  // default Open + make sure option exists
-  unlockStatusSelect(clone);
+  // default status for new cards = Open
+  const sel = qs(".ticket-status-select", clone);
+  if (sel){
+    sel.value = "Open";
+    applySelectGhost(sel);
+    saveField(sel);
+  }
 
+  unlockStatusSelect(clone);
   return clone;
 }
 
@@ -563,26 +537,21 @@ function moveTicketCard(card, newStatus){
 
   dest.appendChild(card);
 
-  if (destId === "openTicketsContainer" && card.dataset.base === "true") lockOpenSelect(card);
-  else unlockStatusSelect(card);
+  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
+    lockOpenSelect(card);
+  }else{
+    unlockStatusSelect(card);
+  }
 }
 
-/* ---------------------------
-   Support Tickets init
---------------------------- */
 function initSupportTickets(){
   const page = qs("#support-tickets");
   if (!page) return;
 
-  // Make sure every status select has Open option at startup
-  qsa(".ticket-status-select", page).forEach(sel=>{
-    ensureSelectOption(sel, "Open", "Open");
-    applySelectGhost(sel);
-  });
-
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
+  // Add/remove ticket cards
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
     const removeBtn = e.target.closest(".remove-ticket-btn");
@@ -594,14 +563,12 @@ function initSupportTickets(){
     e.preventDefault();
     e.stopPropagation();
 
-    // Remove
     if (removeBtn){
       qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
       card.remove();
       return;
     }
 
-    // Add new ticket card (validate current)
     if (!isTicketCardComplete(card)){
       alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
       return;
@@ -613,25 +580,26 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // Clear BASE card after add
+    // ✅ Clear base card fields after add (only if base was used)
     if (card.dataset.base === "true"){
-      const fields = [
-        qs(".ticket-number-input", card),
-        qs(".ticket-zendesk-input", card),
-        qs(".ticket-summary-input", card)
-      ];
-      fields.forEach(el=>{
+      const num = qs(".ticket-number-input", card);
+      const url = qs(".ticket-zendesk-input", card);
+      const sum = qs(".ticket-summary-input", card);
+
+      [num, url, sum].forEach(el=>{
         if (!el) return;
         clearFieldStorage(el);
         el.value = "";
         saveField(el);
       });
+
       lockOpenSelect(card);
     }
 
     newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
+  // Status changes move cards
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
@@ -639,12 +607,14 @@ function initSupportTickets(){
     const card = e.target.closest(".ticket-group");
     if (!card) return;
 
+    const val = sel.value;
+
     if (card.dataset.base === "true"){
       lockOpenSelect(card);
       return;
     }
 
-    moveTicketCard(card, sel.value);
+    moveTicketCard(card, val);
   });
 }
 
@@ -680,7 +650,7 @@ function restoreDealershipMap(){
 }
 
 /* ---------------------------
-   PDF Export (Save All Pages)
+   PDF Export
 --------------------------- */
 async function exportAllPagesPDF(){
   const btn = qs("#savePDF");
@@ -691,7 +661,6 @@ async function exportAllPagesPDF(){
 
   const sections = qsa(".page-section");
   const activeId = qs(".page-section.active")?.id;
-
   sections.forEach(s=> s.classList.add("active"));
 
   await new Promise(r=> setTimeout(r, 80));
@@ -780,15 +749,6 @@ function initPDF(){
 }
 
 /* ---------------------------
-   DMS Integration hook
---------------------------- */
-function initDMSIntegration(){
-  const page = qs("#dms-integration");
-  if (!page) return;
-  qsa("select", page).forEach(applySelectGhost);
-}
-
-/* ---------------------------
    Init on DOM ready
 --------------------------- */
 document.addEventListener("DOMContentLoaded", ()=>{
@@ -808,7 +768,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initSupportTickets();
 
   initOnsiteTrainingDates();
-  initDMSIntegration();
 
   restoreDealershipNameDisplay();
   restoreDealershipMap();
@@ -822,7 +781,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 /* ---------------------------
-   Google Places callback
+   Google Places callback (from your inline HTML)
 --------------------------- */
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
