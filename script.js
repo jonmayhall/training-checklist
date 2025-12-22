@@ -1,21 +1,18 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
    ✅ Includes:
-   - Sidebar navigation (page switching + active button)
-   - Dealership name mirror to topbar
-   - LocalStorage autosave (inputs/selects/textareas + dynamic rows)
-   - “Ghost” placeholder styling for selects + date inputs
-   - Reset This Page + Clear All
-   - Dynamic rows:
-       • Additional Trainers (+)
-       • Additional POC cards (+)
-       • All table “+” add-row buttons (training tables + opcode table, etc.)
-   - Notes UX:
-       • textarea auto-grow
-       • 2x2 notes: height sync + textarea fills remaining space
-   - Google Maps embed updater + “Map” button
-   - Support Tickets module (add/validate/move/persist)
-   - HARD JS-injected CSS patch for “inputs too wide” issues
+   - Sidebar navigation (show/hide page sections + active button)
+   - LocalStorage autosave for inputs/selects/textarea (incl. dynamic rows)
+   - “Reset This Page” + “Clear All” behaviors
+   - Ghost placeholder styling for selects + date placeholders
+   - Training tables: Add Row (+) clones for all .training-table tables
+   - Additional Trainers (+) row: clones w/ proper classes + rounded input
+   - Primary Contacts: Additional POC (+) clone support (if present)
+   - Support Tickets: Add/Remove cards + FIXED validation (scoped to clicked card)
+   - Support Tickets: Auto-move cards to correct status column on status change
+   - Dealership name display + map iframe update + places autocomplete hook
+   - Notes: textarea auto-grow + optional 2-col card height sync (safe)
+   - Save All Pages as PDF (jsPDF + html2canvas)
    ======================================================= */
 
 /* ---------------------------
@@ -30,929 +27,840 @@ function isField(el){
   return (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA");
 }
 
-/* ---------------------------
-   Stable keying for LocalStorage
-   (handles dynamic clones)
---------------------------- */
-function getFieldKey(el){
-  if (!el) return null;
+function uid(){
+  return "id_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
+}
 
-  // Prefer explicit IDs/names if present
+function safeTrim(v){ return (v ?? "").toString().trim(); }
+
+/* ---------------------------
+   Storage keying
+   - stable if element has id/name/data-key
+   - otherwise assign persistent data-uid
+--------------------------- */
+function ensureUID(el){
+  if (!el) return null;
+  if (el.dataset && el.dataset.uid) return el.dataset.uid;
+  const newId = uid();
+  el.dataset.uid = newId;
+  return newId;
+}
+
+function getFieldKey(el){
+  // Prefer explicit identifiers
   if (el.id) return `mkc:${el.id}`;
   if (el.name) return `mkc:${el.name}`;
-
-  // Developer-provided key
   const dk = el.getAttribute("data-key");
   if (dk) return `mkc:${dk}`;
 
-  // If inside a ticket group with id, key by ticket group + class
-  const ticketGroup = el.closest(".ticket-group");
-  if (ticketGroup?.dataset?.ticketId){
-    const cls = el.className ? el.className.split(" ").join(".") : el.tagName.toLowerCase();
-    return `mkc:ticket:${ticketGroup.dataset.ticketId}:${cls}`;
-  }
-
-  // Otherwise compute a stable-ish key based on section + index
-  const sec = el.closest(".page-section");
-  const secId = sec?.id || "unknown";
-
-  const fieldsInSection = qsa("input, select, textarea", sec || document);
-  const idx = fieldsInSection.indexOf(el);
-  return `mkc:${secId}:field:${idx}`;
+  // Otherwise ensure a persistent uid on element
+  const u = ensureUID(el);
+  return `mkc:uid:${u}`;
 }
 
 function saveField(el){
-  if (!isField(el)) return;
-  const key = getFieldKey(el);
-  if (!key) return;
-
-  let val;
-  if (el.type === "checkbox") val = el.checked ? "1" : "0";
-  else val = el.value ?? "";
-
-  try { localStorage.setItem(key, val); } catch(e){}
+  try{
+    const key = getFieldKey(el);
+    let val = "";
+    if (el.type === "checkbox") val = el.checked ? "1" : "0";
+    else val = el.value ?? "";
+    localStorage.setItem(key, val);
+  }catch(e){}
 }
 
 function loadField(el){
-  if (!isField(el)) return;
-  const key = getFieldKey(el);
-  if (!key) return;
-
-  let val = null;
-  try { val = localStorage.getItem(key); } catch(e){}
-
-  if (val === null) return;
-
-  if (el.type === "checkbox") el.checked = (val === "1");
-  else el.value = val;
-
-  // Update placeholder styles
-  refreshGhostForSelect(el);
-  refreshDatePlaceholder(el);
-  autoGrowTextarea(el);
-}
-
-function clearFieldStorageInSection(section){
-  const fields = qsa("input, select, textarea", section);
-  fields.forEach(el => {
+  try{
     const key = getFieldKey(el);
-    if (!key) return;
-    try { localStorage.removeItem(key); } catch(e){}
-  });
+    const stored = localStorage.getItem(key);
+    if (stored === null) return;
+
+    if (el.type === "checkbox") el.checked = (stored === "1");
+    else el.value = stored;
+
+    // refresh placeholder styling
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+  }catch(e){}
 }
 
-function clearAllStorage(){
-  // Only clear keys that start with mkc:
-  const keys = [];
-  for (let i=0; i<localStorage.length; i++){
-    const k = localStorage.key(i);
-    if (k && k.startsWith("mkc:")) keys.push(k);
-  }
-  keys.forEach(k => { try { localStorage.removeItem(k); } catch(e){} });
+function clearFieldStorage(el){
+  try{
+    const key = getFieldKey(el);
+    localStorage.removeItem(key);
+  }catch(e){}
 }
 
 /* ---------------------------
-   Ghost placeholders
+   Ghost placeholder support
 --------------------------- */
-function refreshGhostForSelect(el){
-  if (!el || el.tagName !== "SELECT") return;
+function applySelectGhost(sel){
+  if (!sel || sel.tagName !== "SELECT") return;
 
-  // Treat empty value or first option w/ data-ghost as placeholder
-  const opt = el.options?.[el.selectedIndex];
-  const isGhost = (!el.value) || (opt && opt.getAttribute("data-ghost") === "true");
-
-  if (isGhost) el.classList.add("is-placeholder");
-  else el.classList.remove("is-placeholder");
+  // Ghost if:
+  // - value empty OR selected option has data-ghost="true"
+  const opt = sel.selectedOptions && sel.selectedOptions[0];
+  const ghost = (!sel.value) || (opt && opt.dataset && opt.dataset.ghost === "true");
+  if (ghost) sel.classList.add("is-placeholder");
+  else sel.classList.remove("is-placeholder");
 }
 
-function refreshDatePlaceholder(el){
-  if (!el || el.tagName !== "INPUT" || el.type !== "date") return;
-  if (!el.value) el.classList.add("is-placeholder");
-  else el.classList.remove("is-placeholder");
+function applyDateGhost(input){
+  if (!input || input.type !== "date") return;
+  // If empty show placeholder color class; your CSS handles .is-placeholder
+  if (!input.value) input.classList.add("is-placeholder");
+  else input.classList.remove("is-placeholder");
 }
 
 /* ---------------------------
    Textarea auto-grow
 --------------------------- */
-function autoGrowTextarea(el){
-  if (!el || el.tagName !== "TEXTAREA") return;
-  el.style.height = "auto";
-  el.style.height = `${el.scrollHeight}px`;
+function autoGrowTA(ta){
+  if (!ta) return;
+  // auto-grow without jumping
+  ta.style.height = "auto";
+  ta.style.height = (ta.scrollHeight + 2) + "px";
 }
 
-/* ---------------------------
-   Notes: 2x2 card height sync + textarea fill
-   Applies to `.cards-grid.two-col` rows
---------------------------- */
-function syncNotesRowHeights(){
-  const rows = qsa(".cards-grid.two-col");
-  rows.forEach(row => {
-    const cards = qsa(".section-block", row);
-    if (cards.length !== 2) return;
-
-    // Reset heights before measuring
-    cards.forEach(c => c.style.minHeight = "");
-
-    // Measure max
-    const maxH = Math.max(...cards.map(c => c.getBoundingClientRect().height));
-
-    // Apply
-    cards.forEach(c => c.style.minHeight = `${maxH}px`);
-
-    // Make textarea fill remaining space if card has just one textarea or notes-block
-    cards.forEach(c => {
-      const ta = qs("textarea", c);
-      if (!ta) return;
-
-      // If multiple inputs exist, don’t force fill
-      const otherFields = qsa("input, select", c);
-      if (otherFields.length > 0) return;
-
-      // Fill behavior
-      c.style.display = "flex";
-      c.style.flexDirection = "column";
-
-      // Make textarea grow
-      ta.style.flex = "1 1 auto";
-      ta.style.minHeight = "120px";
-      // keep auto-grow pleasant (still allow larger)
-      autoGrowTextarea(ta);
+function initTextareas(root=document){
+  qsa("textarea", root).forEach(ta=>{
+    autoGrowTA(ta);
+    ta.addEventListener("input", ()=>{
+      autoGrowTA(ta);
+      saveField(ta);
+      // optional card height sync after growth
+      requestAnimationFrame(syncTwoColHeights);
     });
   });
 }
 
 /* ---------------------------
-   Sidebar navigation
+   Optional 2-col height sync (safe)
+   - only for .cards-grid.two-col and .two-col-grid rows
 --------------------------- */
-function initSidebarNav(){
-  const buttons = qsa(".nav-btn");
+function syncTwoColHeights(){
+  // You said you already have JS-driven height sync elsewhere — this is safe
+  // and will not fight your CSS because cards are flex columns.
+  const grids = qsa(".cards-grid.two-col, .two-col-grid");
+  grids.forEach(grid=>{
+    const cards = qsa(":scope > .section-block", grid);
+    if (cards.length < 2) return;
+
+    // reset
+    cards.forEach(c=> c.style.minHeight = "");
+
+    // pair up by row: 2 columns layout
+    for (let i=0; i<cards.length; i+=2){
+      const a = cards[i];
+      const b = cards[i+1];
+      if (!a || !b) continue;
+      const h = Math.max(a.offsetHeight, b.offsetHeight);
+      a.style.minHeight = h + "px";
+      b.style.minHeight = h + "px";
+    }
+  });
+}
+
+/* ---------------------------
+   Page Navigation
+--------------------------- */
+function showSection(id){
   const sections = qsa(".page-section");
+  sections.forEach(s=> s.classList.remove("active"));
+  const target = qs(`#${id}`);
+  if (target) target.classList.add("active");
 
-  function activateSection(targetId){
-    sections.forEach(sec => sec.classList.toggle("active", sec.id === targetId));
-    buttons.forEach(btn => btn.classList.toggle("active", btn.dataset.target === targetId));
-    // after layout change
-    requestAnimationFrame(syncNotesRowHeights);
-  }
+  // update nav
+  qsa(".nav-btn").forEach(btn=>{
+    const to = btn.getAttribute("data-target");
+    btn.classList.toggle("active", to === id);
+  });
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      if (target) activateSection(target);
+  // re-sync heights for visible section
+  requestAnimationFrame(()=>{
+    initTextareas(target || document);
+    syncTwoColHeights();
+  });
+
+  // remember last page
+  try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
+}
+
+function initNav(){
+  qsa(".nav-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const target = btn.getAttribute("data-target");
+      if (target) showSection(target);
     });
   });
+
+  // default to last page if present
+  const last = localStorage.getItem("mkc:lastPage");
+  if (last && qs(`#${last}`)) showSection(last);
+  else{
+    // if one is already active, keep it; otherwise show first
+    const active = qs(".page-section.active");
+    if (!active){
+      const first = qs(".page-section");
+      if (first && first.id) showSection(first.id);
+    }
+  }
 }
 
 /* ---------------------------
-   Dealership name mirror to topbar
---------------------------- */
-function initDealershipNameMirror(){
-  const input = qs("#dealershipNameInput");
-  const display = qs("#dealershipNameDisplay");
-  if (!input || !display) return;
-
-  const update = () => { display.textContent = input.value.trim(); };
-
-  input.addEventListener("input", () => {
-    update();
-    saveField(input);
-  });
-
-  // Load saved value then update
-  loadField(input);
-  update();
-}
-
-/* ---------------------------
-   Universal autosave listeners
---------------------------- */
-function initAutosave(){
-  // Load everything initially
-  qsa("input, select, textarea").forEach(el => loadField(el));
-
-  // Attach listeners
-  document.addEventListener("input", (e) => {
-    const el = e.target;
-    if (!isField(el)) return;
-
-    if (el.tagName === "TEXTAREA") autoGrowTextarea(el);
-    if (el.tagName === "SELECT") refreshGhostForSelect(el);
-    if (el.tagName === "INPUT" && el.type === "date") refreshDatePlaceholder(el);
-
-    saveField(el);
-    // keep layout pretty
-    if (el.tagName === "TEXTAREA") requestAnimationFrame(syncNotesRowHeights);
-  });
-
-  document.addEventListener("change", (e) => {
-    const el = e.target;
-    if (!isField(el)) return;
-
-    if (el.tagName === "SELECT") refreshGhostForSelect(el);
-    if (el.tagName === "INPUT" && el.type === "date") refreshDatePlaceholder(el);
-
-    saveField(el);
-    requestAnimationFrame(syncNotesRowHeights);
-  });
-
-  // Initialize placeholder styles
-  qsa("select").forEach(refreshGhostForSelect);
-  qsa('input[type="date"]').forEach(refreshDatePlaceholder);
-  qsa("textarea").forEach(autoGrowTextarea);
-}
-
-/* ---------------------------
-   Reset Page + Clear All
+   Reset This Page / Clear All
 --------------------------- */
 function resetSection(section){
   if (!section) return;
 
-  // Remove dynamic clones inside this section
-  // Additional trainers clones
-  qsa('[data-clone="true"]', section).forEach(n => n.remove());
+  // Clear all fields in section
+  qsa("input, select, textarea", section).forEach(el=>{
+    if (!isField(el)) return;
 
-  // Remove dynamically added ticket cards (non-base)
-  qsa('.ticket-group', section).forEach(card => {
-    if (card.dataset.base !== "true") card.remove();
-  });
+    // clear storage key
+    clearFieldStorage(el);
 
-  // Remove dynamically added additional POC cards (non-base)
-  qsa(".additional-poc-card", section).forEach(card => {
-    if (card.dataset.base !== "true") card.remove();
-  });
-
-  // Reset fields
-  const fields = qsa("input, select, textarea", section);
-  fields.forEach(el => {
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
-    saveField(el); // will overwrite
-    // remove from storage too (clean slate)
-    const key = getFieldKey(el);
-    if (key) { try { localStorage.removeItem(key); } catch(e){} }
 
-    refreshGhostForSelect(el);
-    refreshDatePlaceholder(el);
-    autoGrowTextarea(el);
-  });
-
-  // Re-lock any “forced Open” ticket base status
-  // (Support Tickets module also handles this, but safe here)
-  qsa(".ticket-status-select", section).forEach(sel => {
-    const card = sel.closest(".ticket-group");
-    if (card && card.dataset.base === "true"){
-      sel.value = "Open";
-      sel.disabled = true;
+    if (el.tagName === "SELECT"){
+      // set to first option if exists
+      if (el.options && el.options.length) el.selectedIndex = 0;
+      applySelectGhost(el);
     }
+
+    if (el.type === "date") applyDateGhost(el);
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
   });
 
-  requestAnimationFrame(syncNotesRowHeights);
+  // Remove dynamic rows/cards inside section (keep base rows/cards)
+  // Training tables: keep first 3 rows if you authored them, remove anything with data-clone
+  qsa("[data-clone='true']", section).forEach(n=> n.remove());
+
+  // Additional trainers container: remove everything
+  const atc = qs("#additionalTrainersContainer", section);
+  if (atc) atc.innerHTML = "";
+
+  // Support tickets: keep base card in Open, wipe other containers
+  if (section.id === "support-tickets"){
+    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"].forEach(id=>{
+      const c = qs(`#${id}`, section);
+      if (c) c.innerHTML = "";
+    });
+
+    // open container: remove all non-base cards
+    const open = qs("#openTicketsContainer", section);
+    if (open){
+      qsa(".ticket-group", open).forEach(card=>{
+        if (card.dataset.base === "true") return;
+        card.remove();
+      });
+      // clear base card fields
+      const base = qs(".ticket-group[data-base='true']", open);
+      if (base){
+        qsa("input, textarea, select", base).forEach(el=>{
+          clearFieldStorage(el);
+          if (el.type === "checkbox") el.checked = false;
+          else el.value = "";
+          if (el.tagName === "SELECT") applySelectGhost(el);
+        });
+      }
+    }
+  }
+
+  // DMS: nothing special to remove
+
+  requestAnimationFrame(()=>{
+    initTextareas(section);
+    syncTwoColHeights();
+  });
 }
 
-function initResetButtons(){
-  // Reset This Page
-  qsa(".clear-page-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const section = btn.closest(".page-section");
-      if (!section) return;
-      if (confirm("Reset this page? This will clear fields and remove added rows on this page.")){
-        resetSection(section);
-      }
+function initResets(){
+  // Reset this page (per section)
+  qsa(".clear-page-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const sec = btn.closest(".page-section");
+      if (!sec) return;
+      resetSection(sec);
     });
   });
 
-  // Clear All
-  const clearAllBtn = qs("#clearAllBtn");
-  if (clearAllBtn){
-    clearAllBtn.addEventListener("click", () => {
-      if (!confirm("Clear ALL pages? This will erase all saved progress.")) return;
+  // Clear All (sidebar button)
+  const clearAll = qs("#clearAllBtn");
+  if (clearAll){
+    clearAll.addEventListener("click", ()=>{
+      // clear all mkc:* keys
+      try{
+        const keys = [];
+        for (let i=0; i<localStorage.length; i++){
+          const k = localStorage.key(i);
+          if (k && k.startsWith("mkc:")) keys.push(k);
+        }
+        keys.forEach(k=> localStorage.removeItem(k));
+      }catch(e){}
 
-      clearAllStorage();
+      // full DOM reset
+      qsa(".page-section").forEach(sec=> resetSection(sec));
 
-      // Remove all clones everywhere
-      qsa('[data-clone="true"]').forEach(n => n.remove());
-      qsa(".additional-poc-card").forEach(card => {
-        if (card.dataset.base !== "true") card.remove();
-      });
-      qsa(".ticket-group").forEach(card => {
-        if (card.dataset.base !== "true") card.remove();
-      });
-
-      // Reset all fields
-      qsa("input, select, textarea").forEach(el => {
-        if (el.type === "checkbox") el.checked = false;
-        else el.value = "";
-        refreshGhostForSelect(el);
-        refreshDatePlaceholder(el);
-        autoGrowTextarea(el);
-      });
-
-      // Clear topbar dealership display
-      const disp = qs("#dealershipNameDisplay");
-      if (disp) disp.textContent = "";
-
-      requestAnimationFrame(syncNotesRowHeights);
+      // also clear last page
+      try{ localStorage.removeItem("mkc:lastPage"); }catch(e){}
     });
   }
 }
 
 /* ---------------------------
-   Dynamic row: Additional Trainers
-   Base row: .checklist-row.integrated-plus.indent-sub[data-base="true"]
-   Inject into: #additionalTrainersContainer
+   Load/save all static fields
 --------------------------- */
+function initPersistence(){
+  // Ensure every field has stable uid if needed + load stored values
+  qsa("input, select, textarea").forEach(el=>{
+    if (!isField(el)) return;
+    // create UID early for dynamic clones too
+    ensureUID(el);
+    loadField(el);
+  });
+
+  // Save on input/change
+  document.addEventListener("input", (e)=>{
+    const el = e.target;
+    if (!isField(el)) return;
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+
+    // dealership name display (if field exists)
+    if (el.id === "dealershipNameInput"){
+      updateDealershipNameDisplay(el.value);
+    }
+  });
+
+  document.addEventListener("change", (e)=>{
+    const el = e.target;
+    if (!isField(el)) return;
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
+}
+
+function initGhosts(){
+  qsa("select").forEach(applySelectGhost);
+  qsa("input[type='date']").forEach(applyDateGhost);
+}
+
+/* ---------------------------
+   Training tables: Add Row (+)
+--------------------------- */
+function cloneTrainingRow(row){
+  const clone = row.cloneNode(true);
+  clone.dataset.clone = "true";
+
+  // clear & re-uid all fields
+  qsa("input, select, textarea", clone).forEach(el=>{
+    if (!isField(el)) return;
+    // remove old id/name? keep structure; we rely on data-uid
+    el.value = "";
+    if (el.type === "checkbox") el.checked = false;
+    ensureUID(el);
+    applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el); // saves blank (optional)
+  });
+
+  return clone;
+}
+
+function initTableAddRow(){
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".table-footer .add-row");
+    if (!btn) return;
+
+    const container = btn.closest(".table-container");
+    const table = qs("table.training-table", container);
+    const tbody = qs("tbody", table);
+    if (!tbody) return;
+
+    // Use last row as template
+    const last = tbody.querySelector("tr:last-child");
+    if (!last) return;
+
+    const clone = cloneTrainingRow(last);
+    tbody.appendChild(clone);
+
+    // Scroll to show new row
+    clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
+
+    requestAnimationFrame(()=>{
+      initTextareas(container);
+      syncTwoColHeights();
+    });
+  });
+}
+
+/* ---------------------------
+   Trainers page: Additional Trainers (+)
+   HTML base row has:
+   <div class="checklist-row integrated-plus indent-sub" data-base="true"> ... <button class="add-row">+</button>
+   and a container: #additionalTrainersContainer
+--------------------------- */
+function createAdditionalTrainerRow(){
+  const row = document.createElement("div");
+  row.className = "checklist-row integrated-plus indent-sub trainer-clone";
+  row.dataset.clone = "true";
+  row.innerHTML = `
+    <label>Additional Trainer</label>
+    <input type="text" placeholder="Enter additional trainer name">
+  `;
+
+  // UID for input
+  const input = qs("input", row);
+  if (input){
+    ensureUID(input);
+    loadField(input);
+  }
+  return row;
+}
+
 function initAdditionalTrainers(){
-  const base = qs('#trainers-deployment .checklist-row.integrated-plus[data-base="true"]');
-  const container = qs("#additionalTrainersContainer");
-  if (!base || !container) return;
+  const page = qs("#trainers-deployment");
+  if (!page) return;
 
-  const addBtn = qs("button.add-row", base);
-  const baseInput = qs('input[type="text"]', base);
-  if (!addBtn || !baseInput) return;
+  // Mark base row (so your CSS locks it)
+  const baseRow = qs(".checklist-row.integrated-plus[data-base='true']", page);
+  if (baseRow) baseRow.classList.add("trainer-base");
 
-  addBtn.addEventListener("click", () => {
-    if (!baseInput.value.trim()){
-      alert("Enter an additional trainer name before adding another.");
+  page.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(".checklist-row.integrated-plus[data-base='true'] .add-row");
+    if (!addBtn) return;
+
+    const container = qs("#additionalTrainersContainer", page);
+    if (!container) return;
+
+    const baseInput = qs("input[type='text']", baseRow);
+    // Optional: require base input filled before allowing clone
+    if (baseInput && !safeTrim(baseInput.value)){
       baseInput.focus();
       return;
     }
 
-    // clone row
-    const clone = base.cloneNode(true);
-    clone.dataset.clone = "true";
-    clone.dataset.base = "false";
-
-    // remove +, replace with X
-    const btn = qs("button.add-row", clone);
-    if (btn){
-      btn.textContent = "✕";
-      btn.title = "Remove trainer";
-      btn.addEventListener("click", () => {
-        // remove storage for fields in clone before removing
-        qsa("input, select, textarea", clone).forEach(el => {
-          const key = getFieldKey(el);
-          if (key) { try { localStorage.removeItem(key); } catch(e){} }
-        });
-        clone.remove();
-        requestAnimationFrame(syncNotesRowHeights);
-      });
-    }
-
-    // clear input in clone for user to add another, BUT keep the one they typed in base by moving value
-    const cloneInput = qs('input[type="text"]', clone);
-    if (cloneInput){
-      cloneInput.value = baseInput.value;
-      baseInput.value = "";
-      saveField(baseInput);
-      saveField(cloneInput);
-    }
-
-    container.appendChild(clone);
-    requestAnimationFrame(syncNotesRowHeights);
+    const newRow = createAdditionalTrainerRow();
+    container.appendChild(newRow);
+    const input = qs("input", newRow);
+    if (input) input.focus();
   });
 }
 
 /* ---------------------------
-   Dynamic cards: Additional POC
-   Base: .additional-poc-card[data-base="true"]
-   Add button: .additional-poc-add
+   Primary Contacts: Additional POC (+) (if present)
+   Looks for .mini-card.additional-poc-card and a base integrated-plus row.
 --------------------------- */
 function initAdditionalPOC(){
-  const base = qs('.additional-poc-card[data-base="true"]');
-  if (!base) return;
+  // Event delegation: any .additional-poc-card base row + button
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
+    if (!btn) return;
 
-  const addBtn = qs(".additional-poc-add", base);
-  if (!addBtn) return;
+    const baseCard = btn.closest(".additional-poc-card");
+    if (!baseCard) return;
 
-  addBtn.addEventListener("click", () => {
-    // Require name before adding another
-    const nameInput = qs('input[type="text"]', qs(".integrated-plus", base) || base);
-    if (nameInput && !nameInput.value.trim()){
-      alert("Enter the Additional POC name before adding another contact.");
-      nameInput.focus();
-      return;
-    }
+    // Find the list/container this card lives in
+    const grid = baseCard.parentElement;
+    if (!grid) return;
 
-    const clone = base.cloneNode(true);
-    clone.dataset.base = "false";
+    // Clone the card
+    const clone = baseCard.cloneNode(true);
     clone.dataset.clone = "true";
+    clone.removeAttribute("data-base");
 
-    // Replace + with remove
-    const btn = qs(".additional-poc-add", clone);
-    if (btn){
-      btn.textContent = "✕";
-      btn.title = "Remove contact";
-      btn.classList.add("remove-poc-btn");
-      btn.addEventListener("click", () => {
-        qsa("input, select, textarea", clone).forEach(el => {
-          const key = getFieldKey(el);
-          if (key) { try { localStorage.removeItem(key); } catch(e){} }
-        });
-        clone.remove();
-        requestAnimationFrame(syncNotesRowHeights);
-      });
-    }
+    // Remove + button row button inside clone
+    const addBtn = qs(".additional-poc-add, .add-row", clone);
+    if (addBtn) addBtn.remove();
 
-    // Clear inputs in clone (it’s a new contact)
-    qsa("input, textarea", clone).forEach(el => {
+    // Clear all inputs in clone and assign uids
+    qsa("input, select, textarea", clone).forEach(el=>{
+      if (!isField(el)) return;
       if (el.type === "checkbox") el.checked = false;
       else el.value = "";
-    });
-    qsa("select", clone).forEach(sel => {
-      sel.value = "";
-      refreshGhostForSelect(sel);
+      ensureUID(el);
+      applySelectGhost(el);
+      if (el.type === "date") applyDateGhost(el);
     });
 
-    base.parentElement.appendChild(clone);
-    requestAnimationFrame(syncNotesRowHeights);
+    grid.appendChild(clone);
+    const firstInput = qs("input, select, textarea", clone);
+    if (firstInput) firstInput.focus();
   });
 }
 
 /* ---------------------------
-   Table add-row buttons
-   Supports:
-   - Any .table-container with a .table-footer button.add-row
-   - Clones the last <tr> in <tbody>
+   Support Tickets
+   - Add/Remove
+   - Validation FIX (scoped to clicked card)
+   - Status change moves card between columns
 --------------------------- */
-function cloneTableRow(table){
-  const tbody = qs("tbody", table);
-  if (!tbody) return null;
+function statusToContainerId(status){
+  switch(status){
+    case "Open": return "openTicketsContainer";
+    case "Tier Two": return "tierTwoTicketsContainer";
+    case "Closed - Resolved": return "closedResolvedTicketsContainer";
+    case "Closed - Feature Not Supported": return "closedFeatureTicketsContainer";
+    default: return "openTicketsContainer";
+  }
+}
 
-  const rows = qsa("tr", tbody);
-  if (!rows.length) return null;
+function lockOpenSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.value = "Open";
+  sel.disabled = true;
+}
 
-  const last = rows[rows.length - 1];
-  const clone = last.cloneNode(true);
+function unlockStatusSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.disabled = false;
+}
 
-  // Clear values in clone
-  qsa("input, select, textarea", clone).forEach(el => {
+function isTicketCardComplete(card){
+  const num = safeTrim(qs(".ticket-number-input", card)?.value);
+  const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
+  const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
+  return !!(num && url && sum);
+}
+
+function makeTicketCloneFromBase(baseCard){
+  const clone = baseCard.cloneNode(true);
+  clone.dataset.clone = "true";
+  clone.removeAttribute("data-base");
+
+  // clear values
+  qsa("input, textarea, select", clone).forEach(el=>{
+    if (!isField(el)) return;
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
-    refreshGhostForSelect(el);
-    refreshDatePlaceholder(el);
-    autoGrowTextarea(el);
+    ensureUID(el);
+    applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
   });
 
-  // Mark it dynamic so reset can remove
-  clone.dataset.clone = "true";
-  tbody.appendChild(clone);
+  // remove disclaimer from clones
+  const disc = qs(".ticket-disclaimer", clone);
+  if (disc) disc.remove();
+
+  // convert + to X
+  const addBtn = qs(".add-ticket-btn", clone);
+  if (addBtn){
+    addBtn.textContent = "×";
+    addBtn.title = "Remove Ticket";
+    addBtn.classList.add("remove-ticket-btn");
+    addBtn.classList.remove("add-ticket-btn");
+  }
+
+  // status select should be editable on clones
+  unlockStatusSelect(clone);
+
   return clone;
 }
 
-function initTableAddRowButtons(){
-  qsa(".table-footer .add-row").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const container = btn.closest(".table-container");
-      const table = qs("table", container);
-      if (!table) return;
-      const newRow = cloneTableRow(table);
-      if (newRow){
-        // Focus first text input if exists
-        const firstText = qs('input[type="text"]', newRow) || qs("input:not([type='checkbox'])", newRow);
-        firstText?.focus();
-      }
-      requestAnimationFrame(syncNotesRowHeights);
-    });
+function moveTicketCard(card, newStatus){
+  const page = qs("#support-tickets");
+  if (!page || !card) return;
+
+  const destId = statusToContainerId(newStatus);
+  const dest = qs(`#${destId}`, page);
+  if (!dest) return;
+
+  dest.appendChild(card);
+
+  // lock Open base card select
+  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
+    lockOpenSelect(card);
+  }else{
+    unlockStatusSelect(card);
+  }
+}
+
+function initSupportTickets(){
+  const page = qs("#support-tickets");
+  if (!page) return;
+
+  // Ensure base "Open" card is locked Open
+  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
+  if (openBase) lockOpenSelect(openBase);
+
+  // Delegated click handler for add/remove
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(".add-ticket-btn");
+    const removeBtn = e.target.closest(".remove-ticket-btn");
+    if (!addBtn && !removeBtn) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // REMOVE
+    if (removeBtn){
+      // also clear stored values for fields inside removed card
+      qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
+      card.remove();
+      return;
+    }
+
+    // ADD — validate only this card (FIX)
+    if (!isTicketCardComplete(card)){
+      alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
+      return;
+    }
+
+    // base card to clone from (always use the Open base if present)
+    const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
+
+    const newCard = makeTicketCloneFromBase(base);
+
+    // append to Open by default
+    const openContainer = qs("#openTicketsContainer", page);
+    if (openContainer) openContainer.appendChild(newCard);
+
+    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
+  });
+
+  // Delegated change handler for status moves
+  document.addEventListener("change", (e)=>{
+    const sel = e.target.closest("#support-tickets .ticket-status-select");
+    if (!sel) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    const val = sel.value;
+
+    // If base card, keep it Open + locked
+    if (card.dataset.base === "true"){
+      lockOpenSelect(card);
+      return;
+    }
+
+    moveTicketCard(card, val);
   });
 }
 
 /* ---------------------------
-   Google Maps updater
+   Dealership Name display + Map
 --------------------------- */
-function buildMapsEmbedUrl(address){
-  const q = encodeURIComponent(address);
-  return `https://www.google.com/maps?q=${q}&z=14&output=embed`;
+function updateDealershipNameDisplay(name){
+  const display = qs("#dealershipNameDisplay");
+  if (!display) return;
+  display.textContent = safeTrim(name);
+  try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
+}
+
+function restoreDealershipNameDisplay(){
+  const v = localStorage.getItem("mkc:dealershipNameDisplay");
+  if (!v) return;
+  updateDealershipNameDisplay(v);
 }
 
 function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame");
+  // If you have an iframe with id="dealershipMapFrame" or similar
+  const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
   if (!frame) return;
-  frame.src = buildMapsEmbedUrl(address);
+
+  const q = encodeURIComponent(address);
+  // Uses Google Maps embed "search" style
+  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+
+  // persist last map address
+  try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
 }
 
-function initMapFeatures(){
-  const addressInput = qs("#dealershipAddressInput");
-  const openBtn = qs("#openAddressInMapsBtn");
-  if (!addressInput || !openBtn) return;
-
-  // Update embed when user leaves field
-  addressInput.addEventListener("change", () => {
-    const addr = addressInput.value.trim();
-    if (addr) updateDealershipMap(addr);
-  });
-
-  openBtn.addEventListener("click", () => {
-    const addr = addressInput.value.trim();
-    if (!addr){
-      alert("Enter an address first.");
-      addressInput.focus();
-      return;
-    }
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  });
-
-  // If already saved, loadField() will populate; then update embed
-  loadField(addressInput);
-  if (addressInput.value.trim()){
-    updateDealershipMap(addressInput.value.trim());
-  }
+function restoreDealershipMap(){
+  const addr = localStorage.getItem("mkc:dealershipMapAddress");
+  if (addr) updateDealershipMap(addr);
 }
 
 /* ---------------------------
-   HARD JS-injected CSS patch
-   (Fix “inputs too wide” / overflow edge cases)
+   PDF Export (Save All Pages)
+   Requires:
+   - html2canvas
+   - jsPDF
 --------------------------- */
-function injectCssPatch(){
-  const css = `
-  /* JS Patch: prevent runaway widths */
-  .checklist-row input,
-  .checklist-row select,
-  .checklist-row textarea{
-    max-width:100%;
-    box-sizing:border-box;
-  }
-  .training-table input,
-  .training-table select{
-    max-width:100%;
-    box-sizing:border-box;
-  }
-  .address-input-wrap{
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-  .address-input-wrap .address-input{
-    flex:1 1 auto;
-    min-width:0;
-  }
-  .scroll-wrapper{
-    overflow:auto;
-  }
-  `;
-  const style = document.createElement("style");
-  style.id = "mkc-js-css-patch";
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-/* ---------------------------
-   Support Tickets module
-   - Add/validate
-   - Move by status
-   - Persist (single JSON key)
---------------------------- */
-(function supportTicketsModule(){
-  const STORAGE_KEY = "mkc:supportTickets:v1";
-
-  const STATUS_TO_CONTAINER_ID = {
-    "Open": "openTicketsContainer",
-    "Tier Two": "tierTwoTicketsContainer",
-    "Closed - Resolved": "closedResolvedTicketsContainer",
-    "Closed - Feature Not Supported": "closedFeatureTicketsContainer",
-  };
-
-  function statusToContainerId(status){
-    return STATUS_TO_CONTAINER_ID[status] || "openTicketsContainer";
-  }
-
-  function buildCardId(){
-    return `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
-  }
-
-  function isComplete(card){
-    const num = card.querySelector(".ticket-number-input")?.value?.trim() || "";
-    const url = card.querySelector(".ticket-zendesk-input")?.value?.trim() || "";
-    const sum = card.querySelector(".ticket-summary-input")?.value?.trim() || "";
-    return Boolean(num && url && sum);
-  }
-
-  function setCardStatus(card, status, { lockOpen=false } = {}){
-    const sel = card.querySelector(".ticket-status-select");
-    if (!sel) return;
-
-    sel.value = status;
-
-    if (lockOpen && status === "Open"){
-      sel.disabled = true;
-      sel.setAttribute("aria-disabled", "true");
-      sel.dataset.locked = "true";
-    } else {
-      sel.disabled = false;
-      sel.removeAttribute("aria-disabled");
-      delete sel.dataset.locked;
-    }
-  }
-
-  function moveCardToStatus(card, status){
-    const containerId = statusToContainerId(status);
-    const container = qs(`#${containerId}`);
-    if (!container) return;
-
-    if (status === "Open") setCardStatus(card, "Open", { lockOpen:true });
-    else setCardStatus(card, status, { lockOpen:false });
-
-    container.appendChild(card);
-  }
-
-  function debounce(fn, wait){
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(null, args), wait);
-    };
-  }
-
-  function serialize(){
-    const allCards = qsa(".ticket-group");
-    return allCards.map(card => {
-      const id = card.dataset.ticketId || buildCardId();
-      card.dataset.ticketId = id;
-
-      const statusSel = card.querySelector(".ticket-status-select");
-      const status = statusSel?.value || "Open";
-
-      return {
-        id,
-        isBase: card.dataset.base === "true",
-        status,
-        ticketNumber: card.querySelector(".ticket-number-input")?.value || "",
-        zendeskUrl: card.querySelector(".ticket-zendesk-input")?.value || "",
-        summary: card.querySelector(".ticket-summary-input")?.value || "",
-      };
-    });
-  }
-
-  function persist(){
-    try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize()));
-    }catch(e){}
-  }
-
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : null;
-    }catch(e){
-      return null;
-    }
-  }
-
-  function normalizeBaseCard(base){
-    if (!base.dataset.ticketId) base.dataset.ticketId = buildCardId();
-
-    // Base always Open + locked
-    setCardStatus(base, "Open", { lockOpen:true });
-
-    // Wire add button
-    const addBtn = base.querySelector(".add-ticket-btn");
-    if (addBtn){
-      addBtn.addEventListener("click", () => {
-        if (!isComplete(base)){
-          base.classList.add("ticket-incomplete");
-          alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
-          return;
-        }
-        base.classList.remove("ticket-incomplete");
-
-        const newCard = cloneFromBase(base);
-
-        // Clear base after cloning (comment out if you want base to keep its values)
-        base.querySelector(".ticket-number-input").value = "";
-        base.querySelector(".ticket-zendesk-input").value = "";
-        base.querySelector(".ticket-summary-input").value = "";
-
-        persist();
-        newCard.querySelector(".ticket-number-input")?.focus();
-      });
-    }
-
-    base.addEventListener("input", debounce(persist, 250));
-    base.addEventListener("change", debounce(persist, 250));
-  }
-
-  function cloneFromBase(base){
-    const clone = base.cloneNode(true);
-    clone.dataset.base = "false";
-    clone.dataset.clone = "true";
-    clone.dataset.ticketId = buildCardId();
-    clone.classList.remove("ticket-incomplete");
-
-    // Remove disclaimer on clones
-    clone.querySelector(".ticket-disclaimer")?.remove();
-
-    // Replace + with remove
-    const btn = clone.querySelector(".add-ticket-btn");
-    if (btn){
-      btn.textContent = "✕";
-      btn.title = "Remove Ticket";
-      btn.classList.add("remove-ticket-btn");
-      btn.classList.remove("add-ticket-btn");
-      btn.addEventListener("click", () => {
-        if (confirm("Remove this ticket card?")){
-          // remove ticket-specific keys too
-          qsa("input, select, textarea", clone).forEach(el => {
-            const k = getFieldKey(el);
-            if (k) { try { localStorage.removeItem(k); } catch(e){} }
-          });
-          clone.remove();
-          persist();
-        }
-      });
-    }
-
-    // Enable status on clones and move on change
-    const statusSel = clone.querySelector(".ticket-status-select");
-    if (statusSel){
-      statusSel.disabled = false;
-      statusSel.addEventListener("change", () => {
-        moveCardToStatus(clone, statusSel.value || "Open");
-        persist();
-      });
-    }
-
-    // Persist + autosave fields
-    clone.addEventListener("input", debounce(persist, 250));
-    clone.addEventListener("change", debounce(persist, 250));
-
-    // Insert into Open by default
-    const openContainer = qs("#openTicketsContainer");
-    openContainer?.appendChild(clone);
-    moveCardToStatus(clone, "Open");
-
-    return clone;
-  }
-
-  function hydrate(data){
-    const openContainer = qs("#openTicketsContainer");
-    if (!openContainer) return;
-
-    const base = openContainer.querySelector('.ticket-group[data-base="true"]');
-    if (!base) return;
-
-    // remove existing non-base
-    qsa(".ticket-group").forEach(card => {
-      if (card.dataset.base !== "true") card.remove();
-    });
-
-    // apply base state if found
-    const baseState = data.find(x => x.isBase);
-    if (baseState){
-      base.dataset.ticketId = baseState.id || base.dataset.ticketId || buildCardId();
-      base.querySelector(".ticket-number-input").value = baseState.ticketNumber || "";
-      base.querySelector(".ticket-zendesk-input").value = baseState.zendeskUrl || "";
-      base.querySelector(".ticket-summary-input").value = baseState.summary || "";
-    }
-    moveCardToStatus(base, "Open");
-    normalizeBaseCard(base);
-
-    // rebuild clones
-    data.filter(x => !x.isBase).forEach(item => {
-      const card = base.cloneNode(true);
-      card.dataset.base = "false";
-      card.dataset.clone = "true";
-      card.dataset.ticketId = item.id || buildCardId();
-
-      card.querySelector(".ticket-disclaimer")?.remove();
-
-      // swap button to remove
-      const btn = card.querySelector(".add-ticket-btn");
-      if (btn){
-        btn.textContent = "✕";
-        btn.title = "Remove Ticket";
-        btn.classList.add("remove-ticket-btn");
-        btn.classList.remove("add-ticket-btn");
-        btn.addEventListener("click", () => {
-          if (confirm("Remove this ticket card?")){
-            card.remove();
-            persist();
-          }
-        });
-      }
-
-      // fill fields
-      card.querySelector(".ticket-number-input").value = item.ticketNumber || "";
-      card.querySelector(".ticket-zendesk-input").value = item.zendeskUrl || "";
-      card.querySelector(".ticket-summary-input").value = item.summary || "";
-
-      // status handler
-      const statusSel = card.querySelector(".ticket-status-select");
-      if (statusSel){
-        statusSel.disabled = false;
-        statusSel.addEventListener("change", () => {
-          moveCardToStatus(card, statusSel.value || "Open");
-          persist();
-        });
-      }
-
-      card.addEventListener("input", debounce(persist, 250));
-      card.addEventListener("change", debounce(persist, 250));
-
-      moveCardToStatus(card, item.status || "Open");
-    });
-  }
-
-  function initSupportTickets(){
-    const openContainer = qs("#openTicketsContainer");
-    if (!openContainer) return;
-
-    const base = openContainer.querySelector('.ticket-group[data-base="true"]');
-    if (!base) return;
-
-    normalizeBaseCard(base);
-
-    const saved = load();
-    if (saved) hydrate(saved);
-    else persist();
-  }
-
-  document.addEventListener("DOMContentLoaded", initSupportTickets);
-})();
-
-/* ---------------------------
-   Optional: Save PDF (if jsPDF + html2canvas are present)
-   Button: #savePDF
-   Strategy: capture each .page-section as an image
---------------------------- */
-async function saveAllPagesAsPDF(){
+async function exportAllPagesPDF(){
   const btn = qs("#savePDF");
-  if (btn) btn.disabled = true;
+  if (btn){
+    btn.disabled = true;
+    btn.textContent = "Saving PDF...";
+  }
 
-  try{
-    if (!window.jspdf?.jsPDF || !window.html2canvas){
-      alert("PDF export requires jsPDF + html2canvas loaded on the page.");
-      return;
+  // Snapshot each page section in order
+  const sections = qsa(".page-section");
+
+  // Temporarily show all sections for capture
+  const activeId = qs(".page-section.active")?.id;
+  sections.forEach(s=> s.classList.add("active"));
+
+  // Ensure layout settled
+  await new Promise(r=> setTimeout(r, 80));
+  syncTwoColHeights();
+  await new Promise(r=> setTimeout(r, 80));
+
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF || !window.html2canvas){
+    alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
+    // restore
+    sections.forEach(s=> s.classList.remove("active"));
+    if (activeId) showSection(activeId);
+    if (btn){
+      btn.disabled = false;
+      btn.textContent = "Save All Pages as PDF";
+    }
+    return;
+  }
+
+  const pdf = new jsPDF("p", "pt", "letter"); // 612x792
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+
+  let first = true;
+
+  for (const sec of sections){
+    // skip empty hidden sections? capture all
+    // Slight padding so shadow isn’t clipped
+    const canvas = await window.html2canvas(sec, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: -window.scrollY
+    });
+
+    const img = canvas.toDataURL("image/png");
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (!first) pdf.addPage();
+
+    // If content taller than one PDF page, slice it
+    if (imgH <= pageH){
+      pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
+    }else{
+      // slice canvas into multiple pages
+      let remaining = imgH;
+      let y = 0;
+
+      // Create a helper canvas for slicing
+      const sliceCanvas = document.createElement("canvas");
+      const ctx = sliceCanvas.getContext("2d");
+
+      const pxPerPt = canvas.width / imgW; // pixels per point
+      const pagePxH = Math.floor(pageH * pxPerPt);
+
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = pagePxH;
+
+      while (remaining > 0){
+        ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
+        ctx.drawImage(canvas, 0, y * pxPerPt, canvas.width, pagePxH, 0, 0, canvas.width, pagePxH);
+        const sliceImg = sliceCanvas.toDataURL("image/png");
+        pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
+
+        remaining -= pageH;
+        y += pageH;
+
+        if (remaining > 0) pdf.addPage();
+      }
     }
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "pt", "letter");
+    first = false;
+  }
 
-    const sections = qsa(".page-section");
-    const activeId = qs(".page-section.active")?.id;
+  pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
 
-    // Temporarily show all sections for capture
-    sections.forEach(sec => sec.classList.add("mkc-pdf-visible"));
-    sections.forEach(sec => sec.classList.add("active"));
+  // Restore only active section
+  sections.forEach(s=> s.classList.remove("active"));
+  if (activeId) showSection(activeId);
 
-    for (let i=0; i<sections.length; i++){
-      const sec = sections[i];
-      // Render
-      const canvas = await window.html2canvas(sec, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
-
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-
-      // Fit image to page width, maintain aspect
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, 0, imgW, imgH);
-    }
-
-    pdf.save("myKaarma_Training_Checklist.pdf");
-
-    // Restore active page
-    sections.forEach(sec => sec.classList.remove("active"));
-    if (activeId) qs(`#${activeId}`)?.classList.add("active");
-
-  } catch (e){
-    console.error(e);
-    alert("PDF export failed. Check console for details.");
-  } finally {
-    // Remove temp class
-    qsa(".page-section").forEach(sec => sec.classList.remove("mkc-pdf-visible"));
-    if (btn) btn.disabled = false;
+  if (btn){
+    btn.disabled = false;
+    btn.textContent = "Save All Pages as PDF";
   }
 }
 
-function initPDFButton(){
+function initPDF(){
   const btn = qs("#savePDF");
   if (!btn) return;
-  btn.addEventListener("click", saveAllPagesAsPDF);
+  btn.addEventListener("click", exportAllPagesPDF);
 }
 
 /* ---------------------------
-   Boot
+   Ensure support tickets + DMS integration aren't "broken"
+   (CSS issues are separate, but JS here prevents logic breakage)
 --------------------------- */
-function initApp(){
-  injectCssPatch();
-  initSidebarNav();
-  initAutosave();
-  initResetButtons();
-  initDealershipNameMirror();
-  initAdditionalTrainers();
-  initAdditionalPOC();
-  initTableAddRowButtons();
-  initMapFeatures();
-  initPDFButton();
-
-  // Post-layout sync
-  requestAnimationFrame(syncNotesRowHeights);
-  window.addEventListener("resize", () => requestAnimationFrame(syncNotesRowHeights));
+function initDMSIntegration(){
+  // Nothing required for the DMS cards (static),
+  // but we’ll ensure any selects inside get ghost styling
+  const page = qs("#dms-integration");
+  if (!page) return;
+  qsa("select", page).forEach(applySelectGhost);
 }
 
-document.addEventListener("DOMContentLoaded", initApp);
+/* ---------------------------
+   Init on DOM ready
+--------------------------- */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // Nav + active page
+  initNav();
+
+  // Ghost text
+  initGhosts();
+
+  // Persistence
+  initPersistence();
+
+  // Textareas + card height sync
+  initTextareas(document);
+  syncTwoColHeights();
+  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
+
+  // Reset behaviors
+  initResets();
+
+  // Training tables add row
+  initTableAddRow();
+
+  // Trainers additional trainers
+  initAdditionalTrainers();
+
+  // Primary contacts additional POC (if present)
+  initAdditionalPOC();
+
+  // Support tickets logic + validation fix + move cards by status
+  initSupportTickets();
+
+  // DMS integration hook
+  initDMSIntegration();
+
+  // Dealership display + map restore
+  restoreDealershipNameDisplay();
+  restoreDealershipMap();
+
+  // PDF
+  initPDF();
+
+  // Any date inputs should get placeholder style on load
+  qsa("input[type='date']").forEach(applyDateGhost);
+
+  // If you have a dealership name input, sync display on load
+  const dn = qs("#dealershipNameInput");
+  if (dn && safeTrim(dn.value)) updateDealershipNameDisplay(dn.value);
+});
+
+/* ---------------------------
+   Google Places callback (from your inline HTML)
+   NOTE: your HTML calls initAutocomplete() in global scope.
+   Leaving that in HTML is fine. This file does not override it.
+--------------------------- */
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
