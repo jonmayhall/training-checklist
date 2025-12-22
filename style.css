@@ -1338,6 +1338,11 @@ main{
   margin-left:auto;
 }
 
+/* Don't inject/position row-actions in integrated-plus rows */
+.checklist-row.integrated-plus > .row-actions{
+  display:none !important;
+}
+
 /* Make sure inputs don't fight the layout */
 .checklist-row select,
 .checklist-row input[type="text"],
@@ -1345,4 +1350,31 @@ main{
 .checklist-row input[type="email"],
 .checklist-row input[type="tel"]{
   margin-left:0 !important;
+}
+
+/* === CLICK FIX: prevent row-actions from overlaying the row === */
+.checklist-row{
+  position:relative;
+}
+
+.checklist-row .row-actions{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin-left:auto !important;
+
+  /* CRITICAL: do not allow it to stretch */
+  flex:0 0 auto !important;
+  width:auto !important;
+  max-width:none !important;
+}
+
+.checklist-row .row-actions *{
+  pointer-events:auto;
+}
+
+/* Make sure label area isn't covering the right controls */
+.checklist-row label{
+  flex:1 1 auto !important;
+  min-width:0 !important;
 }
