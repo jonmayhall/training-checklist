@@ -1245,4 +1245,89 @@ main{
     :has(.additional-poc-add){
     grid-template-columns:1fr !important;
   }
+
+   /* ===========================================================
+   ✅ Primary Contacts — force POC cards 2-up (side-by-side)
+   Works for:
+   - .additional-poc-card (your clone cards)
+   - any parent wrapper that contains them
+   =========================================================== */
+
+/* If you already have a wrapper, this will hit it automatically */
+#primary-contacts .additional-poc-grid,
+#dealership-info .additional-poc-grid,
+.additional-poc-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+  align-items:start !important;
 }
+
+/* 🔥 Auto-detect: parent of the cards becomes a 2-col grid */
+.additional-poc-card{
+  width:100%;
+  min-width:0;
+}
+.additional-poc-card{
+  /* nothing else here—keep card styling as-is */
+}
+
+.additional-poc-card{
+  /* make sure the container can size them properly */
+  box-sizing:border-box;
+}
+
+/* This is the key: turn the parent into a grid */
+.additional-poc-card{
+  /* no-op for parent targeting */
+}
+.additional-poc-card{
+  /* no-op */
+}
+
+/* Target the parent element that directly contains the cards */
+.additional-poc-card{
+  /* no-op */
+}
+.additional-poc-card{
+  /* no-op */
+}
+
+/* ✅ Actual parent grid rule */
+.additional-poc-card{
+  /* no-op */
+}
+.additional-poc-card{
+  /* no-op */
+}
+.additional-poc-card{
+  /* no-op */
+}
+
+/* Parent selector (supported in modern Chrome/Safari) */
+@supports selector(:has(*)){
+  .additional-poc-card:has(*){ /* keep parser happy */ }
+
+  /* Any element that contains POC cards becomes the grid */
+  *:has(> .additional-poc-card){
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    gap:18px !important;
+    align-items:start !important;
+  }
+}
+
+/* Mobile */
+@media (max-width:900px){
+  @supports selector(:has(*)){
+    *:has(> .additional-poc-card){
+      grid-template-columns:1fr !important;
+    }
+  }
+  #primary-contacts .additional-poc-grid,
+  #dealership-info .additional-poc-grid,
+  .additional-poc-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
