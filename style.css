@@ -1417,3 +1417,75 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   max-width:100% !important;
   box-sizing:border-box !important;
 }
+
+/* ===========================================================
+   FIX: Additional Trainers "+” row
+   - Restores the + button behavior/visibility
+   - Makes (input + button) = var(--input-width) total width
+   Put at VERY BOTTOM of style.css
+   =========================================================== */
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  overflow:visible !important;        /* ✅ don’t clip the + */
+}
+
+/* Label behaves like other rows */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  padding-right:16px !important;
+}
+
+/* ✅ Total right-side width matches other inputs:
+   input width = var(--input-width) - 34px
+   + button width = 34px
+   => combined = var(--input-width)
+*/
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+
+  display:flex !important;            /* ✅ ensure visible */
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  z-index:1 !important;
+}
+
+/* Mobile: let it stack naturally full width */
+@media (max-width:600px){
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+    flex-direction:column !important;
+    gap:8px !important;
+    align-items:stretch !important;
+  }
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+    width:100% !important;
+    flex:0 0 auto !important;
+    border-radius:var(--radius-sm) !important;
+  }
+  #trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+    width:100% !important;
+    min-width:0 !important;
+    border-radius:var(--radius-sm) !important;
+    margin-left:0 !important;
+  }
+}
