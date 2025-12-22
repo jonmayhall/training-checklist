@@ -1508,3 +1508,108 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af !importa
   resize:none;
   overflow:hidden;
 }
+
+/* ===========================================================
+   HARD FIX: Grid/Flex overflow causing "slightly too wide" cards
+   + Trainer / Additional POC input too wide
+   Put at VERY BOTTOM of style.css
+   =========================================================== */
+
+/* 1) Critical: allow 2-col grid children to shrink (prevents overflow) */
+.cards-grid.two-col,
+.two-col-grid,
+.primary-contacts-grid{
+  overflow-x:hidden !important;
+}
+
+.cards-grid.two-col > * ,
+.two-col-grid > * ,
+.primary-contacts-grid > *{
+  min-width:0 !important;   /* ✅ KEY FIX */
+  max-width:100% !important;
+}
+
+/* Ensure cards never exceed their grid cell */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.primary-contacts-grid > .mini-card,
+.primary-contacts-grid > .additional-poc-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+/* 2) Trainer additional row: force shrink behavior inside flex */
+#trainers-deployment #additionalTrainersContainer,
+#trainers-deployment #additionalTrainersContainer *{
+  min-width:0 !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+}
+
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus label{
+  flex:0 0 36% !important;
+  max-width:36% !important;
+  min-width:0 !important;
+  padding-right:12px !important;
+}
+
+/* ✅ KEY: this stops the "too wide" default trainer input */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  margin-left:0 !important;
+}
+
+/* + button must NOT stretch the row */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+}
+
+/* 3) Additional POC cards: same shrink rules (fix “slightly too wide”) */
+.primary-contacts-grid .mini-card,
+.primary-contacts-grid .additional-poc-card,
+.primary-contacts-grid .mini-card *{
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row{
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row label{
+  min-width:0 !important;
+}
+
+.mini-card.additional-poc-card .checklist-row input[type="text"],
+.mini-card.additional-poc-card .checklist-row input[type="tel"],
+.mini-card.additional-poc-card .checklist-row input[type="email"]{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Integrated + row inside POC cards must allow shrink */
+.mini-card.additional-poc-card .checklist-row.integrated-plus input[type="text"]{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:100% !important;
+}
