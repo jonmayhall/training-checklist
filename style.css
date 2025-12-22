@@ -1145,3 +1145,46 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* ===========================================================
+   PATCH — Dealership Info
+   1) Onsite Training Dates inputs got giant again
+   2) Primary/Additional POC cards back to 2x2
+   =========================================================== */
+
+/* 1) Force date inputs to NEVER stretch tall */
+.training-dates-row input[type="date"],
+.onsite-training-dates-row input[type="date"]{
+  height:34px !important;
+  max-height:34px !important;
+  min-height:34px !important;
+  line-height:normal !important;
+  flex:0 0 auto !important;
+  align-self:stretch;
+}
+
+/* If you’re using a wrapper like .date-stack, ensure it doesn't stretch weird */
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  align-self:flex-start !important;
+}
+
+/* 2) POC cards back to a 2x2 grid
+   (This targets the container that holds your .additional-poc-card cards.) */
+.additional-poc-card{
+  width:100%;
+  min-width:0;
+}
+
+/* Most builds have these cards inside a .cards-grid — force 2 columns when POC cards exist */
+.cards-grid:has(.additional-poc-card){
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:18px !important;
+}
+
+/* Responsive: keep 1 column on smaller screens */
+@media (max-width:900px){
+  .cards-grid:has(.additional-poc-card){
+    grid-template-columns:1fr !important;
+  }
+}
