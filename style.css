@@ -1586,3 +1586,27 @@ main{
 #mkTableModal .mk-modal-body .training-table{
   min-width:1400px; /* show more columns without feeling cramped */
 }
+
+/* ===========================================================
+   TABLE MODAL — compact / dense mode (POPUP ONLY)
+=========================================================== */
+
+#mkTableModal .training-table th,
+#mkTableModal .training-table td{
+  font-size:11px;
+  padding:4px 4px;
+  line-height:1.15;
+}
+
+#mkTableModal .training-table input[type="text"],
+#mkTableModal .training-table select{
+  font-size:11px;
+  height:24px;
+  padding:2px 4px;
+  min-width:140px;
+}
+
+/* tighten header */
+#mkTableModal .training-table th{
+  white-space:nowrap;
+}
