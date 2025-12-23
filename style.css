@@ -1999,3 +1999,44 @@ main{
   box-sizing:border-box !important;
 }
 
+/* ===========================================================
+   ✅ COMPATIBILITY PATCH (for your CURRENT HTML)
+   - Your HTML uses: notes-col-head / notes-col-cell + notes-icon-btn
+   - This keeps your existing .notes-col/.table-notes-btn rules intact
+=========================================================== */
+
+/* Alias your original notes-col sizing to the actual classes in HTML */
+.training-table th.notes-col-head,
+.training-table td.notes-col-cell{
+  width:60px;
+  min-width:60px;
+  text-align:center !important;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+
+/* Notes icon button in tables (📝) */
+.notes-icon-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#fff;
+  cursor:pointer;
+  padding:0;
+  line-height:1;
+  transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.notes-icon-btn:hover{
+  box-shadow:0 2px 8px rgba(0,0,0,0.10);
+  transform:translateY(-1px);
+  border-color:#cfcfcf;
+}
+.notes-icon{
+  font-size:15px;
+  line-height:1;
+  display:block;
+}
