@@ -1402,6 +1402,148 @@ document.addEventListener("click", (e)=>{
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
 
+/* ===========================================================
+   TABLE EXPAND (⤢) — footer right -> modal (moves real table DOM)
+=========================================================== */
+
+let _mkTableModalRestore = null;
+
+function ensureTableModal(){
+  let modal = qs("#mkTableModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkTableModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
+        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
+      </div>
+      <div class="mk-modal-body" id="mkTableModalBody"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e)=>{
+    if (e.target.closest("[data-mk-close='1']")) closeTableModal();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
+  });
+
+  return modal;
+}
+
+function openTableModal(tableContainer, titleText="Table"){
+  if (!tableContainer) return;
+
+  const modal = ensureTableModal();
+  const title = qs("#mkTableModalTitle", modal);
+  const body  = qs("#mkTableModalBody", modal);
+
+  // Save restore info
+  const parent = tableContainer.parentNode;
+  const next   = tableContainer.nextSibling;
+  _mkTableModalRestore = { tableContainer, parent, next };
+
+  title.textContent = titleText || "Table";
+
+  // Move the REAL container into modal (keeps inputs/editing + listeners)
+  body.innerHTML = "";
+  body.appendChild(tableContainer);
+
+  modal.classList.add("open");
+
+  // optional: keep sticky header behaving
+  requestAnimationFrame(()=>{
+    syncTwoColHeights();
+  });
+}
+
+function closeTableModal(){
+  const modal = qs("#mkTableModal");
+  if (!modal) return;
+
+  // Restore table to original place
+  if (_mkTableModalRestore?.tableContainer && _mkTableModalRestore?.parent){
+    const { tableContainer, parent, next } = _mkTableModalRestore;
+    try{
+      if (next) parent.insertBefore(tableContainer, next);
+      else parent.appendChild(tableContainer);
+    }catch(e){}
+  }
+
+  _mkTableModalRestore = null;
+  modal.classList.remove("open");
+
+  requestAnimationFrame(()=>{
+    syncTwoColHeights();
+  });
+}
+
+function getTableTitleFromContainer(container){
+  // Prefer the orange "section-header" just above the table container
+  const sectionHeader = container.closest(".section")?.querySelector(".section-header");
+  if (sectionHeader) return safeTrim(sectionHeader.textContent) || "Table";
+
+  // fallback
+  return "Table";
+}
+
+function initTableExpanders(root=document){
+  qsa(".table-container", root).forEach(container=>{
+    const footer = qs(".table-footer", container);
+    if (!footer) return;
+
+    // Ensure left wrapper so Add Row stays left
+    let left = qs(":scope > .footer-left", footer);
+    if (!left){
+      left = document.createElement("div");
+      left.className = "footer-left";
+
+      // Move existing footer content (like Add Row button) into left wrapper
+      const kids = Array.from(footer.childNodes);
+      kids.forEach(n => left.appendChild(n));
+      footer.appendChild(left);
+    }
+
+    // Avoid duplicates
+    if (qs(".mk-table-expand", footer)) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-table-expand";
+    btn.title = "Expand table";
+    btn.setAttribute("aria-label","Expand table");
+    btn.textContent = "⤢";
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      openTableModal(container, getTableTitleFromContainer(container));
+    });
+
+    footer.appendChild(btn);
+  });
+}
+
+/* delegated safety net (if tables get injected later) */
+document.addEventListener("click", (e)=>{
+  const b = e.target.closest(".mk-table-expand");
+  if (!b) return;
+  // handled by direct listener above; this is just a safety net
+});
+
+/* ===========================================================
+   Boot: add this ONE line
+   initTableExpanders(document);
+=========================================================== */
+// In your existing DOMContentLoaded boot, add:
+ // initTableExpanders(document);
+
 /* ---------------------------
    Boot
 --------------------------- */
@@ -1425,6 +1567,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   // Notes
   initNotesExpanders(document);
+  initTableExpanders(document);
   initNotesLinkingOption2Only(document);
   initTableNotesButtons(document);
   updateNoteIconStates(document);
