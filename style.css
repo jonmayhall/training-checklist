@@ -1430,3 +1430,10 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* DMS Integration — PUSH-Based = myKaarma Green */
+#dms-integration .dms-chip-push{
+  background: var(--mykaarma-green) !important;
+  border-color: var(--mykaarma-green) !important;
+  color: #1f2937 !important; /* readable dark text */
+}
