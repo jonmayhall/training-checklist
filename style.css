@@ -1188,10 +1188,13 @@ main{
   border:1px solid rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
+
 #dms-integration .dms-chip-pull{
   background:rgba(205,220,57,0.18);        /* myKaarma green tint */
  border-color:rgba(255,255,255,0.35) !important;
-  color:#fff !important;                       /* readable green text */
+  color:#fff !important;   
+}
+   
 #dms-integration .dms-chip-push{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
