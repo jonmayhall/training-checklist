@@ -1462,29 +1462,39 @@ main{
 }
 
 /* =========================
-   NOTES EXPAND BUTTON — BALANCED CORNER
+   NOTES TEXTAREA + EXPAND BUTTON (PRECISE ALIGNMENT)
    ========================= */
 
-.section-block{
+/* Wrapper already exists (.mk-ta-wrap) */
+.mk-ta-wrap{
   position: relative;
+  height: 100%;
 }
 
-.section-block .mk-expand-btn{
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
+/* Textarea fills card completely */
+.mk-ta-wrap > textarea{
+  width: 100%;
+  height: 100%;
+  resize: none;
+}
 
-  /* remove vertical lift */
-  transform: none;
+/* Expand button aligned to textarea padding edge */
+.mk-ta-wrap .mk-expand-btn{
+  position: absolute;
+
+  /* match textarea inner spacing */
+  right: 12px;
+  bottom: 12px;
 
   width: 16px;
   height: 16px;
-  border-radius: 6px;
   padding: 0;
+
   font-size: 10px;
   line-height: 1;
 
-  z-index: 20;
+  border-radius: 6px;
+  z-index: 10;
 }
 
 /* =========================
