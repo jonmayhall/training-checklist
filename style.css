@@ -1271,7 +1271,7 @@ main{
 .mk-ta-wrap .mk-ta-expand{
   position:absolute;
   right:8px;
-  bottom:8px;
+  bottom:12px;
   width:16px;
   height:16px;
   padding:0;
