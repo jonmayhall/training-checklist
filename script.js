@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED NAV)
+   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED)
    ✅ Fixes:
    - Nav clicks work (inline onclick + data-section + href="#id")
    - Add Row (+) for tables
@@ -9,14 +9,12 @@
    - Autosave + Reset Page + Clear All
    - Onsite dates: end defaults to start + 2 days
    - PDF export (all pages)
-   - ✅ NOTES LINKING: single Notes column w/ icon (speech bubble SVG)
-   - ✅ TABLE NOTES:
-       - single Notes column only
-       - bubble icon in Notes column for EVERY row
-       - clicking bubble:
-         1) inserts "• <Row Name>: " into that table’s Notes textarea (ordered)
-         2) jumps to that line
-   - ✅ NOTES POP-OUT: expander opens modal synced + saved
+   - ✅ NOTES LINKING (questions): single icon on checklist rows
+   - ✅ TABLE NOTES COLUMN: ensures ONE Notes column + bubble icon every row
+   - ✅ FILTERS COLUMN FIX: removes random button + forces dropdown everywhere
+   - ✅ TABLE POPUP EXPANDER: footer-right expand button opens modal editor
+   - ✅ POPUP NOTES: shows the table’s Notes card INSIDE the popup (synced + saved)
+   - ✅ TABLE ROW NOTES: clicking row Notes bubble inserts “• Name:” into table Notes textarea
    ======================================================= */
 
 /* ---------------------------
@@ -161,13 +159,12 @@ function showSection(id){
 
   try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
 }
+
 function initNav(){
   // Works for data-section/data-target/href nav buttons (and does not break inline onclick)
   qsa(".nav-btn").forEach(btn=>{
     btn.addEventListener("click", (e)=>{
-      // prevent anchors from jumping before our handler runs
       if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
-
       const id =
         btn.getAttribute("data-section") ||
         btn.getAttribute("data-target") ||
@@ -182,7 +179,7 @@ function initNav(){
   showSection(last || first || "dealership-info");
 }
 
-// ✅ IMPORTANT: allow inline onclick="showSection('...')" to work
+// allow inline onclick="showSection('...')" to work
 window.showSection = showSection;
 window.initNav = initNav;
 
@@ -246,6 +243,7 @@ function resetSection(section){
     updateNoteIconStates(section);
   });
 }
+
 function initResets(){
   qsa(".clear-page-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -310,6 +308,7 @@ function initPersistence(){
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 }
+
 function initGhosts(){
   qsa("select").forEach(applySelectGhost);
   qsa("input[type='date']").forEach(applyDateGhost);
@@ -334,6 +333,7 @@ function cloneTrainingRow(row){
 
   return clone;
 }
+
 function initTableAddRow(){
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".table-footer .add-row");
@@ -649,6 +649,7 @@ function restoreDealershipNameDisplay(){
     if (v) updateDealershipNameDisplay(v);
   }catch(e){}
 }
+
 function updateDealershipMap(address){
   const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
   if (!frame) return;
@@ -662,7 +663,7 @@ function restoreDealershipMap(){
     if (addr) updateDealershipMap(addr);
   }catch(e){}
 }
-// expose for inline html callbacks
+
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 
@@ -772,9 +773,7 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING — Option 2 ONLY (single icon on checklist rows)
-   - Only rows that have a field (input/select/textarea)
-   - Adds "• Question:" lines into the Notes textarea in that group
+   NOTES LINKING — checklist rows (questions)
 =========================================================== */
 function isNotesCard(card){
   const h2 = card?.querySelector("h2");
@@ -802,7 +801,7 @@ function getCleanQuestionText(row){
   const label = row.querySelector("label");
   if (!label) return "";
   const clone = label.cloneNode(true);
-  clone.querySelectorAll(".note-link-btn, .note-btn, .mk-table-note-btn").forEach(n => n.remove());
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
   return (clone.textContent || "").replace(/\s+/g," ").trim();
 }
 function makeNoteLine(row){
@@ -907,13 +906,9 @@ function ensureRowActions(row){
   row.appendChild(actions);
   return actions;
 }
-function initNotesLinkingOption2Only(root=document){
-  qsa(".note-btn", root).forEach(n => n.remove());
 
-  // IMPORTANT: do not remove .note-link-btn globally because tables use it too
-  // We only remove checklist-row buttons we previously created by removing any
-  // note-link buttons that are NOT in tables and are inside checklist rows.
-  qsa(".checklist-row .note-link-btn", root).forEach(n => n.remove());
+function initNotesLinkingOption2Only(root=document){
+  qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
 
   qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
@@ -961,6 +956,7 @@ function initNotesLinkingOption2Only(root=document){
 
   updateNoteIconStates(root);
 }
+
 function updateNoteIconStates(root=document){
   qsa(".checklist-row", root).forEach(row=>{
     const btn = row.querySelector(".note-link-btn");
@@ -972,28 +968,10 @@ function updateNoteIconStates(root=document){
     const line = makeNoteLine(row).trim();
     btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
   });
-
-  // Table buttons: optional "has-note" state based on row-name line
-  qsa("table.training-table", root).forEach(table=>{
-    const notesBlock = findNotesBlockForTable(table);
-    const ta = notesBlock?.querySelector("textarea");
-    if (!ta) return;
-
-    qsa(".mk-table-note-btn", table).forEach(btn=>{
-      const tr = btn.closest("tr");
-      const line = makeTableNoteLineFromRow(tr).trim();
-      btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
-    });
-  });
 }
 
 /* ===========================================================
-   TABLE NOTES BUTTONS + FILTERS FIX
-   ✅ Ensures ONLY ONE "Notes" column exists
-   ✅ Forces bubble icon in Notes column for EVERY row
-   ✅ Removes ANY stray notes buttons from other columns
-   ✅ Normalizes Filters column: ensures dropdown (removes random button)
-   ✅ Clicking a row’s Notes bubble inserts "• <Row Name>: " into that table Notes
+   TABLE NOTES COLUMN + FILTERS FIX + ROW NOTES INSERT
 =========================================================== */
 function thText(th){
   return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
@@ -1045,6 +1023,95 @@ function ensureSingleNotesColumn(table){
 
   return noteIdxs[0];
 }
+
+function renderBubbleBtn(extraClass=""){
+  return `
+    <button type="button" class="note-link-btn mk-table-note-btn ${extraClass}" title="Add row to Notes / Jump to Notes">
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </button>
+  `;
+}
+
+function purgeStrayTableNoteButtons(table, notesIdx){
+  qsa("tbody tr", table).forEach(tr=>{
+    Array.from(tr.children).forEach((td, idx)=>{
+      if (idx === notesIdx) return;
+      qsa(".mk-table-note-btn, .note-link-btn, .note-btn", td).forEach(n => n.remove());
+    });
+  });
+}
+
+/* ✅ Fix Filters column: remove random icon/buttons and ensure dropdown */
+function normalizeFiltersColumn(table){
+  const ths = getHeaderCells(table);
+  const filtersIdx = ths.findIndex(th => thText(th) === "filters");
+  if (filtersIdx === -1) return;
+
+  let templateSelect = null;
+  qsa("tbody tr", table).some(tr=>{
+    const td = tr.children[filtersIdx];
+    const sel = td?.querySelector("select");
+    if (sel){ templateSelect = sel; return true; }
+    return false;
+  });
+
+  qsa("tbody tr", table).forEach(tr=>{
+    const td = tr.children[filtersIdx];
+    if (!td) return;
+
+    // remove junk
+    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn, svg", td).forEach(n => n.remove());
+
+    if (td.querySelector("select")) return;
+
+    if (templateSelect){
+      const newSelect = templateSelect.cloneNode(true);
+      newSelect.value = "";
+      ensureUID(newSelect);
+      loadField(newSelect);
+      applySelectGhost(newSelect);
+      td.innerHTML = "";
+      td.appendChild(newSelect);
+      return;
+    }
+
+    const fallback = document.createElement("select");
+    fallback.innerHTML = `<option data-ghost="true" value="">Select</option>`;
+    ensureUID(fallback);
+    loadField(fallback);
+    applySelectGhost(fallback);
+    td.innerHTML = "";
+    td.appendChild(fallback);
+  });
+}
+
+/* Get "Name" (or 2nd column) value from a row for notes insert */
+function getTableRowName(table, tr){
+  const ths = getHeaderCells(table);
+  let nameIdx = ths.findIndex(th => thText(th) === "name");
+  if (nameIdx === -1) nameIdx = 1; // fallback to 2nd col
+
+  const td = tr.children[nameIdx];
+  if (!td) return "";
+
+  const input = td.querySelector("input, select, textarea");
+  if (input){
+    if (input.tagName === "SELECT"){
+      const opt = input.selectedOptions?.[0];
+      const txt = safeTrim(opt?.textContent || input.value);
+      return txt;
+    }
+    return safeTrim(input.value);
+  }
+
+  return safeTrim(td.textContent);
+}
+
+/* Find the Notes card under the table's section */
 function findNotesBlockForTable(table){
   const section = table.closest(".section");
   if (!section) return null;
@@ -1062,74 +1129,39 @@ function findNotesBlockForTable(table){
   }
   return null;
 }
-function renderTableNoteButton(td){
-  td.innerHTML = `
-    <button type="button" class="note-link-btn mk-table-note-btn" title="Add this row to Notes">
-      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4h16v12H7l-3 3V4z" fill="none"
-              stroke="currentColor" stroke-width="2"
-              stroke-linejoin="round" stroke-linecap="round"/>
-      </svg>
-    </button>
-  `;
-}
-function purgeStrayTableNoteButtons(table, notesIdx){
-  qsa("tbody tr", table).forEach(tr=>{
-    Array.from(tr.children).forEach((td, idx)=>{
-      if (idx === notesIdx) return;
-      qsa(".mk-table-note-btn, .note-btn", td).forEach(n => n.remove());
-    });
-  });
-}
 
-/* ✅ Fix: Filters column must be a dropdown (remove any random buttons) */
-function normalizeFiltersColumn(table){
-  const ths = getHeaderCells(table);
-  const filtersIdx = ths.findIndex(th => thText(th) === "filters");
-  if (filtersIdx === -1) return;
+/* Insert row name into the Notes textarea for that table */
+function insertTableRowNameIntoNotes(table, tr){
+  const notesBlock = findNotesBlockForTable(table);
+  const ta = notesBlock?.querySelector("textarea");
+  if (!ta) return;
 
-  // Find a "good" select to copy (any row where Filters cell already has a <select>)
-  let templateSelect = null;
-  qsa("tbody tr", table).some(tr=>{
-    const td = tr.children[filtersIdx];
-    const sel = td?.querySelector("select");
-    if (sel){ templateSelect = sel; return true; }
-    return false;
-  });
+  const name = getTableRowName(table, tr);
+  if (!name) return;
 
-  qsa("tbody tr", table).forEach(tr=>{
-    const td = tr.children[filtersIdx];
-    if (!td) return;
+  const line = `• ${name}: `;
 
-    // Remove any stray buttons/icons that shouldn't be here
-    qsa("button, .note-btn, .mk-table-note-btn", td).forEach(n => n.remove());
+  const raw = ta.value || "";
+  if (raw.includes(line.trim())){ // already present
+    ta.scrollIntoView({ behavior:"smooth", block:"center" });
+    setTimeout(()=> ta.focus(), 120);
+    return;
+  }
 
-    // If the cell already has a select, we're good
-    if (td.querySelector("select")) return;
+  ta.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
+  saveField(ta);
 
-    // If we have a template select, insert one
-    if (templateSelect){
-      const newSelect = templateSelect.cloneNode(true);
-      newSelect.value = "";
-      ensureUID(newSelect);
-      loadField(newSelect);
-      applySelectGhost(newSelect);
-      td.innerHTML = "";
-      td.appendChild(newSelect);
-      return;
-    }
+  ta.scrollIntoView({ behavior:"smooth", block:"center" });
+  setTimeout(()=>{
+    ta.focus();
+    ta.classList.add("mk-note-jump");
+    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
+  }, 150);
 
-    // Fallback: create a basic blank dropdown (won’t break layout)
-    const fallback = document.createElement("select");
-    fallback.innerHTML = `<option value="" data-ghost="true"></option>`;
-    ensureUID(fallback);
-    loadField(fallback);
-    applySelectGhost(fallback);
-    td.innerHTML = "";
-    td.appendChild(fallback);
-  });
+  requestAnimationFrame(()=> updateNoteIconStates(document));
 }
 
+/* Force Notes column bubble button in every row */
 function applyNotesButtonsToColumn(table, notesColIdx){
   const headRow = table.querySelector("thead tr");
   if (headRow && headRow.children[notesColIdx]){
@@ -1140,149 +1172,187 @@ function applyNotesButtonsToColumn(table, notesColIdx){
     while (tr.children.length <= notesColIdx){
       tr.appendChild(document.createElement("td"));
     }
-    renderTableNoteButton(tr.children[notesColIdx]);
+    tr.children[notesColIdx].innerHTML = renderBubbleBtn("mk-row-note");
   });
 }
 
 /* ===========================================================
-   NEW: TABLE ROW NOTES INSERTION
+   TABLE POPUP (Expand) + POPUP NOTES (synced)
 =========================================================== */
-function getTableRowName(tr){
-  if (!tr) return "";
+let _mkTableModalSourceTable = null;
 
-  // Prefer any visible text input with a value
-  const textInputs = Array.from(tr.querySelectorAll("input[type='text']"))
-    .filter(i => i.offsetParent !== null);
+function ensureTableModal(){
+  let modal = qs("#mkTableModal");
+  if (modal) return modal;
 
-  for (const inp of textInputs){
-    const v = (inp.value || "").trim();
-    if (v) return v;
-  }
+  modal = document.createElement("div");
+  modal.id = "mkTableModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
+        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
+      </div>
+      <div class="mk-modal-body">
+        <div class="mk-table-wrap" id="mkTableModalWrap"></div>
+      </div>
+      <div class="mk-modal-footer">
+        <button type="button" class="table-footer-add add-row" id="mkTableModalAddRow" title="Add Row">+</button>
+        <div class="mk-footer-right"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
 
-  // fallback: first 3 cell texts (ignore button-only cells)
-  const tds = Array.from(tr.children || []);
-  for (let i = 0; i < Math.min(3, tds.length); i++){
-    const td = tds[i];
-    if (!td) continue;
-    if (td.querySelector(".mk-table-note-btn")) continue;
-    const txt = (td.textContent || "").replace(/\s+/g," ").trim();
-    if (txt) return txt;
-  }
-
-  return "";
-}
-function makeTableNoteLineFromRow(tr){
-  const name = getTableRowName(tr);
-  if (!name) return "";
-  return `• ${name}: `;
-}
-function insertTableNoteLineInOrder(textarea, table, clickedTr){
-  const baseLine = makeTableNoteLineFromRow(clickedTr);
-  if (!baseLine) return { didInsert:false, lineStart:0 };
-
-  const raw = textarea.value || "";
-  const lines = raw.split("\n");
-
-  const existingIdx = lines.findIndex(l => (l || "").trim().startsWith(baseLine.trim()));
-  if (existingIdx !== -1){
-    const startPos = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    return { didInsert:false, lineStart:startPos };
-  }
-
-  const tbodyRows = Array.from(table.querySelectorAll("tbody tr"));
-  const orderedKeys = tbodyRows.map(tr => makeTableNoteLineFromRow(tr).trim()).filter(Boolean);
-
-  const myOrder = orderedKeys.indexOf(baseLine.trim());
-  if (myOrder === -1){
-    const startPos = raw.length ? raw.length + 1 : 0;
-    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  let insertBeforeLineIdx = -1;
-  for (let i = 0; i < lines.length; i++){
-    const t = (lines[i] || "").trim();
-    if (!t.startsWith("•")) continue;
-
-    const matchOrder = orderedKeys.findIndex(k => t.startsWith(k));
-    if (matchOrder !== -1 && matchOrder > myOrder){
-      insertBeforeLineIdx = i;
-      break;
-    }
-  }
-
-  if (insertBeforeLineIdx === -1){
-    const startPos = raw.length ? raw.length + 1 : 0;
-    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  lines.splice(insertBeforeLineIdx, 0, baseLine);
-  textarea.value = lines.join("\n");
-
-  const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
-  return { didInsert:true, lineStart:startPos };
-}
-
-function initTableNotesButtons(root=document){
-  const targets = [
-    "#training-checklist table.training-table",
-    "#opcodes-pricing table.training-table"
-  ];
-
-  targets.forEach(sel=>{
-    qsa(sel, root).forEach(table=>{
-      // 0) Normalize Filters column (remove random button, ensure dropdown)
-      normalizeFiltersColumn(table);
-
-      // 1) Fix duplicate Notes columns / create if missing
-      const notesIdx = ensureSingleNotesColumn(table);
-      if (notesIdx === null) return;
-
-      // 2) Purge any stray note buttons from other columns
-      purgeStrayTableNoteButtons(table, notesIdx);
-
-      // 3) Force bubble icon in Notes column for ALL rows
-      applyNotesButtonsToColumn(table, notesIdx);
-
-      // 4) Wire click handler once
-      if (table.dataset.mkNotesWired === "1") return;
-      table.dataset.mkNotesWired = "1";
-
-      table.addEventListener("click", (e)=>{
-        const btn = e.target.closest(".mk-table-note-btn");
-        if (!btn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const tr = btn.closest("tr");
-        const notesBlock = findNotesBlockForTable(table);
-        const ta = notesBlock?.querySelector("textarea");
-        if (!ta) return;
-
-        // ✅ insert "• <Row Name>: " then jump to it
-        const { didInsert, lineStart } = insertTableNoteLineInOrder(ta, table, tr);
-
-        if (didInsert){
-          saveField(ta);
-          requestAnimationFrame(()=> updateNoteIconStates(document));
-          requestAnimationFrame(syncTwoColHeights);
-        }
-
-        notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
-        setTimeout(()=>{
-          ta.focus();
-          const v = ta.value || "";
-          const lineEnd = v.indexOf("\n", lineStart);
-          const endPos = (lineEnd === -1) ? v.length : lineEnd;
-          ta.setSelectionRange(endPos, endPos);
-          ta.classList.add("mk-note-jump");
-          setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
-        }, 160);
-      }, { passive:false });
-    });
+  modal.addEventListener("click", (e)=>{
+    if (e.target.closest("[data-mk-close='1']")) closeTableModal();
   });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
+  });
+
+  return modal;
+}
+
+function closeTableModal(){
+  const modal = qs("#mkTableModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  _mkTableModalSourceTable = null;
+}
+
+/* Mount table’s Notes card INSIDE the popup and sync it */
+function mountTableNotesInsideModal(originalTable, modal){
+  const old = modal.querySelector(".mk-table-notes");
+  if (old) old.remove();
+
+  const notesBlock = findNotesBlockForTable(originalTable);
+  const sourceTA = notesBlock?.querySelector("textarea");
+  if (!sourceTA) return;
+
+  const titleText = (notesBlock.querySelector("h2")?.textContent || "Notes").trim();
+
+  const wrap = document.createElement("div");
+  wrap.className = "mk-table-notes";
+  wrap.innerHTML = `
+    <div class="mk-table-notes-header">
+      <div>${titleText}</div>
+      <button type="button" class="mk-ta-expand" data-mk-notes-expand="1" title="Expand notes" aria-label="Expand notes">⤢</button>
+    </div>
+    <div class="mk-table-notes-body">
+      <textarea class="mk-table-notes-ta" placeholder="Add notes here..."></textarea>
+    </div>
+  `;
+
+  const modalTA = wrap.querySelector(".mk-table-notes-ta");
+  modalTA.value = sourceTA.value || "";
+
+  modalTA.addEventListener("input", ()=>{
+    sourceTA.value = modalTA.value;
+    saveField(sourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+  });
+
+  const expandBtn = wrap.querySelector("[data-mk-notes-expand='1']");
+  expandBtn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    openNotesModal(sourceTA, titleText);
+  });
+
+  modal.querySelector(".mk-modal-body")?.appendChild(wrap);
+}
+
+/* Open popup for a specific table */
+function openTableModalForTable(originalTable, titleText="Table"){
+  const modal = ensureTableModal();
+  const title = qs("#mkTableModalTitle", modal);
+  const wrap = qs("#mkTableModalWrap", modal);
+  const footerRight = qs(".mk-footer-right", modal);
+
+  _mkTableModalSourceTable = originalTable;
+
+  title.textContent = titleText || "Table";
+  wrap.innerHTML = "";
+  footerRight.innerHTML = "";
+
+  // clone the table so it edits the real one by syncing inputs
+  const clone = originalTable.cloneNode(true);
+  clone.classList.add("mk-modal-table");
+  wrap.appendChild(clone);
+
+  // ensure filters + notes column are correct inside clone too
+  const notesIdx = ensureSingleNotesColumn(clone);
+  if (notesIdx !== null){
+    purgeStrayTableNoteButtons(clone, notesIdx);
+    normalizeFiltersColumn(clone);
+    applyNotesButtonsToColumn(clone, notesIdx);
+  }
+
+  // Add footer-right expand button (same style class as notes expander)
+  const expandBtn = document.createElement("button");
+  expandBtn.type = "button";
+  expandBtn.className = "mk-ta-expand";
+  expandBtn.title = "Expand table";
+  expandBtn.setAttribute("aria-label", "Expand table");
+  expandBtn.textContent = "⤢";
+  footerRight.appendChild(expandBtn);
+
+  // Put the table’s Notes section under it (synced)
+  mountTableNotesInsideModal(originalTable, modal);
+
+  // Sync clone inputs <-> original inputs by index map per cell
+  const origFields = qsa("input, select, textarea", originalTable);
+  const cloneFields = qsa("input, select, textarea", clone);
+
+  cloneFields.forEach((f, i)=>{
+    const src = origFields[i];
+    if (!src) return;
+
+    // init value in clone
+    if (src.type === "checkbox") f.checked = src.checked;
+    else f.value = src.value;
+
+    if (f.tagName === "SELECT") applySelectGhost(f);
+
+    // on input/change in clone, push back to original and save
+    const handler = ()=>{
+      if (src.type === "checkbox") src.checked = f.checked;
+      else src.value = f.value;
+
+      if (src.tagName === "SELECT") applySelectGhost(src);
+      saveField(src);
+    };
+
+    f.addEventListener("input", handler);
+    f.addEventListener("change", handler);
+  });
+
+  // Add Row inside modal adds row to original, then re-open modal to refresh
+  const addBtn = qs("#mkTableModalAddRow", modal);
+  if (addBtn){
+    addBtn.onclick = ()=>{
+      const tbody = qs("tbody", originalTable);
+      const last = tbody?.querySelector("tr:last-child");
+      if (!tbody || !last) return;
+
+      const newRow = cloneTrainingRow(last);
+      tbody.appendChild(newRow);
+
+      requestAnimationFrame(()=>{
+        initNotesLinkingOption2Only(document);
+        initTableNotesButtons(document);
+        updateNoteIconStates(document);
+      });
+
+      // refresh modal so it matches
+      openTableModalForTable(originalTable, titleText);
+    };
+  }
+
+  modal.classList.add("open");
 }
 
 /* ===========================================================
@@ -1318,6 +1388,7 @@ function ensureNotesModal(){
 
   return modal;
 }
+
 function openNotesModal(sourceTA, titleText="Notes"){
   const modal = ensureNotesModal();
   const title = qs("#mkNotesModalTitle", modal);
@@ -1338,6 +1409,7 @@ function openNotesModal(sourceTA, titleText="Notes"){
   modal.classList.add("open");
   setTimeout(()=> bigTA.focus(), 0);
 }
+
 function closeNotesModal(){
   const modal = qs("#mkNotesModal");
   if (!modal) return;
@@ -1351,6 +1423,7 @@ function closeNotesModal(){
   modal.classList.remove("open");
   _mkNotesModalSourceTA = null;
 }
+
 function initNotesExpanders(root=document){
   const notesCards = qsa(".section-block", root).filter(isNotesCard);
 
@@ -1358,7 +1431,6 @@ function initNotesExpanders(root=document){
     const ta = qs("textarea", card);
     if (!ta) return;
 
-    // wrap textarea
     let wrap = ta.closest(".mk-ta-wrap");
     if (!wrap){
       wrap = document.createElement("div");
@@ -1367,7 +1439,6 @@ function initNotesExpanders(root=document){
       wrap.appendChild(ta);
     }
 
-    // avoid duplicates
     if (qs(".mk-ta-expand", wrap)) return;
 
     const btn = document.createElement("button");
@@ -1387,10 +1458,14 @@ function initNotesExpanders(root=document){
     wrap.appendChild(btn);
   });
 }
-// delegated safety net
+
+// delegated safety net for notes expand button
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".mk-ta-expand");
   if (!btn) return;
+
+  // ignore table modal footer expand: it uses same class but not inside a notes wrap
+  if (btn.closest("#mkTableModal")) return;
 
   e.preventDefault();
   e.stopPropagation();
@@ -1403,119 +1478,37 @@ document.addEventListener("click", (e)=>{
 });
 
 /* ===========================================================
-   TABLE EXPAND (⤢) — footer right -> modal (moves real table DOM)
+   TABLE NOTES BUTTONS INIT
+   - Ensures single Notes column
+   - Fixes Filters column
+   - Bubble button per row:
+       click => insert row Name into that table’s Notes card
+       then scroll to Notes
+   - Adds table popup expand button in footer-right (inside table footer)
 =========================================================== */
-
-let _mkTableModalRestore = null;
-
-function ensureTableModal(){
-  let modal = qs("#mkTableModal");
-  if (modal) return modal;
-
-  modal = document.createElement("div");
-  modal.id = "mkTableModal";
-  modal.innerHTML = `
-    <div class="mk-modal-backdrop" data-mk-close="1"></div>
-    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
-      <div class="mk-modal-header">
-        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
-        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
-      </div>
-      <div class="mk-modal-body" id="mkTableModalBody"></div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e)=>{
-    if (e.target.closest("[data-mk-close='1']")) closeTableModal();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
-  });
-
-  return modal;
-}
-
-function openTableModal(tableContainer, titleText="Table"){
-  if (!tableContainer) return;
-
-  const modal = ensureTableModal();
-  const title = qs("#mkTableModalTitle", modal);
-  const body  = qs("#mkTableModalBody", modal);
-
-  // Save restore info
-  const parent = tableContainer.parentNode;
-  const next   = tableContainer.nextSibling;
-  _mkTableModalRestore = { tableContainer, parent, next };
-
-  title.textContent = titleText || "Table";
-
-  // Move the REAL container into modal (keeps inputs/editing + listeners)
-  body.innerHTML = "";
-  body.appendChild(tableContainer);
-
-  modal.classList.add("open");
-
-  // optional: keep sticky header behaving
-  requestAnimationFrame(()=>{
-    syncTwoColHeights();
-  });
-}
-
-function closeTableModal(){
-  const modal = qs("#mkTableModal");
-  if (!modal) return;
-
-  // Restore table to original place
-  if (_mkTableModalRestore?.tableContainer && _mkTableModalRestore?.parent){
-    const { tableContainer, parent, next } = _mkTableModalRestore;
-    try{
-      if (next) parent.insertBefore(tableContainer, next);
-      else parent.appendChild(tableContainer);
-    }catch(e){}
-  }
-
-  _mkTableModalRestore = null;
-  modal.classList.remove("open");
-
-  requestAnimationFrame(()=>{
-    syncTwoColHeights();
-  });
-}
-
-function getTableTitleFromContainer(container){
-  // Prefer the orange "section-header" just above the table container
-  const sectionHeader = container.closest(".section")?.querySelector(".section-header");
-  if (sectionHeader) return safeTrim(sectionHeader.textContent) || "Table";
-
-  // fallback
-  return "Table";
-}
-
-function initTableExpanders(root=document){
+function wireTableFooterExpandButtons(root=document){
   qsa(".table-container", root).forEach(container=>{
+    if (container.dataset.mkExpandWired === "1") return;
+    container.dataset.mkExpandWired = "1";
+
+    const table = qs("table.training-table", container);
     const footer = qs(".table-footer", container);
-    if (!footer) return;
+    if (!table || !footer) return;
 
-    // Ensure left wrapper so Add Row stays left
-    let left = qs(":scope > .footer-left", footer);
-    if (!left){
-      left = document.createElement("div");
-      left.className = "footer-left";
-
-      // Move existing footer content (like Add Row button) into left wrapper
-      const kids = Array.from(footer.childNodes);
-      kids.forEach(n => left.appendChild(n));
-      footer.appendChild(left);
+    // create footer-right holder if needed
+    let right = qs(".mk-footer-right", footer);
+    if (!right){
+      right = document.createElement("div");
+      right.className = "mk-footer-right";
+      footer.appendChild(right);
     }
 
-    // Avoid duplicates
-    if (qs(".mk-table-expand", footer)) return;
+    // avoid duplicates
+    if (qs(".mk-table-expand-btn", footer)) return;
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "mk-table-expand";
+    btn.className = "mk-ta-expand mk-table-expand-btn";
     btn.title = "Expand table";
     btn.setAttribute("aria-label","Expand table");
     btn.textContent = "⤢";
@@ -1523,26 +1516,54 @@ function initTableExpanders(root=document){
     btn.addEventListener("click", (e)=>{
       e.preventDefault();
       e.stopPropagation();
-      openTableModal(container, getTableTitleFromContainer(container));
+
+      // title from section header
+      const secHeader = container.closest(".section")?.querySelector(".section-header");
+      const title = (secHeader?.textContent || "Table").trim();
+
+      openTableModalForTable(table, title);
     });
 
-    footer.appendChild(btn);
+    right.appendChild(btn);
   });
 }
 
-/* delegated safety net (if tables get injected later) */
-document.addEventListener("click", (e)=>{
-  const b = e.target.closest(".mk-table-expand");
-  if (!b) return;
-  // handled by direct listener above; this is just a safety net
-});
+function initTableNotesButtons(root=document){
+  const targets = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table"
+  ];
 
-/* ===========================================================
-   Boot: add this ONE line
-   initTableExpanders(document);
-=========================================================== */
-// In your existing DOMContentLoaded boot, add:
- // initTableExpanders(document);
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=>{
+      const notesIdx = ensureSingleNotesColumn(table);
+      if (notesIdx === null) return;
+
+      purgeStrayTableNoteButtons(table, notesIdx);
+      normalizeFiltersColumn(table);
+      applyNotesButtonsToColumn(table, notesIdx);
+
+      if (table.dataset.mkNotesWired === "1") return;
+      table.dataset.mkNotesWired = "1";
+
+      table.addEventListener("click", (e)=>{
+        const btn = e.target.closest(".mk-table-note-btn");
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const tr = btn.closest("tr");
+        if (!tr) return;
+
+        insertTableRowNameIntoNotes(table, tr);
+      }, { passive:false });
+    });
+  });
+
+  // add expand buttons on table footers
+  wireTableFooterExpandButtons(root);
+}
 
 /* ---------------------------
    Boot
@@ -1565,9 +1586,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
   restoreDealershipMap();
   initPDF();
 
-  // Notes
+  // Notes + Tables
   initNotesExpanders(document);
-  initTableExpanders(document);
   initNotesLinkingOption2Only(document);
   initTableNotesButtons(document);
   updateNoteIconStates(document);
