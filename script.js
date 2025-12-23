@@ -915,6 +915,138 @@ function updateNoteIconStates(root=document){
   });
 }
 
+/* ===========================================================
+   NOTES POP-OUT (Modal Expander)
+   - Adds an expand icon to every Notes textarea
+   - Opens a modal to view/edit the full notes
+   =========================================================== */
+
+function isNotesCard(card){
+  const h2 = card?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+
+function ensureNotesModal(){
+  let modal = qs("#mkNotesModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkNotesModal";
+  modal.className = "mk-modal";
+  modal.innerHTML = `
+    <div class="mk-modal-panel" role="dialog" aria-modal="true">
+      <div class="mk-modal-head">
+        <div class="mk-modal-title" id="mkNotesModalTitle">Notes</div>
+        <div class="mk-modal-actions">
+          <button type="button" class="mk-modal-btn close" id="mkNotesModalClose">Close</button>
+        </div>
+      </div>
+      <div class="mk-modal-body">
+        <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // Click outside closes
+  modal.addEventListener("click", (e)=>{
+    if (e.target === modal) closeNotesModal();
+  });
+
+  // Close button
+  qs("#mkNotesModalClose", modal).addEventListener("click", closeNotesModal);
+
+  // ESC closes
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape" && modal.classList.contains("is-open")) closeNotesModal();
+  });
+
+  return modal;
+}
+
+let _mkNotesModalSourceTA = null;
+
+function openNotesModal(sourceTextarea, titleText="Notes"){
+  const modal = ensureNotesModal();
+  const title = qs("#mkNotesModalTitle", modal);
+  const bigTA = qs("#mkNotesModalTextarea", modal);
+
+  _mkNotesModalSourceTA = sourceTextarea;
+
+  title.textContent = titleText || "Notes";
+  bigTA.value = sourceTextarea?.value || "";
+
+  // Keep synced while typing
+  bigTA.oninput = ()=>{
+    if (!_mkNotesModalSourceTA) return;
+    _mkNotesModalSourceTA.value = bigTA.value;
+
+    // save + update icon states + height sync
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  };
+
+  modal.classList.add("is-open");
+  setTimeout(()=> bigTA.focus(), 0);
+}
+
+function closeNotesModal(){
+  const modal = qs("#mkNotesModal");
+  if (!modal) return;
+
+  // final save on close
+  if (_mkNotesModalSourceTA){
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  }
+
+  modal.classList.remove("is-open");
+  _mkNotesModalSourceTA = null;
+}
+
+/* Add expand icon bottom-right to ALL Notes textareas */
+function initNotesExpanders(root=document){
+  // Notes cards = any .section-block whose h2 starts with "Notes"
+  const notesCards = qsa(".section-block", root).filter(isNotesCard);
+
+  notesCards.forEach(card=>{
+    const ta = qs("textarea", card);
+    if (!ta) return;
+
+    // Wrap textarea if not wrapped
+    let wrap = ta.closest(".mk-ta-wrap");
+    if (!wrap){
+      wrap = document.createElement("div");
+      wrap.className = "mk-ta-wrap";
+      ta.parentNode.insertBefore(wrap, ta);
+      wrap.appendChild(ta);
+    }
+
+    // Don’t duplicate button
+    if (qs(".mk-expand-btn", wrap)) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-expand-btn";
+    btn.title = "Expand Notes";
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Use the card title (h2) as modal title
+      const h2 = qs("h2", card);
+      const titleText = (h2?.textContent || "Notes").trim();
+
+      openNotesModal(ta, titleText);
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", ()=>{
   initNav();
   initGhosts();
