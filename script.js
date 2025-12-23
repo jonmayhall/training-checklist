@@ -814,9 +814,8 @@ function getCleanQuestionText(row){
 
 function makeNoteLine(row){
   const q = getCleanQuestionText(row);
-  const header = getCardTitleForRow(row);
   if (!q) return "";
-  return header ? `• ${header}: ${q}: ` : `• ${q}: `;
+  return `• ${q}: `;
 }
 
 function isInNotesCard(row){
