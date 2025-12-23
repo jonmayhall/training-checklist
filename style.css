@@ -1741,3 +1741,35 @@ main{
 #mkTableModal .mk-modal-footer{
   padding:10px 18px 16px;  /* matches body width + bottom space */
 }
+
+/* ===========================================================
+   TABLE EXPAND BUTTON — match Notes expand button (⤢)
+   Class: .mk-table-expand-btn (in table footer)
+=========================================================== */
+
+.mk-table-expand-btn{
+  width:16px;
+  height:16px;
+  padding:0;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  background:#ffffffee;
+  color:#111827;
+  cursor:pointer;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:10px;
+  line-height:1;
+
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  transition:border-color .12s, background .12s, transform .12s;
+}
+
+.mk-table-expand-btn:hover{
+  border-color:var(--orange);
+  background:#fff;
+  transform:translateY(-1px);
+}
