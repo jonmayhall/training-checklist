@@ -1270,7 +1270,7 @@ main{
 /* the actual expand button (JS uses .mk-ta-expand) */
 .mk-ta-wrap .mk-ta-expand{
   position:absolute;
-  right6px;
+  right:6px;
   bottom:14px;
   width:16px;
   height:16px;
