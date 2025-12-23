@@ -1460,37 +1460,37 @@ main{
 }
 
 /* ===========================================================
-   DMS INTEGRATION — CENTER BODY PILLS BETWEEN LINES
-   (Does NOT affect header pills)
+   DMS INTEGRATION — BODY PILLS
+   True vertical centering between text lines
+   Shared centerline on the right
+   (Headers NOT affected)
    =========================================================== */
 
-/* Make each list item a 2-row grid:
-   - Left: field + description
-   - Right: pill centered vertically between them */
+/* Make each list item a positioning context */
 #dms-integration .dms-list li{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  column-gap:12px;
-  row-gap:2px;
-  align-items:center;
+  position: relative;
+  padding-right: 120px; /* reserves space for pills */
 }
 
-/* Field name (top-left) */
-#dms-integration .dms-field{
-  grid-column:1;
-  grid-row:1;
+/* The row-top keeps normal flow */
+#dms-integration .dms-row-top{
+  display: block;
 }
 
-/* Description text (bottom-left) */
-#dms-integration .dms-list p{
-  grid-column:1;
-  grid-row:2;
-}
-
-/* Right-side pill — vertically centered between the two lines */
+/* Body pills only (NOT header chips) */
 #dms-integration .dms-list .dms-tag{
-  grid-column:2;
-  grid-row:1 / span 2;   /* spans both lines */
-  align-self:center;     /* centers between them */
+  position: absolute;
+
+  /* shared horizontal center */
+  right: 16px;
+
+  /* true vertical center between top + bottom text */
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* visual polish */
+  min-width: 90px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
 }
