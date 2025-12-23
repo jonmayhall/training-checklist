@@ -1,11 +1,12 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js
+   myKaarma Interactive Training Checklist — FULL script.js (UPDATED)
    ✅ Fixes:
    - Nav clicks work
    - Add Trainer (+) works
    - Support Tickets: add/remove, status move, validation scoped, base clears after add
    - Autosave + reset/clear + PDF + dates end defaults
    - ✅ NOTES LINKING: Option 2 ONLY (single 📝 icon)
+   - ✅ NOTES POP-OUT: expand icon opens modal to view/edit full Notes
    ======================================================= */
 
 /* ---------------------------
@@ -96,14 +97,14 @@ function applyDateGhost(input){
 
 /* ---------------------------
    Textarea auto-grow
+   (kept for non-notes textareas; Notes will use pop-out modal)
 --------------------------- */
 function autoGrowTA(ta){
   if (!ta) return;
   ta.style.height = "auto";
-  ta.style.overflowY = "hidden";   // ✅ prevent internal scroll
+  // ✅ do NOT force hidden overflow; Notes cards may be fixed-height
   ta.style.height = (ta.scrollHeight + 2) + "px";
 }
-
 
 function initTextareas(root=document){
   qsa("textarea", root).forEach(ta=>{
@@ -112,7 +113,6 @@ function initTextareas(root=document){
       autoGrowTA(ta);
       saveField(ta);
       requestAnimationFrame(syncTwoColHeights);
-      // keep note icons updated if user types into notes
       requestAnimationFrame(()=> updateNoteIconStates());
     });
   });
@@ -157,9 +157,13 @@ function showSection(id){
   requestAnimationFrame(()=>{
     initTextareas(target || document);
     syncTwoColHeights();
+
     // ✅ ensure note icons exist on newly shown page
     initNotesLinkingOption2Only(target || document);
     updateNoteIconStates(target || document);
+
+    // ✅ ensure notes expanders exist on newly shown page
+    initNotesExpanders(target || document);
   });
 
   try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
@@ -240,6 +244,7 @@ function resetSection(section){
     initTextareas(section);
     syncTwoColHeights();
     updateNoteIconStates(section);
+    initNotesExpanders(section);
   });
 }
 
@@ -292,7 +297,6 @@ function initPersistence(){
       updateDealershipNameDisplay(el.value);
     }
 
-    // notes icon state
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 
@@ -353,9 +357,9 @@ function initTableAddRow(){
     requestAnimationFrame(()=>{
       initTextareas(container);
       syncTwoColHeights();
-      // notes linking only applies to checklist rows, but safe:
       initNotesLinkingOption2Only(document);
       updateNoteIconStates(document);
+      initNotesExpanders(document);
     });
   });
 }
@@ -434,6 +438,7 @@ function initAdditionalTrainers(){
       initNotesLinkingOption2Only(page);
       updateNoteIconStates(page);
       syncTwoColHeights();
+      initNotesExpanders(page);
     });
   });
 }
@@ -449,7 +454,7 @@ function initAdditionalPOC(){
     const baseCard = btn.closest(".additional-poc-card");
     if (!baseCard) return;
 
-    const grid = baseCard.parentElement; // <-- .primary-contacts-grid
+    const grid = baseCard.parentElement;
     if (!grid) return;
 
     const clone = baseCard.cloneNode(true);
@@ -478,6 +483,7 @@ function initAdditionalPOC(){
       initNotesLinkingOption2Only(document);
       updateNoteIconStates(document);
       syncTwoColHeights();
+      initNotesExpanders(document);
     });
   });
 }
@@ -775,10 +781,9 @@ function initPDF(){
 
 /* ===========================================================
    NOTES LINKING — Option 2 ONLY (single 📝 icon)
-   - Adds ONE 📝 button per .checklist-row (non-notes cards)
-   - Places icon to the RIGHT of the field (inside .row-actions)
-   - Click inserts a bullet into the paired Notes textarea
-   - Icon turns orange when note exists
+   - Only shows icon on rows that HAVE a field (input/select/textarea)
+   - Uses just "• Question:" (no header prefix)
+   - DOES NOT restructure integrated-plus rows
    =========================================================== */
 
 function findNotesTextareaForRow(row){
@@ -796,14 +801,6 @@ function findNotesTextareaForRow(row){
     });
 
   return notesCard ? notesCard.querySelector("textarea") : null;
-}
-
-function getCardTitleForRow(row){
-  const h2 = row.closest(".section-block")?.querySelector("h2");
-  if (!h2) return "";
-  return (h2.textContent || "")
-    .replace(/^Notes\s*[—-]\s*/i, "")
-    .trim();
 }
 
 function getCleanQuestionText(row){
@@ -832,15 +829,13 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // ✅ DO NOT restructure integrated-plus rows (Trainer +, Additional POC +, etc.)
-  // Those rely on their existing input/button layout.
+  // ✅ do not restructure integrated-plus rows
   if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
   }
 
-  // ✅ Only move a DIRECT child input/select (avoids breaking other layouts)
-  const field = row.querySelector(":scope > input, :scope > select");
+  const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
   if (field) actions.appendChild(field);
 
   row.appendChild(actions);
@@ -848,20 +843,19 @@ function ensureRowActions(row){
 }
 
 function initNotesLinkingOption2Only(root=document){
-  // Hard cleanup: remove any old icons
   qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
 
   qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
 
-   // ✅ Only allow rows that actually have a field
-const field = row.querySelector("input, select, textarea");
-if (!field) return;
+    // ✅ only rows with a real field get a note icon
+    const field = row.querySelector("input, select, textarea");
+    if (!field) return;
 
-const ta = findNotesTextareaForRow(row);
-if (!ta) return;
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
 
-const actions = ensureRowActions(row);
+    const actions = ensureRowActions(row);
 
     const btn = document.createElement("button");
     btn.type = "button";
@@ -895,7 +889,6 @@ const actions = ensureRowActions(row);
       requestAnimationFrame(syncTwoColHeights);
     });
 
-    // ✅ Put icon on RIGHT side of the field
     actions.appendChild(btn);
   });
 
@@ -917,8 +910,8 @@ function updateNoteIconStates(root=document){
 
 /* ===========================================================
    NOTES POP-OUT (Modal Expander)
-   - Adds an expand icon to every Notes textarea
-   - Opens a modal to view/edit the full notes
+   - Adds a small expand icon to each Notes textarea
+   - Opens a modal to view/edit full notes (synced + saved)
    =========================================================== */
 
 function isNotesCard(card){
@@ -927,68 +920,56 @@ function isNotesCard(card){
   return t.startsWith("notes");
 }
 
+let _mkNotesModalSourceTA = null;
+
 function ensureNotesModal(){
   let modal = qs("#mkNotesModal");
   if (modal) return modal;
 
   modal = document.createElement("div");
   modal.id = "mkNotesModal";
-  modal.className = "mk-modal";
   modal.innerHTML = `
-    <div class="mk-modal-panel" role="dialog" aria-modal="true">
-      <div class="mk-modal-head">
+    <div class="mk-modal-backdrop" data-mk-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Notes">
+      <div class="mk-modal-header">
         <div class="mk-modal-title" id="mkNotesModalTitle">Notes</div>
-        <div class="mk-modal-actions">
-          <button type="button" class="mk-modal-btn close" id="mkNotesModalClose">Close</button>
-        </div>
+        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
       </div>
-      <div class="mk-modal-body">
-        <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
-      </div>
+      <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
     </div>
   `;
   document.body.appendChild(modal);
 
-  // Click outside closes
   modal.addEventListener("click", (e)=>{
-    if (e.target === modal) closeNotesModal();
+    if (e.target.closest("[data-mk-close='1']")) closeNotesModal();
   });
 
-  // Close button
-  qs("#mkNotesModalClose", modal).addEventListener("click", closeNotesModal);
-
-  // ESC closes
   document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape" && modal.classList.contains("is-open")) closeNotesModal();
+    if (e.key === "Escape" && modal.classList.contains("open")) closeNotesModal();
   });
 
   return modal;
 }
 
-let _mkNotesModalSourceTA = null;
-
-function openNotesModal(sourceTextarea, titleText="Notes"){
+function openNotesModal(sourceTA, titleText="Notes"){
   const modal = ensureNotesModal();
   const title = qs("#mkNotesModalTitle", modal);
   const bigTA = qs("#mkNotesModalTextarea", modal);
 
-  _mkNotesModalSourceTA = sourceTextarea;
+  _mkNotesModalSourceTA = sourceTA;
 
   title.textContent = titleText || "Notes";
-  bigTA.value = sourceTextarea?.value || "";
+  bigTA.value = sourceTA?.value || "";
 
-  // Keep synced while typing
   bigTA.oninput = ()=>{
     if (!_mkNotesModalSourceTA) return;
     _mkNotesModalSourceTA.value = bigTA.value;
-
-    // save + update icon states + height sync
     saveField(_mkNotesModalSourceTA);
     requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   };
 
-  modal.classList.add("is-open");
+  modal.classList.add("open");
   setTimeout(()=> bigTA.focus(), 0);
 }
 
@@ -996,27 +977,24 @@ function closeNotesModal(){
   const modal = qs("#mkNotesModal");
   if (!modal) return;
 
-  // final save on close
   if (_mkNotesModalSourceTA){
     saveField(_mkNotesModalSourceTA);
     requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   }
 
-  modal.classList.remove("is-open");
+  modal.classList.remove("open");
   _mkNotesModalSourceTA = null;
 }
 
-/* Add expand icon bottom-right to ALL Notes textareas */
 function initNotesExpanders(root=document){
-  // Notes cards = any .section-block whose h2 starts with "Notes"
   const notesCards = qsa(".section-block", root).filter(isNotesCard);
 
   notesCards.forEach(card=>{
     const ta = qs("textarea", card);
     if (!ta) return;
 
-    // Wrap textarea if not wrapped
+    // wrap textarea (no shrink; CSS handles fill)
     let wrap = ta.closest(".mk-ta-wrap");
     if (!wrap){
       wrap = document.createElement("div");
@@ -1025,28 +1003,52 @@ function initNotesExpanders(root=document){
       wrap.appendChild(ta);
     }
 
-    // Don’t duplicate button
-    if (qs(".mk-expand-btn", wrap)) return;
+    // no duplicates
+    if (qs(".mk-ta-expand", wrap)) return;
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "mk-expand-btn";
-    btn.title = "Expand Notes";
+    btn.className = "mk-ta-expand";
+    btn.title = "Expand notes";
+    btn.setAttribute("aria-label","Expand notes");
+    btn.textContent = "⤢";
+
     btn.addEventListener("click", (e)=>{
       e.preventDefault();
       e.stopPropagation();
-
-      // Use the card title (h2) as modal title
       const h2 = qs("h2", card);
-      const titleText = (h2?.textContent || "Notes").trim();
-
-      openNotesModal(ta, titleText);
+      openNotesModal(ta, (h2?.textContent || "Notes").trim());
     });
 
     wrap.appendChild(btn);
   });
 }
 
+// ✅ Delegated handler as a safety net (in case buttons are injected later)
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".mk-ta-expand");
+  if (!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const wrap = btn.closest(".mk-ta-wrap");
+  const ta = qs("textarea", wrap);
+  const card = btn.closest(".section-block");
+  const h2 = qs("h2", card);
+
+  if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
+});
+
+/* ---------------------------
+   Google Places callback (from your inline HTML)
+--------------------------- */
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
+
+/* ---------------------------
+   Boot
+--------------------------- */
 document.addEventListener("DOMContentLoaded", ()=>{
   initNav();
   initGhosts();
@@ -1074,10 +1076,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initNotesLinkingOption2Only(document);
   updateNoteIconStates(document);
 
-     // ✅ Notes pop-out expanders
+  // ✅ Notes pop-out expanders
   initNotesExpanders(document);
 });
-
-/* Google Places callback */
-window.updateDealershipMap = updateDealershipMap;
-window.updateDealershipNameDisplay = updateDealershipNameDisplay;
