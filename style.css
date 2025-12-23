@@ -461,6 +461,11 @@ main{
   color:#fff;
 }
 
+.mk-note-jump{
+  box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
+  transition:box-shadow .2s ease;
+}
+
 /* =========================================
    NOTES LINK BUTTON (📝) — SMALLER
    Paste near your existing .note-link-btn block
