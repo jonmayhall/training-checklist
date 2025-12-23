@@ -1551,3 +1551,23 @@ main{
   padding-left:10px !important;  /* nicer text inset */
   padding-right:10px !important;
 }
+
+/* ===========================================================
+   TRAINING TABLES — CENTER NAMES IN FIRST COLUMN
+   =========================================================== */
+
+/* Center content in FIRST column (Name column) */
+.training-table th:first-child,
+.training-table td:first-child{
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* Center the actual name input */
+.training-table td:first-child input[type="text"]{
+  text-align: center !important;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
