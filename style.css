@@ -1419,55 +1419,48 @@ main{
 }
 
 /* ===========================================================
-   NOTES POP-OUT (Modal Expander) — FIXED (no shrink)
+   NOTES EXPAND BUTTON — CORNER SNAP (POLISHED)
    =========================================================== */
 
-/* Wrapper MUST fill the card like the textarea did */
 .mk-ta-wrap{
   position:relative;
-  flex:1 1 auto;          /* ✅ keep filling the card */
-  display:flex;           /* ✅ allow textarea to stretch */
-  min-height:0;           /* ✅ important for flex children */
 }
 
-/* Textarea inside wrapper fills available space */
-.mk-ta-wrap > textarea{
-  flex:1 1 auto;          /* ✅ fill */
-  width:100% !important;  /* ✅ no shrink */
-  min-height:0 !important;
-  padding-right:36px;     /* ✅ space so text doesn’t hide under icon */
-}
-
-/* MUCH smaller expand button */
+/* snap button tight into bottom-right corner */
 .mk-expand-btn{
   position:absolute;
-  right:8px;
-  bottom:8px;
-  width:18px;             /* ✅ smaller */
-  height:18px;            /* ✅ smaller */
-  border-radius:6px;
+  right:6px;              /* ⬅ tighter to edge */
+  bottom:6px;             /* ⬅ tighter to edge */
+  width:16px;             /* ⬅ smaller */
+  height:16px;
+  border-radius:5px;
   border:1px solid #d1d5db;
-  background:#fff;
+  background:#ffffffee;   /* subtle translucency */
   color:#111827;
   cursor:pointer;
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
-  font-size:11px;
+  font-size:10px;
   line-height:1;
   padding:0;
-  box-shadow:0 1px 4px rgba(0,0,0,0.10);
-  transition:transform .12s, background .12s, border-color .12s;
-  z-index:3;
-}
-.mk-expand-btn:hover{
-  transform:translateY(-1px);
-  border-color:var(--orange);
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  z-index:5;
 }
 
-/* Smaller icon */
+/* icon */
 .mk-expand-btn::before{
   content:"⤢";
-  font-weight:900;
-  font-size:11px;
+  font-weight:800;
+  font-size:10px;
+}
+
+/* hover polish */
+.mk-expand-btn:hover{
+  border-color:var(--orange);
+  background:#fff;
+}
+
+.mk-ta-wrap > textarea{
+  padding-right:30px !important;
 }
