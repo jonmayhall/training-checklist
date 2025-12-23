@@ -1308,6 +1308,86 @@ document.addEventListener("click", (e)=>{
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
 
+/* =========================================================
+   FIX: Training tables — Filters column must be a dropdown
+   Removes that random icon/button in FIRST ROW (and any row)
+========================================================= */
+
+function thText(th){
+  return (th?.textContent || "").trim().toLowerCase();
+}
+function getHeaderCells(table){
+  return Array.from(table.querySelectorAll("thead th"));
+}
+
+function fixTrainingFiltersColumn(table){
+  if (!table) return;
+
+  const headers = getHeaderCells(table);
+  const filtersIdx = headers.findIndex(th => thText(th) === "filters");
+  if (filtersIdx === -1) return;
+
+  const rows = Array.from(table.querySelectorAll("tbody tr"));
+  if (!rows.length) return;
+
+  // Find a working select from ANY row in this column
+  let templateSelect = null;
+  for (const tr of rows){
+    const td = tr.children[filtersIdx];
+    const sel = td?.querySelector("select");
+    if (sel){
+      templateSelect = sel;
+      break;
+    }
+  }
+
+  rows.forEach(tr=>{
+    const td = tr.children[filtersIdx];
+    if (!td) return;
+
+    // 🔥 Remove the random icon/button (and any other junk)
+    td.querySelectorAll("button, svg, .note-link-btn, .note-btn, .mk-table-note-btn")
+      .forEach(n => n.remove());
+
+    // If we already have a select, keep it and just clean up extras
+    const existing = td.querySelector("select");
+    if (existing){
+      // Ensure only one select remains
+      td.querySelectorAll("select").forEach((s,i)=>{ if (i>0) s.remove(); });
+      applySelectGhost(existing);
+      return;
+    }
+
+    // If missing, inject a dropdown
+    if (templateSelect){
+      const newSelect = templateSelect.cloneNode(true);
+      newSelect.value = "";
+      td.innerHTML = "";
+      td.appendChild(newSelect);
+
+      // your autosave conventions
+      ensureUID(newSelect);
+      loadField(newSelect);
+      applySelectGhost(newSelect);
+    }else{
+      // Safe fallback (won’t break layout)
+      const fallback = document.createElement("select");
+      fallback.innerHTML = `<option></option>`;
+      td.innerHTML = "";
+      td.appendChild(fallback);
+
+      ensureUID(fallback);
+      loadField(fallback);
+      applySelectGhost(fallback);
+    }
+  });
+}
+
+/* Run for ALL Training Checklist tables (including ones added later) */
+function fixAllTrainingFilters(){
+  qsa("#training-checklist table.training-table").forEach(fixTrainingFiltersColumn);
+}
+
 /* ---------------------------
    Boot
 --------------------------- */
