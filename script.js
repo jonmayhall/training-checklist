@@ -410,6 +410,78 @@ function initTableAddRow() {
   });
 }
 
+function getOrderedTableKeys(table){
+  const keys = [];
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return keys;
+
+  Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
+    const k = safeTrim(getRowKeyForTableContext(table, tr));
+    if (k) keys.push(k);
+  });
+
+  // de-dupe in order
+  return Array.from(new Set(keys));
+}
+
+function findBulletLineIndex(lines, bullet){
+  const b = (bullet || "").trim();
+  return lines.findIndex(l => (l || "").trim().startsWith(b));
+}
+
+function insertBulletLineInOrderForTable(notesTA, table, bulletLine){
+  if (!notesTA || !table) return { didInsert:false, lineStart:0 };
+
+  const orderedKeys = getOrderedTableKeys(table);
+  const key = safeTrim(bulletLine.replace(/^•\s*/, "").replace(/:\s*$/, "")); // strip "• " and trailing ":"
+  const myOrder = orderedKeys.indexOf(key);
+
+  const raw = notesTA.value || "";
+  const lines = raw.split("\n");
+
+  // already exists?
+  const existingIdx = findBulletLineIndex(lines, bulletLine);
+  if (existingIdx !== -1){
+    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
+    return { didInsert:false, lineStart:start };
+  }
+
+  // if key not found (blank, or weird), just append
+  if (myOrder === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    notesTA.value = raw.trim() ? raw.trim() + "\n" + bulletLine : bulletLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  // insert before the first existing table bullet that belongs AFTER this row
+  let insertBefore = -1;
+  for (let i=0; i<lines.length; i++){
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+
+    // try to match this existing bullet against any table key in order
+    const matchKey = orderedKeys.find(k => t.startsWith(`• ${k}:`) || t.startsWith(`• ${k} :`) || t.startsWith(`• ${k}`));
+    if (!matchKey) continue;
+
+    const matchOrder = orderedKeys.indexOf(matchKey);
+    if (matchOrder !== -1 && matchOrder > myOrder){
+      insertBefore = i;
+      break;
+    }
+  }
+
+  if (insertBefore === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    notesTA.value = raw.trim() ? raw.trim() + "\n" + bulletLine : bulletLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  lines.splice(insertBefore, 0, bulletLine);
+  notesTA.value = lines.join("\n");
+  const startPos = lines.slice(0, insertBefore).join("\n").length + (insertBefore > 0 ? 1 : 0);
+  return { didInsert:true, lineStart:startPos };
+}
+
 /* ---------------------------
    Onsite Training Dates: end defaults to start + 2 days
 --------------------------- */
@@ -1252,26 +1324,28 @@ function getRowKeyForTableContext(contextTable, tr) {
   return getNameFromRow(contextTable, tr) || getOpcodeFromRow(contextTable, tr) || "";
 }
 
-function insertBulletIntoRealNotes(table, bullet) {
+function insertBulletIntoRealNotes(table, bullet){
   const notesBlock = findNotesBlockForTable(table);
   const ta = notesBlock?.querySelector("textarea");
   if (!ta) return;
 
   const line = bullet.trim();
-  const raw = ta.value || "";
-  if (!raw.includes(line)) {
-    ta.value = raw.trim() ? raw.trim() + "\n" + line : line;
-    saveField(ta);
-  }
+  const { didInsert, lineStart } = insertBulletLineInOrderForTable(ta, table, line);
 
-  notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-  setTimeout(() => {
+  if (didInsert) saveField(ta);
+
+  notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
+  setTimeout(()=>{
     ta.focus();
+    const v = ta.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    ta.setSelectionRange(endPos, endPos);
     ta.classList.add("mk-note-jump");
-    setTimeout(() => ta.classList.remove("mk-note-jump"), 700);
+    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
   }, 150);
 
-  requestAnimationFrame(() => updateNoteIconStates(document));
+  requestAnimationFrame(()=> updateNoteIconStates(document));
 }
 
 function tagNameCellsInTable(table) {
@@ -1513,26 +1587,41 @@ function mountPopupNotesCard(titleText, sourceTA) {
   return { notesCard, notesTA: ta };
 }
 
-function insertBulletIntoPopupNotes(modalNotesTA, bullet) {
+function insertBulletIntoPopupNotes(modal, modalNotesTA, bullet){
   const line = bullet.trim();
-  const raw = modalNotesTA.value || "";
-  if (!raw.includes(line)) {
-    modalNotesTA.value = raw.trim() ? raw.trim() + "\n" + line : line;
-  }
 
-  // sync to real notes
-  if (_mkTableModalSourceTA) {
+  // Use the REAL table (not the clone) so row order is accurate
+  const orderTable = _mkTableModalContextTable || null;
+
+  const { didInsert, lineStart } = orderTable
+    ? insertBulletLineInOrderForTable(modalNotesTA, orderTable, line)
+    : (() => {
+        // fallback append
+        const raw = modalNotesTA.value || "";
+        if (!raw.includes(line)) modalNotesTA.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
+        return { didInsert:true, lineStart: raw.length ? raw.length + 1 : 0 };
+      })();
+
+  // sync to real notes textarea
+  if (_mkTableModalSourceTA){
     _mkTableModalSourceTA.value = modalNotesTA.value;
     saveField(_mkTableModalSourceTA);
   }
 
+  // jump to notes inside modal
   const notesCard = modalNotesTA.closest(".section-block");
-  if (notesCard) notesCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (notesCard) notesCard.scrollIntoView({ behavior:"smooth", block:"start" });
 
-  setTimeout(() => {
+  setTimeout(()=>{
     modalNotesTA.focus();
+    constaz;
+    // move cursor to inserted/located line end
+    const v = modalNotesTA.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    modalNotesTA.setSelectionRange(endPos, endPos);
     modalNotesTA.classList.add("mk-note-jump");
-    setTimeout(() => modalNotesTA.classList.remove("mk-note-jump"), 700);
+    setTimeout(()=> modalNotesTA.classList.remove("mk-note-jump"), 700);
   }, 140);
 }
 
