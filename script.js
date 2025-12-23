@@ -975,8 +975,8 @@ function updateNoteIconStates(root=document){
 /* ===========================================================
    TABLE NOTES BUTTONS (Training Checklist + Opcodes)
    ✅ Ensures ONLY ONE "Notes" column exists
-   ✅ Uses ONLY bubble icon in that Notes column
-   ✅ Prevents column shifting that breaks "Filters"
+   ✅ Forces bubble icon in Notes column for EVERY row
+   ✅ Removes ANY stray notes buttons from other columns (Fixes Filters pencil icon)
 =========================================================== */
 
 function thText(th){
@@ -998,8 +998,7 @@ function getNotesHeaderIndexes(table){
 
 function removeColumnByIndex(table, idx){
   // remove TH
-  const ths = table.querySelectorAll("thead tr");
-  ths.forEach(tr=>{
+  table.querySelectorAll("thead tr").forEach(tr=>{
     const cell = tr.children[idx];
     if (cell) cell.remove();
   });
@@ -1015,32 +1014,28 @@ function ensureSingleNotesColumn(table){
   const theadRow = table.querySelector("thead tr");
   if (!theadRow) return null;
 
-  // Find all Notes columns
   const noteIdxs = getNotesHeaderIndexes(table);
 
-  // If multiple, keep the FIRST and remove the rest (right-to-left)
+  // If multiple, keep FIRST, remove rest right-to-left
   if (noteIdxs.length > 1){
     const keep = noteIdxs[0];
-    const remove = noteIdxs.slice(1).sort((a,b)=>b-a);
-    remove.forEach(idx => removeColumnByIndex(table, idx));
+    noteIdxs.slice(1).sort((a,b)=>b-a).forEach(idx => removeColumnByIndex(table, idx));
     return keep;
   }
 
-  // If none, create one at the end
+  // If none, add one at end
   if (noteIdxs.length === 0){
     const th = document.createElement("th");
     th.textContent = "Notes";
     theadRow.appendChild(th);
 
     qsa("tbody tr", table).forEach(tr=>{
-      const td = document.createElement("td");
-      tr.appendChild(td);
+      tr.appendChild(document.createElement("td"));
     });
 
     return theadRow.children.length - 1;
   }
 
-  // Exactly one already exists
   return noteIdxs[0];
 }
 
@@ -1074,16 +1069,29 @@ function renderTableNoteButton(td){
   `;
 }
 
-function applyNotesButtonsToColumn(table, notesColIdx){
-  // Header label sanity
-  const th = table.querySelector("thead tr")?.children?.[notesColIdx];
-  if (th) th.textContent = "Notes";
-
-  // Every row: force ONLY bubble button
+/* ✅ REMOVE any stray note buttons injected into NON-notes columns */
+function purgeStrayTableNoteButtons(table, notesIdx){
   qsa("tbody tr", table).forEach(tr=>{
-    const td = tr.children[notesColIdx];
-    if (!td) return;
-    renderTableNoteButton(td);
+    Array.from(tr.children).forEach((td, idx)=>{
+      if (idx === notesIdx) return;
+      // remove ANY note button variants
+      qsa(".mk-table-note-btn, .note-link-btn, .note-btn", td).forEach(n => n.remove());
+    });
+  });
+}
+
+function applyNotesButtonsToColumn(table, notesColIdx){
+  const headRow = table.querySelector("thead tr");
+  if (headRow && headRow.children[notesColIdx]){
+    headRow.children[notesColIdx].textContent = "Notes";
+  }
+
+  // Make sure EVERY row has a Notes cell and it gets the bubble button
+  qsa("tbody tr", table).forEach(tr=>{
+    while (tr.children.length <= notesColIdx){
+      tr.appendChild(document.createElement("td"));
+    }
+    renderTableNoteButton(tr.children[notesColIdx]);
   });
 }
 
@@ -1097,11 +1105,15 @@ function initTableNotesButtons(root=document){
     qsa(sel, root).forEach(table=>{
       // 1) Fix duplicate Notes columns / create if missing
       const notesIdx = ensureSingleNotesColumn(table);
+      if (notesIdx === null) return;
 
-      // 2) Force ONLY bubble icon in that column
+      // 2) Purge any stray note buttons from other columns (Fixes Filters pencil)
+      purgeStrayTableNoteButtons(table, notesIdx);
+
+      // 3) Force bubble icon in Notes column for ALL rows (Fixes blank first row)
       applyNotesButtonsToColumn(table, notesIdx);
 
-      // 3) One click handler per table (avoid stacking)
+      // 4) Wire click handler once
       if (table.dataset.mkNotesWired === "1") return;
       table.dataset.mkNotesWired = "1";
 
