@@ -1253,7 +1253,7 @@ main{
 ======================================================= */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
-  right:72px;                 /* center of the badge lane */
+  right:52px;                 /* center of the badge lane */
   top:50%;
   transform:translate(50%, -50%);
 
