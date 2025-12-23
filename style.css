@@ -1434,6 +1434,6 @@ main{
 /* DMS Integration — PUSH-Based = myKaarma Green */
 #dms-integration .dms-chip-pull{
   background: var(--mykaarma-green) !important;
-  border-color: var(--mykaarma-green) !important;
-  color: #1f2937 !important; /* readable dark text */
+  border-color:rgba(255,255,255,0.35) !important;
+  color:#fff !important;
 }
