@@ -1458,3 +1458,39 @@ main{
   font-weight:900 !important;
   padding:6px 10px !important;
 }
+
+/* ===========================================================
+   DMS INTEGRATION — CENTER BODY PILLS BETWEEN LINES
+   (Does NOT affect header pills)
+   =========================================================== */
+
+/* Make each list item a 2-row grid:
+   - Left: field + description
+   - Right: pill centered vertically between them */
+#dms-integration .dms-list li{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap:12px;
+  row-gap:2px;
+  align-items:center;
+}
+
+/* Field name (top-left) */
+#dms-integration .dms-field{
+  grid-column:1;
+  grid-row:1;
+}
+
+/* Description text (bottom-left) */
+#dms-integration .dms-list p{
+  grid-column:1;
+  grid-row:2;
+}
+
+/* Right-side pill — vertically centered between the two lines */
+#dms-integration .dms-list .dms-tag{
+  grid-column:2;
+  grid-row:1 / span 2;   /* spans both lines */
+  align-self:center;     /* centers between them */
+}
