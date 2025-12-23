@@ -118,74 +118,107 @@ function initTextareas(root=document){
   });
 }
 
-/* ---------------------------
-   Optional 2-col height sync
---------------------------- */
-function syncTwoColHeights(){
-  const grids = qsa(".cards-grid.two-col, .two-col-grid");
-  grids.forEach(grid=>{
-    const cards = qsa(":scope > .section-block", grid);
-    if (cards.length < 2) return;
+/* ===========================================================
+   NOTES JUMP + ORDERED INSERT (helpers)
+   Put ABOVE initNotesLinkingOption2Only()
+=========================================================== */
 
-    cards.forEach(c=> c.style.minHeight = "");
-
-    for (let i=0; i<cards.length; i+=2){
-      const a = cards[i];
-      const b = cards[i+1];
-      if (!a || !b) continue;
-      const h = Math.max(a.offsetHeight, b.offsetHeight);
-      a.style.minHeight = h + "px";
-      b.style.minHeight = h + "px";
-    }
-  });
+function normalizeNoteKey(line){
+  return (line || "").trim();
 }
 
-/* ---------------------------
-   Page Navigation
---------------------------- */
-function showSection(id){
-  const sections = qsa(".page-section");
-  sections.forEach(s=> s.classList.remove("active"));
-  const target = qs(`#${id}`);
-  if (target) target.classList.add("active");
-
-  qsa(".nav-btn").forEach(btn=>{
-    const to = btn.getAttribute("data-target");
-    btn.classList.toggle("active", to === id);
-  });
-
-  requestAnimationFrame(()=>{
-    initTextareas(target || document);
-    syncTwoColHeights();
-
-    // ✅ ensure note icons exist on newly shown page
-    initNotesLinkingOption2Only(target || document);
-    updateNoteIconStates(target || document);
-
-    // ✅ ensure notes expanders exist on newly shown page
-    initNotesExpanders(target || document);
-  });
-
-  try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
+function getRowOrderKey(row){
+  return normalizeNoteKey(makeNoteLine(row));
 }
 
-function initNav(){
-  qsa(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const target = btn.getAttribute("data-target");
-      if (target) showSection(target);
-    });
-  });
+function getAllRowsInThisNotesGroup(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
 
-  const last = localStorage.getItem("mkc:lastPage");
-  if (last && qs(`#${last}`)) showSection(last);
-  else{
-    const active = qs(".page-section.active");
-    if (!active){
-      const first = qs(".page-section");
-      if (first && first.id) showSection(first.id);
+  if (!wrap) return [];
+
+  return Array.from(wrap.querySelectorAll(".checklist-row"))
+    .filter(r => !isInNotesCard(r))
+    .filter(r => r.querySelector("input, select, textarea"));
+}
+
+function findExistingNoteLineIndex(lines, baseKey){
+  const k = (baseKey || "").trim();
+  return lines.findIndex(l => (l || "").trim().startsWith(k));
+}
+
+function insertNoteLineInOrder(textarea, clickedRow){
+  const allRows = getAllRowsInThisNotesGroup(clickedRow);
+  const orderedKeys = allRows.map(r => getRowOrderKey(r)).filter(Boolean);
+
+  const baseLine = makeNoteLine(clickedRow);
+  if (!baseLine) return { didInsert:false, lineStart:0 };
+
+  const raw = textarea.value || "";
+  const lines = raw.split("\n");
+
+  const existingIdx = findExistingNoteLineIndex(lines, baseLine);
+  if (existingIdx !== -1){
+    return {
+      didInsert:false,
+      lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0)
+    };
+  }
+
+  const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
+  if (myOrder === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  let insertBeforeLineIdx = -1;
+
+  for (let i = 0; i < lines.length; i++){
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+
+    const matchOrder = orderedKeys.findIndex(k => t.startsWith(k.trim()));
+    if (matchOrder !== -1 && matchOrder > myOrder){
+      insertBeforeLineIdx = i;
+      break;
     }
   }
+
+  if (insertBeforeLineIdx === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  lines.splice(insertBeforeLineIdx, 0, baseLine);
+  textarea.value = lines.join("\n");
+
+  const startPos =
+    lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
+
+  return { didInsert:true, lineStart:startPos };
+}
+
+function jumpToNoteLine(textarea, lineStart){
+  if (!textarea) return;
+
+  textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  setTimeout(() => {
+    textarea.focus();
+
+    const v = textarea.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+
+    textarea.setSelectionRange(endPos, endPos);
+
+    textarea.classList.add("mk-note-jump");
+    setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
+  }, 120);
 }
 
 /* ---------------------------
@@ -872,34 +905,23 @@ function initNotesLinkingOption2Only(root=document){
   </svg>
 `;
 
-    btn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
+   btn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
 
-      const textarea = findNotesTextareaForRow(row);
-      if (!textarea) return;
+  const textarea = findNotesTextareaForRow(row);
+  if (!textarea) return;
 
-      const line = makeNoteLine(row);
-      if (!line) return;
+  const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
 
-      const existing = textarea.value || "";
-      if (existing.includes(line.trim())){
-        textarea.focus();
-        updateNoteIconStates(root);
-        return;
-      }
+  if (didInsert){
+    saveField(textarea);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  }
 
-      textarea.value = (existing.trim() ? existing.trim() + "\n" : "") + line;
-      textarea.focus();
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-
-      saveField(textarea);
-      updateNoteIconStates(root);
-      requestAnimationFrame(syncTwoColHeights);
-    });
-
-    actions.appendChild(btn);
-  });
+  jumpToNoteLine(textarea, lineStart);
+});
 
   updateNoteIconStates(root);
 }
