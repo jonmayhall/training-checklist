@@ -687,6 +687,36 @@ main{
 }
 #trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
 
+/* =======================================================
+   TRAINERS — Additional Trainer clones
+   - cloned rows have NO + button, so input should be fully rounded
+   - match size/width to other right-side fields
+======================================================= */
+
+/* Any additional trainer row you add (cloned) */
+#trainers-deployment .trainer-clone input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  /* full pill/rounded like other inputs */
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+
+  /* match other right-side field sizing */
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+
+  /* same look as your other inputs */
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+}
+
 /* =======================
    TABLES
 ======================= */
