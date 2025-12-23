@@ -1253,19 +1253,16 @@ main{
 ======================================================= */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
-  right:16px;
+  right:96px;                 /* center of the badge lane */
   top:50%;
-  transform:translateY(-50%);
+  transform:translate(50%, -50%);
 
-  width:128px;                 /* fixed lane width */
-  min-width:128px !important;  /* prevent later overrides */
-
-  display:flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
   text-align:center;
 
-  padding:3px 8px;
+  padding:3px 8px;            /* original badge size */
   font-size:10px;
   font-weight:600;
   letter-spacing:0.02em;
