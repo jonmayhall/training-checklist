@@ -1836,3 +1836,108 @@ main{
 #mkTableModal .mk-table-notes .mk-ta-expand{
   position:static;
 }
+
+/* ===========================================================
+   TABLE POPUP — Make it feel like TWO CARDS (Table + Notes)
+   Targets your table modal: #mkTableModal
+   =========================================================== */
+
+/* Give the modal body breathing room + stacking layout */
+#mkTableModal .mk-modal-panel{
+  display:flex;
+  flex-direction:column;
+  gap:18px;                 /* space between “cards” */
+  padding:16px 16px 18px;   /* side + bottom padding */
+  box-sizing:border-box;
+}
+
+/* ---------------------------
+   CARD 1: TABLE WRAP
+--------------------------- */
+#mkTableModal .mk-table-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* Keep table scrolling inside the table card */
+#mkTableModal .mk-table-card .mk-table-scroll{
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:10px 10px 12px; /* inner padding so table isn’t glued to edges */
+  box-sizing:border-box;
+}
+
+/* Make inputs/selects behave inside cells (fix overflow) */
+#mkTableModal .mk-table-card table.training-table{
+  width:max-content;
+  min-width:100%;
+  table-layout:auto;
+}
+#mkTableModal .mk-table-card table.training-table input,
+#mkTableModal .mk-table-card table.training-table select{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* Force checkbox + name input to sit side-by-side (not stacked) */
+#mkTableModal .mk-table-card table.training-table td:first-child{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  justify-content:flex-start !important;
+}
+#mkTableModal .mk-table-card table.training-table td:first-child input[type="checkbox"]{
+  flex:0 0 auto !important;
+  margin:0 !important;
+}
+#mkTableModal .mk-table-card table.training-table td:first-child input[type="text"]{
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+}
+
+/* ---------------------------
+   CARD 2: NOTES (match your Notes cards)
+--------------------------- */
+#mkTableModal .mk-table-notes{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* Notes “header bar” like your h2 orange headers */
+#mkTableModal .mk-table-notes .mk-notes-header{
+  background:var(--orange);
+  color:#fff;
+  font-weight:800;
+  font-size:16px;
+  padding:10px 16px;
+}
+
+/* Notes body padding */
+#mkTableModal .mk-table-notes .mk-notes-body{
+  padding:12px 14px 14px;
+}
+
+/* Notes textarea styling like your main notes */
+#mkTableModal .mk-table-notes textarea{
+  width:100% !important;
+  max-width:100% !important;
+  min-height:180px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  box-sizing:border-box;
+  resize:vertical;
+}
