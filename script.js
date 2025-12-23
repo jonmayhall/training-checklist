@@ -1,792 +1,985 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   ✅ Stable, single-file, no dependencies
-   - Sidebar nav (page switching)
-   - Autosave (localStorage) for inputs/selects/textareas
-   - Clear All (global) + Reset This Page (per section)
-   - Add Row (+) for ALL tables (.training-table) using last row as template
-   - Additional Trainers (+)
-   - Additional POC (+)
-   - Support Tickets: add/remove, move by status, base locked to Open
-   - Onsite dates: end defaults to start + 2 days
-   - Dealership name mirrors into topbar display
-   - Notes icon (📝): scroll to target notes, insert bullet (• Name: / • Opcode: / • Question:)
+   “Full JS + fixes” (drop-in)
+   ✅ Nav clicks work + URL hash support
+   ✅ Add Row (+) for ALL .training-table tables
+   ✅ Support Tickets: add/remove, move by status, base locked to Open
+   ✅ Notes icons (📝) jump to correct Notes block + inserts bullets:
+      - Checklist rows: "• Question:"
+      - Training tables: "• <Name>:"
+      - Opcodes table: "• <Opcode>:"
+   ✅ Notes textarea expander (⤢) + Notes modal
+   ✅ Table expand (⤢) to modal + keeps horizontal scroll
+   ✅ Autosave (localStorage) + Restore on load
+   ✅ Reset Page + Clear All
+   ✅ Ghost placeholders for selects (data-ghost="true")
+   ✅ Date helper: end defaults to start + 2 days (for common ids)
+   ✅ PDF export (all pages) if jsPDF + html2canvas are present
    ======================================================= */
 
 (() => {
   "use strict";
 
   /* ---------------------------
-     Helpers
+     Tiny helpers
   --------------------------- */
-  const qs = (sel, root = document) => root.querySelector(sel);
-  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const qs  = (sel, root=document) => root.querySelector(sel);
+  const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-  const STORAGE_KEY = "mk_training_checklist_autosave_v1";
+  const STORAGE_KEY = "mk_interactive_checklist_v1";
 
-  const isTextLike = (el) =>
-    el &&
-    (el.tagName === "INPUT" &&
-      ["text", "email", "number", "date", "tel", "url", "search", "password"].includes(el.type)) ||
-    el.tagName === "TEXTAREA";
+  const debounce = (fn, wait=250) => {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), wait);
+    };
+  };
 
-  const isCheckbox = (el) => el && el.tagName === "INPUT" && el.type === "checkbox";
-  const isSelect = (el) => el && el.tagName === "SELECT";
+  const safeJsonParse = (s, fallback=null) => {
+    try { return JSON.parse(s); } catch { return fallback; }
+  };
 
-  const uid = () => Math.random().toString(36).slice(2, 10);
+  const todayISO = () => {
+    const d = new Date();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  };
 
-  function safeJsonParse(str, fallback = null) {
-    try {
-      return JSON.parse(str);
-    } catch {
-      return fallback;
-    }
-  }
-
-  function addDaysToISODate(iso, days) {
+  const addDaysISO = (iso, days) => {
     if (!iso) return "";
     const d = new Date(iso + "T00:00:00");
     if (Number.isNaN(d.getTime())) return "";
     d.setDate(d.getDate() + days);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  };
 
-  function normalizeValueForSave(el) {
-    if (isCheckbox(el)) return el.checked ? "1" : "0";
-    if (isSelect(el)) return el.value ?? "";
-    if (isTextLike(el)) return el.value ?? "";
-    return "";
-  }
-
-  function applyValueFromSave(el, saved) {
-    if (saved == null) return;
-    if (isCheckbox(el)) el.checked = saved === "1";
-    else if (isSelect(el) || isTextLike(el)) el.value = saved;
-  }
-
-  function setPlaceholderClassForDate(el) {
+  const scrollToEl = (el) => {
     if (!el) return;
-    const has = !!el.value;
-    el.classList.toggle("is-placeholder", !has);
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("mk-note-jump");
+    setTimeout(() => el.classList.remove("mk-note-jump"), 900);
+  };
+
+  /* ---------------------------
+     Ghost placeholders (selects)
+  --------------------------- */
+  function applyGhostPlaceholder(el) {
+    if (!el || el.tagName !== "SELECT") return;
+    const first = el.options?.[0];
+    const hasGhost = first && first.getAttribute("data-ghost") === "true";
+    if (!hasGhost) return;
+
+    // If value empty -> placeholder style
+    if (!el.value) el.classList.add("is-placeholder");
+    else el.classList.remove("is-placeholder");
+
+    // Ensure first option doesn't become a valid "selected" value silently
+    // (We keep it empty string in HTML.)
+  }
+
+  function initGhostSelects(root=document) {
+    qsa("select", root).forEach(sel => {
+      applyGhostPlaceholder(sel);
+      sel.addEventListener("change", () => applyGhostPlaceholder(sel));
+    });
   }
 
   /* ---------------------------
-     Autosave system
+     Nav + pages
   --------------------------- */
-  function ensureAutosaveId(el) {
-    if (!el) return null;
-    // Prefer existing id/name; otherwise assign a stable data-id
-    if (el.id) return `#${el.id}`;
-    if (el.name) return `name:${el.name}`;
+  function setActiveSection(sectionId) {
+    const pages = qsa(".page-section");
+    pages.forEach(p => p.classList.remove("active"));
 
-    if (!el.dataset.autosaveId) {
-      el.dataset.autosaveId = "asv_" + uid();
+    const target = qs(`#${CSS.escape(sectionId)}`);
+    if (target && target.classList.contains("page-section")) {
+      target.classList.add("active");
+    } else {
+      // fallback to first section
+      const first = pages[0];
+      if (first) first.classList.add("active");
+      sectionId = first?.id || sectionId;
     }
-    return `data:${el.dataset.autosaveId}`;
-  }
 
-  function getAllSavableFields(root = document) {
-    const fields = qsa("input, select, textarea", root).filter((el) => {
-      // Skip buttons and non-value inputs
-      if (el.tagName === "INPUT") {
-        if (["button", "submit", "reset", "file"].includes(el.type)) return false;
-      }
-      // Skip disabled (except ticket status select might be disabled, we still want to store it)
-      // But disabled fields are generally derived; ignore unless needed:
-      if (el.disabled && !el.classList.contains("ticket-status-select")) return false;
-      return true;
-    });
-    return fields;
-  }
-
-  function loadAutosave() {
-    const data = safeJsonParse(localStorage.getItem(STORAGE_KEY), {});
-    if (!data || typeof data !== "object") return;
-
-    // Apply in document
-    const fields = getAllSavableFields(document);
-    fields.forEach((el) => {
-      const key = ensureAutosaveId(el);
-      if (!key) return;
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        applyValueFromSave(el, data[key]);
-      }
+    // nav buttons
+    qsa("#sidebar-nav .nav-btn").forEach(btn => {
+      const id = btn.getAttribute("data-target");
+      btn.classList.toggle("active", id === sectionId);
     });
 
-    // Update topbar dealership name display after restore
-    syncDealershipNameToTopbar();
-
-    // Update date placeholder classes
-    setPlaceholderClassForDate(qs("#onsiteStartDate"));
-    setPlaceholderClassForDate(qs("#onsiteEndDate"));
-
-    // After restore, re-evaluate tickets (move cards to correct columns)
-    reconcileTicketsFromDOM();
-  }
-
-  function saveAutosave() {
-    const data = safeJsonParse(localStorage.getItem(STORAGE_KEY), {}) || {};
-    const fields = getAllSavableFields(document);
-
-    fields.forEach((el) => {
-      const key = ensureAutosaveId(el);
-      if (!key) return;
-      data[key] = normalizeValueForSave(el);
-    });
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
-  function clearAutosave() {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-
-  function resetFieldsInRoot(root) {
-    const fields = getAllSavableFields(root);
-
-    fields.forEach((el) => {
-      if (isCheckbox(el)) el.checked = false;
-      else if (isSelect(el)) {
-        // Prefer ghost option
-        const ghost = qsa("option", el).find((o) => o.dataset.ghost === "true");
-        el.value = ghost ? ghost.value : "";
-      } else if (isTextLike(el)) {
-        el.value = "";
-      }
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-
-    // Date placeholders
-    setPlaceholderClassForDate(qs("#onsiteStartDate"));
-    setPlaceholderClassForDate(qs("#onsiteEndDate"));
-
-    // Clear dynamic rows that are not base
-    cleanupDynamicClones(root);
-
-    // Tickets re-lock base status
-    reconcileTicketsFromDOM();
-
-    // Sync topbar display
-    syncDealershipNameToTopbar();
-
-    saveAutosave();
-  }
-
-  function cleanupDynamicClones(root) {
-    // Remove Additional Trainers clones
-    qsa("#additionalTrainersContainer .checklist-row", root).forEach((row) => row.remove());
-
-    // Remove additional POC clones (anything with data-base not true, but class additional-poc-card)
-    qsa(".additional-poc-card", root).forEach((card) => {
-      if (card.dataset.base === "true") return;
-      card.remove();
-    });
-
-    // Remove table added rows beyond first baseline (we keep whatever is in HTML baseline)
-    // NOTE: We only remove rows marked as data-added="true"
-    qsa("tr[data-added='true']", root).forEach((tr) => tr.remove());
-
-    // Support tickets: remove non-base cards
-    qsa(".ticket-group", root).forEach((g) => {
-      if (g.dataset.base === "true") return;
-      g.remove();
-    });
-  }
-
-  /* ---------------------------
-     Sidebar Nav
-  --------------------------- */
-  function showSection(sectionId) {
-    qsa(".page-section").forEach((sec) => sec.classList.remove("active"));
-    const sec = qs(`#${CSS.escape(sectionId)}`);
-    if (sec) sec.classList.add("active");
-
-    qsa(".nav-btn").forEach((b) => b.classList.remove("active"));
-    const btn = qs(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
-    if (btn) btn.classList.add("active");
-
-    // Scroll main to top for consistency (if layout allows)
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // update hash (no jump)
+    if (sectionId) history.replaceState(null, "", `#${sectionId}`);
   }
 
   function initNav() {
-    qsa(".nav-btn").forEach((btn) => {
+    qsa("#sidebar-nav .nav-btn").forEach(btn => {
       btn.addEventListener("click", () => {
-        const target = btn.getAttribute("data-target");
-        if (target) showSection(target);
-      });
-    });
-  }
-
-  /* ---------------------------
-     Dealership name → topbar
-  --------------------------- */
-  function syncDealershipNameToTopbar() {
-    const input = qs("#dealershipNameInput");
-    const display = qs("#dealershipNameDisplay");
-    if (!display) return;
-
-    const name = input ? (input.value || "").trim() : "";
-    display.textContent = name || "";
-  }
-
-  function initDealershipNameSync() {
-    const input = qs("#dealershipNameInput");
-    if (!input) return;
-    input.addEventListener("input", () => {
-      syncDealershipNameToTopbar();
-      saveAutosave();
-    });
-  }
-
-  /* ---------------------------
-     Onsite dates end = start + 2 days
-  --------------------------- */
-  function initOnsiteDates() {
-    const start = qs("#onsiteStartDate");
-    const end = qs("#onsiteEndDate");
-    if (!start || !end) return;
-
-    const onUpdate = () => {
-      setPlaceholderClassForDate(start);
-      setPlaceholderClassForDate(end);
-
-      if (start.value) {
-        // If end empty OR end earlier than start, set to start + 2
-        const desired = addDaysToISODate(start.value, 2);
-        const endVal = end.value || "";
-        if (!endVal) {
-          end.value = desired;
-        } else {
-          // If end < start, bump it
-          if (new Date(endVal + "T00:00:00") < new Date(start.value + "T00:00:00")) {
-            end.value = desired;
-          }
-        }
-        setPlaceholderClassForDate(end);
-      }
-
-      saveAutosave();
-    };
-
-    start.addEventListener("change", onUpdate);
-    start.addEventListener("input", onUpdate);
-    end.addEventListener("change", () => {
-      setPlaceholderClassForDate(end);
-      saveAutosave();
-    });
-    end.addEventListener("input", () => {
-      setPlaceholderClassForDate(end);
-      saveAutosave();
-    });
-  }
-
-  /* ---------------------------
-     Reset page + Clear all
-  --------------------------- */
-  function initResetButtons() {
-    // Reset This Page
-    qsa(".clear-page-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const sec = btn.closest(".page-section");
-        if (!sec) return;
-        resetFieldsInRoot(sec);
+        const id = btn.getAttribute("data-target");
+        if (id) setActiveSection(id);
+        // Save on nav to be safe
+        scheduleSave();
       });
     });
 
-    // Clear All
-    const clearAllBtn = qs("#clearAllBtn");
-    if (clearAllBtn) {
-      clearAllBtn.addEventListener("click", () => {
-        // Clear stored data and reset entire app
-        clearAutosave();
-        resetFieldsInRoot(document);
-        // Ensure first page is visible
-        const first = qs(".nav-btn[data-target]")?.getAttribute("data-target");
-        if (first) showSection(first);
-      });
+    const initial = (location.hash || "").replace("#", "");
+    if (initial) setActiveSection(initial);
+    else {
+      const first = qs(".page-section")?.id;
+      if (first) setActiveSection(first);
     }
-  }
 
-  /* ---------------------------
-     Generic Add Row (+) for tables
-     - Works for any .training-table with a footer button .add-row
-     - Clones LAST row of tbody to preserve Notes icon cell too
-  --------------------------- */
-  function clearInputsInRow(tr) {
-    qsa("input, select, textarea", tr).forEach((el) => {
-      if (isCheckbox(el)) el.checked = false;
-      else if (isSelect(el)) {
-        el.value = "";
-      } else if (isTextLike(el)) {
-        el.value = "";
-      }
+    window.addEventListener("hashchange", () => {
+      const id = (location.hash || "").replace("#", "");
+      if (id) setActiveSection(id);
     });
   }
 
-  function normalizeRowAfterClone(tr) {
-    // Remove any saved autosave ids to avoid collisions
-    qsa("[data-autosave-id]", tr).forEach((el) => delete el.dataset.autosaveId);
+  /* ---------------------------
+     Autosave / restore
+  --------------------------- */
+  function buildKeyForEl(el) {
+    // Prefer stable IDs / names.
+    if (el.id) return `id:${el.id}`;
+    if (el.name) return `name:${el.name}`;
 
-    // Clear values
-    clearInputsInRow(tr);
+    // Otherwise: path key by DOM position within page
+    // (Reasonable for a single-file app; dynamic rows are handled by saving after create.)
+    const section = el.closest(".page-section");
+    const sectionId = section?.id || "no-section";
 
-    // Mark as added so page reset can remove extras
-    tr.dataset.added = "true";
+    // Create a selector-ish signature
+    const parts = [];
+    let node = el;
+    while (node && node !== section && node.nodeType === 1) {
+      const tag = node.tagName.toLowerCase();
+      const cls = (node.className && typeof node.className === "string")
+        ? node.className.trim().split(/\s+/).slice(0,2).join(".")
+        : "";
+      const idx = node.parentElement
+        ? Array.from(node.parentElement.children).indexOf(node)
+        : 0;
+      parts.push(`${tag}${cls ? "."+cls : ""}[${idx}]`);
+      node = node.parentElement;
+    }
+    return `path:${sectionId}:${parts.reverse().join(">")}`;
   }
 
-  function initTableAddRow() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".table-footer .add-row");
-      if (!btn) return;
+  function collectState() {
+    const data = {};
+    const els = qsa("input, select, textarea");
 
-      const container = btn.closest(".table-container");
-      const table = container ? qs("table.training-table", container) : null;
-      if (!table) return;
+    for (const el of els) {
+      // Skip buttons
+      if (el.tagName === "INPUT") {
+        const t = (el.getAttribute("type") || "").toLowerCase();
+        if (t === "button" || t === "submit" || t === "reset") continue;
+      }
 
-      const tbody = qs("tbody", table);
+      const key = buildKeyForEl(el);
+
+      if (el.tagName === "INPUT") {
+        const t = (el.type || "").toLowerCase();
+        if (t === "checkbox") data[key] = !!el.checked;
+        else data[key] = el.value ?? "";
+      } else if (el.tagName === "SELECT") {
+        data[key] = el.value ?? "";
+      } else if (el.tagName === "TEXTAREA") {
+        data[key] = el.value ?? "";
+      }
+    }
+    return data;
+  }
+
+  function applyState(saved) {
+    if (!saved || typeof saved !== "object") return;
+
+    const els = qsa("input, select, textarea");
+    for (const el of els) {
+      // Skip buttons
+      if (el.tagName === "INPUT") {
+        const t = (el.getAttribute("type") || "").toLowerCase();
+        if (t === "button" || t === "submit" || t === "reset") continue;
+      }
+
+      const key = buildKeyForEl(el);
+      if (!(key in saved)) continue;
+
+      const val = saved[key];
+
+      if (el.tagName === "INPUT") {
+        const t = (el.type || "").toLowerCase();
+        if (t === "checkbox") el.checked = !!val;
+        else el.value = String(val ?? "");
+      } else {
+        el.value = String(val ?? "");
+      }
+    }
+
+    // Re-apply ghost placeholder class
+    initGhostSelects(document);
+    // Re-apply acceptance coloring (optional helper)
+    applyAcceptanceColors(document);
+    // Re-apply note indicators
+    refreshNoteIndicators();
+  }
+
+  function saveNow() {
+    const state = collectState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  const scheduleSave = debounce(saveNow, 250);
+
+  function initAutosave() {
+    // Restore first
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const saved = safeJsonParse(raw, null);
+    if (saved) applyState(saved);
+
+    // Save on any interaction
+    document.addEventListener("input", (e) => {
+      const t = e.target;
+      if (!t) return;
+      if (t.matches("input, textarea")) scheduleSave();
+    }, true);
+
+    document.addEventListener("change", (e) => {
+      const t = e.target;
+      if (!t) return;
+      if (t.matches("select, input[type='checkbox'], input[type='date']")) {
+        // Update ghost placeholder
+        if (t.tagName === "SELECT") applyGhostPlaceholder(t);
+        scheduleSave();
+      }
+    }, true);
+  }
+
+  /* ---------------------------
+     Clear All + Reset Page
+  --------------------------- */
+  function clearAll() {
+    localStorage.removeItem(STORAGE_KEY);
+    // safest: reload so dynamic rows/tickets reset too
+    location.reload();
+  }
+
+  function resetPage(sectionEl) {
+    if (!sectionEl) return;
+
+    // Clear inputs/selects/textarea within section
+    qsa("input, select, textarea", sectionEl).forEach(el => {
+      if (el.tagName === "INPUT") {
+        const t = (el.type || "").toLowerCase();
+        if (t === "checkbox") el.checked = false;
+        else if (t !== "button" && t !== "submit" && t !== "reset") el.value = "";
+      } else if (el.tagName === "SELECT") {
+        el.value = "";
+        applyGhostPlaceholder(el);
+      } else {
+        el.value = "";
+      }
+    });
+
+    // Special: reset tickets containers to base only
+    if (sectionEl.id === "support-tickets") resetTicketsToBase();
+
+    // Special: remove dynamically added table rows (keep original 3 where present, or 1)
+    qsa(".training-table", sectionEl).forEach(table => {
+      const tbody = table.tBodies?.[0];
       if (!tbody) return;
+      const rows = Array.from(tbody.rows);
+      // Keep at least 1 row; if you have 3 starter rows, keep 3
+      const keep = Math.min(3, rows.length);
+      rows.slice(keep).forEach(r => r.remove());
+      // Clear remaining rows
+      rows.slice(0, keep).forEach(r => clearTableRow(r));
+    });
 
-      const rows = qsa("tr", tbody);
-      if (!rows.length) return;
+    refreshNoteIndicators();
+    applyAcceptanceColors(sectionEl);
+    scheduleSave();
+  }
 
-      const template = rows[rows.length - 1];
-      const clone = template.cloneNode(true);
+  function initResetButtons() {
+    // Clear All (left sidebar button)
+    const clearAllBtn = qs("#clearAllBtn");
+    if (clearAllBtn) clearAllBtn.addEventListener("click", clearAll);
 
-      normalizeRowAfterClone(clone);
-      tbody.appendChild(clone);
-
-      saveAutosave();
+    // Reset This Page (per section)
+    qsa(".page-section .clear-page-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const section = btn.closest(".page-section");
+        resetPage(section);
+      });
     });
   }
 
   /* ---------------------------
-     Additional Trainers (+)
+     Table Add Row (+)
   --------------------------- */
-  function buildAdditionalTrainerRow() {
-    const row = document.createElement("div");
-    row.className = "checklist-row integrated-plus indent-sub";
-    row.innerHTML = `
-      <label>Additional Trainer</label>
-      <input type="text" placeholder="Enter additional trainer name">
-      <button type="button" class="remove-row" title="Remove trainer">–</button>
-    `;
-    // New autosave ids will be assigned automatically on save
-    return row;
-  }
-
-  function initAdditionalTrainers() {
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest(".checklist-row[data-base='true'] .add-row");
-      if (!addBtn) return;
-
-      // Only for the Additional Trainer base row (page 1)
-      const baseRow = addBtn.closest(".checklist-row");
-      if (!baseRow || baseRow.querySelector("label")?.textContent?.trim() !== "Additional Trainer") return;
-
-      const input = qs("input[type='text']", baseRow);
-      const val = (input?.value || "").trim();
-
-      // Optional gating: if base is empty, don't add
-      if (!val) {
-        input?.focus();
-        return;
+  function clearTableRow(tr) {
+    qsa("input, select, textarea", tr).forEach(el => {
+      if (el.tagName === "INPUT") {
+        const t = (el.type || "").toLowerCase();
+        if (t === "checkbox") el.checked = false;
+        else el.value = "";
+      } else if (el.tagName === "SELECT") {
+        el.value = "";
+      } else {
+        el.value = "";
       }
-
-      const container = qs("#additionalTrainersContainer");
-      if (!container) return;
-
-      const newRow = buildAdditionalTrainerRow();
-      // Put value into the newly created row and clear base input
-      const newInput = qs("input[type='text']", newRow);
-      if (newInput) newInput.value = val;
-      if (input) input.value = "";
-
-      container.appendChild(newRow);
-      saveAutosave();
-    });
-
-    // Remove trainer row
-    document.addEventListener("click", (e) => {
-      const rm = e.target.closest(".remove-row");
-      if (!rm) return;
-      const row = rm.closest(".checklist-row");
-      if (!row) return;
-      row.remove();
-      saveAutosave();
     });
   }
 
-  /* ---------------------------
-     Additional POC (+)
-  --------------------------- */
-  function cloneAdditionalPOC(baseCard) {
-    const clone = baseCard.cloneNode(true);
-    clone.dataset.base = "false";
+  function cloneTableRow(table) {
+    const tbody = table.tBodies?.[0];
+    if (!tbody) return null;
 
-    // Remove the + button and replace with remove
-    const plus = qs(".additional-poc-add", clone);
-    if (plus) {
-      plus.classList.remove("additional-poc-add");
-      plus.classList.remove("add-row");
-      plus.classList.add("remove-poc-btn");
-      plus.textContent = "–";
-      plus.title = "Remove contact";
-    }
+    const rows = Array.from(tbody.rows);
+    const template = rows[rows.length - 1] || rows[0];
+    if (!template) return null;
 
-    // Clear values
-    qsa("input, select, textarea", clone).forEach((el) => {
-      if (isCheckbox(el)) el.checked = false;
-      else if (isSelect(el)) el.value = "";
-      else if (isTextLike(el)) el.value = "";
-      // Clear autosave ids
-      if (el.dataset.autosaveId) delete el.dataset.autosaveId;
-    });
+    const clone = template.cloneNode(true);
+    clearTableRow(clone);
 
+    // Keep notes icon button in place; no special changes needed
+    tbody.appendChild(clone);
+
+    // Re-bind notes icon click inside new row
+    bindNotesIconButtons(clone);
+
+    scheduleSave();
     return clone;
   }
 
-  function initAdditionalPOC() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".additional-poc-add");
-      if (!btn) return;
+  function initTableAddRow() {
+    qsa(".table-container").forEach(container => {
+      const table = qs("table.training-table", container);
+      const footerAdd = qs(".table-footer .add-row", container);
 
-      const baseCard = btn.closest(".additional-poc-card");
-      if (!baseCard || baseCard.dataset.base !== "true") return;
+      if (!table || !footerAdd) return;
 
-      // Gate: require name, role, and email/cell at least? (light gate: require name)
-      const nameInput = qs('input[type="text"]', baseCard);
-      if (nameInput && !nameInput.value.trim()) {
-        nameInput.focus();
-        return;
-      }
-
-      const grid = baseCard.parentElement; // primary-contacts-grid
-      if (!grid) return;
-
-      const newCard = cloneAdditionalPOC(baseCard);
-      grid.appendChild(newCard);
-      saveAutosave();
-    });
-
-    document.addEventListener("click", (e) => {
-      const rm = e.target.closest(".remove-poc-btn");
-      if (!rm) return;
-      const card = rm.closest(".additional-poc-card");
-      if (!card || card.dataset.base === "true") return;
-      card.remove();
-      saveAutosave();
+      footerAdd.addEventListener("click", () => {
+        cloneTableRow(table);
+      });
     });
   }
 
   /* ---------------------------
-     Support Tickets
-     - Base card stays in Open only
-     - "+" duplicates to a new Open ticket card (requires base to be filled)
-     - Status select for non-base cards is enabled; moving columns happens on change
-     - Remove button on non-base cards
+     Acceptance colors helper (optional)
+     (Only applies if selects contain those labels)
   --------------------------- */
-  const ticketContainers = {
-    Open: () => qs("#openTicketsContainer"),
-    "Tier Two": () => qs("#tierTwoTicketsContainer"),
-    "Closed - Resolved": () => qs("#closedResolvedTicketsContainer"),
-    "Closed - Feature Not Supported": () => qs("#closedFeatureTicketsContainer"),
-  };
+  function applyAcceptanceColors(root=document) {
+    qsa(".training-table select", root).forEach(sel => {
+      sel.classList.remove("accept-yes","accept-neutral","accept-no","accept-na");
+      const v = (sel.value || "").toLowerCase();
 
-  function isTicketBaseComplete(baseGroup) {
-    const num = qs(".ticket-number-input", baseGroup)?.value?.trim();
-    const url = qs(".ticket-zendesk-input", baseGroup)?.value?.trim();
-    const sum = qs(".ticket-summary-input", baseGroup)?.value?.trim();
-    return !!(num && url && sum);
+      if (v.includes("fully adopted") || v.includes("mostly adopted")) sel.classList.add("accept-yes");
+      else if (v.includes("neutral")) sel.classList.add("accept-neutral");
+      else if (v.includes("needs support") || v.includes("not accepted")) sel.classList.add("accept-no");
+      else if (v === "n/a") sel.classList.add("accept-na");
+    });
   }
 
-  function createRemoveTicketBtn() {
+  /* ---------------------------
+     Notes: checklist-row linking + table notes + fixes
+     - HTML already includes:
+       * .notes-icon-btn data-notes-target="notes-..."
+       * Notes blocks with corresponding id="notes-..."
+  --------------------------- */
+  function ensureLineStartsWithBullet(line) {
+    const trimmed = (line || "").trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("•")) return trimmed;
+    return `• ${trimmed}`;
+  }
+
+  function appendNoteLine(textarea, line) {
+    if (!textarea) return;
+    const txt = textarea.value || "";
+    const safeLine = ensureLineStartsWithBullet(line);
+
+    if (!txt.trim()) {
+      textarea.value = safeLine;
+    } else {
+      const endsWithNL = txt.endsWith("\n");
+      textarea.value = txt + (endsWithNL ? "" : "\n") + safeLine;
+    }
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    scheduleSave();
+    refreshNoteIndicators();
+  }
+
+  function getTableContextLine(btn) {
+    // Determine which table this button belongs to
+    const section = btn.closest(".page-section");
+    const sectionId = section?.id || "";
+
+    // Row context
+    const tr = btn.closest("tr");
+    const table = btn.closest("table.training-table");
+
+    // Training Checklist tables: first cell has checkbox+name input
+    if (sectionId === "training-checklist") {
+      const nameInput = qs("td:first-child input[type='text']", tr);
+      const name = (nameInput?.value || "").trim();
+      return name ? `• ${name}:` : "• (Name):";
+    }
+
+    // Opcodes: opcode is in 2nd column input (after checkbox)
+    if (sectionId === "opcodes-pricing") {
+      // Find first text input after the checkbox column, usually opcode
+      const opcodeInput = qs("td:nth-child(2) input[type='text']", tr) || qs("td input[type='text']", tr);
+      const opcode = (opcodeInput?.value || "").trim();
+      return opcode ? `• ${opcode}:` : "• (Opcode):";
+    }
+
+    // Generic fallback
+    return "• Note:";
+  }
+
+  function bindNotesIconButtons(root=document) {
+    qsa(".notes-icon-btn", root).forEach(btn => {
+      if (btn.__mkBound) return;
+      btn.__mkBound = true;
+
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-notes-target");
+        const notesBlock = targetId ? qs(`#${CSS.escape(targetId)}`) : null;
+        const textarea = notesBlock ? qs("textarea", notesBlock) : null;
+
+        if (!notesBlock || !textarea) return;
+
+        // Jump to notes block
+        scrollToEl(notesBlock);
+
+        // Insert the right bullet line based on context:
+        // - If this is a table notes icon button -> name/opcode line
+        const inTable = !!btn.closest("table.training-table");
+        if (inTable) {
+          const line = getTableContextLine(btn);
+          appendNoteLine(textarea, line);
+          return;
+        }
+
+        // - Otherwise checklist-row note icon: Question bullet
+        appendNoteLine(textarea, "• Question:");
+      });
+    });
+  }
+
+  function refreshNoteIndicators() {
+    // Marks buttons orange if their target textarea has content
+    qsa(".notes-icon-btn").forEach(btn => {
+      const targetId = btn.getAttribute("data-notes-target");
+      const notesBlock = targetId ? qs(`#${CSS.escape(targetId)}`) : null;
+      const textarea = notesBlock ? qs("textarea", notesBlock) : null;
+      const has = textarea ? !!(textarea.value || "").trim() : false;
+      btn.classList.toggle("has-note", has);
+      // For compatibility with your older CSS class name:
+      // If you also have .note-link-btn, ignore here.
+    });
+  }
+
+  /* ---------------------------
+     Notes textarea expander (⤢) + modal
+  --------------------------- */
+  function ensureNotesModal() {
+    let modal = qs("#mkNotesModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "mkNotesModal";
+    modal.innerHTML = `
+      <div class="mk-modal-backdrop" role="presentation"></div>
+      <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Notes">
+        <div class="mk-modal-header">
+          <div class="mk-modal-title">Notes</div>
+          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
+        </div>
+        <textarea class="mk-modal-textarea"></textarea>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const backdrop = qs(".mk-modal-backdrop", modal);
+    const closeBtn = qs(".mk-modal-close", modal);
+
+    const close = () => {
+      modal.classList.remove("open");
+      modal.__activeTextarea = null;
+    };
+
+    backdrop.addEventListener("click", close);
+    closeBtn.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("open")) close();
+    });
+
+    // Sync changes back to the active textarea
+    const modalTa = qs(".mk-modal-textarea", modal);
+    modalTa.addEventListener("input", () => {
+      const active = modal.__activeTextarea;
+      if (!active) return;
+      active.value = modalTa.value;
+      scheduleSave();
+      refreshNoteIndicators();
+    });
+
+    return modal;
+  }
+
+  function wrapTextareasWithExpand(root=document) {
+    qsa("textarea", root).forEach(ta => {
+      // Skip if already wrapped or modal textarea
+      if (ta.classList.contains("mk-modal-textarea")) return;
+      if (ta.closest(".mk-ta-wrap")) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "mk-ta-wrap";
+
+      const parent = ta.parentElement;
+      parent.insertBefore(wrap, ta);
+      wrap.appendChild(ta);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-ta-expand";
+      btn.textContent = "⤢";
+      btn.title = "Expand notes";
+      wrap.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const modal = ensureNotesModal();
+        const modalTa = qs(".mk-modal-textarea", modal);
+        const title = qs(".mk-modal-title", modal);
+
+        // Title = nearest card header if available
+        const block = ta.closest(".section-block");
+        const h2 = block ? qs("h2", block) : null;
+        title.textContent = h2 ? h2.textContent.trim() : "Notes";
+
+        modal.__activeTextarea = ta;
+        modalTa.value = ta.value || "";
+        modal.classList.add("open");
+        setTimeout(() => modalTa.focus(), 0);
+      });
+    });
+  }
+
+  /* ---------------------------
+     Table expand modal (⤢)
+  --------------------------- */
+  function ensureTableModal() {
+    let modal = qs("#mkTableModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "mkTableModal";
+    modal.innerHTML = `
+      <div class="mk-modal-backdrop" role="presentation"></div>
+      <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Table">
+        <div class="mk-modal-header">
+          <div class="mk-modal-title">Table</div>
+          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
+        </div>
+        <div class="mk-table-modal-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const backdrop = qs(".mk-modal-backdrop", modal);
+    const closeBtn = qs(".mk-modal-close", modal);
+    const body = qs(".mk-table-modal-body", modal);
+
+    const close = () => {
+      modal.classList.remove("open");
+      // Return moved content
+      if (modal.__moved && modal.__originalParent) {
+        modal.__originalParent.appendChild(modal.__moved);
+      }
+      modal.__moved = null;
+      modal.__originalParent = null;
+      body.innerHTML = "";
+    };
+
+    backdrop.addEventListener("click", close);
+    closeBtn.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("open")) close();
+    });
+
+    modal.__close = close;
+    return modal;
+  }
+
+  function addExpandButtonsToTableFooters() {
+    qsa(".table-container").forEach(container => {
+      const footer = qs(".table-footer", container);
+      const addBtn = qs(".add-row", footer);
+      if (!footer || !addBtn) return;
+
+      // Don’t double add
+      if (qs(".mk-table-expand-btn", footer)) return;
+
+      // Wrap left so Add Row stays left (CSS supports .footer-left)
+      let left = qs(".footer-left", footer);
+      if (!left) {
+        left = document.createElement("div");
+        left.className = "footer-left";
+        // move existing children into left except expand (none yet)
+        const kids = Array.from(footer.childNodes);
+        kids.forEach(k => left.appendChild(k));
+        footer.appendChild(left);
+      }
+
+      const expand = document.createElement("button");
+      expand.type = "button";
+      expand.className = "mk-table-expand-btn";
+      expand.textContent = "⤢";
+      expand.title = "Expand table";
+      footer.appendChild(expand);
+
+      expand.addEventListener("click", () => {
+        const modal = ensureTableModal();
+        const body = qs(".mk-table-modal-body", modal);
+        const title = qs(".mk-modal-title", modal);
+
+        // Title from nearest section header
+        const sectionHeader = container.closest(".section")?.querySelector(".section-header");
+        title.textContent = sectionHeader
+          ? sectionHeader.textContent.trim()
+          : "Table";
+
+        // Move the container (so inputs keep bindings)
+        modal.__moved = container;
+        modal.__originalParent = container.parentElement;
+
+        body.appendChild(container);
+        modal.classList.add("open");
+
+        // Make sure modal has expand wrap applied if needed
+        wrapTextareasWithExpand(modal);
+      });
+    });
+  }
+
+  /* ---------------------------
+     Support Tickets (Open/Tier Two/Closed...)
+  --------------------------- */
+  function getTicketContainers() {
+    return {
+      open: qs("#openTicketsContainer"),
+      tier2: qs("#tierTwoTicketsContainer"),
+      resolved: qs("#closedResolvedTicketsContainer"),
+      feature: qs("#closedFeatureTicketsContainer"),
+    };
+  }
+
+  function ticketStatusToContainerKey(status) {
+    switch (status) {
+      case "Open": return "open";
+      case "Tier Two": return "tier2";
+      case "Closed - Resolved": return "resolved";
+      case "Closed - Feature Not Supported": return "feature";
+      default: return "open";
+    }
+  }
+
+  function makeRemoveBtn() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "remove-ticket-btn";
     btn.title = "Remove Ticket";
-    btn.textContent = "–";
+    btn.textContent = "−";
     return btn;
   }
 
-  function cloneTicketGroupFromBase(baseGroup) {
-    const clone = baseGroup.cloneNode(true);
-    clone.dataset.base = "false";
+  function bindTicketCard(card) {
+    if (!card || card.__mkBound) return;
+    card.__mkBound = true;
 
-    // Enable status select for clone
-    const statusSel = qs(".ticket-status-select", clone);
-    if (statusSel) statusSel.disabled = false;
+    const isBase = card.getAttribute("data-base") === "true";
 
-    // Remove disclaimer in clone
-    const disclaimer = qs(".ticket-disclaimer", clone);
-    if (disclaimer) disclaimer.remove();
+    const statusSel = qs(".ticket-status-select", card);
+    const addBtn = qs(".add-ticket-btn", card);
+    const numberInput = qs(".ticket-number-input", card);
+    const urlInput = qs(".ticket-zendesk-input", card);
+    const summaryTa = qs(".ticket-summary-input", card);
 
-    // Change "+" button to remove button
-    const addBtn = qs(".add-ticket-btn", clone);
-    if (addBtn) {
-      addBtn.replaceWith(createRemoveTicketBtn());
+    // Base stays locked to Open
+    if (isBase && statusSel) {
+      statusSel.value = "Open";
+      statusSel.disabled = true;
     }
 
-    // Keep values from base (we intentionally copy filled base into new card),
-    // then clear base fields after adding
-    return clone;
-  }
-
-  function moveTicketGroupToStatus(ticketGroup, status) {
-    const containerGetter = ticketContainers[status];
-    const container = containerGetter ? containerGetter() : null;
-    if (!container) return;
-
-    container.appendChild(ticketGroup);
-  }
-
-  function lockBaseTicketStatus() {
-    const base = qs("#openTicketsContainer .ticket-group[data-base='true']");
-    if (!base) return;
-    const sel = qs(".ticket-status-select", base);
-    if (!sel) return;
-    sel.value = "Open";
-    sel.disabled = true;
-  }
-
-  function initSupportTickets() {
-    // Add ticket from base (Open)
-    document.addEventListener("click", (e) => {
-      const add = e.target.closest(".add-ticket-btn");
-      if (!add) return;
-
-      const baseGroup = add.closest(".ticket-group");
-      if (!baseGroup || baseGroup.dataset.base !== "true") return;
-
-      if (!isTicketBaseComplete(baseGroup)) {
-        // Gate: must complete base before adding
-        // (No alert to keep UX clean; focus first missing)
-        const num = qs(".ticket-number-input", baseGroup);
-        const url = qs(".ticket-zendesk-input", baseGroup);
-        const sum = qs(".ticket-summary-input", baseGroup);
-
-        if (num && !num.value.trim()) return num.focus();
-        if (url && !url.value.trim()) return url.focus();
-        if (sum && !sum.value.trim()) return sum.focus();
-        return;
-      }
-
-      const clone = cloneTicketGroupFromBase(baseGroup);
-      // Ensure clone status defaults to Open
-      const statusSel = qs(".ticket-status-select", clone);
-      if (statusSel) statusSel.value = "Open";
-
-      // Append clone into Open container
-      moveTicketGroupToStatus(clone, "Open");
-
-      // Clear base fields for next ticket
-      qsa("input, textarea", baseGroup).forEach((el) => {
-        if (isTextLike(el)) el.value = "";
+    // Status change moves non-base cards
+    if (statusSel && !isBase) {
+      statusSel.disabled = false;
+      statusSel.addEventListener("change", () => {
+        const status = statusSel.value;
+        const containers = getTicketContainers();
+        const key = ticketStatusToContainerKey(status);
+        const target = containers[key];
+        if (target) target.appendChild(card);
+        scheduleSave();
       });
-      lockBaseTicketStatus();
+    }
 
-      saveAutosave();
-    });
+    // Add ticket: only from base card
+    if (addBtn && isBase) {
+      addBtn.addEventListener("click", () => {
+        const num = (numberInput?.value || "").trim();
+        const url = (urlInput?.value || "").trim();
+        const sum = (summaryTa?.value || "").trim();
 
-    // Remove non-base ticket
-    document.addEventListener("click", (e) => {
-      const rm = e.target.closest(".remove-ticket-btn");
-      if (!rm) return;
-      const group = rm.closest(".ticket-group");
-      if (!group || group.dataset.base === "true") return;
-      group.remove();
-      saveAutosave();
-    });
+        // Require completion before cloning (matches your disclaimer)
+        if (!num || !url || !sum) {
+          alert("Please complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
+          return;
+        }
 
-    // Change status → move ticket to correct column (non-base only)
-    document.addEventListener("change", (e) => {
-      const sel = e.target.closest(".ticket-status-select");
-      if (!sel) return;
+        const clone = card.cloneNode(true);
+        clone.removeAttribute("data-base");
+        clone.setAttribute("data-base", "false");
 
-      const group = sel.closest(".ticket-group");
-      if (!group || group.dataset.base === "true") {
-        lockBaseTicketStatus();
-        return;
-      }
+        // Remove disclaimer if present
+        const disclaimer = qs(".ticket-disclaimer", clone);
+        if (disclaimer) disclaimer.remove();
 
-      const val = sel.value || "Open";
-      moveTicketGroupToStatus(group, val);
-      saveAutosave();
-    });
+        // Add remove button next to the ticket number
+        const wrap = qs(".ticket-number-wrap", clone);
+        const addBtnClone = qs(".add-ticket-btn", clone);
+        if (addBtnClone) addBtnClone.remove();
 
-    lockBaseTicketStatus();
+        const removeBtn = makeRemoveBtn();
+        wrap?.appendChild(removeBtn);
+
+        removeBtn.addEventListener("click", () => {
+          clone.remove();
+          scheduleSave();
+        });
+
+        // Enable status dropdown for clone
+        const statusClone = qs(".ticket-status-select", clone);
+        if (statusClone) {
+          statusClone.disabled = false;
+          // default clone stays in Open until user changes
+          statusClone.value = "Open";
+        }
+
+        // Append into Open container (but not inside the base group’s inner)
+        const containers = getTicketContainers();
+        containers.open?.appendChild(clone);
+
+        bindTicketCard(clone);
+
+        // Clear base for next entry
+        numberInput.value = "";
+        urlInput.value = "";
+        summaryTa.value = "";
+
+        scheduleSave();
+      });
+    }
   }
 
-  function reconcileTicketsFromDOM() {
-    // After load/reset: enforce base status and move non-base groups according to their select value
-    lockBaseTicketStatus();
+  function initTickets() {
+    // Bind base card
+    qsa("#openTicketsContainer .ticket-group").forEach(bindTicketCard);
 
-    qsa(".ticket-group").forEach((group) => {
-      if (group.dataset.base === "true") return;
+    // Bind any existing non-base cards (if restored)
+    qsa("#tierTwoTicketsContainer .ticket-group, #closedResolvedTicketsContainer .ticket-group, #closedFeatureTicketsContainer .ticket-group")
+      .forEach(bindTicketCard);
+  }
 
-      const sel = qs(".ticket-status-select", group);
-      if (!sel) return;
+  function resetTicketsToBase() {
+    const containers = getTicketContainers();
+    if (!containers.open) return;
 
-      // Ensure enabled
-      sel.disabled = false;
+    // Keep base card only
+    const base = qs("#openTicketsContainer .ticket-group[data-base='true']");
+    containers.tier2 && (containers.tier2.innerHTML = "");
+    containers.resolved && (containers.resolved.innerHTML = "");
+    containers.feature && (containers.feature.innerHTML = "");
 
-      // Replace any lingering add button with remove button
-      const addBtn = qs(".add-ticket-btn", group);
-      if (addBtn) addBtn.replaceWith(createRemoveTicketBtn());
+    containers.open.innerHTML = "";
+    if (base) containers.open.appendChild(base);
 
-      // Remove disclaimer if present
-      const disclaimer = qs(".ticket-disclaimer", group);
-      if (disclaimer) disclaimer.remove();
-
-      const status = sel.value || "Open";
-      moveTicketGroupToStatus(group, status);
+    // Clear base fields
+    qsa("input, textarea", base).forEach(el => {
+      if (el.tagName === "INPUT") el.value = "";
+      else el.value = "";
     });
+    const sel = qs(".ticket-status-select", base);
+    if (sel) { sel.value = "Open"; sel.disabled = true; }
+
+    scheduleSave();
   }
 
   /* ---------------------------
-     Notes Icon Buttons (📝)
-     - Scroll to target notes block
-     - Insert bullet template into textarea
-       • If row has name/opcode → "• <value>:"
-       • Else → "• Question:"
+     Date helper: end = start + 2 days
+     (Common ids used in your project)
   --------------------------- */
-  function getRowLabelForNotes(btn) {
-    const row = btn.closest("tr");
-    if (!row) return "";
+  function initDateHelpers() {
+    const pairs = [
+      ["onsiteStartDate", "onsiteEndDate"],
+      ["trainingStartDate", "trainingEndDate"],
+      ["onsiteTrainingStartDate", "onsiteTrainingEndDate"],
+    ];
 
-    // Prefer "Opcode" table: second column text input commonly in row
-    // But we can just take first text input in the row
-    const textInputs = qsa('input[type="text"]', row);
-    if (textInputs.length) return (textInputs[0].value || "").trim();
+    pairs.forEach(([startId, endId]) => {
+      const start = qs(`#${CSS.escape(startId)}`);
+      const end   = qs(`#${CSS.escape(endId)}`);
+      if (!start || !end) return;
 
-    // If there are no text inputs, fallback empty
-    return "";
-  }
-
-  function insertAtCursor(textarea, insertText) {
-    const start = textarea.selectionStart ?? textarea.value.length;
-    const end = textarea.selectionEnd ?? textarea.value.length;
-
-    const before = textarea.value.slice(0, start);
-    const after = textarea.value.slice(end);
-
-    const needsNL = before.length && !before.endsWith("\n");
-    const text = (needsNL ? "\n" : "") + insertText;
-
-    textarea.value = before + text + after;
-
-    const newPos = (before + text).length;
-    textarea.setSelectionRange(newPos, newPos);
-    textarea.focus();
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  function initNotesIcons() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".notes-icon-btn");
-      if (!btn) return;
-
-      const targetId = btn.getAttribute("data-notes-target");
-      if (!targetId) return;
-
-      const block = qs(`#${CSS.escape(targetId)}`);
-      if (!block) return;
-
-      const textarea = qs("textarea", block);
-      if (!textarea) return;
-
-      const label = getRowLabelForNotes(btn);
-      const bullet = label ? `• ${label}:\n` : `• Question:\n`;
-
-      block.scrollIntoView({ behavior: "smooth", block: "start" });
-      insertAtCursor(textarea, bullet);
-
-      saveAutosave();
+      start.addEventListener("change", () => {
+        if (!start.value) return;
+        const suggested = addDaysISO(start.value, 2);
+        // Only set if end empty or earlier than start
+        if (!end.value || end.value < start.value) end.value = suggested;
+        scheduleSave();
+      });
     });
   }
 
   /* ---------------------------
-     Global autosave listeners
+     PDF export (all pages)
+     Requires: window.jspdf?.jsPDF and window.html2canvas
   --------------------------- */
-  function initAutosaveListeners() {
-    // Save on input/change for all fields
-    document.addEventListener("input", (e) => {
-      const el = e.target;
-      if (!el) return;
+  async function exportAllPagesToPDF() {
+    const jsPDF = window.jspdf?.jsPDF;
+    const html2canvas = window.html2canvas;
+    if (!jsPDF || !html2canvas) {
+      alert("PDF export requires jsPDF + html2canvas to be loaded.");
+      return;
+    }
 
-      if (el.id === "dealershipNameInput") {
-        syncDealershipNameToTopbar();
+    const sections = qsa(".page-section");
+    if (!sections.length) return;
+
+    // Temporarily show all sections for capture
+    const prev = sections.map(s => s.classList.contains("active"));
+    sections.forEach(s => s.classList.add("active"));
+
+    const pdf = new jsPDF("p", "pt", "letter");
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    for (let i = 0; i < sections.length; i++) {
+      const el = sections[i];
+
+      // Scroll to top of element to ensure correct render
+      el.scrollIntoView({ behavior: "auto", block: "start" });
+
+      // canvas
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const img = canvas.toDataURL("image/png");
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      // Fit to page with simple pagination if too tall
+      let remaining = imgH;
+      let y = 0;
+
+      if (i > 0) pdf.addPage();
+
+      // If the section fits on one page:
+      if (imgH <= pageH) {
+        pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
+      } else {
+        // Multi-page slice approach
+        // Create a temp canvas to slice vertically
+        const sliceCanvas = document.createElement("canvas");
+        const ctx = sliceCanvas.getContext("2d");
+
+        const pxPerPt = canvas.width / imgW;         // pixels per point
+        const pagePxH = Math.floor(pageH * pxPerPt); // page height in pixels
+
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = pagePxH;
+
+        let sy = 0;
+        let pageIndex = 0;
+
+        while (sy < canvas.height) {
+          ctx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+          ctx.drawImage(canvas, 0, sy, canvas.width, pagePxH, 0, 0, canvas.width, pagePxH);
+
+          const sliceImg = sliceCanvas.toDataURL("image/png");
+          if (pageIndex > 0) pdf.addPage();
+          pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
+
+          sy += pagePxH;
+          pageIndex++;
+        }
       }
+    }
 
-      // Date placeholder class updates
-      if (el.id === "onsiteStartDate" || el.id === "onsiteEndDate") {
-        setPlaceholderClassForDate(el);
-      }
-
-      // If user edits base ticket fields, nothing special—just save
-      saveAutosave();
+    // Restore previous active states
+    sections.forEach((s, idx) => {
+      s.classList.toggle("active", prev[idx]);
     });
 
-    document.addEventListener("change", (e) => {
-      const el = e.target;
-      if (!el) return;
+    const filename = `myKaarma_Onsite_Training_${todayISO()}.pdf`;
+    pdf.save(filename);
+  }
 
-      if (el.id === "dealershipNameInput") {
-        syncDealershipNameToTopbar();
-      }
-
-      if (el.id === "onsiteStartDate" || el.id === "onsiteEndDate") {
-        setPlaceholderClassForDate(el);
-      }
-
-      saveAutosave();
-    });
+  function initPDFButton() {
+    const btn = qs("#savePDF");
+    if (!btn) return;
+    btn.addEventListener("click", exportAllPagesToPDF);
   }
 
   /* ---------------------------
-     Map "Map" button (fallback)
-     - If your Google Maps autocomplete is present, it will update iframe elsewhere
-     - This button just opens the typed address in a new tab (Google Maps)
-  --------------------------- */
-  function initMapButtonFallback() {
-    const btn = qs("#openAddressInMapsBtn");
-    const input = qs("#dealershipAddressInput");
-    if (!btn || !input) return;
-
-    btn.addEventListener("click", () => {
-      const addr = (input.value || "").trim();
-      if (!addr) return input.focus();
-      const url = "https://www.google.com/maps?q=" + encodeURIComponent(addr);
-      window.open(url, "_blank", "noopener,noreferrer");
-    });
-  }
-
-  /* ---------------------------
-     Init
+     Init everything
   --------------------------- */
   function init() {
     initNav();
+    initGhostSelects(document);
+    initAutosave();
     initResetButtons();
     initTableAddRow();
-    initAdditionalTrainers();
-    initAdditionalPOC();
-    initSupportTickets();
-    initOnsiteDates();
-    initDealershipNameSync();
-    initNotesIcons();
-    initAutosaveListeners();
-    initMapButtonFallback();
+    applyAcceptanceColors(document);
 
-    // Restore values last
-    loadAutosave();
+    // Notes + expanders + indicators
+    bindNotesIconButtons(document);
+    wrapTextareasWithExpand(document);
+    refreshNoteIndicators();
 
-    // Ensure base ticket status always Open
-    lockBaseTicketStatus();
+    // Table expand buttons
+    addExpandButtonsToTableFooters();
+
+    // Tickets
+    initTickets();
+
+    // Dates
+    initDateHelpers();
+
+    // PDF
+    initPDFButton();
+
+    // Keep indicators accurate
+    document.addEventListener("input", debounce(() => {
+      refreshNoteIndicators();
+      applyAcceptanceColors(document);
+    }, 250), true);
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  // Run after DOM ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
 })();
