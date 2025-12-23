@@ -1150,8 +1150,21 @@ main{
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:96px; /* ~1 inch on most displays */
+  gap:96px;                 /* ~1 inch gap H + V */
   margin-top:14px;
+  align-items:start;        /* prevents stretch weirdness */
+}
+
+/* bring card structure back + make skinnier */
+#dms-integration .dms-card{
+  width:520px;              /* skinnier card */
+  max-width:100%;
+  margin:0 auto;            /* centers in each column */
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow);
+  overflow:hidden;
 }
 
 #dms-integration .dms-card-header{
