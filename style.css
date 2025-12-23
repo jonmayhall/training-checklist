@@ -1195,10 +1195,11 @@ main{
   color:#fff !important;
 }
 
-#dms-integration .dms-chip-pull{
-  background:rgba(205,220,57,0.18) !important;   /* ✅ add !important */
-  border-color:rgba(255,255,255,0.35) !important; /* same as push */
-  color:#fff !important;                          /* same as push */
+/* Stronger + higher-specificity Pull header chip */
+#dms-integration .dms-card-header .dms-chip.dms-chip-pull{
+  background: rgba(205,220,57,0.45) !important;  /* was 0.18 (too subtle) */
+  border-color: rgba(255,255,255,0.35) !important;
+  color:#fff !important;
 }
 
 #dms-integration .dms-list{
