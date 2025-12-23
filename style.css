@@ -1403,3 +1403,17 @@ main{
     resize:none !important;        /* keep clean UI */
   }
 }
+
+/* ✅ NOTES: allow textarea + card to grow with content (no internal scroll) */
+.section-block textarea{
+  overflow-y: hidden !important;   /* kill inner scrollbar */
+}
+
+/* Only in the 2-col / notes layouts, stop flex-stretching the textarea */
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea,
+.grid-2 > .section-block textarea{
+  flex: 0 0 auto !important;       /* ✅ lets height be content-driven */
+  height: auto !important;
+  resize: none !important;         /* keep if you don't want manual resize */
+}
