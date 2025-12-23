@@ -861,7 +861,16 @@ function initNotesLinkingOption2Only(root=document){
     btn.type = "button";
     btn.className = "note-link-btn";
     btn.title = "Add this question to Notes";
-    btn.textContent = "📝";
+   btn.innerHTML = `
+  <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M4 4h16v12H7l-3 3V4z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linejoin="round"
+      stroke-linecap="round"/>
+  </svg>
+`;
 
     btn.addEventListener("click", (e)=>{
       e.preventDefault();
