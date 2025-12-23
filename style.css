@@ -1437,3 +1437,24 @@ main{
   border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
+
+/* ===========================================================
+   DMS INTEGRATION — BODY PILLS ONLY
+   (Smaller, lighter, NOT header pills)
+   =========================================================== */
+
+/* Target pills inside the card body ONLY */
+#dms-integration .dms-list .dms-tag{
+  font-size:10px !important;        /* smaller */
+  font-weight:600 !important;       /* less bold */
+  padding:3px 7px !important;       /* tighter pill */
+  letter-spacing:0.03em !important;
+  border-radius:999px;
+}
+
+/* Ensure header pills remain untouched */
+#dms-integration .dms-card-header .dms-chip{
+  font-size:11px !important;
+  font-weight:900 !important;
+  padding:6px 10px !important;
+}
