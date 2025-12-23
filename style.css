@@ -602,6 +602,27 @@ main{
 }
 
 /* =======================================================
+   DEALERSHIP INFO — Additional POC (BASE) width match
+   Make the base input match cloned inputs
+======================================================= */
+
+/* Base Additional POC card: match cloned input width */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  /* match your other right-side field sizing */
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+}
+
+/* Base Additional POC card: keep the + button from stealing space */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus > .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+}
+
+/* =======================================================
    DEALERSHIP INFO — Additional POC clones
    - cloned cards have NO + button, so input should be fully rounded
    - match size/width to other right-side fields
