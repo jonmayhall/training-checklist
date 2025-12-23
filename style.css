@@ -435,7 +435,13 @@ main{
    We do NOT hide row-actions globally, because that would remove 📝
    for any row that gets wrapped. Only hide on rows you explicitly mark.
 */
-.checklist-row.integrated-plus > .row-actions{ display:none !important; }
+/* Integrated-plus rows still need row-actions for 📝 */
+.checklist-row.integrated-plus > .row-actions{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-left:8px !important;
+}
 
 /* =======================
    Notes link button (📝)
