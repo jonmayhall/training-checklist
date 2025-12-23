@@ -1106,6 +1106,28 @@ main{
   cursor:not-allowed;
 }
 
+/* =======================================================
+   SUPPORT TICKETS — Typography cleanup
+   Reduce visual noise & match rest of app
+======================================================= */
+
+#support-tickets .ticket-group-inner{
+  font-size:13px;              /* match checklist/table text */
+  line-height:1.4;
+}
+
+#support-tickets .ticket-row label{
+  font-size:13px !important;
+  font-weight:500 !important;  /* lighter than default */
+  color:#222;
+}
+
+#support-tickets input[type="text"],
+#support-tickets select,
+#support-tickets textarea{
+  font-size:13px !important;
+}
+
 /* =======================
    DMS INTEGRATION
 ======================= */
