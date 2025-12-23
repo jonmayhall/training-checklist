@@ -534,16 +534,23 @@ main{
 }
 
 /* =======================
-   DEALERSHIP INFO PAGE FIXES
+   DEALERSHIP INFO PAGE FIXES (FINAL)
 ======================= */
+
+/* -----------------------
+   Onsite / Training Dates
+   (restore compact height)
+------------------------ */
 .training-dates-row,
 .onsite-training-dates-row{
   align-items:flex-start !important;
 }
+
 .training-dates-row label,
 .onsite-training-dates-row label{
-  padding-top:7px !important;
+  padding-top:6px !important;
 }
+
 .training-dates-row .date-stack,
 .onsite-training-dates-row .date-stack{
   flex:0 0 var(--input-width) !important;
@@ -551,25 +558,33 @@ main{
   margin-left:auto !important;
   display:flex !important;
   flex-direction:column !important;
-  gap:8px !important;
-  align-items:stretch !important;
+  gap:6px !important;                 /* tighter spacing */
 }
+
 .training-dates-row .date-stack input[type="date"],
 .onsite-training-dates-row .date-stack input[type="date"]{
   height:34px !important;
   padding:7px 10px !important;
 }
 
-/* =======================
-   PRIMARY CONTACTS GRID
-======================= */
+/* -----------------------
+   Primary Contacts Grid
+------------------------ */
 .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
+  gap:28px;                           /* horizontal + vertical gap */
   margin-top:10px;
 }
 
+/* Make cards slightly narrower to create breathing room */
+.primary-contacts-grid > .contact-card,
+.primary-contacts-grid > .additional-poc-card{
+  max-width:560px;                    /* narrower than before */
+  margin:0 auto;                     /* centered in column */
+}
+
+/* Mini cards */
 .mini-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
@@ -579,60 +594,33 @@ main{
   padding:14px 14px 6px;
 }
 
-.mini-card .checklist-row{
-  padding-left:16px;
-  padding-right:16px;
+/* Rows inside contact cards */
+#dealership-info .primary-contacts-grid .checklist-row{
+  padding-left:16px !important;       /* reduced indent */
+  padding-right:16px !important;
 }
 
-.contact-card,
-.additional-poc-card{
-  width:100%;
-  min-width:0;
+/* Sub-rows (still indented, just less) */
+#dealership-info .primary-contacts-grid .checklist-row.indent-sub{
+  padding-left:28px !important;
 }
 
-/* =======================================================
-   CONTACT CARDS — NARROWER INPUT WIDTHS (HEIGHT UNCHANGED)
-======================================================= */
-
-/* Use a smaller width ONLY inside contact cards */
-#dealership-info .primary-contacts-grid{
-  --contact-input-width:220px; /* ← adjust if needed (was ~340) */
-}
-
-/* Apply narrower width */
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="text"],
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="email"],
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="tel"]{
-
-  flex:0 0 var(--contact-input-width) !important;
-  width:var(--contact-input-width) !important;
-  max-width:var(--contact-input-width) !important;
-
-  height:34px !important;        /* unchanged */
-  padding:7px 10px !important;  /* unchanged */
-}
-
-/* =======================================================
-   ADDITIONAL POC — BASE (+ button attached)
-======================================================= */
+/* -----------------------
+   Additional POC — BASE
+   (keep + attached, same width)
+------------------------ */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus input[type="text"]{
 
-  flex:0 0 calc(var(--contact-input-width) - 34px) !important;
-  width:calc(var(--contact-input-width) - 34px) !important;
-  max-width:calc(var(--contact-input-width) - 34px) !important;
-
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  max-width:calc(var(--input-width) - 34px) !important;
 }
 
-/* =======================================================
-   ADDITIONAL POC — CLONES (no + button)
-======================================================= */
+/* -----------------------
+   Additional POC — CLONES
+------------------------ */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-clone="true"]
   .checklist-row.integrated-plus input[type="text"],
@@ -640,11 +628,14 @@ main{
   .additional-poc-card:not([data-base="true"])
   .checklist-row.integrated-plus input[type="text"]{
 
-  flex:0 0 var(--contact-input-width) !important;
-  width:var(--contact-input-width) !important;
-  max-width:var(--contact-input-width) !important;
+  height:34px !important;
+  padding:7px 10px !important;
 
   border-radius:var(--radius-sm) !important;
+
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
 }
 
 /* Dealership Address card */
