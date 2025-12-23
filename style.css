@@ -1181,6 +1181,7 @@ main{
   gap:12px !important;
   border-bottom:1px solid var(--border) !important;
 }
+
 #dms-integration .dms-name{
   font-weight:900 !important;
   font-size:16px !important;
@@ -1199,7 +1200,7 @@ main{
   border:1px solid rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-   
+
 #dms-integration .dms-chip-push{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
@@ -1208,8 +1209,8 @@ main{
 
 /* Stronger + higher-specificity Pull header chip */
 #dms-integration .dms-card-header .dms-chip.dms-chip-pull{
-  background: rgba(205,220,57,0.45) !important;  /* was 0.18 (too subtle) */
-  border-color: rgba(255,255,255,0.35) !important;
+  background:rgba(205,220,57,0.45) !important;  /* more visible green */
+  border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
 
@@ -1218,10 +1219,12 @@ main{
   padding:10px 12px 14px;
   margin:0;
 }
+
+/* Each row */
 #dms-integration .dms-list li{
   position:relative;
   padding:10px 10px;
-  padding-right:120px;
+  padding-right:160px;      /* reserve a fixed badge lane */
   border-bottom:1px solid #efefef;
 }
 #dms-integration .dms-list li:last-child{ border-bottom:none; }
@@ -1230,119 +1233,76 @@ main{
   display:block;
   margin-bottom:4px;
 }
+
 #dms-integration .dms-field{
   font-weight:800;
   color:#111827;
   font-size:13px;
 }
+
 #dms-integration .dms-list p{
   margin:0;
   font-size:12px;
   color:#6b7280;
 }
 
+/* =======================================================
+   BODY BADGES (right side)
+   - fixed-width lane so every badge lines up perfectly
+   - center text inside each badge
+======================================================= */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
   right:16px;
   top:50%;
   transform:translateY(-50%);
-  min-width:78px;
+
+  width:128px;                 /* fixed lane width */
+  min-width:128px !important;  /* prevent later overrides */
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:0.03em;
-  text-transform:uppercase;
+
   padding:3px 8px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  color:#111827;
-}
-
-#dms-integration .dms-tag-auto{
-  border-color:rgba(34,197,94,0.35);
-  background:rgba(34,197,94,0.12);
-  color:#14532d;
-}
-#dms-integration .dms-tag-ondemand{
-  border-color:rgba(245,158,11,0.35);
-  background:rgba(245,158,11,0.14);
-  color:#78350f;
-}
-#dms-integration .dms-tag-withro{
-  border-color:rgba(59,130,246,0.35);
-  background:rgba(59,130,246,0.12);
-  color:#1e3a8a;
-}
-#dms-integration .dms-tag-planned{
-  border-color:rgba(99,102,241,0.35);
-  background:rgba(99,102,241,0.12);
-  color:#312e81;
-}
-#dms-integration .dms-tag-na{
-  border-color:rgba(156,163,175,0.55);
-  background:rgba(156,163,175,0.18);
-  color:#374151;
-}
-
-/* =======================================================
-   DMS INTEGRATION — BODY BADGES (not headers)
-   - Light/tinted badges
-   - Smaller + calmer
-   - Centered on right side
-======================================================= */
-
-/* Body-only badges (list items) */
-#dms-integration .dms-list .dms-tag{
-  right:16px;
-  top:50%;
-  transform:translateY(-50%);
-
-  min-width:64px;
-  padding:3px 8px;
-
   font-size:10px;
   font-weight:600;
   letter-spacing:0.02em;
+  text-transform:uppercase;
 
   border-radius:999px;
   border:1px solid var(--border);
   background:#f7f7f7;
   color:#111827;
 
-  text-align:center;
   white-space:nowrap;
 }
 
-/* --- Light color variants (BODY ONLY) --- */
-
+/* Light color variants (BODY ONLY) */
 #dms-integration .dms-list .dms-tag-auto{
-  background:rgba(34,197,94,0.12);
   border-color:rgba(34,197,94,0.35);
+  background:rgba(34,197,94,0.12);
   color:#14532d;
 }
-
 #dms-integration .dms-list .dms-tag-ondemand{
-  background:rgba(245,158,11,0.14);
   border-color:rgba(245,158,11,0.35);
+  background:rgba(245,158,11,0.14);
   color:#78350f;
 }
-
 #dms-integration .dms-list .dms-tag-withro{
-  background:rgba(59,130,246,0.12);
   border-color:rgba(59,130,246,0.35);
+  background:rgba(59,130,246,0.12);
   color:#1e3a8a;
 }
-
 #dms-integration .dms-list .dms-tag-planned{
-  background:rgba(99,102,241,0.12);
   border-color:rgba(99,102,241,0.35);
+  background:rgba(99,102,241,0.12);
   color:#312e81;
 }
-
 #dms-integration .dms-list .dms-tag-na{
-  background:rgba(156,163,175,0.18);
   border-color:rgba(156,163,175,0.45);
+  background:rgba(156,163,175,0.18);
   color:#374151;
 }
 
