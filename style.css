@@ -1773,3 +1773,66 @@ main{
   background:#fff;
   transform:translateY(-1px);
 }
+
+/* ===========================================================
+   TABLE POPUP — Notes section styled EXACTLY like Notes cards
+=========================================================== */
+
+/* spacing between table and notes card */
+#mkTableModal .mk-table-notes{
+  margin-top:18px;
+}
+
+/* card shell */
+#mkTableModal .mk-table-notes{
+  background:#fff;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* header matches .section-block h2 */
+#mkTableModal .mk-table-notes .mk-table-notes-header{
+  background:var(--orange);
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* body matches Notes card padding */
+#mkTableModal .mk-table-notes .mk-table-notes-body{
+  padding:14px 16px 16px;
+}
+
+/* textarea matches Notes textarea */
+#mkTableModal .mk-table-notes textarea{
+  width:100% !important;
+  min-height:220px;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  resize:vertical;
+}
+
+/* focus state matches main app */
+#mkTableModal .mk-table-notes textarea:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 4px rgba(239,109,34,0.35);
+  outline:none;
+  background:#fff9f5;
+}
+
+/* expand icon inside header — same as Notes cards */
+#mkTableModal .mk-table-notes .mk-ta-expand{
+  position:static;
+}
