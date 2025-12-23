@@ -1508,3 +1508,44 @@ main{
   letter-spacing: 0.03em;
 }
 
+/* =========================
+   NOTES ICON — Speech Bubble
+   ========================= */
+
+.note-link-btn{
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  border:1px solid #d1d5db;
+  background:#fff;
+  color:#9ca3af; /* default gray */
+  cursor:pointer;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0;
+  transition:color .15s, border-color .15s, background .15s;
+}
+
+/* SVG sizing */
+.note-link-btn .note-icon{
+  width:14px;
+  height:14px;
+  display:block;
+}
+
+/* Hover (subtle) */
+.note-link-btn:hover{
+  color:#6b7280;
+  border-color:#9ca3af;
+}
+
+/* ✅ HAS NOTE = ORANGE */
+.note-link-btn.has-note{
+  color:var(--orange);
+  border-color:var(--orange);
+  background:#fff;
+}
+
