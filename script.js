@@ -100,8 +100,10 @@ function applyDateGhost(input){
 function autoGrowTA(ta){
   if (!ta) return;
   ta.style.height = "auto";
+  ta.style.overflowY = "hidden";   // ✅ prevent internal scroll
   ta.style.height = (ta.scrollHeight + 2) + "px";
 }
+
 
 function initTextareas(root=document){
   qsa("textarea", root).forEach(ta=>{
