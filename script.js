@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED NAV)
+   myKaarma Interactive Training Checklist — FULL script.js (CLEAN + STABLE)
    ✅ Fixes:
    - Nav clicks work (inline onclick + data-section + href="#id")
    - Add Row (+) for tables
@@ -9,8 +9,9 @@
    - Autosave + Reset Page + Clear All
    - Onsite dates: end defaults to start + 2 days
    - PDF export (all pages)
-   - ✅ NOTES LINKING: single Notes column w/ icon (speech bubble SVG)
-   - ✅ TABLE NOTES JUMP: table icon scrolls to that table’s Notes card
+   - ✅ NOTES LINKING: icon on checklist rows (adds ordered "• Question:" lines)
+   - ✅ TABLE NOTES: single Notes column + bubble icon, jumps to that table’s Notes block
+   - ✅ FILTERS FIX: Filters column always a dropdown (removes random pencil/icon)
    - ✅ NOTES POP-OUT: expander opens modal synced + saved
    ======================================================= */
 
@@ -158,10 +159,8 @@ function showSection(id){
 }
 
 function initNav(){
-  // Works for data-section/data-target/href nav buttons (and does not break inline onclick)
   qsa(".nav-btn").forEach(btn=>{
     btn.addEventListener("click", (e)=>{
-      // prevent anchors from jumping before our handler runs
       if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
 
       const id =
@@ -173,14 +172,12 @@ function initNav(){
     });
   });
 
-  const last = (()=>{ try{ return localStorage.getItem("mkc:lastPage"); }catch(e){ return null; } })();
+  let last = null;
+  try{ last = localStorage.getItem("mkc:lastPage"); }catch(e){}
   const first = qsa(".page-section")[0]?.id;
   showSection(last || first || "dealership-info");
 }
-
-// ✅ IMPORTANT: allow inline onclick="showSection('...')" to work
-window.showSection = showSection;
-window.initNav = initNav;
+window.showSection = showSection; // allow inline onclick
 
 /* ---------------------------
    Reset This Page / Clear All
@@ -289,10 +286,7 @@ function initPersistence(){
 
     saveField(el);
 
-    if (el.id === "dealershipNameInput"){
-      updateDealershipNameDisplay(el.value);
-    }
-
+    if (el.id === "dealershipNameInput") updateDealershipNameDisplay(el.value);
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 
@@ -307,7 +301,6 @@ function initPersistence(){
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 }
-
 function initGhosts(){
   qsa("select").forEach(applySelectGhost);
   qsa("input[type='date']").forEach(applyDateGhost);
@@ -332,7 +325,6 @@ function cloneTrainingRow(row){
 
   return clone;
 }
-
 function initTableAddRow(){
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".table-footer .add-row");
@@ -348,7 +340,6 @@ function initTableAddRow(){
 
     const clone = cloneTrainingRow(last);
     tbody.appendChild(clone);
-
     clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
 
     requestAnimationFrame(()=>{
@@ -356,7 +347,7 @@ function initTableAddRow(){
       syncTwoColHeights();
       initNotesExpanders(document);
       initNotesLinkingOption2Only(document);
-      initTableNotesButtons(document);
+      initTableNotesButtons(document);     // ✅ re-normalize Notes + Filters
       updateNoteIconStates(document);
     });
   });
@@ -559,11 +550,8 @@ function moveTicketCard(card, newStatus){
 
   dest.appendChild(card);
 
-  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
-    lockOpenSelect(card);
-  }else{
-    unlockStatusSelect(card);
-  }
+  if (destId === "openTicketsContainer" && card.dataset.base === "true") lockOpenSelect(card);
+  else unlockStatusSelect(card);
 }
 function initSupportTickets(){
   const page = qs("#support-tickets");
@@ -600,7 +588,6 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // clear base fields after add
     if (card.dataset.base === "true"){
       const num = qs(".ticket-number-input", card);
       const url = qs(".ticket-zendesk-input", card);
@@ -662,8 +649,6 @@ function restoreDealershipMap(){
     if (addr) updateDealershipMap(addr);
   }catch(e){}
 }
-
-// expose for inline html callbacks
 window.updateDealershipMap = updateDealershipMap;
 window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 
@@ -773,9 +758,7 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING — Option 2 ONLY (single icon on checklist rows)
-   - Only rows that have a field (input/select/textarea)
-   - Adds "• Question:" lines into the Notes textarea in that group
+   NOTES LINKING — Option 2 ONLY (icon on checklist rows)
 =========================================================== */
 function isNotesCard(card){
   const h2 = card?.querySelector("h2");
@@ -897,7 +880,6 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // do not restructure integrated-plus rows
   if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
@@ -908,7 +890,6 @@ function ensureRowActions(row){
   row.appendChild(actions);
   return actions;
 }
-
 function initNotesLinkingOption2Only(root=document){
   qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
 
@@ -958,7 +939,6 @@ function initNotesLinkingOption2Only(root=document){
 
   updateNoteIconStates(root);
 }
-
 function updateNoteIconStates(root=document){
   qsa(".checklist-row", root).forEach(row=>{
     const btn = row.querySelector(".note-link-btn");
@@ -973,57 +953,42 @@ function updateNoteIconStates(root=document){
 }
 
 /* ===========================================================
-   TABLE NOTES BUTTONS (Training Checklist + Opcodes)
-   ✅ Ensures ONLY ONE "Notes" column exists
-   ✅ Forces bubble icon in Notes column for EVERY row
-   ✅ Removes ANY stray notes buttons from other columns (Fixes Filters pencil icon)
+   TABLE NOTES BUTTONS + FILTERS NORMALIZE
 =========================================================== */
-
 function thText(th){
   return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
 }
-
 function getHeaderCells(table){
   return Array.from(table.querySelectorAll("thead tr th"));
 }
-
 function getNotesHeaderIndexes(table){
   const ths = getHeaderCells(table);
   const idxs = [];
-  ths.forEach((th, i)=>{
-    if (thText(th) === "notes") idxs.push(i);
-  });
+  ths.forEach((th, i)=>{ if (thText(th) === "notes") idxs.push(i); });
   return idxs;
 }
-
 function removeColumnByIndex(table, idx){
-  // remove TH
   table.querySelectorAll("thead tr").forEach(tr=>{
     const cell = tr.children[idx];
     if (cell) cell.remove();
   });
-
-  // remove TDs
   qsa("tbody tr", table).forEach(tr=>{
     const cell = tr.children[idx];
     if (cell) cell.remove();
   });
 }
-
 function ensureSingleNotesColumn(table){
   const theadRow = table.querySelector("thead tr");
   if (!theadRow) return null;
 
   const noteIdxs = getNotesHeaderIndexes(table);
 
-  // If multiple, keep FIRST, remove rest right-to-left
   if (noteIdxs.length > 1){
     const keep = noteIdxs[0];
     noteIdxs.slice(1).sort((a,b)=>b-a).forEach(idx => removeColumnByIndex(table, idx));
     return keep;
   }
 
-  // If none, add one at end
   if (noteIdxs.length === 0){
     const th = document.createElement("th");
     th.textContent = "Notes";
@@ -1038,7 +1003,6 @@ function ensureSingleNotesColumn(table){
 
   return noteIdxs[0];
 }
-
 function findNotesBlockForTable(table){
   const section = table.closest(".section");
   if (!section) return null;
@@ -1056,7 +1020,6 @@ function findNotesBlockForTable(table){
   }
   return null;
 }
-
 function renderTableNoteButton(td){
   td.innerHTML = `
     <button type="button" class="note-link-btn mk-table-note-btn" title="Jump to this table’s Notes">
@@ -1068,25 +1031,21 @@ function renderTableNoteButton(td){
     </button>
   `;
 }
-
-/* ✅ REMOVE any stray note buttons injected into NON-notes columns */
 function purgeStrayTableNoteButtons(table, notesIdx){
   qsa("tbody tr", table).forEach(tr=>{
     Array.from(tr.children).forEach((td, idx)=>{
       if (idx === notesIdx) return;
-      // remove ANY note button variants
       qsa(".mk-table-note-btn, .note-link-btn, .note-btn", td).forEach(n => n.remove());
     });
   });
 }
 
-/* ✅ Fix: Filters column must be a dropdown (remove any random buttons) */
+/* ✅ Filters column must be dropdown, remove random icon/button */
 function normalizeFiltersColumn(table){
   const ths = getHeaderCells(table);
   const filtersIdx = ths.findIndex(th => thText(th) === "filters");
   if (filtersIdx === -1) return;
 
-  // Find a "good" select to copy (any row where Filters cell already has a <select>)
   let templateSelect = null;
   qsa("tbody tr", table).some(tr=>{
     const td = tr.children[filtersIdx];
@@ -1099,32 +1058,28 @@ function normalizeFiltersColumn(table){
     const td = tr.children[filtersIdx];
     if (!td) return;
 
-    // Remove any stray buttons/icons that shouldn't be here
-    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n => n.remove());
+    // remove any junk in filters cell
+    qsa("button, svg, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n => n.remove());
 
-    // If the cell already has a select, we're good
-    if (td.querySelector("select")) return;
-
-    // If we have a template select, insert one
-    if (templateSelect){
-      const newSelect = templateSelect.cloneNode(true);
-      newSelect.value = "";            // reset default
-      ensureUID(newSelect);            // keep your autosave pattern
-      loadField(newSelect);            // restore if saved
-      applySelectGhost(newSelect);
-      td.innerHTML = "";
-      td.appendChild(newSelect);
+    // if it already has a select, keep only one
+    const existing = td.querySelector("select");
+    if (existing){
+      td.querySelectorAll("select").forEach((s,i)=>{ if (i>0) s.remove(); });
+      applySelectGhost(existing);
       return;
     }
 
-    // Fallback: create a basic blank dropdown (won’t break layout)
-    const fallback = document.createElement("select");
-    fallback.innerHTML = `<option></option>`;
-    ensureUID(fallback);
-    loadField(fallback);
-    applySelectGhost(fallback);
+    // inject a select
+    const newSelect = templateSelect ? templateSelect.cloneNode(true) : document.createElement("select");
+    if (!templateSelect) newSelect.innerHTML = `<option></option>`;
+    newSelect.value = "";
+
     td.innerHTML = "";
-    td.appendChild(fallback);
+    td.appendChild(newSelect);
+
+    ensureUID(newSelect);
+    loadField(newSelect);
+    applySelectGhost(newSelect);
   });
 }
 
@@ -1134,7 +1089,6 @@ function applyNotesButtonsToColumn(table, notesColIdx){
     headRow.children[notesColIdx].textContent = "Notes";
   }
 
-  // Make sure EVERY row has a Notes cell and it gets the bubble button
   qsa("tbody tr", table).forEach(tr=>{
     while (tr.children.length <= notesColIdx){
       tr.appendChild(document.createElement("td"));
@@ -1151,17 +1105,19 @@ function initTableNotesButtons(root=document){
 
   targets.forEach(sel=>{
     qsa(sel, root).forEach(table=>{
-      // 1) Fix duplicate Notes columns / create if missing
       const notesIdx = ensureSingleNotesColumn(table);
       if (notesIdx === null) return;
 
-      // 2) Purge any stray note buttons from other columns (Fixes Filters pencil)
-      (table, notesIdx);
+      // ✅ Fix Filters column icon
+      normalizeFiltersColumn(table);
 
-      // 3) Force bubble icon in Notes column for ALL rows (Fixes blank first row)
+      // ✅ Remove stray notes buttons from other columns
+      purgeStrayTableNoteButtons(table, notesIdx);
+
+      // ✅ Force bubble icon into Notes column for every row
       applyNotesButtonsToColumn(table, notesIdx);
 
-      // 4) Wire click handler once
+      // Wire click handler once
       if (table.dataset.mkNotesWired === "1") return;
       table.dataset.mkNotesWired = "1";
 
@@ -1220,7 +1176,6 @@ function ensureNotesModal(){
 
   return modal;
 }
-
 function openNotesModal(sourceTA, titleText="Notes"){
   const modal = ensureNotesModal();
   const title = qs("#mkNotesModalTitle", modal);
@@ -1241,7 +1196,6 @@ function openNotesModal(sourceTA, titleText="Notes"){
   modal.classList.add("open");
   setTimeout(()=> bigTA.focus(), 0);
 }
-
 function closeNotesModal(){
   const modal = qs("#mkNotesModal");
   if (!modal) return;
@@ -1255,7 +1209,6 @@ function closeNotesModal(){
   modal.classList.remove("open");
   _mkNotesModalSourceTA = null;
 }
-
 function initNotesExpanders(root=document){
   const notesCards = qsa(".section-block", root).filter(isNotesCard);
 
@@ -1263,7 +1216,6 @@ function initNotesExpanders(root=document){
     const ta = qs("textarea", card);
     if (!ta) return;
 
-    // wrap textarea
     let wrap = ta.closest(".mk-ta-wrap");
     if (!wrap){
       wrap = document.createElement("div");
@@ -1272,7 +1224,6 @@ function initNotesExpanders(root=document){
       wrap.appendChild(ta);
     }
 
-    // avoid duplicates
     if (qs(".mk-ta-expand", wrap)) return;
 
     const btn = document.createElement("button");
@@ -1292,8 +1243,6 @@ function initNotesExpanders(root=document){
     wrap.appendChild(btn);
   });
 }
-
-// delegated safety net
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".mk-ta-expand");
   if (!btn) return;
@@ -1307,86 +1256,6 @@ document.addEventListener("click", (e)=>{
   const h2 = qs("h2", card);
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
-
-/* =========================================================
-   FIX: Training tables — Filters column must be a dropdown
-   Removes that random icon/button in FIRST ROW (and any row)
-========================================================= */
-
-function thText(th){
-  return (th?.textContent || "").trim().toLowerCase();
-}
-function getHeaderCells(table){
-  return Array.from(table.querySelectorAll("thead th"));
-}
-
-function fixTrainingFiltersColumn(table){
-  if (!table) return;
-
-  const headers = getHeaderCells(table);
-  const filtersIdx = headers.findIndex(th => thText(th) === "filters");
-  if (filtersIdx === -1) return;
-
-  const rows = Array.from(table.querySelectorAll("tbody tr"));
-  if (!rows.length) return;
-
-  // Find a working select from ANY row in this column
-  let templateSelect = null;
-  for (const tr of rows){
-    const td = tr.children[filtersIdx];
-    const sel = td?.querySelector("select");
-    if (sel){
-      templateSelect = sel;
-      break;
-    }
-  }
-
-  rows.forEach(tr=>{
-    const td = tr.children[filtersIdx];
-    if (!td) return;
-
-    // 🔥 Remove the random icon/button (and any other junk)
-    td.querySelectorAll("button, svg, .note-link-btn, .note-btn, .mk-table-note-btn")
-      .forEach(n => n.remove());
-
-    // If we already have a select, keep it and just clean up extras
-    const existing = td.querySelector("select");
-    if (existing){
-      // Ensure only one select remains
-      td.querySelectorAll("select").forEach((s,i)=>{ if (i>0) s.remove(); });
-      applySelectGhost(existing);
-      return;
-    }
-
-    // If missing, inject a dropdown
-    if (templateSelect){
-      const newSelect = templateSelect.cloneNode(true);
-      newSelect.value = "";
-      td.innerHTML = "";
-      td.appendChild(newSelect);
-
-      // your autosave conventions
-      ensureUID(newSelect);
-      loadField(newSelect);
-      applySelectGhost(newSelect);
-    }else{
-      // Safe fallback (won’t break layout)
-      const fallback = document.createElement("select");
-      fallback.innerHTML = `<option></option>`;
-      td.innerHTML = "";
-      td.appendChild(fallback);
-
-      ensureUID(fallback);
-      loadField(fallback);
-      applySelectGhost(fallback);
-    }
-  });
-}
-
-/* Run for ALL Training Checklist tables (including ones added later) */
-function fixAllTrainingFilters(){
-  qsa("#training-checklist table.training-table").forEach(fixTrainingFiltersColumn);
-}
 
 /* ---------------------------
    Boot
@@ -1409,9 +1278,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
   restoreDealershipMap();
   initPDF();
 
-  // Notes
   initNotesExpanders(document);
   initNotesLinkingOption2Only(document);
-  initTableNotesButtons(document);
+  initTableNotesButtons(document);   // ✅ also fixes Filters column + Notes column
   updateNoteIconStates(document);
 });
