@@ -706,6 +706,26 @@ main{
   color:#555;
 }
 
+/* =======================================================
+   CONTACT CARDS — Smaller text inputs only
+   (Primary Contacts + Additional POC)
+======================================================= */
+
+/* Target text inputs inside contact cards only */
+#dealership-info .primary-contacts-grid
+  input[type="text"],
+#dealership-info .primary-contacts-grid
+  input[type="email"],
+#dealership-info .primary-contacts-grid
+  input[type="tel"]{
+
+  height:30px !important;          /* was 34px */
+  font-size:12px !important;       /* slightly smaller text */
+  padding:5px 8px !important;      /* tighter padding */
+
+  border-radius:var(--radius-sm);
+}
+
 /* =======================
    Notes cards textarea fill (2-col layouts)
 ======================= */
