@@ -577,10 +577,13 @@ main{
   overflow:hidden;
   padding:14px 14px 6px;
 }
+
+/* keep mini-card rows consistent */
 .mini-card .checklist-row{
   padding-left:18px;
   padding-right:18px;
 }
+
 .contact-card,
 .additional-poc-card{
   width:100%;
@@ -588,38 +591,25 @@ main{
 }
 
 /* =======================================================
-   PRIMARY CONTACT CARDS — Reduce indentation
+   PRIMARY CONTACT CARDS — Reduce indentation (scoped)
 ======================================================= */
-
-/* Base rows inside Primary Contact cards */
 #dealership-info .primary-contacts-grid .checklist-row{
-  padding-left:16px !important;   /* was 32px */
+  padding-left:16px !important; /* less indented than global */
 }
-
-/* Sub/indented rows inside Primary Contact cards */
 #dealership-info .primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:32px !important;   /* was 48–60px */
+  padding-left:30px !important; /* sub-rows still indented, just less */
 }
 
 /* =======================================================
    DEALERSHIP INFO — Additional POC (BASE) width match
-   Make the base input match cloned inputs
+   Base card has + button, so input must account for it
 ======================================================= */
-
-/* Base Additional POC card: match cloned input width */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  /* match your other right-side field sizing */
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-/* Base Additional POC card: keep the + button from stealing space */
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus > .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
+  /* make the base input the same visual width as clones */
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  max-width:calc(var(--input-width) - 34px) !important;
 }
 
 /* =======================================================
@@ -627,8 +617,6 @@ main{
    - cloned cards have NO + button, so input should be fully rounded
    - match size/width to other right-side fields
 ======================================================= */
-
-/* Target ONLY cloned Additional POC cards (not the base one) */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
 #dealership-info .primary-contacts-grid
@@ -716,27 +704,6 @@ main{
   margin:6px 10px 10px;
   font-size:12px;
   color:#555;
-}
-
-/* =======================================================
-   DEALERSHIP INFO — Additional POC (BASE) width match
-   Make the base input match cloned inputs
-======================================================= */
-
-/* Base Additional POC card: match cloned input width */
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  /* match your other right-side field sizing */
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-/* Base Additional POC card: keep the + button from stealing space */
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus > .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
 }
 
 /* =======================
