@@ -853,11 +853,14 @@ function initNotesLinkingOption2Only(root=document){
   qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
 
-    const ta = findNotesTextareaForRow(row);
-    if (!ta) return;
+   // ✅ Only allow rows that actually have a field
+const field = row.querySelector("input, select, textarea");
+if (!field) return;
 
-    const actions = ensureRowActions(row);
-    if (actions.querySelector(".note-link-btn")) return;
+const ta = findNotesTextareaForRow(row);
+if (!ta) return;
+
+const actions = ensureRowActions(row);
 
     const btn = document.createElement("button");
     btn.type = "button";
