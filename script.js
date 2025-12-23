@@ -974,19 +974,77 @@ function updateNoteIconStates(root=document){
 
 /* ===========================================================
    TABLE NOTES BUTTONS (Training Checklist + Opcodes)
-   - Adds a final "Notes" column to each .training-table on:
-     #training-checklist, #opcodes-pricing
-   - Clicking icon jumps to the Notes card directly BELOW that table
+   ✅ Ensures ONLY ONE "Notes" column exists
+   ✅ Uses ONLY bubble icon in that Notes column
+   ✅ Prevents column shifting that breaks "Filters"
 =========================================================== */
-function getTableTitle(table){
-  const section = table.closest(".section");
-  const header = section?.querySelector(".section-header");
-  const txt = (header?.textContent || "").replace(/\s+/g," ").trim();
-  return txt || "Table Notes";
+
+function thText(th){
+  return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
+}
+
+function getHeaderCells(table){
+  return Array.from(table.querySelectorAll("thead tr th"));
+}
+
+function getNotesHeaderIndexes(table){
+  const ths = getHeaderCells(table);
+  const idxs = [];
+  ths.forEach((th, i)=>{
+    if (thText(th) === "notes") idxs.push(i);
+  });
+  return idxs;
+}
+
+function removeColumnByIndex(table, idx){
+  // remove TH
+  const ths = table.querySelectorAll("thead tr");
+  ths.forEach(tr=>{
+    const cell = tr.children[idx];
+    if (cell) cell.remove();
+  });
+
+  // remove TDs
+  qsa("tbody tr", table).forEach(tr=>{
+    const cell = tr.children[idx];
+    if (cell) cell.remove();
+  });
+}
+
+function ensureSingleNotesColumn(table){
+  const theadRow = table.querySelector("thead tr");
+  if (!theadRow) return null;
+
+  // Find all Notes columns
+  const noteIdxs = getNotesHeaderIndexes(table);
+
+  // If multiple, keep the FIRST and remove the rest (right-to-left)
+  if (noteIdxs.length > 1){
+    const keep = noteIdxs[0];
+    const remove = noteIdxs.slice(1).sort((a,b)=>b-a);
+    remove.forEach(idx => removeColumnByIndex(table, idx));
+    return keep;
+  }
+
+  // If none, create one at the end
+  if (noteIdxs.length === 0){
+    const th = document.createElement("th");
+    th.textContent = "Notes";
+    theadRow.appendChild(th);
+
+    qsa("tbody tr", table).forEach(tr=>{
+      const td = document.createElement("td");
+      tr.appendChild(td);
+    });
+
+    return theadRow.children.length - 1;
+  }
+
+  // Exactly one already exists
+  return noteIdxs[0];
 }
 
 function findNotesBlockForTable(table){
-  // expects: after table’s .section, the next .section-block "Notes — ..."
   const section = table.closest(".section");
   if (!section) return null;
 
@@ -996,57 +1054,57 @@ function findNotesBlockForTable(table){
       const h2 = node.querySelector("h2");
       const t = (h2?.textContent || "").trim().toLowerCase();
       if (t.startsWith("notes")) return node;
-      // if it’s a section-block but not notes, stop at first block
-      // (keeps it tied to the correct table)
       return null;
     }
-    // if we hit another .section, stop
     if (node.classList?.contains("section")) return null;
     node = node.nextElementSibling;
   }
   return null;
 }
 
-function ensureTableNotesColumn(table){
-  const theadRow = table.querySelector("thead tr");
-  if (!theadRow) return;
+function renderTableNoteButton(td){
+  td.innerHTML = `
+    <button type="button" class="note-link-btn mk-table-note-btn" title="Jump to this table’s Notes">
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </button>
+  `;
+}
 
-  // already added?
-  if (theadRow.querySelector("th.mk-notes-col")) return;
+function applyNotesButtonsToColumn(table, notesColIdx){
+  // Header label sanity
+  const th = table.querySelector("thead tr")?.children?.[notesColIdx];
+  if (th) th.textContent = "Notes";
 
-  const th = document.createElement("th");
-  th.className = "mk-notes-col";
-  th.textContent = "Notes";
-  theadRow.appendChild(th);
-
-  // add td to each body row
+  // Every row: force ONLY bubble button
   qsa("tbody tr", table).forEach(tr=>{
-    const td = document.createElement("td");
-    td.className = "mk-notes-col";
-    td.innerHTML = `
-      <button type="button" class="note-link-btn mk-table-note-btn" title="Jump to this table’s Notes">
-        <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 4h16v12H7l-3 3V4z" fill="none"
-                stroke="currentColor" stroke-width="2"
-                stroke-linejoin="round" stroke-linecap="round"/>
-        </svg>
-      </button>
-    `;
-    tr.appendChild(td);
+    const td = tr.children[notesColIdx];
+    if (!td) return;
+    renderTableNoteButton(td);
   });
 }
 
 function initTableNotesButtons(root=document){
-  const scopes = [
+  const targets = [
     "#training-checklist table.training-table",
     "#opcodes-pricing table.training-table"
   ];
 
-  scopes.forEach(sel=>{
+  targets.forEach(sel=>{
     qsa(sel, root).forEach(table=>{
-      ensureTableNotesColumn(table);
+      // 1) Fix duplicate Notes columns / create if missing
+      const notesIdx = ensureSingleNotesColumn(table);
 
-      // wire clicks (event delegation safe too)
+      // 2) Force ONLY bubble icon in that column
+      applyNotesButtonsToColumn(table, notesIdx);
+
+      // 3) One click handler per table (avoid stacking)
+      if (table.dataset.mkNotesWired === "1") return;
+      table.dataset.mkNotesWired = "1";
+
       table.addEventListener("click", (e)=>{
         const btn = e.target.closest(".mk-table-note-btn");
         if (!btn) return;
@@ -1058,7 +1116,6 @@ function initTableNotesButtons(root=document){
         const ta = notesBlock?.querySelector("textarea");
         if (!ta) return;
 
-        // scroll + highlight
         notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
         setTimeout(()=>{
           ta.focus();
