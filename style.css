@@ -582,6 +582,37 @@ main{
   width:100%;
   min-width:0;
 }
+/* =======================================================
+   DEALERSHIP INFO — Additional POC clones
+   - cloned cards have NO + button, so input should be fully rounded
+   - match size/width to other right-side fields
+======================================================= */
+
+/* Target ONLY cloned Additional POC cards (not the base one) */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
+#dealership-info .primary-contacts-grid
+  .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  /* full rounded like normal inputs */
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+
+  /* match standard right-side field sizing */
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+}
 
 /* Dealership Address card */
 #dealership-address-card .checklist-row{
