@@ -1,8 +1,9 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT CSS (SINGLE SOURCE OF TRUTH)
+   myKaarma Interactive Training Checklist — CLEANED CSS
+   ✅ Single source of truth
    ✅ Preserves: Support Tickets + DMS + Primary Contacts + Equal-height 2-col cards
    ✅ Preserves: Notes Linking (📝) + Notes Pop-out Expander (⤢) + Modal
-   ✅ Adds: TABLE Notes column button styling (for Training Checklist + Opcodes tables)
+   ✅ Preserves: Table Notes column + Table Popup Expand (⤢)
    ======================================================= */
 
 /* =======================
@@ -67,7 +68,7 @@ input[type="date"].is-placeholder{ color:#9ca3af; }
 input[type="date"]::-webkit-datetime-edit{ color:inherit; }
 input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
-/* Tables should never look "ghosted" */
+/* Tables should never look ghosted */
 .training-table select,
 .training-table select.is-placeholder{
   color:var(--ink) !important;
@@ -119,7 +120,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 #app{
   display:flex;
   min-height:100vh;
-  margin-top:70px; /* below fixed topbar */
+  margin-top:70px;
   overflow-x:hidden;
 }
 
@@ -253,7 +254,7 @@ main{
   color:#555;
 }
 
-/* Reset This Page (top-right) */
+/* Reset This Page */
 .page-section .clear-page-btn{
   position:absolute !important;
   top:16px !important;
@@ -280,7 +281,7 @@ main{
 }
 
 /* =======================
-   SECTION BLOCKS (BIG CARDS)
+   SECTION BLOCKS
 ======================= */
 .section-block{
   background:#fff;
@@ -388,7 +389,7 @@ main{
   height:34px;
 }
 
-/* Textareas (base) */
+/* Textareas */
 .section-block textarea{
   width:100% !important;
   max-width:100% !important;
@@ -419,7 +420,6 @@ main{
 
 /* =======================
    Notes linking layout (row-actions)
-   (JS wraps the field + 📝 into .row-actions)
 ======================= */
 .checklist-row .row-actions{
   display:inline-flex !important;
@@ -431,12 +431,14 @@ main{
   max-width:none !important;
 }
 
-/* Do not show row-actions in integrated-plus rows */
+/* IMPORTANT:
+   We do NOT hide row-actions globally, because that would remove 📝
+   for any row that gets wrapped. Only hide on rows you explicitly mark.
+*/
 .checklist-row.integrated-plus > .row-actions{ display:none !important; }
 
 /* =======================
-   Notes link button (📝) — speech bubble SVG
-   - default gray, turns orange when .has-note is applied
+   Notes link button (📝)
 ======================= */
 .note-link-btn{
   width:20px;
@@ -474,7 +476,7 @@ main{
 }
 
 /* =======================
-   Integrated “+” rows (general)
+   Integrated “+” rows
 ======================= */
 .section-block .checklist-row.integrated-plus{
   display:flex;
@@ -640,7 +642,7 @@ main{
 }
 
 /* =======================
-   Notes cards + textarea fill (2-col layouts)
+   Notes cards textarea fill (2-col layouts)
 ======================= */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
@@ -649,8 +651,6 @@ main{
   flex-direction:column;
   min-width:0;
 }
-
-/* default: notes textareas fill available area */
 .cards-grid.two-col > .section-block textarea,
 .two-col-grid .section-block textarea,
 .grid-2 > .section-block textarea{
@@ -676,17 +676,8 @@ main{
   width:calc(var(--input-width) - 34px) !important;
   margin-left:auto !important;
 }
-#trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-}
 #trainers-deployment #additionalTrainersContainer .checklist-row{
   padding-left:60px !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
-  width:var(--input-width) !important;
-  border-radius:var(--radius-sm) !important;
 }
 #trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
 
@@ -748,7 +739,7 @@ main{
   z-index:3;
 }
 
-/* Sticky first column (most tables) */
+/* Sticky first column */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -785,6 +776,7 @@ main{
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
+/* Table footer: left + right */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -792,7 +784,8 @@ main{
   padding:6px 10px;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:space-between;
+  gap:10px;
   border-bottom-left-radius:var(--radius-lg);
   border-bottom-right-radius:var(--radius-lg);
 }
@@ -820,7 +813,7 @@ main{
 .training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
 .training-table select.accept-na{ background:#e5e7eb; border-color:#9ca3af; color:#374151; }
 
-/* Opcodes: first column not sticky + centered checkbox */
+/* Opcodes: first column not sticky */
 #opcodes-pricing .training-table th:first-child,
 #opcodes-pricing .training-table td:first-child{
   position:static;
@@ -859,17 +852,15 @@ main{
   text-align:center;
 }
 
-/* Names column centered (2nd column) */
+/* Names column centered */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){
   text-align:center !important;
 }
 
-/* =======================================================
-   TABLE NOTES COLUMN (NEW)
-   - works with JS-injected Notes column (header "Notes" + icon)
-   - does NOT change your table layout
-======================================================= */
+/* =======================
+   TABLE NOTES COLUMN
+======================= */
 .training-table th.notes-col,
 .training-table td.notes-col{
   width:60px;
@@ -877,35 +868,37 @@ main{
   text-align:center !important;
   vertical-align:middle;
 }
-.training-table th.notes-col{
-  white-space:nowrap;
+
+/* Use same bubble button style as note-link-btn */
+.training-table .mk-table-note-btn{
+  width:20px;
+  height:20px;
 }
 
-/* table notes icon button */
-.table-notes-btn{
+/* =======================
+   TABLE EXPAND (⤢) button in footer
+======================= */
+.mk-table-expand-btn{
+  width:16px;
+  height:16px;
+  padding:0;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  background:#ffffffee;
+  color:#111827;
+  cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:30px;
-  height:30px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  cursor:pointer;
-  padding:0;
+  font-size:10px;
   line-height:1;
-  transition:transform .12s, box-shadow .12s, border-color .12s;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  transition:border-color .12s, background .12s, transform .12s;
 }
-.table-notes-btn:hover{
-  box-shadow:0 2px 8px rgba(0,0,0,0.10);
+.mk-table-expand-btn:hover{
+  border-color:var(--orange);
+  background:#fff;
   transform:translateY(-1px);
-  border-color:#cfcfcf;
-}
-.table-notes-btn svg{
-  width:16px;
-  height:16px;
-  display:block;
-  fill:var(--orange);
 }
 
 /* =======================
@@ -937,10 +930,8 @@ main{
 }
 #support-tickets .ticket-group-inner{ padding:16px 18px 14px; }
 
-/* normalize bold */
 #support-tickets .ticket-group-inner,
 #support-tickets .ticket-group-inner *{ font-weight:400; }
-#support-tickets .ticket-group-inner label,
 #support-tickets .ticket-row label{ font-weight:500 !important; }
 
 #support-tickets .ticket-row{
@@ -1092,15 +1083,11 @@ main{
   border:1px solid rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-
-/* Pull-based = myKaarma green (header chip only) */
 #dms-integration .dms-chip-pull{
   background:rgba(205,220,57,0.22) !important;
   border-color:rgba(205,220,57,0.65) !important;
   color:#111827 !important;
 }
-
-/* Push-based stays white-tinted */
 #dms-integration .dms-chip-push{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
@@ -1115,12 +1102,11 @@ main{
 #dms-integration .dms-list li{
   position:relative;
   padding:10px 10px;
-  padding-right:120px; /* reserves space for pills */
+  padding-right:120px;
   border-bottom:1px solid #efefef;
 }
 #dms-integration .dms-list li:last-child{ border-bottom:none; }
 
-/* let the top row flow naturally */
 #dms-integration .dms-row-top{
   display:block;
   margin-bottom:4px;
@@ -1136,7 +1122,6 @@ main{
   color:#6b7280;
 }
 
-/* BODY pills only */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
   right:16px;
@@ -1144,7 +1129,6 @@ main{
   transform:translateY(-50%);
   min-width:78px;
   text-align:center;
-
   font-size:10px;
   font-weight:600;
   letter-spacing:0.03em;
@@ -1183,71 +1167,8 @@ main{
 }
 
 /* =======================
-   PRIMARY CONTACTS PATCHES
-======================= */
-#dealership-info .primary-contacts-grid{ --input-width:240px; }
-
-#dealership-info .primary-contacts-grid .mini-card .checklist-row input,
-#dealership-info .primary-contacts-grid .mini-card .checklist-row select{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-/* Base Additional POC row: input + plus button total matches others */
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  max-width:calc(var(--input-width) - 34px) !important;
-  height:34px !important;
-}
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus .add-row{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-}
-
-/* Cloned Additional POC cards */
-#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
-  .checklist-row.integrated-plus .add-row{
-  display:none !important;
-}
-#dealership-info .primary-contacts-grid .additional-poc-card:not([data-base="true"])
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
-}
-
-/* Strong left shift (side-by-side cards only) */
-.cards-grid.two-col .checklist-row,
-.two-col-grid .checklist-row,
-.primary-contacts-grid .checklist-row{
-  padding-left:12px !important;
-}
-.cards-grid.two-col .checklist-row.indent-sub,
-.two-col-grid .checklist-row.indent-sub,
-.primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:36px !important;
-}
-
-/* Primary contacts: shift labels left even more */
-#dealership-info .primary-contacts-grid .mini-card .checklist-row{
-  padding-left:10px !important;
-  padding-right:10px !important;
-}
-#dealership-info .primary-contacts-grid .mini-card .checklist-row.indent-sub{
-  padding-left:30px !important;
-}
-
-/* ===========================================================
    EQUAL-HEIGHT 2-COL ROWS
-   Pre-Training + Monday Visit + Post-Training
-=========================================================== */
+======================= */
 #pre-training .cards-grid.two-col,
 #monday-visit .cards-grid.two-col,
 #post-training .cards-grid.two-col{
@@ -1261,7 +1182,6 @@ main{
   flex-direction:column !important;
   min-width:0;
 }
-/* Notes cards: textarea fills remaining space */
 #pre-training .cards-grid.two-col > .section-block textarea,
 #monday-visit .cards-grid.two-col > .section-block textarea,
 #post-training .cards-grid.two-col > .section-block textarea{
@@ -1270,28 +1190,10 @@ main{
   height:auto !important;
   resize:none !important;
 }
-/* Left cards (no textarea): add empty space */
-@supports selector(.x:has(textarea)){
-  #pre-training .cards-grid.two-col > .section-block:not(:has(textarea))::after,
-  #monday-visit .cards-grid.two-col > .section-block:not(:has(textarea))::after,
-  #post-training .cards-grid.two-col > .section-block:not(:has(textarea))::after{
-    content:"";
-    display:block;
-    flex:1 1 auto;
-  }
-}
-@supports not selector(.x:has(textarea)){
-  #pre-training .cards-grid.two-col > .section-block,
-  #monday-visit .cards-grid.two-col > .section-block,
-  #post-training .cards-grid.two-col > .section-block{
-    min-height:380px;
-  }
-}
 
-/* ===========================================================
+/* =======================
    NOTES POP-OUT EXPANDER (⤢)
-   Matches JS button class: .mk-ta-expand
-=========================================================== */
+======================= */
 .mk-ta-wrap{
   position:relative;
   height:100%;
@@ -1332,10 +1234,9 @@ main{
   background:#fff;
 }
 
-/* ===========================================================
-   NOTES MODAL (Pop-out)
-   Matches JS: #mkNotesModal.open + classes
-=========================================================== */
+/* =======================
+   NOTES MODAL
+======================= */
 #mkNotesModal{
   position:fixed;
   inset:0;
@@ -1406,6 +1307,104 @@ main{
 }
 
 /* =======================
+   TABLE MODAL (mkTableModal)
+   (JS also injects patches for sizing/scroll)
+======================= */
+#mkTableModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99998;
+}
+#mkTableModal.open{ display:block; }
+
+#mkTableModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+}
+#mkTableModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1400px, calc(100vw - 28px));
+  max-height:90vh;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#mkTableModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+#mkTableModal .mk-modal-title{
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:.3px;
+}
+#mkTableModal .mk-modal-close{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
+
+#mkTableModal .mk-modal-content{
+  padding:16px 16px 18px;
+  overflow:auto;
+  background:#fff;
+}
+#mkTableModal .mk-modal-stack{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* Make popup table scroll horizontally like page */
+#mkTableModal .mk-table-scroll{
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:10px 10px 12px;
+  box-sizing:border-box;
+}
+#mkTableModal .mk-table-scroll table.training-table{
+  width:max-content;
+  min-width:100%;
+}
+
+/* Popup notes card textarea */
+#mkTableModal .mk-modal-notes textarea{
+  width:100% !important;
+  min-height:220px;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  resize:vertical;
+}
+
+/* =======================
    RESPONSIVE
 ======================= */
 @media (max-width:900px){
@@ -1468,575 +1467,4 @@ main{
   }
 
   .training-table{ min-width:760px; }
-}
-
-/* ===========================================================
-   TABLE EXPAND (⤢) — footer right + modal
-=========================================================== */
-
-/* Footer: keep Add Row on left, expand button on right */
-.table-footer{
-  justify-content:space-between;
-  gap:10px;
-}
-.table-footer .footer-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-/* Expand button uses same visual language as notes expander */
-.table-footer .mk-table-expand{
-  margin-left:auto;
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid #d1d5db;
-  background:#ffffffee;
-  color:#111827;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:14px;
-  line-height:1;
-  box-shadow:0 1px 3px rgba(0,0,0,0.12);
-}
-.table-footer .mk-table-expand:hover{
-  border-color:var(--orange);
-  background:#fff;
-}
-
-/* Table modal */
-#mkTableModal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:99998;
-}
-#mkTableModal.open{ display:block; }
-
-#mkTableModal .mk-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-}
-#mkTableModal .mk-modal-panel{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:min(1400px, calc(100vw - 28px));
-  height:min(88vh, 900px);
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-#mkTableModal .mk-modal-header{
-  background:var(--orange);
-  color:#fff;
-  padding:12px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-#mkTableModal .mk-modal-title{
-  font-weight:900;
-  font-size:16px;
-  letter-spacing:.3px;
-}
-#mkTableModal .mk-modal-close{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.55);
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  line-height:1;
-}
-#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
-
-#mkTableModal .mk-modal-body{
-  flex:1 1 auto;
-  overflow:auto;
-  padding:14px;
-  background:#f3f4f6;
-}
-
-/* Make the moved table container fill the modal nicely */
-#mkTableModal .mk-modal-body .table-container{
-  max-width:none !important;
-  width:100% !important;
-  margin:0 !important;
-  border-radius:18px !important;
-}
-#mkTableModal .mk-modal-body .scroll-wrapper{
-  overflow:auto !important;
-  padding-bottom:10px;
-}
-#mkTableModal .mk-modal-body .training-table{
-  min-width:1400px; /* show more columns without feeling cramped */
-}
-
-/* ===========================================================
-   TABLE MODAL — compact / dense mode (POPUP ONLY)
-=========================================================== */
-
-#mkTableModal .training-table th,
-#mkTableModal .training-table td{
-  font-size:11px;
-  padding:4px 4px;
-  line-height:1.15;
-}
-
-#mkTableModal .training-table input[type="text"],
-#mkTableModal .training-table select{
-  font-size:11px;
-  height:24px;
-  padding:2px 4px;
-  min-width:140px;
-}
-
-/* tighten header */
-#mkTableModal .training-table th{
-  white-space:nowrap;
-}
-
-/* ===========================================================
-   TABLE POPUP (mkTableModal) — FIX OVERFLOW + LESS DEAD SPACE
-=========================================================== */
-
-/* Modal should size to content, not force tall empty space */
-#mkTableModal .mk-modal-panel{
-  height:auto !important;
-  max-height:90vh !important;
-}
-
-#mkTableModal .mk-modal-body{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:10px 12px 12px !important;
-  flex:0 0 auto !important; /* prevents “fill the world” dead space */
-  overflow:auto;
-}
-
-/* Table wrapper inside modal should not create huge empty areas */
-#mkTableModal .mk-table-wrap{
-  flex:0 0 auto;
-  overflow:auto;
-  border:1px solid #e5e7eb;
-  border-radius:14px;
-  background:#fff;
-}
-
-/* Force inputs/selects to stay inside cells */
-#mkTableModal table.training-table{
-  width:max-content;              /* keep your horizontal scroll ability */
-}
-
-#mkTableModal .training-table td,
-#mkTableModal .training-table th{
-  overflow:hidden;                /* prevents spill outside cell */
-  vertical-align:middle;
-}
-
-/* ✅ Critical: no “min-width:180px” inside popup */
-#mkTableModal .training-table input[type="text"],
-#mkTableModal .training-table input[type="number"],
-#mkTableModal .training-table input[type="email"],
-#mkTableModal .training-table input[type="tel"],
-#mkTableModal .training-table select,
-#mkTableModal .training-table textarea{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  box-sizing:border-box !important;
-  display:block !important;
-}
-
-/* Slightly smaller controls inside popup */
-#mkTableModal .training-table th,
-#mkTableModal .training-table td{
-  font-size:11px;
-  padding:4px 4px;
-  line-height:1.15;
-}
-
-#mkTableModal .training-table input[type="text"],
-#mkTableModal .training-table select{
-  font-size:11px;
-  height:24px;
-  padding:2px 6px;
-}
-
-/* Notes area inside modal */
-#mkTableModal .mk-table-notes{
-  flex:0 0 auto;
-  border:1px solid #e5e7eb;
-  border-radius:14px;
-  background:#fff;
-  overflow:hidden;
-}
-
-#mkTableModal .mk-table-notes .mk-table-notes-header{
-  background:var(--orange);
-  color:#fff;
-  font-weight:900;
-  padding:10px 12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-#mkTableModal .mk-table-notes .mk-table-notes-body{
-  padding:10px 12px 12px;
-}
-
-#mkTableModal .mk-table-notes textarea{
-  width:100% !important;
-  min-height:120px;
-  resize:vertical;
-  font-size:12px;
-  box-sizing:border-box;
-}
-
-/* Put table expand button in footer right (if you’re using footer button) */
-#mkTableModal .mk-modal-footer{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 12px 12px;
-}
-#mkTableModal .mk-footer-right{
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-/* ===========================================================
-   TABLE POPUP — side + bottom breathing room
-=========================================================== */
-
-#mkTableModal .mk-modal-panel{
-  padding:0; /* header controls its own padding */
-}
-
-#mkTableModal .mk-modal-body{
-  padding:14px 18px 18px;  /* ⬅️ left/right + extra bottom */
-}
-
-/* If you have a footer (expand button lives here) */
-#mkTableModal .mk-modal-footer{
-  padding:10px 18px 16px;  /* matches body width + bottom space */
-}
-
-/* ===========================================================
-   TABLE EXPAND BUTTON — match Notes expand button (⤢)
-   Class: .mk-table-expand-btn (in table footer)
-=========================================================== */
-
-.mk-table-expand-btn{
-  width:16px;
-  height:16px;
-  padding:0;
-  border-radius:6px;
-  border:1px solid #d1d5db;
-  background:#ffffffee;
-  color:#111827;
-  cursor:pointer;
-
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  font-size:10px;
-  line-height:1;
-
-  box-shadow:0 1px 3px rgba(0,0,0,0.12);
-  transition:border-color .12s, background .12s, transform .12s;
-}
-
-.mk-table-expand-btn:hover{
-  border-color:var(--orange);
-  background:#fff;
-  transform:translateY(-1px);
-}
-
-/* ===========================================================
-   TABLE POPUP — Notes section styled EXACTLY like Notes cards
-=========================================================== */
-
-/* spacing between table and notes card */
-#mkTableModal .mk-table-notes{
-  margin-top:18px;
-}
-
-/* card shell */
-#mkTableModal .mk-table-notes{
-  background:#fff;
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-
-/* header matches .section-block h2 */
-#mkTableModal .mk-table-notes .mk-table-notes-header{
-  background:var(--orange);
-  color:#fff;
-  font-size:16px;
-  font-weight:800;
-  padding:10px 16px;
-  border-bottom:1px solid var(--border);
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-/* body matches Notes card padding */
-#mkTableModal .mk-table-notes .mk-table-notes-body{
-  padding:14px 16px 16px;
-}
-
-/* textarea matches Notes textarea */
-#mkTableModal .mk-table-notes textarea{
-  width:100% !important;
-  min-height:220px;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  resize:vertical;
-}
-
-/* focus state matches main app */
-#mkTableModal .mk-table-notes textarea:focus{
-  border-color:var(--orange);
-  box-shadow:0 0 4px rgba(239,109,34,0.35);
-  outline:none;
-  background:#fff9f5;
-}
-
-/* expand icon inside header — same as Notes cards */
-#mkTableModal .mk-table-notes .mk-ta-expand{
-  position:static;
-}
-
-/* ===========================================================
-   TABLE POPUP — Make it feel like TWO CARDS (Table + Notes)
-   Targets your table modal: #mkTableModal
-   =========================================================== */
-
-/* Give the modal body breathing room + stacking layout */
-#mkTableModal .mk-modal-panel{
-  display:flex;
-  flex-direction:column;
-  gap:18px;                 /* space between “cards” */
-  padding:16px 16px 18px;   /* side + bottom padding */
-  box-sizing:border-box;
-}
-
-/* ---------------------------
-   CARD 1: TABLE WRAP
---------------------------- */
-#mkTableModal .mk-table-card{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-
-/* Keep table scrolling inside the table card */
-#mkTableModal .mk-table-card .mk-table-scroll{
-  width:100%;
-  overflow-x:auto;
-  overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:10px 10px 12px; /* inner padding so table isn’t glued to edges */
-  box-sizing:border-box;
-}
-
-/* Make inputs/selects behave inside cells (fix overflow) */
-#mkTableModal .mk-table-card table.training-table{
-  width:max-content;
-  min-width:100%;
-  table-layout:auto;
-}
-#mkTableModal .mk-table-card table.training-table input,
-#mkTableModal .mk-table-card table.training-table select{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  box-sizing:border-box !important;
-}
-
-/* Force checkbox + name input to sit side-by-side (not stacked) */
-#mkTableModal .mk-table-card table.training-table td:first-child{
-  display:flex !important;
-  align-items:center !important;
-  gap:10px !important;
-  justify-content:flex-start !important;
-}
-#mkTableModal .mk-table-card table.training-table td:first-child input[type="checkbox"]{
-  flex:0 0 auto !important;
-  margin:0 !important;
-}
-#mkTableModal .mk-table-card table.training-table td:first-child input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;
-  min-width:0 !important;
-}
-
-/* ---------------------------
-   CARD 2: NOTES (match your Notes cards)
---------------------------- */
-#mkTableModal .mk-table-notes{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-
-/* Notes “header bar” like your h2 orange headers */
-#mkTableModal .mk-table-notes .mk-notes-header{
-  background:var(--orange);
-  color:#fff;
-  font-weight:800;
-  font-size:16px;
-  padding:10px 16px;
-}
-
-/* Notes body padding */
-#mkTableModal .mk-table-notes .mk-notes-body{
-  padding:12px 14px 14px;
-}
-
-/* Notes textarea styling like your main notes */
-#mkTableModal .mk-table-notes textarea{
-  width:100% !important;
-  max-width:100% !important;
-  min-height:180px;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  box-sizing:border-box;
-  resize:vertical;
-}
-
-/* ===========================================================
-   TABLE MODAL — page-like spacing + two-card stack
-   =========================================================== */
-#mkTableModal .mk-modal-panel{
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-#mkTableModal .mk-table-modal-body{
-  padding:18px 20px 22px;
-  overflow:auto;              /* vertical scroll if needed */
-  display:flex;
-  flex-direction:column;
-  gap:22px;                   /* space between the two cards */
-  background:#fff;
-}
-
-/* Make the modal’s inner cards match the page width */
-#mkTableModal .mk-table-modal-body .table-container,
-#mkTableModal .mk-table-modal-body .section-block{
-  max-width:100%;
-}
-
-/* Ensure table can scroll horizontally INSIDE the popup like the page */
-#mkTableModal .mk-table-modal-body .scroll-wrapper{
-  overflow-x:auto !important;
-  overflow-y:hidden !important;
-  -webkit-overflow-scrolling:touch;
-}
-
-/* Fix checkbox + name field alignment inside popup table (side-by-side) */
-#mkTableModal table.training-table td:first-child{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:10px !important;
-}
-#mkTableModal table.training-table td:first-child input[type="checkbox"]{
-  margin:0 !important;
-  flex:0 0 auto !important;
-}
-#mkTableModal table.training-table td:first-child input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;
-  min-width:0 !important;
-}
-
-/* Make inputs/selects never overflow their cells */
-#mkTableModal table.training-table input,
-#mkTableModal table.training-table select{
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-  box-sizing:border-box !important;
-}
-
-/* ===========================================================
-   ✅ COMPATIBILITY PATCH (for your CURRENT HTML)
-   - Your HTML uses: notes-col-head / notes-col-cell + notes-icon-btn
-   - This keeps your existing .notes-col/.table-notes-btn rules intact
-=========================================================== */
-
-/* Alias your original notes-col sizing to the actual classes in HTML */
-.training-table th.notes-col-head,
-.training-table td.notes-col-cell{
-  width:60px;
-  min-width:60px;
-  text-align:center !important;
-  vertical-align:middle;
-  white-space:nowrap;
-}
-
-/* Notes icon button in tables (📝) */
-.notes-icon-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:30px;
-  height:30px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  cursor:pointer;
-  padding:0;
-  line-height:1;
-  transition:transform .12s, box-shadow .12s, border-color .12s;
-}
-.notes-icon-btn:hover{
-  box-shadow:0 2px 8px rgba(0,0,0,0.10);
-  transform:translateY(-1px);
-  border-color:#cfcfcf;
-}
-.notes-icon{
-  font-size:15px;
-  line-height:1;
-  display:block;
 }
