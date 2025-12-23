@@ -1419,22 +1419,33 @@ main{
 }
 
 /* ===========================================================
-   NOTES POP-OUT (Modal Expander)
+   NOTES POP-OUT (Modal Expander) — FIXED (no shrink)
    =========================================================== */
 
-/* Wrap textarea so we can anchor an icon in bottom-right */
+/* Wrapper MUST fill the card like the textarea did */
 .mk-ta-wrap{
   position:relative;
+  flex:1 1 auto;          /* ✅ keep filling the card */
+  display:flex;           /* ✅ allow textarea to stretch */
+  min-height:0;           /* ✅ important for flex children */
 }
 
-/* Expand button in bottom-right corner of Notes textarea */
+/* Textarea inside wrapper fills available space */
+.mk-ta-wrap > textarea{
+  flex:1 1 auto;          /* ✅ fill */
+  width:100% !important;  /* ✅ no shrink */
+  min-height:0 !important;
+  padding-right:36px;     /* ✅ space so text doesn’t hide under icon */
+}
+
+/* MUCH smaller expand button */
 .mk-expand-btn{
   position:absolute;
-  right:10px;
-  bottom:12px;
-  width:28px;
-  height:28px;
-  border-radius:10px;
+  right:8px;
+  bottom:8px;
+  width:18px;             /* ✅ smaller */
+  height:18px;            /* ✅ smaller */
+  border-radius:6px;
   border:1px solid #d1d5db;
   background:#fff;
   color:#111827;
@@ -1442,108 +1453,21 @@ main{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
+  font-size:11px;
   line-height:1;
-  box-shadow:0 2px 6px rgba(0,0,0,0.10);
+  padding:0;
+  box-shadow:0 1px 4px rgba(0,0,0,0.10);
   transition:transform .12s, background .12s, border-color .12s;
-  z-index:2;
+  z-index:3;
 }
 .mk-expand-btn:hover{
   transform:translateY(-1px);
   border-color:var(--orange);
 }
 
-/* little “pop out” icon */
+/* Smaller icon */
 .mk-expand-btn::before{
-  content:"⤢"; /* expand */
-  font-weight:900;
-}
-
-/* Modal overlay */
-.mk-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999999;
-  padding:24px;
-}
-
-.mk-modal.is-open{ display:flex; }
-
-.mk-modal-panel{
-  width:min(1100px, 96vw);
-  height:min(78vh, 900px);
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  border:1px solid rgba(0,0,0,0.08);
-}
-
-.mk-modal-head{
-  background:var(--orange);
-  color:#fff;
-  padding:12px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.mk-modal-title{
-  font-weight:900;
-  font-size:14px;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-}
-.mk-modal-actions{
-  display:flex;
-  gap:8px;
-}
-
-.mk-modal-btn{
-  border:none;
-  border-radius:999px;
-  padding:8px 12px;
+  content:"⤢";
   font-weight:900;
   font-size:11px;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  cursor:pointer;
-}
-.mk-modal-btn.close{
-  background:rgba(255,255,255,0.22);
-  color:#fff;
-  border:1px solid rgba(255,255,255,0.35);
-}
-.mk-modal-btn.close:hover{
-  background:rgba(255,255,255,0.30);
-}
-
-.mk-modal-body{
-  padding:14px 16px 16px;
-  flex:1 1 auto;
-  display:flex;
-  flex-direction:column;
-}
-
-.mk-modal-textarea{
-  flex:1 1 auto;
-  width:100%;
-  border:1px solid #dcdcdc;
-  border-radius:14px;
-  padding:12px 12px;
-  background:#f7f7f7;
-  font-size:13px;
-  resize:none;
-  outline:none;
-}
-.mk-modal-textarea:focus{
-  border-color:var(--orange);
-  box-shadow:0 0 4px rgba(239,109,34,0.35);
-  background:#fff9f5;
 }
