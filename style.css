@@ -1094,6 +1094,22 @@ main{
   margin:0 0 18px 0 !important;
 }
 
+/* =======================================================
+   SUPPORT TICKETS — Summary spacing fix
+======================================================= */
+
+#support-tickets .ticket-row.ticket-summary-row{
+  margin-top:10px;             /* match spacing above other rows */
+}
+
+#support-tickets .ticket-row.ticket-summary-row label{
+  margin-bottom:6px;           /* consistent label → field spacing */
+}
+
+#support-tickets .ticket-row.ticket-summary-row textarea{
+  margin-top:0 !important;
+}
+
 /* Disclaimer */
 #support-tickets .ticket-disclaimer{
   margin:18px 0 0 !important;
