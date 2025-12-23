@@ -1378,3 +1378,28 @@ main{
   flex:1 1 auto !important;
   min-width:0 !important;
 }
+
+/* ===========================================================
+   NOTES TEXTAREAS — EXPAND CARD INSTEAD OF SCROLLING
+   (Overrides the 2x2 "textarea fill" behavior)
+   =========================================================== */
+
+/* Target ONLY textareas inside Notes cards */
+.section-block:has(h2) textarea{
+  /* harmless baseline; overridden below for notes specifically */
+}
+
+/* Notes cards: stop forcing textarea to scroll inside a fixed area */
+.section-block:has(h2:where(:is(:not(*)))){} /* no-op; ignore */
+
+/* If your browser supports :has() (Chrome does) */
+@supports selector(.x:has(y)){
+  .section-block:has(h2):has(textarea) textarea{
+    flex:0 0 auto !important;      /* don't stretch-fill */
+    height:auto !important;        /* allow JS to set height */
+    min-height:140px !important;   /* optional baseline */
+    max-height:none !important;
+    overflow:hidden !important;    /* ✅ no internal scrolling */
+    resize:none !important;        /* keep clean UI */
+  }
+}
