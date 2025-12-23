@@ -1073,6 +1073,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // ✅ Notes linking
   initNotesLinkingOption2Only(document);
   updateNoteIconStates(document);
+
+     // ✅ Notes pop-out expanders
+  initNotesExpanders(document);
 });
 
 /* Google Places callback */
