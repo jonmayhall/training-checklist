@@ -1080,6 +1080,54 @@ function purgeStrayTableNoteButtons(table, notesIdx){
   });
 }
 
+/* ✅ Fix: Filters column must be a dropdown (remove any random buttons) */
+function normalizeFiltersColumn(table){
+  const ths = getHeaderCells(table);
+  const filtersIdx = ths.findIndex(th => thText(th) === "filters");
+  if (filtersIdx === -1) return;
+
+  // Find a "good" select to copy (any row where Filters cell already has a <select>)
+  let templateSelect = null;
+  qsa("tbody tr", table).some(tr=>{
+    const td = tr.children[filtersIdx];
+    const sel = td?.querySelector("select");
+    if (sel){ templateSelect = sel; return true; }
+    return false;
+  });
+
+  qsa("tbody tr", table).forEach(tr=>{
+    const td = tr.children[filtersIdx];
+    if (!td) return;
+
+    // Remove any stray buttons/icons that shouldn't be here
+    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n => n.remove());
+
+    // If the cell already has a select, we're good
+    if (td.querySelector("select")) return;
+
+    // If we have a template select, insert one
+    if (templateSelect){
+      const newSelect = templateSelect.cloneNode(true);
+      newSelect.value = "";            // reset default
+      ensureUID(newSelect);            // keep your autosave pattern
+      loadField(newSelect);            // restore if saved
+      applySelectGhost(newSelect);
+      td.innerHTML = "";
+      td.appendChild(newSelect);
+      return;
+    }
+
+    // Fallback: create a basic blank dropdown (won’t break layout)
+    const fallback = document.createElement("select");
+    fallback.innerHTML = `<option></option>`;
+    ensureUID(fallback);
+    loadField(fallback);
+    applySelectGhost(fallback);
+    td.innerHTML = "";
+    td.appendChild(fallback);
+  });
+}
+
 function applyNotesButtonsToColumn(table, notesColIdx){
   const headRow = table.querySelector("thead tr");
   if (headRow && headRow.children[notesColIdx]){
@@ -1108,7 +1156,7 @@ function initTableNotesButtons(root=document){
       if (notesIdx === null) return;
 
       // 2) Purge any stray note buttons from other columns (Fixes Filters pencil)
-      purgeStrayTableNoteButtons(table, notesIdx);
+      (table, notesIdx);
 
       // 3) Force bubble icon in Notes column for ALL rows (Fixes blank first row)
       applyNotesButtonsToColumn(table, notesIdx);
