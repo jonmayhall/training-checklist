@@ -1,9 +1,22 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   STABLE + FIXED NAV + TABLE NOTES + POPUP TABLE + FIXES
-   ✅ Fixes added in this version:
-   - Popup table horizontal scroll restored (left/right)
-   - Training tables: checkbox sits LEFT of Name input (not stacked)
+   ✅ Stable + Restored + Fixed
+   - Nav clicks work
+   - Add Row (+) for tables
+   - Additional Trainers (+)
+   - Additional POC (+)
+   - Support Tickets: add/remove, move by status, base locked to Open
+   - Autosave + Reset Page + Clear All
+   - Onsite dates: end defaults to start + 2 days
+   - PDF export (all pages)
+   - ✅ Question Notes Linking: single 📝 icon per row -> inserts "• Question:"
+   - ✅ Table Notes Column: single Notes column, bubble button on every row
+   - ✅ Table Notes Bullet Insert:
+       - Training Checklist inserts "• <Name>:"
+       - Opcodes inserts "• <Opcode>:"
+   - ✅ Table Popup Expand (⤢) in footer right
+   - ✅ Popup scroll left/right restored
+   - ✅ Training name cell layout fixed (checkbox left of input)
    ======================================================= */
 
 /* ---------------------------
@@ -108,7 +121,7 @@ function syncTwoColHeights(){
 }
 
 /* ---------------------------
-   Textarea auto-grow (non-modal use)
+   Textarea auto-grow
 --------------------------- */
 function autoGrowTA(ta){
   if (!ta) return;
@@ -148,7 +161,6 @@ function showSection(id){
 
   try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
 }
-
 function initNav(){
   qsa(".nav-btn").forEach(btn=>{
     btn.addEventListener("click", (e)=>{
@@ -167,14 +179,13 @@ function initNav(){
   const first = qsa(".page-section")[0]?.id;
   showSection(last || first || "dealership-info");
 }
-
 window.showSection = showSection;
 window.initNav = initNav;
 
 /* ===========================================================
-   ✅ JS-INJECTED CSS PATCH
-   - Restore popup horizontal scroll
-   - Force checkbox + name input to sit side-by-side
+   ✅ RUNTIME PATCHES (DO NOT REPLACE YOUR CSS FILE)
+   - popup scroll left/right
+   - checkbox left of name input
 =========================================================== */
 function injectRuntimePatches(){
   if (qs("#mkRuntimePatches")) return;
@@ -182,83 +193,48 @@ function injectRuntimePatches(){
   const style = document.createElement("style");
   style.id = "mkRuntimePatches";
   style.textContent = `
-    /* Popup table must scroll left/right */
-    #mkTableModal .mk-table-body{
-      overflow: hidden !important;
-    }
+    /* Popup: ensure horizontal scroll exists */
     #mkTableModal .mk-table-scroll{
-      overflow-x: auto !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
-      width: 100%;
+      width:100% !important;
+      overflow-x:auto !important;
+      overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch;
     }
-    #mkTableModal table{
-      width: max-content !important; /* allow horizontal scroll */
-      min-width: 100% !important;
+    #mkTableModal .mk-table-scroll table{
+      width:max-content !important;
+      min-width:100% !important;
     }
 
-    /* Ensure inputs fit cells (prevents overflow like Name field) */
+    /* Inputs never overflow cells in popup */
     #mkTableModal table input[type="text"],
-    #mkTableModal table input[type="number"],
-    #mkTableModal table input[type="email"],
-    #mkTableModal table input[type="tel"],
-    #mkTableModal table select{
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
+    #mkTableModal table select,
+    #mkTableModal table textarea{
+      width:100% !important;
+      max-width:100% !important;
+      box-sizing:border-box !important;
+      min-width:0 !important;
     }
 
-    /* Training tables: checkbox left of Name input */
-    table.training-table td.mk-name-cell{
-      display: flex !important;
-      align-items: center !important;
-      gap: 10px !important; /* padding between checkbox and input */
-    }
-    table.training-table td.mk-name-cell input[type="checkbox"]{
-      flex: 0 0 auto !important;
-      margin: 0 !important;
-    }
-    table.training-table td.mk-name-cell input[type="text"],
-    table.training-table td.mk-name-cell select,
-    table.training-table td.mk-name-cell textarea{
-      flex: 1 1 auto !important;
-      min-width: 0 !important; /* allow shrinking inside flex */
-    }
-
-    /* Popup tables: if Name cell uses same fix */
+    /* Name cell: checkbox left of input (main + popup) */
+    table.training-table td.mk-name-cell,
     #mkTableModal td.mk-name-cell{
       display:flex !important;
       align-items:center !important;
       gap:10px !important;
     }
-    #mkTableModal td.mk-name-cell input[type="checkbox"]{ flex:0 0 auto !important; margin:0 !important; }
-    #mkTableModal td.mk-name-cell input[type="text"]{ flex:1 1 auto !important; min-width:0 !important; }
+    table.training-table td.mk-name-cell input[type="checkbox"],
+    #mkTableModal td.mk-name-cell input[type="checkbox"]{
+      flex:0 0 auto !important;
+      margin:0 !important;
+    }
+    table.training-table td.mk-name-cell input[type="text"],
+    #mkTableModal td.mk-name-cell input[type="text"]{
+      flex:1 1 auto !important;
+      min-width:0 !important;
+      width:auto !important;
+    }
   `;
   document.head.appendChild(style);
-}
-
-/* Tag the "Name" column TDs so CSS can style them */
-function tagNameCells(table){
-  const ths = Array.from(table.querySelectorAll("thead tr th"));
-  const nameIdx = ths.findIndex(th => (th.textContent || "").trim().toLowerCase() === "name");
-  if (nameIdx === -1) return;
-
-  qsa("tbody tr", table).forEach(tr=>{
-    const td = tr.children[nameIdx];
-    if (!td) return;
-
-    td.classList.add("mk-name-cell");
-
-    // If checkbox + input are stacked due to <br> or blocks, normalize
-    const cb = td.querySelector('input[type="checkbox"]');
-    const text = td.querySelector('input[type="text"], select, textarea');
-    if (cb && text){
-      // Remove accidental <br> nodes between them (common cause of stacking)
-      Array.from(td.childNodes).forEach(n=>{
-        if (n.nodeName === "BR") n.remove();
-      });
-    }
-  });
 }
 
 /* ---------------------------
@@ -320,12 +296,9 @@ function resetSection(section){
     initTableNotesButtons(section);
     initTablePopupExpandButtons(section);
     updateNoteIconStates(section);
-
-    // ✅ apply name-cell tagging again after reset
-    qsa("table.training-table", section).forEach(tagNameCells);
+    tagNameCellsInTableSection(section);
   });
 }
-
 function initResets(){
   qsa(".clear-page-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -371,6 +344,11 @@ function initPersistence(){
     if (el.type === "date") applyDateGhost(el);
 
     saveField(el);
+
+    if (el.id === "dealershipNameInput"){
+      updateDealershipNameDisplay(el.value);
+    }
+
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 
@@ -385,7 +363,6 @@ function initPersistence(){
     requestAnimationFrame(()=> updateNoteIconStates());
   });
 }
-
 function initGhosts(){
   qsa("select").forEach(applySelectGhost);
   qsa("input[type='date']").forEach(applyDateGhost);
@@ -410,7 +387,6 @@ function cloneTrainingRow(row){
 
   return clone;
 }
-
 function initTableAddRow(){
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".table-footer .add-row");
@@ -437,9 +413,7 @@ function initTableAddRow(){
       initTableNotesButtons(document);
       initTablePopupExpandButtons(document);
       updateNoteIconStates(document);
-
-      // ✅ tag name cells in new row
-      tagNameCells(table);
+      tagNameCellsInTable(table);
     });
   });
 }
@@ -474,23 +448,593 @@ function initOnsiteTrainingDates(){
 }
 
 /* ---------------------------
-   (Keep your other modules: Additional Trainers, Additional POC, Support Tickets,
-   Dealership display/map, PDF, Notes linking, Table Notes column, Popup modal, Notes expander)
-   — unchanged from your prior stable version —
+   Trainers page: Additional Trainers (+)
 --------------------------- */
+function initAdditionalTrainers(){
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(
+      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+    );
+    if (!addBtn) return;
+
+    const page = qs("#trainers-deployment");
+    if (!page) return;
+
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
+    const container = qs("#additionalTrainersContainer", page);
+
+    const newRow = document.createElement("div");
+    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
+    newRow.dataset.clone = "true";
+    newRow.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" placeholder="Enter additional trainer name">
+    `;
+
+    const input = qs("input", newRow);
+    if (input){
+      ensureUID(input);
+      loadField(input);
+    }
+
+    if (container) container.appendChild(newRow);
+    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+
+    if (input) input.focus();
+
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(page);
+      initTableNotesButtons(page);
+      updateNoteIconStates(page);
+      syncTwoColHeights();
+      initNotesExpanders(page);
+    });
+  });
+}
+
+/* ---------------------------
+   Primary Contacts: Additional POC (+)
+--------------------------- */
+function initAdditionalPOC(){
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
+    if (!btn) return;
+
+    const baseCard = btn.closest(".additional-poc-card");
+    if (!baseCard) return;
+
+    const grid = baseCard.parentElement;
+    if (!grid) return;
+
+    const clone = baseCard.cloneNode(true);
+    clone.dataset.clone = "true";
+    clone.removeAttribute("data-base");
+
+    const addBtn = qs(".additional-poc-add, .add-row", clone);
+    if (addBtn) addBtn.remove();
+
+    qsa("input, select, textarea", clone).forEach(el=>{
+      if (!isField(el)) return;
+      if (el.type === "checkbox") el.checked = false;
+      else el.value = "";
+      ensureUID(el);
+      applySelectGhost(el);
+      if (el.type === "date") applyDateGhost(el);
+      saveField(el);
+    });
+
+    grid.appendChild(clone);
+
+    const firstInput = qs("input, select, textarea", clone);
+    if (firstInput) firstInput.focus();
+
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(document);
+      initTableNotesButtons(document);
+      updateNoteIconStates(document);
+      syncTwoColHeights();
+      initNotesExpanders(document);
+    });
+  });
+}
+
+/* ---------------------------
+   Support Tickets
+--------------------------- */
+function statusToContainerId(status){
+  switch(status){
+    case "Open": return "openTicketsContainer";
+    case "Tier Two": return "tierTwoTicketsContainer";
+    case "Closed - Resolved": return "closedResolvedTicketsContainer";
+    case "Closed - Feature Not Supported": return "closedFeatureTicketsContainer";
+    default: return "openTicketsContainer";
+  }
+}
+function lockOpenSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.value = "Open";
+  sel.disabled = true;
+}
+function unlockStatusSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.disabled = false;
+  if (!sel.value) sel.value = "Open";
+  applySelectGhost(sel);
+  saveField(sel);
+}
+function isTicketCardComplete(card){
+  const num = safeTrim(qs(".ticket-number-input", card)?.value);
+  const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
+  const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
+  return !!(num && url && sum);
+}
+function makeTicketCloneFromBase(baseCard){
+  const clone = baseCard.cloneNode(true);
+  clone.dataset.clone = "true";
+  clone.removeAttribute("data-base");
+
+  qsa("input, textarea, select", clone).forEach(el=>{
+    if (!isField(el)) return;
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+    ensureUID(el);
+    applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
+
+  const disc = qs(".ticket-disclaimer", clone);
+  if (disc) disc.remove();
+
+  const addBtn = qs(".add-ticket-btn", clone);
+  if (addBtn){
+    addBtn.textContent = "×";
+    addBtn.title = "Remove Ticket";
+    addBtn.classList.add("remove-ticket-btn");
+    addBtn.classList.remove("add-ticket-btn");
+  }
+
+  const sel = qs(".ticket-status-select", clone);
+  if (sel){
+    sel.value = "Open";
+    applySelectGhost(sel);
+    saveField(sel);
+  }
+
+  unlockStatusSelect(clone);
+  return clone;
+}
+function moveTicketCard(card, newStatus){
+  const page = qs("#support-tickets");
+  if (!page || !card) return;
+  const destId = statusToContainerId(newStatus);
+  const dest = qs(`#${destId}`, page);
+  if (!dest) return;
+
+  dest.appendChild(card);
+
+  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
+    lockOpenSelect(card);
+  }else{
+    unlockStatusSelect(card);
+  }
+}
+function initSupportTickets(){
+  const page = qs("#support-tickets");
+  if (!page) return;
+
+  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
+  if (openBase) lockOpenSelect(openBase);
+
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(".add-ticket-btn");
+    const removeBtn = e.target.closest(".remove-ticket-btn");
+    if (!addBtn && !removeBtn) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (removeBtn){
+      qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
+      card.remove();
+      return;
+    }
+
+    if (!isTicketCardComplete(card)){
+      alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
+      return;
+    }
+
+    const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
+    const newCard = makeTicketCloneFromBase(base);
+
+    const openContainer = qs("#openTicketsContainer", page);
+    if (openContainer) openContainer.appendChild(newCard);
+
+    if (card.dataset.base === "true"){
+      const num = qs(".ticket-number-input", card);
+      const url = qs(".ticket-zendesk-input", card);
+      const sum = qs(".ticket-summary-input", card);
+      [num, url, sum].forEach(el=>{
+        if (!el) return;
+        clearFieldStorage(el);
+        el.value = "";
+        saveField(el);
+      });
+      lockOpenSelect(card);
+    }
+
+    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
+  });
+
+  document.addEventListener("change", (e)=>{
+    const sel = e.target.closest("#support-tickets .ticket-status-select");
+    if (!sel) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    const val = sel.value;
+    if (card.dataset.base === "true"){
+      lockOpenSelect(card);
+      return;
+    }
+    moveTicketCard(card, val);
+  });
+}
+
+/* ---------------------------
+   Dealership Name display + Map
+--------------------------- */
+function updateDealershipNameDisplay(name){
+  const display = qs("#dealershipNameDisplay");
+  if (!display) return;
+  display.textContent = safeTrim(name);
+  try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
+}
+function restoreDealershipNameDisplay(){
+  try{
+    const v = localStorage.getItem("mkc:dealershipNameDisplay");
+    if (v) updateDealershipNameDisplay(v);
+  }catch(e){}
+}
+function updateDealershipMap(address){
+  const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
+  if (!frame) return;
+  const q = encodeURIComponent(address);
+  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+  try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
+}
+function restoreDealershipMap(){
+  try{
+    const addr = localStorage.getItem("mkc:dealershipMapAddress");
+    if (addr) updateDealershipMap(addr);
+  }catch(e){}
+}
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
+
+/* ---------------------------
+   PDF Export
+--------------------------- */
+async function exportAllPagesPDF(){
+  const btn = qs("#savePDF");
+  if (btn){
+    btn.disabled = true;
+    btn.textContent = "Saving PDF...";
+  }
+
+  const sections = qsa(".page-section");
+  const activeId = qs(".page-section.active")?.id;
+
+  sections.forEach(s=> s.classList.add("active"));
+  await new Promise(r=> setTimeout(r, 80));
+  syncTwoColHeights();
+  await new Promise(r=> setTimeout(r, 80));
+
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF || !window.html2canvas){
+    alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
+    sections.forEach(s=> s.classList.remove("active"));
+    if (activeId) showSection(activeId);
+    if (btn){
+      btn.disabled = false;
+      btn.textContent = "Save All Pages as PDF";
+    }
+    return;
+  }
+
+  const pdf = new jsPDF("p", "pt", "letter");
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+
+  let first = true;
+
+  for (const sec of sections){
+    const canvas = await window.html2canvas(sec, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: -window.scrollY
+    });
+
+    const img = canvas.toDataURL("image/png");
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (!first) pdf.addPage();
+
+    if (imgH <= pageH){
+      pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
+    }else{
+      let remaining = imgH;
+      let y = 0;
+
+      const sliceCanvas = document.createElement("canvas");
+      const ctx = sliceCanvas.getContext("2d");
+
+      const pxPerPt = canvas.width / imgW;
+      const pagePxH = Math.floor(pageH * pxPerPt);
+
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = pagePxH;
+
+      while (remaining > 0){
+        ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
+        ctx.drawImage(
+          canvas,
+          0, y * pxPerPt,
+          canvas.width, pagePxH,
+          0, 0,
+          canvas.width, pagePxH
+        );
+
+        const sliceImg = sliceCanvas.toDataURL("image/png");
+        pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
+
+        remaining -= pageH;
+        y += pageH;
+
+        if (remaining > 0) pdf.addPage();
+      }
+    }
+
+    first = false;
+  }
+
+  pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
+
+  sections.forEach(s=> s.classList.remove("active"));
+  if (activeId) showSection(activeId);
+
+  if (btn){
+    btn.disabled = false;
+    btn.textContent = "Save All Pages as PDF";
+  }
+}
+function initPDF(){
+  const btn = qs("#savePDF");
+  if (!btn) return;
+  btn.addEventListener("click", exportAllPagesPDF);
+}
 
 /* ===========================================================
-   TABLE NOTES COLUMN + POPUP TABLE
-   (Same as your last version, BUT with popup scroll fix + name cell tagging)
+   QUESTION NOTES LINKING — single 📝 icon per checklist row
 =========================================================== */
+function isNotesCard(card){
+  const h2 = card?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+function isInNotesCard(row){
+  const card = row.closest(".section-block");
+  return isNotesCard(card);
+}
+function findNotesTextareaForRow(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
 
-/* --- existing table notes helpers --- */
-function thText(th){ return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase(); }
-function getHeaderCells(table){ return Array.from(table.querySelectorAll("thead tr th")); }
+  if (!wrap) return null;
+
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
+    .find(card => isNotesCard(card));
+
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+function getCleanQuestionText(row){
+  const label = row.querySelector("label");
+  if (!label) return "";
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
+}
+function makeNoteLine(row){
+  const q = getCleanQuestionText(row);
+  if (!q) return "";
+  return `• ${q}: `;
+}
+function normalizeNoteKey(line){ return (line || "").trim(); }
+function getAllRowsInThisNotesGroup(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
+  if (!wrap) return [];
+  return Array.from(wrap.querySelectorAll(".checklist-row"))
+    .filter(r => !isInNotesCard(r))
+    .filter(r => r.querySelector("input, select, textarea"));
+}
+function getRowOrderKey(row){
+  return normalizeNoteKey(makeNoteLine(row));
+}
+function findExistingNoteLineIndex(lines, baseKey){
+  const k = (baseKey || "").trim();
+  return lines.findIndex(l => (l || "").trim().startsWith(k));
+}
+function insertNoteLineInOrder(textarea, clickedRow){
+  const allRows = getAllRowsInThisNotesGroup(clickedRow);
+  const orderedKeys = allRows.map(r => getRowOrderKey(r)).filter(Boolean);
+
+  const baseLine = makeNoteLine(clickedRow);
+  if (!baseLine) return { didInsert:false, lineStart:0 };
+
+  const raw = textarea.value || "";
+  const lines = raw.split("\n");
+
+  const existingIdx = findExistingNoteLineIndex(lines, baseLine);
+  if (existingIdx !== -1){
+    return {
+      didInsert:false,
+      lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0)
+    };
+  }
+
+  const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
+  if (myOrder === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  let insertBeforeLineIdx = -1;
+  for (let i = 0; i < lines.length; i++){
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+    const matchOrder = orderedKeys.findIndex(k => t.startsWith(k.trim()));
+    if (matchOrder !== -1 && matchOrder > myOrder){
+      insertBeforeLineIdx = i;
+      break;
+    }
+  }
+
+  if (insertBeforeLineIdx === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  }
+
+  lines.splice(insertBeforeLineIdx, 0, baseLine);
+  textarea.value = lines.join("\n");
+  const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
+  return { didInsert:true, lineStart:startPos };
+}
+function jumpToNoteLine(textarea, lineStart){
+  if (!textarea) return;
+  textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    textarea.focus();
+    const v = textarea.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    textarea.setSelectionRange(endPos, endPos);
+    textarea.classList.add("mk-note-jump");
+    setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
+  }, 120);
+}
+function ensureRowActions(row){
+  let actions = row.querySelector(":scope > .row-actions");
+  if (actions) return actions;
+
+  actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  // do not restructure integrated-plus rows
+  if (row.classList.contains("integrated-plus")){
+    row.appendChild(actions);
+    return actions;
+  }
+
+  const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
+  if (field) actions.appendChild(field);
+  row.appendChild(actions);
+  return actions;
+}
+function initNotesLinkingOption2Only(root=document){
+  // remove any prior injected note buttons (ONLY our note buttons)
+  qsa(".note-btn, .note-link-btn:not(.mk-table-note-btn)", root).forEach(n => n.remove());
+
+  qsa(".checklist-row", root).forEach(row=>{
+    if (isInNotesCard(row)) return;
+
+    const field = row.querySelector("input, select, textarea");
+    if (!field) return;
+
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const actions = ensureRowActions(row);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-link-btn";
+    btn.title = "Add this question to Notes";
+    btn.innerHTML = `
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
+
+      const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
+
+      if (didInsert){
+        saveField(textarea);
+        requestAnimationFrame(()=> updateNoteIconStates(document));
+        requestAnimationFrame(syncTwoColHeights);
+      }
+
+      jumpToNoteLine(textarea, lineStart);
+    });
+
+    actions.appendChild(btn);
+  });
+
+  updateNoteIconStates(root);
+}
+function updateNoteIconStates(root=document){
+  qsa(".checklist-row", root).forEach(row=>{
+    const btn = row.querySelector(".note-link-btn:not(.mk-table-note-btn)");
+    if (!btn) return;
+
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const line = makeNoteLine(row).trim();
+    btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
+  });
+}
+
+/* ===========================================================
+   TABLE NOTES COLUMN + BULLET INSERT (Name / Opcode)
+=========================================================== */
+function thText(th){
+  return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
+}
+function getHeaderCells(table){
+  return Array.from(table.querySelectorAll("thead tr th"));
+}
 function getNotesHeaderIndexes(table){
   const ths = getHeaderCells(table);
   const idxs = [];
-  ths.forEach((th, i)=>{ if (thText(th) === "notes") idxs.push(i); });
+  ths.forEach((th, i)=>{
+    if (thText(th) === "notes") idxs.push(i);
+  });
   return idxs;
 }
 function removeColumnByIndex(table, idx){
@@ -518,7 +1062,9 @@ function ensureSingleNotesColumn(table){
     const th = document.createElement("th");
     th.textContent = "Notes";
     theadRow.appendChild(th);
-    qsa("tbody tr", table).forEach(tr=> tr.appendChild(document.createElement("td")));
+    qsa("tbody tr", table).forEach(tr=>{
+      tr.appendChild(document.createElement("td"));
+    });
     return theadRow.children.length - 1;
   }
   return noteIdxs[0];
@@ -584,9 +1130,14 @@ function normalizeFiltersColumn(table){
 }
 function applyNotesButtonsToColumn(table, notesColIdx){
   const headRow = table.querySelector("thead tr");
-  if (headRow && headRow.children[notesColIdx]) headRow.children[notesColIdx].textContent = "Notes";
+  if (headRow && headRow.children[notesColIdx]){
+    headRow.children[notesColIdx].textContent = "Notes";
+  }
+
   qsa("tbody tr", table).forEach(tr=>{
-    while (tr.children.length <= notesColIdx) tr.appendChild(document.createElement("td"));
+    while (tr.children.length <= notesColIdx){
+      tr.appendChild(document.createElement("td"));
+    }
     renderTableNoteButton(tr.children[notesColIdx]);
   });
 }
@@ -607,6 +1158,84 @@ function findNotesBlockForTable(table){
   }
   return null;
 }
+
+/* ✅ Extract correct key for row:
+   - Opcodes table -> opcode value
+   - Training checklist -> full name value
+*/
+function getColumnIndexByHeader(table, headerNames){
+  const ths = getHeaderCells(table);
+  const targets = headerNames.map(h => h.toLowerCase());
+  return ths.findIndex(th => targets.includes(thText(th)));
+}
+function getCellFieldText(td){
+  if (!td) return "";
+  // prefer text input/select value
+  const txt = td.querySelector("input[type='text'], input:not([type]), textarea");
+  if (txt) return safeTrim(txt.value);
+
+  const sel = td.querySelector("select");
+  if (sel){
+    const opt = sel.selectedOptions?.[0];
+    return safeTrim(opt?.textContent || sel.value);
+  }
+
+  // fallback: td text
+  return safeTrim(td.textContent);
+}
+function getOpcodeFromRow(table, tr){
+  const idx = getColumnIndexByHeader(table, ["opcode", "op code", "opcodes"]);
+  if (idx === -1) return "";
+  return getCellFieldText(tr.children[idx]);
+}
+function getNameFromRow(table, tr){
+  // Name might be "Name" header or sometimes first column
+  let idx = getColumnIndexByHeader(table, ["name"]);
+  if (idx === -1) idx = 0;
+  const td = tr.children[idx];
+  if (!td) return "";
+  // specifically: checkbox + input in same cell -> get input value
+  const nameInput = td.querySelector("input[type='text']");
+  if (nameInput) return safeTrim(nameInput.value);
+  return getCellFieldText(td);
+}
+function getRowKeyForTable(table, tr){
+  const onOpcodesPage = !!table.closest("#opcodes-pricing");
+  if (onOpcodesPage){
+    return getOpcodeFromRow(table, tr) || "";
+  }
+  const onTrainingPage = !!table.closest("#training-checklist");
+  if (onTrainingPage){
+    return getNameFromRow(table, tr) || "";
+  }
+  // fallback:
+  return getNameFromRow(table, tr) || getOpcodeFromRow(table, tr) || "";
+}
+
+/* Insert bullet into the REAL notes textarea below the table */
+function insertBulletIntoRealNotes(table, bullet){
+  const notesBlock = findNotesBlockForTable(table);
+  const ta = notesBlock?.querySelector("textarea");
+  if (!ta) return;
+
+  const line = bullet.trim();
+  const raw = ta.value || "";
+  if (!raw.includes(line)){
+    ta.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
+    saveField(ta);
+  }
+
+  notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
+  setTimeout(()=>{
+    ta.focus();
+    ta.classList.add("mk-note-jump");
+    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
+  }, 150);
+
+  requestAnimationFrame(()=> updateNoteIconStates(document));
+}
+
+/* Init table notes buttons + click behavior */
 function initTableNotesButtons(root=document){
   const targets = [
     "#training-checklist table.training-table",
@@ -621,9 +1250,7 @@ function initTableNotesButtons(root=document){
       purgeStrayTableNoteButtons(table, notesIdx);
       normalizeFiltersColumn(table);
       applyNotesButtonsToColumn(table, notesIdx);
-
-      // ✅ Tag Name cells so checkbox/input align properly
-      tagNameCells(table);
+      tagNameCellsInTable(table);
 
       if (table.dataset.mkNotesWired === "1") return;
       table.dataset.mkNotesWired = "1";
@@ -631,243 +1258,48 @@ function initTableNotesButtons(root=document){
       table.addEventListener("click", (e)=>{
         const btn = e.target.closest(".mk-table-note-btn");
         if (!btn) return;
+
         e.preventDefault();
         e.stopPropagation();
 
-        const notesBlock = findNotesBlockForTable(table);
-        const ta = notesBlock?.querySelector("textarea");
-        if (!ta) return;
+        const tr = btn.closest("tr");
+        if (!tr) return;
 
-        notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
-        setTimeout(()=>{
-          ta.focus();
-          ta.classList.add("mk-note-jump");
-          setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
-        }, 150);
+        const key = getRowKeyForTable(table, tr);
+        if (!key) return;
+
+        insertBulletIntoRealNotes(table, `• ${key}: `);
       }, { passive:false });
     });
   });
 }
 
 /* ===========================================================
-   POPUP TABLE (expand) — uses injected CSS for scroll
+   ✅ Training table Name cell fix: tag the Name TD
 =========================================================== */
-function ensureTableModal(){
-  let modal = qs("#mkTableModal");
-  if (modal) return modal;
+function tagNameCellsInTable(table){
+  const nameIdx = getColumnIndexByHeader(table, ["name"]);
+  if (nameIdx === -1) return;
 
-  modal = document.createElement("div");
-  modal.id = "mkTableModal";
-  modal.innerHTML = `
-    <div class="mk-modal-backdrop" data-mk-table-close="1"></div>
-    <div class="mk-modal-panel mk-table-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
-      <div class="mk-modal-header">
-        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
-        <button type="button" class="mk-modal-close" data-mk-table-close="1" aria-label="Close">×</button>
-      </div>
-
-      <div class="mk-table-body">
-        <div class="mk-table-scroll" id="mkTableModalContent"></div>
-      </div>
-
-      <div class="mk-table-notes">
-        <div class="mk-table-notes-title">Notes</div>
-        <textarea class="mk-table-notes-ta" rows="6" placeholder="Notes for this table..."></textarea>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e)=>{
-    if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
-  });
-
-  return modal;
-}
-function closeTableModal(){
-  const modal = qs("#mkTableModal");
-  if (!modal) return;
-  modal.classList.remove("open");
-}
-
-function getTableRowName(table, tr){
-  const ths = getHeaderCells(table);
-  let nameIdx = ths.findIndex(th => thText(th) === "name");
-  const extractFromCell = (td) => {
-    if (!td) return "";
-    const fields = Array.from(td.querySelectorAll("input, select, textarea"))
-      .filter(f => f.type !== "checkbox");
-    if (fields.length){
-      const parts = fields.map(f=>{
-        if (f.tagName === "SELECT"){
-          const opt = f.selectedOptions?.[0];
-          return safeTrim(opt?.textContent || f.value);
-        }
-        return safeTrim(f.value);
-      }).filter(Boolean);
-      return safeTrim(parts.join(" "));
-    }
-    return safeTrim(td.textContent);
-  };
-
-  if (nameIdx !== -1){
-    const v = extractFromCell(tr.children[nameIdx]);
-    if (v) return v;
-  }
-
-  const notesIdxs = getNotesHeaderIndexes(table);
-  const notesIdx = notesIdxs.length ? notesIdxs[0] : -1;
-
-  for (let i = 0; i < tr.children.length; i++){
-    if (i === notesIdx) continue;
-    const v = extractFromCell(tr.children[i]);
-    if (v) return v;
-  }
-  return "";
-}
-function getRowKeyForNotes(table, tr){
-  const ths = getHeaderCells(table);
-  const opcodeIdx = ths.findIndex(th => {
-    const t = thText(th);
-    return t === "opcode" || t === "op code" || t.includes("opcode");
-  });
-  if (opcodeIdx !== -1){
-    const td = tr.children[opcodeIdx];
-    const field = td?.querySelector("input, select, textarea");
-    const val = field
-      ? (field.tagName === "SELECT"
-          ? safeTrim(field.selectedOptions?.[0]?.textContent || field.value)
-          : safeTrim(field.value))
-      : safeTrim(td?.textContent);
-    if (val) return val;
-  }
-  return getTableRowName(table, tr);
-}
-function insertLineIntoPopupNotes(modal, sourceTA, line){
-  if (!modal || !sourceTA || !line) return;
-  const modalTA = modal.querySelector(".mk-table-notes-ta");
-  if (!modalTA) return;
-
-  const raw = modalTA.value || "";
-  if (!raw.includes(line.trim())){
-    modalTA.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
-  }
-
-  sourceTA.value = modalTA.value;
-  saveField(sourceTA);
-
-  const notesWrap = modal.querySelector(".mk-table-notes");
-  if (notesWrap) notesWrap.scrollIntoView({ behavior:"smooth", block:"start" });
-
-  setTimeout(()=>{
-    modalTA.focus();
-    modalTA.classList.add("mk-note-jump");
-    setTimeout(()=> modalTA.classList.remove("mk-note-jump"), 700);
-  }, 150);
-}
-function mountPopupNotes(modal, sourceTA){
-  const modalTA = qs(".mk-table-notes-ta", modal);
-  if (!modalTA) return;
-  modalTA.value = sourceTA?.value || "";
-  modalTA.oninput = ()=>{
-    if (!sourceTA) return;
-    sourceTA.value = modalTA.value;
-    saveField(sourceTA);
-  };
-}
-function openTableModalForTable(originalTable, titleText){
-  const modal = ensureTableModal();
-  const title = qs("#mkTableModalTitle", modal);
-  const content = qs("#mkTableModalContent", modal);
-
-  title.textContent = titleText || "Table";
-  content.innerHTML = "";
-
-  const clone = originalTable.cloneNode(true);
-  clone.classList.add("mk-popup-table");
-
-  qsa("input, select, textarea", clone).forEach(el=>{
-    ensureUID(el);
-    loadField(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-    el.addEventListener("input", ()=> saveField(el));
-    el.addEventListener("change", ()=> saveField(el));
-  });
-
-  // ✅ name cell tagging for popup too
-  tagNameCells(clone);
-
-  content.appendChild(clone);
-
-  const notesBlock = findNotesBlockForTable(originalTable);
-  const sourceTA = notesBlock?.querySelector("textarea");
-  if (sourceTA) mountPopupNotes(modal, sourceTA);
-
-  clone.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".mk-table-note-btn");
-    if (!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const tr = btn.closest("tr");
-    if (!tr || !sourceTA) return;
-
-    const key = getRowKeyForNotes(clone, tr);
-    if (!key) return;
-
-    insertLineIntoPopupNotes(modal, sourceTA, `• ${key}: `);
-  }, { passive:false });
-
-  modal.classList.add("open");
-}
-
-function ensureExpandBtnInTableFooter(table){
-  const container = table.closest(".table-container");
-  if (!container) return;
-  const footer = qs(".table-footer", container);
-  if (!footer) return;
-
-  if (qs(".mk-table-expand-btn", footer)) return;
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mk-table-expand-btn";
-  btn.title = "Expand table";
-  btn.setAttribute("aria-label","Expand table");
-  btn.textContent = "⤢";
-
-  footer.style.justifyContent = "space-between";
-  const rightWrap = document.createElement("div");
-  rightWrap.style.marginLeft = "auto";
-  rightWrap.appendChild(btn);
-  footer.appendChild(rightWrap);
-
-  btn.addEventListener("click", (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-
-    const sectionHeader = container.previousElementSibling;
-    const t = safeTrim(sectionHeader?.textContent || "Table");
-    openTableModalForTable(table, t);
+  qsa("tbody tr", table).forEach(tr=>{
+    const td = tr.children[nameIdx];
+    if (!td) return;
+    td.classList.add("mk-name-cell");
+    // remove accidental <br> that could cause stacking
+    Array.from(td.childNodes).forEach(n=>{
+      if (n.nodeName === "BR") n.remove();
+    });
   });
 }
-function initTablePopupExpandButtons(root=document){
-  const targets = [
-    "#training-checklist table.training-table",
-    "#opcodes-pricing table.training-table"
-  ];
-  targets.forEach(sel=>{
-    qsa(sel, root).forEach(table=> ensureExpandBtnInTableFooter(table));
-  });
+function tagNameCellsInTableSection(section){
+  qsa("#training-checklist table.training-table", section).forEach(tagNameCellsInTable);
+}
+function tagNameCellsOnLoad(){
+  qsa("#training-checklist table.training-table").forEach(tagNameCellsInTable);
 }
 
 /* ===========================================================
-   NOTES POP-OUT (kept, unchanged)
+   NOTES POP-OUT (Modal Expander)
 =========================================================== */
 let _mkNotesModalSourceTA = null;
 
@@ -899,7 +1331,6 @@ function ensureNotesModal(){
 
   return modal;
 }
-
 function openNotesModal(sourceTA, titleText="Notes"){
   const modal = ensureNotesModal();
   const title = qs("#mkNotesModalTitle", modal);
@@ -913,30 +1344,25 @@ function openNotesModal(sourceTA, titleText="Notes"){
     if (!_mkNotesModalSourceTA) return;
     _mkNotesModalSourceTA.value = bigTA.value;
     saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   };
 
   modal.classList.add("open");
   setTimeout(()=> bigTA.focus(), 0);
 }
-
 function closeNotesModal(){
   const modal = qs("#mkNotesModal");
   if (!modal) return;
 
   if (_mkNotesModalSourceTA){
     saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   }
 
   modal.classList.remove("open");
   _mkNotesModalSourceTA = null;
-}
-
-function isNotesCard(card){
-  const h2 = card?.querySelector("h2");
-  const t = (h2?.textContent || "").trim().toLowerCase();
-  return t.startsWith("notes");
 }
 function initNotesExpanders(root=document){
   const notesCards = qsa(".section-block", root).filter(isNotesCard);
@@ -972,8 +1398,6 @@ function initNotesExpanders(root=document){
     wrap.appendChild(btn);
   });
 }
-
-// delegated safety net
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".mk-ta-expand");
   if (!btn) return;
@@ -987,12 +1411,194 @@ document.addEventListener("click", (e)=>{
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
 
-/* ---------------------------
-   Notes linking placeholder stubs (your existing functions)
-   (If you already have these elsewhere, keep yours — these are safe no-ops)
---------------------------- */
-function initNotesLinkingOption2Only(){ /* keep your existing implementation */ }
-function updateNoteIconStates(){ /* keep your existing implementation */ }
+/* ===========================================================
+   TABLE POPUP EXPAND (⤢ in footer right)
+   - Popup includes table + a notes textarea
+   - Clicking row Notes bubble inserts correct bullet into popup notes
+     AND syncs to real notes below the table
+=========================================================== */
+let _mkTableModalSourceTA = null;
+let _mkTableModalSourceTable = null;
+
+function ensureTableModal(){
+  let modal = qs("#mkTableModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkTableModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-table-close="1"></div>
+    <div class="mk-modal-panel mk-table-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
+        <button type="button" class="mk-modal-close" data-mk-table-close="1" aria-label="Close">×</button>
+      </div>
+
+      <div class="mk-table-body">
+        <div class="mk-table-scroll" id="mkTableModalContent"></div>
+      </div>
+
+      <div class="mk-table-notes">
+        <div class="mk-table-notes-title">Notes</div>
+        <textarea class="mk-table-notes-ta" rows="8" placeholder="Notes for this table..."></textarea>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e)=>{
+    if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
+  });
+
+  return modal;
+}
+function closeTableModal(){
+  const modal = qs("#mkTableModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  _mkTableModalSourceTA = null;
+  _mkTableModalSourceTable = null;
+}
+function mountPopupNotes(modal, sourceTA){
+  const modalTA = qs(".mk-table-notes-ta", modal);
+  if (!modalTA) return;
+
+  _mkTableModalSourceTA = sourceTA;
+
+  modalTA.value = sourceTA?.value || "";
+  modalTA.oninput = ()=>{
+    if (!_mkTableModalSourceTA) return;
+    _mkTableModalSourceTA.value = modalTA.value;
+    saveField(_mkTableModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+  };
+}
+function insertBulletIntoPopupNotes(modal, bullet){
+  const modalTA = qs(".mk-table-notes-ta", modal);
+  if (!modalTA) return;
+
+  const line = bullet.trim();
+  const raw = modalTA.value || "";
+  if (!raw.includes(line)){
+    modalTA.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
+  }
+
+  // sync to real notes too
+  if (_mkTableModalSourceTA){
+    _mkTableModalSourceTA.value = modalTA.value;
+    saveField(_mkTableModalSourceTA);
+  }
+
+  const notesWrap = qs(".mk-table-notes", modal);
+  if (notesWrap) notesWrap.scrollIntoView({ behavior:"smooth", block:"start" });
+
+  setTimeout(()=>{
+    modalTA.focus();
+    modalTA.classList.add("mk-note-jump");
+    setTimeout(()=> modalTA.classList.remove("mk-note-jump"), 700);
+  }, 150);
+
+  requestAnimationFrame(()=> updateNoteIconStates(document));
+}
+function openTableModalForTable(originalTable, titleText){
+  const modal = ensureTableModal();
+  const title = qs("#mkTableModalTitle", modal);
+  const content = qs("#mkTableModalContent", modal);
+
+  title.textContent = titleText || "Table";
+  content.innerHTML = "";
+
+  // clone table
+  const clone = originalTable.cloneNode(true);
+  clone.classList.add("mk-popup-table");
+
+  // re-wire persistence
+  qsa("input, select, textarea", clone).forEach(el=>{
+    ensureUID(el);
+    loadField(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    el.addEventListener("input", ()=> saveField(el));
+    el.addEventListener("change", ()=> saveField(el));
+  });
+
+  // tag name cells in popup too
+  tagNameCellsInTable(clone);
+
+  content.appendChild(clone);
+
+  // link popup notes to real notes textarea below the original table
+  const notesBlock = findNotesBlockForTable(originalTable);
+  const sourceTA = notesBlock?.querySelector("textarea");
+  if (sourceTA) mountPopupNotes(modal, sourceTA);
+
+  _mkTableModalSourceTable = originalTable;
+
+  // clicking bubble in popup inserts correct bullet and jumps to popup notes
+  clone.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".mk-table-note-btn");
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const tr = btn.closest("tr");
+    if (!tr) return;
+
+    const key = getRowKeyForTable(originalTable, tr);
+    if (!key) return;
+
+    insertBulletIntoPopupNotes(modal, `• ${key}: `);
+  }, { passive:false });
+
+  modal.classList.add("open");
+}
+
+/* Add expand button in footer right */
+function ensureExpandBtnInTableFooter(table){
+  const container = table.closest(".table-container");
+  if (!container) return;
+  const footer = qs(".table-footer", container);
+  if (!footer) return;
+
+  if (qs(".mk-table-expand-btn", footer)) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "mk-table-expand-btn";
+  btn.title = "Expand table";
+  btn.setAttribute("aria-label","Expand table");
+  btn.textContent = "⤢";
+
+  footer.style.justifyContent = "space-between";
+
+  const rightWrap = document.createElement("div");
+  rightWrap.style.marginLeft = "auto";
+  rightWrap.appendChild(btn);
+  footer.appendChild(rightWrap);
+
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+
+    const sectionHeader = container.previousElementSibling;
+    const t = safeTrim(sectionHeader?.textContent || "Table");
+    openTableModalForTable(table, t);
+  });
+}
+function initTablePopupExpandButtons(root=document){
+  const targets = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table"
+  ];
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=> ensureExpandBtnInTableFooter(table));
+  });
+}
 
 /* ---------------------------
    Boot
@@ -1009,15 +1615,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   initResets();
   initTableAddRow();
+  initAdditionalTrainers();
+  initAdditionalPOC();
+  initSupportTickets();
   initOnsiteTrainingDates();
+  restoreDealershipNameDisplay();
+  restoreDealershipMap();
+  initPDF();
 
-  // Tables + Notes
+  // Notes
   initNotesExpanders(document);
   initNotesLinkingOption2Only(document);
   initTableNotesButtons(document);
   initTablePopupExpandButtons(document);
   updateNoteIconStates(document);
 
-  // ✅ tag name cells on load (fix checkbox position immediately)
-  qsa("#training-checklist table.training-table, #opcodes-pricing table.training-table").forEach(tagNameCells);
+  // Name-cell layout fix
+  tagNameCellsOnLoad();
 });
