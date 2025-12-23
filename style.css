@@ -1462,27 +1462,28 @@ main{
 }
 
 /* =========================
-   EXPAND BUTTON: TRUE CORNER PLACEMENT
+   NOTES EXPAND BUTTON — TRUE CARD CORNER
    ========================= */
-.section-block .mk-ta-wrap{
-  position: relative;
+.section-block{
+  position: relative; /* anchor for button */
 }
 
-.section-block .mk-ta-wrap .mk-expand-btn{
+.section-block .mk-expand-btn{
   position: absolute;
-  right: 6px;
-  bottom: 6px;
+  right: 12px;
+  bottom: 12px;
 
-  /* nudges it "right and up" into the corner */
-  transform: translate(2px, -2px);
+  /* visually tuck it up into the corner */
+  transform: translateY(-18px);
 
   width: 16px;
   height: 16px;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 0;
   font-size: 10px;
   line-height: 1;
-  z-index: 10;
+
+  z-index: 20;
 }
 
 /* =========================
