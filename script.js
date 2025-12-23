@@ -1,13 +1,17 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js (UPDATED / CLEAN)
-   ✅ Preserves layout + all existing behaviors
-   ✅ Nav clicks work
-   ✅ Add Trainer (+) works
-   ✅ Support Tickets: add/remove, status move, validation scoped, base clears after add
-   ✅ Autosave + reset/clear + PDF + onsite dates end default
-   ✅ NOTES LINKING (single 📝 icon) for checklist rows
-   ✅ NOTES POP-OUT (⤢) modal for Notes textareas
-   ✅ TABLE NOTES BUTTONS (🗨️) injected into tables + links to the page Notes
+   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED NAV)
+   ✅ Fixes:
+   - Nav clicks work (inline onclick + data-section + href="#id")
+   - Add Row (+) for tables
+   - Additional Trainers (+)
+   - Primary Contacts: Additional POC (+)
+   - Support Tickets: add/remove, move by status, base locked to Open, validation
+   - Autosave + Reset Page + Clear All
+   - Onsite dates: end defaults to start + 2 days
+   - PDF export (all pages)
+   - ✅ NOTES LINKING: single Notes column w/ icon (speech bubble SVG)
+   - ✅ TABLE NOTES JUMP: table icon scrolls to that table’s Notes card
+   - ✅ NOTES POP-OUT: expander opens modal synced + saved
    ======================================================= */
 
 /* ---------------------------
@@ -21,38 +25,10 @@ function isField(el){
   const tag = el.tagName;
   return (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA");
 }
-
 function uid(){
   return "id_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
 }
-
-function safeTrim(v){
-  return (v ?? "").toString().trim();
-}
-
-/* ---------------------------
-   Optional 2-col height sync
---------------------------- */
-function syncTwoColHeights(){
-  const grids = qsa(".cards-grid.two-col, .two-col-grid, .grid-2");
-  grids.forEach(grid=>{
-    const cards = qsa(":scope > .section-block", grid);
-    if (cards.length < 2) return;
-
-    // clear
-    cards.forEach(c=> c.style.minHeight = "");
-
-    // pairs
-    for (let i=0; i<cards.length; i+=2){
-      const a = cards[i];
-      const b = cards[i+1];
-      if (!a || !b) continue;
-      const h = Math.max(a.offsetHeight, b.offsetHeight);
-      a.style.minHeight = h + "px";
-      b.style.minHeight = h + "px";
-    }
-  });
-}
+function safeTrim(v){ return (v ?? "").toString().trim(); }
 
 /* ---------------------------
    Storage keying
@@ -64,16 +40,14 @@ function ensureUID(el){
   el.dataset.uid = newId;
   return newId;
 }
-
 function getFieldKey(el){
-  if (el.id)   return `mkc:${el.id}`;
+  if (el.id) return `mkc:${el.id}`;
   if (el.name) return `mkc:${el.name}`;
   const dk = el.getAttribute("data-key");
   if (dk) return `mkc:${dk}`;
   const u = ensureUID(el);
   return `mkc:uid:${u}`;
 }
-
 function saveField(el){
   try{
     const key = getFieldKey(el);
@@ -83,7 +57,6 @@ function saveField(el){
     localStorage.setItem(key, val);
   }catch(e){}
 }
-
 function loadField(el){
   try{
     const key = getFieldKey(el);
@@ -97,7 +70,6 @@ function loadField(el){
     if (el.type === "date") applyDateGhost(el);
   }catch(e){}
 }
-
 function clearFieldStorage(el){
   try{
     const key = getFieldKey(el);
@@ -115,31 +87,42 @@ function applySelectGhost(sel){
   if (ghost) sel.classList.add("is-placeholder");
   else sel.classList.remove("is-placeholder");
 }
-
 function applyDateGhost(input){
   if (!input || input.type !== "date") return;
   if (!input.value) input.classList.add("is-placeholder");
   else input.classList.remove("is-placeholder");
 }
 
-function initGhosts(){
-  qsa("select").forEach(applySelectGhost);
-  qsa("input[type='date']").forEach(applyDateGhost);
+/* ---------------------------
+   Optional 2-col height sync
+--------------------------- */
+function syncTwoColHeights(){
+  const grids = qsa(".cards-grid.two-col, .two-col-grid");
+  grids.forEach(grid=>{
+    const cards = qsa(":scope > .section-block", grid);
+    if (cards.length < 2) return;
+
+    cards.forEach(c=> c.style.minHeight = "");
+
+    for (let i=0; i<cards.length; i+=2){
+      const a = cards[i];
+      const b = cards[i+1];
+      if (!a || !b) continue;
+      const h = Math.max(a.offsetHeight, b.offsetHeight);
+      a.style.minHeight = h + "px";
+      b.style.minHeight = h + "px";
+    }
+  });
 }
 
 /* ---------------------------
-   Textarea auto-grow
-   (Notes cards are fixed-height; modal handles long edits)
+   Textarea auto-grow (non-modal use)
 --------------------------- */
 function autoGrowTA(ta){
   if (!ta) return;
-  // Don't fight fixed-height Notes cards
-  if (ta.closest(".mk-ta-wrap")) return;
-
   ta.style.height = "auto";
   ta.style.height = (ta.scrollHeight + 2) + "px";
 }
-
 function initTextareas(root=document){
   qsa("textarea", root).forEach(ta=>{
     autoGrowTA(ta);
@@ -147,7 +130,7 @@ function initTextareas(root=document){
       autoGrowTA(ta);
       saveField(ta);
       requestAnimationFrame(syncTwoColHeights);
-      requestAnimationFrame(()=> updateNoteIconStates(document));
+      requestAnimationFrame(()=> updateNoteIconStates());
     });
   });
 }
@@ -158,31 +141,46 @@ function initTextareas(root=document){
 function showSection(id){
   const sections = qsa(".page-section");
   sections.forEach(s=> s.classList.remove("active"));
-  const target = qs(`#${id}`);
+  const target = qs(`#${CSS.escape(id)}`);
   if (target) target.classList.add("active");
 
   qsa(".nav-btn").forEach(btn=>{
-    const to = btn.getAttribute("data-section");
+    const to =
+      btn.getAttribute("data-section") ||
+      btn.getAttribute("data-target") ||
+      btn.getAttribute("href")?.replace("#","") ||
+      btn.getAttribute("onclick")?.match(/showSection\(['"]([^'"]+)['"]\)/)?.[1];
+
     btn.classList.toggle("active", to === id);
   });
 
   try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
-  requestAnimationFrame(syncTwoColHeights);
 }
 
 function initNav(){
+  // Works for data-section/data-target/href nav buttons (and does not break inline onclick)
   qsa(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.getAttribute("data-section");
+    btn.addEventListener("click", (e)=>{
+      // prevent anchors from jumping before our handler runs
+      if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
+
+      const id =
+        btn.getAttribute("data-section") ||
+        btn.getAttribute("data-target") ||
+        btn.getAttribute("href")?.replace("#","");
+
       if (id) showSection(id);
     });
   });
 
-  // restore last page
   const last = (()=>{ try{ return localStorage.getItem("mkc:lastPage"); }catch(e){ return null; } })();
   const first = qsa(".page-section")[0]?.id;
   showSection(last || first || "dealership-info");
 }
+
+// ✅ IMPORTANT: allow inline onclick="showSection('...')" to work
+window.showSection = showSection;
+window.initNav = initNav;
 
 /* ---------------------------
    Reset This Page / Clear All
@@ -190,7 +188,6 @@ function initNav(){
 function resetSection(section){
   if (!section) return;
 
-  // clear fields in this section
   qsa("input, select, textarea", section).forEach(el=>{
     if (!isField(el)) return;
     clearFieldStorage(el);
@@ -206,19 +203,17 @@ function resetSection(section){
     if (el.tagName === "TEXTAREA") autoGrowTA(el);
   });
 
-  // remove cloned rows/cards
   qsa("[data-clone='true']", section).forEach(n=> n.remove());
 
-  // Trainers clones container
   const atc = qs("#additionalTrainersContainer", section);
   if (atc) atc.innerHTML = "";
 
-  // Support Tickets: clear non-base in all stacks
   if (section.id === "support-tickets"){
-    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"].forEach(id=>{
-      const c = qs(`#${id}`, section);
-      if (c) c.innerHTML = "";
-    });
+    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"]
+      .forEach(id=>{
+        const c = qs(`#${id}`, section);
+        if (c) c.innerHTML = "";
+      });
 
     const open = qs("#openTicketsContainer", section);
     if (open){
@@ -226,7 +221,6 @@ function resetSection(section){
         if (card.dataset.base === "true") return;
         card.remove();
       });
-
       const base = qs(".ticket-group[data-base='true']", open);
       if (base){
         qsa("input, textarea, select", base).forEach(el=>{
@@ -242,10 +236,10 @@ function resetSection(section){
   requestAnimationFrame(()=>{
     initTextareas(section);
     syncTwoColHeights();
-    initNotesLinkingOption2Only(section);
-    updateNoteIconStates(section);
     initNotesExpanders(section);
+    initNotesLinkingOption2Only(section);
     initTableNotesButtons(section);
+    updateNoteIconStates(section);
   });
 }
 
@@ -253,7 +247,8 @@ function initResets(){
   qsa(".clear-page-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const sec = btn.closest(".page-section");
-      if (sec) resetSection(sec);
+      if (!sec) return;
+      resetSection(sec);
     });
   });
 
@@ -268,7 +263,6 @@ function initResets(){
         }
         keys.forEach(k=> localStorage.removeItem(k));
       }catch(e){}
-
       qsa(".page-section").forEach(sec=> resetSection(sec));
       try{ localStorage.removeItem("mkc:lastPage"); }catch(e){}
     });
@@ -279,7 +273,6 @@ function initResets(){
    Persistence
 --------------------------- */
 function initPersistence(){
-  // load initial
   qsa("input, select, textarea").forEach(el=>{
     if (!isField(el)) return;
     ensureUID(el);
@@ -300,7 +293,7 @@ function initPersistence(){
       updateDealershipNameDisplay(el.value);
     }
 
-    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
 
   document.addEventListener("change", (e)=>{
@@ -311,8 +304,13 @@ function initPersistence(){
     if (el.type === "date") applyDateGhost(el);
 
     saveField(el);
-    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
+}
+
+function initGhosts(){
+  qsa("select").forEach(applySelectGhost);
+  qsa("input[type='date']").forEach(applyDateGhost);
 }
 
 /* ---------------------------
@@ -324,11 +322,10 @@ function cloneTrainingRow(row){
 
   qsa("input, select, textarea", clone).forEach(el=>{
     if (!isField(el)) return;
+    el.value = "";
     if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-
     ensureUID(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
+    applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
     saveField(el);
   });
@@ -351,15 +348,16 @@ function initTableAddRow(){
 
     const clone = cloneTrainingRow(last);
     tbody.appendChild(clone);
+
     clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
 
     requestAnimationFrame(()=>{
       initTextareas(container);
       syncTwoColHeights();
-      initNotesLinkingOption2Only(document);
-      updateNoteIconStates(document);
       initNotesExpanders(document);
+      initNotesLinkingOption2Only(document);
       initTableNotesButtons(document);
+      updateNoteIconStates(document);
     });
   });
 }
@@ -376,22 +374,21 @@ function addDaysISO(iso, days){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
-
 function initOnsiteTrainingDates(){
   const start = qs("#onsiteStartDate");
-  const end   = qs("#onsiteEndDate");
-  if (!start || !end) return;
-
-  start.addEventListener("change", ()=>{
-    if (!start.value) return;
-    if (end.value) return;
-    const v = addDaysISO(start.value, 2);
-    if (v){
-      end.value = v;
-      applyDateGhost(end);
-      saveField(end);
-    }
-  });
+  const end = qs("#onsiteEndDate");
+  if (start && end){
+    start.addEventListener("change", ()=>{
+      if (!start.value) return;
+      if (end.value) return;
+      const v = addDaysISO(start.value, 2);
+      if (v){
+        end.value = v;
+        applyDateGhost(end);
+        saveField(end);
+      }
+    });
+  }
 }
 
 /* ---------------------------
@@ -431,10 +428,10 @@ function initAdditionalTrainers(){
 
     requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(page);
+      initTableNotesButtons(page);
       updateNoteIconStates(page);
       syncTwoColHeights();
       initNotesExpanders(page);
-      initTableNotesButtons(page);
     });
   });
 }
@@ -444,7 +441,7 @@ function initAdditionalTrainers(){
 --------------------------- */
 function initAdditionalPOC(){
   document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".additional-poc-card[data-base='true'] .add-row, .additional-poc-card[data-base='true'] .additional-poc-add");
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
     if (!btn) return;
 
     const baseCard = btn.closest(".additional-poc-card");
@@ -457,7 +454,6 @@ function initAdditionalPOC(){
     clone.dataset.clone = "true";
     clone.removeAttribute("data-base");
 
-    // remove the add button from clone
     const addBtn = qs(".additional-poc-add, .add-row", clone);
     if (addBtn) addBtn.remove();
 
@@ -465,23 +461,23 @@ function initAdditionalPOC(){
       if (!isField(el)) return;
       if (el.type === "checkbox") el.checked = false;
       else el.value = "";
-
       ensureUID(el);
-      if (el.tagName === "SELECT") applySelectGhost(el);
+      applySelectGhost(el);
       if (el.type === "date") applyDateGhost(el);
       saveField(el);
     });
 
     grid.appendChild(clone);
+
     const firstInput = qs("input, select, textarea", clone);
     if (firstInput) firstInput.focus();
 
     requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(document);
+      initTableNotesButtons(document);
       updateNoteIconStates(document);
       syncTwoColHeights();
       initNotesExpanders(document);
-      initTableNotesButtons(document);
     });
   });
 }
@@ -498,16 +494,12 @@ function statusToContainerId(status){
     default: return "openTicketsContainer";
   }
 }
-
 function lockOpenSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
   sel.value = "Open";
   sel.disabled = true;
-  applySelectGhost(sel);
-  saveField(sel);
 }
-
 function unlockStatusSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
@@ -516,14 +508,12 @@ function unlockStatusSelect(card){
   applySelectGhost(sel);
   saveField(sel);
 }
-
 function isTicketCardComplete(card){
   const num = safeTrim(qs(".ticket-number-input", card)?.value);
   const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
   const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
   return !!(num && url && sum);
 }
-
 function makeTicketCloneFromBase(baseCard){
   const clone = baseCard.cloneNode(true);
   clone.dataset.clone = "true";
@@ -534,16 +524,14 @@ function makeTicketCloneFromBase(baseCard){
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
     ensureUID(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
+    applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
     saveField(el);
   });
 
-  // remove disclaimer on clones
   const disc = qs(".ticket-disclaimer", clone);
   if (disc) disc.remove();
 
-  // convert add -> remove
   const addBtn = qs(".add-ticket-btn", clone);
   if (addBtn){
     addBtn.textContent = "×";
@@ -562,11 +550,9 @@ function makeTicketCloneFromBase(baseCard){
   unlockStatusSelect(clone);
   return clone;
 }
-
 function moveTicketCard(card, newStatus){
   const page = qs("#support-tickets");
   if (!page || !card) return;
-
   const destId = statusToContainerId(newStatus);
   const dest = qs(`#${destId}`, page);
   if (!dest) return;
@@ -579,7 +565,6 @@ function moveTicketCard(card, newStatus){
     unlockStatusSelect(card);
   }
 }
-
 function initSupportTickets(){
   const page = qs("#support-tickets");
   if (!page) return;
@@ -587,7 +572,6 @@ function initSupportTickets(){
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
-  // add/remove
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
     const removeBtn = e.target.closest(".remove-ticket-btn");
@@ -605,7 +589,6 @@ function initSupportTickets(){
       return;
     }
 
-    // adding
     if (!isTicketCardComplete(card)){
       alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
       return;
@@ -617,22 +600,23 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // clear base if base add
+    // clear base fields after add
     if (card.dataset.base === "true"){
-      [qs(".ticket-number-input", card), qs(".ticket-zendesk-input", card), qs(".ticket-summary-input", card)]
-        .forEach(el=>{
-          if (!el) return;
-          clearFieldStorage(el);
-          el.value = "";
-          saveField(el);
-        });
+      const num = qs(".ticket-number-input", card);
+      const url = qs(".ticket-zendesk-input", card);
+      const sum = qs(".ticket-summary-input", card);
+      [num, url, sum].forEach(el=>{
+        if (!el) return;
+        clearFieldStorage(el);
+        el.value = "";
+        saveField(el);
+      });
       lockOpenSelect(card);
     }
 
     newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  // status move
   document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
@@ -640,12 +624,12 @@ function initSupportTickets(){
     const card = e.target.closest(".ticket-group");
     if (!card) return;
 
+    const val = sel.value;
     if (card.dataset.base === "true"){
       lockOpenSelect(card);
       return;
     }
-
-    moveTicketCard(card, sel.value);
+    moveTicketCard(card, val);
   });
 }
 
@@ -658,7 +642,6 @@ function updateDealershipNameDisplay(name){
   display.textContent = safeTrim(name);
   try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
 }
-
 function restoreDealershipNameDisplay(){
   try{
     const v = localStorage.getItem("mkc:dealershipNameDisplay");
@@ -673,13 +656,16 @@ function updateDealershipMap(address){
   frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
   try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
 }
-
 function restoreDealershipMap(){
   try{
     const addr = localStorage.getItem("mkc:dealershipMapAddress");
     if (addr) updateDealershipMap(addr);
   }catch(e){}
 }
+
+// expose for inline html callbacks
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 
 /* ---------------------------
    PDF Export
@@ -735,7 +721,6 @@ async function exportAllPagesPDF(){
     if (imgH <= pageH){
       pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
     }else{
-      // slice tall canvas into multiple pages
       let remaining = imgH;
       let y = 0;
 
@@ -752,8 +737,10 @@ async function exportAllPagesPDF(){
         ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
         ctx.drawImage(
           canvas,
-          0, y * pxPerPt, canvas.width, pagePxH,
-          0, 0, canvas.width, pagePxH
+          0, y * pxPerPt,
+          canvas.width, pagePxH,
+          0, 0,
+          canvas.width, pagePxH
         );
 
         const sliceImg = sliceCanvas.toDataURL("image/png");
@@ -761,6 +748,7 @@ async function exportAllPagesPDF(){
 
         remaining -= pageH;
         y += pageH;
+
         if (remaining > 0) pdf.addPage();
       }
     }
@@ -778,7 +766,6 @@ async function exportAllPagesPDF(){
     btn.textContent = "Save All Pages as PDF";
   }
 }
-
 function initPDF(){
   const btn = qs("#savePDF");
   if (!btn) return;
@@ -786,32 +773,63 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING — Ordered insert + jump helpers
+   NOTES LINKING — Option 2 ONLY (single icon on checklist rows)
+   - Only rows that have a field (input/select/textarea)
+   - Adds "• Question:" lines into the Notes textarea in that group
 =========================================================== */
+function isNotesCard(card){
+  const h2 = card?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+function isInNotesCard(row){
+  const card = row.closest(".section-block");
+  return isNotesCard(card);
+}
+function findNotesTextareaForRow(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
+
+  if (!wrap) return null;
+
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
+    .find(card => isNotesCard(card));
+
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+function getCleanQuestionText(row){
+  const label = row.querySelector("label");
+  if (!label) return "";
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
+}
+function makeNoteLine(row){
+  const q = getCleanQuestionText(row);
+  if (!q) return "";
+  return `• ${q}: `;
+}
 function normalizeNoteKey(line){ return (line || "").trim(); }
 
+function getAllRowsInThisNotesGroup(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2");
+  if (!wrap) return [];
+  return Array.from(wrap.querySelectorAll(".checklist-row"))
+    .filter(r => !isInNotesCard(r))
+    .filter(r => r.querySelector("input, select, textarea"));
+}
 function getRowOrderKey(row){
   return normalizeNoteKey(makeNoteLine(row));
 }
-
-function isNotesCardRow(row){
-  const h2 = row.closest(".section-block")?.querySelector("h2");
-  return (h2?.textContent || "").trim().toLowerCase().startsWith("notes");
-}
-
-function getAllRowsInThisNotesGroup(row){
-  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2") || row.closest(".page-section");
-  if (!wrap) return [];
-  return Array.from(wrap.querySelectorAll(".checklist-row"))
-    .filter(r => !isNotesCardRow(r))
-    .filter(r => r.querySelector("input, select, textarea"));
-}
-
 function findExistingNoteLineIndex(lines, baseKey){
   const k = (baseKey || "").trim();
   return lines.findIndex(l => (l || "").trim().startsWith(k));
 }
-
 function insertNoteLineInOrder(textarea, clickedRow){
   const allRows = getAllRowsInThisNotesGroup(clickedRow);
   const orderedKeys = allRows.map(r => getRowOrderKey(r)).filter(Boolean);
@@ -824,24 +842,23 @@ function insertNoteLineInOrder(textarea, clickedRow){
 
   const existingIdx = findExistingNoteLineIndex(lines, baseLine);
   if (existingIdx !== -1){
-    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    return { didInsert:false, lineStart:start };
+    return {
+      didInsert:false,
+      lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0)
+    };
   }
 
   const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
-  const appendLine = ()=>{
+  if (myOrder === -1){
     const startPos = raw.length ? raw.length + 1 : 0;
     textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
     return { didInsert:true, lineStart:startPos };
-  };
-
-  if (myOrder === -1) return appendLine();
+  }
 
   let insertBeforeLineIdx = -1;
   for (let i = 0; i < lines.length; i++){
     const t = (lines[i] || "").trim();
     if (!t.startsWith("•")) continue;
-
     const matchOrder = orderedKeys.findIndex(k => t.startsWith(k.trim()));
     if (matchOrder !== -1 && matchOrder > myOrder){
       insertBeforeLineIdx = i;
@@ -849,15 +866,17 @@ function insertNoteLineInOrder(textarea, clickedRow){
     }
   }
 
-  if (insertBeforeLineIdx === -1) return appendLine();
+  if (insertBeforeLineIdx === -1){
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  }
 
   lines.splice(insertBeforeLineIdx, 0, baseLine);
   textarea.value = lines.join("\n");
-
   const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
   return { didInsert:true, lineStart:startPos };
 }
-
 function jumpToNoteLine(textarea, lineStart){
   if (!textarea) return;
   textarea.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -871,42 +890,6 @@ function jumpToNoteLine(textarea, lineStart){
     setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
   }, 120);
 }
-
-/* ===========================================================
-   NOTES LINKING — Option 2 ONLY (single 📝 icon)
-=========================================================== */
-function findNotesTextareaForRow(row){
-  const wrap =
-    row.closest(".cards-grid.two-col") ||
-    row.closest(".two-col-grid") ||
-    row.closest(".grid-2") ||
-    row.closest(".page-section");
-
-  if (!wrap) return null;
-
-  const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
-    .find(card => {
-      const h2 = card.querySelector("h2");
-      return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
-    });
-
-  return notesCard ? notesCard.querySelector("textarea") : null;
-}
-
-function getCleanQuestionText(row){
-  const label = row.querySelector("label");
-  if (!label) return "";
-  const clone = label.cloneNode(true);
-  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
-  return (clone.textContent || "").replace(/\s+/g," ").trim();
-}
-
-function makeNoteLine(row){
-  const q = getCleanQuestionText(row);
-  if (!q) return "";
-  return `• ${q}:`;
-}
-
 function ensureRowActions(row){
   let actions = row.querySelector(":scope > .row-actions");
   if (actions) return actions;
@@ -914,7 +897,7 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // keep integrated-plus rows untouched (CSS hides row-actions there anyway)
+  // do not restructure integrated-plus rows
   if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
@@ -927,13 +910,11 @@ function ensureRowActions(row){
 }
 
 function initNotesLinkingOption2Only(root=document){
-  // remove any old injected icons (safe)
   qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
 
   qsa(".checklist-row", root).forEach(row=>{
-    if (isNotesCardRow(row)) return;
+    if (isInNotesCard(row)) return;
 
-    // only rows with a field get a note icon
     const field = row.querySelector("input, select, textarea");
     if (!field) return;
 
@@ -948,9 +929,9 @@ function initNotesLinkingOption2Only(root=document){
     btn.title = "Add this question to Notes";
     btn.innerHTML = `
       <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4h16v12H7l-3 3V4z"
-          fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none"
+              stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
     `;
 
@@ -962,11 +943,13 @@ function initNotesLinkingOption2Only(root=document){
       if (!textarea) return;
 
       const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
+
       if (didInsert){
         saveField(textarea);
         requestAnimationFrame(()=> updateNoteIconStates(document));
         requestAnimationFrame(syncTwoColHeights);
       }
+
       jumpToNoteLine(textarea, lineStart);
     });
 
@@ -990,14 +973,106 @@ function updateNoteIconStates(root=document){
 }
 
 /* ===========================================================
-   NOTES POP-OUT (Modal Expander)
+   TABLE NOTES BUTTONS (Training Checklist + Opcodes)
+   - Adds a final "Notes" column to each .training-table on:
+     #training-checklist, #opcodes-pricing
+   - Clicking icon jumps to the Notes card directly BELOW that table
 =========================================================== */
-function isNotesCard(card){
-  const h2 = card?.querySelector("h2");
-  const t = (h2?.textContent || "").trim().toLowerCase();
-  return t.startsWith("notes");
+function getTableTitle(table){
+  const section = table.closest(".section");
+  const header = section?.querySelector(".section-header");
+  const txt = (header?.textContent || "").replace(/\s+/g," ").trim();
+  return txt || "Table Notes";
 }
 
+function findNotesBlockForTable(table){
+  // expects: after table’s .section, the next .section-block "Notes — ..."
+  const section = table.closest(".section");
+  if (!section) return null;
+
+  let node = section.nextElementSibling;
+  while (node){
+    if (node.classList?.contains("section-block")){
+      const h2 = node.querySelector("h2");
+      const t = (h2?.textContent || "").trim().toLowerCase();
+      if (t.startsWith("notes")) return node;
+      // if it’s a section-block but not notes, stop at first block
+      // (keeps it tied to the correct table)
+      return null;
+    }
+    // if we hit another .section, stop
+    if (node.classList?.contains("section")) return null;
+    node = node.nextElementSibling;
+  }
+  return null;
+}
+
+function ensureTableNotesColumn(table){
+  const theadRow = table.querySelector("thead tr");
+  if (!theadRow) return;
+
+  // already added?
+  if (theadRow.querySelector("th.mk-notes-col")) return;
+
+  const th = document.createElement("th");
+  th.className = "mk-notes-col";
+  th.textContent = "Notes";
+  theadRow.appendChild(th);
+
+  // add td to each body row
+  qsa("tbody tr", table).forEach(tr=>{
+    const td = document.createElement("td");
+    td.className = "mk-notes-col";
+    td.innerHTML = `
+      <button type="button" class="note-link-btn mk-table-note-btn" title="Jump to this table’s Notes">
+        <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4h16v12H7l-3 3V4z" fill="none"
+                stroke="currentColor" stroke-width="2"
+                stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+      </button>
+    `;
+    tr.appendChild(td);
+  });
+}
+
+function initTableNotesButtons(root=document){
+  const scopes = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table"
+  ];
+
+  scopes.forEach(sel=>{
+    qsa(sel, root).forEach(table=>{
+      ensureTableNotesColumn(table);
+
+      // wire clicks (event delegation safe too)
+      table.addEventListener("click", (e)=>{
+        const btn = e.target.closest(".mk-table-note-btn");
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const notesBlock = findNotesBlockForTable(table);
+        const ta = notesBlock?.querySelector("textarea");
+        if (!ta) return;
+
+        // scroll + highlight
+        notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
+        setTimeout(()=>{
+          ta.focus();
+          ta.classList.add("mk-note-jump");
+          setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
+        }, 150);
+      }, { passive:false });
+    });
+  });
+}
+
+/* ===========================================================
+   NOTES POP-OUT (Modal Expander)
+=========================================================== */
 let _mkNotesModalSourceTA = null;
 
 function ensureNotesModal(){
@@ -1035,7 +1110,6 @@ function openNotesModal(sourceTA, titleText="Notes"){
   const bigTA = qs("#mkNotesModalTextarea", modal);
 
   _mkNotesModalSourceTA = sourceTA;
-
   title.textContent = titleText || "Notes";
   bigTA.value = sourceTA?.value || "";
 
@@ -1072,7 +1146,7 @@ function initNotesExpanders(root=document){
     const ta = qs("textarea", card);
     if (!ta) return;
 
-    // wrap textarea (once)
+    // wrap textarea
     let wrap = ta.closest(".mk-ta-wrap");
     if (!wrap){
       wrap = document.createElement("div");
@@ -1081,7 +1155,7 @@ function initNotesExpanders(root=document){
       wrap.appendChild(ta);
     }
 
-    // avoid duplicate buttons
+    // avoid duplicates
     if (qs(".mk-ta-expand", wrap)) return;
 
     const btn = document.createElement("button");
@@ -1102,10 +1176,11 @@ function initNotesExpanders(root=document){
   });
 }
 
-// delegated safety net (if injected later)
+// delegated safety net
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".mk-ta-expand");
   if (!btn) return;
+
   e.preventDefault();
   e.stopPropagation();
 
@@ -1116,132 +1191,6 @@ document.addEventListener("click", (e)=>{
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
 
-/* ===========================================================
-   TABLE NOTES BUTTONS (injected Notes column + link to Notes)
-   - Adds a Notes column if missing
-   - Each row gets a button that inserts an ordered line and jumps
-=========================================================== */
-function findNotesTextareaForTable(table){
-  const page = table.closest(".page-section");
-  if (!page) return null;
-
-  const notesCard = Array.from(page.querySelectorAll(".section-block"))
-    .find(card=>{
-      const h2 = card.querySelector("h2");
-      return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
-    });
-
-  return notesCard ? notesCard.querySelector("textarea") : null;
-}
-
-function getTableTitle(table){
-  const container = table.closest(".table-container");
-  const section = container?.previousElementSibling;
-  if (section && section.classList.contains("section-header")){
-    return safeTrim(section.textContent) || "Table";
-  }
-  return "Table";
-}
-
-function getRowLabelForTableRow(tr){
-  // Prefer a text input value (training checklist name, etc.)
-  const txt = tr.querySelector("input[type='text']");
-  const v = safeTrim(txt?.value);
-  if (v) return v;
-
-  // fall back to the second column text
-  const tds = tr.querySelectorAll("td");
-  const fallback = safeTrim(tds[1]?.textContent);
-  if (fallback) return fallback;
-
-  return "Row";
-}
-
-function ensureNotesHeader(table){
-  const theadRow = table.querySelector("thead tr");
-  if (!theadRow) return;
-
-  // already present?
-  if (theadRow.querySelector("th.notes-col")) return;
-
-  const th = document.createElement("th");
-  th.className = "notes-col";
-  th.textContent = "Notes";
-  theadRow.appendChild(th);
-}
-
-function ensureNotesCell(table, tr){
-  // already has?
-  if (tr.querySelector("td.notes-col")) return;
-
-  const td = document.createElement("td");
-  td.className = "notes-col";
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "table-notes-btn";
-  btn.title = "Add this row to Notes";
-  btn.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 4h16v12H7l-3 3V4z" />
-    </svg>
-  `;
-
-  btn.addEventListener("click", (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-
-    const ta = findNotesTextareaForTable(table);
-    if (!ta) return;
-
-    const title = getTableTitle(table);
-    const rowLabel = getRowLabelForTableRow(tr);
-
-    const line = `• [${title}] ${rowLabel}:`;
-    const raw = ta.value || "";
-    const lines = raw.split("\n");
-
-    // insert only if missing
-    let lineStart = 0;
-    const existingIdx = lines.findIndex(l => (l || "").trim().startsWith(line));
-    if (existingIdx !== -1){
-      lineStart = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    }else{
-      const startPos = raw.length ? raw.length + 1 : 0;
-      ta.value = raw.trim() ? raw.trim() + "\n" + line : line;
-      saveField(ta);
-      lineStart = startPos;
-    }
-
-    jumpToNoteLine(ta, lineStart);
-  });
-
-  td.appendChild(btn);
-  tr.appendChild(td);
-}
-
-function initTableNotesButtons(root=document){
-  qsa("table.training-table", root).forEach(table=>{
-    const ta = findNotesTextareaForTable(table);
-    if (!ta) return;
-
-    ensureNotesHeader(table);
-
-    const tbody = table.querySelector("tbody");
-    if (!tbody) return;
-
-    Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
-      ensureNotesCell(table, tr);
-    });
-  });
-}
-
-/* ---------------------------
-   Google Places callback hooks (from inline HTML)
---------------------------- */
-window.updateDealershipMap = updateDealershipMap;
-window.updateDealershipNameDisplay = updateDealershipNameDisplay;
-
 /* ---------------------------
    Boot
 --------------------------- */
@@ -1250,7 +1199,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initGhosts();
   initPersistence();
   initTextareas(document);
-
   syncTwoColHeights();
   window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
 
@@ -1260,19 +1208,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initAdditionalPOC();
   initSupportTickets();
   initOnsiteTrainingDates();
-
   restoreDealershipNameDisplay();
   restoreDealershipMap();
-
   initPDF();
 
-  // ✅ Notes linking (rows)
-  initNotesLinkingOption2Only(document);
-  updateNoteIconStates(document);
-
-  // ✅ Notes pop-out expanders
+  // Notes
   initNotesExpanders(document);
-
-  // ✅ Table Notes buttons
+  initNotesLinkingOption2Only(document);
   initTableNotesButtons(document);
+  updateNoteIconStates(document);
 });
