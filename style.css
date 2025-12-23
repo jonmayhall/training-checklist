@@ -1461,6 +1461,44 @@ main{
   background:#fff;
 }
 
-.mk-ta-wrap > textarea{
-  padding-right:30px !important;
+/* =========================
+   EXPAND BUTTON: TRUE CORNER PLACEMENT
+   ========================= */
+.section-block .mk-ta-wrap{
+  position: relative;
+}
+
+.section-block .mk-ta-wrap .mk-expand-btn{
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+
+  /* nudges it "right and up" into the corner */
+  transform: translate(2px, -2px);
+
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  z-index: 10;
+}
+
+/* =========================
+   NOTES TEXTAREA: KEEP FILLING THE CARD
+   ========================= */
+.section-block .mk-ta-wrap{
+  flex: 1 1 auto;     /* wrapper grows */
+  display: flex;      /* lets textarea stretch */
+  min-height: 0;      /* important for flex children */
+}
+
+.section-block .mk-ta-wrap > textarea{
+  flex: 1 1 auto;     /* textarea grows */
+  width: 100% !important;
+  height: 100% !important;  /* keeps it filling */
+  min-height: 220px;         /* match your notes baseline */
+  padding-right: 30px !important; /* room for the icon */
+  resize: none;              /* optional, keeps UI clean */
 }
