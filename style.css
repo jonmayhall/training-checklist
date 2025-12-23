@@ -1335,11 +1335,33 @@ main{
   color:#374151;
 }
 
-/* Stronger + higher-specificity Pull header chip */
-#dms-integration .dms-card-header .dms-chip.dms-chip-pull{
-  background: rgba(205,220,57,0.45) !important;  /* was 0.18 (too subtle) */
-  border-color: rgba(255,255,255,0.35) !important;
-  color:#fff !important;
+/* =======================================================
+   DMS INTEGRATION — Layout refinement
+   - Skinnier cards
+   - More space between cards (H + V)
+======================================================= */
+
+/* Increase spacing between cards */
+#dms-integration .dms-grid{
+  gap:32px;                 /* was 18px */
+  align-items:start;
+}
+
+/* Make cards skinnier */
+#dms-integration .dms-card{
+  max-width:520px;          /* controls card width */
+  margin:0 auto;            /* centers cards in each column */
+}
+
+/* Add more internal vertical breathing room */
+#dms-integration .dms-list li{
+  padding-top:14px;
+  padding-bottom:14px;
+}
+
+/* Extra vertical separation between DMS cards on wrap */
+#dms-integration{
+  padding-bottom:12px;
 }
 
 /* =======================
