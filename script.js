@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED)
+   myKaarma Interactive Training Checklist — FULL script.js (STABLE + FIXED NAV + POPUP TABLE NOTES FIX)
    ✅ Fixes:
    - Nav clicks work (inline onclick + data-section + href="#id")
    - Add Row (+) for tables
@@ -10,11 +10,10 @@
    - Onsite dates: end defaults to start + 2 days
    - PDF export (all pages)
    - ✅ NOTES LINKING (questions): single icon on checklist rows
-   - ✅ TABLE NOTES COLUMN: ensures ONE Notes column + bubble icon every row
-   - ✅ FILTERS COLUMN FIX: removes random button + forces dropdown everywhere
-   - ✅ TABLE POPUP EXPANDER: footer-right expand button opens modal editor
-   - ✅ POPUP NOTES: shows the table’s Notes card INSIDE the popup (synced + saved)
-   - ✅ TABLE ROW NOTES: clicking row Notes bubble inserts “• Name:” into table Notes textarea
+   - ✅ TABLE NOTES COLUMN: single Notes column + bubble icon + filters dropdown normalization
+   - ✅ TABLE POPUP: Expand button in footer-right opens popup
+   - ✅ POPUP NOTES: row bubble inserts correct FULL Name (training) or Opcode (opcodes) into popup notes
+   - ✅ POPUP NOTES AREA: shown below popup table, synced to page Notes textarea + autosaved
    ======================================================= */
 
 /* ---------------------------
@@ -161,10 +160,10 @@ function showSection(id){
 }
 
 function initNav(){
-  // Works for data-section/data-target/href nav buttons (and does not break inline onclick)
   qsa(".nav-btn").forEach(btn=>{
     btn.addEventListener("click", (e)=>{
       if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
+
       const id =
         btn.getAttribute("data-section") ||
         btn.getAttribute("data-target") ||
@@ -240,6 +239,7 @@ function resetSection(section){
     initNotesExpanders(section);
     initNotesLinkingOption2Only(section);
     initTableNotesButtons(section);
+    initTablePopupExpandButtons(section);
     updateNoteIconStates(section);
   });
 }
@@ -358,6 +358,7 @@ function initTableAddRow(){
       initNotesExpanders(document);
       initNotesLinkingOption2Only(document);
       initTableNotesButtons(document);
+      initTablePopupExpandButtons(document);
       updateNoteIconStates(document);
     });
   });
@@ -430,6 +431,7 @@ function initAdditionalTrainers(){
     requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(page);
       initTableNotesButtons(page);
+      initTablePopupExpandButtons(page);
       updateNoteIconStates(page);
       syncTwoColHeights();
       initNotesExpanders(page);
@@ -476,6 +478,7 @@ function initAdditionalPOC(){
     requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(document);
       initTableNotesButtons(document);
+      initTablePopupExpandButtons(document);
       updateNoteIconStates(document);
       syncTwoColHeights();
       initNotesExpanders(document);
@@ -601,7 +604,6 @@ function initSupportTickets(){
     const openContainer = qs("#openTicketsContainer", page);
     if (openContainer) openContainer.appendChild(newCard);
 
-    // clear base fields after add
     if (card.dataset.base === "true"){
       const num = qs(".ticket-number-input", card);
       const url = qs(".ticket-zendesk-input", card);
@@ -773,7 +775,7 @@ function initPDF(){
 }
 
 /* ===========================================================
-   NOTES LINKING — checklist rows (questions)
+   NOTES LINKING — Option 2 ONLY (single icon on checklist rows)
 =========================================================== */
 function isNotesCard(card){
   const h2 = card?.querySelector("h2");
@@ -895,7 +897,6 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // do not restructure integrated-plus rows
   if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
@@ -971,8 +972,12 @@ function updateNoteIconStates(root=document){
 }
 
 /* ===========================================================
-   TABLE NOTES COLUMN + FILTERS FIX + ROW NOTES INSERT
+   TABLE NOTES BUTTONS (Training Checklist + Opcodes)
+   - Ensures single Notes column
+   - Bubble icon in Notes column for EVERY row
+   - Normalizes Filters column (replaces stray pencil button with dropdown)
 =========================================================== */
+
 function thText(th){
   return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
 }
@@ -1008,7 +1013,6 @@ function ensureSingleNotesColumn(table){
     noteIdxs.slice(1).sort((a,b)=>b-a).forEach(idx => removeColumnByIndex(table, idx));
     return keep;
   }
-
   if (noteIdxs.length === 0){
     const th = document.createElement("th");
     th.textContent = "Notes";
@@ -1020,13 +1024,12 @@ function ensureSingleNotesColumn(table){
 
     return theadRow.children.length - 1;
   }
-
   return noteIdxs[0];
 }
 
-function renderBubbleBtn(extraClass=""){
-  return `
-    <button type="button" class="note-link-btn mk-table-note-btn ${extraClass}" title="Add row to Notes / Jump to Notes">
+function renderTableNoteButton(td){
+  td.innerHTML = `
+    <button type="button" class="note-link-btn mk-table-note-btn" title="Jump to this table’s Notes">
       <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 4h16v12H7l-3 3V4z" fill="none"
               stroke="currentColor" stroke-width="2"
@@ -1045,7 +1048,6 @@ function purgeStrayTableNoteButtons(table, notesIdx){
   });
 }
 
-/* ✅ Fix Filters column: remove random icon/buttons and ensure dropdown */
 function normalizeFiltersColumn(table){
   const ths = getHeaderCells(table);
   const filtersIdx = ths.findIndex(th => thText(th) === "filters");
@@ -1063,8 +1065,7 @@ function normalizeFiltersColumn(table){
     const td = tr.children[filtersIdx];
     if (!td) return;
 
-    // remove junk
-    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn, svg", td).forEach(n => n.remove());
+    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n => n.remove());
 
     if (td.querySelector("select")) return;
 
@@ -1080,7 +1081,7 @@ function normalizeFiltersColumn(table){
     }
 
     const fallback = document.createElement("select");
-    fallback.innerHTML = `<option data-ghost="true" value="">Select</option>`;
+    fallback.innerHTML = `<option></option>`;
     ensureUID(fallback);
     loadField(fallback);
     applySelectGhost(fallback);
@@ -1089,29 +1090,20 @@ function normalizeFiltersColumn(table){
   });
 }
 
-/* Get "Name" (or 2nd column) value from a row for notes insert */
-function getTableRowName(table, tr){
-  const ths = getHeaderCells(table);
-  let nameIdx = ths.findIndex(th => thText(th) === "name");
-  if (nameIdx === -1) nameIdx = 1; // fallback to 2nd col
-
-  const td = tr.children[nameIdx];
-  if (!td) return "";
-
-  const input = td.querySelector("input, select, textarea");
-  if (input){
-    if (input.tagName === "SELECT"){
-      const opt = input.selectedOptions?.[0];
-      const txt = safeTrim(opt?.textContent || input.value);
-      return txt;
-    }
-    return safeTrim(input.value);
+function applyNotesButtonsToColumn(table, notesColIdx){
+  const headRow = table.querySelector("thead tr");
+  if (headRow && headRow.children[notesColIdx]){
+    headRow.children[notesColIdx].textContent = "Notes";
   }
 
-  return safeTrim(td.textContent);
+  qsa("tbody tr", table).forEach(tr=>{
+    while (tr.children.length <= notesColIdx){
+      tr.appendChild(document.createElement("td"));
+    }
+    renderTableNoteButton(tr.children[notesColIdx]);
+  });
 }
 
-/* Find the Notes card under the table's section */
 function findNotesBlockForTable(table){
   const section = table.closest(".section");
   if (!section) return null;
@@ -1130,56 +1122,49 @@ function findNotesBlockForTable(table){
   return null;
 }
 
-/* Insert row name into the Notes textarea for that table */
-function insertTableRowNameIntoNotes(table, tr){
-  const notesBlock = findNotesBlockForTable(table);
-  const ta = notesBlock?.querySelector("textarea");
-  if (!ta) return;
+function initTableNotesButtons(root=document){
+  const targets = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table"
+  ];
 
-  const name = getTableRowName(table, tr);
-  if (!name) return;
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=>{
+      const notesIdx = ensureSingleNotesColumn(table);
+      if (notesIdx === null) return;
 
-  const line = `• ${name}: `;
+      purgeStrayTableNoteButtons(table, notesIdx);
+      normalizeFiltersColumn(table);
+      applyNotesButtonsToColumn(table, notesIdx);
 
-  const raw = ta.value || "";
-  if (raw.includes(line.trim())){ // already present
-    ta.scrollIntoView({ behavior:"smooth", block:"center" });
-    setTimeout(()=> ta.focus(), 120);
-    return;
-  }
+      if (table.dataset.mkNotesWired === "1") return;
+      table.dataset.mkNotesWired = "1";
 
-  ta.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
-  saveField(ta);
+      table.addEventListener("click", (e)=>{
+        const btn = e.target.closest(".mk-table-note-btn");
+        if (!btn) return;
 
-  ta.scrollIntoView({ behavior:"smooth", block:"center" });
-  setTimeout(()=>{
-    ta.focus();
-    ta.classList.add("mk-note-jump");
-    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
-  }, 150);
+        e.preventDefault();
+        e.stopPropagation();
 
-  requestAnimationFrame(()=> updateNoteIconStates(document));
-}
+        const notesBlock = findNotesBlockForTable(table);
+        const ta = notesBlock?.querySelector("textarea");
+        if (!ta) return;
 
-/* Force Notes column bubble button in every row */
-function applyNotesButtonsToColumn(table, notesColIdx){
-  const headRow = table.querySelector("thead tr");
-  if (headRow && headRow.children[notesColIdx]){
-    headRow.children[notesColIdx].textContent = "Notes";
-  }
-
-  qsa("tbody tr", table).forEach(tr=>{
-    while (tr.children.length <= notesColIdx){
-      tr.appendChild(document.createElement("td"));
-    }
-    tr.children[notesColIdx].innerHTML = renderBubbleBtn("mk-row-note");
+        notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
+        setTimeout(()=>{
+          ta.focus();
+          ta.classList.add("mk-note-jump");
+          setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
+        }, 150);
+      }, { passive:false });
+    });
   });
 }
 
 /* ===========================================================
-   TABLE POPUP (Expand) + POPUP NOTES (synced)
+   TABLE POPUP (Expand) + POPUP NOTES (fixed full Name pull)
 =========================================================== */
-let _mkTableModalSourceTable = null;
 
 function ensureTableModal(){
   let modal = qs("#mkTableModal");
@@ -1188,25 +1173,27 @@ function ensureTableModal(){
   modal = document.createElement("div");
   modal.id = "mkTableModal";
   modal.innerHTML = `
-    <div class="mk-modal-backdrop" data-mk-close="1"></div>
-    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
+    <div class="mk-modal-backdrop" data-mk-table-close="1"></div>
+    <div class="mk-modal-panel mk-table-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
       <div class="mk-modal-header">
         <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
-        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
+        <button type="button" class="mk-modal-close" data-mk-table-close="1" aria-label="Close">×</button>
       </div>
-      <div class="mk-modal-body">
-        <div class="mk-table-wrap" id="mkTableModalWrap"></div>
+
+      <div class="mk-table-body">
+        <div class="mk-table-scroll" id="mkTableModalContent"></div>
       </div>
-      <div class="mk-modal-footer">
-        <button type="button" class="table-footer-add add-row" id="mkTableModalAddRow" title="Add Row">+</button>
-        <div class="mk-footer-right"></div>
+
+      <div class="mk-table-notes">
+        <div class="mk-table-notes-title">Notes</div>
+        <textarea class="mk-table-notes-ta" rows="6" placeholder="Notes for this table..."></textarea>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
 
   modal.addEventListener("click", (e)=>{
-    if (e.target.closest("[data-mk-close='1']")) closeTableModal();
+    if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
   });
 
   document.addEventListener("keydown", (e)=>{
@@ -1220,143 +1207,226 @@ function closeTableModal(){
   const modal = qs("#mkTableModal");
   if (!modal) return;
   modal.classList.remove("open");
-  _mkTableModalSourceTable = null;
+  modal.removeAttribute("data-source-table");
+  modal.removeAttribute("data-source-notes-ta");
 }
 
-/* Mount table’s Notes card INSIDE the popup and sync it */
-function mountTableNotesInsideModal(originalTable, modal){
-  const old = modal.querySelector(".mk-table-notes");
-  if (old) old.remove();
+function thIndexByLabel(table, labels){
+  const ths = getHeaderCells(table);
+  const set = new Set(labels.map(s=>s.toLowerCase()));
+  return ths.findIndex(th => set.has(thText(th)));
+}
 
-  const notesBlock = findNotesBlockForTable(originalTable);
-  const sourceTA = notesBlock?.querySelector("textarea");
-  if (!sourceTA) return;
+/* ✅ FIX: pull FULL Name from the row (handles checkbox column + multiple fields) */
+function getTableRowName(table, tr){
+  const ths = getHeaderCells(table);
 
-  const titleText = (notesBlock.querySelector("h2")?.textContent || "Notes").trim();
+  const extractFromCell = (td) => {
+    if (!td) return "";
+    const fields = Array.from(td.querySelectorAll("input, select, textarea"))
+      .filter(f => f.type !== "checkbox");
 
-  const wrap = document.createElement("div");
-  wrap.className = "mk-table-notes";
-  wrap.innerHTML = `
-    <div class="mk-table-notes-header">
-      <div>${titleText}</div>
-      <button type="button" class="mk-ta-expand" data-mk-notes-expand="1" title="Expand notes" aria-label="Expand notes">⤢</button>
-    </div>
-    <div class="mk-table-notes-body">
-      <textarea class="mk-table-notes-ta" placeholder="Add notes here..."></textarea>
-    </div>
-  `;
+    if (fields.length){
+      const parts = fields.map(f=>{
+        if (f.tagName === "SELECT"){
+          const opt = f.selectedOptions?.[0];
+          return safeTrim(opt?.textContent || f.value);
+        }
+        return safeTrim(f.value);
+      }).filter(Boolean);
 
-  const modalTA = wrap.querySelector(".mk-table-notes-ta");
-  modalTA.value = sourceTA.value || "";
+      return safeTrim(parts.join(" "));
+    }
+    return safeTrim(td.textContent);
+  };
 
-  modalTA.addEventListener("input", ()=>{
+  let nameIdx = ths.findIndex(th => thText(th) === "name");
+  if (nameIdx !== -1){
+    const v = extractFromCell(tr.children[nameIdx]);
+    if (v) return v;
+  }
+
+  const notesIdxs = getNotesHeaderIndexes(table);
+  const notesIdx = notesIdxs.length ? notesIdxs[0] : -1;
+
+  for (let i = 0; i < tr.children.length; i++){
+    if (i === notesIdx) continue;
+    const v = extractFromCell(tr.children[i]);
+    if (v) return v;
+  }
+
+  return "";
+}
+
+function getRowKeyForNotes(table, tr){
+  const ths = getHeaderCells(table);
+
+  const opcodeIdx = ths.findIndex(th => {
+    const t = thText(th);
+    return t === "opcode" || t === "op code" || t.includes("opcode");
+  });
+
+  if (opcodeIdx !== -1){
+    const td = tr.children[opcodeIdx];
+    const field = td?.querySelector("input, select, textarea");
+    const val = field
+      ? (field.tagName === "SELECT"
+          ? safeTrim(field.selectedOptions?.[0]?.textContent || field.value)
+          : safeTrim(field.value))
+      : safeTrim(td?.textContent);
+
+    if (val) return val;
+  }
+
+  return getTableRowName(table, tr);
+}
+
+function insertLineIntoPopupNotes(modal, sourceTA, line){
+  if (!modal || !sourceTA || !line) return;
+
+  const modalTA = modal.querySelector(".mk-table-notes-ta");
+  if (!modalTA) return;
+
+  const normalized = line.trim();
+
+  const raw = modalTA.value || "";
+  if (!raw.includes(normalized)){
+    modalTA.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
+  }
+
+  sourceTA.value = modalTA.value;
+  saveField(sourceTA);
+
+  const notesWrap = modal.querySelector(".mk-table-notes");
+  if (notesWrap) notesWrap.scrollIntoView({ behavior:"smooth", block:"start" });
+
+  setTimeout(()=>{
+    modalTA.focus();
+    modalTA.classList.add("mk-note-jump");
+    setTimeout(()=> modalTA.classList.remove("mk-note-jump"), 700);
+  }, 150);
+}
+
+function mountPopupNotes(modal, sourceTA){
+  const modalTA = qs(".mk-table-notes-ta", modal);
+  if (!modalTA) return;
+
+  modalTA.value = sourceTA?.value || "";
+
+  modalTA.oninput = ()=>{
+    if (!sourceTA) return;
     sourceTA.value = modalTA.value;
     saveField(sourceTA);
     requestAnimationFrame(()=> updateNoteIconStates(document));
-  });
-
-  const expandBtn = wrap.querySelector("[data-mk-notes-expand='1']");
-  expandBtn.addEventListener("click", (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    openNotesModal(sourceTA, titleText);
-  });
-
-  modal.querySelector(".mk-modal-body")?.appendChild(wrap);
+  };
 }
 
-/* Open popup for a specific table */
-function openTableModalForTable(originalTable, titleText="Table"){
+function openTableModalForTable(originalTable, titleText){
   const modal = ensureTableModal();
   const title = qs("#mkTableModalTitle", modal);
-  const wrap = qs("#mkTableModalWrap", modal);
-  const footerRight = qs(".mk-footer-right", modal);
-
-  _mkTableModalSourceTable = originalTable;
+  const content = qs("#mkTableModalContent", modal);
 
   title.textContent = titleText || "Table";
-  wrap.innerHTML = "";
-  footerRight.innerHTML = "";
+  content.innerHTML = "";
 
-  // clone the table so it edits the real one by syncing inputs
   const clone = originalTable.cloneNode(true);
-  clone.classList.add("mk-modal-table");
-  wrap.appendChild(clone);
 
-  // ensure filters + notes column are correct inside clone too
-  const notesIdx = ensureSingleNotesColumn(clone);
-  if (notesIdx !== null){
-    purgeStrayTableNoteButtons(clone, notesIdx);
-    normalizeFiltersColumn(clone);
-    applyNotesButtonsToColumn(clone, notesIdx);
-  }
+  // Make popup table editable and visually tight
+  clone.classList.add("mk-popup-table");
+  qsa("input, select, textarea", clone).forEach(el=>{
+    ensureUID(el);
+    loadField(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
 
-  // Add footer-right expand button (same style class as notes expander)
-  const expandBtn = document.createElement("button");
-  expandBtn.type = "button";
-  expandBtn.className = "mk-ta-expand";
-  expandBtn.title = "Expand table";
-  expandBtn.setAttribute("aria-label", "Expand table");
-  expandBtn.textContent = "⤢";
-  footerRight.appendChild(expandBtn);
-
-  // Put the table’s Notes section under it (synced)
-  mountTableNotesInsideModal(originalTable, modal);
-
-  // Sync clone inputs <-> original inputs by index map per cell
-  const origFields = qsa("input, select, textarea", originalTable);
-  const cloneFields = qsa("input, select, textarea", clone);
-
-  cloneFields.forEach((f, i)=>{
-    const src = origFields[i];
-    if (!src) return;
-
-    // init value in clone
-    if (src.type === "checkbox") f.checked = src.checked;
-    else f.value = src.value;
-
-    if (f.tagName === "SELECT") applySelectGhost(f);
-
-    // on input/change in clone, push back to original and save
-    const handler = ()=>{
-      if (src.type === "checkbox") src.checked = f.checked;
-      else src.value = f.value;
-
-      if (src.tagName === "SELECT") applySelectGhost(src);
-      saveField(src);
-    };
-
-    f.addEventListener("input", handler);
-    f.addEventListener("change", handler);
+    el.addEventListener("input", ()=> saveField(el));
+    el.addEventListener("change", ()=> saveField(el));
   });
 
-  // Add Row inside modal adds row to original, then re-open modal to refresh
-  const addBtn = qs("#mkTableModalAddRow", modal);
-  if (addBtn){
-    addBtn.onclick = ()=>{
-      const tbody = qs("tbody", originalTable);
-      const last = tbody?.querySelector("tr:last-child");
-      if (!tbody || !last) return;
+  content.appendChild(clone);
 
-      const newRow = cloneTrainingRow(last);
-      tbody.appendChild(newRow);
-
-      requestAnimationFrame(()=>{
-        initNotesLinkingOption2Only(document);
-        initTableNotesButtons(document);
-        updateNoteIconStates(document);
-      });
-
-      // refresh modal so it matches
-      openTableModalForTable(originalTable, titleText);
-    };
+  // Popup notes are the SAME Notes card used by the page for that table
+  const notesBlock = findNotesBlockForTable(originalTable);
+  const sourceTA = notesBlock?.querySelector("textarea");
+  if (sourceTA){
+    mountPopupNotes(modal, sourceTA);
+  }else{
+    const modalTA = qs(".mk-table-notes-ta", modal);
+    if (modalTA){
+      modalTA.value = "";
+      modalTA.oninput = null;
+    }
   }
+
+  // Wire popup row Notes bubble -> insert bullet into POPUP notes
+  clone.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".mk-table-note-btn");
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const tr = btn.closest("tr");
+    if (!tr || !sourceTA) return;
+
+    const key = getRowKeyForNotes(clone, tr);
+    if (!key) return;
+
+    const line = `• ${key}: `;
+    insertLineIntoPopupNotes(modal, sourceTA, line);
+  }, { passive:false });
 
   modal.classList.add("open");
 }
 
+function ensureExpandBtnInTableFooter(table){
+  const container = table.closest(".table-container");
+  if (!container) return;
+
+  const footer = qs(".table-footer", container);
+  if (!footer) return;
+
+  if (qs(".mk-table-expand-btn", footer)) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "mk-table-expand-btn";
+  btn.title = "Expand table";
+  btn.setAttribute("aria-label","Expand table");
+  btn.textContent = "⤢";
+
+  // right side
+  footer.style.justifyContent = "space-between";
+  const rightWrap = document.createElement("div");
+  rightWrap.style.marginLeft = "auto";
+  rightWrap.appendChild(btn);
+  footer.appendChild(rightWrap);
+
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+
+    // title from section header
+    const sectionHeader = container.previousElementSibling;
+    const t = safeTrim(sectionHeader?.textContent || "Table");
+    openTableModalForTable(table, t);
+  });
+}
+
+function initTablePopupExpandButtons(root=document){
+  const targets = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table"
+  ];
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=>{
+      ensureExpandBtnInTableFooter(table);
+    });
+  });
+}
+
 /* ===========================================================
-   NOTES POP-OUT (Modal Expander)
+   NOTES POP-OUT (Modal Expander for Notes cards)
 =========================================================== */
 let _mkNotesModalSourceTA = null;
 
@@ -1459,13 +1529,10 @@ function initNotesExpanders(root=document){
   });
 }
 
-// delegated safety net for notes expand button
+// delegated safety net
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".mk-ta-expand");
   if (!btn) return;
-
-  // ignore table modal footer expand: it uses same class but not inside a notes wrap
-  if (btn.closest("#mkTableModal")) return;
 
   e.preventDefault();
   e.stopPropagation();
@@ -1476,94 +1543,6 @@ document.addEventListener("click", (e)=>{
   const h2 = qs("h2", card);
   if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
 });
-
-/* ===========================================================
-   TABLE NOTES BUTTONS INIT
-   - Ensures single Notes column
-   - Fixes Filters column
-   - Bubble button per row:
-       click => insert row Name into that table’s Notes card
-       then scroll to Notes
-   - Adds table popup expand button in footer-right (inside table footer)
-=========================================================== */
-function wireTableFooterExpandButtons(root=document){
-  qsa(".table-container", root).forEach(container=>{
-    if (container.dataset.mkExpandWired === "1") return;
-    container.dataset.mkExpandWired = "1";
-
-    const table = qs("table.training-table", container);
-    const footer = qs(".table-footer", container);
-    if (!table || !footer) return;
-
-    // create footer-right holder if needed
-    let right = qs(".mk-footer-right", footer);
-    if (!right){
-      right = document.createElement("div");
-      right.className = "mk-footer-right";
-      footer.appendChild(right);
-    }
-
-    // avoid duplicates
-    if (qs(".mk-table-expand-btn", footer)) return;
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "mk-ta-expand mk-table-expand-btn";
-    btn.title = "Expand table";
-    btn.setAttribute("aria-label","Expand table");
-    btn.textContent = "⤢";
-
-    btn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-
-      // title from section header
-      const secHeader = container.closest(".section")?.querySelector(".section-header");
-      const title = (secHeader?.textContent || "Table").trim();
-
-      openTableModalForTable(table, title);
-    });
-
-    right.appendChild(btn);
-  });
-}
-
-function initTableNotesButtons(root=document){
-  const targets = [
-    "#training-checklist table.training-table",
-    "#opcodes-pricing table.training-table"
-  ];
-
-  targets.forEach(sel=>{
-    qsa(sel, root).forEach(table=>{
-      const notesIdx = ensureSingleNotesColumn(table);
-      if (notesIdx === null) return;
-
-      purgeStrayTableNoteButtons(table, notesIdx);
-      normalizeFiltersColumn(table);
-      applyNotesButtonsToColumn(table, notesIdx);
-
-      if (table.dataset.mkNotesWired === "1") return;
-      table.dataset.mkNotesWired = "1";
-
-      table.addEventListener("click", (e)=>{
-        const btn = e.target.closest(".mk-table-note-btn");
-        if (!btn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const tr = btn.closest("tr");
-        if (!tr) return;
-
-        insertTableRowNameIntoNotes(table, tr);
-      }, { passive:false });
-    });
-  });
-
-  // add expand buttons on table footers
-  wireTableFooterExpandButtons(root);
-}
 
 /* ---------------------------
    Boot
@@ -1590,5 +1569,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initNotesExpanders(document);
   initNotesLinkingOption2Only(document);
   initTableNotesButtons(document);
+  initTablePopupExpandButtons(document);
   updateNoteIconStates(document);
 });
