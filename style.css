@@ -461,6 +461,43 @@ main{
   color:#fff;
 }
 
+/* =========================================
+   NOTES LINK BUTTON (📝) — SMALLER
+   Paste near your existing .note-link-btn block
+========================================= */
+.note-link-btn{
+  width:18px;
+  height:18px;
+  font-size:10px;
+  border-radius:999px;
+}
+.note-link-btn:hover{
+  transform:translateY(-1px);
+}
+
+/* (optional) slightly tighter gap between field and icon */
+.checklist-row .row-actions{
+  gap:6px !important;
+}
+
+/* =========================================
+   DMS INTEGRATION — PULL-BASED CHIP = myKaarma GREEN
+   Paste in your DMS Integration section
+========================================= */
+#dms-integration .dms-chip-pull{
+  background:rgba(205,220,57,0.22) !important;   /* myKaarma green (soft) */
+  border-color:rgba(205,220,57,0.65) !important;
+  color:#111827 !important;                     /* readable on light green */
+}
+
+/* If you want PUSH to stay as-is, do nothing.
+   If PUSH is currently being affected by a shared selector, keep this: */
+#dms-integration .dms-chip-push{
+  background:rgba(255,255,255,0.18) !important;
+  border-color:rgba(255,255,255,0.35) !important;
+  color:#fff !important;
+}
+
 /* =======================
    Integrated “+” rows (general)
 ======================= */
