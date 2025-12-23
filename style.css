@@ -601,45 +601,71 @@ main{
 }
 
 /* =======================================================
-   DEALERSHIP INFO — Additional POC (BASE) width match
-   Base card has + button, so input must account for it
+   CONTACT CARDS — TRUE COMPACT MODE (HALF-SIZE)
+   - Shrinks ALL contact card inputs
+   - Keeps + button attached
+   - Scoped ONLY to Primary Contacts + Additional POC
 ======================================================= */
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
-  /* make the base input the same visual width as clones */
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  max-width:calc(var(--input-width) - 34px) !important;
+
+/* 1) Make all text inputs in contact cards smaller */
+#dealership-info .primary-contacts-grid input[type="text"],
+#dealership-info .primary-contacts-grid input[type="email"],
+#dealership-info .primary-contacts-grid input[type="tel"]{
+  height:26px !important;
+  min-height:26px !important;
+  max-height:26px !important;
+
+  font-size:11.5px !important;
+  padding:4px 8px !important;
+  line-height:1.2 !important;
 }
 
-/* =======================================================
-   DEALERSHIP INFO — Additional POC clones
-   - cloned cards have NO + button, so input should be fully rounded
-   - match size/width to other right-side fields
-======================================================= */
+/* 2) Integrated + rows should stretch so input + button stay flush */
+#dealership-info .primary-contacts-grid .checklist-row.integrated-plus{
+  align-items:stretch !important;
+}
+
+/* 3) Match + button size to the smaller inputs (prevents separation) */
 #dealership-info .primary-contacts-grid
-  .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
+  .checklist-row.integrated-plus > .add-row{
+  height:26px !important;
+  min-height:26px !important;
+  max-height:26px !important;
+
+  width:26px !important;
+  min-width:26px !important;
+
+  font-size:16px !important;
+  line-height:1 !important;
+}
+
+/* 4) BASE Additional POC: input width must account for + button */
 #dealership-info .primary-contacts-grid
-  .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
 
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
+  flex:0 0 calc(var(--input-width) - 26px) !important;
+  width:calc(var(--input-width) - 26px) !important;
+  max-width:calc(var(--input-width) - 26px) !important;
 
-  /* full rounded like normal inputs */
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
-  border-top-left-radius:var(--radius-sm) !important;
-  border-bottom-left-radius:var(--radius-sm) !important;
+  /* base row still has split radius because + is attached */
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
 
-  /* match standard right-side field sizing */
+/* 5) CLONED Additional POC cards: no + button, so fully rounded */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-clone="true"]
+  .checklist-row.integrated-plus input[type="text"],
+#dealership-info .primary-contacts-grid
+  .additional-poc-card:not([data-base="true"])
+  .checklist-row.integrated-plus input[type="text"]{
+
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
 
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) !important;
 }
 
 /* Dealership Address card */
@@ -704,26 +730,6 @@ main{
   margin:6px 10px 10px;
   font-size:12px;
   color:#555;
-}
-
-/* =======================================================
-   CONTACT CARDS — Smaller text inputs only
-   (Primary Contacts + Additional POC)
-======================================================= */
-
-/* Target text inputs inside contact cards only */
-#dealership-info .primary-contacts-grid
-  input[type="text"],
-#dealership-info .primary-contacts-grid
-  input[type="email"],
-#dealership-info .primary-contacts-grid
-  input[type="tel"]{
-
-  height:30px !important;          /* was 34px */
-  font-size:12px !important;       /* slightly smaller text */
-  padding:5px 8px !important;      /* tighter padding */
-
-  border-radius:var(--radius-sm);
 }
 
 /* =======================
