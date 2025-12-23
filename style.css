@@ -1189,29 +1189,14 @@ main{
   color:#fff !important;
 }
 #dms-integration .dms-chip-pull{
-  background:rgba(205,220,57,0.22) !important;
-  border-color:rgba(205,220,57,0.65) !important;
-  color:#111827 !important;
-}
+  background:rgba(205,220,57,0.18);        /* myKaarma green tint */
+ border-color:rgba(255,255,255,0.35) !important;
+  color:#fff !important;                       /* readable green text */
 #dms-integration .dms-chip-push{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-
-/* =======================================================
-   DMS INTEGRATION — Push-based BODY badge
-   - myKaarma green
-   - SAME treatment as Push-based (light tint, border, text)
-   - Does NOT affect headers
-======================================================= */
-
-#dms-integration .dms-list .dms-tag-push{
-  background:rgba(205,220,57,0.18);        /* myKaarma green tint */
-  border-color:rgba(255,255,255,0.35) !important;
-  color:#fff !important;                      
-}
-
 
 #dms-integration .dms-list{
   list-style:none;
