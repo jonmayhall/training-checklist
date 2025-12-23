@@ -1514,3 +1514,40 @@ main{
   padding-right: 30px !important; /* room for the icon */
   resize: none;              /* optional, keeps UI clean */
 }
+
+/* ===========================================================
+   TABLE PATCHES
+   - Opcodes: center first column checkboxes
+   - Training tables: center Names column
+   - Training checklist: more space between checkbox + name field
+   =========================================================== */
+
+/* 1) Opcodes table: center checkbox in first column */
+#opcodes-pricing .training-table td:first-child{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+#opcodes-pricing .training-table td:first-child input[type="checkbox"]{
+  display:inline-block !important;
+  margin:0 auto !important;
+}
+
+/* 2) ALL training tables: center the "Names" column (2nd column) */
+.training-table th:nth-child(2),
+.training-table td:nth-child(2){
+  text-align:center !important;
+}
+
+/* 3) Training Checklist table: add padding between checkbox + name textbox */
+#training-checklist .training-table td:first-child{
+  gap:12px !important;         /* was 6px */
+  padding-left:10px !important;
+  padding-right:10px !important;
+}
+#training-checklist .training-table td:first-child input[type="checkbox"]{
+  margin:0 !important;
+}
+#training-checklist .training-table td:first-child input[type="text"]{
+  padding-left:10px !important;  /* nicer text inset */
+  padding-right:10px !important;
+}
