@@ -1,4 +1,4 @@
-/* =======================================================
+ /* =======================================================
    myKaarma Interactive Training Checklist — CLEANED CSS
    ✅ Single source of truth
    ✅ Preserves: Support Tickets + DMS + Primary Contacts + Equal-height 2-col cards
@@ -1333,6 +1333,13 @@ main{
   background:rgba(156,163,175,0.18);
   border-color:rgba(156,163,175,0.45);
   color:#374151;
+}
+
+/* Stronger + higher-specificity Pull header chip */
+#dms-integration .dms-card-header .dms-chip.dms-chip-pull{
+  background: rgba(205,220,57,0.45) !important;  /* was 0.18 (too subtle) */
+  border-color: rgba(255,255,255,0.35) !important;
+  color:#fff !important;
 }
 
 /* =======================
