@@ -1562,22 +1562,29 @@ function openTableModalForTable(originalTable, titleText){
 function ensureExpandBtnInTableFooter(table){
   const container = table.closest(".table-container");
   if (!container) return;
+
   const footer = qs(".table-footer", container);
   if (!footer) return;
 
+  // ✅ don’t duplicate
   if (qs(".mk-table-expand-btn", footer)) return;
 
   const btn = document.createElement("button");
   btn.type = "button";
-  btn.className = "mk-table-expand-btn";
+
+  // ✅ MATCH the Notes expander exactly (same class)
+  btn.className = "mk-ta-expand mk-table-expand-btn";
+
   btn.title = "Expand table";
   btn.setAttribute("aria-label","Expand table");
   btn.textContent = "⤢";
 
-  footer.style.justifyContent = "space-between";
-
+  // keep footer layout intact; just push to the right
   const rightWrap = document.createElement("div");
+  rightWrap.className = "mk-table-expand-wrap";
   rightWrap.style.marginLeft = "auto";
+  rightWrap.style.display = "flex";
+  rightWrap.style.alignItems = "center";
   rightWrap.appendChild(btn);
   footer.appendChild(rightWrap);
 
@@ -1590,6 +1597,7 @@ function ensureExpandBtnInTableFooter(table){
     openTableModalForTable(table, t);
   });
 }
+
 function initTablePopupExpandButtons(root=document){
   const targets = [
     "#training-checklist table.training-table",
