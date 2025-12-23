@@ -1,15 +1,13 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js
-   ✅ Includes:
-   - LocalStorage save/restore for inputs/selects/textareas
-   - Sidebar navigation + dealership name display
-   - Reset This Page + Clear All
-   - Dynamic "Add Row" (tables + trainer + additional POC)
-   - Support Tickets add/move by status
-   - ✅ NEW: Adds "Notes" icon column to:
-       - ALL Training Checklist tables
-       - Opcodes table
-     And clicking the icon scrolls to the correct Notes section
+   myKaarma Interactive Training Checklist — FULL script.js (UPDATED / CLEAN)
+   ✅ Preserves layout + all existing behaviors
+   ✅ Nav clicks work
+   ✅ Add Trainer (+) works
+   ✅ Support Tickets: add/remove, status move, validation scoped, base clears after add
+   ✅ Autosave + reset/clear + PDF + onsite dates end default
+   ✅ NOTES LINKING (single 📝 icon) for checklist rows
+   ✅ NOTES POP-OUT (⤢) modal for Notes textareas
+   ✅ TABLE NOTES BUTTONS (🗨️) injected into tables + links to the page Notes
    ======================================================= */
 
 /* ---------------------------
@@ -24,193 +22,27 @@ function isField(el){
   return (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA");
 }
 
-function getFieldKey(el){
-  if (el.id) return `mkc:${el.id}`;
-  if (el.name) return `mkc:${el.name}`;
-  const dk = el.getAttribute("data-key");
-  if (dk) return `mkc:${dk}`;
-
-  // Fallback: stable-ish key using section + index
-  const sec = el.closest(".page-section");
-  const secId = sec?.id || "unknown";
-  const fields = qsa("input, select, textarea", sec || document);
-  const idx = fields.indexOf(el);
-  return `mkc:${secId}:${idx}`;
+function uid(){
+  return "id_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
 }
 
-function setDealershipNameDisplay(){
-  const src = qs("#dealershipNameInput");
-  const out = qs("#dealershipNameDisplay");
-  if (!out) return;
-  out.textContent = (src?.value || "").trim();
-}
-
-/* ---------------------------
-   LocalStorage persistence
---------------------------- */
-function saveField(el){
-  if (!isField(el)) return;
-
-  // Skip disabled selects we "lock" (ticket status)
-  if (el.disabled && el.classList.contains("ticket-status-select")) return;
-
-  const key = getFieldKey(el);
-  const val = (el.type === "checkbox") ? (el.checked ? "1" : "0") : el.value;
-  localStorage.setItem(key, val);
-}
-
-function loadField(el){
-  if (!isField(el)) return;
-
-  const key = getFieldKey(el);
-  const saved = localStorage.getItem(key);
-  if (saved === null) return;
-
-  if (el.type === "checkbox"){
-    el.checked = (saved === "1");
-  } else {
-    el.value = saved;
-  }
-
-  // Dealership name topbar sync
-  if (el.id === "dealershipNameInput") setDealershipNameDisplay();
-
-  // Date placeholder class
-  if (el.type === "date"){
-    if (el.value) el.classList.remove("is-placeholder");
-    else el.classList.add("is-placeholder");
-  }
-}
-
-function restoreAllFields(){
-  qsa("input, select, textarea").forEach(loadField);
-  setDealershipNameDisplay();
-}
-
-function wireAutosave(){
-  document.addEventListener("input", (e)=>{
-    const el = e.target;
-    if (!isField(el)) return;
-
-    // Date placeholder class
-    if (el.type === "date"){
-      if (el.value) el.classList.remove("is-placeholder");
-      else el.classList.add("is-placeholder");
-    }
-
-    saveField(el);
-
-    if (el.id === "dealershipNameInput") setDealershipNameDisplay();
-  });
-
-  document.addEventListener("change", (e)=>{
-    const el = e.target;
-    if (!isField(el)) return;
-    saveField(el);
-
-    if (el.id === "dealershipNameInput") setDealershipNameDisplay();
-  });
-}
-
-/* ---------------------------
-   Page Navigation
---------------------------- */
-function showSection(id){
-  const sections = qsa(".page-section");
-  sections.forEach(s => s.classList.remove("active"));
-  const target = qs(`#${id}`);
-  if (target) target.classList.add("active");
-
-  qsa(".nav-btn").forEach(btn=>{
-    btn.classList.toggle("active", btn.dataset.target === id);
-  });
-
-  // Run height sync if your CSS uses two-col grids
-  syncTwoColHeights();
-
-  // Tiny scroll reset
-  window.scrollTo({ top: 0, behavior: "instant" });
-}
-
-function wireNav(){
-  qsa(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.dataset.target;
-      if (id) showSection(id);
-    });
-  });
-}
-
-/* ---------------------------
-   Reset functions
---------------------------- */
-function clearSection(sectionEl){
-  if (!sectionEl) return;
-
-  const fields = qsa("input, select, textarea", sectionEl);
-
-  fields.forEach(el=>{
-    const key = getFieldKey(el);
-    localStorage.removeItem(key);
-
-    if (el.type === "checkbox"){
-      el.checked = false;
-    } else if (el.tagName === "SELECT"){
-      // prefer ghost option if present
-      const ghost = qsa("option", el).find(o => o.dataset.ghost === "true");
-      el.value = ghost ? ghost.value : "";
-    } else {
-      el.value = "";
-    }
-
-    if (el.type === "date"){
-      el.classList.add("is-placeholder");
-    }
-  });
-
-  // Remove dynamically injected rows/cards inside this page
-  qsa("[data-injected='true']", sectionEl).forEach(n => n.remove());
-  qsa("[data-cloned='true']", sectionEl).forEach(n => n.remove());
-
-  // Support tickets: clear all non-base tickets in this page
-  qsa(".ticket-group", sectionEl).forEach(group=>{
-    if (!group.hasAttribute("data-base")) group.remove();
-  });
-
-  // Reset dealership name display if we are on dealership page
-  if (sectionEl.id === "dealership-info") setDealershipNameDisplay();
-
-  // Rebuild notes columns after clearing dynamic rows
-  addNotesColumnsEverywhere();
-
-  // Re-sync heights
-  syncTwoColHeights();
-}
-
-function clearAll(){
-  // Remove only our keys
-  Object.keys(localStorage).forEach(k=>{
-    if (k.startsWith("mkc:")) localStorage.removeItem(k);
-  });
-
-  // Clear UI
-  qsa(".page-section").forEach(sec=> clearSection(sec));
-
-  // Return to first page
-  showSection("trainers-deployment");
+function safeTrim(v){
+  return (v ?? "").toString().trim();
 }
 
 /* ---------------------------
    Optional 2-col height sync
 --------------------------- */
 function syncTwoColHeights(){
-  const grids = qsa(".cards-grid.two-col, .two-col-grid");
+  const grids = qsa(".cards-grid.two-col, .two-col-grid, .grid-2");
   grids.forEach(grid=>{
     const cards = qsa(":scope > .section-block", grid);
     if (cards.length < 2) return;
 
+    // clear
     cards.forEach(c=> c.style.minHeight = "");
 
+    // pairs
     for (let i=0; i<cards.length; i+=2){
       const a = cards[i];
       const b = cards[i+1];
@@ -223,457 +55,1224 @@ function syncTwoColHeights(){
 }
 
 /* ---------------------------
-   Dynamic add-row: Trainers
+   Storage keying
 --------------------------- */
-function wireAdditionalTrainers(){
-  const baseRow = qs("#trainers-deployment .checklist-row[data-base='true']");
-  const container = qs("#additionalTrainersContainer");
-  if (!baseRow || !container) return;
+function ensureUID(el){
+  if (!el) return null;
+  if (el.dataset && el.dataset.uid) return el.dataset.uid;
+  const newId = uid();
+  el.dataset.uid = newId;
+  return newId;
+}
 
-  const addBtn = qs(".add-row", baseRow);
-  if (!addBtn) return;
+function getFieldKey(el){
+  if (el.id)   return `mkc:${el.id}`;
+  if (el.name) return `mkc:${el.name}`;
+  const dk = el.getAttribute("data-key");
+  if (dk) return `mkc:${dk}`;
+  const u = ensureUID(el);
+  return `mkc:uid:${u}`;
+}
 
-  addBtn.addEventListener("click", ()=>{
-    const input = qs("input", baseRow);
-    const name = (input?.value || "").trim();
+function saveField(el){
+  try{
+    const key = getFieldKey(el);
+    let val = "";
+    if (el.type === "checkbox") val = el.checked ? "1" : "0";
+    else val = el.value ?? "";
+    localStorage.setItem(key, val);
+  }catch(e){}
+}
 
-    if (!name){
-      input?.focus();
-      return;
-    }
+function loadField(el){
+  try{
+    const key = getFieldKey(el);
+    const stored = localStorage.getItem(key);
+    if (stored === null) return;
 
-    const row = baseRow.cloneNode(true);
-    row.removeAttribute("data-base");
-    row.setAttribute("data-injected", "true");
+    if (el.type === "checkbox") el.checked = (stored === "1");
+    else el.value = stored;
 
-    const rowInput = qs("input", row);
-    if (rowInput) rowInput.value = name;
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+  }catch(e){}
+}
 
-    // Remove + button from cloned rows
-    const btn = qs(".add-row", row);
-    if (btn) btn.remove();
+function clearFieldStorage(el){
+  try{
+    const key = getFieldKey(el);
+    localStorage.removeItem(key);
+  }catch(e){}
+}
 
-    container.appendChild(row);
+/* ---------------------------
+   Ghost placeholder support
+--------------------------- */
+function applySelectGhost(sel){
+  if (!sel || sel.tagName !== "SELECT") return;
+  const opt = sel.selectedOptions && sel.selectedOptions[0];
+  const ghost = (!sel.value) || (opt && opt.dataset && opt.dataset.ghost === "true");
+  if (ghost) sel.classList.add("is-placeholder");
+  else sel.classList.remove("is-placeholder");
+}
 
-    // clear base input
-    input.value = "";
-    saveField(input);
+function applyDateGhost(input){
+  if (!input || input.type !== "date") return;
+  if (!input.value) input.classList.add("is-placeholder");
+  else input.classList.remove("is-placeholder");
+}
+
+function initGhosts(){
+  qsa("select").forEach(applySelectGhost);
+  qsa("input[type='date']").forEach(applyDateGhost);
+}
+
+/* ---------------------------
+   Textarea auto-grow
+   (Notes cards are fixed-height; modal handles long edits)
+--------------------------- */
+function autoGrowTA(ta){
+  if (!ta) return;
+  // Don't fight fixed-height Notes cards
+  if (ta.closest(".mk-ta-wrap")) return;
+
+  ta.style.height = "auto";
+  ta.style.height = (ta.scrollHeight + 2) + "px";
+}
+
+function initTextareas(root=document){
+  qsa("textarea", root).forEach(ta=>{
+    autoGrowTA(ta);
+    ta.addEventListener("input", ()=>{
+      autoGrowTA(ta);
+      saveField(ta);
+      requestAnimationFrame(syncTwoColHeights);
+      requestAnimationFrame(()=> updateNoteIconStates(document));
+    });
   });
 }
 
 /* ---------------------------
-   Dynamic add-row: Additional POC cards
+   Page Navigation
 --------------------------- */
-function wireAdditionalPOC(){
-  const baseCard = qs(".additional-poc-card[data-base='true']");
-  if (!baseCard) return;
+function showSection(id){
+  const sections = qsa(".page-section");
+  sections.forEach(s=> s.classList.remove("active"));
+  const target = qs(`#${id}`);
+  if (target) target.classList.add("active");
 
-  const btn = qs(".additional-poc-add", baseCard);
-  if (!btn) return;
+  qsa(".nav-btn").forEach(btn=>{
+    const to = btn.getAttribute("data-section");
+    btn.classList.toggle("active", to === id);
+  });
 
-  btn.addEventListener("click", ()=>{
-    const clone = baseCard.cloneNode(true);
-    clone.removeAttribute("data-base");
-    clone.setAttribute("data-injected", "true");
-    clone.classList.add("is-added");
+  try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
+  requestAnimationFrame(syncTwoColHeights);
+}
 
-    // remove + button on clone
-    const plus = qs(".additional-poc-add", clone);
-    if (plus) plus.remove();
+function initNav(){
+  qsa(".nav-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-section");
+      if (id) showSection(id);
+    });
+  });
 
-    // clear fields in clone
-    qsa("input, select, textarea", clone).forEach(el=>{
-      if (el.type === "checkbox") el.checked = false;
-      else if (el.tagName === "SELECT") el.value = "";
-      else el.value = "";
+  // restore last page
+  const last = (()=>{ try{ return localStorage.getItem("mkc:lastPage"); }catch(e){ return null; } })();
+  const first = qsa(".page-section")[0]?.id;
+  showSection(last || first || "dealership-info");
+}
+
+/* ---------------------------
+   Reset This Page / Clear All
+--------------------------- */
+function resetSection(section){
+  if (!section) return;
+
+  // clear fields in this section
+  qsa("input, select, textarea", section).forEach(el=>{
+    if (!isField(el)) return;
+    clearFieldStorage(el);
+
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+
+    if (el.tagName === "SELECT"){
+      if (el.options && el.options.length) el.selectedIndex = 0;
+      applySelectGhost(el);
+    }
+    if (el.type === "date") applyDateGhost(el);
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
+  });
+
+  // remove cloned rows/cards
+  qsa("[data-clone='true']", section).forEach(n=> n.remove());
+
+  // Trainers clones container
+  const atc = qs("#additionalTrainersContainer", section);
+  if (atc) atc.innerHTML = "";
+
+  // Support Tickets: clear non-base in all stacks
+  if (section.id === "support-tickets"){
+    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"].forEach(id=>{
+      const c = qs(`#${id}`, section);
+      if (c) c.innerHTML = "";
     });
 
-    baseCard.parentElement.appendChild(clone);
+    const open = qs("#openTicketsContainer", section);
+    if (open){
+      qsa(".ticket-group", open).forEach(card=>{
+        if (card.dataset.base === "true") return;
+        card.remove();
+      });
+
+      const base = qs(".ticket-group[data-base='true']", open);
+      if (base){
+        qsa("input, textarea, select", base).forEach(el=>{
+          clearFieldStorage(el);
+          if (el.type === "checkbox") el.checked = false;
+          else el.value = "";
+          if (el.tagName === "SELECT") applySelectGhost(el);
+        });
+      }
+    }
+  }
+
+  requestAnimationFrame(()=>{
+    initTextareas(section);
+    syncTwoColHeights();
+    initNotesLinkingOption2Only(section);
+    updateNoteIconStates(section);
+    initNotesExpanders(section);
+    initTableNotesButtons(section);
+  });
+}
+
+function initResets(){
+  qsa(".clear-page-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const sec = btn.closest(".page-section");
+      if (sec) resetSection(sec);
+    });
+  });
+
+  const clearAll = qs("#clearAllBtn");
+  if (clearAll){
+    clearAll.addEventListener("click", ()=>{
+      try{
+        const keys = [];
+        for (let i=0; i<localStorage.length; i++){
+          const k = localStorage.key(i);
+          if (k && k.startsWith("mkc:")) keys.push(k);
+        }
+        keys.forEach(k=> localStorage.removeItem(k));
+      }catch(e){}
+
+      qsa(".page-section").forEach(sec=> resetSection(sec));
+      try{ localStorage.removeItem("mkc:lastPage"); }catch(e){}
+    });
+  }
+}
+
+/* ---------------------------
+   Persistence
+--------------------------- */
+function initPersistence(){
+  // load initial
+  qsa("input, select, textarea").forEach(el=>{
+    if (!isField(el)) return;
+    ensureUID(el);
+    loadField(el);
+  });
+
+  document.addEventListener("input", (e)=>{
+    const el = e.target;
+    if (!isField(el)) return;
+
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+
+    saveField(el);
+
+    if (el.id === "dealershipNameInput"){
+      updateDealershipNameDisplay(el.value);
+    }
+
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+  });
+
+  document.addEventListener("change", (e)=>{
+    const el = e.target;
+    if (!isField(el)) return;
+
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+
+    saveField(el);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
   });
 }
 
 /* ---------------------------
-   Dynamic add-row: Tables (+ buttons)
+   Training tables: Add Row (+)
 --------------------------- */
-function wireTableAddRowButtons(){
+function cloneTrainingRow(row){
+  const clone = row.cloneNode(true);
+  clone.dataset.clone = "true";
+
+  qsa("input, select, textarea", clone).forEach(el=>{
+    if (!isField(el)) return;
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+
+    ensureUID(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
+
+  return clone;
+}
+
+function initTableAddRow(){
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".table-footer .add-row");
     if (!btn) return;
 
     const container = btn.closest(".table-container");
-    const table = qs("table", container);
+    const table = qs("table.training-table", container);
     const tbody = qs("tbody", table);
-    if (!table || !tbody) return;
+    if (!tbody) return;
 
-    const rows = qsa("tr", tbody);
-    const template = rows[rows.length - 1];
-    if (!template) return;
+    const last = tbody.querySelector("tr:last-child");
+    if (!last) return;
 
-    const clone = template.cloneNode(true);
-    clone.setAttribute("data-injected", "true");
+    const clone = cloneTrainingRow(last);
+    tbody.appendChild(clone);
+    clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
 
-    // clear inputs/selects in the new row
+    requestAnimationFrame(()=>{
+      initTextareas(container);
+      syncTwoColHeights();
+      initNotesLinkingOption2Only(document);
+      updateNoteIconStates(document);
+      initNotesExpanders(document);
+      initTableNotesButtons(document);
+    });
+  });
+}
+
+/* ---------------------------
+   Onsite Training Dates: end defaults to start + 2
+--------------------------- */
+function addDaysISO(iso, days){
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function initOnsiteTrainingDates(){
+  const start = qs("#onsiteStartDate");
+  const end   = qs("#onsiteEndDate");
+  if (!start || !end) return;
+
+  start.addEventListener("change", ()=>{
+    if (!start.value) return;
+    if (end.value) return;
+    const v = addDaysISO(start.value, 2);
+    if (v){
+      end.value = v;
+      applyDateGhost(end);
+      saveField(end);
+    }
+  });
+}
+
+/* ---------------------------
+   Trainers page: Additional Trainers (+)
+--------------------------- */
+function initAdditionalTrainers(){
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest(
+      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+    );
+    if (!addBtn) return;
+
+    const page = qs("#trainers-deployment");
+    if (!page) return;
+
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
+    const container = qs("#additionalTrainersContainer", page);
+
+    const newRow = document.createElement("div");
+    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
+    newRow.dataset.clone = "true";
+    newRow.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" placeholder="Enter additional trainer name">
+    `;
+
+    const input = qs("input", newRow);
+    if (input){
+      ensureUID(input);
+      loadField(input);
+    }
+
+    if (container) container.appendChild(newRow);
+    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+
+    if (input) input.focus();
+
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(page);
+      updateNoteIconStates(page);
+      syncTwoColHeights();
+      initNotesExpanders(page);
+      initTableNotesButtons(page);
+    });
+  });
+}
+
+/* ---------------------------
+   Primary Contacts: Additional POC (+)
+--------------------------- */
+function initAdditionalPOC(){
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .add-row, .additional-poc-card[data-base='true'] .additional-poc-add");
+    if (!btn) return;
+
+    const baseCard = btn.closest(".additional-poc-card");
+    if (!baseCard) return;
+
+    const grid = baseCard.parentElement;
+    if (!grid) return;
+
+    const clone = baseCard.cloneNode(true);
+    clone.dataset.clone = "true";
+    clone.removeAttribute("data-base");
+
+    // remove the add button from clone
+    const addBtn = qs(".additional-poc-add, .add-row", clone);
+    if (addBtn) addBtn.remove();
+
     qsa("input, select, textarea", clone).forEach(el=>{
+      if (!isField(el)) return;
       if (el.type === "checkbox") el.checked = false;
-      else if (el.tagName === "SELECT") el.value = "";
       else el.value = "";
+
+      ensureUID(el);
+      if (el.tagName === "SELECT") applySelectGhost(el);
+      if (el.type === "date") applyDateGhost(el);
+      saveField(el);
     });
 
-    tbody.appendChild(clone);
+    grid.appendChild(clone);
+    const firstInput = qs("input, select, textarea", clone);
+    if (firstInput) firstInput.focus();
 
-    // Ensure notes column exists + correct cell exists in new row
-    ensureNotesColumnForTable(table);
-
-    // Re-apply persistence keys will be generated on save (fallback index changes are okay)
+    requestAnimationFrame(()=>{
+      initNotesLinkingOption2Only(document);
+      updateNoteIconStates(document);
+      syncTwoColHeights();
+      initNotesExpanders(document);
+      initTableNotesButtons(document);
+    });
   });
 }
 
 /* ---------------------------
    Support Tickets
 --------------------------- */
-function getTicketContainers(){
-  return {
-    Open: qs("#openTicketsContainer"),
-    "Tier Two": qs("#tierTwoTicketsContainer"),
-    "Closed - Resolved": qs("#closedResolvedTicketsContainer"),
-    "Closed - Feature Not Supported": qs("#closedFeatureTicketsContainer"),
-  };
+function statusToContainerId(status){
+  switch(status){
+    case "Open": return "openTicketsContainer";
+    case "Tier Two": return "tierTwoTicketsContainer";
+    case "Closed - Resolved": return "closedResolvedTicketsContainer";
+    case "Closed - Feature Not Supported": return "closedFeatureTicketsContainer";
+    default: return "openTicketsContainer";
+  }
 }
 
-function lockTicketStatus(selectEl, value){
-  if (!selectEl) return;
-  selectEl.value = value;
-  selectEl.disabled = true;
-  selectEl.setAttribute("aria-disabled", "true");
+function lockOpenSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.value = "Open";
+  sel.disabled = true;
+  applySelectGhost(sel);
+  saveField(sel);
+}
+
+function unlockStatusSelect(card){
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.disabled = false;
+  if (!sel.value) sel.value = "Open";
+  applySelectGhost(sel);
+  saveField(sel);
 }
 
 function isTicketCardComplete(card){
-  const num = qs(".ticket-number-input", card)?.value?.trim();
-  const url = qs(".ticket-zendesk-input", card)?.value?.trim();
-  const summary = qs(".ticket-summary-input", card)?.value?.trim();
-  return !!(num && url && summary);
+  const num = safeTrim(qs(".ticket-number-input", card)?.value);
+  const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
+  const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
+  return !!(num && url && sum);
 }
 
-function wireSupportTickets(){
-  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']");
-  if (!openBase) return;
+function makeTicketCloneFromBase(baseCard){
+  const clone = baseCard.cloneNode(true);
+  clone.dataset.clone = "true";
+  clone.removeAttribute("data-base");
 
-  // Ensure base status is locked to Open
-  lockTicketStatus(qs(".ticket-status-select", openBase), "Open");
+  qsa("input, textarea, select", clone).forEach(el=>{
+    if (!isField(el)) return;
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+    ensureUID(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
 
+  // remove disclaimer on clones
+  const disc = qs(".ticket-disclaimer", clone);
+  if (disc) disc.remove();
+
+  // convert add -> remove
+  const addBtn = qs(".add-ticket-btn", clone);
+  if (addBtn){
+    addBtn.textContent = "×";
+    addBtn.title = "Remove Ticket";
+    addBtn.classList.add("remove-ticket-btn");
+    addBtn.classList.remove("add-ticket-btn");
+  }
+
+  const sel = qs(".ticket-status-select", clone);
+  if (sel){
+    sel.value = "Open";
+    applySelectGhost(sel);
+    saveField(sel);
+  }
+
+  unlockStatusSelect(clone);
+  return clone;
+}
+
+function moveTicketCard(card, newStatus){
+  const page = qs("#support-tickets");
+  if (!page || !card) return;
+
+  const destId = statusToContainerId(newStatus);
+  const dest = qs(`#${destId}`, page);
+  if (!dest) return;
+
+  dest.appendChild(card);
+
+  if (destId === "openTicketsContainer" && card.dataset.base === "true"){
+    lockOpenSelect(card);
+  }else{
+    unlockStatusSelect(card);
+  }
+}
+
+function initSupportTickets(){
+  const page = qs("#support-tickets");
+  if (!page) return;
+
+  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
+  if (openBase) lockOpenSelect(openBase);
+
+  // add/remove
   document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
-    if (!addBtn) return;
+    const removeBtn = e.target.closest(".remove-ticket-btn");
+    if (!addBtn && !removeBtn) return;
 
-    const card = addBtn.closest(".ticket-group");
+    const card = e.target.closest(".ticket-group");
     if (!card) return;
 
-    // Only allow add if current card is complete
-    if (!isTicketCardComplete(card)){
-      // focus first missing
-      const n = qs(".ticket-number-input", card);
-      const u = qs(".ticket-zendesk-input", card);
-      const s = qs(".ticket-summary-input", card);
-      if (!n?.value?.trim()) n?.focus();
-      else if (!u?.value?.trim()) u?.focus();
-      else s?.focus();
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (removeBtn){
+      qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
+      card.remove();
       return;
     }
 
-    // Create new ticket card in OPEN section
-    const clone = card.cloneNode(true);
-    clone.removeAttribute("data-base");
-    clone.setAttribute("data-injected", "true");
+    // adding
+    if (!isTicketCardComplete(card)){
+      alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
+      return;
+    }
 
-    // Clear fields
-    qsa("input, textarea, select", clone).forEach(el=>{
-      if (el.tagName === "SELECT") el.value = "Open";
-      else el.value = "";
-    });
+    const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
+    const newCard = makeTicketCloneFromBase(base);
 
-    // Lock status select to Open
-    lockTicketStatus(qs(".ticket-status-select", clone), "Open");
+    const openContainer = qs("#openTicketsContainer", page);
+    if (openContainer) openContainer.appendChild(newCard);
 
-    // Remove disclaimer from clones
-    const disclaimer = qs(".ticket-disclaimer", clone);
-    if (disclaimer) disclaimer.remove();
+    // clear base if base add
+    if (card.dataset.base === "true"){
+      [qs(".ticket-number-input", card), qs(".ticket-zendesk-input", card), qs(".ticket-summary-input", card)]
+        .forEach(el=>{
+          if (!el) return;
+          clearFieldStorage(el);
+          el.value = "";
+          saveField(el);
+        });
+      lockOpenSelect(card);
+    }
 
-    // Add clone after current
-    const openContainer = qs("#openTicketsContainer");
-    openContainer.appendChild(clone);
+    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  // If you ever decide to allow changing status later, you can unlock + move cards here.
+  // status move
+  document.addEventListener("change", (e)=>{
+    const sel = e.target.closest("#support-tickets .ticket-status-select");
+    if (!sel) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    if (card.dataset.base === "true"){
+      lockOpenSelect(card);
+      return;
+    }
+
+    moveTicketCard(card, sel.value);
+  });
 }
 
 /* ---------------------------
-   Google Map helpers (address)
+   Dealership Name display + Map
 --------------------------- */
+function updateDealershipNameDisplay(name){
+  const display = qs("#dealershipNameDisplay");
+  if (!display) return;
+  display.textContent = safeTrim(name);
+  try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
+}
+
+function restoreDealershipNameDisplay(){
+  try{
+    const v = localStorage.getItem("mkc:dealershipNameDisplay");
+    if (v) updateDealershipNameDisplay(v);
+  }catch(e){}
+}
+
 function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame");
+  const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
   if (!frame) return;
-
-  const encoded = encodeURIComponent(address);
-  frame.src = `https://www.google.com/maps?q=${encoded}&z=14&output=embed`;
+  const q = encodeURIComponent(address);
+  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+  try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
 }
 
-function wireMapButton(){
-  const btn = qs("#openAddressInMapsBtn");
-  const input = qs("#dealershipAddressInput");
-  if (!btn || !input) return;
-
-  btn.addEventListener("click", ()=>{
-    const addr = (input.value || "").trim();
-    if (!addr) return;
-    updateDealershipMap(addr);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, "_blank");
-  });
+function restoreDealershipMap(){
+  try{
+    const addr = localStorage.getItem("mkc:dealershipMapAddress");
+    if (addr) updateDealershipMap(addr);
+  }catch(e){}
 }
 
-/* =======================================================
-   ✅ NOTES ICON COLUMN (NEW)
-   - Adds a Notes header + icon cell to the end of each row
-   - Clicking icon navigates to that table’s Notes block
-======================================================= */
-
-/** Map tables -> notes target ids (add these ids in HTML if possible) */
-const NOTES_TARGETS_BY_SECTION_TITLE = {
-  "Technicians – Checklist": "notes-techs",
-  "Service Advisors – Checklist": "notes-advisors",
-  "Parts Representatives – Checklist": "notes-parts",
-  "Shop Foreman / Shop Dispatcher – Checklist": "notes-foreman",
-  "BDC / Scheduler – Checklist": "notes-bdc",
-  "PU&D Drivers – Checklist": "notes-pud-drivers",
-  "PU&D Dispatcher – Checklist": "notes-pud-dispatch",
-};
-
-function getSectionHeaderTitleForTable(table){
-  const section = table.closest(".section");
-  const titleEl = section ? qs(".section-header span, .section-header", section) : null;
-  if (!titleEl) return "";
-  return (titleEl.textContent || "").trim();
-}
-
-/** Fallback: locate the closest Notes block inside the same page-section */
-function findFallbackNotesBlockId(table){
-  const page = table.closest(".page-section");
-  if (!page) return "";
-
-  // If table is in Opcodes page, prefer "Notes — Opcodes & Pricing"
-  if (page.id === "opcodes-pricing"){
-    const block = qsa(".section-block", page).find(b=>{
-      const h = qs("h2", b);
-      return h && (h.textContent || "").trim().toLowerCase().includes("notes — opcodes");
-    });
-    if (block){
-      if (!block.id) block.id = "notes-opcodes";
-      return block.id;
-    }
-    return "notes-opcodes";
+/* ---------------------------
+   PDF Export
+--------------------------- */
+async function exportAllPagesPDF(){
+  const btn = qs("#savePDF");
+  if (btn){
+    btn.disabled = true;
+    btn.textContent = "Saving PDF...";
   }
 
-  // In Training Checklist page, find a Notes block below the table’s section
-  if (page.id === "training-checklist"){
-    const section = table.closest(".section");
-    if (section){
-      // find next sibling section-block with h2 containing "Notes"
-      let node = section.nextElementSibling;
-      while (node){
-        if (node.classList?.contains("section-block")){
-          const h2 = qs("h2", node);
-          if (h2 && (h2.textContent || "").trim().toLowerCase().startsWith("notes")){
-            if (!node.id){
-              // best effort id
-              node.id = "notes-" + Math.random().toString(16).slice(2);
-            }
-            return node.id;
-          }
-          // If it’s a section-block but not notes, break (we passed it)
-          break;
-        }
-        node = node.nextElementSibling;
+  const sections = qsa(".page-section");
+  const activeId = qs(".page-section.active")?.id;
+
+  sections.forEach(s=> s.classList.add("active"));
+  await new Promise(r=> setTimeout(r, 80));
+  syncTwoColHeights();
+  await new Promise(r=> setTimeout(r, 80));
+
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF || !window.html2canvas){
+    alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
+    sections.forEach(s=> s.classList.remove("active"));
+    if (activeId) showSection(activeId);
+    if (btn){
+      btn.disabled = false;
+      btn.textContent = "Save All Pages as PDF";
+    }
+    return;
+  }
+
+  const pdf = new jsPDF("p", "pt", "letter");
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+
+  let first = true;
+
+  for (const sec of sections){
+    const canvas = await window.html2canvas(sec, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: -window.scrollY
+    });
+
+    const img = canvas.toDataURL("image/png");
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (!first) pdf.addPage();
+
+    if (imgH <= pageH){
+      pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
+    }else{
+      // slice tall canvas into multiple pages
+      let remaining = imgH;
+      let y = 0;
+
+      const sliceCanvas = document.createElement("canvas");
+      const ctx = sliceCanvas.getContext("2d");
+
+      const pxPerPt = canvas.width / imgW;
+      const pagePxH = Math.floor(pageH * pxPerPt);
+
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = pagePxH;
+
+      while (remaining > 0){
+        ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
+        ctx.drawImage(
+          canvas,
+          0, y * pxPerPt, canvas.width, pagePxH,
+          0, 0, canvas.width, pagePxH
+        );
+
+        const sliceImg = sliceCanvas.toDataURL("image/png");
+        pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
+
+        remaining -= pageH;
+        y += pageH;
+        if (remaining > 0) pdf.addPage();
       }
     }
+
+    first = false;
   }
 
-  // Absolute fallback: first notes block in page
-  const firstNotes = qsa(".section-block", page).find(b=>{
-    const h2 = qs("h2", b);
-    return h2 && (h2.textContent || "").trim().toLowerCase().startsWith("notes");
+  pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
+
+  sections.forEach(s=> s.classList.remove("active"));
+  if (activeId) showSection(activeId);
+
+  if (btn){
+    btn.disabled = false;
+    btn.textContent = "Save All Pages as PDF";
+  }
+}
+
+function initPDF(){
+  const btn = qs("#savePDF");
+  if (!btn) return;
+  btn.addEventListener("click", exportAllPagesPDF);
+}
+
+/* ===========================================================
+   NOTES LINKING — Ordered insert + jump helpers
+=========================================================== */
+function normalizeNoteKey(line){ return (line || "").trim(); }
+
+function getRowOrderKey(row){
+  return normalizeNoteKey(makeNoteLine(row));
+}
+
+function isNotesCardRow(row){
+  const h2 = row.closest(".section-block")?.querySelector("h2");
+  return (h2?.textContent || "").trim().toLowerCase().startsWith("notes");
+}
+
+function getAllRowsInThisNotesGroup(row){
+  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2") || row.closest(".page-section");
+  if (!wrap) return [];
+  return Array.from(wrap.querySelectorAll(".checklist-row"))
+    .filter(r => !isNotesCardRow(r))
+    .filter(r => r.querySelector("input, select, textarea"));
+}
+
+function findExistingNoteLineIndex(lines, baseKey){
+  const k = (baseKey || "").trim();
+  return lines.findIndex(l => (l || "").trim().startsWith(k));
+}
+
+function insertNoteLineInOrder(textarea, clickedRow){
+  const allRows = getAllRowsInThisNotesGroup(clickedRow);
+  const orderedKeys = allRows.map(r => getRowOrderKey(r)).filter(Boolean);
+
+  const baseLine = makeNoteLine(clickedRow);
+  if (!baseLine) return { didInsert:false, lineStart:0 };
+
+  const raw = textarea.value || "";
+  const lines = raw.split("\n");
+
+  const existingIdx = findExistingNoteLineIndex(lines, baseLine);
+  if (existingIdx !== -1){
+    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
+    return { didInsert:false, lineStart:start };
+  }
+
+  const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
+  const appendLine = ()=>{
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert:true, lineStart:startPos };
+  };
+
+  if (myOrder === -1) return appendLine();
+
+  let insertBeforeLineIdx = -1;
+  for (let i = 0; i < lines.length; i++){
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+
+    const matchOrder = orderedKeys.findIndex(k => t.startsWith(k.trim()));
+    if (matchOrder !== -1 && matchOrder > myOrder){
+      insertBeforeLineIdx = i;
+      break;
+    }
+  }
+
+  if (insertBeforeLineIdx === -1) return appendLine();
+
+  lines.splice(insertBeforeLineIdx, 0, baseLine);
+  textarea.value = lines.join("\n");
+
+  const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
+  return { didInsert:true, lineStart:startPos };
+}
+
+function jumpToNoteLine(textarea, lineStart){
+  if (!textarea) return;
+  textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    textarea.focus();
+    const v = textarea.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    textarea.setSelectionRange(endPos, endPos);
+    textarea.classList.add("mk-note-jump");
+    setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
+  }, 120);
+}
+
+/* ===========================================================
+   NOTES LINKING — Option 2 ONLY (single 📝 icon)
+=========================================================== */
+function findNotesTextareaForRow(row){
+  const wrap =
+    row.closest(".cards-grid.two-col") ||
+    row.closest(".two-col-grid") ||
+    row.closest(".grid-2") ||
+    row.closest(".page-section");
+
+  if (!wrap) return null;
+
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block"))
+    .find(card => {
+      const h2 = card.querySelector("h2");
+      return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
+    });
+
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+
+function getCleanQuestionText(row){
+  const label = row.querySelector("label");
+  if (!label) return "";
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n => n.remove());
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
+}
+
+function makeNoteLine(row){
+  const q = getCleanQuestionText(row);
+  if (!q) return "";
+  return `• ${q}:`;
+}
+
+function ensureRowActions(row){
+  let actions = row.querySelector(":scope > .row-actions");
+  if (actions) return actions;
+
+  actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  // keep integrated-plus rows untouched (CSS hides row-actions there anyway)
+  if (row.classList.contains("integrated-plus")){
+    row.appendChild(actions);
+    return actions;
+  }
+
+  const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
+  if (field) actions.appendChild(field);
+  row.appendChild(actions);
+  return actions;
+}
+
+function initNotesLinkingOption2Only(root=document){
+  // remove any old injected icons (safe)
+  qsa(".note-btn, .note-link-btn", root).forEach(n => n.remove());
+
+  qsa(".checklist-row", root).forEach(row=>{
+    if (isNotesCardRow(row)) return;
+
+    // only rows with a field get a note icon
+    const field = row.querySelector("input, select, textarea");
+    if (!field) return;
+
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const actions = ensureRowActions(row);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-link-btn";
+    btn.title = "Add this question to Notes";
+    btn.innerHTML = `
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z"
+          fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
+
+      const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
+      if (didInsert){
+        saveField(textarea);
+        requestAnimationFrame(()=> updateNoteIconStates(document));
+        requestAnimationFrame(syncTwoColHeights);
+      }
+      jumpToNoteLine(textarea, lineStart);
+    });
+
+    actions.appendChild(btn);
   });
-  if (firstNotes){
-    if (!firstNotes.id) firstNotes.id = "notes-" + Math.random().toString(16).slice(2);
-    return firstNotes.id;
-  }
 
-  return "";
+  updateNoteIconStates(root);
 }
 
-function getNotesTargetIdForTable(table){
-  const page = table.closest(".page-section");
-  const pageId = page?.id || "";
-
-  // Opcodes table -> notes-opcodes
-  if (pageId === "opcodes-pricing"){
-    // Use explicit id if you added it; otherwise create it on the notes block
-    const explicit = qs("#notes-opcodes");
-    if (explicit) return "notes-opcodes";
-    return findFallbackNotesBlockId(table) || "notes-opcodes";
-  }
-
-  // Training Checklist tables -> map by section title
-  if (pageId === "training-checklist"){
-    const title = getSectionHeaderTitleForTable(table);
-    const target = NOTES_TARGETS_BY_SECTION_TITLE[title];
-    if (target) return target;
-    return findFallbackNotesBlockId(table);
-  }
-
-  return findFallbackNotesBlockId(table);
-}
-
-/** Use the "same icon style as other pages" — safest is a button with 📝 and shared classes.
-    If you already have an icon class elsewhere, keep these class names and style them in CSS. */
-function buildNotesIconButton(targetId){
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "notes-icon-btn";
-  btn.setAttribute("aria-label", "Open Notes");
-  if (targetId) btn.dataset.notesTarget = targetId;
-
-  // Icon (simple, reliable). If you have an existing SVG elsewhere, swap it here.
-  const span = document.createElement("span");
-  span.className = "notes-icon";
-  span.setAttribute("aria-hidden", "true");
-  span.textContent = "📝";
-
-  btn.appendChild(span);
-  return btn;
-}
-
-function ensureNotesColumnForTable(table){
-  if (!table) return;
-
-  const theadRow = qs("thead tr", table);
-  const tbody = qs("tbody", table);
-  if (!theadRow || !tbody) return;
-
-  // Do we already have a Notes column?
-  const ths = qsa("th", theadRow).map(th => (th.textContent || "").trim().toLowerCase());
-  const hasNotes = ths.includes("notes");
-  if (!hasNotes){
-    const th = document.createElement("th");
-    th.textContent = "Notes";
-    th.className = "notes-col-head";
-    theadRow.appendChild(th);
-  }
-
-  // Ensure each row has the td + button
-  const targetId = getNotesTargetIdForTable(table);
-  qsa("tr", tbody).forEach(tr=>{
-    // If already has a notes cell (by class), skip
-    const existing = qs("td.notes-col-cell", tr);
-    if (existing) return;
-
-    const td = document.createElement("td");
-    td.className = "notes-col-cell";
-
-    const btn = buildNotesIconButton(targetId);
-    td.appendChild(btn);
-
-    tr.appendChild(td);
-  });
-}
-
-function addNotesColumnsEverywhere(){
-  // Training Checklist tables
-  qsa("#training-checklist table.training-table").forEach(ensureNotesColumnForTable);
-
-  // Opcodes table(s)
-  qsa("#opcodes-pricing table.training-table").forEach(ensureNotesColumnForTable);
-}
-
-function flashTarget(el){
-  if (!el) return;
-  el.classList.add("notes-jump-flash");
-  setTimeout(()=> el.classList.remove("notes-jump-flash"), 900);
-}
-
-function scrollToNotesTarget(targetId){
-  if (!targetId) return;
-
-  // If target is not on current page, still works after showSection sets it active.
-  const el = qs(`#${CSS.escape(targetId)}`);
-  if (!el) return;
-
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-  flashTarget(el);
-
-  // focus first textarea if present
-  const ta = qs("textarea", el);
-  ta?.focus?.();
-}
-
-function wireNotesIconClicks(){
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".notes-icon-btn");
+function updateNoteIconStates(root=document){
+  qsa(".checklist-row", root).forEach(row=>{
+    const btn = row.querySelector(".note-link-btn");
     if (!btn) return;
 
-    const targetId = btn.dataset.notesTarget || "";
-    const page = btn.closest(".page-section");
-    const pageId = page?.id || "";
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
 
-    // Make sure we are on the correct page section
-    if (pageId && !page.classList.contains("active")){
-      showSection(pageId);
+    const line = makeNoteLine(row).trim();
+    btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
+  });
+}
+
+/* ===========================================================
+   NOTES POP-OUT (Modal Expander)
+=========================================================== */
+function isNotesCard(card){
+  const h2 = card?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+
+let _mkNotesModalSourceTA = null;
+
+function ensureNotesModal(){
+  let modal = qs("#mkNotesModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkNotesModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Notes">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkNotesModalTitle">Notes</div>
+        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
+      </div>
+      <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e)=>{
+    if (e.target.closest("[data-mk-close='1']")) closeNotesModal();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape" && modal.classList.contains("open")) closeNotesModal();
+  });
+
+  return modal;
+}
+
+function openNotesModal(sourceTA, titleText="Notes"){
+  const modal = ensureNotesModal();
+  const title = qs("#mkNotesModalTitle", modal);
+  const bigTA = qs("#mkNotesModalTextarea", modal);
+
+  _mkNotesModalSourceTA = sourceTA;
+
+  title.textContent = titleText || "Notes";
+  bigTA.value = sourceTA?.value || "";
+
+  bigTA.oninput = ()=>{
+    if (!_mkNotesModalSourceTA) return;
+    _mkNotesModalSourceTA.value = bigTA.value;
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  };
+
+  modal.classList.add("open");
+  setTimeout(()=> bigTA.focus(), 0);
+}
+
+function closeNotesModal(){
+  const modal = qs("#mkNotesModal");
+  if (!modal) return;
+
+  if (_mkNotesModalSourceTA){
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(()=> updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  }
+
+  modal.classList.remove("open");
+  _mkNotesModalSourceTA = null;
+}
+
+function initNotesExpanders(root=document){
+  const notesCards = qsa(".section-block", root).filter(isNotesCard);
+
+  notesCards.forEach(card=>{
+    const ta = qs("textarea", card);
+    if (!ta) return;
+
+    // wrap textarea (once)
+    let wrap = ta.closest(".mk-ta-wrap");
+    if (!wrap){
+      wrap = document.createElement("div");
+      wrap.className = "mk-ta-wrap";
+      ta.parentNode.insertBefore(wrap, ta);
+      wrap.appendChild(ta);
     }
 
-    // If your Notes blocks are on the same page, this will work immediately.
-    // If ids aren't present, scrollToNotesTarget will no-op; add ids for best result.
-    scrollToNotesTarget(targetId);
+    // avoid duplicate buttons
+    if (qs(".mk-ta-expand", wrap)) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-ta-expand";
+    btn.title = "Expand notes";
+    btn.setAttribute("aria-label","Expand notes");
+    btn.textContent = "⤢";
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const h2 = qs("h2", card);
+      openNotesModal(ta, (h2?.textContent || "Notes").trim());
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
+// delegated safety net (if injected later)
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".mk-ta-expand");
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+
+  const wrap = btn.closest(".mk-ta-wrap");
+  const ta = qs("textarea", wrap);
+  const card = btn.closest(".section-block");
+  const h2 = qs("h2", card);
+  if (ta) openNotesModal(ta, (h2?.textContent || "Notes").trim());
+});
+
+/* ===========================================================
+   TABLE NOTES BUTTONS (injected Notes column + link to Notes)
+   - Adds a Notes column if missing
+   - Each row gets a button that inserts an ordered line and jumps
+=========================================================== */
+function findNotesTextareaForTable(table){
+  const page = table.closest(".page-section");
+  if (!page) return null;
+
+  const notesCard = Array.from(page.querySelectorAll(".section-block"))
+    .find(card=>{
+      const h2 = card.querySelector("h2");
+      return h2 && h2.textContent.trim().toLowerCase().startsWith("notes");
+    });
+
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+
+function getTableTitle(table){
+  const container = table.closest(".table-container");
+  const section = container?.previousElementSibling;
+  if (section && section.classList.contains("section-header")){
+    return safeTrim(section.textContent) || "Table";
+  }
+  return "Table";
+}
+
+function getRowLabelForTableRow(tr){
+  // Prefer a text input value (training checklist name, etc.)
+  const txt = tr.querySelector("input[type='text']");
+  const v = safeTrim(txt?.value);
+  if (v) return v;
+
+  // fall back to the second column text
+  const tds = tr.querySelectorAll("td");
+  const fallback = safeTrim(tds[1]?.textContent);
+  if (fallback) return fallback;
+
+  return "Row";
+}
+
+function ensureNotesHeader(table){
+  const theadRow = table.querySelector("thead tr");
+  if (!theadRow) return;
+
+  // already present?
+  if (theadRow.querySelector("th.notes-col")) return;
+
+  const th = document.createElement("th");
+  th.className = "notes-col";
+  th.textContent = "Notes";
+  theadRow.appendChild(th);
+}
+
+function ensureNotesCell(table, tr){
+  // already has?
+  if (tr.querySelector("td.notes-col")) return;
+
+  const td = document.createElement("td");
+  td.className = "notes-col";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "table-notes-btn";
+  btn.title = "Add this row to Notes";
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4h16v12H7l-3 3V4z" />
+    </svg>
+  `;
+
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+
+    const ta = findNotesTextareaForTable(table);
+    if (!ta) return;
+
+    const title = getTableTitle(table);
+    const rowLabel = getRowLabelForTableRow(tr);
+
+    const line = `• [${title}] ${rowLabel}:`;
+    const raw = ta.value || "";
+    const lines = raw.split("\n");
+
+    // insert only if missing
+    let lineStart = 0;
+    const existingIdx = lines.findIndex(l => (l || "").trim().startsWith(line));
+    if (existingIdx !== -1){
+      lineStart = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
+    }else{
+      const startPos = raw.length ? raw.length + 1 : 0;
+      ta.value = raw.trim() ? raw.trim() + "\n" + line : line;
+      saveField(ta);
+      lineStart = startPos;
+    }
+
+    jumpToNoteLine(ta, lineStart);
+  });
+
+  td.appendChild(btn);
+  tr.appendChild(td);
+}
+
+function initTableNotesButtons(root=document){
+  qsa("table.training-table", root).forEach(table=>{
+    const ta = findNotesTextareaForTable(table);
+    if (!ta) return;
+
+    ensureNotesHeader(table);
+
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
+      ensureNotesCell(table, tr);
+    });
   });
 }
 
 /* ---------------------------
-   Reset buttons wiring
+   Google Places callback hooks (from inline HTML)
 --------------------------- */
-function wireResetButtons(){
-  // Reset This Page buttons
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".clear-page-btn");
-    if (!btn) return;
-    const page = btn.closest(".page-section");
-    clearSection(page);
-  });
-
-  // Clear all
-  const clearBtn = qs("#clearAllBtn");
-  clearBtn?.addEventListener("click", clearAll);
-}
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 
 /* ---------------------------
-   Init
+   Boot
 --------------------------- */
 document.addEventListener("DOMContentLoaded", ()=>{
-  wireAutosave();
-  restoreAllFields();
+  initNav();
+  initGhosts();
+  initPersistence();
+  initTextareas(document);
 
-  wireNav();
-  wireResetButtons();
-  wireAdditionalTrainers();
-  wireAdditionalPOC();
-  wireTableAddRowButtons();
-  wireSupportTickets();
-  wireMapButton();
-
-  // ✅ Notes column + clicking behavior
-  addNotesColumnsEverywhere();
-  wireNotesIconClicks();
-
-  // Initial sync
   syncTwoColHeights();
+  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
 
-  // Default active section safety
-  const active = qs(".page-section.active")?.id;
-  if (active) showSection(active);
+  initResets();
+  initTableAddRow();
+  initAdditionalTrainers();
+  initAdditionalPOC();
+  initSupportTickets();
+  initOnsiteTrainingDates();
+
+  restoreDealershipNameDisplay();
+  restoreDealershipMap();
+
+  initPDF();
+
+  // ✅ Notes linking (rows)
+  initNotesLinkingOption2Only(document);
+  updateNoteIconStates(document);
+
+  // ✅ Notes pop-out expanders
+  initNotesExpanders(document);
+
+  // ✅ Table Notes buttons
+  initTableNotesButtons(document);
 });
