@@ -1417,3 +1417,133 @@ main{
   height: auto !important;
   resize: none !important;         /* keep if you don't want manual resize */
 }
+
+/* ===========================================================
+   NOTES POP-OUT (Modal Expander)
+   =========================================================== */
+
+/* Wrap textarea so we can anchor an icon in bottom-right */
+.mk-ta-wrap{
+  position:relative;
+}
+
+/* Expand button in bottom-right corner of Notes textarea */
+.mk-expand-btn{
+  position:absolute;
+  right:10px;
+  bottom:12px;
+  width:28px;
+  height:28px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  background:#fff;
+  color:#111827;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  line-height:1;
+  box-shadow:0 2px 6px rgba(0,0,0,0.10);
+  transition:transform .12s, background .12s, border-color .12s;
+  z-index:2;
+}
+.mk-expand-btn:hover{
+  transform:translateY(-1px);
+  border-color:var(--orange);
+}
+
+/* little “pop out” icon */
+.mk-expand-btn::before{
+  content:"⤢"; /* expand */
+  font-weight:900;
+}
+
+/* Modal overlay */
+.mk-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999999;
+  padding:24px;
+}
+
+.mk-modal.is-open{ display:flex; }
+
+.mk-modal-panel{
+  width:min(1100px, 96vw);
+  height:min(78vh, 900px);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  border:1px solid rgba(0,0,0,0.08);
+}
+
+.mk-modal-head{
+  background:var(--orange);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.mk-modal-title{
+  font-weight:900;
+  font-size:14px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.mk-modal-actions{
+  display:flex;
+  gap:8px;
+}
+
+.mk-modal-btn{
+  border:none;
+  border-radius:999px;
+  padding:8px 12px;
+  font-weight:900;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.mk-modal-btn.close{
+  background:rgba(255,255,255,0.22);
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.35);
+}
+.mk-modal-btn.close:hover{
+  background:rgba(255,255,255,0.30);
+}
+
+.mk-modal-body{
+  padding:14px 16px 16px;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+}
+
+.mk-modal-textarea{
+  flex:1 1 auto;
+  width:100%;
+  border:1px solid #dcdcdc;
+  border-radius:14px;
+  padding:12px 12px;
+  background:#f7f7f7;
+  font-size:13px;
+  resize:none;
+  outline:none;
+}
+.mk-modal-textarea:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 4px rgba(239,109,34,0.35);
+  background:#fff9f5;
+}
