@@ -1,985 +1,1689 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js
-   “Full JS + fixes” (drop-in)
-   ✅ Nav clicks work + URL hash support
-   ✅ Add Row (+) for ALL .training-table tables
-   ✅ Support Tickets: add/remove, move by status, base locked to Open
-   ✅ Notes icons (📝) jump to correct Notes block + inserts bullets:
-      - Checklist rows: "• Question:"
-      - Training tables: "• <Name>:"
-      - Opcodes table: "• <Opcode>:"
-   ✅ Notes textarea expander (⤢) + Notes modal
-   ✅ Table expand (⤢) to modal + keeps horizontal scroll
-   ✅ Autosave (localStorage) + Restore on load
-   ✅ Reset Page + Clear All
-   ✅ Ghost placeholders for selects (data-ghost="true")
-   ✅ Date helper: end defaults to start + 2 days (for common ids)
-   ✅ PDF export (all pages) if jsPDF + html2canvas are present
+   myKaarma Interactive Training Checklist — CLEANED script.js
+   ✅ Preserves stable behavior described in your header
+   ✅ Restores missing JS syntax lost in chat copy
+   ✅ Keeps: notes buttons, add-row, tickets, table notes, popups, autosave hooks
    ======================================================= */
 
-(() => {
-  "use strict";
+/* ---------------------------
+   Tiny helpers
+--------------------------- */
+const qs = (sel, root = document) => root.querySelector(sel);
+const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  /* ---------------------------
-     Tiny helpers
-  --------------------------- */
-  const qs  = (sel, root=document) => root.querySelector(sel);
-  const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+function isField(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";
+}
 
-  const STORAGE_KEY = "mk_interactive_checklist_v1";
+function uid() {
+  return "id_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now().toString(36);
+}
 
-  const debounce = (fn, wait=250) => {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), wait);
-    };
-  };
+function safeTrim(v) {
+  return (v ?? "").toString().trim();
+}
 
-  const safeJsonParse = (s, fallback=null) => {
-    try { return JSON.parse(s); } catch { return fallback; }
-  };
+/* ---------------------------
+   Storage keying
+--------------------------- */
+function ensureUID(el) {
+  if (!el) return null;
+  if (el.dataset && el.dataset.uid) return el.dataset.uid;
+  const newId = uid();
+  el.dataset.uid = newId;
+  return newId;
+}
 
-  const todayISO = () => {
-    const d = new Date();
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const dd = String(d.getDate()).padStart(2,"0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  };
+function getFieldKey(el) {
+  if (el.id) return `mkc:${el.id}`;
+  if (el.name) return `mkc:${el.name}`;
+  const dk = el.getAttribute("data-key");
+  if (dk) return `mkc:${dk}`;
+  const u = ensureUID(el);
+  return `mkc:uid:${u}`;
+}
 
-  const addDaysISO = (iso, days) => {
-    if (!iso) return "";
-    const d = new Date(iso + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const dd = String(d.getDate()).padStart(2,"0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  };
+function saveField(el) {
+  try {
+    const key = getFieldKey(el);
+    let val = "";
+    if (el.type === "checkbox") val = el.checked ? "1" : "0";
+    else val = el.value ?? "";
+    localStorage.setItem(key, val);
+  } catch (e) {}
+}
 
-  const scrollToEl = (el) => {
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    el.classList.add("mk-note-jump");
-    setTimeout(() => el.classList.remove("mk-note-jump"), 900);
-  };
+function loadField(el) {
+  try {
+    const key = getFieldKey(el);
+    const stored = localStorage.getItem(key);
+    if (stored === null) return;
 
-  /* ---------------------------
-     Ghost placeholders (selects)
-  --------------------------- */
-  function applyGhostPlaceholder(el) {
-    if (!el || el.tagName !== "SELECT") return;
-    const first = el.options?.[0];
-    const hasGhost = first && first.getAttribute("data-ghost") === "true";
-    if (!hasGhost) return;
+    if (el.type === "checkbox") el.checked = stored === "1";
+    else el.value = stored;
 
-    // If value empty -> placeholder style
-    if (!el.value) el.classList.add("is-placeholder");
-    else el.classList.remove("is-placeholder");
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+  } catch (e) {}
+}
 
-    // Ensure first option doesn't become a valid "selected" value silently
-    // (We keep it empty string in HTML.)
-  }
+function clearFieldStorage(el) {
+  try {
+    const key = getFieldKey(el);
+    localStorage.removeItem(key);
+  } catch (e) {}
+}
 
-  function initGhostSelects(root=document) {
-    qsa("select", root).forEach(sel => {
-      applyGhostPlaceholder(sel);
-      sel.addEventListener("change", () => applyGhostPlaceholder(sel));
-    });
-  }
+/* ---------------------------
+   Ghost placeholder support
+--------------------------- */
+function applySelectGhost(sel) {
+  if (!sel || sel.tagName !== "SELECT") return;
+  const opt = sel.selectedOptions && sel.selectedOptions[0];
+  const ghost = !sel.value || (opt && opt.dataset && opt.dataset.ghost === "true");
+  if (ghost) sel.classList.add("is-placeholder");
+  else sel.classList.remove("is-placeholder");
+}
 
-  /* ---------------------------
-     Nav + pages
-  --------------------------- */
-  function setActiveSection(sectionId) {
-    const pages = qsa(".page-section");
-    pages.forEach(p => p.classList.remove("active"));
+function applyDateGhost(input) {
+  if (!input || input.type !== "date") return;
+  if (!input.value) input.classList.add("is-placeholder");
+  else input.classList.remove("is-placeholder");
+}
 
-    const target = qs(`#${CSS.escape(sectionId)}`);
-    if (target && target.classList.contains("page-section")) {
-      target.classList.add("active");
-    } else {
-      // fallback to first section
-      const first = pages[0];
-      if (first) first.classList.add("active");
-      sectionId = first?.id || sectionId;
+/* ---------------------------
+   Optional 2-col height sync
+--------------------------- */
+function syncTwoColHeights() {
+  const grids = qsa(".cards-grid.two-col, .two-col-grid");
+  grids.forEach((grid) => {
+    const cards = qsa(":scope > .section-block", grid);
+    if (cards.length < 2) return;
+
+    cards.forEach((c) => (c.style.minHeight = ""));
+
+    for (let i = 0; i < cards.length; i += 2) {
+      const a = cards[i];
+      const b = cards[i + 1];
+      if (!a || !b) continue;
+      const h = Math.max(a.offsetHeight, b.offsetHeight);
+      a.style.minHeight = h + "px";
+      b.style.minHeight = h + "px";
     }
+  });
+}
 
-    // nav buttons
-    qsa("#sidebar-nav .nav-btn").forEach(btn => {
-      const id = btn.getAttribute("data-target");
-      btn.classList.toggle("active", id === sectionId);
+/* ---------------------------
+   Textarea auto-grow
+--------------------------- */
+function autoGrowTA(ta) {
+  if (!ta) return;
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + 2 + "px";
+}
+
+function initTextareas(root = document) {
+  qsa("textarea", root).forEach((ta) => {
+    autoGrowTA(ta);
+    ta.addEventListener("input", () => {
+      autoGrowTA(ta);
+      saveField(ta);
+      requestAnimationFrame(syncTwoColHeights);
+      requestAnimationFrame(() => updateNoteIconStates());
+    });
+  });
+}
+
+/* ---------------------------
+   Page Navigation
+--------------------------- */
+function showSection(id) {
+  qsa(".page-section").forEach((s) => s.classList.remove("active"));
+  const target = qs(`#${CSS.escape(id)}`);
+  if (target) target.classList.add("active");
+
+  qsa(".nav-btn").forEach((btn) => {
+    const to =
+      btn.getAttribute("data-section") ||
+      btn.getAttribute("data-target") ||
+      btn.getAttribute("href")?.replace("#", "") ||
+      btn.getAttribute("onclick")?.match(/showSection\(['"]([^'"]+)['"]\)/)?.[1];
+    btn.classList.toggle("active", to === id);
+  });
+
+  try {
+    localStorage.setItem("mkc:lastPage", id);
+  } catch (e) {}
+}
+
+function initNav() {
+  qsa(".nav-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
+      const id =
+        btn.getAttribute("data-section") ||
+        btn.getAttribute("data-target") ||
+        btn.getAttribute("href")?.replace("#", "");
+      if (id) showSection(id);
+    });
+  });
+
+  let last = null;
+  try {
+    last = localStorage.getItem("mkc:lastPage");
+  } catch (e) {}
+
+  const first = qsa(".page-section")[0]?.id;
+  showSection(last || first || "dealership-info");
+}
+
+window.showSection = showSection;
+window.initNav = initNav;
+
+/* ===========================================================
+   ✅ Runtime style patches (JS-injected; does NOT replace CSS)
+=========================================================== */
+function injectRuntimePatches() {
+  if (qs("#mkRuntimePatches")) return;
+
+  const style = document.createElement("style");
+  style.id = "mkRuntimePatches";
+  style.textContent = `
+    /* Table Modal shell */
+    #mkTableModal{ position:fixed; inset:0; z-index:99998; display:none; }
+    #mkTableModal.open{ display:block; }
+    #mkTableModal .mk-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+    #mkTableModal .mk-modal-panel{
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      width:min(1200px, calc(100vw - 60px));
+      max-height:calc(100vh - 60px);
+      background:#fff; border-radius:22px;
+      box-shadow:0 10px 40px rgba(0,0,0,.35);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    #mkTableModal .mk-modal-content{ padding:16px 16px 18px; overflow:auto; }
+    #mkTableModal .mk-table-scroll{ width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding:10px 10px 12px; box-sizing:border-box; }
+    #mkTableModal .mk-table-scroll table{ width:max-content; min-width:100%; }
+    #mkTableModal table input[type="text"],
+    #mkTableModal table select,
+    #mkTableModal table textarea{ width:100%; max-width:100%; box-sizing:border-box; min-width:0; }
+    table.training-table td.mk-name-cell, #mkTableModal td.mk-name-cell{ display:flex; align-items:center; gap:10px; }
+    table.training-table td.mk-name-cell input[type="checkbox"], #mkTableModal td.mk-name-cell input[type="checkbox"]{ flex:0 0 auto; margin:0; }
+    table.training-table td.mk-name-cell input[type="text"], #mkTableModal td.mk-name-cell input[type="text"]{ flex:1 1 auto; min-width:0; width:auto; }
+    #mkTableModal .mk-modal-stack{ display:flex; flex-direction:column; gap:16px; }
+    #mkTableModal .mk-modal-notes textarea{ height:220px; max-height:40vh; resize:vertical; }
+  `;
+  document.head.appendChild(style);
+}
+
+/* ---------------------------
+   Reset This Page / Clear All
+--------------------------- */
+function resetSection(section) {
+  if (!section) return;
+
+  qsa("input, select, textarea", section).forEach((el) => {
+    if (!isField(el)) return;
+
+    clearFieldStorage(el);
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+
+    if (el.tagName === "SELECT") {
+      if (el.options && el.options.length) el.selectedIndex = 0;
+      applySelectGhost(el);
+    }
+    if (el.type === "date") applyDateGhost(el);
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
+  });
+
+  // remove clones
+  qsa("[data-clone='true']", section).forEach((n) => n.remove());
+
+  // additional trainers container clear
+  const atc = qs("#additionalTrainersContainer", section);
+  if (atc) atc.innerHTML = "";
+
+  // support ticket secondary columns clear + reset base open
+  if (section.id === "support-tickets") {
+    ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach((id) => {
+      const c = qs(`#${id}`, section);
+      if (c) c.innerHTML = "";
     });
 
-    // update hash (no jump)
-    if (sectionId) history.replaceState(null, "", `#${sectionId}`);
-  }
-
-  function initNav() {
-    qsa("#sidebar-nav .nav-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-target");
-        if (id) setActiveSection(id);
-        // Save on nav to be safe
-        scheduleSave();
+    const open = qs("#openTicketsContainer", section);
+    if (open) {
+      qsa(".ticket-group", open).forEach((card) => {
+        if (card.dataset.base === "true") return;
+        card.remove();
       });
-    });
 
-    const initial = (location.hash || "").replace("#", "");
-    if (initial) setActiveSection(initial);
-    else {
-      const first = qs(".page-section")?.id;
-      if (first) setActiveSection(first);
-    }
-
-    window.addEventListener("hashchange", () => {
-      const id = (location.hash || "").replace("#", "");
-      if (id) setActiveSection(id);
-    });
-  }
-
-  /* ---------------------------
-     Autosave / restore
-  --------------------------- */
-  function buildKeyForEl(el) {
-    // Prefer stable IDs / names.
-    if (el.id) return `id:${el.id}`;
-    if (el.name) return `name:${el.name}`;
-
-    // Otherwise: path key by DOM position within page
-    // (Reasonable for a single-file app; dynamic rows are handled by saving after create.)
-    const section = el.closest(".page-section");
-    const sectionId = section?.id || "no-section";
-
-    // Create a selector-ish signature
-    const parts = [];
-    let node = el;
-    while (node && node !== section && node.nodeType === 1) {
-      const tag = node.tagName.toLowerCase();
-      const cls = (node.className && typeof node.className === "string")
-        ? node.className.trim().split(/\s+/).slice(0,2).join(".")
-        : "";
-      const idx = node.parentElement
-        ? Array.from(node.parentElement.children).indexOf(node)
-        : 0;
-      parts.push(`${tag}${cls ? "."+cls : ""}[${idx}]`);
-      node = node.parentElement;
-    }
-    return `path:${sectionId}:${parts.reverse().join(">")}`;
-  }
-
-  function collectState() {
-    const data = {};
-    const els = qsa("input, select, textarea");
-
-    for (const el of els) {
-      // Skip buttons
-      if (el.tagName === "INPUT") {
-        const t = (el.getAttribute("type") || "").toLowerCase();
-        if (t === "button" || t === "submit" || t === "reset") continue;
-      }
-
-      const key = buildKeyForEl(el);
-
-      if (el.tagName === "INPUT") {
-        const t = (el.type || "").toLowerCase();
-        if (t === "checkbox") data[key] = !!el.checked;
-        else data[key] = el.value ?? "";
-      } else if (el.tagName === "SELECT") {
-        data[key] = el.value ?? "";
-      } else if (el.tagName === "TEXTAREA") {
-        data[key] = el.value ?? "";
-      }
-    }
-    return data;
-  }
-
-  function applyState(saved) {
-    if (!saved || typeof saved !== "object") return;
-
-    const els = qsa("input, select, textarea");
-    for (const el of els) {
-      // Skip buttons
-      if (el.tagName === "INPUT") {
-        const t = (el.getAttribute("type") || "").toLowerCase();
-        if (t === "button" || t === "submit" || t === "reset") continue;
-      }
-
-      const key = buildKeyForEl(el);
-      if (!(key in saved)) continue;
-
-      const val = saved[key];
-
-      if (el.tagName === "INPUT") {
-        const t = (el.type || "").toLowerCase();
-        if (t === "checkbox") el.checked = !!val;
-        else el.value = String(val ?? "");
-      } else {
-        el.value = String(val ?? "");
-      }
-    }
-
-    // Re-apply ghost placeholder class
-    initGhostSelects(document);
-    // Re-apply acceptance coloring (optional helper)
-    applyAcceptanceColors(document);
-    // Re-apply note indicators
-    refreshNoteIndicators();
-  }
-
-  function saveNow() {
-    const state = collectState();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-  const scheduleSave = debounce(saveNow, 250);
-
-  function initAutosave() {
-    // Restore first
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const saved = safeJsonParse(raw, null);
-    if (saved) applyState(saved);
-
-    // Save on any interaction
-    document.addEventListener("input", (e) => {
-      const t = e.target;
-      if (!t) return;
-      if (t.matches("input, textarea")) scheduleSave();
-    }, true);
-
-    document.addEventListener("change", (e) => {
-      const t = e.target;
-      if (!t) return;
-      if (t.matches("select, input[type='checkbox'], input[type='date']")) {
-        // Update ghost placeholder
-        if (t.tagName === "SELECT") applyGhostPlaceholder(t);
-        scheduleSave();
-      }
-    }, true);
-  }
-
-  /* ---------------------------
-     Clear All + Reset Page
-  --------------------------- */
-  function clearAll() {
-    localStorage.removeItem(STORAGE_KEY);
-    // safest: reload so dynamic rows/tickets reset too
-    location.reload();
-  }
-
-  function resetPage(sectionEl) {
-    if (!sectionEl) return;
-
-    // Clear inputs/selects/textarea within section
-    qsa("input, select, textarea", sectionEl).forEach(el => {
-      if (el.tagName === "INPUT") {
-        const t = (el.type || "").toLowerCase();
-        if (t === "checkbox") el.checked = false;
-        else if (t !== "button" && t !== "submit" && t !== "reset") el.value = "";
-      } else if (el.tagName === "SELECT") {
-        el.value = "";
-        applyGhostPlaceholder(el);
-      } else {
-        el.value = "";
-      }
-    });
-
-    // Special: reset tickets containers to base only
-    if (sectionEl.id === "support-tickets") resetTicketsToBase();
-
-    // Special: remove dynamically added table rows (keep original 3 where present, or 1)
-    qsa(".training-table", sectionEl).forEach(table => {
-      const tbody = table.tBodies?.[0];
-      if (!tbody) return;
-      const rows = Array.from(tbody.rows);
-      // Keep at least 1 row; if you have 3 starter rows, keep 3
-      const keep = Math.min(3, rows.length);
-      rows.slice(keep).forEach(r => r.remove());
-      // Clear remaining rows
-      rows.slice(0, keep).forEach(r => clearTableRow(r));
-    });
-
-    refreshNoteIndicators();
-    applyAcceptanceColors(sectionEl);
-    scheduleSave();
-  }
-
-  function initResetButtons() {
-    // Clear All (left sidebar button)
-    const clearAllBtn = qs("#clearAllBtn");
-    if (clearAllBtn) clearAllBtn.addEventListener("click", clearAll);
-
-    // Reset This Page (per section)
-    qsa(".page-section .clear-page-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const section = btn.closest(".page-section");
-        resetPage(section);
-      });
-    });
-  }
-
-  /* ---------------------------
-     Table Add Row (+)
-  --------------------------- */
-  function clearTableRow(tr) {
-    qsa("input, select, textarea", tr).forEach(el => {
-      if (el.tagName === "INPUT") {
-        const t = (el.type || "").toLowerCase();
-        if (t === "checkbox") el.checked = false;
-        else el.value = "";
-      } else if (el.tagName === "SELECT") {
-        el.value = "";
-      } else {
-        el.value = "";
-      }
-    });
-  }
-
-  function cloneTableRow(table) {
-    const tbody = table.tBodies?.[0];
-    if (!tbody) return null;
-
-    const rows = Array.from(tbody.rows);
-    const template = rows[rows.length - 1] || rows[0];
-    if (!template) return null;
-
-    const clone = template.cloneNode(true);
-    clearTableRow(clone);
-
-    // Keep notes icon button in place; no special changes needed
-    tbody.appendChild(clone);
-
-    // Re-bind notes icon click inside new row
-    bindNotesIconButtons(clone);
-
-    scheduleSave();
-    return clone;
-  }
-
-  function initTableAddRow() {
-    qsa(".table-container").forEach(container => {
-      const table = qs("table.training-table", container);
-      const footerAdd = qs(".table-footer .add-row", container);
-
-      if (!table || !footerAdd) return;
-
-      footerAdd.addEventListener("click", () => {
-        cloneTableRow(table);
-      });
-    });
-  }
-
-  /* ---------------------------
-     Acceptance colors helper (optional)
-     (Only applies if selects contain those labels)
-  --------------------------- */
-  function applyAcceptanceColors(root=document) {
-    qsa(".training-table select", root).forEach(sel => {
-      sel.classList.remove("accept-yes","accept-neutral","accept-no","accept-na");
-      const v = (sel.value || "").toLowerCase();
-
-      if (v.includes("fully adopted") || v.includes("mostly adopted")) sel.classList.add("accept-yes");
-      else if (v.includes("neutral")) sel.classList.add("accept-neutral");
-      else if (v.includes("needs support") || v.includes("not accepted")) sel.classList.add("accept-no");
-      else if (v === "n/a") sel.classList.add("accept-na");
-    });
-  }
-
-  /* ---------------------------
-     Notes: checklist-row linking + table notes + fixes
-     - HTML already includes:
-       * .notes-icon-btn data-notes-target="notes-..."
-       * Notes blocks with corresponding id="notes-..."
-  --------------------------- */
-  function ensureLineStartsWithBullet(line) {
-    const trimmed = (line || "").trim();
-    if (!trimmed) return "";
-    if (trimmed.startsWith("•")) return trimmed;
-    return `• ${trimmed}`;
-  }
-
-  function appendNoteLine(textarea, line) {
-    if (!textarea) return;
-    const txt = textarea.value || "";
-    const safeLine = ensureLineStartsWithBullet(line);
-
-    if (!txt.trim()) {
-      textarea.value = safeLine;
-    } else {
-      const endsWithNL = txt.endsWith("\n");
-      textarea.value = txt + (endsWithNL ? "" : "\n") + safeLine;
-    }
-    textarea.focus();
-    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
-    scheduleSave();
-    refreshNoteIndicators();
-  }
-
-  function getTableContextLine(btn) {
-    // Determine which table this button belongs to
-    const section = btn.closest(".page-section");
-    const sectionId = section?.id || "";
-
-    // Row context
-    const tr = btn.closest("tr");
-    const table = btn.closest("table.training-table");
-
-    // Training Checklist tables: first cell has checkbox+name input
-    if (sectionId === "training-checklist") {
-      const nameInput = qs("td:first-child input[type='text']", tr);
-      const name = (nameInput?.value || "").trim();
-      return name ? `• ${name}:` : "• (Name):";
-    }
-
-    // Opcodes: opcode is in 2nd column input (after checkbox)
-    if (sectionId === "opcodes-pricing") {
-      // Find first text input after the checkbox column, usually opcode
-      const opcodeInput = qs("td:nth-child(2) input[type='text']", tr) || qs("td input[type='text']", tr);
-      const opcode = (opcodeInput?.value || "").trim();
-      return opcode ? `• ${opcode}:` : "• (Opcode):";
-    }
-
-    // Generic fallback
-    return "• Note:";
-  }
-
-  function bindNotesIconButtons(root=document) {
-    qsa(".notes-icon-btn", root).forEach(btn => {
-      if (btn.__mkBound) return;
-      btn.__mkBound = true;
-
-      btn.addEventListener("click", () => {
-        const targetId = btn.getAttribute("data-notes-target");
-        const notesBlock = targetId ? qs(`#${CSS.escape(targetId)}`) : null;
-        const textarea = notesBlock ? qs("textarea", notesBlock) : null;
-
-        if (!notesBlock || !textarea) return;
-
-        // Jump to notes block
-        scrollToEl(notesBlock);
-
-        // Insert the right bullet line based on context:
-        // - If this is a table notes icon button -> name/opcode line
-        const inTable = !!btn.closest("table.training-table");
-        if (inTable) {
-          const line = getTableContextLine(btn);
-          appendNoteLine(textarea, line);
-          return;
-        }
-
-        // - Otherwise checklist-row note icon: Question bullet
-        appendNoteLine(textarea, "• Question:");
-      });
-    });
-  }
-
-  function refreshNoteIndicators() {
-    // Marks buttons orange if their target textarea has content
-    qsa(".notes-icon-btn").forEach(btn => {
-      const targetId = btn.getAttribute("data-notes-target");
-      const notesBlock = targetId ? qs(`#${CSS.escape(targetId)}`) : null;
-      const textarea = notesBlock ? qs("textarea", notesBlock) : null;
-      const has = textarea ? !!(textarea.value || "").trim() : false;
-      btn.classList.toggle("has-note", has);
-      // For compatibility with your older CSS class name:
-      // If you also have .note-link-btn, ignore here.
-    });
-  }
-
-  /* ---------------------------
-     Notes textarea expander (⤢) + modal
-  --------------------------- */
-  function ensureNotesModal() {
-    let modal = qs("#mkNotesModal");
-    if (modal) return modal;
-
-    modal = document.createElement("div");
-    modal.id = "mkNotesModal";
-    modal.innerHTML = `
-      <div class="mk-modal-backdrop" role="presentation"></div>
-      <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Notes">
-        <div class="mk-modal-header">
-          <div class="mk-modal-title">Notes</div>
-          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
-        </div>
-        <textarea class="mk-modal-textarea"></textarea>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    const backdrop = qs(".mk-modal-backdrop", modal);
-    const closeBtn = qs(".mk-modal-close", modal);
-
-    const close = () => {
-      modal.classList.remove("open");
-      modal.__activeTextarea = null;
-    };
-
-    backdrop.addEventListener("click", close);
-    closeBtn.addEventListener("click", close);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("open")) close();
-    });
-
-    // Sync changes back to the active textarea
-    const modalTa = qs(".mk-modal-textarea", modal);
-    modalTa.addEventListener("input", () => {
-      const active = modal.__activeTextarea;
-      if (!active) return;
-      active.value = modalTa.value;
-      scheduleSave();
-      refreshNoteIndicators();
-    });
-
-    return modal;
-  }
-
-  function wrapTextareasWithExpand(root=document) {
-    qsa("textarea", root).forEach(ta => {
-      // Skip if already wrapped or modal textarea
-      if (ta.classList.contains("mk-modal-textarea")) return;
-      if (ta.closest(".mk-ta-wrap")) return;
-
-      const wrap = document.createElement("div");
-      wrap.className = "mk-ta-wrap";
-
-      const parent = ta.parentElement;
-      parent.insertBefore(wrap, ta);
-      wrap.appendChild(ta);
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-ta-expand";
-      btn.textContent = "⤢";
-      btn.title = "Expand notes";
-      wrap.appendChild(btn);
-
-      btn.addEventListener("click", () => {
-        const modal = ensureNotesModal();
-        const modalTa = qs(".mk-modal-textarea", modal);
-        const title = qs(".mk-modal-title", modal);
-
-        // Title = nearest card header if available
-        const block = ta.closest(".section-block");
-        const h2 = block ? qs("h2", block) : null;
-        title.textContent = h2 ? h2.textContent.trim() : "Notes";
-
-        modal.__activeTextarea = ta;
-        modalTa.value = ta.value || "";
-        modal.classList.add("open");
-        setTimeout(() => modalTa.focus(), 0);
-      });
-    });
-  }
-
-  /* ---------------------------
-     Table expand modal (⤢)
-  --------------------------- */
-  function ensureTableModal() {
-    let modal = qs("#mkTableModal");
-    if (modal) return modal;
-
-    modal = document.createElement("div");
-    modal.id = "mkTableModal";
-    modal.innerHTML = `
-      <div class="mk-modal-backdrop" role="presentation"></div>
-      <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Table">
-        <div class="mk-modal-header">
-          <div class="mk-modal-title">Table</div>
-          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
-        </div>
-        <div class="mk-table-modal-body"></div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    const backdrop = qs(".mk-modal-backdrop", modal);
-    const closeBtn = qs(".mk-modal-close", modal);
-    const body = qs(".mk-table-modal-body", modal);
-
-    const close = () => {
-      modal.classList.remove("open");
-      // Return moved content
-      if (modal.__moved && modal.__originalParent) {
-        modal.__originalParent.appendChild(modal.__moved);
-      }
-      modal.__moved = null;
-      modal.__originalParent = null;
-      body.innerHTML = "";
-    };
-
-    backdrop.addEventListener("click", close);
-    closeBtn.addEventListener("click", close);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("open")) close();
-    });
-
-    modal.__close = close;
-    return modal;
-  }
-
-  function addExpandButtonsToTableFooters() {
-    qsa(".table-container").forEach(container => {
-      const footer = qs(".table-footer", container);
-      const addBtn = qs(".add-row", footer);
-      if (!footer || !addBtn) return;
-
-      // Don’t double add
-      if (qs(".mk-table-expand-btn", footer)) return;
-
-      // Wrap left so Add Row stays left (CSS supports .footer-left)
-      let left = qs(".footer-left", footer);
-      if (!left) {
-        left = document.createElement("div");
-        left.className = "footer-left";
-        // move existing children into left except expand (none yet)
-        const kids = Array.from(footer.childNodes);
-        kids.forEach(k => left.appendChild(k));
-        footer.appendChild(left);
-      }
-
-      const expand = document.createElement("button");
-      expand.type = "button";
-      expand.className = "mk-table-expand-btn";
-      expand.textContent = "⤢";
-      expand.title = "Expand table";
-      footer.appendChild(expand);
-
-      expand.addEventListener("click", () => {
-        const modal = ensureTableModal();
-        const body = qs(".mk-table-modal-body", modal);
-        const title = qs(".mk-modal-title", modal);
-
-        // Title from nearest section header
-        const sectionHeader = container.closest(".section")?.querySelector(".section-header");
-        title.textContent = sectionHeader
-          ? sectionHeader.textContent.trim()
-          : "Table";
-
-        // Move the container (so inputs keep bindings)
-        modal.__moved = container;
-        modal.__originalParent = container.parentElement;
-
-        body.appendChild(container);
-        modal.classList.add("open");
-
-        // Make sure modal has expand wrap applied if needed
-        wrapTextareasWithExpand(modal);
-      });
-    });
-  }
-
-  /* ---------------------------
-     Support Tickets (Open/Tier Two/Closed...)
-  --------------------------- */
-  function getTicketContainers() {
-    return {
-      open: qs("#openTicketsContainer"),
-      tier2: qs("#tierTwoTicketsContainer"),
-      resolved: qs("#closedResolvedTicketsContainer"),
-      feature: qs("#closedFeatureTicketsContainer"),
-    };
-  }
-
-  function ticketStatusToContainerKey(status) {
-    switch (status) {
-      case "Open": return "open";
-      case "Tier Two": return "tier2";
-      case "Closed - Resolved": return "resolved";
-      case "Closed - Feature Not Supported": return "feature";
-      default: return "open";
-    }
-  }
-
-  function makeRemoveBtn() {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "remove-ticket-btn";
-    btn.title = "Remove Ticket";
-    btn.textContent = "−";
-    return btn;
-  }
-
-  function bindTicketCard(card) {
-    if (!card || card.__mkBound) return;
-    card.__mkBound = true;
-
-    const isBase = card.getAttribute("data-base") === "true";
-
-    const statusSel = qs(".ticket-status-select", card);
-    const addBtn = qs(".add-ticket-btn", card);
-    const numberInput = qs(".ticket-number-input", card);
-    const urlInput = qs(".ticket-zendesk-input", card);
-    const summaryTa = qs(".ticket-summary-input", card);
-
-    // Base stays locked to Open
-    if (isBase && statusSel) {
-      statusSel.value = "Open";
-      statusSel.disabled = true;
-    }
-
-    // Status change moves non-base cards
-    if (statusSel && !isBase) {
-      statusSel.disabled = false;
-      statusSel.addEventListener("change", () => {
-        const status = statusSel.value;
-        const containers = getTicketContainers();
-        const key = ticketStatusToContainerKey(status);
-        const target = containers[key];
-        if (target) target.appendChild(card);
-        scheduleSave();
-      });
-    }
-
-    // Add ticket: only from base card
-    if (addBtn && isBase) {
-      addBtn.addEventListener("click", () => {
-        const num = (numberInput?.value || "").trim();
-        const url = (urlInput?.value || "").trim();
-        const sum = (summaryTa?.value || "").trim();
-
-        // Require completion before cloning (matches your disclaimer)
-        if (!num || !url || !sum) {
-          alert("Please complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
-          return;
-        }
-
-        const clone = card.cloneNode(true);
-        clone.removeAttribute("data-base");
-        clone.setAttribute("data-base", "false");
-
-        // Remove disclaimer if present
-        const disclaimer = qs(".ticket-disclaimer", clone);
-        if (disclaimer) disclaimer.remove();
-
-        // Add remove button next to the ticket number
-        const wrap = qs(".ticket-number-wrap", clone);
-        const addBtnClone = qs(".add-ticket-btn", clone);
-        if (addBtnClone) addBtnClone.remove();
-
-        const removeBtn = makeRemoveBtn();
-        wrap?.appendChild(removeBtn);
-
-        removeBtn.addEventListener("click", () => {
-          clone.remove();
-          scheduleSave();
+      const base = qs(".ticket-group[data-base='true']", open);
+      if (base) {
+        qsa("input, textarea, select", base).forEach((el) => {
+          clearFieldStorage(el);
+          if (el.type === "checkbox") el.checked = false;
+          else el.value = "";
+          if (el.tagName === "SELECT") applySelectGhost(el);
         });
-
-        // Enable status dropdown for clone
-        const statusClone = qs(".ticket-status-select", clone);
-        if (statusClone) {
-          statusClone.disabled = false;
-          // default clone stays in Open until user changes
-          statusClone.value = "Open";
-        }
-
-        // Append into Open container (but not inside the base group’s inner)
-        const containers = getTicketContainers();
-        containers.open?.appendChild(clone);
-
-        bindTicketCard(clone);
-
-        // Clear base for next entry
-        numberInput.value = "";
-        urlInput.value = "";
-        summaryTa.value = "";
-
-        scheduleSave();
-      });
+      }
     }
   }
 
-  function initTickets() {
-    // Bind base card
-    qsa("#openTicketsContainer .ticket-group").forEach(bindTicketCard);
+  requestAnimationFrame(() => {
+    initTextareas(section);
+    syncTwoColHeights();
+    initNotesExpanders(section);
+    initNotesLinkingOption2Only(section);
+    initTableNotesButtons(section);
+    initTablePopupExpandButtons(section);
+    updateNoteIconStates(section);
+    tagNameCellsInTableSection(section);
+  });
+}
 
-    // Bind any existing non-base cards (if restored)
-    qsa("#tierTwoTicketsContainer .ticket-group, #closedResolvedTicketsContainer .ticket-group, #closedFeatureTicketsContainer .ticket-group")
-      .forEach(bindTicketCard);
+function initResets() {
+  qsa(".clear-page-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sec = btn.closest(".page-section");
+      if (!sec) return;
+      resetSection(sec);
+    });
+  });
+
+  const clearAll = qs("#clearAllBtn");
+  if (clearAll) {
+    clearAll.addEventListener("click", () => {
+      try {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith("mkc:")) keys.push(k);
+        }
+        keys.forEach((k) => localStorage.removeItem(k));
+      } catch (e) {}
+
+      qsa(".page-section").forEach((sec) => resetSection(sec));
+
+      try {
+        localStorage.removeItem("mkc:lastPage");
+      } catch (e) {}
+    });
   }
+}
 
-  function resetTicketsToBase() {
-    const containers = getTicketContainers();
-    if (!containers.open) return;
+/* ---------------------------
+   Persistence
+--------------------------- */
+function initPersistence() {
+  qsa("input, select, textarea").forEach((el) => {
+    if (!isField(el)) return;
+    ensureUID(el);
+    loadField(el);
+  });
 
-    // Keep base card only
-    const base = qs("#openTicketsContainer .ticket-group[data-base='true']");
-    containers.tier2 && (containers.tier2.innerHTML = "");
-    containers.resolved && (containers.resolved.innerHTML = "");
-    containers.feature && (containers.feature.innerHTML = "");
+  document.addEventListener("input", (e) => {
+    const el = e.target;
+    if (!isField(el)) return;
 
-    containers.open.innerHTML = "";
-    if (base) containers.open.appendChild(base);
+    if (el.tagName === "TEXTAREA") autoGrowTA(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
 
-    // Clear base fields
-    qsa("input, textarea", base).forEach(el => {
-      if (el.tagName === "INPUT") el.value = "";
+    saveField(el);
+
+    if (el.id === "dealershipNameInput") updateDealershipNameDisplay(el.value);
+
+    requestAnimationFrame(() => updateNoteIconStates());
+  });
+
+  document.addEventListener("change", (e) => {
+    const el = e.target;
+    if (!isField(el)) return;
+
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+
+    saveField(el);
+    requestAnimationFrame(() => updateNoteIconStates());
+  });
+}
+
+function initGhosts() {
+  qsa("select").forEach(applySelectGhost);
+  qsa("input[type='date']").forEach(applyDateGhost);
+}
+
+/* ---------------------------
+   Training tables: Add Row (+)
+--------------------------- */
+function cloneTrainingRow(row) {
+  const clone = row.cloneNode(true);
+  clone.dataset.clone = "true";
+
+  qsa("input, select, textarea", clone).forEach((el) => {
+    if (!isField(el)) return;
+    el.value = "";
+    if (el.type === "checkbox") el.checked = false;
+    ensureUID(el);
+    applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
+
+  return clone;
+}
+
+function initTableAddRow() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".table-footer .add-row");
+    if (!btn) return;
+
+    const container = btn.closest(".table-container");
+    const table = qs("table.training-table", container);
+    if (!table) return;
+
+    const tbody = qs("tbody", table);
+    if (!tbody) return;
+
+    const last = tbody.querySelector("tr:last-child");
+    if (!last) return;
+
+    const clone = cloneTrainingRow(last);
+    tbody.appendChild(clone);
+    clone.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    requestAnimationFrame(() => {
+      initTextareas(container);
+      syncTwoColHeights();
+      initNotesExpanders(document);
+      initNotesLinkingOption2Only(document);
+      initTableNotesButtons(document);
+      initTablePopupExpandButtons(document);
+      updateNoteIconStates(document);
+      tagNameCellsInTable(table);
+    });
+  });
+}
+
+/* ---------------------------
+   Onsite Training Dates: end defaults to start + 2 days
+--------------------------- */
+function addDaysISO(iso, days) {
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function initOnsiteTrainingDates() {
+  const start = qs("#onsiteStartDate");
+  const end = qs("#onsiteEndDate");
+
+  if (start && end) {
+    start.addEventListener("change", () => {
+      if (!start.value) return;
+      if (end.value) return;
+      const v = addDaysISO(start.value, 2);
+      if (v) {
+        end.value = v;
+        applyDateGhost(end);
+        saveField(end);
+      }
+    });
+  }
+}
+
+/* ---------------------------
+   Trainers page: Additional Trainers (+)
+--------------------------- */
+function initAdditionalTrainers() {
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest(
+      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+    );
+    if (!addBtn) return;
+
+    const page = qs("#trainers-deployment");
+    if (!page) return;
+
+    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
+    const container = qs("#additionalTrainersContainer", page);
+
+    const newRow = document.createElement("div");
+    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
+    newRow.dataset.clone = "true";
+    newRow.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" placeholder="Enter additional trainer name">
+    `;
+
+    const input = qs("input", newRow);
+    if (input) {
+      ensureUID(input);
+      loadField(input);
+    }
+
+    if (container) container.appendChild(newRow);
+    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+
+    if (input) input.focus();
+
+    requestAnimationFrame(() => {
+      initNotesLinkingOption2Only(page);
+      initTableNotesButtons(page);
+      updateNoteIconStates(page);
+      syncTwoColHeights();
+      initNotesExpanders(page);
+    });
+  });
+}
+
+/* ---------------------------
+   Primary Contacts: Additional POC (+)
+--------------------------- */
+function initAdditionalPOC() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
+    if (!btn) return;
+
+    const baseCard = btn.closest(".additional-poc-card");
+    if (!baseCard) return;
+
+    const grid = baseCard.parentElement;
+    if (!grid) return;
+
+    const clone = baseCard.cloneNode(true);
+    clone.dataset.clone = "true";
+    clone.removeAttribute("data-base");
+
+    const addBtn = qs(".additional-poc-add, .add-row", clone);
+    if (addBtn) addBtn.remove();
+
+    qsa("input, select, textarea", clone).forEach((el) => {
+      if (!isField(el)) return;
+      if (el.type === "checkbox") el.checked = false;
       else el.value = "";
+      ensureUID(el);
+      applySelectGhost(el);
+      if (el.type === "date") applyDateGhost(el);
+      saveField(el);
     });
-    const sel = qs(".ticket-status-select", base);
-    if (sel) { sel.value = "Open"; sel.disabled = true; }
 
-    scheduleSave();
+    grid.appendChild(clone);
+
+    const firstInput = qs("input, select, textarea", clone);
+    if (firstInput) firstInput.focus();
+
+    requestAnimationFrame(() => {
+      initNotesLinkingOption2Only(document);
+      initTableNotesButtons(document);
+      updateNoteIconStates(document);
+      syncTwoColHeights();
+      initNotesExpanders(document);
+    });
+  });
+}
+
+/* ---------------------------
+   Support Tickets
+--------------------------- */
+function statusToContainerId(status) {
+  switch (status) {
+    case "Open":
+      return "openTicketsContainer";
+    case "Tier Two":
+      return "tierTwoTicketsContainer";
+    case "Closed - Resolved":
+      return "closedResolvedTicketsContainer";
+    case "Closed - Feature Not Supported":
+      return "closedFeatureTicketsContainer";
+    default:
+      return "openTicketsContainer";
+  }
+}
+
+function lockOpenSelect(card) {
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.value = "Open";
+  sel.disabled = true;
+}
+
+function unlockStatusSelect(card) {
+  const sel = qs(".ticket-status-select", card);
+  if (!sel) return;
+  sel.disabled = false;
+  if (!sel.value) sel.value = "Open";
+  applySelectGhost(sel);
+  saveField(sel);
+}
+
+function isTicketCardComplete(card) {
+  const num = safeTrim(qs(".ticket-number-input", card)?.value);
+  const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
+  const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
+  return !!(num && url && sum);
+}
+
+function makeTicketCloneFromBase(baseCard) {
+  const clone = baseCard.cloneNode(true);
+  clone.dataset.clone = "true";
+  clone.removeAttribute("data-base");
+
+  qsa("input, textarea, select", clone).forEach((el) => {
+    if (!isField(el)) return;
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+    ensureUID(el);
+    applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    saveField(el);
+  });
+
+  const disc = qs(".ticket-disclaimer", clone);
+  if (disc) disc.remove();
+
+  const addBtn = qs(".add-ticket-btn", clone);
+  if (addBtn) {
+    addBtn.textContent = "×";
+    addBtn.title = "Remove Ticket";
+    addBtn.classList.add("remove-ticket-btn");
+    addBtn.classList.remove("add-ticket-btn");
   }
 
-  /* ---------------------------
-     Date helper: end = start + 2 days
-     (Common ids used in your project)
-  --------------------------- */
-  function initDateHelpers() {
-    const pairs = [
-      ["onsiteStartDate", "onsiteEndDate"],
-      ["trainingStartDate", "trainingEndDate"],
-      ["onsiteTrainingStartDate", "onsiteTrainingEndDate"],
-    ];
-
-    pairs.forEach(([startId, endId]) => {
-      const start = qs(`#${CSS.escape(startId)}`);
-      const end   = qs(`#${CSS.escape(endId)}`);
-      if (!start || !end) return;
-
-      start.addEventListener("change", () => {
-        if (!start.value) return;
-        const suggested = addDaysISO(start.value, 2);
-        // Only set if end empty or earlier than start
-        if (!end.value || end.value < start.value) end.value = suggested;
-        scheduleSave();
-      });
-    });
+  const sel = qs(".ticket-status-select", clone);
+  if (sel) {
+    sel.value = "Open";
+    applySelectGhost(sel);
+    saveField(sel);
   }
 
-  /* ---------------------------
-     PDF export (all pages)
-     Requires: window.jspdf?.jsPDF and window.html2canvas
-  --------------------------- */
-  async function exportAllPagesToPDF() {
-    const jsPDF = window.jspdf?.jsPDF;
-    const html2canvas = window.html2canvas;
-    if (!jsPDF || !html2canvas) {
-      alert("PDF export requires jsPDF + html2canvas to be loaded.");
+  unlockStatusSelect(clone);
+  return clone;
+}
+
+function moveTicketCard(card, newStatus) {
+  const page = qs("#support-tickets");
+  if (!page || !card) return;
+
+  const destId = statusToContainerId(newStatus);
+  const dest = qs(`#${destId}`, page);
+  if (!dest) return;
+
+  dest.appendChild(card);
+
+  if (destId === "openTicketsContainer" && card.dataset.base === "true") {
+    lockOpenSelect(card);
+  } else {
+    unlockStatusSelect(card);
+  }
+}
+
+function initSupportTickets() {
+  const page = qs("#support-tickets");
+  if (!page) return;
+
+  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
+  if (openBase) lockOpenSelect(openBase);
+
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest(".add-ticket-btn");
+    const removeBtn = e.target.closest(".remove-ticket-btn");
+    if (!addBtn && !removeBtn) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (removeBtn) {
+      qsa("input, select, textarea", card).forEach((el) => clearFieldStorage(el));
+      card.remove();
       return;
     }
 
-    const sections = qsa(".page-section");
-    if (!sections.length) return;
+    if (!isTicketCardComplete(card)) {
+      alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
+      return;
+    }
 
-    // Temporarily show all sections for capture
-    const prev = sections.map(s => s.classList.contains("active"));
-    sections.forEach(s => s.classList.add("active"));
+    const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
+    const newCard = makeTicketCloneFromBase(base);
 
-    const pdf = new jsPDF("p", "pt", "letter");
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
+    const openContainer = qs("#openTicketsContainer", page);
+    if (openContainer) openContainer.appendChild(newCard);
 
-    for (let i = 0; i < sections.length; i++) {
-      const el = sections[i];
-
-      // Scroll to top of element to ensure correct render
-      el.scrollIntoView({ behavior: "auto", block: "start" });
-
-      // canvas
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
+    // clear base inputs after successful add
+    if (card.dataset.base === "true") {
+      const num = qs(".ticket-number-input", card);
+      const url = qs(".ticket-zendesk-input", card);
+      const sum = qs(".ticket-summary-input", card);
+      [num, url, sum].forEach((el) => {
+        if (!el) return;
+        clearFieldStorage(el);
+        el.value = "";
+        saveField(el);
       });
+      lockOpenSelect(card);
+    }
 
-      const img = canvas.toDataURL("image/png");
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
+    newCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
 
-      // Fit to page with simple pagination if too tall
+  document.addEventListener("change", (e) => {
+    const sel = e.target.closest("#support-tickets .ticket-status-select");
+    if (!sel) return;
+
+    const card = e.target.closest(".ticket-group");
+    if (!card) return;
+
+    if (card.dataset.base === "true") {
+      lockOpenSelect(card);
+      return;
+    }
+
+    moveTicketCard(card, sel.value);
+  });
+}
+
+/* ---------------------------
+   Dealership Name display + Map
+--------------------------- */
+function updateDealershipNameDisplay(name) {
+  const display = qs("#dealershipNameDisplay");
+  if (!display) return;
+  display.textContent = safeTrim(name);
+
+  try {
+    localStorage.setItem("mkc:dealershipNameDisplay", display.textContent);
+  } catch (e) {}
+}
+
+function restoreDealershipNameDisplay() {
+  try {
+    const v = localStorage.getItem("mkc:dealershipNameDisplay");
+    if (v) updateDealershipNameDisplay(v);
+  } catch (e) {}
+}
+
+function updateDealershipMap(address) {
+  const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
+  if (!frame) return;
+  const q = encodeURIComponent(address);
+  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+
+  try {
+    localStorage.setItem("mkc:dealershipMapAddress", address);
+  } catch (e) {}
+}
+
+function restoreDealershipMap() {
+  try {
+    const addr = localStorage.getItem("mkc:dealershipMapAddress");
+    if (addr) updateDealershipMap(addr);
+  } catch (e) {}
+}
+
+window.updateDealershipMap = updateDealershipMap;
+window.updateDealershipNameDisplay = updateDealershipNameDisplay;
+
+/* ---------------------------
+   PDF Export
+--------------------------- */
+async function exportAllPagesPDF() {
+  const btn = qs("#savePDF");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Saving PDF...";
+  }
+
+  const sections = qsa(".page-section");
+  const activeId = qs(".page-section.active")?.id;
+
+  sections.forEach((s) => s.classList.add("active"));
+  await new Promise((r) => setTimeout(r, 80));
+  syncTwoColHeights();
+  await new Promise((r) => setTimeout(r, 80));
+
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF || !window.html2canvas) {
+    alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
+    sections.forEach((s) => s.classList.remove("active"));
+    if (activeId) showSection(activeId);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Save All Pages as PDF";
+    }
+    return;
+  }
+
+  const pdf = new jsPDF("p", "pt", "letter");
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+
+  let first = true;
+
+  for (const sec of sections) {
+    const canvas = await window.html2canvas(sec, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: -window.scrollY,
+    });
+
+    const img = canvas.toDataURL("image/png");
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (!first) pdf.addPage();
+
+    if (imgH <= pageH) {
+      pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
+    } else {
       let remaining = imgH;
       let y = 0;
 
-      if (i > 0) pdf.addPage();
+      const sliceCanvas = document.createElement("canvas");
+      const ctx = sliceCanvas.getContext("2d");
 
-      // If the section fits on one page:
-      if (imgH <= pageH) {
-        pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
-      } else {
-        // Multi-page slice approach
-        // Create a temp canvas to slice vertically
-        const sliceCanvas = document.createElement("canvas");
-        const ctx = sliceCanvas.getContext("2d");
+      const pxPerPt = canvas.width / imgW;
+      const pagePxH = Math.floor(pageH * pxPerPt);
 
-        const pxPerPt = canvas.width / imgW;         // pixels per point
-        const pagePxH = Math.floor(pageH * pxPerPt); // page height in pixels
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = pagePxH;
 
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = pagePxH;
+      while (remaining > 0) {
+        ctx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(canvas, 0, y * pxPerPt, canvas.width, pagePxH, 0, 0, canvas.width, pagePxH);
 
-        let sy = 0;
-        let pageIndex = 0;
+        const sliceImg = sliceCanvas.toDataURL("image/png");
+        pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
 
-        while (sy < canvas.height) {
-          ctx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-          ctx.drawImage(canvas, 0, sy, canvas.width, pagePxH, 0, 0, canvas.width, pagePxH);
+        remaining -= pageH;
+        y += pageH;
 
-          const sliceImg = sliceCanvas.toDataURL("image/png");
-          if (pageIndex > 0) pdf.addPage();
-          pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
-
-          sy += pagePxH;
-          pageIndex++;
-        }
+        if (remaining > 0) pdf.addPage();
       }
     }
 
-    // Restore previous active states
-    sections.forEach((s, idx) => {
-      s.classList.toggle("active", prev[idx]);
+    first = false;
+  }
+
+  pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
+
+  sections.forEach((s) => s.classList.remove("active"));
+  if (activeId) showSection(activeId);
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "Save All Pages as PDF";
+  }
+}
+
+function initPDF() {
+  const btn = qs("#savePDF");
+  if (!btn) return;
+  btn.addEventListener("click", exportAllPagesPDF);
+}
+
+/* ===========================================================
+   ✅ Question Notes Linking: single 📝 icon per checklist row
+=========================================================== */
+function isNotesCard(card) {
+  const h2 = card?.querySelector("h2");
+  const t = (h2?.textContent || "").trim().toLowerCase();
+  return t.startsWith("notes");
+}
+
+function isInNotesCard(row) {
+  const card = row.closest(".section-block");
+  return isNotesCard(card);
+}
+
+function findNotesTextareaForRow(row) {
+  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
+  if (!wrap) return null;
+
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block")).find((card) => isNotesCard(card));
+  return notesCard ? notesCard.querySelector("textarea") : null;
+}
+
+function getCleanQuestionText(row) {
+  const label = row.querySelector("label");
+  if (!label) return "";
+  const clone = label.cloneNode(true);
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach((n) => n.remove());
+  return (clone.textContent || "").replace(/\s+/g, " ").trim();
+}
+
+function makeNoteLine(row) {
+  const q = getCleanQuestionText(row);
+  if (!q) return "";
+  return `• ${q}:`;
+}
+
+function normalizeNoteKey(line) {
+  return (line || "").trim();
+}
+
+function getAllRowsInThisNotesGroup(row) {
+  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
+  if (!wrap) return [];
+  return Array.from(wrap.querySelectorAll(".checklist-row"))
+    .filter((r) => !isInNotesCard(r))
+    .filter((r) => r.querySelector("input, select, textarea"));
+}
+
+function getRowOrderKey(row) {
+  return normalizeNoteKey(makeNoteLine(row));
+}
+
+function findExistingNoteLineIndex(lines, baseKey) {
+  const k = (baseKey || "").trim();
+  return lines.findIndex((l) => (l || "").trim().startsWith(k));
+}
+
+function insertNoteLineInOrder(textarea, clickedRow) {
+  const allRows = getAllRowsInThisNotesGroup(clickedRow);
+  const orderedKeys = allRows.map((r) => getRowOrderKey(r)).filter(Boolean);
+  const baseLine = makeNoteLine(clickedRow);
+  if (!baseLine) return { didInsert: false, lineStart: 0 };
+
+  const raw = textarea.value || "";
+  const lines = raw.split("\n");
+
+  const existingIdx = findExistingNoteLineIndex(lines, baseLine);
+  if (existingIdx !== -1) {
+    return {
+      didInsert: false,
+      lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0),
+    };
+  }
+
+  const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
+  if (myOrder === -1) {
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert: true, lineStart: startPos };
+  }
+
+  let insertBeforeLineIdx = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+    const matchOrder = orderedKeys.findIndex((k) => t.startsWith(k.trim()));
+    if (matchOrder !== -1 && matchOrder > myOrder) {
+      insertBeforeLineIdx = i;
+      break;
+    }
+  }
+
+  if (insertBeforeLineIdx === -1) {
+    const startPos = raw.length ? raw.length + 1 : 0;
+    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    return { didInsert: true, lineStart: startPos };
+  }
+
+  lines.splice(insertBeforeLineIdx, 0, baseLine);
+  textarea.value = lines.join("\n");
+
+  const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
+  return { didInsert: true, lineStart: startPos };
+}
+
+function jumpToNoteLine(textarea, lineStart) {
+  if (!textarea) return;
+  textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    textarea.focus();
+    const v = textarea.value || "";
+    const lineEnd = v.indexOf("\n", lineStart);
+    const endPos = lineEnd === -1 ? v.length : lineEnd;
+    textarea.setSelectionRange(endPos, endPos);
+    textarea.classList.add("mk-note-jump");
+    setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
+  }, 120);
+}
+
+function ensureRowActions(row) {
+  let actions = row.querySelector(":scope > .row-actions");
+  if (actions) return actions;
+
+  actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  // For integrated-plus rows: keep existing layout (do not wrap field)
+  if (row.classList.contains("integrated-plus")) {
+    row.appendChild(actions);
+    return actions;
+  }
+
+  // For normal rows: move the right-side field into row-actions and append the button
+  const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
+  if (field) actions.appendChild(field);
+  row.appendChild(actions);
+  return actions;
+}
+
+/**
+ * Option2: one 📝 icon per checklist-row (NOT table notes buttons)
+ */
+function initNotesLinkingOption2Only(root = document) {
+  // Remove only question-note buttons (leave table note buttons alone)
+  qsa(".note-btn, .note-link-btn:not(.mk-table-note-btn)", root).forEach((n) => n.remove());
+
+  qsa(".checklist-row", root).forEach((row) => {
+    if (isInNotesCard(row)) return;
+
+    const field = row.querySelector("input, select, textarea");
+    if (!field) return;
+
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const actions = ensureRowActions(row);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-link-btn";
+    btn.title = "Add this question to Notes";
+    btn.innerHTML = `
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
+
+      const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
+      if (didInsert) {
+        saveField(textarea);
+        requestAnimationFrame(() => updateNoteIconStates(document));
+        requestAnimationFrame(syncTwoColHeights);
+      }
+      jumpToNoteLine(textarea, lineStart);
     });
 
-    const filename = `myKaarma_Onsite_Training_${todayISO()}.pdf`;
-    pdf.save(filename);
-  }
+    actions.appendChild(btn);
+  });
 
-  function initPDFButton() {
-    const btn = qs("#savePDF");
+  updateNoteIconStates(root);
+}
+
+function updateNoteIconStates(root = document) {
+  qsa(".checklist-row", root).forEach((row) => {
+    const btn = row.querySelector(".note-link-btn:not(.mk-table-note-btn)");
     if (!btn) return;
-    btn.addEventListener("click", exportAllPagesToPDF);
+
+    const ta = findNotesTextareaForRow(row);
+    if (!ta) return;
+
+    const line = makeNoteLine(row).trim();
+    btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
+  });
+}
+
+/* ===========================================================
+   ✅ Table Notes Column + Bullet Insert (Name / Opcode)
+=========================================================== */
+function thText(th) {
+  return (th?.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function getHeaderCells(table) {
+  return Array.from(table.querySelectorAll("thead tr th"));
+}
+
+function getNotesHeaderIndexes(table) {
+  const ths = getHeaderCells(table);
+  const idxs = [];
+  ths.forEach((th, i) => {
+    if (thText(th) === "notes") idxs.push(i);
+  });
+  return idxs;
+}
+
+function removeColumnByIndex(table, idx) {
+  table.querySelectorAll("thead tr").forEach((tr) => {
+    const cell = tr.children[idx];
+    if (cell) cell.remove();
+  });
+  qsa("tbody tr", table).forEach((tr) => {
+    const cell = tr.children[idx];
+    if (cell) cell.remove();
+  });
+}
+
+function ensureSingleNotesColumn(table) {
+  const theadRow = table.querySelector("thead tr");
+  if (!theadRow) return null;
+
+  const noteIdxs = getNotesHeaderIndexes(table);
+
+  if (noteIdxs.length > 1) {
+    const keep = noteIdxs[0];
+    noteIdxs
+      .slice(1)
+      .sort((a, b) => b - a)
+      .forEach((idx) => removeColumnByIndex(table, idx));
+    return keep;
   }
 
-  /* ---------------------------
-     Init everything
-  --------------------------- */
-  function init() {
-    initNav();
-    initGhostSelects(document);
-    initAutosave();
-    initResetButtons();
-    initTableAddRow();
-    applyAcceptanceColors(document);
+  if (noteIdxs.length === 0) {
+    const th = document.createElement("th");
+    th.textContent = "Notes";
+    th.classList.add("notes-col");
+    theadRow.appendChild(th);
 
-    // Notes + expanders + indicators
-    bindNotesIconButtons(document);
-    wrapTextareasWithExpand(document);
-    refreshNoteIndicators();
+    qsa("tbody tr", table).forEach((tr) => {
+      const td = document.createElement("td");
+      td.classList.add("notes-col");
+      tr.appendChild(td);
+    });
 
-    // Table expand buttons
-    addExpandButtonsToTableFooters();
-
-    // Tickets
-    initTickets();
-
-    // Dates
-    initDateHelpers();
-
-    // PDF
-    initPDFButton();
-
-    // Keep indicators accurate
-    document.addEventListener("input", debounce(() => {
-      refreshNoteIndicators();
-      applyAcceptanceColors(document);
-    }, 250), true);
+    return theadRow.children.length - 1;
   }
 
-  // Run after DOM ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
+  // ensure class
+  theadRow.children[noteIdxs[0]]?.classList.add("notes-col");
+  qsa("tbody tr", table).forEach((tr) => tr.children[noteIdxs[0]]?.classList.add("notes-col"));
+
+  return noteIdxs[0];
+}
+
+function renderTableNoteButton(td) {
+  td.classList.add("notes-col");
+  td.innerHTML = `
+    <button type="button" class="note-link-btn mk-table-note-btn" title="Notes">
+      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v12H7l-3 3V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </button>
+  `;
+}
+
+function purgeStrayTableNoteButtons(table, notesIdx) {
+  qsa("tbody tr", table).forEach((tr) => {
+    Array.from(tr.children).forEach((td, idx) => {
+      if (idx === notesIdx) return;
+      qsa(".mk-table-note-btn", td).forEach((n) => n.remove());
+    });
+  });
+}
+
+function normalizeFiltersColumn(table) {
+  const ths = getHeaderCells(table);
+  const filtersIdx = ths.findIndex((th) => thText(th) === "filters");
+  if (filtersIdx === -1) return;
+
+  let templateSelect = null;
+  qsa("tbody tr", table).some((tr) => {
+    const td = tr.children[filtersIdx];
+    const sel = td?.querySelector("select");
+    if (sel) {
+      templateSelect = sel;
+      return true;
+    }
+    return false;
+  });
+
+  qsa("tbody tr", table).forEach((tr) => {
+    const td = tr.children[filtersIdx];
+    if (!td) return;
+
+    // remove any buttons accidentally injected
+    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach((n) => n.remove());
+
+    if (td.querySelector("select")) return;
+
+    if (templateSelect) {
+      const newSelect = templateSelect.cloneNode(true);
+      newSelect.value = "";
+      ensureUID(newSelect);
+      loadField(newSelect);
+      applySelectGhost(newSelect);
+      td.innerHTML = "";
+      td.appendChild(newSelect);
+      return;
+    }
+
+    const fallback = document.createElement("select");
+    fallback.innerHTML = `<option></option>`;
+    ensureUID(fallback);
+    loadField(fallback);
+    applySelectGhost(fallback);
+    td.innerHTML = "";
+    td.appendChild(fallback);
+  });
+}
+
+function applyNotesButtonsToColumn(table, notesColIdx) {
+  const headRow = table.querySelector("thead tr");
+  if (headRow && headRow.children[notesColIdx]) {
+    headRow.children[notesColIdx].textContent = "Notes";
+    headRow.children[notesColIdx].classList.add("notes-col");
   }
 
-})();
+  qsa("tbody tr", table).forEach((tr) => {
+    while (tr.children.length <= notesColIdx) tr.appendChild(document.createElement("td"));
+    renderTableNoteButton(tr.children[notesColIdx]);
+  });
+}
+
+function findNotesBlockForTable(table) {
+  const section = table.closest(".section");
+  if (!section) return null;
+
+  let node = section.nextElementSibling;
+  while (node) {
+    if (node.classList?.contains("section-block")) {
+      const h2 = node.querySelector("h2");
+      const t = (h2?.textContent || "").trim().toLowerCase();
+      if (t.startsWith("notes")) return node;
+      return null;
+    }
+    if (node.classList?.contains("section")) return null;
+    node = node.nextElementSibling;
+  }
+  return null;
+}
+
+function getColumnIndexByHeader(table, headerNames) {
+  const ths = getHeaderCells(table);
+  const targets = headerNames.map((h) => h.toLowerCase());
+  return ths.findIndex((th) => targets.includes(thText(th)));
+}
+
+function getCellFieldText(td) {
+  if (!td) return "";
+  const txts = Array.from(td.querySelectorAll("input[type='text'], input:not([type])"))
+    .map((i) => safeTrim(i.value))
+    .filter(Boolean);
+  if (txts.length > 1) return txts.join(" ");
+  if (txts.length === 1) return txts[0];
+
+  const ta = td.querySelector("textarea");
+  if (ta) return safeTrim(ta.value);
+
+  const sel = td.querySelector("select");
+  if (sel) {
+    const opt = sel.selectedOptions?.[0];
+    return safeTrim(opt?.textContent || sel.value);
+  }
+
+  return safeTrim(td.textContent);
+}
+
+function getOpcodeFromRow(table, tr) {
+  const idx = getColumnIndexByHeader(table, ["opcode", "op code", "opcodes"]);
+  if (idx === -1) return "";
+  return getCellFieldText(tr.children[idx]);
+}
+
+function getNameFromRow(table, tr) {
+  let idx = getColumnIndexByHeader(table, ["name"]);
+  if (idx === -1) idx = 0;
+  const td = tr.children[idx];
+  if (!td) return "";
+  return getCellFieldText(td);
+}
+
+function getRowKeyForTableContext(contextTable, tr) {
+  const isOpcodes = !!contextTable.closest("#opcodes-pricing");
+  const isTraining = !!contextTable.closest("#training-checklist");
+  if (isOpcodes) return getOpcodeFromRow(contextTable, tr);
+  if (isTraining) return getNameFromRow(contextTable, tr);
+  return getNameFromRow(contextTable, tr) || getOpcodeFromRow(contextTable, tr) || "";
+}
+
+function insertBulletIntoRealNotes(table, bullet) {
+  const notesBlock = findNotesBlockForTable(table);
+  const ta = notesBlock?.querySelector("textarea");
+  if (!ta) return;
+
+  const line = bullet.trim();
+  const raw = ta.value || "";
+  if (!raw.includes(line)) {
+    ta.value = raw.trim() ? raw.trim() + "\n" + line : line;
+    saveField(ta);
+  }
+
+  notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => {
+    ta.focus();
+    ta.classList.add("mk-note-jump");
+    setTimeout(() => ta.classList.remove("mk-note-jump"), 700);
+  }, 150);
+
+  requestAnimationFrame(() => updateNoteIconStates(document));
+}
+
+function tagNameCellsInTable(table) {
+  const nameIdx = getColumnIndexByHeader(table, ["name"]);
+  if (nameIdx === -1) return;
+  qsa("tbody tr", table).forEach((tr) => {
+    const td = tr.children[nameIdx];
+    if (!td) return;
+    td.classList.add("mk-name-cell");
+    Array.from(td.childNodes).forEach((n) => {
+      if (n.nodeName === "BR") n.remove();
+    });
+  });
+}
+
+function tagNameCellsInTableSection(section) {
+  qsa("#training-checklist table.training-table", section).forEach(tagNameCellsInTable);
+}
+
+function tagNameCellsOnLoad() {
+  qsa("#training-checklist table.training-table").forEach(tagNameCellsInTable);
+}
+
+function initTableNotesButtons(root = document) {
+  const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
+
+  targets.forEach((sel) => {
+    qsa(sel, root).forEach((table) => {
+      const notesIdx = ensureSingleNotesColumn(table);
+      if (notesIdx === null) return;
+
+      purgeStrayTableNoteButtons(table, notesIdx);
+      normalizeFiltersColumn(table);
+      applyNotesButtonsToColumn(table, notesIdx);
+      tagNameCellsInTable(table);
+
+      if (table.dataset.mkNotesWired === "1") return;
+      table.dataset.mkNotesWired = "1";
+
+      table.addEventListener(
+        "click",
+        (e) => {
+          const btn = e.target.closest(".mk-table-note-btn");
+          if (!btn) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          const tr = btn.closest("tr");
+          if (!tr) return;
+
+          const key = getRowKeyForTableContext(table, tr);
+          if (!key) return;
+
+          insertBulletIntoRealNotes(table, `• ${key}:`);
+        },
+        { passive: false }
+      );
+    });
+  });
+}
+
+/* ===========================================================
+   Notes POP-OUT (Notes textarea expander)
+=========================================================== */
+let _mkNotesModalSourceTA = null;
+
+function ensureNotesModal() {
+  let modal = qs("#mkNotesModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkNotesModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Notes">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkNotesModalTitle">Notes</div>
+        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
+      </div>
+      <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-mk-close='1']")) closeNotesModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeNotesModal();
+  });
+
+  return modal;
+}
+
+function openNotesModal(sourceTA, titleText = "Notes") {
+  const modal = ensureNotesModal();
+  const title = qs("#mkNotesModalTitle", modal);
+  const bigTA = qs("#mkNotesModalTextarea", modal);
+
+  _mkNotesModalSourceTA = sourceTA;
+
+  title.textContent = titleText || "Notes";
+  bigTA.value = sourceTA?.value || "";
+
+  bigTA.oninput = () => {
+    if (!_mkNotesModalSourceTA) return;
+    _mkNotesModalSourceTA.value = bigTA.value;
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(() => updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  };
+
+  modal.classList.add("open");
+  setTimeout(() => bigTA.focus(), 0);
+}
+
+function closeNotesModal() {
+  const modal = qs("#mkNotesModal");
+  if (!modal) return;
+
+  if (_mkNotesModalSourceTA) {
+    saveField(_mkNotesModalSourceTA);
+    requestAnimationFrame(() => updateNoteIconStates(document));
+    requestAnimationFrame(syncTwoColHeights);
+  }
+
+  modal.classList.remove("open");
+  _mkNotesModalSourceTA = null;
+}
+
+function initNotesExpanders(root = document) {
+  const notesCards = qsa(".section-block", root).filter(isNotesCard);
+
+  notesCards.forEach((card) => {
+    const ta = qs("textarea", card);
+    if (!ta) return;
+
+    let wrap = ta.closest(".mk-ta-wrap");
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.className = "mk-ta-wrap";
+      ta.parentNode.insertBefore(wrap, ta);
+      wrap.appendChild(ta);
+    }
+
+    if (qs(".mk-ta-expand", wrap)) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-ta-expand";
+    btn.title = "Expand notes";
+    btn.setAttribute("aria-label", "Expand notes");
+    btn.textContent = "⤢";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const h2 = qs("h2", card);
+      openNotesModal(ta, (h2?.textContent || "Notes").trim());
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
+/* ===========================================================
+   ✅ Table Popup Expand (⤢ in footer right)
+=========================================================== */
+let _mkTableModalSourceTA = null;
+let _mkTableModalContextTable = null;
+
+function ensureTableModal() {
+  let modal = qs("#mkTableModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkTableModal";
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" data-mk-table-close="1"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
+      <div class="mk-modal-header">
+        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
+        <button type="button" class="mk-modal-close" data-mk-table-close="1" aria-label="Close">×</button>
+      </div>
+      <div class="mk-modal-content">
+        <div class="mk-modal-stack" id="mkTableModalStack"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
+  });
+
+  return modal;
+}
+
+function closeTableModal() {
+  const modal = qs("#mkTableModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  _mkTableModalSourceTA = null;
+  _mkTableModalContextTable = null;
+}
+
+function buildCard(titleText) {
+  const card = document.createElement("div");
+  card.className = "section-block";
+  card.innerHTML = `<h2>${titleText}</h2><div class="mk-card-body"></div>`;
+  return card;
+}
+
+function mountPopupNotesCard(titleText, sourceTA) {
+  const notesCard = buildCard(titleText || "Notes");
+  notesCard.classList.add("mk-modal-notes");
+
+  const body = qs(".mk-card-body", notesCard);
+  const ta = document.createElement("textarea");
+  ta.placeholder = "Notes for this table...";
+  ta.value = sourceTA?.value || "";
+  body.appendChild(ta);
+
+  _mkTableModalSourceTA = sourceTA;
+
+  // sync popup TA -> real TA
+  ta.addEventListener("input", () => {
+    if (_mkTableModalSourceTA) {
+      _mkTableModalSourceTA.value = ta.value;
+      saveField(_mkTableModalSourceTA);
+    }
+  });
+
+  return { notesCard, notesTA: ta };
+}
+
+function insertBulletIntoPopupNotes(modalNotesTA, bullet) {
+  const line = bullet.trim();
+  const raw = modalNotesTA.value || "";
+  if (!raw.includes(line)) {
+    modalNotesTA.value = raw.trim() ? raw.trim() + "\n" + line : line;
+  }
+
+  // sync to real notes
+  if (_mkTableModalSourceTA) {
+    _mkTableModalSourceTA.value = modalNotesTA.value;
+    saveField(_mkTableModalSourceTA);
+  }
+
+  const notesCard = modalNotesTA.closest(".section-block");
+  if (notesCard) notesCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  setTimeout(() => {
+    modalNotesTA.focus();
+    modalNotesTA.classList.add("mk-note-jump");
+    setTimeout(() => modalNotesTA.classList.remove("mk-note-jump"), 700);
+  }, 140);
+}
+
+function openTableModalForTable(originalTable, titleText) {
+  const modal = ensureTableModal();
+  const title = qs("#mkTableModalTitle", modal);
+  const stack = qs("#mkTableModalStack", modal);
+
+  title.textContent = titleText || "Table";
+  stack.innerHTML = "";
+
+  _mkTableModalContextTable = originalTable;
+
+  // -------- Table card --------
+  const tableCard = buildCard(titleText || "Table");
+  const tableBody = qs(".mk-card-body", tableCard);
+
+  const tableContainer = document.createElement("div");
+  tableContainer.className = "table-container";
+
+  const tableClone = originalTable.cloneNode(true);
+  tableClone.classList.add("training-table", "mk-popup-table");
+
+  const scrollWrap = document.createElement("div");
+  scrollWrap.className = "mk-table-scroll";
+  scrollWrap.appendChild(tableClone);
+
+  const footer = document.createElement("div");
+  footer.className = "table-footer";
+  footer.innerHTML = `<button type="button" class="add-row" title="Add Row">+</button>`;
+
+  tableContainer.appendChild(scrollWrap);
+  tableContainer.appendChild(footer);
+  tableBody.appendChild(tableContainer);
+
+  // wire persistence in popup
+  qsa("input, select, textarea", tableClone).forEach((el) => {
+    ensureUID(el);
+    loadField(el);
+    if (el.tagName === "SELECT") applySelectGhost(el);
+    if (el.type === "date") applyDateGhost(el);
+    el.addEventListener("input", () => saveField(el));
+    el.addEventListener("change", () => saveField(el));
+  });
+
+  tagNameCellsInTable(tableClone);
+
+  // -------- Notes card synced to real table notes --------
+  const realNotesBlock = findNotesBlockForTable(originalTable);
+  const realTA = realNotesBlock?.querySelector("textarea");
+  const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
+
+  tableClone.addEventListener(
+    "click",
+    (e) => {
+      const btn = e.target.closest(".mk-table-note-btn");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const tr = btn.closest("tr");
+      if (!tr) return;
+
+      const key = getRowKeyForTableContext(_mkTableModalContextTable, tr);
+      if (!key) return;
+
+      insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
+    },
+    { passive: false }
+  );
+
+  stack.appendChild(tableCard);
+  stack.appendChild(notesCard);
+
+  modal.classList.add("open");
+}
+
+function ensureExpandBtnInTableFooter(table) {
+  const container = table.closest(".table-container");
+  if (!container) return;
+
+  const footer = qs(".table-footer", container);
+  if (!footer) return;
+
+  if (qs(".mk-table-expand-btn", footer)) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "mk-ta-expand mk-table-expand-btn";
+  btn.title = "Expand table";
+  btn.setAttribute("aria-label", "Expand table");
+  btn.textContent = "⤢";
+
+  const rightWrap = document.createElement("div");
+  rightWrap.style.marginLeft = "auto";
+  rightWrap.style.display = "flex";
+  rightWrap.style.alignItems = "center";
+  rightWrap.appendChild(btn);
+
+  footer.appendChild(rightWrap);
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const sectionHeader = container.previousElementSibling;
+    const t = safeTrim(sectionHeader?.textContent || "Table");
+    openTableModalForTable(table, t);
+  });
+}
+
+function initTablePopupExpandButtons(root = document) {
+  const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
+  targets.forEach((sel) => {
+    qsa(sel, root).forEach((table) => ensureExpandBtnInTableFooter(table));
+  });
+}
+
+/* ---------------------------
+   Boot
+--------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  injectRuntimePatches();
+
+  initNav();
+  initGhosts();
+  initPersistence();
+
+  initTextareas(document);
+  syncTwoColHeights();
+  window.addEventListener("resize", () => requestAnimationFrame(syncTwoColHeights));
+
+  initResets();
+  initTableAddRow();
+
+  initAdditionalTrainers();
+  initAdditionalPOC();
+  initSupportTickets();
+  initOnsiteTrainingDates();
+
+  restoreDealershipNameDisplay();
+  restoreDealershipMap();
+
+  initPDF();
+
+  // Notes + tables
+  initNotesExpanders(document);
+  initNotesLinkingOption2Only(document);
+  initTableNotesButtons(document);
+  initTablePopupExpandButtons(document);
+  updateNoteIconStates(document);
+
+  // Name cell layout fix
+  tagNameCellsOnLoad();
+});
