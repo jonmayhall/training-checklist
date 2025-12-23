@@ -254,6 +254,10 @@ main{
   color:#555;
 }
 
+#dms-integration .page-subtitle{
+  margin-bottom:40px;
+}
+
 /* Reset This Page */
 .page-section .clear-page-btn{
   position:absolute !important;
