@@ -1150,7 +1150,7 @@ main{
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:96px;                 /* ~1 inch gap H + V */
+  gap:48px;                 /* ~1 inch gap H + V */
   margin-top:14px;
   align-items:start;        /* prevents stretch weirdness */
 }
