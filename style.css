@@ -1462,19 +1462,20 @@ main{
 }
 
 /* =========================
-   NOTES EXPAND BUTTON — TRUE CARD CORNER
+   NOTES EXPAND BUTTON — BALANCED CORNER
    ========================= */
+
 .section-block{
-  position: relative; /* anchor for button */
+  position: relative;
 }
 
 .section-block .mk-expand-btn{
   position: absolute;
-  right: 12px;
-  bottom: 12px;
+  right: 14px;
+  bottom: 14px;
 
-  /* visually tuck it up into the corner */
-  transform: translateY(-18px);
+  /* remove vertical lift */
+  transform: none;
 
   width: 16px;
   height: 16px;
