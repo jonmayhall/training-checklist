@@ -1494,3 +1494,17 @@ main{
   font-size: 11px;
   font-weight: 600;
 }
+
+/* ===========================================================
+   DMS BODY PILLS — smaller & lighter (non-header only)
+   =========================================================== */
+
+#dms-integration .dms-list .dms-tag{
+  font-size: 10px;        /* smaller than header pills */
+  font-weight: 600;      /* lighter than headers */
+  padding: 3px 8px;      /* tighter pill */
+  min-width: 78px;       /* less visual weight */
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
