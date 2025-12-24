@@ -533,82 +533,32 @@ main{
   transform:translateY(-1px);
 }
 
-/* =======================
-   DEALERSHIP INFO PAGE FIXES
-   (DROP-IN REPLACEMENT)
-======================= */
-
-/* -------------------------------------------------------
-   Dealership Info: set a smaller right-side field width
-   ONLY for this page (fixes wide inputs + date inputs)
-------------------------------------------------------- */
-#dealership-info{
-  --di-input-width:170px;          /* contact + date field width */
-}
-
-/* -------------------------------------------------------
-   Training Dates + Onsite Training Dates (fix huge date boxes)
-------------------------------------------------------- */
-#dealership-info .training-dates-row,
-#dealership-info .onsite-training-dates-row{
-  align-items:flex-start !important;
-}
-
-#dealership-info .training-dates-row label,
-#dealership-info .onsite-training-dates-row label{
-  padding-top:7px !important;
-}
-
-/* stack of dates on the right */
-#dealership-info .training-dates-row .date-stack,
-#dealership-info .onsite-training-dates-row .date-stack{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  margin-left:auto !important;
-
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-  align-items:stretch !important;
-}
-
-/* actual date inputs */
-#dealership-info .training-dates-row .date-stack input[type="date"],
-#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  padding:7px 10px !important;
-}
-
 /* ============================
-   DEALERSHIP INFO — Card sizing + even spacing
+   DEALERSHIP INFO — Card sizing + field widths (FINAL)
 ============================ */
 
-/* Keep one consistent right-side field width for THIS page */
 #dealership-info{
-  --di-input-width:170px;   /* this controls contact fields + date fields */
-  --di-gap:28px;            /* one “even” spacing value */
+  /* 33% wider than before */
+  --di-input-width:225px;     /* was ~170px */
+  --di-gap:28px;
 }
 
-/* Even space around cards (edges + between cards) */
+/* Primary Contacts grid */
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:var(--di-gap);                 /* same H + V */
-  padding:var(--di-gap);             /* same space around the outside */
+  gap:var(--di-gap);
+  padding:var(--di-gap);
   margin-top:10px;
 }
 
-/* Make the card smaller (outer edges inward) + reduce inside padding (content outward) */
+/* Card size + inner spacing */
 #dealership-info .primary-contacts-grid .mini-card{
   width:100%;
-  max-width:520px;                   /* smaller card */
+  max-width:520px;
   justify-self:center;
 
-  padding:10px 12px 6px;             /* less inside padding (content outward) */
+  padding:10px 12px 6px;
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
@@ -616,7 +566,7 @@ main{
   overflow:hidden;
 }
 
-/* Reduce row indentation inside cards */
+/* Reduce indentation inside cards */
 #dealership-info .primary-contacts-grid .checklist-row{
   padding-left:12px !important;
   padding-right:12px !important;
@@ -625,20 +575,41 @@ main{
   padding-left:24px !important;
 }
 
-/* Make ALL right-side fields in these cards the same width */
-#dealership-info .primary-contacts-grid .checklist-row input[type="text"],
-#dealership-info .primary-contacts-grid .checklist-row input[type="email"],
-#dealership-info .primary-contacts-grid .checklist-row input[type="tel"],
-#dealership-info .primary-contacts-grid .checklist-row select{
+/* ============================
+   CONTACT CARD INPUT WIDTHS
+============================ */
+
+/* All right-side fields in contact cards */
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="text"],
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="email"],
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="tel"],
+#dealership-info .primary-contacts-grid
+  .checklist-row select{
+
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
-  height:34px !important;
+
+  height:34px !important;        /* unchanged */
+}
+
+/* Base Additional POC (with + button) */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+
+  flex:0 0 calc(var(--di-input-width) - 34px) !important;
+  width:calc(var(--di-input-width) - 34px) !important;
+  max-width:calc(var(--di-input-width) - 34px) !important;
 }
 
 /* ============================
-   DEALERSHIP INFO — Dates: match other field widths
+   TRAINING DATES — MATCH CONTACT INPUTS
 ============================ */
+
 #dealership-info .training-dates-row .date-stack,
 #dealership-info .onsite-training-dates-row .date-stack{
   flex:0 0 var(--di-input-width) !important;
