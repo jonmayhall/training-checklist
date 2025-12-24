@@ -1,27 +1,31 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — script.js (FULL)
-   ✅ FIXED
-   - Nav/menu buttons work
-   - Reset page + Clear all work
-   - Autosave/restore works
-   - ✅ Filters column restored (rows normalized to header)
-   - ✅ Notes bubble forced into Notes column (no “first column” bug)
-   - ✅ Notes icon = 💬 (orange on click) + bullet header inserted
-   - ✅ Table notes textarea bigger
-   - ✅ Support ticket add (+) works (delegated; no lost bindings)
-   - ✅ No scroll/movement when notes clicked
-   - ✅ Table popups include Add Row + notes work
+   myKaarma Interactive Training Checklist — script.js
+   ✅ FIXED + UPDATED (per your latest notes)
+   - Restores ALL nav/buttons/menu (no crashes, no double-binding)
+   - Notes buttons = bubble icon (turns orange when notes exist)
+   - Notes buttons work on questions + tables + table popups
+   - Training tables use Name as bullet label; Opcode tables use Opcode
+   - Notes buttons stay in the Notes column (won’t show in first column)
+   - Filters column dropdowns stay in Filters column (prevents mis-injection)
+   - Table popups include Add Row (+) and keep clean “card” layout
+   - Table notes textarea is bigger (popup + page stays consistent)
+   - Support Tickets add button works
+   - Notes click does NOT scroll / shift the page
+   - Reset Page clears related Notes state so old bullets don’t come back
 ======================================================= */
 
 (() => {
   "use strict";
 
   /* -----------------------------
-     KEYS + HELPERS
+     STORAGE KEYS
   ----------------------------- */
   const LS_KEY = "mk_training_checklist_v2";
   const NOTES_KEY = "mk_training_notes_v2";
 
+  /* -----------------------------
+     HELPERS
+  ----------------------------- */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -43,6 +47,14 @@
     el.dataset[k] = "true";
     return true;
   };
+
+  const escapeHTML = (s) =>
+    String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
   /* -----------------------------
      PLACEHOLDER / GHOST CLASSING
@@ -72,7 +84,7 @@
     $$("input").forEach(applyPlaceholderClassToInput);
     $$("textarea").forEach(applyPlaceholderClassToTextarea);
 
-    if (!bindOnce(document.body, "placeholder_events")) return;
+    if (!bindOnce(document.body, "ph_events")) return;
 
     document.addEventListener("change", (e) => {
       const t = e.target;
@@ -88,6 +100,36 @@
       if (t.tagName === "INPUT") applyPlaceholderClassToInput(t);
       if (t.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(t);
     });
+  }
+
+  /* -----------------------------
+     NAV
+  ----------------------------- */
+  function initNav() {
+    const navButtons = $$("#sidebar-nav .nav-btn");
+    const sections = $$(".page-section");
+
+    const showSection = (id) => {
+      sections.forEach((s) => s.classList.toggle("active", s.id === id));
+      navButtons.forEach((b) => b.classList.toggle("active", b.dataset.target === id));
+      window.scrollTo({ top: 0, behavior: "auto" });
+    };
+
+    navButtons.forEach((btn) => {
+      if (!bindOnce(btn, "nav")) return;
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        if (!target) return;
+        showSection(target);
+
+        const state = loadState();
+        state.__lastPage = target;
+        saveState(state);
+      });
+    });
+
+    const state = loadState();
+    if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
   }
 
   /* -----------------------------
@@ -125,6 +167,15 @@
   }
 
   function snapshotDynamicBlocks(state) {
+    // Additional trainers (if present)
+    const at = $("#additionalTrainersContainer");
+    if (at) state.__additionalTrainersHTML = at.innerHTML;
+
+    // Additional POCs (if present)
+    const pcs = $$(".additional-poc-card");
+    if (pcs.length) state.__additionalPocsHTML = pcs.map((c) => c.outerHTML).join("");
+
+    // Tickets
     state.__ticketsHTML = {
       open: $("#openTicketsContainer")?.innerHTML || "",
       tierTwo: $("#tierTwoTicketsContainer")?.innerHTML || "",
@@ -134,6 +185,20 @@
   }
 
   function restoreDynamicBlocks(state) {
+    if (typeof state.__additionalTrainersHTML === "string" && $("#additionalTrainersContainer")) {
+      $("#additionalTrainersContainer").innerHTML = state.__additionalTrainersHTML;
+    }
+
+    if (typeof state.__additionalPocsHTML === "string" && state.__additionalPocsHTML) {
+      const grid = $(".primary-contacts-grid");
+      if (grid) {
+        $$(".additional-poc-card", grid).forEach((el) => el.remove());
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = state.__additionalPocsHTML;
+        Array.from(wrapper.children).forEach((child) => grid.appendChild(child));
+      }
+    }
+
     const t = state.__ticketsHTML;
     if (t) {
       if ($("#openTicketsContainer") && t.open) $("#openTicketsContainer").innerHTML = t.open;
@@ -153,7 +218,9 @@
       controls.forEach((el, i) => {
         const inTable = !!el.closest("table");
         const inTickets = !!el.closest("#support-tickets");
-        if (inTable || inTickets) return;
+        const inAdditionalTrainer = !!el.closest("#additionalTrainersContainer");
+        const inAdditionalPoc = !!el.closest(".additional-poc-card");
+        if (inTable || inTickets || inAdditionalTrainer || inAdditionalPoc) return;
 
         const key = `${sectionId}::ctrl::${i}`;
         if (el.type === "checkbox") state.__controls[key] = !!el.checked;
@@ -171,7 +238,9 @@
       controls.forEach((el, i) => {
         const inTable = !!el.closest("table");
         const inTickets = !!el.closest("#support-tickets");
-        if (inTable || inTickets) return;
+        const inAdditionalTrainer = !!el.closest("#additionalTrainersContainer");
+        const inAdditionalPoc = !!el.closest(".additional-poc-card");
+        if (inTable || inTickets || inAdditionalTrainer || inAdditionalPoc) return;
 
         const key = `${sectionId}::ctrl::${i}`;
         if (!(key in map)) return;
@@ -186,13 +255,14 @@
     });
   }
 
+  // ✅ You asked about this: it IS here
   const persistAllDebounced = debounce(() => {
     const state = loadState();
     snapshotTables(state);
     snapshotDynamicBlocks(state);
     snapshotFormControls(state);
     saveState(state);
-  }, 300);
+  }, 250);
 
   function initAutosave() {
     if (!bindOnce(document.body, "autosave")) return;
@@ -226,107 +296,187 @@
   }
 
   /* -----------------------------
-     NAV
+     RESET PAGE / CLEAR ALL
+     - clears Notes state so old bullets don’t come back
   ----------------------------- */
-  function initNav() {
-    const navButtons = $$("#sidebar-nav .nav-btn");
-    const sections = $$(".page-section");
-
-    const showSection = (id) => {
-      sections.forEach((s) => s.classList.toggle("active", s.id === id));
-      navButtons.forEach((b) => b.classList.toggle("active", b.dataset.target === id));
-      window.scrollTo({ top: 0, behavior: "auto" });
-    };
-
-    navButtons.forEach((btn) => {
-      if (!bindOnce(btn, "nav")) return;
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.target;
-        if (!target) return;
-        showSection(target);
-
-        const state = loadState();
-        state.__lastPage = target;
-        saveState(state);
-      });
-    });
-
-    const state = loadState();
-    if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
+  function loadNotesState() {
+    return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {};
+  }
+  function saveNotesState(state) {
+    localStorage.setItem(NOTES_KEY, JSON.stringify(state));
   }
 
-/* -----------------------------
-   RESET PAGE / CLEAR ALL
------------------------------ */
-function clearSection(sectionEl) {
-  if (!sectionEl) return;
-
-  // Clear normal controls (not tables/tickets)
-  $$("input, select, textarea", sectionEl).forEach((el) => {
-    const inTable = !!el.closest("table");
-    const inTickets = !!el.closest("#support-tickets");
-    if (inTable || inTickets) return;
-
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-  });
-
-  // Clear tables (keep first 1–3 rows)
-  $$(".table-container", sectionEl).forEach((tc) => {
-    const table = $("table", tc);
-    const tbody = table?.tBodies?.[0];
-    if (!tbody) return;
-
-    const rows = Array.from(tbody.rows);
-    const keep = Math.max(1, Math.min(3, rows.length));
-    rows.forEach((r, idx) => {
-      if (idx >= keep) r.remove();
-      else {
-        $$("input, select, textarea", r).forEach((el) => {
-          if (el.type === "checkbox") el.checked = false;
-          else el.value = "";
-        });
-      }
-    });
-  });
-
-  // Clear tickets
-  if (sectionEl.id === "support-tickets") {
-    const open = $("#openTicketsContainer");
-    const base = $(".ticket-group[data-base='true']", open);
-    if (open && base) open.innerHTML = base.outerHTML;
-    if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
-    if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
-    if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
-  }
-
-  // ✅ NEW: ALSO CLEAR NOTES STATE FOR THIS PAGE (prevents old bullets from returning)
-  (() => {
+  function clearNotesForSection(sectionEl) {
+    if (!sectionEl) return;
     const notesState = loadNotesState();
 
-    const notesBlocks = $$(
-      "[id^='notes-'].section-block, [id^='notes-auto-'].section-block, [id^='notes-card-'].section-block",
-      sectionEl
-    );
-
-    notesBlocks.forEach((block) => {
-      if (!block.id) return;
-
-      // remove stored items for this notes target
-      delete notesState[block.id];
-
-      // clear visible textarea too
+    // Remove any notes blocks that live in this section
+    $$("[id^='notes-'], [id^='notes-card-']", sectionEl).forEach((block) => {
+      if (block?.id && notesState[block.id]) delete notesState[block.id];
       const ta = $("textarea", block);
       if (ta) ta.value = "";
     });
 
     saveNotesState(notesState);
-  })();
+  }
 
-  initPlaceholderStyling();
-  persistAllDebounced();
-  refreshAllNotesButtons();
-}
+  function clearSection(sectionEl) {
+    if (!sectionEl) return;
+
+    // Clear non-table/non-ticket controls
+    $$("input, select, textarea", sectionEl).forEach((el) => {
+      const inTable = !!el.closest("table");
+      const inTickets = !!el.closest("#support-tickets");
+      const inAdditionalTrainer = !!el.closest("#additionalTrainersContainer");
+      const inAdditionalPoc = !!el.closest(".additional-poc-card");
+      if (inTable || inTickets || inAdditionalTrainer || inAdditionalPoc) return;
+
+      if (el.type === "checkbox") el.checked = false;
+      else el.value = "";
+    });
+
+    // Reset tables: keep up to first 3 rows (or 1 if only 1 exists)
+    $$(".table-container", sectionEl).forEach((tc) => {
+      const table = $("table", tc);
+      const tbody = table?.tBodies?.[0];
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.rows);
+      const keep = Math.max(1, Math.min(3, rows.length));
+      rows.forEach((r, idx) => {
+        if (idx >= keep) r.remove();
+        else clearRowControls(r);
+      });
+    });
+
+    // Tickets reset
+    if (sectionEl.id === "support-tickets") {
+      const open = $("#openTicketsContainer");
+      const base = $(".ticket-group[data-base='true']", open);
+      if (open && base) open.innerHTML = base.outerHTML;
+      if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
+      if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
+      if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
+    }
+
+    // ✅ Clear notes state for this section (fixes “old bullets come back”)
+    clearNotesForSection(sectionEl);
+
+    // Refresh UI
+    initPlaceholderStyling();
+    persistAllDebounced();
+    refreshAllNotesButtons();
+  }
+
+  function initResetButtons() {
+    $$(".clear-page-btn").forEach((btn) => {
+      if (!bindOnce(btn, "reset_page")) return;
+      btn.addEventListener("click", () => {
+        const sec = btn.closest(".page-section");
+        clearSection(sec);
+      });
+    });
+
+    const clearAllBtn = $("#clearAllBtn");
+    if (clearAllBtn && bindOnce(clearAllBtn, "clear_all")) {
+      clearAllBtn.addEventListener("click", () => {
+        localStorage.removeItem(LS_KEY);
+        localStorage.removeItem(NOTES_KEY);
+        closeModal();
+        $$(".page-section").forEach(clearSection);
+        saveState({});
+      });
+    }
+  }
+
+  /* -----------------------------
+     ONSITE DATES: end defaults to start + 2 days
+  ----------------------------- */
+  function initOnsiteDates() {
+    const start = $("#onsiteStartDate");
+    const end = $("#onsiteEndDate");
+    if (!start || !end) return;
+    if (!bindOnce(start, "onsite_date")) return;
+
+    const addDays = (yyyy_mm_dd, days) => {
+      const d = new Date(yyyy_mm_dd + "T00:00:00");
+      if (Number.isNaN(d.getTime())) return "";
+      d.setDate(d.getDate() + days);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    start.addEventListener("change", () => {
+      if (!start.value) return;
+      if (!end.value) {
+        end.value = addDays(start.value, 2);
+        applyPlaceholderClassToInput(end);
+        persistAllDebounced();
+      }
+    });
+  }
+
+  /* -----------------------------
+     ADDITIONAL TRAINERS (+)
+  ----------------------------- */
+  function initAdditionalTrainers() {
+    const container = $("#additionalTrainersContainer");
+    const baseRow = $(".checklist-row.integrated-plus[data-base='true']");
+    if (!container || !baseRow) return;
+
+    const addBtn = $(".add-row", baseRow);
+    if (!addBtn) return;
+    if (!bindOnce(addBtn, "add_trainer")) return;
+
+    addBtn.addEventListener("click", () => {
+      const clone = baseRow.cloneNode(true);
+      clone.dataset.base = "false";
+
+      const inp = $("input[type='text']", clone);
+      if (inp) inp.value = "";
+
+      // remove + button from clones
+      $$(".add-row", clone).forEach((b) => b.remove());
+
+      container.appendChild(clone);
+
+      if (inp) applyPlaceholderClassToInput(inp);
+      persistAllDebounced();
+    });
+  }
+
+  /* -----------------------------
+     ADDITIONAL POC (+)
+  ----------------------------- */
+  function initAdditionalPOCs() {
+    const baseCard = $(".additional-poc-card[data-base='true']");
+    const grid = $(".primary-contacts-grid");
+    if (!baseCard || !grid) return;
+
+    const addBtn = $(".additional-poc-add", baseCard);
+    if (!addBtn) return;
+    if (!bindOnce(addBtn, "add_poc")) return;
+
+    addBtn.addEventListener("click", () => {
+      const clone = baseCard.cloneNode(true);
+      clone.dataset.base = "false";
+
+      $$("input", clone).forEach((inp) => (inp.value = ""));
+      $$(".additional-poc-add", clone).forEach((b) => b.remove());
+
+      grid.appendChild(clone);
+
+      $$("input, select, textarea", clone).forEach((el) => {
+        if (el.tagName === "INPUT") applyPlaceholderClassToInput(el);
+        if (el.tagName === "SELECT") applyPlaceholderClassToSelect(el);
+        if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
+      });
+
+      persistAllDebounced();
+    });
+  }
 
   /* -----------------------------
      TABLE: ADD ROW (+)
@@ -339,15 +489,20 @@ function clearSection(sectionEl) {
       if (el.tagName === "INPUT") applyPlaceholderClassToInput(el);
       if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
     });
+
+    // ensure notes button is in notes column only
+    normalizeNotesCellsInRow(row);
   }
 
   function cloneLastRow(table) {
     const tbody = table.tBodies?.[0];
     if (!tbody || !tbody.rows.length) return null;
+
     const last = tbody.rows[tbody.rows.length - 1];
     const clone = last.cloneNode(true);
     clearRowControls(clone);
     tbody.appendChild(clone);
+
     return clone;
   }
 
@@ -362,190 +517,98 @@ function clearSection(sectionEl) {
       footerAdd.addEventListener("click", () => {
         const newRow = cloneLastRow(table);
         if (newRow) {
-          normalizeAllTables();     // ✅ keeps columns aligned
-          persistAllDebounced();
+          bindNotesButtonsWithin(newRow);
           refreshAllNotesButtons();
+          persistAllDebounced();
         }
       });
     });
   }
 
   /* -----------------------------
-     ✅ TABLE NORMALIZATION (FIXES FILTERS + NOTES COLUMN SHIFT)
+     NOTES BUTTON (bubble icon)
   ----------------------------- */
-  const TRAINING_SELECT_HTML = `
-    <select>
-      <option></option>
-      <option>Web</option>
-      <option>Mobile</option>
-      <option>Web &amp; Mobile</option>
-      <option>Not Trained</option>
-    </select>`.trim();
+  const NOTES_SVG = `
+    <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 18l-3 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H9l-2 1z" />
+      <path class="dots" d="M9 11h.01M12 11h.01M15 11h.01" />
+    </svg>
+  `;
 
-  const YESNO_SELECT_HTML = `
-    <select>
-      <option></option>
-      <option>Yes</option>
-      <option>No</option>
-      <option>Not Trained</option>
-    </select>`.trim();
+  function ensureBubbleIcon(btn) {
+    if (!btn) return;
+    if (btn.querySelector("svg.notes-bubble")) return;
+    btn.innerHTML = NOTES_SVG;
+  }
 
-  function tableHeaderMeta(table) {
+  function normalizeNotesCellsInRow(tr) {
+    if (!tr || tr.tagName !== "TR") return;
+
+    const table = tr.closest("table");
+    if (!table) return;
+
     const ths = $$("thead th", table);
-    const names = ths.map((th) => (th.textContent || "").trim().toLowerCase());
-    const notesIdx = ths.findIndex((th, i) => th.classList.contains("notes-col-head") || names[i] === "notes");
-    const filtersIdx = names.findIndex((n) => n.includes("filters"));
-    const hasOpcode = names.includes("opcode");
-    return { ths, names, notesIdx, filtersIdx, hasOpcode };
-  }
-
-  function ensureRowCellCount(table, tr) {
-    const { ths } = tableHeaderMeta(table);
-    const needed = ths.length;
-    let tds = Array.from(tr.children).filter((n) => n.tagName === "TD");
-
-    while (tds.length < needed) {
-      tr.appendChild(document.createElement("td"));
-      tds = Array.from(tr.children).filter((n) => n.tagName === "TD");
-    }
-  }
-
-  function ensureFiltersCell(table, tr) {
-    const { filtersIdx, notesIdx, hasOpcode } = tableHeaderMeta(table);
-    if (filtersIdx < 0) return;
-
-    const tds = Array.from(tr.children).filter((n) => n.tagName === "TD");
-    const cell = tds[filtersIdx];
-    if (!cell) return;
-
-    // if it already has a select, keep it
-    if (cell.querySelector("select")) return;
-
-    // create the appropriate dropdown (training tables use TRAINING_SELECT)
-    cell.innerHTML = hasOpcode ? YESNO_SELECT_HTML : TRAINING_SELECT_HTML;
-    const sel = cell.querySelector("select");
-    if (sel) applyPlaceholderClassToSelect(sel);
-
-    // if filtersIdx is after notesIdx (shouldn't happen), keep order via normalization
-    if (notesIdx >= 0 && filtersIdx > notesIdx) {
-      // no-op; alignment handled by header count
-    }
-  }
-
-  function ensureNotesCell(table, tr) {
-    const { notesIdx } = tableHeaderMeta(table);
+    const notesIdx = ths.findIndex((th) => th.classList.contains("notes-col-head") || th.textContent.trim().toLowerCase() === "notes");
     if (notesIdx < 0) return;
 
-    const tds = Array.from(tr.children).filter((n) => n.tagName === "TD");
-    const notesCell = tds[notesIdx];
-    if (!notesCell) return;
-
-    notesCell.classList.add("notes-col-cell");
-
-    // if there is no notes button, add it
-    if (!notesCell.querySelector(".notes-icon-btn")) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "notes-icon-btn notes-bubble-btn";
-      btn.setAttribute("aria-label", "Open Notes");
-      btn.innerHTML = `<span class="notes-icon" aria-hidden="true">💬</span>`;
-      notesCell.appendChild(btn);
-    }
-
-    // force any notes button that ended up elsewhere into this cell
-    const misplaced = tr.querySelectorAll(".notes-icon-btn");
-    misplaced.forEach((b) => {
-      if (!notesCell.contains(b)) notesCell.appendChild(b);
-    });
-  }
-
-  function normalizeTable(table) {
-    const tbody = table.tBodies?.[0];
-    if (!tbody) return;
-
-    const { notesIdx } = tableHeaderMeta(table);
-
-    Array.from(tbody.rows).forEach((tr) => {
-      ensureRowCellCount(table, tr);
-      ensureFiltersCell(table, tr);
-      ensureNotesCell(table, tr);
-
-      // also ensure notes header exists visually (if HTML missing class)
-      if (notesIdx >= 0) {
-        const th = $$("thead th", table)[notesIdx];
-        if (th) th.classList.add("notes-col-head");
+    const tds = Array.from(tr.children);
+    // If any notes buttons ended up in a non-notes cell, remove them
+    tds.forEach((td, idx) => {
+      if (!td) return;
+      if (idx !== notesIdx) {
+        $$(".notes-icon-btn", td).forEach((b) => b.remove());
       }
     });
+
+    const notesTd = tds[notesIdx];
+    if (!notesTd) return;
+
+    notesTd.classList.add("notes-col-cell");
+
+    // Ensure there is a notes button in the notes cell
+    let btn = $(".notes-icon-btn", notesTd);
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "notes-icon-btn";
+      btn.setAttribute("aria-label", "Add note");
+
+      // try to inherit target from any existing button in row/table
+      const existing = $(".notes-icon-btn[data-notes-target]", tr.closest("tbody") || table);
+      if (existing?.dataset?.notesTarget) btn.dataset.notesTarget = existing.dataset.notesTarget;
+
+      notesTd.appendChild(btn);
+    }
+
+    ensureBubbleIcon(btn);
   }
 
-  function normalizeAllTables() {
-    $$("table.training-table").forEach(normalizeTable);
+  function normalizeAllTrainingTables() {
+    $$("table.training-table tbody tr").forEach((tr) => normalizeNotesCellsInRow(tr));
   }
 
   /* -----------------------------
-     NOTES STATE + ORANGE BUBBLES
+     NOTES SYSTEM
+     - stores by LABEL (Name/Opcode/Question label)
+     - keeps stable order + avoids “old bullets”
   ----------------------------- */
-  function loadNotesState() { return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {}; }
-  function saveNotesState(state) { localStorage.setItem(NOTES_KEY, JSON.stringify(state)); }
-
-  function setNotesButtonVisual(btn, filled) {
-    if (!btn) return;
-    btn.dataset.filled = filled ? "true" : "false";
-    btn.classList.toggle("notes-filled", !!filled);
-
-    const icon = btn.querySelector(".notes-icon");
-    if (filled) {
-      btn.style.borderColor = "#f57c00";
-      btn.style.background = "rgba(245, 124, 0, 0.14)";
-      if (icon) icon.style.color = "#f57c00";
-    } else {
-      btn.style.borderColor = "";
-      btn.style.background = "";
-      if (icon) icon.style.color = "";
-    }
-  }
-
-  function makeBubbleButton(notesTargetId) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "notes-icon-btn notes-bubble-btn";
-    btn.dataset.notesTarget = notesTargetId;
-    btn.setAttribute("aria-label", "Open Notes");
-    btn.innerHTML = `<span class="notes-icon" aria-hidden="true">💬</span>`;
-    setNotesButtonVisual(btn, false);
-    return btn;
-  }
-
-  function getRowSignatureIndex(btn) {
+  function getBulletLabel(btn) {
     const tr = btn.closest("tr");
     if (tr) {
-      const tbody = tr.parentElement;
-      const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
-      const idx = rows.indexOf(tr);
-      return idx >= 0 ? idx : 9999;
-    }
-    const sec = btn.closest(".page-section") || document;
-    const all = $$(".notes-icon-btn", sec).filter((b) => !b.closest("table"));
-    const idx = all.indexOf(btn);
-    return idx >= 0 ? idx : 9999;
-  }
+      const table = tr.closest("table");
+      const headers = table ? $$("thead th", table).map((th) => th.textContent.trim().toLowerCase()) : [];
+      const hasOpcodeHeader = headers.includes("opcode");
 
-  function isOpcodeTableRow(tr) {
-    const table = tr?.closest?.("table");
-    if (!table) return false;
-    const headers = $$("thead th", table).map((th) => th.textContent.trim().toLowerCase());
-    return headers.includes("opcode");
-  }
-
-  function getBulletLabelForButton(btn) {
-    const tr = btn.closest("tr");
-    if (tr) {
-      if (isOpcodeTableRow(tr)) {
+      if (hasOpcodeHeader) {
         const opcodeInput = tr.querySelector("td:nth-child(2) input[type='text']");
-        return opcodeInput?.value?.trim() || "Opcode";
+        const opcode = opcodeInput?.value?.trim();
+        return opcode || "Opcode";
       }
+
+      // Training tables: Name is first text input in the row (name field)
       const nameInput = tr.querySelector("td input[type='text']");
-      return nameInput?.value?.trim() || "Name";
+      const name = nameInput?.value?.trim();
+      return name || "Name";
     }
 
     const row = btn.closest(".checklist-row");
@@ -553,15 +616,22 @@ function clearSection(sectionEl) {
     return label ? label.replace(/\s+/g, " ") : "Note";
   }
 
-  function ensureNotesItem(targetId, sigIndex, label) {
+  function ensureNotesBlock(targetId) {
     const notesState = loadNotesState();
-    notesState[targetId] = notesState[targetId] || { items: {} };
+    if (!notesState[targetId]) notesState[targetId] = { order: [], items: {} };
+    if (!Array.isArray(notesState[targetId].order)) notesState[targetId].order = [];
+    if (!notesState[targetId].items) notesState[targetId].items = {};
+    return notesState;
+  }
 
-    const itemId = String(sigIndex);
-    if (!notesState[targetId].items[itemId]) {
-      notesState[targetId].items[itemId] = { label, text: "" };
-    } else {
-      notesState[targetId].items[itemId].label = label;
+  function ensureNotesItem(targetId, label) {
+    const notesState = ensureNotesBlock(targetId);
+    const block = notesState[targetId];
+
+    const key = label.trim() || "Note";
+    if (!block.items[key]) {
+      block.items[key] = { text: "" };
+      block.order.push(key);
     }
 
     saveNotesState(notesState);
@@ -570,18 +640,16 @@ function clearSection(sectionEl) {
   function buildNotesText(targetId) {
     const notesState = loadNotesState();
     const block = notesState[targetId];
-    if (!block?.items) return "";
-
-    const entries = Object.entries(block.items)
-      .map(([k, v]) => ({ k: Number(k), v }))
-      .sort((a, b) => a.k - b.k);
+    if (!block) return "";
 
     const parts = [];
-    entries.forEach(({ v }) => {
-      parts.push(`• ${v.label}:`);
-      const body = (v.text || "").trim();
+    const order = Array.isArray(block.order) ? block.order : Object.keys(block.items || {});
+    order.forEach((label) => {
+      if (!label) return;
+      parts.push(`• ${label}:`);
+      const body = (block.items?.[label]?.text || "").trim();
       if (body) parts.push(body);
-      parts.push("");
+      parts.push(""); // blank line between bullets
     });
 
     while (parts.length && parts[parts.length - 1] === "") parts.pop();
@@ -589,208 +657,221 @@ function clearSection(sectionEl) {
   }
 
   function hydrateNotesTextarea(targetId) {
-    const ta = $("#" + targetId)?.querySelector?.("textarea");
+    const blockEl = $("#" + targetId);
+    const ta = blockEl?.querySelector?.("textarea");
     if (!ta) return;
+
     ta.value = buildNotesText(targetId);
     applyPlaceholderClassToTextarea(ta);
+
+    // Make table notes bigger (page + popup clones)
+    ta.style.minHeight = ta.style.minHeight || "140px";
+    ta.style.height = ta.style.height || "160px";
+
+    persistAllDebounced();
   }
 
-  function bulletExists(targetId, sigIndex) {
+  function setNotesTextForLabel(targetId, label, text) {
+    const notesState = ensureNotesBlock(targetId);
+    const block = notesState[targetId];
+    const key = label.trim() || "Note";
+
+    if (!block.items[key]) {
+      block.items[key] = { text: "" };
+      block.order.push(key);
+    }
+    block.items[key].text = text ?? "";
+
+    saveNotesState(notesState);
+  }
+
+  function buttonHasNotesForTarget(notesTarget, label) {
     const notesState = loadNotesState();
-    return !!notesState?.[targetId]?.items?.[String(sigIndex)];
+    const block = notesState?.[notesTarget];
+    const key = (label || "").trim();
+    const t = block?.items?.[key]?.text || "";
+    return t.trim().length > 0;
   }
 
-  function refreshNotesButtonsForScope(root) {
-    $$(".notes-icon-btn", root).forEach((btn) => {
-      const targetId = btn.dataset.notesTarget;
-      if (!targetId) return;
-      const sigIndex = getRowSignatureIndex(btn);
-      // orange if bullet exists (per your request: orange after click)
-      setNotesButtonVisual(btn, bulletExists(targetId, sigIndex));
-      // enforce bubble icon
-      const icon = btn.querySelector(".notes-icon");
-      if (icon) icon.textContent = "💬";
-    });
+  function refreshNotesButton(btn, overrideTarget) {
+    const notesTarget = overrideTarget || btn.dataset.notesTarget;
+    if (!notesTarget) return;
+
+    ensureBubbleIcon(btn);
+
+    const label = getBulletLabel(btn);
+    const hasNotes = buttonHasNotesForTarget(notesTarget, label);
+    btn.classList.toggle("has-notes", hasNotes);
   }
 
   function refreshAllNotesButtons() {
-    refreshNotesButtonsForScope(document);
-    if (modalEl && modalEl.style.display === "block") refreshNotesButtonsForScope(modalEl);
+    $$(".notes-icon-btn").forEach((btn) => refreshNotesButton(btn));
   }
 
-  const parseAndStoreNotesFromTextarea = debounce((ta) => {
-    const block = ta.closest(".section-block");
-    const id = block?.id;
-    if (!id) return;
+  function bindNotesButton(btn, options = {}) {
+    if (!btn) return;
+    ensureBubbleIcon(btn);
 
-    const raw = ta.value || "";
-    const lines = raw.split("\n");
-    const parsed = [];
-    let current = null;
+    if (!bindOnce(btn, "notes_btn")) return;
 
-    for (const line of lines) {
-      const m = line.match(/^•\s(.+):\s*$/);
-      if (m) {
-        if (current) parsed.push(current);
-        current = { label: m[1], textLines: [] };
-      } else if (current) {
-        current.textLines.push(line);
-      }
-    }
-    if (current) parsed.push(current);
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const notesState = loadNotesState();
-    notesState[id] = notesState[id] || { items: {} };
-    const existing = notesState[id].items || {};
+      const notesTarget = options.overrideNotesTarget || btn.dataset.notesTarget;
+      if (!notesTarget) return;
 
-    const labelToKey = new Map();
-    Object.entries(existing).forEach(([k, v]) => { if (v?.label) labelToKey.set(v.label, k); });
+      const label = getBulletLabel(btn);
 
-    let maxKey = Math.max(-1, ...Object.keys(existing).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
+      // Ensure exists, hydrate textarea (adds bullet header)
+      ensureNotesItem(notesTarget, label);
+      hydrateNotesTextarea(notesTarget);
 
-    parsed.forEach((it) => {
-      let key = labelToKey.get(it.label);
-      if (key == null) {
-        maxKey += 1;
-        key = String(maxKey);
-        notesState[id].items[key] = { label: it.label, text: "" };
-      }
-      notesState[id].items[key].label = it.label;
-      notesState[id].items[key].text = it.textLines.join("\n").trim();
+      // ✅ DO NOT scroll / shift page
+      // (No scrollIntoView here)
+
+      // Orange state will turn on only when there is text;
+      // BUT we still refresh to keep consistent.
+      refreshNotesButton(btn, notesTarget);
+
+      persistAllDebounced();
     });
+  }
 
-    saveNotesState(notesState);
-    hydrateNotesTextarea(id);
-    persistAllDebounced();
-    refreshAllNotesButtons();
-  }, 250);
+  function bindNotesButtonsWithin(root, opts = {}) {
+    $$(".notes-icon-btn", root).forEach((btn) => bindNotesButton(btn, opts));
+  }
 
+  /* -----------------------------
+     Notes textarea parsing
+     - Saves text under the correct label
+  ----------------------------- */
   function initNotesTextareaParsing() {
     $$("textarea").forEach((ta) => {
       const block = ta.closest(".section-block");
       const id = block?.id;
       if (!id) return;
-      if (!id.startsWith("notes-") && !id.startsWith("notes-auto-") && !id.startsWith("notes-card-")) return;
+      if (!id.startsWith("notes-") && !id.startsWith("notes-card-")) return;
+
+      // Make notes bigger (tables + cards)
+      ta.style.minHeight = ta.style.minHeight || "140px";
+      ta.style.height = ta.style.height || "160px";
+
       if (!bindOnce(ta, "notes_parse")) return;
 
-      ta.addEventListener("input", () => parseAndStoreNotesFromTextarea(ta));
-      ta.addEventListener("change", () => parseAndStoreNotesFromTextarea(ta));
+      const parseAndStore = debounce(() => {
+        const raw = ta.value || "";
+        const lines = raw.split("\n");
+
+        let currentLabel = null;
+        let currentLines = [];
+
+        const flush = () => {
+          if (!currentLabel) return;
+          setNotesTextForLabel(id, currentLabel, currentLines.join("\n").trim());
+        };
+
+        // Reset block order based on appearance
+        const notesState = ensureNotesBlock(id);
+        notesState[id].order = [];
+        notesState[id].items = notesState[id].items || {};
+
+        for (const line of lines) {
+          const m = line.match(/^•\s(.+):\s*$/);
+          if (m) {
+            flush();
+            currentLabel = m[1].trim();
+            currentLines = [];
+            if (currentLabel) {
+              if (!notesState[id].items[currentLabel]) notesState[id].items[currentLabel] = { text: "" };
+              notesState[id].order.push(currentLabel);
+            }
+          } else if (currentLabel != null) {
+            currentLines.push(line);
+          }
+        }
+        flush();
+
+        saveNotesState(notesState);
+
+        // Refresh button orange states
+        refreshAllNotesButtons();
+        persistAllDebounced();
+      }, 300);
+
+      ta.addEventListener("input", parseAndStore);
+      ta.addEventListener("change", parseAndStore);
     });
 
+    // hydrate from state on load
     const notesState = loadNotesState();
     Object.keys(notesState).forEach((id) => {
       if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
     });
   }
 
-  function ensureElementId(el, prefix = "notes-auto") {
+  /* -----------------------------
+     AUTO-ADD NOTES BUTTONS TO 2x2 CARDS
+     - uses bubble icon, targets notes block in same row
+  ----------------------------- */
+  function ensureElementId(el, prefix = "notes-card") {
     if (el.id) return el.id;
     el.id = `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now()}`;
     return el.id;
   }
 
-  function findNotesBlockInSection(sectionEl) {
-    const explicit = $$("[id^='notes-'].section-block", sectionEl).find((b) => b.querySelector("textarea"));
-    if (explicit) return explicit;
+  function injectNotesButtonsIntoTwoColCards() {
+    $$(".cards-grid.two-col").forEach((grid) => {
+      const blocks = $$(".section-block", grid);
+      if (blocks.length < 2) return;
 
-    return $$(".section-block", sectionEl).find((b) => {
-      const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
-      return h2.startsWith("notes") && b.querySelector("textarea");
-    }) || null;
-  }
-
-  // ✅ adds bubbles to non-table checklist rows; NO scroll, no movement
-  function injectNotesBubblesAcrossPages() {
-    $$(".page-section").forEach((sec) => {
-      const notesBlock = findNotesBlockInSection(sec);
+      const notesBlock = blocks.find((b) => {
+        const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
+        return h2.startsWith("notes");
+      });
       if (!notesBlock) return;
 
-      const notesId = ensureElementId(notesBlock, "notes-auto");
+      const notesId = ensureElementId(notesBlock, "notes-card");
+      const notesTA = $("textarea", notesBlock);
+      if (!notesTA) return;
 
-      $$(".checklist-row", sec).forEach((row) => {
+      // left (questions)
+      const questionBlock = blocks.find((b) => b !== notesBlock);
+      if (!questionBlock) return;
+
+      $$(".checklist-row", questionBlock).forEach((row) => {
+        // skip table rows / weird nested
         if (row.closest("table")) return;
-        if (row.closest(".section-block") === notesBlock) return;
-        const hasControl = !!row.querySelector("input, select, textarea");
-        if (!hasControl) return;
-        if (row.querySelector(".notes-icon-btn")) return;
 
-        row.appendChild(makeBubbleButton(notesId));
+        if (row.querySelector(".notes-icon-btn")) {
+          const existing = row.querySelector(".notes-icon-btn");
+          existing.dataset.notesTarget = notesId;
+          ensureBubbleIcon(existing);
+          return;
+        }
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "notes-icon-btn";
+        btn.dataset.notesTarget = notesId;
+        btn.setAttribute("aria-label", "Add note");
+        btn.innerHTML = NOTES_SVG;
+
+        row.appendChild(btn);
       });
     });
-  }
 
-  // ✅ Delegated notes clicks — NO scrollIntoView
-  function initDelegatedNotesHandlers() {
-    if (!bindOnce(document.body, "delegated_notes")) return;
-
-    document.addEventListener("click", (e) => {
-      const btn = e.target?.closest?.(".notes-icon-btn");
-      if (!btn) return;
-
-      const notesTarget = btn.dataset.notesTarget;
-      if (!notesTarget) return;
-
-      const sigIndex = getRowSignatureIndex(btn);
-      const label = getBulletLabelForButton(btn);
-
-      ensureNotesItem(notesTarget, sigIndex, label);
-      hydrateNotesTextarea(notesTarget);
-
-      // ORANGE immediately after click
-      setNotesButtonVisual(btn, true);
-
-      persistAllDebounced();
-      refreshAllNotesButtons();
-    });
-
-    // if user changes name/opcode after bullet exists, keep header synced
-    document.addEventListener("input", (e) => {
-      const t = e.target;
-      if (!t || t.tagName !== "INPUT" || t.type !== "text") return;
-      const tr = t.closest("tr");
-      if (!tr) return;
-
-      const btn = tr.querySelector(".notes-icon-btn[data-notes-target]");
-      if (!btn) return;
-
-      const targetId = btn.dataset.notesTarget;
-      if (!targetId) return;
-
-      const sigIndex = getRowSignatureIndex(btn);
-      const label = getBulletLabelForButton(btn);
-
-      const notesState = loadNotesState();
-      const item = notesState?.[targetId]?.items?.[String(sigIndex)];
-      if (item) {
-        item.label = label;
-        saveNotesState(notesState);
-        hydrateNotesTextarea(targetId);
-        refreshAllNotesButtons();
-      }
-    });
-  }
-
-  /* -----------------------------
-     ✅ MAKE TABLE NOTES TEXTAREAS BIGGER
-  ----------------------------- */
-  function enlargeTableNotesTextareas() {
-    $$("[id^='notes-'].section-block textarea").forEach((ta) => {
-      // bigger for the role notes blocks (tables)
-      ta.style.minHeight = "220px";
-      ta.style.width = "100%";
-      ta.style.maxWidth = "100%";
-      ta.style.boxSizing = "border-box";
-      ta.style.overflowX = "hidden";
-      ta.style.whiteSpace = "pre-wrap";
-      ta.style.wordBreak = "break-word";
-    });
+    bindNotesButtonsWithin(document);
   }
 
   /* -----------------------------
      TABLE POPUP MODAL
+     - clean layout, includes Add Row (+)
+     - notes buttons work inside popup too
   ----------------------------- */
   let modalEl = null;
 
+  // ✅ You asked to keep this function / let modalEl=null
   function ensureModal() {
     if (modalEl) return modalEl;
 
@@ -802,52 +883,45 @@ function clearSection(sectionEl) {
     modalEl.style.display = "none";
     modalEl.style.background = "rgba(0,0,0,0.55)";
     modalEl.style.padding = "18px";
-    modalEl.style.boxSizing = "border-box";
+    modalEl.style.overflow = "auto";
 
     modalEl.innerHTML = `
-      <div style="width:100%; min-height: calc(100vh - 36px); display:flex; align-items:center; justify-content:center;">
-        <div id="mkTableModalPanel" style="
-          width: min(1400px, 96vw);
-          max-height: 90vh;
-          background: #ffffff;
-          border-radius: 18px;
-          box-shadow: 0 18px 60px rgba(0,0,0,.35);
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        ">
-          <div style="padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
-                      display:flex; align-items:center; justify-content:space-between; gap:12px;">
-            <div id="mkTableModalTitle" style="font-weight:800; font-size:20px;"></div>
-            <div style="display:flex; gap:10px;">
-              <button type="button" id="mkTableModalExpand" title="Expand" style="
-                width:40px;height:40px;border-radius:12px;
-                border:1px solid rgba(0,0,0,0.12);
-                background:#fff;cursor:pointer;font-size:18px;">⤢</button>
-              <button type="button" id="mkTableModalClose" title="Close" style="
-                width:40px;height:40px;border-radius:12px;
-                border:1px solid rgba(0,0,0,0.12);
-                background:#fff;cursor:pointer;font-size:22px;line-height:1;">×</button>
-            </div>
+      <div id="mkTableModalShell" style="max-width:1400px;margin:0 auto;">
+        <div id="mkTableModalBar" style="
+          background:#fff;border-radius:16px;padding:14px 16px;
+          box-shadow:0 10px 30px rgba(0,0,0,0.22);
+          display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;">
+          <div id="mkTableModalTitle" style="font-weight:800;font-size:22px;"></div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" id="mkTableModalExpand" title="Expand" style="
+              width:40px;height:40px;border-radius:12px;border:1px solid rgba(0,0,0,0.12);
+              background:#fff;cursor:pointer;font-size:18px;">↗</button>
+            <button type="button" id="mkTableModalClose" title="Close" style="
+              width:40px;height:40px;border-radius:12px;border:1px solid rgba(0,0,0,0.12);
+              background:#fff;cursor:pointer;font-size:22px;line-height:1;">×</button>
           </div>
-          <div id="mkTableModalBody" style="padding:16px; overflow:auto; display:flex; flex-direction:column; gap:16px;"></div>
         </div>
+
+        <div id="mkTableModalCards" style="display:grid;gap:16px;"></div>
       </div>
     `;
 
     document.body.appendChild(modalEl);
 
     $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
+
     $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
-      const panel = $("#mkTableModalPanel", modalEl);
-      if (!panel) return;
-      const full = panel.dataset.full === "true";
-      panel.dataset.full = (!full).toString();
-      panel.style.width = full ? "min(1400px, 96vw)" : "98vw";
-      panel.style.maxHeight = full ? "90vh" : "95vh";
+      const shell = $("#mkTableModalShell", modalEl);
+      if (!shell) return;
+      const full = shell.dataset.full === "true";
+      shell.dataset.full = (!full).toString();
+      shell.style.maxWidth = full ? "1400px" : "96vw";
     });
 
-    modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeModal(); });
+    modalEl.addEventListener("click", (e) => {
+      if (e.target === modalEl) closeModal();
+    });
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
     });
@@ -858,8 +932,8 @@ function clearSection(sectionEl) {
   function closeModal() {
     if (!modalEl) return;
     modalEl.style.display = "none";
-    const body = $("#mkTableModalBody", modalEl);
-    if (body) body.innerHTML = "";
+    const cards = $("#mkTableModalCards", modalEl);
+    if (cards) cards.innerHTML = "";
   }
 
   function findRelatedNotesBlock(tableContainer) {
@@ -869,15 +943,15 @@ function clearSection(sectionEl) {
 
     const section = tableContainer.closest(".page-section");
     if (!section) return null;
-    const all = $$("[id^='notes-'].section-block", section);
+    const all = $$("[id^='notes-'].section-block, [id^='notes-card-'].section-block", section);
     return all[0] || null;
   }
 
-  function renderTablePopup(tableContainer) {
+  function openTablePopup(tableContainer) {
     const modal = ensureModal();
-    const body = $("#mkTableModalBody", modal);
+    const cards = $("#mkTableModalCards", modal);
     const titleEl = $("#mkTableModalTitle", modal);
-    if (!body || !titleEl) return;
+    if (!cards || !titleEl) return;
 
     const header =
       tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
@@ -887,82 +961,75 @@ function clearSection(sectionEl) {
 
     titleEl.textContent = header;
 
+    // Table card
     const tableCard = document.createElement("div");
     tableCard.className = "section-block";
-    tableCard.innerHTML = `<h2>${header}</h2>`;
+    tableCard.innerHTML = `<h2>${escapeHTML(header)}</h2>`;
 
     const tableClone = tableContainer.cloneNode(true);
-    $$(".expand-table-btn", tableClone).forEach((el) => el.remove());
 
-    const notesBlock = findRelatedNotesBlock(tableContainer);
-    const realNotesId = notesBlock?.id;
-
-    // force notes buttons in clone to use the real notes target
-    if (realNotesId) {
-      $$(".notes-icon-btn", tableClone).forEach((b) => { b.dataset.notesTarget = realNotesId; });
-    }
-
-    // constrain scroll
+    // constrain scroll inside popup
     const scrollWrap = $(".scroll-wrapper", tableClone);
     if (scrollWrap) {
-      scrollWrap.style.maxHeight = "44vh";
-      scrollWrap.style.overflowY = "auto";
-      scrollWrap.style.overflowX = "auto";
-    }
-
-    // ✅ Add Row in popup adds to REAL table then rerenders
-    const modalAdd = $(".table-footer .add-row", tableClone);
-    if (modalAdd) {
-      modalAdd.textContent = "+";
-      modalAdd.title = "Add Row";
-      if (!modalAdd.dataset.modalAddBound) {
-        modalAdd.dataset.modalAddBound = "true";
-        modalAdd.addEventListener("click", () => {
-          const realTable = $("table", tableContainer);
-          if (!realTable) return;
-          const newRow = cloneLastRow(realTable);
-          if (newRow) {
-            normalizeAllTables();
-            persistAllDebounced();
-            refreshAllNotesButtons();
-            renderTablePopup(tableContainer);
-          }
-        });
-      }
+      scrollWrap.style.maxHeight = "42vh";
+      scrollWrap.style.overflow = "auto";
     }
 
     tableCard.appendChild(tableClone);
 
-    // Notes card clone + sync textarea
+    // Notes card
+    const notesBlock = findRelatedNotesBlock(tableContainer);
     const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
-    if (notesClone && notesBlock) {
+
+    // Bigger notes in popup
+    if (notesClone) {
+      const ta = $("textarea", notesClone);
+      if (ta) {
+        ta.style.minHeight = "170px";
+        ta.style.height = "190px";
+      }
+    }
+
+    // 2-way binding notes textarea
+    if (notesBlock && notesClone) {
       const realTA = $("textarea", notesBlock);
       const modalTA = $("textarea", notesClone);
       if (realTA && modalTA) {
         modalTA.value = realTA.value;
-        if (!modalTA.dataset.modalSyncBound) {
-          modalTA.dataset.modalSyncBound = "true";
-          modalTA.addEventListener("input", () => {
-            realTA.value = modalTA.value;
-            parseAndStoreNotesFromTextarea(realTA);
-          });
-        }
+
+        modalTA.addEventListener("input", () => {
+          realTA.value = modalTA.value;
+          applyPlaceholderClassToTextarea(realTA);
+
+          // parse + store for button states
+          // (we reuse parsing by triggering change)
+          realTA.dispatchEvent(new Event("input", { bubbles: true }));
+          refreshAllNotesButtons();
+          persistAllDebounced();
+        });
+
+        const syncBack = () => {
+          if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
+        };
+        realTA.addEventListener("input", syncBack);
+        realTA.addEventListener("change", syncBack);
       }
-      enlargeTableNotesTextareas();
     }
 
-    body.innerHTML = "";
-    body.appendChild(tableCard);
-    if (notesClone) body.appendChild(notesClone);
+    cards.innerHTML = "";
+    cards.appendChild(tableCard);
+    if (notesClone) cards.appendChild(notesClone);
 
-    // normalize inside popup too
-    $$("table.training-table", tableCard).forEach(normalizeTable);
-    refreshNotesButtonsForScope(tableCard);
-  }
+    // Notes buttons in popup should target real notes block id
+    const realNotesId = notesBlock?.id;
+    bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
 
-  function openTablePopup(tableContainer) {
-    const modal = ensureModal();
-    renderTablePopup(tableContainer);
+    // Normalize notes column in popup rows
+    $$("tbody tr", tableCard).forEach((tr) => normalizeNotesCellsInRow(tr));
+    bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
+
+    refreshAllNotesButtons();
+
     modal.style.display = "block";
   }
 
@@ -977,7 +1044,7 @@ function clearSection(sectionEl) {
         expandBtn.type = "button";
         expandBtn.className = "expand-table-btn";
         expandBtn.title = "Expand table";
-        expandBtn.textContent = "⤢";
+        expandBtn.textContent = "↗";
         footer.appendChild(expandBtn);
       }
 
@@ -987,7 +1054,7 @@ function clearSection(sectionEl) {
   }
 
   /* -----------------------------
-     ✅ SUPPORT TICKETS — delegated (+) so it never “stops working”
+     SUPPORT TICKETS
   ----------------------------- */
   function ticketIsComplete(groupEl) {
     const num = $(".ticket-number-input", groupEl)?.value?.trim();
@@ -1004,23 +1071,26 @@ function clearSection(sectionEl) {
     }
   }
 
-  function moveTicketGroupByStatus(groupEl) {
+  function bindTicketStatusMover(groupEl) {
     const status = $(".ticket-status-select", groupEl);
     if (!status) return;
-    const val = status.value;
+    if (!bindOnce(status, "ticket_move")) return;
 
-    const open = $("#openTicketsContainer");
-    const t2 = $("#tierTwoTicketsContainer");
-    const cr = $("#closedResolvedTicketsContainer");
-    const cf = $("#closedFeatureTicketsContainer");
-    if (!open || !t2 || !cr || !cf) return;
+    status.addEventListener("change", () => {
+      const val = status.value;
+      const open = $("#openTicketsContainer");
+      const t2 = $("#tierTwoTicketsContainer");
+      const cr = $("#closedResolvedTicketsContainer");
+      const cf = $("#closedFeatureTicketsContainer");
+      if (!open || !t2 || !cr || !cf) return;
 
-    if (val === "Open") open.appendChild(groupEl);
-    else if (val === "Tier Two") t2.appendChild(groupEl);
-    else if (val === "Closed - Resolved") cr.appendChild(groupEl);
-    else if (val === "Closed - Feature Not Supported") cf.appendChild(groupEl);
+      if (val === "Open") open.appendChild(groupEl);
+      else if (val === "Tier Two") t2.appendChild(groupEl);
+      else if (val === "Closed - Resolved") cr.appendChild(groupEl);
+      else if (val === "Closed - Feature Not Supported") cf.appendChild(groupEl);
 
-    persistAllDebounced();
+      persistAllDebounced();
+    });
   }
 
   function initSupportTickets() {
@@ -1030,14 +1100,9 @@ function clearSection(sectionEl) {
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (base) lockBaseOpenStatus(base);
 
-    // delegated add (+)
-    if (!bindOnce(openContainer, "tickets_add_delegated")) {
-      // already bound
-    } else {
-      openContainer.addEventListener("click", (e) => {
-        const addBtn = e.target?.closest?.(".add-ticket-btn");
-        if (!addBtn) return;
-
+    const addBtn = $(".add-ticket-btn", base || openContainer);
+    if (addBtn && bindOnce(addBtn, "add_ticket")) {
+      addBtn.addEventListener("click", () => {
         const baseGroup = $(".ticket-group[data-base='true']", openContainer);
         if (!baseGroup) return;
 
@@ -1057,69 +1122,70 @@ function clearSection(sectionEl) {
         }
 
         openContainer.appendChild(clone);
+
+        // clear base card inputs for next ticket
         $$("input, textarea", baseGroup).forEach((el) => (el.value = ""));
+
         persistAllDebounced();
+        bindTicketStatusMover(clone);
       });
     }
 
-    // delegated status move (all containers)
-    const containers = [
-      openContainer,
-      $("#tierTwoTicketsContainer"),
-      $("#closedResolvedTicketsContainer"),
-      $("#closedFeatureTicketsContainer")
-    ].filter(Boolean);
-
-    containers.forEach((cont) => {
-      if (!bindOnce(cont, "tickets_status_delegated")) return;
-      cont.addEventListener("change", (e) => {
-        const sel = e.target?.closest?.(".ticket-status-select");
-        if (!sel) return;
-
-        const group = sel.closest(".ticket-group");
-        if (!group) return;
-
-        if (group.dataset.base === "true") {
-          lockBaseOpenStatus(group);
-          return;
-        }
-
-        moveTicketGroupByStatus(group);
+    [openContainer, $("#tierTwoTicketsContainer"), $("#closedResolvedTicketsContainer"), $("#closedFeatureTicketsContainer")]
+      .filter(Boolean)
+      .forEach((cont) => {
+        $$(".ticket-group", cont).forEach((g) => {
+          if (g.dataset.base === "true") lockBaseOpenStatus(g);
+          else bindTicketStatusMover(g);
+        });
       });
-    });
-
-    // ensure base remains locked
-    const baseAgain = $(".ticket-group[data-base='true']", openContainer);
-    if (baseAgain) lockBaseOpenStatus(baseAgain);
   }
 
   /* -----------------------------
      BOOT
   ----------------------------- */
   function boot() {
+    // Restore first so bindings are attached to restored DOM
     restoreAll();
 
     initNav();
     initPlaceholderStyling();
     initAutosave();
     initResetButtons();
+    initOnsiteDates();
 
-    normalizeAllTables();               // ✅ fixes filters + notes column
-    injectNotesBubblesAcrossPages();    // ✅ bubbles back on question rows
-    initDelegatedNotesHandlers();       // ✅ notes work everywhere + no movement
-    initNotesTextareaParsing();
-    enlargeTableNotesTextareas();
+    initAdditionalTrainers();
+    initAdditionalPOCs();
 
+    // Normalize notes column on existing rows before binding notes buttons
+    normalizeAllTrainingTables();
+
+    // Table add row + expand popup
     initTableAddRowButtons();
     initTableExpandButtons();
 
+    // Notes buttons in tables + questions
+    bindNotesButtonsWithin(document);
+
+    // Auto-add notes buttons to 2x2 cards
+    injectNotesButtonsIntoTwoColCards();
+
+    // Notes parsing (turns orange when text exists)
+    initNotesTextareaParsing();
+
+    // Tickets
     initSupportTickets();
 
-    initPlaceholderStyling();
+    // Final refresh
     refreshAllNotesButtons();
+    initPlaceholderStyling();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
-
+  try {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+    else boot();
+  } catch (err) {
+    console.error("mk checklist boot error:", err);
+    // If something goes wrong, at least keep the app usable
+  }
 })();
