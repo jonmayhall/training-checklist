@@ -677,6 +677,34 @@ main{
   }
 }
 
+/* =========================================
+   DEALERSHIP INFO — Make DATE inputs match all other inputs
+   (size, background, border, radius, padding)
+========================================= */
+#dealership-info .training-dates-row .date-stack input[type="date"],
+#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  width:100% !important;                /* uses the date-stack width */
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important;
+
+  background:#f7f7f7 !important;
+  color:var(--ink) !important;
+
+  font-size:13px !important;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+
+  /* remove the “pill / native” look */
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-shadow:none !important;
+}
+
 /* =======================
    Notes cards textarea fill (2-col layouts)
 ======================= */
