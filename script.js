@@ -504,67 +504,81 @@
   ----------------------------- */
   let modalEl = null;
 
-  function ensureModal() {
-    if (modalEl) return modalEl;
+ function ensureModal() {
+  if (modalEl) return modalEl;
 
-    modalEl = document.createElement("div");
-    modalEl.id = "mkTableModal";
-    modalEl.style.position = "fixed";
-    modalEl.style.inset = "0";
-    modalEl.style.zIndex = "9999";
-    modalEl.style.display = "none";
-    modalEl.style.background = "rgba(0,0,0,0.55)";
-    modalEl.style.padding = "18px";
-    modalEl.style.overflow = "auto";
+  modalEl = document.createElement("div");
+  modalEl.id = "mkTableModal";
+  modalEl.style.position = "fixed";
+  modalEl.style.inset = "0";
+  modalEl.style.zIndex = "9999";
+  modalEl.style.display = "none";
+  modalEl.style.background = "rgba(0,0,0,0.55)";
+  modalEl.style.padding = "18px";
+  modalEl.style.overflow = "auto";
 
-    modalEl.innerHTML = `
-      <div id="mkTableModalInner" style="
-        max-width: 1300px;
-        margin: 0 auto;
-        background: #fff;
-        border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  modalEl.innerHTML = `
+    <div id="mkTableModalShell" style="
+      max-width: 1400px;
+      margin: 0 auto;
+    ">
+      <!-- Title bar (simple) -->
+      <div id="mkTableModalBar" style="
+        background:#fff;
+        border-radius:16px;
+        padding:14px 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:14px;
       ">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
-          <div id="mkTableModalTitle" style="font-weight:800; font-size:22px;"></div>
-          <div style="display:flex; gap:10px;">
-            <button type="button" id="mkTableModalExpand" title="Expand" style="
-              width:40px;height:40px;border-radius:12px;border:1px solid rgba(0,0,0,0.12);background:#fff;cursor:pointer;
-            ">↗</button>
-            <button type="button" id="mkTableModalClose" title="Close" style="
-              width:40px;height:40px;border-radius:12px;border:1px solid rgba(0,0,0,0.12);background:#fff;cursor:pointer;
-            ">×</button>
-          </div>
-        </div>
-
-        <div id="mkTableModalCards" style="display:grid; gap:18px;">
-          <!-- card clones injected -->
+        <div id="mkTableModalTitle" style="font-weight:800; font-size:22px;"></div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" id="mkTableModalExpand" title="Expand" style="
+            width:40px;height:40px;border-radius:12px;
+            border:1px solid rgba(0,0,0,0.12);
+            background:#fff;cursor:pointer;
+            font-size:18px;
+          ">↗</button>
+          <button type="button" id="mkTableModalClose" title="Close" style="
+            width:40px;height:40px;border-radius:12px;
+            border:1px solid rgba(0,0,0,0.12);
+            background:#fff;cursor:pointer;
+            font-size:22px; line-height:1;
+          ">×</button>
         </div>
       </div>
-    `;
 
-    document.body.appendChild(modalEl);
+      <!-- IMPORTANT: This is NOT a new “card”.
+           We let your real .section-block cards be the UI. -->
+      <div id="mkTableModalCards" style="display:grid; gap:16px;"></div>
+    </div>
+  `;
 
-    $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
-    $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
-      const inner = $("#mkTableModalInner", modalEl);
-      if (!inner) return;
-      const full = inner.dataset.full === "true";
-      inner.dataset.full = (!full).toString();
-      inner.style.maxWidth = full ? "1300px" : "96vw";
-    });
+  document.body.appendChild(modalEl);
 
-    modalEl.addEventListener("click", (e) => {
-      if (e.target === modalEl) closeModal();
-    });
+  $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
-    });
+  $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
+    const shell = $("#mkTableModalShell", modalEl);
+    if (!shell) return;
+    const full = shell.dataset.full === "true";
+    shell.dataset.full = (!full).toString();
+    shell.style.maxWidth = full ? "1400px" : "96vw";
+  });
 
-    return modalEl;
-  }
+  modalEl.addEventListener("click", (e) => {
+    if (e.target === modalEl) closeModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
+  });
+
+  return modalEl;
+}
 
   function closeModal() {
     if (!modalEl) return;
@@ -586,67 +600,77 @@
     return all[0] || null;
   }
 
-  function openTablePopup(tableContainer) {
-    const modal = ensureModal();
-    const cards = $("#mkTableModalCards", modal);
-    const title = $("#mkTableModalTitle", modal);
-    if (!cards || !title) return;
+ function openTablePopup(tableContainer) {
+  const modal = ensureModal();
+  const cards = $("#mkTableModalCards", modal);
+  const titleEl = $("#mkTableModalTitle", modal);
+  if (!cards || !titleEl) return;
 
-    // Title = section header label (same as your screenshot)
-    const header =
-      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
-      tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
-      tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
-      "Table";
+  // Title = same label you see above the table on the page
+  const header =
+    tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
+    tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
+    tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
+    "Table";
 
-    title.textContent = header;
+  titleEl.textContent = header;
 
-    // Clone the REAL table-container (keeps your exact table styling)
-    const tableClone = tableContainer.cloneNode(true);
+  // 1) Build a REAL "section-block" card for the TABLE (so it matches page)
+  const tableCard = document.createElement("div");
+  tableCard.className = "section-block";
+  tableCard.innerHTML = `<h2>${header}</h2>`;
 
-    // Remove the footer buttons inside the popup (you only want view/edit)
-    $$(".table-footer", tableClone).forEach((el) => el.remove());
+  // Clone the actual table-container (keeps your table styling)
+  const tableClone = tableContainer.cloneNode(true);
 
-    // Ensure scroll in modal (same behavior)
-    const scrollWrap = $(".scroll-wrapper", tableClone);
-    if (scrollWrap) {
-      scrollWrap.style.maxHeight = "42vh";
-      scrollWrap.style.overflow = "auto";
-    }
+  // Remove footer controls in popup (no add/expand inside popup)
+  $$(".table-footer", tableClone).forEach((el) => el.remove());
 
-    // Clone the REAL notes block (keeps your exact notes card styling)
-    const notesBlock = findRelatedNotesBlock(tableContainer);
-    const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
-
-    // Link popup notes textarea to real textarea (2-way)
-    if (notesBlock && notesClone) {
-      const realTA = $("textarea", notesBlock);
-      const modalTA = $("textarea", notesClone);
-      if (realTA && modalTA) {
-        modalTA.value = realTA.value;
-        modalTA.addEventListener("input", () => {
-          realTA.value = modalTA.value;
-          applyPlaceholderClassToTextarea(realTA);
-          persistAllDebounced();
-        });
-        const syncBack = () => {
-          if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
-        };
-        realTA.addEventListener("input", syncBack);
-        realTA.addEventListener("change", syncBack);
-      }
-    }
-
-    cards.innerHTML = "";
-    cards.appendChild(tableClone);
-    if (notesClone) cards.appendChild(notesClone);
-
-    // In modal clone: notes buttons should still work (and write to REAL notes target)
-    const realNotesId = notesBlock?.id;
-    bindNotesButtonsWithin(tableClone, { overrideNotesTarget: realNotesId, fromModal: true });
-
-    modal.style.display = "block";
+  // Give scroll-wrapper a sane height in popup, but keep your styling
+  const scrollWrap = $(".scroll-wrapper", tableClone);
+  if (scrollWrap) {
+    scrollWrap.style.maxHeight = "45vh";
+    scrollWrap.style.overflow = "auto";
   }
+
+  tableCard.appendChild(tableClone);
+
+  // 2) Clone the REAL related notes card (your section-block already)
+  const notesBlock = findRelatedNotesBlock(tableContainer);
+  const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
+
+  // Link popup notes textarea <-> real textarea (2-way)
+  if (notesBlock && notesClone) {
+    const realTA = $("textarea", notesBlock);
+    const modalTA = $("textarea", notesClone);
+    if (realTA && modalTA) {
+      modalTA.value = realTA.value;
+
+      modalTA.addEventListener("input", () => {
+        realTA.value = modalTA.value;
+        applyPlaceholderClassToTextarea(realTA);
+        persistAllDebounced();
+      });
+
+      const syncBack = () => {
+        if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
+      };
+      realTA.addEventListener("input", syncBack);
+      realTA.addEventListener("change", syncBack);
+    }
+  }
+
+  // Render
+  cards.innerHTML = "";
+  cards.appendChild(tableCard);
+  if (notesClone) cards.appendChild(notesClone);
+
+  // Notes buttons in popup should still write to the REAL notes target
+  const realNotesId = notesBlock?.id;
+  bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
+
+  modal.style.display = "block";
+}
 
   function initTableExpandButtons() {
     $$(".table-container").forEach((tc) => {
