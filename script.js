@@ -1347,7 +1347,8 @@ function insertBulletIntoRealNotes(table, bullet){
   requestAnimationFrame(()=> updateNoteIconStates(document));
 }
 
-function tagNameCellsInTable(table){
+// attaching to each "Name" column
+function tagNameCellsInTable(table) {
   const nameIdx = getColumnIndexByHeader(table, ["name"]);
   if (nameIdx === -1) return;
   qsa("tbody tr", table).forEach(tr=>{
@@ -1722,13 +1723,14 @@ function openTableModalForTable(originalTable, titleText){
   modal.classList.add("open");
 }
 
-function ensureExpandBtnInTableFooter(table){
+function ensureExpandBtnInTableFooter(table) {
   const container = table.closest(".table-container");
   if (!container) return;
 
   const footer = qs(".table-footer", container);
   if (!footer) return;
 
+  // avoid duplicates
   if (qs(".mk-table-expand-btn", footer)) return;
 
   const btn = document.createElement("button");
@@ -1738,7 +1740,9 @@ function ensureExpandBtnInTableFooter(table){
   btn.setAttribute("aria-label", "Expand table");
   btn.textContent = "⤢";
 
+  // push to right
   const rightWrap = document.createElement("div");
+  rightWrap.className = "mk-table-expand-wrap";
   rightWrap.style.marginLeft = "auto";
   rightWrap.style.display = "flex";
   rightWrap.style.alignItems = "center";
@@ -1746,23 +1750,32 @@ function ensureExpandBtnInTableFooter(table){
 
   footer.appendChild(rightWrap);
 
-  btn.addEventListener("click", (e)=>{
+  btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // ✅ Use the actual card title (h2) as the popup title
+    // use the card title as popup title
     const card = container.closest(".section-block");
     const h2 = qs("h2", card);
     const popupTitle = safeTrim(h2?.textContent || "Table");
+
+    if (typeof openTableModalForTable !== "function") {
+      console.error("openTableModalForTable is not defined.");
+      return;
+    }
 
     openTableModalForTable(table, popupTitle);
   });
 }
 
-function initTablePopupExpandButtons(root=document){
-  const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
-  targets.forEach(sel=>{
-    qsa(sel, root).forEach(table=> ensureExpandBtnInTableFooter(table));
+function initTablePopupExpandButtons(root = document) {
+  const targets = [
+    "#training-checklist table.training-table",
+    "#opcodes-pricing table.training-table",
+  ];
+
+  targets.forEach((sel) => {
+    qsa(sel, root).forEach((table) => ensureExpandBtnInTableFooter(table));
   });
 }
 
