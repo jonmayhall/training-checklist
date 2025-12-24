@@ -1,17 +1,17 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   ✅ Stable + Clean + Fixed
-   - Nav clicks work (sidebar -> section)
-   - Add Row (+) for tables (clones last row, preserves Notes icon)
-   - Additional Trainers (+)
-   - Additional POC (+)
-   - Support Tickets: add/remove, move by status, base locked to Open
-   - Autosave (localStorage) + Reset Page + Clear All
-   - Onsite dates: end defaults to start + 2 days
-   - PDF export (all pages)  ⚠️ requires jsPDF/html2canvas on page
-   - ✅ Notes Linking (📝 icon -> scroll/focus matching Notes block)
-   - ✅ Notes bullet insert + spacing (tables + checklist rows)
-   - ✅ Table Expand (⤢) opens modal with real table (no cloning)
+   ✅ Fixes / Adds:
+   - ✅ Additional Trainers (+) works reliably (no fragile selector)
+   - ✅ Placeholder/ghost/date styling handled via CSS (see snippet)
+   - ✅ Table Expand (⤢) opens SAME table layout + adds related Notes card below
+        (moves real DOM nodes into modal; no cloning; preserves data/inputs)
+   - ✅ Notes icon behavior (📝):
+        - Training tables insert bullets using Name
+        - Opcodes inserts bullets using Opcode
+        - Keeps bullets in the SAME ORDER as table rows (even if clicked out of order)
+        - Clear blank-line spacing between bullet sections
+        - Works identically inside popups
+   - Nav clicks, table add-row, POCs, Support Tickets, Autosave, Reset/Clear, Dates, PDF
 ======================================================= */
 
 (() => {
@@ -20,8 +20,8 @@
   /* =========================
      CONFIG
   ========================= */
-  const STORAGE_KEY = "mkInteractiveChecklist_v1";
-  const STORAGE_META_KEY = "mkInteractiveChecklist_meta_v1";
+  const STORAGE_KEY = "mkInteractiveChecklist_v2";
+  const STORAGE_META_KEY = "mkInteractiveChecklist_meta_v2";
   const AUTOSAVE_DEBOUNCE_MS = 450;
 
   /* =========================
@@ -36,8 +36,7 @@
     initDynamicAdditionalPOCs();
 
     initTablesAddRowButtons();
-    initNotesIconLinking();
-    initNotesBulletInsertForTables();
+    initNotesIconLinkingAndBullets(); // upgraded notes system
 
     initSupportTickets();
 
@@ -49,7 +48,7 @@
 
     initPdfExportButton();
 
-    initTableExpandFeature();
+    initTableExpandFeature(); // upgraded: includes notes card
   });
 
   /* ======================================================
@@ -66,16 +65,13 @@
       const targetId = btn.getAttribute("data-target");
       if (!targetId) return;
 
-      // active button
       nav.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // show section
       document.querySelectorAll(".page-section").forEach((sec) => sec.classList.remove("active"));
       const section = document.getElementById(targetId);
       if (section) section.classList.add("active");
 
-      // scroll top of main content on nav
       const main = document.querySelector("main");
       if (main) main.scrollTo({ top: 0, behavior: "smooth" });
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -91,8 +87,7 @@
     if (!input || !display) return;
 
     const render = () => {
-      const v = (input.value || "").trim();
-      display.textContent = v ? v : "";
+      display.textContent = (input.value || "").trim();
     };
 
     input.addEventListener("input", render);
@@ -109,8 +104,7 @@
 
     const setPlaceholderClass = (el) => {
       if (!el) return;
-      if (el.value) el.classList.remove("is-placeholder");
-      else el.classList.add("is-placeholder");
+      el.classList.toggle("is-placeholder", !el.value);
     };
 
     const addDays = (yyyyMmDd, days) => {
@@ -125,7 +119,6 @@
     start.addEventListener("change", () => {
       setPlaceholderClass(start);
 
-      // only auto-set end if empty or before start
       if (!end.value) {
         end.value = addDays(start.value, 2);
       } else {
@@ -133,6 +126,7 @@
         const e = new Date(end.value);
         if (e < s) end.value = addDays(start.value, 2);
       }
+
       setPlaceholderClass(end);
       triggerAutosaveSoon();
     });
@@ -147,54 +141,58 @@
   }
 
   /* ======================================================
-     Additional Trainers (+)
-     Base row has: .checklist-row.integrated-plus.indent-sub[data-base="true"]
-     Container: #additionalTrainersContainer
+     Additional Trainers (+) — FIXED
+     - Your HTML puts #additionalTrainersContainer RIGHT AFTER the base row
+     - So we anchor baseRow off that container (no selector guessing)
   ====================================================== */
   function initDynamicAdditionalTrainers() {
     const container = document.getElementById("additionalTrainersContainer");
-    const baseRow = document.querySelector('#trainers-deployment .checklist-row[data-base="true"]');
-    if (!container || !baseRow) return;
+    if (!container) return;
 
+    // base row should be directly before container
+    const baseRow = container.previousElementSibling;
+    if (!baseRow || !baseRow.classList.contains("checklist-row")) return;
+
+    // delegated click on base row only
     baseRow.addEventListener("click", (e) => {
-      const btn = e.target.closest(".add-row");
-      if (!btn) return;
+      const plusBtn = e.target.closest("button.add-row");
+      if (!plusBtn) return;
 
-      const input = baseRow.querySelector('input[type="text"]');
-      if (!input) return;
+      const baseInput = baseRow.querySelector('input[type="text"]');
+      if (!baseInput) return;
 
-      // Require base filled before adding
-      if (!input.value.trim()) {
-        input.focus();
+      // require base filled before adding
+      if (!baseInput.value.trim()) {
+        baseInput.focus();
         return;
       }
 
-      const newRow = baseRow.cloneNode(true);
-      newRow.removeAttribute("data-base");
-      newRow.classList.add("is-clone");
+      const clone = baseRow.cloneNode(true);
+      clone.removeAttribute("data-base");
+      clone.classList.add("is-clone");
 
-      // remove + button from clones and replace with remove
-      const plus = newRow.querySelector(".add-row");
-      if (plus) {
-        plus.textContent = "–";
-        plus.title = "Remove trainer";
-        plus.classList.add("remove-row");
-        plus.classList.remove("add-row");
+      // change + to remove
+      const btn = clone.querySelector("button.add-row");
+      if (btn) {
+        btn.textContent = "–";
+        btn.title = "Remove trainer";
+        btn.classList.remove("add-row");
+        btn.classList.add("remove-trainer-row");
       }
 
-      // Clear cloned input
-      const newInput = newRow.querySelector('input[type="text"]');
-      if (newInput) newInput.value = "";
+      // clear clone input
+      const input = clone.querySelector('input[type="text"]');
+      if (input) input.value = "";
 
-      container.appendChild(newRow);
+      container.appendChild(clone);
       triggerAutosaveSoon();
     });
 
-    // delegated remove
+    // remove trainer rows (delegated on container)
     container.addEventListener("click", (e) => {
-      const removeBtn = e.target.closest(".remove-row");
-      if (!removeBtn) return;
-      const row = removeBtn.closest(".checklist-row");
+      const rm = e.target.closest(".remove-trainer-row");
+      if (!rm) return;
+      const row = rm.closest(".checklist-row");
       if (row) row.remove();
       triggerAutosaveSoon();
     });
@@ -202,8 +200,6 @@
 
   /* ======================================================
      Additional POC (+)
-     Base card: .mini-card.additional-poc-card[data-base="true"]
-     Button: .additional-poc-add (inside base)
   ====================================================== */
   function initDynamicAdditionalPOCs() {
     const base = document.querySelector('.additional-poc-card[data-base="true"]');
@@ -214,8 +210,7 @@
       const btn = e.target.closest(".additional-poc-add");
       if (!btn) return;
 
-      // Require base name field filled before adding
-      const nameInput = base.querySelector('.checklist-row input[type="text"]');
+      const nameInput = base.querySelector('.checklist-row.integrated-plus input[type="text"]');
       if (nameInput && !nameInput.value.trim()) {
         nameInput.focus();
         return;
@@ -225,7 +220,6 @@
       clone.removeAttribute("data-base");
       clone.classList.add("is-clone");
 
-      // Change + to remove
       const plus = clone.querySelector(".additional-poc-add");
       if (plus) {
         plus.textContent = "–";
@@ -234,13 +228,11 @@
         plus.classList.remove("additional-poc-add");
       }
 
-      // Clear inputs in clone
       clone.querySelectorAll("input").forEach((i) => (i.value = ""));
       grid.appendChild(clone);
       triggerAutosaveSoon();
     });
 
-    // delegated remove
     grid.addEventListener("click", (e) => {
       const btn = e.target.closest(".remove-poc");
       if (!btn) return;
@@ -252,10 +244,6 @@
 
   /* ======================================================
      TABLES: Add Row (+)
-     - footer button: .table-footer .add-row
-     - clones last <tr> in <tbody>
-     - clears inputs/selects
-     - keeps Notes icon cell
   ====================================================== */
   function initTablesAddRowButtons() {
     document.addEventListener("click", (e) => {
@@ -272,28 +260,29 @@
 
       const newRow = lastRow.cloneNode(true);
 
-      // Clear values
       newRow.querySelectorAll("input, textarea, select").forEach((el) => {
-        if (el.tagName === "SELECT") {
-          el.selectedIndex = 0;
-        } else if (el.type === "checkbox" || el.type === "radio") {
-          el.checked = false;
-        } else {
-          el.value = "";
-        }
+        if (el.tagName === "SELECT") el.selectedIndex = 0;
+        else if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+        else el.value = "";
       });
 
       tbody.appendChild(newRow);
       triggerAutosaveSoon();
+
+      // if table has notes target, keep notes order consistent after adding row
+      const notesTarget = getNotesTargetIdFromTable(table);
+      if (notesTarget) reorderNotesToMatchTable(table, notesTarget);
     });
   }
 
   /* ======================================================
-     Notes icon linking:
-     button.notes-icon-btn[data-notes-target="notes-techs"]
-     scroll to target and focus textarea
+     NOTES: linking + bullet insertion + ordered reflow
+     - Works for any .notes-icon-btn with data-notes-target
+     - Inserts bullet header for the row, then reorders headers
+       to match table row order (top->bottom)
+     - Ensures blank line spacing between bullet sections
   ====================================================== */
-  function initNotesIconLinking() {
+  function initNotesIconLinkingAndBullets() {
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".notes-icon-btn");
       if (!btn) return;
@@ -301,83 +290,155 @@
       const targetId = btn.getAttribute("data-notes-target");
       if (!targetId) return;
 
-      const target = document.getElementById(targetId);
-      if (!target) return;
-
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      // focus textarea after small delay
-      setTimeout(() => {
-        const ta = target.querySelector("textarea");
-        if (ta) ta.focus();
-      }, 250);
-    });
-  }
-
-  /* ======================================================
-     Notes bullet insert + spacing for TABLE notes icons
-     - Inserts "• <Name>:" (Training tables)
-     - Inserts "• <Opcode>:" (Opcodes table)
-     - Adds a blank line between bullet headers
-  ====================================================== */
-  function initNotesBulletInsertForTables() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".notes-icon-btn");
-      if (!btn) return;
-
-      const targetId = btn.getAttribute("data-notes-target");
-      const notesBlock = targetId ? document.getElementById(targetId) : null;
+      const notesBlock = document.getElementById(targetId);
       const textarea = notesBlock?.querySelector("textarea");
       if (!textarea) return;
 
+      // always scroll/focus
+      notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => textarea.focus(), 220);
+
+      // if this notes icon is in a TABLE row, insert bullet and reorder
       const row = btn.closest("tr");
-      if (!row) return;
-
-      // Determine label from first text input cell (Name/Opcode)
-      const firstText = row.querySelector('input[type="text"]');
-      const token = (firstText?.value || "").trim();
-
-      let header = "";
-      if (targetId === "notes-opcodes") {
-        header = token ? `• ${token}:` : "• Opcode:";
-      } else if (targetId && targetId.startsWith("notes-")) {
-        header = token ? `• ${token}:` : "• Name:";
+      const table = btn.closest("table");
+      if (row && table) {
+        const header = buildHeaderForRow(table, row, targetId);
+        if (header) {
+          ensureHeaderExists(textarea, header);
+          reorderNotesToMatchTable(table, targetId);
+          triggerAutosaveSoon();
+        }
       }
-
-      if (!header) return;
-
-      insertBulletHeaderWithSpacing(textarea, header);
-      triggerAutosaveSoon();
     });
   }
 
-  function insertBulletHeaderWithSpacing(textarea, headerLine) {
-    const existing = textarea.value || "";
-    const trimmed = existing.replace(/\s+$/g, "");
+  function buildHeaderForRow(table, row, targetId) {
+    // Training tables: use Name (first text input)
+    // Opcodes: use Opcode (first text input in row, typically opcode column)
+    const firstText = row.querySelector('input[type="text"]');
+    const token = (firstText?.value || "").trim();
 
-    // If already contains this exact header, just scroll caret there
-    if (trimmed.includes(headerLine)) {
-      const idx = trimmed.indexOf(headerLine);
-      textarea.focus();
-      textarea.setSelectionRange(idx, idx + headerLine.length);
-      return;
+    if (targetId === "notes-opcodes") {
+      return token ? `• ${token}:` : "• Opcode:";
     }
 
-    // Ensure blank line separation between headers
-    const needsBreak = trimmed.length ? "\n\n" : "";
-    const newText = trimmed + needsBreak + headerLine + "\n";
+    // default role notes blocks (techs/advisors/parts/etc.)
+    if (targetId && targetId.startsWith("notes-")) {
+      return token ? `• ${token}:` : "• Name:";
+    }
 
-    textarea.value = newText;
-    textarea.focus();
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    return "";
+  }
+
+  function ensureHeaderExists(textarea, headerLine) {
+    const current = textarea.value || "";
+
+    // already present
+    if (current.includes(headerLine)) return;
+
+    const trimmed = current.replace(/\s+$/g, "");
+    const prefix = trimmed.length ? "\n\n" : "";
+    textarea.value = trimmed + prefix + headerLine + "\n";
+  }
+
+  function reorderNotesToMatchTable(table, notesTargetId) {
+    const notesBlock = document.getElementById(notesTargetId);
+    const textarea = notesBlock?.querySelector("textarea");
+    if (!textarea) return;
+
+    // expected headers in row order
+    const expectedHeaders = [];
+    const rows = [...table.querySelectorAll("tbody tr")];
+
+    rows.forEach((r) => {
+      // only tables that have notes icons should be processed
+      const icon = r.querySelector(".notes-icon-btn[data-notes-target]");
+      if (!icon) return;
+
+      // build header for each row in order using current tokens
+      const hdr = buildHeaderForRow(table, r, notesTargetId);
+      if (hdr) expectedHeaders.push(hdr);
+    });
+
+    // parse textarea into blocks keyed by header
+    const blocks = parseNotesBlocks(textarea.value);
+
+    // ensure blocks exist for any header that was created by click
+    expectedHeaders.forEach((h) => {
+      if (!blocks.has(h) && textarea.value.includes(h)) blocks.set(h, h + "\n");
+    });
+
+    // rebuild notes in correct order with spacing
+    const orderedParts = [];
+    expectedHeaders.forEach((h) => {
+      if (blocks.has(h)) orderedParts.push(normalizeBlock(blocks.get(h)));
+    });
+
+    // keep any "extra" blocks (headers that no longer exist in table) at bottom
+    const extras = [];
+    blocks.forEach((val, key) => {
+      if (!expectedHeaders.includes(key)) extras.push(normalizeBlock(val));
+    });
+
+    const rebuilt = [...orderedParts, ...extras]
+      .filter(Boolean)
+      .map((b) => b.trimEnd())
+      .join("\n\n") // clear spacing between bullet sections
+      .trimEnd();
+
+    textarea.value = rebuilt ? rebuilt + "\n" : "";
+  }
+
+  function parseNotesBlocks(text) {
+    // A block starts at a header like: "• Something:"
+    // and continues until next header or end.
+    const blocks = new Map();
+    if (!text) return blocks;
+
+    const lines = text.split("\n");
+    let currentHeader = null;
+    let currentBuf = [];
+
+    const headerRegex = /^•\s.+:\s*$/;
+
+    const flush = () => {
+      if (currentHeader) {
+        blocks.set(currentHeader, currentBuf.join("\n").trimEnd() + "\n");
+      }
+    };
+
+    for (const line of lines) {
+      if (headerRegex.test(line.trim())) {
+        flush();
+        currentHeader = line.trim();
+        currentBuf = [currentHeader];
+      } else {
+        if (currentHeader) currentBuf.push(line);
+        else {
+          // text before first header becomes an "extra" block
+          const k = "__preface__";
+          const prev = blocks.get(k) || "";
+          blocks.set(k, prev + line + "\n");
+        }
+      }
+    }
+    flush();
+    return blocks;
+  }
+
+  function normalizeBlock(blockText) {
+    if (!blockText) return "";
+    // ensure a header line + content, and no huge trailing whitespace
+    return blockText.trimEnd();
+  }
+
+  function getNotesTargetIdFromTable(table) {
+    const btn = table.querySelector(".notes-icon-btn[data-notes-target]");
+    return btn ? btn.getAttribute("data-notes-target") : "";
   }
 
   /* ======================================================
      SUPPORT TICKETS
-     - Base card stays in Open container
-     - Base status locked to Open
-     - Add Ticket (+) only works when base is completed
-     - Status change moves cards between containers
   ====================================================== */
   function initSupportTickets() {
     const openC = document.getElementById("openTicketsContainer");
@@ -386,7 +447,6 @@
     const closedFeatC = document.getElementById("closedFeatureTicketsContainer");
     if (!openC || !tierTwoC || !closedResC || !closedFeatC) return;
 
-    // lock base status to Open
     const base = openC.querySelector('.ticket-group[data-base="true"]');
     if (base) {
       const status = base.querySelector(".ticket-status-select");
@@ -396,7 +456,6 @@
       }
     }
 
-    // Add ticket (+)
     openC.addEventListener("click", (e) => {
       const addBtn = e.target.closest(".add-ticket-btn");
       if (!addBtn) return;
@@ -404,11 +463,9 @@
       const group = addBtn.closest(".ticket-group");
       if (!group) return;
 
-      // Base card completion requirement
       if (group.getAttribute("data-base") === "true") {
         const ok = isTicketCardComplete(group);
         if (!ok) {
-          // focus first missing field
           focusFirstMissingTicketField(group);
           return;
         }
@@ -417,18 +474,15 @@
       const newCard = (base || group).cloneNode(true);
       newCard.removeAttribute("data-base");
 
-      // unlock status on clones
       const status = newCard.querySelector(".ticket-status-select");
       if (status) {
         status.disabled = false;
         status.value = "Open";
       }
 
-      // remove disclaimer on clones
       const disc = newCard.querySelector(".ticket-disclaimer");
       if (disc) disc.remove();
 
-      // swap + button to remove button on clones
       const plus = newCard.querySelector(".add-ticket-btn");
       if (plus) {
         plus.textContent = "–";
@@ -437,14 +491,11 @@
         plus.classList.remove("add-ticket-btn");
       }
 
-      // clear fields
       newCard.querySelectorAll("input, textarea").forEach((el) => (el.value = ""));
-
       openC.appendChild(newCard);
       triggerAutosaveSoon();
     });
 
-    // Remove ticket
     document.addEventListener("click", (e) => {
       const rm = e.target.closest(".remove-ticket-btn");
       if (!rm) return;
@@ -453,7 +504,6 @@
       triggerAutosaveSoon();
     });
 
-    // Move cards by status
     document.addEventListener("change", (e) => {
       const sel = e.target.closest(".ticket-status-select");
       if (!sel) return;
@@ -461,7 +511,6 @@
       const card = sel.closest(".ticket-group");
       if (!card) return;
 
-      // base cannot move
       if (card.getAttribute("data-base") === "true") {
         sel.value = "Open";
         return;
@@ -505,7 +554,7 @@
   }
 
   /* ======================================================
-     RESET PAGE (Reset This Page)
+     RESET PAGE
   ====================================================== */
   function initResetPageButtons() {
     document.addEventListener("click", (e) => {
@@ -521,27 +570,19 @@
   }
 
   function resetSection(section) {
-    // Reset form elements in this section
     section.querySelectorAll("input, textarea, select").forEach((el) => {
-      if (el.tagName === "SELECT") {
-        el.selectedIndex = 0;
-      } else if (el.type === "checkbox" || el.type === "radio") {
-        el.checked = false;
-      } else {
-        el.value = "";
-      }
+      if (el.tagName === "SELECT") el.selectedIndex = 0;
+      else if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+      else el.value = "";
     });
 
-    // Remove cloned additional trainers
     const addTrainers = section.querySelector("#additionalTrainersContainer");
     if (addTrainers) addTrainers.innerHTML = "";
 
-    // Remove cloned additional POCs (keep base)
     section
       .querySelectorAll(".additional-poc-card.is-clone, .additional-poc-card:not([data-base='true'])")
       .forEach((c) => c.remove());
 
-    // Support tickets: remove all non-base ticket cards, clear base fields
     if (section.id === "support-tickets") {
       const openC = document.getElementById("openTicketsContainer");
       if (openC) {
@@ -576,20 +617,20 @@
       document.querySelectorAll(".page-section").forEach((sec) => resetSection(sec));
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_META_KEY);
-      // update topbar dealership name display
+
       const disp = document.getElementById("dealershipNameDisplay");
       if (disp) disp.textContent = "";
+
       triggerAutosaveSoon();
     });
   }
 
   /* ======================================================
-     AUTOSAVE (localStorage)
+     AUTOSAVE
   ====================================================== */
   let autosaveTimer = null;
 
   function initAutosave() {
-    // Save on input/change in any form field
     document.addEventListener("input", (e) => {
       if (e.target.closest("input, textarea, select")) triggerAutosaveSoon();
     });
@@ -606,10 +647,7 @@
   function saveToAutosave() {
     const data = collectState();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    localStorage.setItem(
-      STORAGE_META_KEY,
-      JSON.stringify({ savedAt: new Date().toISOString() })
-    );
+    localStorage.setItem(STORAGE_META_KEY, JSON.stringify({ savedAt: new Date().toISOString() }));
   }
 
   function restoreFromAutosave() {
@@ -625,9 +663,6 @@
   }
 
   function collectState() {
-    // Store values by stable selector strategy:
-    // 1) all inputs/textareas/selects with ids => {id: value}
-    // 2) everything else by DOM path index (best-effort)
     const state = {
       ids: {},
       nodes: [],
@@ -645,18 +680,15 @@
       state.ids[el.id] = serializeEl(el);
     });
 
-    // Capture dynamic containers HTML
     const addTrainers = document.getElementById("additionalTrainersContainer");
     if (addTrainers) state.html.additionalTrainers = addTrainers.innerHTML;
 
     const pocGrid = document.querySelector(".primary-contacts-grid");
     if (pocGrid) {
-      // store only non-base additional POCs
       const clones = [...pocGrid.querySelectorAll(".additional-poc-card:not([data-base='true'])")];
       state.html.additionalPOCs = clones.map((c) => c.outerHTML).join("");
     }
 
-    // Support ticket containers
     const openC = document.getElementById("openTicketsContainer");
     if (openC) {
       const clones = [...openC.querySelectorAll(".ticket-group:not([data-base='true'])")];
@@ -669,7 +701,6 @@
     const cf = document.getElementById("closedFeatureTicketsContainer");
     if (cf) state.html.ticketsClosedFeature = cf.innerHTML;
 
-    // Best-effort for other fields (index-based)
     const all = [...document.querySelectorAll("main input, main textarea, main select")];
     state.nodes = all.map((el) => serializeEl(el));
 
@@ -679,7 +710,6 @@
   function applyState(state) {
     if (!state) return;
 
-    // Restore ID-bound fields first
     if (state.ids) {
       Object.entries(state.ids).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -687,17 +717,16 @@
       });
     }
 
-    // Restore dynamic HTML containers then rebind behaviors automatically via delegation
     const addTrainers = document.getElementById("additionalTrainersContainer");
     if (addTrainers && state.html?.additionalTrainers != null) {
       addTrainers.innerHTML = state.html.additionalTrainers;
-      // ensure remove buttons exist on restored clones
+      // normalize restored trainer clone buttons
       addTrainers.querySelectorAll(".checklist-row").forEach((row) => {
         if (row.getAttribute("data-base") === "true") return;
         const btn = row.querySelector("button");
         if (btn && btn.textContent.trim() === "+") {
           btn.textContent = "–";
-          btn.classList.add("remove-row");
+          btn.classList.add("remove-trainer-row");
           btn.classList.remove("add-row");
         }
       });
@@ -705,13 +734,10 @@
 
     const pocGrid = document.querySelector(".primary-contacts-grid");
     if (pocGrid && state.html?.additionalPOCs != null) {
-      // remove any existing non-base
       pocGrid.querySelectorAll(".additional-poc-card:not([data-base='true'])").forEach((c) => c.remove());
-      // append restored
       const temp = document.createElement("div");
       temp.innerHTML = state.html.additionalPOCs;
       temp.querySelectorAll(".additional-poc-card").forEach((card) => {
-        // normalize remove button
         const b = card.querySelector("button");
         if (b) {
           b.textContent = "–";
@@ -724,7 +750,6 @@
       });
     }
 
-    // Support tickets restore
     const openC = document.getElementById("openTicketsContainer");
     if (openC && state.html?.ticketsOpenClones != null) {
       openC.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((c) => c.remove());
@@ -739,10 +764,8 @@
     const cf = document.getElementById("closedFeatureTicketsContainer");
     if (cf && state.html?.ticketsClosedFeature != null) cf.innerHTML = state.html.ticketsClosedFeature;
 
-    // Normalize ticket clone buttons + status locks
     normalizeTicketsAfterRestore();
 
-    // Restore index-based values as fallback (keeps most things even without IDs)
     if (Array.isArray(state.nodes)) {
       const all = [...document.querySelectorAll("main input, main textarea, main select")];
       for (let i = 0; i < Math.min(all.length, state.nodes.length); i++) {
@@ -750,12 +773,10 @@
       }
     }
 
-    // update dealership display
     const dn = document.getElementById("dealershipNameInput");
     const disp = document.getElementById("dealershipNameDisplay");
     if (dn && disp) disp.textContent = (dn.value || "").trim();
 
-    // placeholder classes for dates
     const s = document.getElementById("onsiteStartDate");
     const e = document.getElementById("onsiteEndDate");
     if (s) s.classList.toggle("is-placeholder", !s.value);
@@ -766,7 +787,6 @@
     const openC = document.getElementById("openTicketsContainer");
     if (!openC) return;
 
-    // lock base
     const base = openC.querySelector('.ticket-group[data-base="true"]');
     if (base) {
       const status = base.querySelector(".ticket-status-select");
@@ -776,7 +796,6 @@
       }
     }
 
-    // normalize clones remove btn and disclaimer
     document.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((card) => {
       const disc = card.querySelector(".ticket-disclaimer");
       if (disc) disc.remove();
@@ -803,22 +822,14 @@
 
   function deserializeEl(el, data) {
     if (!el || !data) return;
-
     if (data.t === "select") el.value = data.v ?? "";
     else if (data.t === "checkbox") el.checked = !!data.v;
     else if (data.t === "value") el.value = data.v ?? "";
-    else if (data.t === "radio") {
-      // best effort
-      el.checked = !!data.v;
-    }
+    else if (data.t === "radio") el.checked = !!data.v;
   }
 
   /* ======================================================
-     PDF EXPORT (Save All Pages as PDF)
-     ⚠️ Requires:
-        - jsPDF available as window.jspdf.jsPDF
-        - html2canvas available as window.html2canvas
-     If missing, shows an alert.
+     PDF EXPORT (unchanged)
   ====================================================== */
   function initPdfExportButton() {
     const btn = document.getElementById("savePDF");
@@ -841,18 +852,15 @@
       const pageW = doc.internal.pageSize.getWidth();
       const pageH = doc.internal.pageSize.getHeight();
 
-      // temporarily show each section to capture
       for (let i = 0; i < sections.length; i++) {
         sections.forEach((s) => s.classList.remove("active"));
         sections[i].classList.add("active");
 
-        // allow layout settle
         await wait(120);
 
         const canvas = await html2canvas(sections[i], { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL("image/png");
 
-        // fit into page
         const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
         const imgW = canvas.width * ratio;
         const imgH = canvas.height * ratio;
@@ -861,7 +869,6 @@
         doc.addImage(imgData, "PNG", (pageW - imgW) / 2, 24, imgW, imgH);
       }
 
-      // restore active
       sections.forEach((s) => s.classList.remove("active"));
       if (active) active.classList.add("active");
       else sections[0].classList.add("active");
@@ -875,15 +882,15 @@
   }
 
   /* ======================================================
-     TABLE EXPAND (⤢) — moves real table into modal + back
-     - Preserves all inputs/selects/checkboxes (no cloning)
-     - Keeps horizontal/vertical scroll
+     TABLE EXPAND (⤢) — upgraded:
+     - Moves the REAL .table-container (so it looks identical)
+     - Also finds the related Notes block (by notes target id)
+       and moves that Notes card below in the popup
   ====================================================== */
   function initTableExpandFeature() {
     ensureTableExpandStyles();
-    const modal = ensureTableExpandModal();
+    const overlay = ensureTableExpandModal();
 
-    // Add expand buttons to every table footer (unless already present)
     document.querySelectorAll(".table-container").forEach((container) => {
       const footer = container.querySelector(".table-footer");
       if (!footer) return;
@@ -899,7 +906,7 @@
         footer.appendChild(btn);
       }
 
-      btn.addEventListener("click", () => openTableInModal(container, modal));
+      btn.addEventListener("click", () => openExpanded(container, overlay));
     });
   }
 
@@ -917,7 +924,7 @@
           <button type="button" class="table-expand-close" aria-label="Close expanded table" title="Close">✕</button>
         </div>
         <div class="table-expand-body">
-          <div class="table-expand-scroll"></div>
+          <div class="table-expand-stack" id="tableExpandStack"></div>
         </div>
         <div class="table-expand-footer">
           <button type="button" class="table-expand-close secondary">Close</button>
@@ -926,72 +933,84 @@
     `;
     document.body.appendChild(overlay);
 
-    // close handlers
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeExpandedTable(overlay);
+      if (e.target === overlay) closeExpanded(overlay);
     });
     overlay.querySelectorAll(".table-expand-close").forEach((b) => {
-      b.addEventListener("click", () => closeExpandedTable(overlay));
+      b.addEventListener("click", () => closeExpanded(overlay));
     });
 
-    // ESC closes
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && overlay.classList.contains("open")) {
-        closeExpandedTable(overlay);
-      }
+      if (e.key === "Escape" && overlay.classList.contains("open")) closeExpanded(overlay);
     });
 
     return overlay;
   }
 
-  function openTableInModal(tableContainer, overlay) {
-    // Prevent double-open
+  function openExpanded(tableContainer, overlay) {
     if (overlay.__active) return;
 
     const table = tableContainer.querySelector("table");
     if (!table) return;
 
     const titleEl = overlay.querySelector("#tableExpandTitle");
+    const stack = overlay.querySelector("#tableExpandStack");
 
-    // Try to pull a title: nearest .section-header or h2 above the table container
+    // Title guess
     const sectionHeader =
       tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
       tableContainer.closest(".section-block")?.querySelector("h2")?.textContent?.trim() ||
       "Expanded Table";
     titleEl.textContent = sectionHeader;
 
-    // Save where the table came from
+    // Find related notes block via notes target id on the table
+    const notesTargetId = getNotesTargetIdFromTable(table);
+    const notesBlock = notesTargetId ? document.getElementById(notesTargetId) : null;
+
+    // Save original positions (so we can put them back exactly)
     overlay.__active = {
-      table,
-      originalParent: table.parentNode,
-      originalNextSibling: table.nextSibling,
+      tableContainer,
+      tableParent: tableContainer.parentNode,
+      tableNext: tableContainer.nextSibling,
+
+      notesBlock,
+      notesParent: notesBlock?.parentNode || null,
+      notesNext: notesBlock?.nextSibling || null,
     };
 
-    // Move actual table into modal scroll area
-    const scrollHost = overlay.querySelector(".table-expand-scroll");
-    scrollHost.innerHTML = "";
-    scrollHost.appendChild(table);
+    // Move REAL nodes into modal stack
+    stack.innerHTML = "";
+    stack.appendChild(tableContainer);
+    if (notesBlock) stack.appendChild(notesBlock);
 
     overlay.classList.add("open");
     document.body.classList.add("no-scroll");
-
     overlay.querySelector(".table-expand-close")?.focus();
   }
 
-  function closeExpandedTable(overlay) {
+  function closeExpanded(overlay) {
     if (!overlay.__active) {
       overlay.classList.remove("open");
       document.body.classList.remove("no-scroll");
       return;
     }
 
-    const { table, originalParent, originalNextSibling } = overlay.__active;
+    const a = overlay.__active;
 
-    // Restore table exactly where it was
-    if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
-      originalParent.insertBefore(table, originalNextSibling);
+    // restore table container
+    if (a.tableNext && a.tableNext.parentNode === a.tableParent) {
+      a.tableParent.insertBefore(a.tableContainer, a.tableNext);
     } else {
-      originalParent.appendChild(table);
+      a.tableParent.appendChild(a.tableContainer);
+    }
+
+    // restore notes block if it existed
+    if (a.notesBlock && a.notesParent) {
+      if (a.notesNext && a.notesNext.parentNode === a.notesParent) {
+        a.notesParent.insertBefore(a.notesBlock, a.notesNext);
+      } else {
+        a.notesParent.appendChild(a.notesBlock);
+      }
     }
 
     overlay.__active = null;
@@ -1032,7 +1051,7 @@
 
       .table-expand-modal{
         width: min(1400px, 96vw);
-        height: min(820px, 92vh);
+        height: min(900px, 92vh);
         background: rgba(13,18,32,0.98);
         border: 1px solid rgba(255,255,255,0.12);
         border-radius: 18px;
@@ -1067,17 +1086,15 @@
 
       .table-expand-body{
         flex: 1;
-        overflow: hidden;
-        padding: 12px;
-      }
-      .table-expand-scroll{
-        width: 100%;
-        height: 100%;
         overflow: auto;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.03);
-        padding: 10px;
+        padding: 14px;
+      }
+
+      /* stack table + notes card */
+      .table-expand-stack{
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
       }
 
       .table-expand-footer{
