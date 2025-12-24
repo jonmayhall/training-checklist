@@ -1671,3 +1671,108 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* =========================
+   TABLE MODAL — CLEAN LAYOUT
+========================= */
+.table-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.table-modal{
+  background: #fff;
+  width: min(1200px, 96vw);
+  max-height: 90vh;
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.35);
+  overflow: hidden; /* keeps header + body clean */
+  display: flex;
+  flex-direction: column;
+}
+
+.table-modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+}
+
+.table-modal-title{
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.table-modal-actions{
+  display: flex;
+  gap: 10px;
+}
+
+.table-modal-iconbtn{
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  cursor: pointer;
+}
+
+.table-modal-body{
+  padding: 16px;
+  overflow: auto;           /* the modal scrolls vertically */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;                /* space between the two cards */
+}
+
+/* Inner cards (table card + notes card) */
+.table-modal-card{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+/* Card headers should match your app style (clean, not orange bar) */
+.table-modal-card .section-header,
+.table-modal-card h2{
+  margin: 0;
+}
+
+/* TABLE CARD: allow horizontal scroll for the TABLE only */
+.table-modal-tablewrap{
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px;
+}
+
+/* Important: keep table from exploding layout */
+.table-modal-tablewrap table{
+  min-width: 980px; /* adjust if needed */
+}
+
+/* NOTES CARD: absolutely no right scroll */
+.table-modal-noteswrap{
+  padding: 12px;
+  overflow: hidden;
+}
+
+.table-modal-noteswrap textarea{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
