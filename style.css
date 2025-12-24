@@ -700,10 +700,12 @@ main{
   align-items:center !important;
 }
 
-/* keep input+button from stretching weirdly */
+/* =======================================================
+   DEALERSHIP ADDRESS — make textbox ~2x wider
+======================================================= */
 #dealership-address-card .address-input-wrap{
-  width:min(520px, 100%) !important;
-  max-width:520px !important;
+  width:min(1040px, 100%) !important;   /* was ~520px */
+  max-width:1040px !important;
   margin-left:auto !important;
 
   display:flex !important;
