@@ -1,42 +1,35 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
    ✅ Fixes / Adds:
-   - ✅ Additional Trainers (+) works reliably (no fragile selector)
-   - ✅ Placeholder/ghost/date styling handled via CSS (see snippet)
-   - ✅ Table Expand (⤢) opens SAME table layout + adds related Notes card below
-        (moves real DOM nodes into modal; no cloning; preserves data/inputs)
-   - ✅ Notes icon behavior (📝):
-        - Training tables insert bullets using Name
-        - Opcodes inserts bullets using Opcode
-        - Keeps bullets in the SAME ORDER as table rows (even if clicked out of order)
-        - Clear blank-line spacing between bullet sections
-        - Works identically inside popups
+   - ✅ Additional Trainers (+) works (robust delegated handler)
+   - ✅ Table Expand popup: WHITE modal + TWO WHITE CARDS:
+        (1) table container (unchanged DOM, exact layout)
+        (2) related Notes section-block (exact look)
+   - ✅ Notes bullets kept in TABLE ROW ORDER always
+   - ✅ Training tables bullet uses Name (e.g., • Jon:)
+   - ✅ Opcodes bullet uses Opcode (e.g., • OP123:)
+   - ✅ Clear spacing between bullet sections
+   - ✅ Works the same inside popup (real DOM moved, not cloned)
    - Nav clicks, table add-row, POCs, Support Tickets, Autosave, Reset/Clear, Dates, PDF
 ======================================================= */
 
 (() => {
   "use strict";
 
-  /* =========================
-     CONFIG
-  ========================= */
   const STORAGE_KEY = "mkInteractiveChecklist_v2";
   const STORAGE_META_KEY = "mkInteractiveChecklist_meta_v2";
   const AUTOSAVE_DEBOUNCE_MS = 450;
 
-  /* =========================
-     BOOT
-  ========================= */
   document.addEventListener("DOMContentLoaded", () => {
     initSidebarNav();
     initDealershipNameMirror();
     initOnsiteDatesAutoEnd();
 
-    initDynamicAdditionalTrainers();
+    initDynamicAdditionalTrainers();   // ✅ FIXED
     initDynamicAdditionalPOCs();
 
     initTablesAddRowButtons();
-    initNotesIconLinkingAndBullets(); // upgraded notes system
+    initNotesIconLinkingAndBullets();  // ✅ ordered bullets + spacing
 
     initSupportTickets();
 
@@ -44,11 +37,11 @@
     initClearAllButton();
 
     initAutosave();
-    restoreFromAutosave(); // restore after handlers exist
+    restoreFromAutosave();
 
     initPdfExportButton();
 
-    initTableExpandFeature(); // upgraded: includes notes card
+    initTableExpandFeature();          // ✅ WHITE popup + 2 cards
   });
 
   /* ======================================================
@@ -86,10 +79,7 @@
     const display = document.getElementById("dealershipNameDisplay");
     if (!input || !display) return;
 
-    const render = () => {
-      display.textContent = (input.value || "").trim();
-    };
-
+    const render = () => (display.textContent = (input.value || "").trim());
     input.addEventListener("input", render);
     render();
   }
@@ -102,10 +92,7 @@
     const end = document.getElementById("onsiteEndDate");
     if (!start || !end) return;
 
-    const setPlaceholderClass = (el) => {
-      if (!el) return;
-      el.classList.toggle("is-placeholder", !el.value);
-    };
+    const setPlaceholderClass = (el) => el?.classList.toggle("is-placeholder", !el.value);
 
     const addDays = (yyyyMmDd, days) => {
       if (!yyyyMmDd) return "";
@@ -119,9 +106,8 @@
     start.addEventListener("change", () => {
       setPlaceholderClass(start);
 
-      if (!end.value) {
-        end.value = addDays(start.value, 2);
-      } else {
+      if (!end.value) end.value = addDays(start.value, 2);
+      else {
         const s = new Date(start.value);
         const e = new Date(end.value);
         if (e < s) end.value = addDays(start.value, 2);
@@ -141,27 +127,31 @@
   }
 
   /* ======================================================
-     Additional Trainers (+) — FIXED
-     - Your HTML puts #additionalTrainersContainer RIGHT AFTER the base row
-     - So we anchor baseRow off that container (no selector guessing)
+     ✅ Additional Trainers (+) — HARD-FIX
+     - Uses delegated click on document
+     - Finds the base trainer row via [data-base="true"] AND label "Additional Trainer"
+     - Appends clones into #additionalTrainersContainer
   ====================================================== */
   function initDynamicAdditionalTrainers() {
     const container = document.getElementById("additionalTrainersContainer");
     if (!container) return;
 
-    // base row should be directly before container
-    const baseRow = container.previousElementSibling;
-    if (!baseRow || !baseRow.classList.contains("checklist-row")) return;
-
-    // delegated click on base row only
-    baseRow.addEventListener("click", (e) => {
-      const plusBtn = e.target.closest("button.add-row");
+    // delegated click: works even after restore or DOM moves
+    document.addEventListener("click", (e) => {
+      const plusBtn = e.target.closest(".checklist-row.integrated-plus[data-base='true'] button.add-row");
       if (!plusBtn) return;
+
+      const baseRow = plusBtn.closest(".checklist-row");
+      if (!baseRow) return;
+
+      // make sure this is the trainers section base row
+      const labelTxt = (baseRow.querySelector("label")?.textContent || "").trim().toLowerCase();
+      if (!labelTxt.includes("additional trainer")) return;
 
       const baseInput = baseRow.querySelector('input[type="text"]');
       if (!baseInput) return;
 
-      // require base filled before adding
+      // require the base row be filled before adding
       if (!baseInput.value.trim()) {
         baseInput.focus();
         return;
@@ -171,8 +161,8 @@
       clone.removeAttribute("data-base");
       clone.classList.add("is-clone");
 
-      // change + to remove
-      const btn = clone.querySelector("button.add-row");
+      // convert + to remove
+      const btn = clone.querySelector("button");
       if (btn) {
         btn.textContent = "–";
         btn.title = "Remove trainer";
@@ -188,8 +178,8 @@
       triggerAutosaveSoon();
     });
 
-    // remove trainer rows (delegated on container)
-    container.addEventListener("click", (e) => {
+    // remove trainer clone
+    document.addEventListener("click", (e) => {
       const rm = e.target.closest(".remove-trainer-row");
       if (!rm) return;
       const row = rm.closest(".checklist-row");
@@ -220,7 +210,7 @@
       clone.removeAttribute("data-base");
       clone.classList.add("is-clone");
 
-      const plus = clone.querySelector(".additional-poc-add");
+      const plus = clone.querySelector("button");
       if (plus) {
         plus.textContent = "–";
         plus.title = "Remove contact";
@@ -236,8 +226,7 @@
     grid.addEventListener("click", (e) => {
       const btn = e.target.closest(".remove-poc");
       if (!btn) return;
-      const card = btn.closest(".mini-card");
-      if (card) card.remove();
+      btn.closest(".mini-card")?.remove();
       triggerAutosaveSoon();
     });
   }
@@ -259,7 +248,6 @@
       if (!lastRow) return;
 
       const newRow = lastRow.cloneNode(true);
-
       newRow.querySelectorAll("input, textarea, select").forEach((el) => {
         if (el.tagName === "SELECT") el.selectedIndex = 0;
         else if (el.type === "checkbox" || el.type === "radio") el.checked = false;
@@ -269,18 +257,16 @@
       tbody.appendChild(newRow);
       triggerAutosaveSoon();
 
-      // if table has notes target, keep notes order consistent after adding row
+      // keep notes ordering in sync after row add
       const notesTarget = getNotesTargetIdFromTable(table);
       if (notesTarget) reorderNotesToMatchTable(table, notesTarget);
     });
   }
 
   /* ======================================================
-     NOTES: linking + bullet insertion + ordered reflow
-     - Works for any .notes-icon-btn with data-notes-target
-     - Inserts bullet header for the row, then reorders headers
-       to match table row order (top->bottom)
-     - Ensures blank line spacing between bullet sections
+     NOTES: icon click -> scroll + insert bullet header
+     - Ordered by table row position ALWAYS
+     - spacing between bullet sections ALWAYS
   ====================================================== */
   function initNotesIconLinkingAndBullets() {
     document.addEventListener("click", (e) => {
@@ -294,18 +280,16 @@
       const textarea = notesBlock?.querySelector("textarea");
       if (!textarea) return;
 
-      // always scroll/focus
       notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(() => textarea.focus(), 220);
+      setTimeout(() => textarea.focus(), 200);
 
-      // if this notes icon is in a TABLE row, insert bullet and reorder
       const row = btn.closest("tr");
       const table = btn.closest("table");
       if (row && table) {
         const header = buildHeaderForRow(table, row, targetId);
         if (header) {
           ensureHeaderExists(textarea, header);
-          reorderNotesToMatchTable(table, targetId);
+          reorderNotesToMatchTable(table, targetId); // ✅ forces correct order
           triggerAutosaveSoon();
         }
       }
@@ -313,27 +297,16 @@
   }
 
   function buildHeaderForRow(table, row, targetId) {
-    // Training tables: use Name (first text input)
-    // Opcodes: use Opcode (first text input in row, typically opcode column)
+    // Grab first text input from the row (Name column for training tables; Opcode for opcodes table)
     const firstText = row.querySelector('input[type="text"]');
     const token = (firstText?.value || "").trim();
 
-    if (targetId === "notes-opcodes") {
-      return token ? `• ${token}:` : "• Opcode:";
-    }
-
-    // default role notes blocks (techs/advisors/parts/etc.)
-    if (targetId && targetId.startsWith("notes-")) {
-      return token ? `• ${token}:` : "• Name:";
-    }
-
-    return "";
+    if (targetId === "notes-opcodes") return token ? `• ${token}:` : "• Opcode:";
+    return token ? `• ${token}:` : "• Name:";
   }
 
   function ensureHeaderExists(textarea, headerLine) {
     const current = textarea.value || "";
-
-    // already present
     if (current.includes(headerLine)) return;
 
     const trimmed = current.replace(/\s+$/g, "");
@@ -346,79 +319,65 @@
     const textarea = notesBlock?.querySelector("textarea");
     if (!textarea) return;
 
-    // expected headers in row order
-    const expectedHeaders = [];
     const rows = [...table.querySelectorAll("tbody tr")];
 
-    rows.forEach((r) => {
-      // only tables that have notes icons should be processed
-      const icon = r.querySelector(".notes-icon-btn[data-notes-target]");
-      if (!icon) return;
+    const expectedHeaders = rows
+      .map((r) => {
+        const icon = r.querySelector(`.notes-icon-btn[data-notes-target="${notesTargetId}"]`);
+        if (!icon) return null;
+        const hdr = buildHeaderForRow(table, r, notesTargetId);
+        return hdr || null;
+      })
+      .filter(Boolean);
 
-      // build header for each row in order using current tokens
-      const hdr = buildHeaderForRow(table, r, notesTargetId);
-      if (hdr) expectedHeaders.push(hdr);
-    });
-
-    // parse textarea into blocks keyed by header
     const blocks = parseNotesBlocks(textarea.value);
 
-    // ensure blocks exist for any header that was created by click
+    // rebuild in expected order + extras at bottom
+    const ordered = [];
     expectedHeaders.forEach((h) => {
-      if (!blocks.has(h) && textarea.value.includes(h)) blocks.set(h, h + "\n");
+      if (blocks.has(h)) ordered.push(normalizeBlock(blocks.get(h)));
+      else if ((textarea.value || "").includes(h)) ordered.push(h + "\n");
     });
 
-    // rebuild notes in correct order with spacing
-    const orderedParts = [];
-    expectedHeaders.forEach((h) => {
-      if (blocks.has(h)) orderedParts.push(normalizeBlock(blocks.get(h)));
-    });
-
-    // keep any "extra" blocks (headers that no longer exist in table) at bottom
     const extras = [];
     blocks.forEach((val, key) => {
       if (!expectedHeaders.includes(key)) extras.push(normalizeBlock(val));
     });
 
-    const rebuilt = [...orderedParts, ...extras]
+    const rebuilt = [...ordered, ...extras]
       .filter(Boolean)
       .map((b) => b.trimEnd())
-      .join("\n\n") // clear spacing between bullet sections
+      .join("\n\n") // ✅ clear spacing between bullet sections
       .trimEnd();
 
     textarea.value = rebuilt ? rebuilt + "\n" : "";
   }
 
   function parseNotesBlocks(text) {
-    // A block starts at a header like: "• Something:"
-    // and continues until next header or end.
     const blocks = new Map();
     if (!text) return blocks;
 
     const lines = text.split("\n");
-    let currentHeader = null;
-    let currentBuf = [];
-
     const headerRegex = /^•\s.+:\s*$/;
 
+    let currentHeader = null;
+    let buf = [];
+
     const flush = () => {
-      if (currentHeader) {
-        blocks.set(currentHeader, currentBuf.join("\n").trimEnd() + "\n");
-      }
+      if (currentHeader) blocks.set(currentHeader, buf.join("\n").trimEnd() + "\n");
     };
 
     for (const line of lines) {
-      if (headerRegex.test(line.trim())) {
+      const t = line.trim();
+      if (headerRegex.test(t)) {
         flush();
-        currentHeader = line.trim();
-        currentBuf = [currentHeader];
+        currentHeader = t;
+        buf = [currentHeader];
       } else {
-        if (currentHeader) currentBuf.push(line);
+        if (currentHeader) buf.push(line);
         else {
-          // text before first header becomes an "extra" block
           const k = "__preface__";
-          const prev = blocks.get(k) || "";
-          blocks.set(k, prev + line + "\n");
+          blocks.set(k, (blocks.get(k) || "") + line + "\n");
         }
       }
     }
@@ -427,9 +386,7 @@
   }
 
   function normalizeBlock(blockText) {
-    if (!blockText) return "";
-    // ensure a header line + content, and no huge trailing whitespace
-    return blockText.trimEnd();
+    return (blockText || "").trimEnd();
   }
 
   function getNotesTargetIdFromTable(table) {
@@ -438,7 +395,7 @@
   }
 
   /* ======================================================
-     SUPPORT TICKETS
+     SUPPORT TICKETS (same behavior)
   ====================================================== */
   function initSupportTickets() {
     const openC = document.getElementById("openTicketsContainer");
@@ -464,8 +421,7 @@
       if (!group) return;
 
       if (group.getAttribute("data-base") === "true") {
-        const ok = isTicketCardComplete(group);
-        if (!ok) {
+        if (!isTicketCardComplete(group)) {
           focusFirstMissingTicketField(group);
           return;
         }
@@ -480,8 +436,7 @@
         status.value = "Open";
       }
 
-      const disc = newCard.querySelector(".ticket-disclaimer");
-      if (disc) disc.remove();
+      newCard.querySelector(".ticket-disclaimer")?.remove();
 
       const plus = newCard.querySelector(".add-ticket-btn");
       if (plus) {
@@ -499,8 +454,7 @@
     document.addEventListener("click", (e) => {
       const rm = e.target.closest(".remove-ticket-btn");
       if (!rm) return;
-      const card = rm.closest(".ticket-group");
-      if (card) card.remove();
+      rm.closest(".ticket-group")?.remove();
       triggerAutosaveSoon();
     });
 
@@ -530,12 +484,7 @@
     const num = card.querySelector(".ticket-number-input");
     const url = card.querySelector(".ticket-zendesk-input");
     const sum = card.querySelector(".ticket-summary-input");
-
-    return (
-      !!(num && num.value.trim()) &&
-      !!(url && url.value.trim()) &&
-      !!(sum && sum.value.trim())
-    );
+    return !!(num?.value.trim() && url?.value.trim() && sum?.value.trim());
   }
 
   function focusFirstMissingTicketField(card) {
@@ -576,8 +525,7 @@
       else el.value = "";
     });
 
-    const addTrainers = section.querySelector("#additionalTrainersContainer");
-    if (addTrainers) addTrainers.innerHTML = "";
+    section.querySelector("#additionalTrainersContainer")?.replaceChildren();
 
     section
       .querySelectorAll(".additional-poc-card.is-clone, .additional-poc-card:not([data-base='true'])")
@@ -585,23 +533,20 @@
 
     if (section.id === "support-tickets") {
       const openC = document.getElementById("openTicketsContainer");
-      if (openC) {
-        openC.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((c) => c.remove());
-        const base = openC.querySelector('.ticket-group[data-base="true"]');
-        if (base) {
-          base.querySelectorAll("input, textarea").forEach((el) => (el.value = ""));
-          const status = base.querySelector(".ticket-status-select");
-          if (status) {
-            status.value = "Open";
-            status.disabled = true;
-          }
+      openC?.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((c) => c.remove());
+
+      const base = openC?.querySelector('.ticket-group[data-base="true"]');
+      if (base) {
+        base.querySelectorAll("input, textarea").forEach((el) => (el.value = ""));
+        const status = base.querySelector(".ticket-status-select");
+        if (status) {
+          status.value = "Open";
+          status.disabled = true;
         }
       }
+
       ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach(
-        (id) => {
-          const c = document.getElementById(id);
-          if (c) c.innerHTML = "";
-        }
+        (id) => document.getElementById(id)?.replaceChildren()
       );
     }
   }
@@ -614,13 +559,10 @@
     if (!btn) return;
 
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".page-section").forEach((sec) => resetSection(sec));
+      document.querySelectorAll(".page-section").forEach(resetSection);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_META_KEY);
-
-      const disp = document.getElementById("dealershipNameDisplay");
-      if (disp) disp.textContent = "";
-
+      document.getElementById("dealershipNameDisplay")?.replaceChildren();
       triggerAutosaveSoon();
     });
   }
@@ -653,13 +595,9 @@
   function restoreFromAutosave() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
-
     try {
-      const data = JSON.parse(raw);
-      applyState(data);
-    } catch {
-      // ignore
-    }
+      applyState(JSON.parse(raw));
+    } catch {}
   }
 
   function collectState() {
@@ -702,7 +640,7 @@
     if (cf) state.html.ticketsClosedFeature = cf.innerHTML;
 
     const all = [...document.querySelectorAll("main input, main textarea, main select")];
-    state.nodes = all.map((el) => serializeEl(el));
+    state.nodes = all.map(serializeEl);
 
     return state;
   }
@@ -710,27 +648,13 @@
   function applyState(state) {
     if (!state) return;
 
-    if (state.ids) {
-      Object.entries(state.ids).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) deserializeEl(el, val);
-      });
-    }
+    Object.entries(state.ids || {}).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) deserializeEl(el, val);
+    });
 
     const addTrainers = document.getElementById("additionalTrainersContainer");
-    if (addTrainers && state.html?.additionalTrainers != null) {
-      addTrainers.innerHTML = state.html.additionalTrainers;
-      // normalize restored trainer clone buttons
-      addTrainers.querySelectorAll(".checklist-row").forEach((row) => {
-        if (row.getAttribute("data-base") === "true") return;
-        const btn = row.querySelector("button");
-        if (btn && btn.textContent.trim() === "+") {
-          btn.textContent = "–";
-          btn.classList.add("remove-trainer-row");
-          btn.classList.remove("add-row");
-        }
-      });
-    }
+    if (addTrainers && state.html?.additionalTrainers != null) addTrainers.innerHTML = state.html.additionalTrainers;
 
     const pocGrid = document.querySelector(".primary-contacts-grid");
     if (pocGrid && state.html?.additionalPOCs != null) {
@@ -757,12 +681,9 @@
       temp.innerHTML = state.html.ticketsOpenClones;
       temp.querySelectorAll(".ticket-group").forEach((card) => openC.appendChild(card));
     }
-    const t2 = document.getElementById("tierTwoTicketsContainer");
-    if (t2 && state.html?.ticketsTierTwo != null) t2.innerHTML = state.html.ticketsTierTwo;
-    const cr = document.getElementById("closedResolvedTicketsContainer");
-    if (cr && state.html?.ticketsClosedResolved != null) cr.innerHTML = state.html.ticketsClosedResolved;
-    const cf = document.getElementById("closedFeatureTicketsContainer");
-    if (cf && state.html?.ticketsClosedFeature != null) cf.innerHTML = state.html.ticketsClosedFeature;
+    if (document.getElementById("tierTwoTicketsContainer")) document.getElementById("tierTwoTicketsContainer").innerHTML = state.html?.ticketsTierTwo || "";
+    if (document.getElementById("closedResolvedTicketsContainer")) document.getElementById("closedResolvedTicketsContainer").innerHTML = state.html?.ticketsClosedResolved || "";
+    if (document.getElementById("closedFeatureTicketsContainer")) document.getElementById("closedFeatureTicketsContainer").innerHTML = state.html?.ticketsClosedFeature || "";
 
     normalizeTicketsAfterRestore();
 
@@ -786,7 +707,6 @@
   function normalizeTicketsAfterRestore() {
     const openC = document.getElementById("openTicketsContainer");
     if (!openC) return;
-
     const base = openC.querySelector('.ticket-group[data-base="true"]');
     if (base) {
       const status = base.querySelector(".ticket-status-select");
@@ -795,11 +715,8 @@
         status.disabled = true;
       }
     }
-
     document.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((card) => {
-      const disc = card.querySelector(".ticket-disclaimer");
-      if (disc) disc.remove();
-
+      card.querySelector(".ticket-disclaimer")?.remove();
       const plus = card.querySelector(".add-ticket-btn");
       if (plus) {
         plus.textContent = "–";
@@ -838,7 +755,6 @@
     btn.addEventListener("click", async () => {
       const jsPDF = window.jspdf?.jsPDF;
       const html2canvas = window.html2canvas;
-
       if (!jsPDF || !html2canvas) {
         alert("PDF export requires jsPDF + html2canvas to be loaded.");
         return;
@@ -882,14 +798,13 @@
   }
 
   /* ======================================================
-     TABLE EXPAND (⤢) — upgraded:
-     - Moves the REAL .table-container (so it looks identical)
-     - Also finds the related Notes block (by notes target id)
-       and moves that Notes card below in the popup
+     ✅ TABLE EXPAND — WHITE popup with TWO cards (table + notes)
+     - Moves the REAL table-container and the REAL notes .section-block
+       so the look is identical.
   ====================================================== */
   function initTableExpandFeature() {
-    ensureTableExpandStyles();
-    const overlay = ensureTableExpandModal();
+    injectTableExpandStyles_WHITE();
+    const overlay = ensureTableExpandModal_WHITE();
 
     document.querySelectorAll(".table-container").forEach((container) => {
       const footer = container.querySelector(".table-footer");
@@ -906,11 +821,11 @@
         footer.appendChild(btn);
       }
 
-      btn.addEventListener("click", () => openExpanded(container, overlay));
+      btn.addEventListener("click", () => openExpanded_WHITE(container, overlay));
     });
   }
 
-  function ensureTableExpandModal() {
+  function ensureTableExpandModal_WHITE() {
     let overlay = document.getElementById("tableExpandOverlay");
     if (overlay) return overlay;
 
@@ -934,20 +849,20 @@
     document.body.appendChild(overlay);
 
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeExpanded(overlay);
+      if (e.target === overlay) closeExpanded_WHITE(overlay);
     });
     overlay.querySelectorAll(".table-expand-close").forEach((b) => {
-      b.addEventListener("click", () => closeExpanded(overlay));
+      b.addEventListener("click", () => closeExpanded_WHITE(overlay));
     });
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && overlay.classList.contains("open")) closeExpanded(overlay);
+      if (e.key === "Escape" && overlay.classList.contains("open")) closeExpanded_WHITE(overlay);
     });
 
     return overlay;
   }
 
-  function openExpanded(tableContainer, overlay) {
+  function openExpanded_WHITE(tableContainer, overlay) {
     if (overlay.__active) return;
 
     const table = tableContainer.querySelector("table");
@@ -956,18 +871,17 @@
     const titleEl = overlay.querySelector("#tableExpandTitle");
     const stack = overlay.querySelector("#tableExpandStack");
 
-    // Title guess
     const sectionHeader =
       tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
       tableContainer.closest(".section-block")?.querySelector("h2")?.textContent?.trim() ||
       "Expanded Table";
     titleEl.textContent = sectionHeader;
 
-    // Find related notes block via notes target id on the table
+    // find related notes block
     const notesTargetId = getNotesTargetIdFromTable(table);
     const notesBlock = notesTargetId ? document.getElementById(notesTargetId) : null;
 
-    // Save original positions (so we can put them back exactly)
+    // Save original positions
     overlay.__active = {
       tableContainer,
       tableParent: tableContainer.parentNode,
@@ -978,64 +892,70 @@
       notesNext: notesBlock?.nextSibling || null,
     };
 
-    // Move REAL nodes into modal stack
+    // Create WHITE cards in modal stack, then move real nodes into them
     stack.innerHTML = "";
-    stack.appendChild(tableContainer);
-    if (notesBlock) stack.appendChild(notesBlock);
+
+    const card1 = document.createElement("div");
+    card1.className = "table-expand-card";
+    card1.appendChild(tableContainer);
+
+    stack.appendChild(card1);
+
+    if (notesBlock) {
+      const card2 = document.createElement("div");
+      card2.className = "table-expand-card";
+      card2.appendChild(notesBlock);
+      stack.appendChild(card2);
+    }
 
     overlay.classList.add("open");
     document.body.classList.add("no-scroll");
     overlay.querySelector(".table-expand-close")?.focus();
   }
 
-  function closeExpanded(overlay) {
-    if (!overlay.__active) {
-      overlay.classList.remove("open");
-      document.body.classList.remove("no-scroll");
-      return;
-    }
-
+  function closeExpanded_WHITE(overlay) {
     const a = overlay.__active;
 
-    // restore table container
-    if (a.tableNext && a.tableNext.parentNode === a.tableParent) {
-      a.tableParent.insertBefore(a.tableContainer, a.tableNext);
-    } else {
-      a.tableParent.appendChild(a.tableContainer);
+    overlay.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+
+    if (!a) return;
+
+    // restore table
+    if (a.tableParent) {
+      if (a.tableNext && a.tableNext.parentNode === a.tableParent) a.tableParent.insertBefore(a.tableContainer, a.tableNext);
+      else a.tableParent.appendChild(a.tableContainer);
     }
 
-    // restore notes block if it existed
+    // restore notes
     if (a.notesBlock && a.notesParent) {
-      if (a.notesNext && a.notesNext.parentNode === a.notesParent) {
-        a.notesParent.insertBefore(a.notesBlock, a.notesNext);
-      } else {
-        a.notesParent.appendChild(a.notesBlock);
-      }
+      if (a.notesNext && a.notesNext.parentNode === a.notesParent) a.notesParent.insertBefore(a.notesBlock, a.notesNext);
+      else a.notesParent.appendChild(a.notesBlock);
     }
 
     overlay.__active = null;
-    overlay.classList.remove("open");
-    document.body.classList.remove("no-scroll");
   }
 
-  function ensureTableExpandStyles() {
+  function injectTableExpandStyles_WHITE() {
     if (document.getElementById("tableExpandStyles")) return;
 
     const style = document.createElement("style");
     style.id = "tableExpandStyles";
     style.textContent = `
+      body.no-scroll{ overflow: hidden !important; }
+
       .table-expand-btn{
         margin-left: 10px;
         padding: 6px 10px;
         border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.18);
-        background: rgba(255,255,255,0.06);
-        color: inherit;
+        border: 1px solid rgba(0,0,0,0.12);
+        background: #ffffff;
+        color: #111;
         cursor: pointer;
         font-size: 16px;
         line-height: 1;
       }
-      .table-expand-btn:hover{ background: rgba(255,255,255,0.10); }
+      .table-expand-btn:hover{ background: #f6f6f6; }
 
       .table-expand-overlay{
         position: fixed;
@@ -1043,19 +963,20 @@
         display: none;
         align-items: center;
         justify-content: center;
-        background: rgba(0,0,0,0.62);
+        background: rgba(0,0,0,0.55);
         z-index: 9999;
         padding: 18px;
       }
       .table-expand-overlay.open{ display: flex; }
 
+      /* WHITE modal shell */
       .table-expand-modal{
         width: min(1400px, 96vw);
         height: min(900px, 92vh);
-        background: rgba(13,18,32,0.98);
-        border: 1px solid rgba(255,255,255,0.12);
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.12);
         border-radius: 18px;
-        box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+        box-shadow: 0 18px 60px rgba(0,0,0,0.35);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -1066,50 +987,68 @@
         align-items: center;
         justify-content: space-between;
         padding: 12px 14px;
-        border-bottom: 1px solid rgba(255,255,255,0.12);
+        border-bottom: 1px solid rgba(0,0,0,0.10);
+        background: #ffffff;
       }
       .table-expand-title{
         font-weight: 700;
         font-size: 14px;
-        opacity: 0.95;
+        color: #111;
       }
       .table-expand-close{
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.06);
-        color: inherit;
+        border: 1px solid rgba(0,0,0,0.12);
+        background: #ffffff;
+        color: #111;
         border-radius: 10px;
         padding: 6px 10px;
         cursor: pointer;
         line-height: 1;
       }
-      .table-expand-close:hover{ background: rgba(255,255,255,0.10); }
+      .table-expand-close:hover{ background: #f6f6f6; }
 
       .table-expand-body{
         flex: 1;
         overflow: auto;
         padding: 14px;
+        background: #ffffff;
       }
 
-      /* stack table + notes card */
+      /* TWO cards stacked */
       .table-expand-stack{
         display: flex;
         flex-direction: column;
         gap: 14px;
       }
+      .table-expand-card{
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.12);
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        padding: 10px;
+      }
 
       .table-expand-footer{
         padding: 10px 14px;
-        border-top: 1px solid rgba(255,255,255,0.12);
+        border-top: 1px solid rgba(0,0,0,0.10);
         display: flex;
         justify-content: flex-end;
         gap: 10px;
+        background: #ffffff;
       }
       .table-expand-close.secondary{
         font-size: 13px;
         padding: 8px 12px;
       }
 
-      body.no-scroll{ overflow: hidden !important; }
+      /* Make sure moved content doesn't inherit dark backgrounds inside popup */
+      .table-expand-modal .section-block{
+        background: #ffffff !important;
+        border: none !important; /* outer card handles border */
+        box-shadow: none !important;
+      }
+      .table-expand-modal .table-container{
+        background: transparent !important;
+      }
     `;
     document.head.appendChild(style);
   }
