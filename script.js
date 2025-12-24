@@ -1,8 +1,24 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEANED script.js
-   ✅ Preserves stable behavior described in your header
-   ✅ Restores missing JS syntax lost in chat copy
-   ✅ Keeps: notes buttons, add-row, tickets, table notes, popups, autosave hooks
+   myKaarma Interactive Training Checklist — CLEAN script.js (FULL)
+   ✅ Stable + Restored + Fixed
+   - Nav clicks work
+   - Add Row (+) for tables
+   - Additional Trainers (+)
+   - Additional POC (+)
+   - Support Tickets: add/remove, move by status, base locked to Open
+   - Autosave + Reset Page + Clear All
+   - Onsite dates: end defaults to start + 2 days
+   - PDF export (all pages)
+   - ✅ Question Notes Linking: single 📝 icon per row -> inserts "• <Question>:"
+   - ✅ NEW: Notes insert spacing (blank line before new bullet) so new notes are obvious
+   - ✅ Table Notes Column: single Notes column, bubble button on every row
+   - ✅ Table Notes Bullet Insert:
+       - Training Checklist inserts "• <Name>:"
+       - Opcodes inserts "• <Opcode>:"
+     + ✅ NEW: same spacing between inserted bullets
+   - ✅ Table Popup Expand (⤢) in footer right
+   - ✅ Popup scroll left/right restored
+   - ✅ Training name cell layout fixed (checkbox left of input)
    ======================================================= */
 
 /* ---------------------------
@@ -25,9 +41,6 @@ function safeTrim(v) {
   return (v ?? "").toString().trim();
 }
 
-/* ---------------------------
-   Storage keying
---------------------------- */
 function ensureUID(el) {
   if (!el) return null;
   if (el.dataset && el.dataset.uid) return el.dataset.uid;
@@ -36,6 +49,9 @@ function ensureUID(el) {
   return newId;
 }
 
+/* ---------------------------
+   Storage keying
+--------------------------- */
 function getFieldKey(el) {
   if (el.id) return `mkc:${el.id}`;
   if (el.name) return `mkc:${el.name}`;
@@ -191,7 +207,6 @@ function injectRuntimePatches() {
   const style = document.createElement("style");
   style.id = "mkRuntimePatches";
   style.textContent = `
-    /* Table Modal shell */
     #mkTableModal{ position:fixed; inset:0; z-index:99998; display:none; }
     #mkTableModal.open{ display:block; }
     #mkTableModal .mk-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
@@ -358,6 +373,28 @@ function initGhosts() {
   qsa("input[type='date']").forEach(applyDateGhost);
 }
 
+/* ===========================================================
+   ✅ Notes insertion spacing helpers (NEW)
+=========================================================== */
+function ensureBlankLineBeforeInsert(lines, insertIndex) {
+  // If inserting not at top and previous line isn't blank, insert a blank line.
+  if (insertIndex > 0 && safeTrim(lines[insertIndex - 1]) !== "") {
+    lines.splice(insertIndex, 0, "");
+    insertIndex += 1;
+  }
+  return insertIndex;
+}
+
+function appendWithSpacing(raw, line) {
+  const t = safeTrim(raw);
+  if (!t) return line;
+
+  // ensure there is exactly one blank line before the new bullet
+  const endsWithBlankLine = /\n\s*\n\s*$/.test(raw);
+  if (endsWithBlankLine) return raw.replace(/\s*$/, "") + "\n" + line;
+  return raw.replace(/\s*$/, "") + "\n\n" + line;
+}
+
 /* ---------------------------
    Training tables: Add Row (+)
 --------------------------- */
@@ -408,78 +445,6 @@ function initTableAddRow() {
       tagNameCellsInTable(table);
     });
   });
-}
-
-function getOrderedTableKeys(table){
-  const keys = [];
-  const tbody = table.querySelector("tbody");
-  if (!tbody) return keys;
-
-  Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
-    const k = safeTrim(getRowKeyForTableContext(table, tr));
-    if (k) keys.push(k);
-  });
-
-  // de-dupe in order
-  return Array.from(new Set(keys));
-}
-
-function findBulletLineIndex(lines, bullet){
-  const b = (bullet || "").trim();
-  return lines.findIndex(l => (l || "").trim().startsWith(b));
-}
-
-function insertBulletLineInOrderForTable(notesTA, table, bulletLine){
-  if (!notesTA || !table) return { didInsert:false, lineStart:0 };
-
-  const orderedKeys = getOrderedTableKeys(table);
-  const key = safeTrim(bulletLine.replace(/^•\s*/, "").replace(/:\s*$/, "")); // strip "• " and trailing ":"
-  const myOrder = orderedKeys.indexOf(key);
-
-  const raw = notesTA.value || "";
-  const lines = raw.split("\n");
-
-  // already exists?
-  const existingIdx = findBulletLineIndex(lines, bulletLine);
-  if (existingIdx !== -1){
-    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    return { didInsert:false, lineStart:start };
-  }
-
-  // if key not found (blank, or weird), just append
-  if (myOrder === -1){
-    const startPos = raw.length ? raw.length + 1 : 0;
-    notesTA.value = raw.trim() ? raw.trim() + "\n" + bulletLine : bulletLine;
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  // insert before the first existing table bullet that belongs AFTER this row
-  let insertBefore = -1;
-  for (let i=0; i<lines.length; i++){
-    const t = (lines[i] || "").trim();
-    if (!t.startsWith("•")) continue;
-
-    // try to match this existing bullet against any table key in order
-    const matchKey = orderedKeys.find(k => t.startsWith(`• ${k}:`) || t.startsWith(`• ${k} :`) || t.startsWith(`• ${k}`));
-    if (!matchKey) continue;
-
-    const matchOrder = orderedKeys.indexOf(matchKey);
-    if (matchOrder !== -1 && matchOrder > myOrder){
-      insertBefore = i;
-      break;
-    }
-  }
-
-  if (insertBefore === -1){
-    const startPos = raw.length ? raw.length + 1 : 0;
-    notesTA.value = raw.trim() ? raw.trim() + "\n" + bulletLine : bulletLine;
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  lines.splice(insertBefore, 0, bulletLine);
-  notesTA.value = lines.join("\n");
-  const startPos = lines.slice(0, insertBefore).join("\n").length + (insertBefore > 0 ? 1 : 0);
-  return { didInsert:true, lineStart:startPos };
 }
 
 /* ---------------------------
@@ -563,7 +528,9 @@ function initAdditionalTrainers() {
 --------------------------- */
 function initAdditionalPOC() {
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
+    const btn = e.target.closest(
+      ".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row"
+    );
     if (!btn) return;
 
     const baseCard = btn.closest(".additional-poc-card");
@@ -910,6 +877,7 @@ function initPDF() {
 
 /* ===========================================================
    ✅ Question Notes Linking: single 📝 icon per checklist row
+   + NEW spacing between inserted bullets
 =========================================================== */
 function isNotesCard(card) {
   const h2 = card?.querySelector("h2");
@@ -944,10 +912,6 @@ function makeNoteLine(row) {
   return `• ${q}:`;
 }
 
-function normalizeNoteKey(line) {
-  return (line || "").trim();
-}
-
 function getAllRowsInThisNotesGroup(row) {
   const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
   if (!wrap) return [];
@@ -956,18 +920,15 @@ function getAllRowsInThisNotesGroup(row) {
     .filter((r) => r.querySelector("input, select, textarea"));
 }
 
-function getRowOrderKey(row) {
-  return normalizeNoteKey(makeNoteLine(row));
-}
-
-function findExistingNoteLineIndex(lines, baseKey) {
-  const k = (baseKey || "").trim();
+function findExistingNoteLineIndex(lines, baseLine) {
+  const k = (baseLine || "").trim();
   return lines.findIndex((l) => (l || "").trim().startsWith(k));
 }
 
 function insertNoteLineInOrder(textarea, clickedRow) {
   const allRows = getAllRowsInThisNotesGroup(clickedRow);
-  const orderedKeys = allRows.map((r) => getRowOrderKey(r)).filter(Boolean);
+  const orderedKeys = allRows.map((r) => makeNoteLine(r).trim()).filter(Boolean);
+
   const baseLine = makeNoteLine(clickedRow);
   if (!baseLine) return { didInsert: false, lineStart: 0 };
 
@@ -982,19 +943,20 @@ function insertNoteLineInOrder(textarea, clickedRow) {
     };
   }
 
-  const myOrder = orderedKeys.indexOf(getRowOrderKey(clickedRow));
+  const myOrder = orderedKeys.indexOf(baseLine.trim());
   if (myOrder === -1) {
-    const startPos = raw.length ? raw.length + 1 : 0;
-    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    const startPos = (textarea.value || "").length;
+    textarea.value = appendWithSpacing(textarea.value || "", baseLine);
     return { didInsert: true, lineStart: startPos };
   }
 
+  // find first bullet already in textarea that belongs AFTER this one
   let insertBeforeLineIdx = -1;
 
   for (let i = 0; i < lines.length; i++) {
     const t = (lines[i] || "").trim();
     if (!t.startsWith("•")) continue;
-    const matchOrder = orderedKeys.findIndex((k) => t.startsWith(k.trim()));
+    const matchOrder = orderedKeys.findIndex((k) => t.startsWith(k));
     if (matchOrder !== -1 && matchOrder > myOrder) {
       insertBeforeLineIdx = i;
       break;
@@ -1002,10 +964,13 @@ function insertNoteLineInOrder(textarea, clickedRow) {
   }
 
   if (insertBeforeLineIdx === -1) {
-    const startPos = raw.length ? raw.length + 1 : 0;
-    textarea.value = raw.trim() ? raw.trim() + "\n" + baseLine : baseLine;
+    const startPos = (textarea.value || "").length;
+    textarea.value = appendWithSpacing(textarea.value || "", baseLine);
     return { didInsert: true, lineStart: startPos };
   }
+
+  // NEW: ensure blank line before inserted bullet (clear separation)
+  insertBeforeLineIdx = ensureBlankLineBeforeInsert(lines, insertBeforeLineIdx);
 
   lines.splice(insertBeforeLineIdx, 0, baseLine);
   textarea.value = lines.join("\n");
@@ -1049,7 +1014,7 @@ function ensureRowActions(row) {
 }
 
 /**
- * Option2: one 📝 icon per checklist-row (NOT table notes buttons)
+ * One 📝 icon per checklist-row (NOT table notes buttons)
  */
 function initNotesLinkingOption2Only(root = document) {
   // Remove only question-note buttons (leave table note buttons alone)
@@ -1113,6 +1078,7 @@ function updateNoteIconStates(root = document) {
 
 /* ===========================================================
    ✅ Table Notes Column + Bullet Insert (Name / Opcode)
+   + NEW spacing between inserted bullets
 =========================================================== */
 function thText(th) {
   return (th?.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -1219,7 +1185,6 @@ function normalizeFiltersColumn(table) {
     const td = tr.children[filtersIdx];
     if (!td) return;
 
-    // remove any buttons accidentally injected
     qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach((n) => n.remove());
 
     if (td.querySelector("select")) return;
@@ -1324,7 +1289,78 @@ function getRowKeyForTableContext(contextTable, tr) {
   return getNameFromRow(contextTable, tr) || getOpcodeFromRow(contextTable, tr) || "";
 }
 
-function insertBulletIntoRealNotes(table, bullet){
+function getOrderedTableKeys(table) {
+  const keys = [];
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return keys;
+
+  Array.from(tbody.querySelectorAll("tr")).forEach((tr) => {
+    const k = safeTrim(getRowKeyForTableContext(table, tr));
+    if (k) keys.push(k);
+  });
+
+  return Array.from(new Set(keys));
+}
+
+function findBulletLineIndex(lines, bullet) {
+  const b = (bullet || "").trim();
+  return lines.findIndex((l) => (l || "").trim().startsWith(b));
+}
+
+function insertBulletLineInOrderForTable(notesTA, table, bulletLine) {
+  if (!notesTA || !table) return { didInsert: false, lineStart: 0 };
+
+  const orderedKeys = getOrderedTableKeys(table);
+  const key = safeTrim(bulletLine.replace(/^•\s*/, "").replace(/:\s*$/, ""));
+  const myOrder = orderedKeys.indexOf(key);
+
+  const raw = notesTA.value || "";
+  const lines = raw.split("\n");
+
+  const existingIdx = findBulletLineIndex(lines, bulletLine);
+  if (existingIdx !== -1) {
+    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
+    return { didInsert: false, lineStart: start };
+  }
+
+  // if key not found, append with spacing
+  if (myOrder === -1) {
+    const startPos = (notesTA.value || "").length;
+    notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
+    return { didInsert: true, lineStart: startPos };
+  }
+
+  // insert before first existing bullet that belongs AFTER this row
+  let insertBefore = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const t = (lines[i] || "").trim();
+    if (!t.startsWith("•")) continue;
+
+    const matchKey = orderedKeys.find((k) => t.startsWith(`• ${k}:`) || t.startsWith(`• ${k}`));
+    if (!matchKey) continue;
+
+    const matchOrder = orderedKeys.indexOf(matchKey);
+    if (matchOrder !== -1 && matchOrder > myOrder) {
+      insertBefore = i;
+      break;
+    }
+  }
+
+  if (insertBefore === -1) {
+    const startPos = (notesTA.value || "").length;
+    notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
+    return { didInsert: true, lineStart: startPos };
+  }
+
+  insertBefore = ensureBlankLineBeforeInsert(lines, insertBefore);
+
+  lines.splice(insertBefore, 0, bulletLine);
+  notesTA.value = lines.join("\n");
+  const startPos = lines.slice(0, insertBefore).join("\n").length + (insertBefore > 0 ? 1 : 0);
+  return { didInsert: true, lineStart: startPos };
+}
+
+function insertBulletIntoRealNotes(table, bullet) {
   const notesBlock = findNotesBlockForTable(table);
   const ta = notesBlock?.querySelector("textarea");
   if (!ta) return;
@@ -1334,18 +1370,18 @@ function insertBulletIntoRealNotes(table, bullet){
 
   if (didInsert) saveField(ta);
 
-  notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
-  setTimeout(()=>{
+  notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => {
     ta.focus();
     const v = ta.value || "";
     const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    const endPos = lineEnd === -1 ? v.length : lineEnd;
     ta.setSelectionRange(endPos, endPos);
     ta.classList.add("mk-note-jump");
-    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
+    setTimeout(() => ta.classList.remove("mk-note-jump"), 700);
   }, 150);
 
-  requestAnimationFrame(()=> updateNoteIconStates(document));
+  requestAnimationFrame(() => updateNoteIconStates(document));
 }
 
 function tagNameCellsInTable(table) {
@@ -1587,42 +1623,44 @@ function mountPopupNotesCard(titleText, sourceTA) {
   return { notesCard, notesTA: ta };
 }
 
-function insertBulletIntoPopupNotes(modal, modalNotesTA, bullet){
-  const line = bullet.trim();
+function getTbodyRowIndex(tr) {
+  if (!tr || !tr.parentElement) return -1;
+  return Array.from(tr.parentElement.children).indexOf(tr);
+}
 
-  // Use the REAL table (not the clone) so row order is accurate
+function insertBulletIntoPopupNotes(modalNotesTA, bullet) {
+  const line = bullet.trim();
   const orderTable = _mkTableModalContextTable || null;
 
   const { didInsert, lineStart } = orderTable
     ? insertBulletLineInOrderForTable(modalNotesTA, orderTable, line)
     : (() => {
-        // fallback append
-        const raw = modalNotesTA.value || "";
-        if (!raw.includes(line)) modalNotesTA.value = raw.trim() ? (raw.trim() + "\n" + line) : line;
-        return { didInsert:true, lineStart: raw.length ? raw.length + 1 : 0 };
+        const startPos = (modalNotesTA.value || "").length;
+        modalNotesTA.value = appendWithSpacing(modalNotesTA.value || "", line);
+        return { didInsert: true, lineStart: startPos };
       })();
 
   // sync to real notes textarea
-  if (_mkTableModalSourceTA){
+  if (_mkTableModalSourceTA) {
     _mkTableModalSourceTA.value = modalNotesTA.value;
     saveField(_mkTableModalSourceTA);
   }
 
   // jump to notes inside modal
   const notesCard = modalNotesTA.closest(".section-block");
-  if (notesCard) notesCard.scrollIntoView({ behavior:"smooth", block:"start" });
+  if (notesCard) notesCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  setTimeout(()=>{
+  setTimeout(() => {
     modalNotesTA.focus();
-    constaz;
-    // move cursor to inserted/located line end
     const v = modalNotesTA.value || "";
     const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = (lineEnd === -1) ? v.length : lineEnd;
+    const endPos = lineEnd === -1 ? v.length : lineEnd;
     modalNotesTA.setSelectionRange(endPos, endPos);
     modalNotesTA.classList.add("mk-note-jump");
-    setTimeout(()=> modalNotesTA.classList.remove("mk-note-jump"), 700);
+    setTimeout(() => modalNotesTA.classList.remove("mk-note-jump"), 700);
   }, 140);
+
+  if (didInsert) requestAnimationFrame(() => updateNoteIconStates(document));
 }
 
 function openTableModalForTable(originalTable, titleText) {
@@ -1669,23 +1707,56 @@ function openTableModalForTable(originalTable, titleText) {
 
   tagNameCellsInTable(tableClone);
 
+  // modal add-row also adds to real table
+  footer.querySelector(".add-row")?.addEventListener("click", () => {
+    const realTbody = originalTable.tBodies?.[0];
+    const cloneTbody = tableClone.tBodies?.[0];
+    if (!realTbody || !cloneTbody) return;
+
+    const realLast = realTbody.querySelector("tr:last-child");
+    const cloneLast = cloneTbody.querySelector("tr:last-child");
+    if (!realLast || !cloneLast) return;
+
+    const realNew = cloneTrainingRow(realLast);
+    const cloneNew = cloneTrainingRow(cloneLast);
+
+    realTbody.appendChild(realNew);
+    cloneTbody.appendChild(cloneNew);
+
+    requestAnimationFrame(() => {
+      initTableNotesButtons(document);
+      tagNameCellsInTable(originalTable);
+      tagNameCellsInTable(tableClone);
+      updateNoteIconStates(document);
+    });
+  });
+
   // -------- Notes card synced to real table notes --------
   const realNotesBlock = findNotesBlockForTable(originalTable);
   const realTA = realNotesBlock?.querySelector("textarea");
   const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
+
+  // Ensure tableClone has a single Notes column button too
+  initTableNotesButtons(tableCard);
 
   tableClone.addEventListener(
     "click",
     (e) => {
       const btn = e.target.closest(".mk-table-note-btn");
       if (!btn) return;
+
       e.preventDefault();
       e.stopPropagation();
 
-      const tr = btn.closest("tr");
-      if (!tr) return;
+      const cloneTr = btn.closest("tr");
+      if (!cloneTr) return;
 
-      const key = getRowKeyForTableContext(_mkTableModalContextTable, tr);
+      // IMPORTANT: map clone row index -> original row
+      const idx = getTbodyRowIndex(cloneTr);
+      const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
+      if (!origTr) return;
+
+      const key = getRowKeyForTableContext(originalTable, origTr);
       if (!key) return;
 
       insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
