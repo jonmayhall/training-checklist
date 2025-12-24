@@ -1473,6 +1473,39 @@ td.notes-col-cell .notes-bubble-btn{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
   resize:none;
 }
+/* =========================
+   Table Popup (Modal) — force clean card + no right overflow
+========================= */
+#mkTableModal{
+  overflow: hidden !important;
+}
+
+#mkTableModalShell{
+  width: 100%;
+}
+
+#mkTableModalCards{
+  width: 100%;
+}
+
+#mkTableModalCards .section-block{
+  width: 100%;
+  overflow: hidden;          /* prevents “flows off right side” */
+}
+
+/* Keep table scrolling inside scroll-wrapper like normal */
+#mkTableModalCards .scroll-wrapper{
+  overflow: auto !important;
+  max-width: 100% !important;
+}
+
+/* Notes card should never scroll left/right */
+#mkTableModalCards .section-block textarea{
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  resize: vertical;
+}
 
 /* =======================
    TABLE MODAL (mkTableModal)
