@@ -583,46 +583,49 @@ main{
   padding:7px 10px !important;
 }
 
-/* -------------------------------------------------------
-   Primary Contacts grid: narrower cards + matching gaps
-------------------------------------------------------- */
+/* ============================
+   DEALERSHIP INFO — Card sizing + even spacing
+============================ */
+
+/* Keep one consistent right-side field width for THIS page */
+#dealership-info{
+  --di-input-width:170px;   /* this controls contact fields + date fields */
+  --di-gap:28px;            /* one “even” spacing value */
+}
+
+/* Even space around cards (edges + between cards) */
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  column-gap:28px;                 /* horizontal gap */
-  row-gap:28px;                    /* vertical gap matches */
+  gap:var(--di-gap);                 /* same H + V */
+  padding:var(--di-gap);             /* same space around the outside */
   margin-top:10px;
 }
 
-/* Make each card a bit narrower without breaking layout */
+/* Make the card smaller (outer edges inward) + reduce inside padding (content outward) */
 #dealership-info .primary-contacts-grid .mini-card{
+  width:100%;
+  max-width:520px;                   /* smaller card */
+  justify-self:center;
+
+  padding:10px 12px 6px;             /* less inside padding (content outward) */
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
-  padding:14px 14px 6px;
-
-  max-width:560px;                 /* slightly narrower */
-  width:100%;
-  justify-self:center;             /* centers within its grid column */
 }
 
-/* Keep mini-card rows consistent */
-#dealership-info .primary-contacts-grid .mini-card .checklist-row{
-  padding-left:16px !important;
-  padding-right:16px !important;
+/* Reduce row indentation inside cards */
+#dealership-info .primary-contacts-grid .checklist-row{
+  padding-left:12px !important;
+  padding-right:12px !important;
 }
-
-/* Sub/indented rows: less indented */
 #dealership-info .primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:30px !important;
+  padding-left:24px !important;
 }
 
-/* -------------------------------------------------------
-   Contact card inputs: make them HALF-WIDTH (not shorter)
-   while keeping normal height everywhere
-------------------------------------------------------- */
+/* Make ALL right-side fields in these cards the same width */
 #dealership-info .primary-contacts-grid .checklist-row input[type="text"],
 #dealership-info .primary-contacts-grid .checklist-row input[type="email"],
 #dealership-info .primary-contacts-grid .checklist-row input[type="tel"],
@@ -630,7 +633,31 @@ main{
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
-  height:34px !important;          /* keep same height as rest of app */
+  height:34px !important;
+}
+
+/* ============================
+   DEALERSHIP INFO — Dates: match other field widths
+============================ */
+#dealership-info .training-dates-row .date-stack,
+#dealership-info .onsite-training-dates-row .date-stack{
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  margin-left:auto !important;
+}
+
+#dealership-info .training-dates-row .date-stack input[type="date"],
+#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+}
+
+/* Responsive */
+@media (max-width:900px){
+  #dealership-info .primary-contacts-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 /* -------------------------------------------------------
