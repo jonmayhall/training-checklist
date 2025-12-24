@@ -395,6 +395,45 @@ function appendWithSpacing(raw, line) {
   return raw.replace(/\s*$/, "") + "\n\n" + line;
 }
 
+function normalizeNotesBulletSpacing(text) {
+  const lines = (text || "").split("\n");
+  const out = [];
+
+  const isBulletHeader = (l) => /^\s*•\s+.+:\s*$/.test(l || "");
+  const isNonEmpty = (l) => safeTrim(l) !== "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const cur = lines[i];
+
+    // If this line is a bullet header and the last output line is ALSO a bullet header
+    // (or a non-empty line), ensure a blank line before it.
+    if (isBulletHeader(cur)) {
+      // Find last meaningful line in out
+      let j = out.length - 1;
+      while (j >= 0 && !isNonEmpty(out[j])) j--;
+
+      if (j >= 0 && isBulletHeader(out[j])) {
+        // ensure exactly one blank line between bullet headers
+        if (out[out.length - 1] !== "") out.push("");
+      } else if (j >= 0 && isNonEmpty(out[j]) && out[out.length - 1] !== "") {
+        // if there is text right before a bullet header, give it breathing room too
+        out.push("");
+      }
+    }
+
+    out.push(cur);
+  }
+
+  return out.join("\n");
+}
+
+function applyNotesSpacing(textarea) {
+  if (!textarea) return;
+  const before = textarea.value || "";
+  const after = normalizeNotesBulletSpacing(before);
+  if (after !== before) textarea.value = after;
+}
+
 /* ---------------------------
    Training tables: Add Row (+)
 --------------------------- */
@@ -1041,21 +1080,16 @@ function initNotesLinkingOption2Only(root = document) {
       </svg>
     `;
 
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+   const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
 
-      const textarea = findNotesTextareaForRow(row);
-      if (!textarea) return;
+// enforce spacing every time (even if bullet already existed)
+applyNotesSpacing(textarea);
 
-      const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
-      if (didInsert) {
-        saveField(textarea);
-        requestAnimationFrame(() => updateNoteIconStates(document));
-        requestAnimationFrame(syncTwoColHeights);
-      }
-      jumpToNoteLine(textarea, lineStart);
-    });
+saveField(textarea);
+requestAnimationFrame(() => updateNoteIconStates(document));
+requestAnimationFrame(syncTwoColHeights);
+
+jumpToNoteLine(textarea, lineStart);
 
     actions.appendChild(btn);
   });
@@ -1258,6 +1292,9 @@ function getCellFieldText(td) {
   const ta = td.querySelector("textarea");
   if (ta) return safeTrim(ta.value);
 
+  applyNotesSpacing(ta);
+saveField(ta);
+ 
   const sel = td.querySelector("select");
   if (sel) {
     const opt = sel.selectedOptions?.[0];
@@ -1763,6 +1800,13 @@ function openTableModalForTable(originalTable, titleText) {
     },
     { passive: false }
   );
+
+   applyNotesSpacing(modalNotesTA);
+
+if (_mkTableModalSourceTA) {
+  _mkTableModalSourceTA.value = modalNotesTA.value;
+  saveField(_mkTableModalSourceTA);
+}
 
   stack.appendChild(tableCard);
   stack.appendChild(notesCard);
