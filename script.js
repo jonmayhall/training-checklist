@@ -255,73 +255,78 @@
     if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
   }
 
-  /* -----------------------------
-     RESET PAGE / CLEAR ALL
-  ----------------------------- */
-  function clearSection(sectionEl) {
-    if (!sectionEl) return;
+/* -----------------------------
+   RESET PAGE / CLEAR ALL
+----------------------------- */
+function clearSection(sectionEl) {
+  if (!sectionEl) return;
 
-    $$("input, select, textarea", sectionEl).forEach((el) => {
-      const inTable = !!el.closest("table");
-      const inTickets = !!el.closest("#support-tickets");
-      if (inTable || inTickets) return;
+  // Clear normal controls (not tables/tickets)
+  $$("input, select, textarea", sectionEl).forEach((el) => {
+    const inTable = !!el.closest("table");
+    const inTickets = !!el.closest("#support-tickets");
+    if (inTable || inTickets) return;
 
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
+    if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
+  });
+
+  // Clear tables (keep first 1–3 rows)
+  $$(".table-container", sectionEl).forEach((tc) => {
+    const table = $("table", tc);
+    const tbody = table?.tBodies?.[0];
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.rows);
+    const keep = Math.max(1, Math.min(3, rows.length));
+    rows.forEach((r, idx) => {
+      if (idx >= keep) r.remove();
+      else {
+        $$("input, select, textarea", r).forEach((el) => {
+          if (el.type === "checkbox") el.checked = false;
+          else el.value = "";
+        });
+      }
     });
+  });
 
-    $$(".table-container", sectionEl).forEach((tc) => {
-      const table = $("table", tc);
-      const tbody = table?.tBodies?.[0];
-      if (!tbody) return;
-
-      const rows = Array.from(tbody.rows);
-      const keep = Math.max(1, Math.min(3, rows.length));
-      rows.forEach((r, idx) => {
-        if (idx >= keep) r.remove();
-        else {
-          $$("input, select, textarea", r).forEach((el) => {
-            if (el.type === "checkbox") el.checked = false;
-            else el.value = "";
-          });
-        }
-      });
-    });
-
-    if (sectionEl.id === "support-tickets") {
-      const open = $("#openTicketsContainer");
-      const base = $(".ticket-group[data-base='true']", open);
-      if (open && base) open.innerHTML = base.outerHTML;
-      if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
-      if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
-      if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
-    }
-
-    initPlaceholderStyling();
-    persistAllDebounced();
-    refreshAllNotesButtons();
+  // Clear tickets
+  if (sectionEl.id === "support-tickets") {
+    const open = $("#openTicketsContainer");
+    const base = $(".ticket-group[data-base='true']", open);
+    if (open && base) open.innerHTML = base.outerHTML;
+    if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
+    if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
+    if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
   }
 
-  function initResetButtons() {
-    $$(".clear-page-btn").forEach((btn) => {
-      if (!bindOnce(btn, "reset_page")) return;
-      btn.addEventListener("click", () => {
-        const sec = btn.closest(".page-section");
-        clearSection(sec);
-      });
+  // ✅ NEW: ALSO CLEAR NOTES STATE FOR THIS PAGE (prevents old bullets from returning)
+  (() => {
+    const notesState = loadNotesState();
+
+    const notesBlocks = $$(
+      "[id^='notes-'].section-block, [id^='notes-auto-'].section-block, [id^='notes-card-'].section-block",
+      sectionEl
+    );
+
+    notesBlocks.forEach((block) => {
+      if (!block.id) return;
+
+      // remove stored items for this notes target
+      delete notesState[block.id];
+
+      // clear visible textarea too
+      const ta = $("textarea", block);
+      if (ta) ta.value = "";
     });
 
-    const clearAllBtn = $("#clearAllBtn");
-    if (clearAllBtn && bindOnce(clearAllBtn, "clear_all")) {
-      clearAllBtn.addEventListener("click", () => {
-        localStorage.removeItem(LS_KEY);
-        localStorage.removeItem(NOTES_KEY);
-        closeModal();
-        $$(".page-section").forEach(clearSection);
-        saveState({});
-      });
-    }
-  }
+    saveNotesState(notesState);
+  })();
+
+  initPlaceholderStyling();
+  persistAllDebounced();
+  refreshAllNotesButtons();
+}
 
   /* -----------------------------
      TABLE: ADD ROW (+)
