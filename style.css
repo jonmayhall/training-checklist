@@ -1,11 +1,11 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEANED CSS
-   ✅ Single source of truth
-   ✅ Preserves: Support Tickets + DMS + Primary Contacts + Equal-height 2-col cards
-   ✅ Preserves: Notes Linking (📝) + Notes Pop-out Expander (⤢) + Modal
-   ✅ Preserves: Table Notes column + Table Popup Expand (⤢)
-   ✅ FIXED: Dealership Address + Map button styling + Map sizing
-   ✅ FIXED: Training Date inputs match all other text inputs (size + look)
+   myKaarma Interactive Training Checklist — CLEAN CSS
+   ✅ Single source of truth (no duplicate blocks)
+   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables
+   ✅ Dealership Address: input + MAP button attached + map restored
+   ✅ Dealership Address textbox: ~1/3 shorter
+   ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
+   ✅ Training Date inputs match all other inputs
    ======================================================= */
 
 /* =======================
@@ -533,11 +533,9 @@ main{
 }
 
 /* =======================================================
-   DEALERSHIP INFO PAGE FIXES  ✅ REPLACEMENT BLOCK
+   DEALERSHIP INFO PAGE FIXES
    - Training Dates inputs match everything else (width + look)
-   - Primary Contacts: UNIFORM spacing on all sides
-     (center gap = top/bottom gap = outer border gap)
-   - NO “1/8 longer” changes
+   - Primary Contacts: uniform spacing around + between cards
 ======================================================= */
 
 /* Training dates rows align like normal rows */
@@ -571,37 +569,34 @@ main{
   height:34px !important;
   min-height:34px !important;
   max-height:34px !important;
+
   padding:7px 10px !important;
+
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
+
   background:#f7f7f7 !important;
   color:var(--ink) !important;
+
   font-size:13px !important;
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+
   -webkit-appearance:none !important;
   appearance:none !important;
   box-shadow:none !important;
 }
 
-/* =======================================================
-   PRIMARY CONTACTS — UNIFORM SPACING
-   Goal:
-   - double the center gap by making cards smaller
-   - same gap above/below cards
-   - same gap around the outside from the larger border
-======================================================= */
-
+/* =============== PRIMARY CONTACTS (uniform gap) =============== */
 #dealership-info{
   --di-input-width:225px;
-  --pc-gap:39px; /* 25% smaller than before */
+  --pc-gap:30px; /* uniform spacing (reduced ~25% from the larger gap) */
 }
 
-/* Grid provides ALL spacing: between cards AND around the edges */
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:var(--pc-gap) !important;          /* center gap + vertical gap */
-  padding:var(--pc-gap) !important;      /* outer gap matches center gap */
+  gap:var(--pc-gap) !important;       /* between cards */
+  padding:var(--pc-gap) !important;   /* outside matches between */
   margin-top:10px;
   align-items:start;
   justify-items:stretch;
@@ -615,12 +610,9 @@ main{
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
-
-  /* keep original feel (NOT taller) */
-  padding:14px 14px 6px;
-
+  padding:14px 14px 6px; /* keep original height feel */
   width:100%;
-  max-width:none;          /* ✅ remove “card gets centered/narrowed” behavior */
+  max-width:none;
   justify-self:stretch;
   min-width:0;
 }
@@ -637,7 +629,7 @@ main{
   min-width:0;
 }
 
-/* ---- Primary contacts indentation (scoped) ---- */
+/* indentation (scoped) */
 #dealership-info .primary-contacts-grid .checklist-row{
   padding-left:16px !important;
 }
@@ -645,7 +637,7 @@ main{
   padding-left:30px !important;
 }
 
-/* ---- Contact-card field widths (ONLY inside primary contacts grid) ---- */
+/* field widths inside contact cards */
 #dealership-info .primary-contacts-grid
   .checklist-row input[type="text"],
 #dealership-info .primary-contacts-grid
@@ -1463,67 +1455,12 @@ main{
   resize:vertical;
 }
 
-/* =======================
-   RESPONSIVE
-======================= */
-@media (max-width:900px){
-  #sidebar{ width:190px; }
-  main{ margin-left:190px; padding:20px; }
-  #clearAllBtn{ width:calc(190px - 48px); }
-
-  .cards-grid.two-col,
-  .cards-grid.three-col,
-  .two-col-grid,
-  .grid-2{
-    grid-template-columns:1fr;
-  }
-
-  #dealership-info .primary-contacts-grid{ grid-template-columns:1fr; }
-  #dms-integration .dms-grid{ grid-template-columns:1fr; }
-
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
-}
-
-@media (max-width:600px){
-  #sidebar{ display:none; }
-  main{ margin-left:0; padding:16px; }
-
-  .checklist-row{
-    flex-direction:column;
-    align-items:flex-start;
-    padding-left:20px;
-  }
-  .checklist-row label{
-    padding-right:0;
-    margin-bottom:4px;
-  }
-
-  .section-block .checklist-row input[type="text"],
-  .section-block .checklist-row input[type="number"],
-  .section-block .checklist-row input[type="email"],
-  .section-block .checklist-row input[type="tel"],
-  .section-block .checklist-row input[type="date"],
-  .section-block .checklist-row select{
-    margin-left:0;
-    width:100%;
-    flex:0 0 auto;
-  }
-
-  .training-table{ min-width:760px; }
-}
-
 /* =======================================================
    DEALERSHIP ADDRESS — single source of truth
-   - ~1/3 narrower than full row
    - Input + MAP button attached + styled
-   - Map styling restored
+   - MAP restored
+   - Textbox ~1/3 shorter
 ======================================================= */
-
 #dealership-address-card .checklist-row{
   display:grid !important;
   grid-template-columns:260px minmax(0,1fr) !important;
@@ -1531,11 +1468,11 @@ main{
   align-items:center !important;
 }
 
-/* the wrap sits in the 2nd grid column */
+/* This is the ONLY width control you need */
 #dealership-address-card .address-input-wrap{
   width:100% !important;
-  max-width:680px !important;     /* ~1/3 smaller than “full” */
-  justify-self:end !important;    /* IMPORTANT: makes max-width actually matter */
+  max-width:450px !important;        /* ✅ ~1/3 shorter than the old 680 */
+  justify-self:end !important;
   margin-left:auto !important;
 
   display:flex !important;
@@ -1603,17 +1540,43 @@ main{
   border:0 !important;
   display:block !important;
 }
-
 .map-helper-text{
   margin:6px 10px 10px;
   font-size:12px;
   color:#555;
 }
 
-/* Mobile */
+/* =======================
+   RESPONSIVE
+======================= */
 @media (max-width:900px){
+  #sidebar{ width:190px; }
+  main{ margin-left:190px; padding:20px; }
+  #clearAllBtn{ width:calc(190px - 48px); }
+
+  .cards-grid.two-col,
+  .cards-grid.three-col,
+  .two-col-grid,
+  .grid-2{
+    grid-template-columns:1fr;
+  }
+
+  #dealership-info .primary-contacts-grid{
+    grid-template-columns:1fr;
+  }
+  #dms-integration .dms-grid{ grid-template-columns:1fr; }
+
+  #support-tickets #openTicketsContainer,
+  #support-tickets #tierTwoTicketsContainer,
+  #support-tickets #closedResolvedTicketsContainer,
+  #support-tickets #closedFeatureTicketsContainer{
+    grid-template-columns:1fr;
+  }
+
+  /* Address stacks */
   #dealership-address-card .checklist-row{
     grid-template-columns:1fr !important;
+    align-items:flex-start !important;
   }
   #dealership-address-card .address-input-wrap{
     max-width:100% !important;
@@ -1622,91 +1585,30 @@ main{
   }
 }
 
-/* =======================================================
-   DEALERSHIP ADDRESS — shrink textbox by ~1/3 (REAL)
-   (limits the GRID column itself, not just the input)
-======================================================= */
+@media (max-width:600px){
+  #sidebar{ display:none; }
+  main{ margin-left:0; padding:16px; }
 
-#dealership-address-card .checklist-row{
-  display:grid !important;
-  grid-template-columns:260px minmax(0,1fr) !important;
-  column-gap:18px !important;
-  align-items:center !important;
-}
-
-/* Make the 2nd column (the input/button area) only 66% width */
-#dealership-address-card .checklist-row > :last-child{
-  width:66.666% !important;     /* <-- take off 1/3 */
-  justify-self:end !important;  /* keep it aligned right */
-}
-
-/* Wrap fills that reduced column */
-#dealership-address-card .address-input-wrap{
-  width:100% !important;
-  max-width:100% !important;
-  margin-left:0 !important;
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-}
-
-#dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-#dealership-address-card .address-input-wrap .small-map-btn,
-#dealership-address-card .address-input-wrap button{
-  flex:0 0 44px !important;
-  width:44px !important;
-  min-width:44px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border:1px solid var(--orange) !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:11px !important;
-  font-weight:900 !important;
-  letter-spacing:0.08em !important;
-  text-transform:uppercase !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  cursor:pointer !important;
-  padding:0 !important;
-}
-
-/* Keep map working */
-#dealership-address-card .map-wrapper{
-  margin:16px 0 8px !important;
-  border-radius:var(--radius-lg) !important;
-  overflow:hidden !important;
-  border:1px solid var(--border) !important;
-  background:#f8f8f8 !important;
-}
-#dealership-address-card .map-frame,
-#dealership-address-card .map-wrapper iframe{
-  width:100% !important;
-  height:440px !important;
-  border:0 !important;
-  display:block !important;
-}
-
-/* Mobile */
-@media (max-width:900px){
-  #dealership-address-card .checklist-row{
-    grid-template-columns:1fr !important;
+  .checklist-row{
+    flex-direction:column;
+    align-items:flex-start;
+    padding-left:20px;
   }
-  #dealership-address-card .checklist-row > :last-child{
-    width:100% !important;
-    justify-self:stretch !important;
+  .checklist-row label{
+    padding-right:0;
+    margin-bottom:4px;
   }
-}
 
+  .section-block .checklist-row input[type="text"],
+  .section-block .checklist-row input[type="number"],
+  .section-block .checklist-row input[type="email"],
+  .section-block .checklist-row input[type="tel"],
+  .section-block .checklist-row input[type="date"],
+  .section-block .checklist-row select{
+    margin-left:0;
+    width:100%;
+    flex:0 0 auto;
+  }
+
+  .training-table{ min-width:760px; }
+}
