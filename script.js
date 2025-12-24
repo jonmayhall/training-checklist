@@ -1,12 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — script.js
-   ✅ UPDATED (per your notes bubble requests)
-   - Notes buttons (💬 bubble) are back on the right pages/questions
-   - Bubble turns ORANGE when notes exist (works in page + in table popups)
-   - Table popups INCLUDE the + Add Row button
-     * Add Row in popup adds to the REAL table + refreshes popup
-   - Still no delete buttons added
-   - Still no double-binding
+   ✅ NOTES FIX (tables + popups)
+   - Notes bubbles work everywhere (questions + tables + popup tables)
+   - Bubble turns ORANGE when notes exist for that row/question
+   - Training tables use the ROW NAME as bullet label
+   - Opcode tables use the ROW OPCODE as bullet label
+   - FIXES the “buttons don’t work after restore/clone” issue by using
+     ONE delegated click handler (no bindOnce on notes buttons)
 ======================================================= */
 
 (() => {
@@ -41,14 +41,14 @@
   };
 
   /* -----------------------------
-     NOTES BUTTON VISUALS (orange when filled)
+     NOTES BUTTON VISUALS
   ----------------------------- */
   function setNotesButtonVisual(btn, filled) {
     if (!btn) return;
     btn.dataset.filled = filled ? "true" : "false";
     btn.classList.toggle("notes-filled", !!filled);
 
-    // Inline styling so it works immediately even if CSS isn’t updated
+    // inline so it works even if CSS isn’t updated
     const icon = btn.querySelector(".notes-icon");
     if (filled) {
       btn.style.borderColor = "#f57c00";
@@ -73,44 +73,13 @@
   }
 
   /* -----------------------------
-     NAV
-  ----------------------------- */
-  function initNav() {
-    const navButtons = $$("#sidebar-nav .nav-btn");
-    const sections = $$(".page-section");
-
-    const showSection = (id) => {
-      sections.forEach((s) => s.classList.toggle("active", s.id === id));
-      navButtons.forEach((b) => b.classList.toggle("active", b.dataset.target === id));
-      window.scrollTo({ top: 0, behavior: "auto" });
-    };
-
-    navButtons.forEach((btn) => {
-      if (!bindOnce(btn, "nav")) return;
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.target;
-        if (!target) return;
-        showSection(target);
-
-        const state = loadState();
-        state.__lastPage = target;
-        saveState(state);
-      });
-    });
-
-    const state = loadState();
-    if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
-  }
-
-  /* -----------------------------
-     PLACEHOLDER / GHOST CLASSING
+     PLACEHOLDER STYLING
   ----------------------------- */
   function applyPlaceholderClassToSelect(sel) {
     const opt = sel.selectedOptions?.[0];
     const isGhost = !!opt?.dataset?.ghost || sel.value === "" || opt?.value === "";
     sel.classList.toggle("is-placeholder", isGhost);
   }
-
   function applyPlaceholderClassToInput(inp) {
     if (inp.type === "date") {
       inp.classList.toggle("is-placeholder", !inp.value);
@@ -119,7 +88,6 @@
     const hasPh = !!inp.getAttribute("placeholder");
     if (hasPh) inp.classList.toggle("is-placeholder", !inp.value);
   }
-
   function applyPlaceholderClassToTextarea(ta) {
     const hasPh = !!ta.getAttribute("placeholder");
     if (hasPh) ta.classList.toggle("is-placeholder", !ta.value);
@@ -151,12 +119,8 @@
   /* -----------------------------
      AUTOSAVE / RESTORE
   ----------------------------- */
-  function loadState() {
-    return safeJSONParse(localStorage.getItem(LS_KEY), {}) || {};
-  }
-  function saveState(state) {
-    localStorage.setItem(LS_KEY, JSON.stringify(state));
-  }
+  function loadState() { return safeJSONParse(localStorage.getItem(LS_KEY), {}) || {}; }
+  function saveState(state) { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 
   function snapshotTables(state) {
     state.__tables = state.__tables || {};
@@ -223,7 +187,6 @@
 
   function snapshotFormControls(state) {
     state.__controls = state.__controls || {};
-
     $$(".page-section").forEach((sec) => {
       const sectionId = sec.id;
       const controls = $$("input, select, textarea", sec);
@@ -308,185 +271,7 @@
   }
 
   /* -----------------------------
-     RESET PAGE / CLEAR ALL
-  ----------------------------- */
-  function clearSection(sectionEl) {
-    if (!sectionEl) return;
-
-    $$("input, select, textarea", sectionEl).forEach((el) => {
-      const inTable = !!el.closest("table");
-      const inTickets = !!el.closest("#support-tickets");
-      const inAdditionalTrainer = !!el.closest("#additionalTrainersContainer");
-      const inAdditionalPoc = !!el.closest(".additional-poc-card");
-      if (inTable || inTickets || inAdditionalTrainer || inAdditionalPoc) return;
-
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-    });
-
-    $$(".table-container", sectionEl).forEach((tc) => {
-      const table = $("table", tc);
-      const tbody = table?.tBodies?.[0];
-      if (!tbody) return;
-
-      const rows = Array.from(tbody.rows);
-      const keep = Math.max(1, Math.min(3, rows.length));
-      rows.forEach((r, idx) => {
-        if (idx >= keep) r.remove();
-        else {
-          $$("input, select, textarea", r).forEach((el) => {
-            if (el.type === "checkbox") el.checked = false;
-            else el.value = "";
-          });
-        }
-      });
-    });
-
-    if (sectionEl.id === "trainers-deployment") {
-      const at = $("#additionalTrainersContainer");
-      if (at) at.innerHTML = "";
-      const base = $(".checklist-row[data-base='true'] input[type='text']", sectionEl);
-      if (base) base.value = "";
-    }
-
-    if (sectionEl.id === "dealership-info") {
-      const grid = $(".primary-contacts-grid", sectionEl);
-      if (grid) {
-        const cards = $$(".additional-poc-card", grid);
-        cards.forEach((c, idx) => {
-          if (idx === 0) $$("input", c).forEach((inp) => (inp.value = ""));
-          else c.remove();
-        });
-      }
-    }
-
-    if (sectionEl.id === "support-tickets") {
-      const open = $("#openTicketsContainer");
-      const base = $(".ticket-group[data-base='true']", open);
-      if (open && base) open.innerHTML = base.outerHTML;
-      if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
-      if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
-      if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
-    }
-
-    $$("select", sectionEl).forEach(applyPlaceholderClassToSelect);
-    $$("input", sectionEl).forEach(applyPlaceholderClassToInput);
-    $$("textarea", sectionEl).forEach(applyPlaceholderClassToTextarea);
-
-    persistAllDebounced();
-  }
-
-  function initResetButtons() {
-    $$(".clear-page-btn").forEach((btn) => {
-      if (!bindOnce(btn, "reset_page")) return;
-      btn.addEventListener("click", () => {
-        const sec = btn.closest(".page-section");
-        clearSection(sec);
-        refreshAllNotesButtons(); // keep bubbles accurate after reset
-      });
-    });
-
-    const clearAllBtn = $("#clearAllBtn");
-    if (clearAllBtn && bindOnce(clearAllBtn, "clear_all")) {
-      clearAllBtn.addEventListener("click", () => {
-        localStorage.removeItem(LS_KEY);
-        localStorage.removeItem(NOTES_KEY);
-        closeModal();
-        $$(".page-section").forEach(clearSection);
-        saveState({});
-        refreshAllNotesButtons();
-      });
-    }
-  }
-
-  /* -----------------------------
-     ONSITE DATES: end defaults to start + 2 days
-  ----------------------------- */
-  function initOnsiteDates() {
-    const start = $("#onsiteStartDate");
-    const end = $("#onsiteEndDate");
-    if (!start || !end) return;
-    if (!bindOnce(start, "onsite_date")) return;
-
-    const addDays = (yyyy_mm_dd, days) => {
-      const d = new Date(yyyy_mm_dd + "T00:00:00");
-      if (Number.isNaN(d.getTime())) return "";
-      d.setDate(d.getDate() + days);
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    };
-
-    start.addEventListener("change", () => {
-      if (!start.value) return;
-      if (!end.value) {
-        end.value = addDays(start.value, 2);
-        applyPlaceholderClassToInput(end);
-        persistAllDebounced();
-      }
-    });
-  }
-
-  /* -----------------------------
-     ADDITIONAL TRAINERS (+) — NO DELETE BUTTONS
-  ----------------------------- */
-  function initAdditionalTrainers() {
-    const container = $("#additionalTrainersContainer");
-    const baseRow = $(".checklist-row.integrated-plus[data-base='true']");
-    if (!container || !baseRow) return;
-
-    const addBtn = $(".add-row", baseRow);
-    if (!addBtn) return;
-    if (!bindOnce(addBtn, "add_trainer")) return;
-
-    addBtn.addEventListener("click", () => {
-      const clone = baseRow.cloneNode(true);
-      clone.dataset.base = "false";
-
-      const inp = $("input[type='text']", clone);
-      if (inp) inp.value = "";
-
-      $$(".add-row", clone).forEach((b) => b.remove());
-      container.appendChild(clone);
-
-      if (inp) applyPlaceholderClassToInput(inp);
-      persistAllDebounced();
-    });
-  }
-
-  /* -----------------------------
-     ADDITIONAL POC (+) — NO DELETE BUTTONS
-  ----------------------------- */
-  function initAdditionalPOCs() {
-    const baseCard = $(".additional-poc-card[data-base='true']");
-    const grid = $(".primary-contacts-grid");
-    if (!baseCard || !grid) return;
-
-    const addBtn = $(".additional-poc-add", baseCard);
-    if (!addBtn) return;
-    if (!bindOnce(addBtn, "add_poc")) return;
-
-    addBtn.addEventListener("click", () => {
-      const clone = baseCard.cloneNode(true);
-      clone.dataset.base = "false";
-
-      $$("input", clone).forEach((inp) => (inp.value = ""));
-      $$(".additional-poc-add", clone).forEach((b) => b.remove());
-      grid.appendChild(clone);
-
-      $$("input, select, textarea", clone).forEach((el) => {
-        if (el.tagName === "INPUT") applyPlaceholderClassToInput(el);
-        if (el.tagName === "SELECT") applyPlaceholderClassToSelect(el);
-        if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
-      });
-
-      persistAllDebounced();
-    });
-  }
-
-  /* -----------------------------
-     TABLE: ADD ROW (+)
+     TABLE: ADD ROW
   ----------------------------- */
   function clearRowControls(row) {
     $$("input, select, textarea", row).forEach((el) => {
@@ -519,7 +304,6 @@
       footerAdd.addEventListener("click", () => {
         const newRow = cloneLastRow(table);
         if (newRow) {
-          bindNotesButtonsWithin(newRow);
           persistAllDebounced();
           refreshAllNotesButtons();
         }
@@ -528,325 +312,49 @@
   }
 
   /* -----------------------------
-     TABLE POPUP MODAL (keep ensureModal + modalEl)
-     - includes Add Row button
-     - Add Row in modal updates REAL table + refreshes modal UI
+     NOTES STATE
   ----------------------------- */
-  let modalEl = null;
+  function loadNotesState() { return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {}; }
+  function saveNotesState(state) { localStorage.setItem(NOTES_KEY, JSON.stringify(state)); }
 
-  function ensureModal() {
-    if (modalEl) return modalEl;
-
-    modalEl = document.createElement("div");
-    modalEl.id = "mkTableModal";
-    modalEl.style.position = "fixed";
-    modalEl.style.inset = "0";
-    modalEl.style.zIndex = "9999";
-    modalEl.style.display = "none";
-    modalEl.style.background = "rgba(0,0,0,0.55)";
-    modalEl.style.padding = "18px";
-    modalEl.style.boxSizing = "border-box";
-
-    modalEl.innerHTML = `
-      <div id="mkTableModalCenter" style="
-        width: 100%;
-        min-height: calc(100vh - 36px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <div id="mkTableModalPanel" style="
-          width: min(1400px, 96vw);
-          max-height: 90vh;
-          background: #ffffff;
-          border-radius: 18px;
-          box-shadow: 0 18px 60px rgba(0,0,0,.35);
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        ">
-          <div id="mkTableModalBar" style="
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-          ">
-            <div id="mkTableModalTitle" style="font-weight: 800; font-size: 20px;"></div>
-            <div style="display:flex; gap:10px;">
-              <button type="button" id="mkTableModalExpand" title="Expand" style="
-                width:40px;height:40px;border-radius:12px;
-                border:1px solid rgba(0,0,0,0.12);
-                background:#fff;cursor:pointer;
-                font-size:18px;
-              ">⤢</button>
-              <button type="button" id="mkTableModalClose" title="Close" style="
-                width:40px;height:40px;border-radius:12px;
-                border:1px solid rgba(0,0,0,0.12);
-                background:#fff;cursor:pointer;
-                font-size:22px; line-height:1;
-              ">×</button>
-            </div>
-          </div>
-
-          <div id="mkTableModalBody" style="
-            padding: 16px;
-            overflow: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-          "></div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modalEl);
-
-    $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
-
-    $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
-      const panel = $("#mkTableModalPanel", modalEl);
-      if (!panel) return;
-      const full = panel.dataset.full === "true";
-      panel.dataset.full = (!full).toString();
-      panel.style.width = full ? "min(1400px, 96vw)" : "98vw";
-      panel.style.maxHeight = full ? "90vh" : "95vh";
-    });
-
-    modalEl.addEventListener("click", (e) => {
-      if (e.target === modalEl) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
-    });
-
-    return modalEl;
-  }
-
-  function closeModal() {
-    if (!modalEl) return;
-    modalEl.style.display = "none";
-    const body = $("#mkTableModalBody", modalEl);
-    if (body) body.innerHTML = "";
-    modalEl.dataset.tcKey = "";
-  }
-
-  function findRelatedNotesBlock(tableContainer) {
-    const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
-    const id = btn?.dataset?.notesTarget;
-    if (id && $("#" + id)) return $("#" + id);
-
-    const section = tableContainer.closest(".page-section");
-    if (!section) return null;
-    const all = $$("[id^='notes-'].section-block", section);
-    return all[0] || null;
-  }
-
-  function tcKeyFor(tableContainer) {
-    // Stable-ish identity for modal refresh
-    const all = $$(".table-container");
-    const idx = all.indexOf(tableContainer);
-    const sectionId = closestSectionId(tableContainer);
-    return `${sectionId}::tc::${idx}`;
-  }
-
-  function resolveTcFromKey(key) {
-    if (!key) return null;
-    const m = key.match(/^(.+)::tc::(\d+)$/);
-    if (!m) return null;
-    const idx = Number(m[2]);
-    const all = $$(".table-container");
-    return all[idx] || null;
-  }
-
-  function renderTablePopup(tableContainer) {
-    const modal = ensureModal();
-    const body = $("#mkTableModalBody", modal);
-    const titleEl = $("#mkTableModalTitle", modal);
-    if (!body || !titleEl) return;
-
-    const header =
-      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
-      tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
-      tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
-      "Table";
-
-    titleEl.textContent = header;
-
-    // Card 1: Table (clone) + footer with Add Row
-    const tableCard = document.createElement("div");
-    tableCard.className = "section-block";
-    tableCard.innerHTML = `<h2>${header}</h2>`;
-
-    const tableClone = tableContainer.cloneNode(true);
-
-    // ✅ In popup: keep Add Row button, but remove the expand button inside the footer (if present)
-    $$(".expand-table-btn", tableClone).forEach((el) => el.remove());
-
-    // Contain scroll inside the table card
-    const scrollWrap = $(".scroll-wrapper", tableClone);
-    if (scrollWrap) {
-      scrollWrap.style.maxHeight = "44vh";
-      scrollWrap.style.overflowY = "auto";
-      scrollWrap.style.overflowX = "auto";
-      scrollWrap.style.paddingBottom = "6px";
-    }
-    const tbl = $("table", tableClone);
-    if (tbl) {
-      tbl.style.width = "max-content";
-      tbl.style.minWidth = "100%";
-    }
-
-    // Wire modal Add Row to REAL table, then refresh modal
-    const modalAdd = $(".table-footer .add-row", tableClone);
-    if (modalAdd) {
-      modalAdd.textContent = "+";
-      modalAdd.title = "Add Row";
-      modalAdd.style.cursor = "pointer";
-
-      if (bindOnce(modalAdd, "modal_add_row")) {
-        modalAdd.addEventListener("click", () => {
-          const realTable = $("table", tableContainer);
-          if (!realTable) return;
-          const newRow = cloneLastRow(realTable);
-          if (newRow) {
-            bindNotesButtonsWithin(newRow);
-            persistAllDebounced();
-            refreshAllNotesButtons();
-            // Re-render modal content to reflect the new row
-            renderTablePopup(tableContainer);
-          }
-        });
-      }
-    }
-
-    tableCard.appendChild(tableClone);
-
-    // Card 2: Notes
-    const notesBlock = findRelatedNotesBlock(tableContainer);
-    const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
-
-    if (notesClone) {
-      notesClone.style.overflow = "hidden";
-      const ta = $("textarea", notesClone);
-      if (ta) {
-        ta.style.width = "100%";
-        ta.style.maxWidth = "100%";
-        ta.style.boxSizing = "border-box";
-        ta.style.overflowX = "hidden";
-        ta.style.whiteSpace = "pre-wrap";
-        ta.style.wordBreak = "break-word";
-      }
-    }
-
-    // Sync modal notes textarea with real
-    if (notesBlock && notesClone) {
-      const realTA = $("textarea", notesBlock);
-      const modalTA = $("textarea", notesClone);
-      if (realTA && modalTA) {
-        modalTA.value = realTA.value;
-
-        if (bindOnce(modalTA, "modal_notes_sync")) {
-          modalTA.addEventListener("input", () => {
-            realTA.value = modalTA.value;
-            applyPlaceholderClassToTextarea(realTA);
-            persistAllDebounced();
-            // notes changed: update bubble orange state everywhere
-            parseAndStoreNotesFromTextarea(realTA);
-            refreshAllNotesButtons();
-          });
-        }
-
-        if (bindOnce(realTA, "real_notes_syncback")) {
-          const syncBack = () => {
-            if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
-          };
-          realTA.addEventListener("input", syncBack);
-          realTA.addEventListener("change", syncBack);
-        }
-      }
-    }
-
-    body.innerHTML = "";
-    body.appendChild(tableCard);
-    if (notesClone) body.appendChild(notesClone);
-
-    // Ensure notes buttons inside modal work + show filled state
-    const realNotesId = notesBlock?.id;
-    bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
-    refreshNotesButtonsForScope(tableCard);
-  }
-
-  function openTablePopup(tableContainer) {
-    const modal = ensureModal();
-    modal.dataset.tcKey = tcKeyFor(tableContainer);
-    renderTablePopup(tableContainer);
-    modal.style.display = "block";
-  }
-
-  function initTableExpandButtons() {
-    $$(".table-container").forEach((tc) => {
-      const footer = $(".table-footer", tc);
-      if (!footer) return;
-
-      let expandBtn = $(".expand-table-btn", footer);
-      if (!expandBtn) {
-        expandBtn = document.createElement("button");
-        expandBtn.type = "button";
-        expandBtn.className = "expand-table-btn";
-        expandBtn.title = "Expand table";
-        expandBtn.textContent = "⤢";
-        footer.appendChild(expandBtn);
-      }
-
-      if (!bindOnce(expandBtn, "expand_table")) return;
-      expandBtn.addEventListener("click", () => openTablePopup(tc));
-    });
-  }
-
-  /* -----------------------------
-     NOTES SYSTEM — ordered + bubble filled state
-  ----------------------------- */
-  function loadNotesState() {
-    return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {};
-  }
-  function saveNotesState(state) {
-    localStorage.setItem(NOTES_KEY, JSON.stringify(state));
-  }
-
-  function getRowSignature(btn) {
+  // Signature index:
+  // - Table rows: row index in tbody
+  // - Questions: index among notes buttons on that page outside tables
+  function getRowSignatureIndex(btn) {
     const tr = btn.closest("tr");
     if (tr) {
       const tbody = tr.parentElement;
       const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
       const idx = rows.indexOf(tr);
-      return { kind: "table", index: idx >= 0 ? idx : 9999 };
+      return idx >= 0 ? idx : 9999;
     }
-
     const sec = btn.closest(".page-section") || document;
     const all = $$(".notes-icon-btn", sec).filter((b) => !b.closest("table"));
     const idx = all.indexOf(btn);
-    return { kind: "question", index: idx >= 0 ? idx : 9999 };
+    return idx >= 0 ? idx : 9999;
   }
 
-  function getBulletLabel(btn) {
+  // Bullet label rules:
+  // - Opcode tables: pull opcode text
+  // - Training tables: pull name text
+  // - Questions: use the label text of the checklist-row
+  function isOpcodeTable(btnOrRow) {
+    const row = btnOrRow.closest ? btnOrRow : null;
+    const table = row?.closest?.("table");
+    if (!table) return false;
+    const headers = $$("thead th", table).map((th) => th.textContent.trim().toLowerCase());
+    return headers.includes("opcode");
+  }
+
+  function getBulletLabelForButton(btn) {
     const tr = btn.closest("tr");
     if (tr) {
-      const table = tr.closest("table");
-      const headers = table ? $$("thead th", table).map((th) => th.textContent.trim().toLowerCase()) : [];
-      const hasOpcodeHeader = headers.includes("opcode");
-
-      if (hasOpcodeHeader) {
+      if (isOpcodeTable(tr)) {
         const opcodeInput = tr.querySelector("td:nth-child(2) input[type='text']");
-        const opcode = opcodeInput?.value?.trim();
-        return opcode || "Opcode";
+        return opcodeInput?.value?.trim() || "Opcode";
       }
-
       const nameInput = tr.querySelector("td input[type='text']");
-      const name = nameInput?.value?.trim();
-      return name || "Name";
+      return nameInput?.value?.trim() || "Name";
     }
 
     const row = btn.closest(".checklist-row");
@@ -858,12 +366,13 @@
     const notesState = loadNotesState();
     notesState[targetId] = notesState[targetId] || { items: {} };
 
-    const itemId = `${sigIndex}`;
+    const itemId = String(sigIndex);
     if (!notesState[targetId].items[itemId]) {
       notesState[targetId].items[itemId] = { label, text: "" };
     } else {
       notesState[targetId].items[itemId].label = label;
     }
+
     saveNotesState(notesState);
   }
 
@@ -896,7 +405,31 @@
     persistAllDebounced();
   }
 
-  // ---- Parse notes textarea to store per-bullet text (and drive bubble orange state)
+  // Bubble orange = item exists AND item.text has content
+  function bulletHasNotes(targetId, sigIndex) {
+    const notesState = loadNotesState();
+    const block = notesState[targetId];
+    const item = block?.items?.[String(sigIndex)];
+    return !!(item && (item.text || "").trim().length);
+  }
+
+  function refreshNotesButtonsForScope(root) {
+    $$(".notes-icon-btn", root).forEach((btn) => {
+      const targetId = btn.dataset.notesTarget;
+      if (!targetId) return;
+      const sigIndex = getRowSignatureIndex(btn);
+      setNotesButtonVisual(btn, bulletHasNotes(targetId, sigIndex));
+    });
+  }
+
+  function refreshAllNotesButtons() {
+    refreshNotesButtonsForScope(document);
+    if (modalEl && modalEl.style.display === "block") refreshNotesButtonsForScope(modalEl);
+  }
+
+  /* -----------------------------
+     Parse textarea back into state (keeps bubbles accurate)
+  ----------------------------- */
   const parseAndStoreNotesFromTextarea = debounce((ta) => {
     const block = ta.closest(".section-block");
     const id = block?.id;
@@ -922,13 +455,11 @@
     notesState[id] = notesState[id] || { items: {} };
     const existing = notesState[id].items || {};
 
-    // keep keys stable when possible by matching labels
     const labelToKey = new Map();
-    Object.entries(existing).forEach(([k, v]) => {
-      if (v?.label) labelToKey.set(v.label, k);
-    });
+    Object.entries(existing).forEach(([k, v]) => { if (v?.label) labelToKey.set(v.label, k); });
 
     let maxKey = Math.max(-1, ...Object.keys(existing).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
+
     parsed.forEach((it) => {
       let key = labelToKey.get(it.label);
       if (key == null) {
@@ -941,47 +472,93 @@
     });
 
     saveNotesState(notesState);
-
-    // keep textarea formatted with bullets/spacers (nice UX)
     hydrateNotesTextarea(id);
-
-    // update bubbles
     refreshAllNotesButtons();
   }, 250);
 
-  function bindNotesButton(btn, options = {}) {
-    if (!btn) return;
-    if (!bindOnce(btn, "notes_btn")) return;
+  function initNotesTextareaParsing() {
+    $$("textarea").forEach((ta) => {
+      const block = ta.closest(".section-block");
+      const id = block?.id;
+      if (!id) return;
+      if (!id.startsWith("notes-") && !id.startsWith("notes-auto-") && !id.startsWith("notes-card-")) return;
+      if (!bindOnce(ta, "notes_parse")) return;
 
-    btn.addEventListener("click", () => {
-      const notesTarget = options.overrideNotesTarget || btn.dataset.notesTarget;
-      if (!notesTarget) return;
+      ta.addEventListener("input", () => parseAndStoreNotesFromTextarea(ta));
+      ta.addEventListener("change", () => parseAndStoreNotesFromTextarea(ta));
+    });
 
-      const sig = getRowSignature(btn);
-      const label = getBulletLabel(btn);
-
-      ensureNotesItem(notesTarget, sig.index, label);
-      hydrateNotesTextarea(notesTarget);
-
-      // Scroll to notes when on-page (not modal)
-      const block = $("#" + notesTarget);
-      if (block && !options.fromModal) block.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      persistAllDebounced();
-
-      // bubble should turn orange if notes already exist for that bullet
-      refreshNotesButtonsForScope(document);
+    // hydrate from saved
+    const notesState = loadNotesState();
+    Object.keys(notesState).forEach((id) => {
+      if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
     });
   }
 
-  function bindNotesButtonsWithin(root, opts = {}) {
-    $$(".notes-icon-btn", root).forEach((btn) => bindNotesButton(btn, opts));
+  /* -----------------------------
+     DELEGATED NOTES HANDLERS (KEY FIX)
+     This makes notes buttons work even after restore/clone/popup renders.
+  ----------------------------- */
+  function initDelegatedNotesHandlers() {
+    if (!bindOnce(document.body, "delegated_notes")) return;
+
+    // 1) Click any notes button (questions + tables + popups)
+    document.addEventListener("click", (e) => {
+      const btn = e.target?.closest?.(".notes-icon-btn");
+      if (!btn) return;
+
+      const notesTarget = btn.dataset.notesTarget;
+      if (!notesTarget) return;
+
+      const sigIndex = getRowSignatureIndex(btn);
+      const label = getBulletLabelForButton(btn);
+
+      ensureNotesItem(notesTarget, sigIndex, label);
+      hydrateNotesTextarea(notesTarget);
+
+      // scroll only if it’s not in the modal
+      if (!btn.closest("#mkTableModal")) {
+        const block = $("#" + notesTarget);
+        if (block) block.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      persistAllDebounced();
+      refreshAllNotesButtons();
+    });
+
+    // 2) When user types a Name/Opcode, update that bullet label in state (if it exists)
+    document.addEventListener("input", (e) => {
+      const t = e.target;
+      if (!t || t.tagName !== "INPUT" || t.type !== "text") return;
+
+      const tr = t.closest("tr");
+      if (!tr) return;                 // only table rows matter here
+      const table = tr.closest("table");
+      if (!table) return;
+
+      const btn = tr.querySelector(".notes-icon-btn[data-notes-target]");
+      if (!btn) return;
+      const targetId = btn.dataset.notesTarget;
+      if (!targetId) return;
+
+      const sigIndex = getRowSignatureIndex(btn);
+      const label = getBulletLabelForButton(btn);
+
+      const notesState = loadNotesState();
+      const item = notesState?.[targetId]?.items?.[String(sigIndex)];
+      if (item) {
+        item.label = label;
+        saveNotesState(notesState);
+
+        // keep textarea formatting synced
+        hydrateNotesTextarea(targetId);
+        refreshAllNotesButtons();
+      }
+    });
   }
 
   /* -----------------------------
-     AUTO-ADD 💬 BUBBLES ON PAGES + QUESTIONS
-     - For each page-section: find a notes card, then add bubble to each .checklist-row question
-     - Also keeps your existing manual notes buttons (tables, etc.)
+     AUTO-ADD 💬 TO QUESTION ROWS (not tables)
   ----------------------------- */
   function ensureElementId(el, prefix = "auto-notes") {
     if (el.id) return el.id;
@@ -990,11 +567,9 @@
   }
 
   function findNotesBlockInSection(sectionEl) {
-    // prefer explicit notes-* ids
     const explicit = $$("[id^='notes-'].section-block", sectionEl).find((b) => b.querySelector("textarea"));
     if (explicit) return explicit;
 
-    // fallback: any section-block whose h2 starts with Notes
     return $$(".section-block", sectionEl).find((b) => {
       const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
       return h2.startsWith("notes") && b.querySelector("textarea");
@@ -1008,159 +583,236 @@
 
       const notesId = ensureElementId(notesBlock, "notes-auto");
 
-      // Add bubble to checklist rows that are “questions” (not tables, not inside notes block)
       $$(".checklist-row", sec).forEach((row) => {
         if (row.closest("table")) return;
         if (row.closest(".section-block") === notesBlock) return;
-
-        // must have a control (skip label-only headings)
         const hasControl = !!row.querySelector("input, select, textarea");
         if (!hasControl) return;
+        if (row.querySelector(".notes-icon-btn")) return;
 
-        if (row.querySelector(".notes-icon-btn")) return; // already has one
-
-        const btn = makeBubbleButton(notesId);
-        row.appendChild(btn);
+        row.appendChild(makeBubbleButton(notesId));
       });
     });
-
-    bindNotesButtonsWithin(document);
   }
 
   /* -----------------------------
-     NOTES TEXTAREAS: bind parsing + hydrate
+     TABLE POPUP MODAL
+     - Notes buttons inside popup should still target the REAL notes block
+     - Add Row in popup updates REAL table, then re-renders popup
   ----------------------------- */
-  function initNotesTextareaParsing() {
-    $$("textarea").forEach((ta) => {
-      const block = ta.closest(".section-block");
-      const id = block?.id;
-      if (!id) return;
-      if (!id.startsWith("notes-") && !id.startsWith("notes-auto-") && !id.startsWith("notes-card-")) return;
-      if (!bindOnce(ta, "notes_parse")) return;
+  let modalEl = null;
 
-      ta.addEventListener("input", () => parseAndStoreNotesFromTextarea(ta));
-      ta.addEventListener("change", () => parseAndStoreNotesFromTextarea(ta));
+  function ensureModal() {
+    if (modalEl) return modalEl;
+
+    modalEl = document.createElement("div");
+    modalEl.id = "mkTableModal";
+    modalEl.style.position = "fixed";
+    modalEl.style.inset = "0";
+    modalEl.style.zIndex = "9999";
+    modalEl.style.display = "none";
+    modalEl.style.background = "rgba(0,0,0,0.55)";
+    modalEl.style.padding = "18px";
+    modalEl.style.boxSizing = "border-box";
+
+    modalEl.innerHTML = `
+      <div style="width:100%; min-height: calc(100vh - 36px); display:flex; align-items:center; justify-content:center;">
+        <div id="mkTableModalPanel" style="
+          width: min(1400px, 96vw);
+          max-height: 90vh;
+          background: #ffffff;
+          border-radius: 18px;
+          box-shadow: 0 18px 60px rgba(0,0,0,.35);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        ">
+          <div style="padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+                      display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div id="mkTableModalTitle" style="font-weight:800; font-size:20px;"></div>
+            <div style="display:flex; gap:10px;">
+              <button type="button" id="mkTableModalExpand" title="Expand" style="
+                width:40px;height:40px;border-radius:12px;
+                border:1px solid rgba(0,0,0,0.12);
+                background:#fff;cursor:pointer;font-size:18px;">⤢</button>
+              <button type="button" id="mkTableModalClose" title="Close" style="
+                width:40px;height:40px;border-radius:12px;
+                border:1px solid rgba(0,0,0,0.12);
+                background:#fff;cursor:pointer;font-size:22px;line-height:1;">×</button>
+            </div>
+          </div>
+          <div id="mkTableModalBody" style="padding:16px; overflow:auto; display:flex; flex-direction:column; gap:16px;"></div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalEl);
+
+    $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
+    $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
+      const panel = $("#mkTableModalPanel", modalEl);
+      if (!panel) return;
+      const full = panel.dataset.full === "true";
+      panel.dataset.full = (!full).toString();
+      panel.style.width = full ? "min(1400px, 96vw)" : "98vw";
+      panel.style.maxHeight = full ? "90vh" : "95vh";
     });
 
-    // hydrate all notes blocks from state on load
-    const notesState = loadNotesState();
-    Object.keys(notesState).forEach((id) => {
-      if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
+    modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeModal(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
     });
+
+    return modalEl;
   }
 
-  /* -----------------------------
-     BUBBLE ORANGE STATE: compute and apply
-  ----------------------------- */
-  function bulletHasNotes(targetId, sigIndex) {
-    const notesState = loadNotesState();
-    const block = notesState[targetId];
-    if (!block?.items) return false;
-    const item = block.items[String(sigIndex)];
-    return !!(item && (item.text || "").trim().length);
+  function closeModal() {
+    if (!modalEl) return;
+    modalEl.style.display = "none";
+    const body = $("#mkTableModalBody", modalEl);
+    if (body) body.innerHTML = "";
+    modalEl.dataset.tcKey = "";
   }
 
-  function refreshNotesButtonsForScope(root) {
-    $$(".notes-icon-btn", root).forEach((btn) => {
-      const targetId = btn.dataset.notesTarget;
-      if (!targetId) return;
+  function findRelatedNotesBlock(tableContainer) {
+    const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
+    const id = btn?.dataset?.notesTarget;
+    if (id && $("#" + id)) return $("#" + id);
 
-      const sig = getRowSignature(btn);
-      const filled = bulletHasNotes(targetId, sig.index);
-      setNotesButtonVisual(btn, filled);
-    });
+    const section = tableContainer.closest(".page-section");
+    if (!section) return null;
+    const all = $$("[id^='notes-'].section-block", section);
+    return all[0] || null;
   }
 
-  function refreshAllNotesButtons() {
-    refreshNotesButtonsForScope(document);
-    // also if modal is open, refresh in modal too
-    if (modalEl && modalEl.style.display === "block") refreshNotesButtonsForScope(modalEl);
+  function tcKeyFor(tableContainer) {
+    const all = $$(".table-container");
+    const idx = all.indexOf(tableContainer);
+    const sectionId = closestSectionId(tableContainer);
+    return `${sectionId}::tc::${idx}`;
   }
 
-  /* -----------------------------
-     SUPPORT TICKETS
-  ----------------------------- */
-  function ticketIsComplete(groupEl) {
-    const num = $(".ticket-number-input", groupEl)?.value?.trim();
-    const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
-    const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
-    return !!num && (!!url || !!summary);
-  }
+  function renderTablePopup(tableContainer) {
+    const modal = ensureModal();
+    const body = $("#mkTableModalBody", modal);
+    const titleEl = $("#mkTableModalTitle", modal);
+    if (!body || !titleEl) return;
 
-  function lockBaseOpenStatus(openBaseGroup) {
-    const status = $(".ticket-status-select", openBaseGroup);
-    if (status) {
-      status.value = "Open";
-      status.disabled = true;
+    const header =
+      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
+      tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
+      tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
+      "Table";
+
+    titleEl.textContent = header;
+
+    const tableCard = document.createElement("div");
+    tableCard.className = "section-block";
+    tableCard.innerHTML = `<h2>${header}</h2>`;
+
+    const tableClone = tableContainer.cloneNode(true);
+
+    // remove the expand button inside clone footer (only modal header has expand)
+    $$(".expand-table-btn", tableClone).forEach((el) => el.remove());
+
+    // IMPORTANT: make sure popup table notes buttons target the REAL notes block
+    const notesBlock = findRelatedNotesBlock(tableContainer);
+    const realNotesId = notesBlock?.id;
+    if (realNotesId) {
+      $$(".notes-icon-btn", tableClone).forEach((b) => { b.dataset.notesTarget = realNotesId; });
     }
-  }
 
-  function bindTicketStatusMover(groupEl) {
-    const status = $(".ticket-status-select", groupEl);
-    if (!status) return;
-    if (!bindOnce(status, "ticket_move")) return;
-
-    status.addEventListener("change", () => {
-      const val = status.value;
-      const open = $("#openTicketsContainer");
-      const t2 = $("#tierTwoTicketsContainer");
-      const cr = $("#closedResolvedTicketsContainer");
-      const cf = $("#closedFeatureTicketsContainer");
-      if (!open || !t2 || !cr || !cf) return;
-
-      if (val === "Open") open.appendChild(groupEl);
-      else if (val === "Tier Two") t2.appendChild(groupEl);
-      else if (val === "Closed - Resolved") cr.appendChild(groupEl);
-      else if (val === "Closed - Feature Not Supported") cf.appendChild(groupEl);
-
-      persistAllDebounced();
-    });
-  }
-
-  function initSupportTickets() {
-    const openContainer = $("#openTicketsContainer");
-    if (!openContainer) return;
-
-    const base = $(".ticket-group[data-base='true']", openContainer);
-    if (base) lockBaseOpenStatus(base);
-
-    const addBtn = $(".add-ticket-btn", base || openContainer);
-    if (addBtn && bindOnce(addBtn, "add_ticket")) {
-      addBtn.addEventListener("click", () => {
-        const baseGroup = $(".ticket-group[data-base='true']", openContainer);
-        if (!baseGroup) return;
-        if (!ticketIsComplete(baseGroup)) {
-          $(".ticket-number-input", baseGroup)?.focus();
-          return;
-        }
-
-        const clone = baseGroup.cloneNode(true);
-        clone.dataset.base = "false";
-        $$(".ticket-disclaimer", clone).forEach((el) => el.remove());
-
-        const status = $(".ticket-status-select", clone);
-        if (status) {
-          status.disabled = false;
-          status.value = "Open";
-        }
-
-        openContainer.appendChild(clone);
-
-        $$("input, textarea", baseGroup).forEach((el) => (el.value = ""));
-        persistAllDebounced();
-
-        bindTicketStatusMover(clone);
-      });
+    // contain table scroll
+    const scrollWrap = $(".scroll-wrapper", tableClone);
+    if (scrollWrap) {
+      scrollWrap.style.maxHeight = "44vh";
+      scrollWrap.style.overflowY = "auto";
+      scrollWrap.style.overflowX = "auto";
     }
 
-    [openContainer, $("#tierTwoTicketsContainer"), $("#closedResolvedTicketsContainer"), $("#closedFeatureTicketsContainer")]
-      .filter(Boolean)
-      .forEach((cont) => {
-        $$(".ticket-group", cont).forEach((g) => {
-          if (g.dataset.base === "true") lockBaseOpenStatus(g);
-          else bindTicketStatusMover(g);
+    // wire modal Add Row to REAL table, then re-render popup to show it
+    const modalAdd = $(".table-footer .add-row", tableClone);
+    if (modalAdd) {
+      modalAdd.textContent = "+";
+      modalAdd.title = "Add Row";
+      if (bindOnce(modalAdd, "modal_add_row")) {
+        modalAdd.addEventListener("click", () => {
+          const realTable = $("table", tableContainer);
+          if (!realTable) return;
+          const newRow = cloneLastRow(realTable);
+          if (newRow) {
+            persistAllDebounced();
+            refreshAllNotesButtons();
+            renderTablePopup(tableContainer);
+          }
         });
-      });
+      }
+    }
+
+    tableCard.appendChild(tableClone);
+
+    // Notes card clone (keeps your UI)
+    const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
+    if (notesClone) {
+      const ta = $("textarea", notesClone);
+      if (ta) {
+        ta.style.width = "100%";
+        ta.style.maxWidth = "100%";
+        ta.style.boxSizing = "border-box";
+        ta.style.overflowX = "hidden";
+        ta.style.whiteSpace = "pre-wrap";
+        ta.style.wordBreak = "break-word";
+      }
+
+      // sync modal textarea <-> real textarea
+      const realTA = $("textarea", notesBlock);
+      const modalTA = $("textarea", notesClone);
+      if (realTA && modalTA) {
+        modalTA.value = realTA.value;
+
+        if (bindOnce(modalTA, "modal_notes_sync")) {
+          modalTA.addEventListener("input", () => {
+            realTA.value = modalTA.value;
+            applyPlaceholderClassToTextarea(realTA);
+            persistAllDebounced();
+            parseAndStoreNotesFromTextarea(realTA);
+          });
+        }
+      }
+    }
+
+    body.innerHTML = "";
+    body.appendChild(tableCard);
+    if (notesClone) body.appendChild(notesClone);
+
+    refreshNotesButtonsForScope(tableCard);
+  }
+
+  function openTablePopup(tableContainer) {
+    const modal = ensureModal();
+    modal.dataset.tcKey = tcKeyFor(tableContainer);
+    renderTablePopup(tableContainer);
+    modal.style.display = "block";
+  }
+
+  function initTableExpandButtons() {
+    $$(".table-container").forEach((tc) => {
+      const footer = $(".table-footer", tc);
+      if (!footer) return;
+
+      let expandBtn = $(".expand-table-btn", footer);
+      if (!expandBtn) {
+        expandBtn = document.createElement("button");
+        expandBtn.type = "button";
+        expandBtn.className = "expand-table-btn";
+        expandBtn.title = "Expand table";
+        expandBtn.textContent = "⤢";
+        footer.appendChild(expandBtn);
+      }
+
+      if (!bindOnce(expandBtn, "expand_table")) return;
+      expandBtn.addEventListener("click", () => openTablePopup(tc));
+    });
   }
 
   /* -----------------------------
@@ -1169,31 +821,22 @@
   function boot() {
     restoreAll();
 
-    initNav();
     initPlaceholderStyling();
     initAutosave();
-    initResetButtons();
-    initOnsiteDates();
-
-    initAdditionalTrainers();
-    initAdditionalPOCs();
 
     initTableAddRowButtons();
     initTableExpandButtons();
 
-    // Notes: inject bubbles across pages, then bind + parse
+    // inject bubbles for question rows only (tables already have buttons in your HTML)
     injectNotesBubblesAcrossPages();
-    bindNotesButtonsWithin(document);
+
+    // ✅ THE IMPORTANT PART: one delegated handler makes notes buttons work
+    // even after restoreTables() replaced tbody HTML (event listeners would otherwise be lost)
+    initDelegatedNotesHandlers();
+
     initNotesTextareaParsing();
 
-    initSupportTickets();
-
-    // placeholder refresh after restores/injections
-    $$("select").forEach(applyPlaceholderClassToSelect);
-    $$("input").forEach(applyPlaceholderClassToInput);
-    $$("textarea").forEach(applyPlaceholderClassToTextarea);
-
-    // initial bubble orange state
+    // initial orange state
     refreshAllNotesButtons();
   }
 
