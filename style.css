@@ -447,6 +447,47 @@ main{
   margin-left:8px !important;
 }
 
+/* =======================================================
+   INDENTED Q&A ROWS — bring inputs in to match non-indented padding
+   Applies to stacked/normal question cards (non-table rows)
+======================================================= */
+
+/* Non-indented rows: lock a consistent "content width" baseline */
+.section-block .checklist-row{
+  padding-right:22px;                 /* matches your section-block side feel */
+}
+
+/* Indented rows: input should NOT stay pinned to the far right */
+.section-block .checklist-row.indent-sub input[type="text"],
+.section-block .checklist-row.indent-sub input[type="number"],
+.section-block .checklist-row.indent-sub input[type="email"],
+.section-block .checklist-row.indent-sub input[type="tel"],
+.section-block .checklist-row.indent-sub input[type="date"],
+.section-block .checklist-row.indent-sub select{
+  margin-left:0 !important;           /* stop the "push to far right" */
+}
+
+/* Give the indented row its own right-side alignment that matches non-indented */
+.section-block .checklist-row.indent-sub{
+  padding-right:22px !important;      /* same as normal row */
+}
+
+/* Make label take the remaining space and keep input aligned */
+.section-block .checklist-row.indent-sub label{
+  flex:1 1 auto !important;
+}
+
+/* Ensure input stays a fixed width but sits "in" with the content */
+.section-block .checklist-row.indent-sub input[type="text"],
+.section-block .checklist-row.indent-sub input[type="number"],
+.section-block .checklist-row.indent-sub input[type="email"],
+.section-block .checklist-row.indent-sub input[type="tel"],
+.section-block .checklist-row.indent-sub input[type="date"],
+.section-block .checklist-row.indent-sub select{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+}
+
 /* =======================
    Notes link button (📝)
 ======================= */
