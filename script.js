@@ -1,6 +1,6 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN script.js (FULL)
-   ✅ Stable + Restored + Fixed
+   myKaarma Interactive Training Checklist — FULL script.js
+   ✅ Stable + Clean + Fixed
    - Nav clicks work
    - Add Row (+) for tables
    - Additional Trainers (+)
@@ -9,70 +9,70 @@
    - Autosave + Reset Page + Clear All
    - Onsite dates: end defaults to start + 2 days
    - PDF export (all pages)
-   - ✅ Question Notes Linking: single 📝 icon per row -> inserts "• <Question>:"
-   - ✅ NEW: Notes insert spacing (blank line before new bullet) so new notes are obvious
+   - ✅ Question Notes Linking: single 📝 icon per checklist row -> inserts "• <Question>:"
+   - ✅ Notes spacing: adds a blank line between bullet headers so new notes are obvious
    - ✅ Table Notes Column: single Notes column, bubble button on every row
    - ✅ Table Notes Bullet Insert:
        - Training Checklist inserts "• <Name>:"
        - Opcodes inserts "• <Opcode>:"
-     + ✅ NEW: same spacing between inserted bullets
+     + ✅ Notes spacing applies here too
    - ✅ Table Popup Expand (⤢) in footer right
    - ✅ Popup scroll left/right restored
+   - ✅ Popup header cleanup:
+       - Modal header shows the section title
+       - Inside cards use "Table" + "Notes" (no duplicate big title twice)
    - ✅ Training name cell layout fixed (checkbox left of input)
    ======================================================= */
 
 /* ---------------------------
    Tiny helpers
 --------------------------- */
-const qs = (sel, root = document) => root.querySelector(sel);
-const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const qs  = (sel, root=document) => root.querySelector(sel);
+const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-function isField(el) {
+function isField(el){
   if (!el) return false;
-  const tag = el.tagName;
-  return tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";
+  const t = el.tagName;
+  return t === "INPUT" || t === "SELECT" || t === "TEXTAREA";
 }
 
-function uid() {
-  return "id_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now().toString(36);
+function uid(){
+  return "id_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
 }
 
-function safeTrim(v) {
+function safeTrim(v){
   return (v ?? "").toString().trim();
-}
-
-function ensureUID(el) {
-  if (!el) return null;
-  if (el.dataset && el.dataset.uid) return el.dataset.uid;
-  const newId = uid();
-  el.dataset.uid = newId;
-  return newId;
 }
 
 /* ---------------------------
    Storage keying
 --------------------------- */
-function getFieldKey(el) {
+function ensureUID(el){
+  if (!el) return null;
+  if (el.dataset?.uid) return el.dataset.uid;
+  const id = uid();
+  el.dataset.uid = id;
+  return id;
+}
+
+function getFieldKey(el){
   if (el.id) return `mkc:${el.id}`;
   if (el.name) return `mkc:${el.name}`;
   const dk = el.getAttribute("data-key");
   if (dk) return `mkc:${dk}`;
-  const u = ensureUID(el);
-  return `mkc:uid:${u}`;
+  return `mkc:uid:${ensureUID(el)}`;
 }
 
-function saveField(el) {
-  try {
+function saveField(el){
+  try{
     const key = getFieldKey(el);
-    let val = "";
-    if (el.type === "checkbox") val = el.checked ? "1" : "0";
-    else val = el.value ?? "";
+    const val = (el.type === "checkbox") ? (el.checked ? "1" : "0") : (el.value ?? "");
     localStorage.setItem(key, val);
-  } catch (e) {}
+  }catch(e){}
 }
 
-function loadField(el) {
-  try {
+function loadField(el){
+  try{
     const key = getFieldKey(el);
     const stored = localStorage.getItem(key);
     if (stored === null) return;
@@ -82,47 +82,44 @@ function loadField(el) {
 
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-  } catch (e) {}
+  }catch(e){}
 }
 
-function clearFieldStorage(el) {
-  try {
+function clearFieldStorage(el){
+  try{
     const key = getFieldKey(el);
     localStorage.removeItem(key);
-  } catch (e) {}
+  }catch(e){}
 }
 
 /* ---------------------------
    Ghost placeholder support
 --------------------------- */
-function applySelectGhost(sel) {
+function applySelectGhost(sel){
   if (!sel || sel.tagName !== "SELECT") return;
   const opt = sel.selectedOptions && sel.selectedOptions[0];
-  const ghost = !sel.value || (opt && opt.dataset && opt.dataset.ghost === "true");
-  if (ghost) sel.classList.add("is-placeholder");
-  else sel.classList.remove("is-placeholder");
+  const ghost = !sel.value || (opt?.dataset?.ghost === "true");
+  sel.classList.toggle("is-placeholder", !!ghost);
 }
 
-function applyDateGhost(input) {
+function applyDateGhost(input){
   if (!input || input.type !== "date") return;
-  if (!input.value) input.classList.add("is-placeholder");
-  else input.classList.remove("is-placeholder");
+  input.classList.toggle("is-placeholder", !input.value);
 }
 
 /* ---------------------------
    Optional 2-col height sync
 --------------------------- */
-function syncTwoColHeights() {
+function syncTwoColHeights(){
   const grids = qsa(".cards-grid.two-col, .two-col-grid");
-  grids.forEach((grid) => {
+  grids.forEach(grid=>{
     const cards = qsa(":scope > .section-block", grid);
     if (cards.length < 2) return;
 
-    cards.forEach((c) => (c.style.minHeight = ""));
+    cards.forEach(c => (c.style.minHeight = ""));
 
-    for (let i = 0; i < cards.length; i += 2) {
-      const a = cards[i];
-      const b = cards[i + 1];
+    for (let i=0; i<cards.length; i+=2){
+      const a = cards[i], b = cards[i+1];
       if (!a || !b) continue;
       const h = Math.max(a.offsetHeight, b.offsetHeight);
       a.style.minHeight = h + "px";
@@ -134,20 +131,20 @@ function syncTwoColHeights() {
 /* ---------------------------
    Textarea auto-grow
 --------------------------- */
-function autoGrowTA(ta) {
+function autoGrowTA(ta){
   if (!ta) return;
   ta.style.height = "auto";
-  ta.style.height = ta.scrollHeight + 2 + "px";
+  ta.style.height = (ta.scrollHeight + 2) + "px";
 }
 
-function initTextareas(root = document) {
-  qsa("textarea", root).forEach((ta) => {
+function initTextareas(root=document){
+  qsa("textarea", root).forEach(ta=>{
     autoGrowTA(ta);
-    ta.addEventListener("input", () => {
+    ta.addEventListener("input", ()=>{
       autoGrowTA(ta);
       saveField(ta);
       requestAnimationFrame(syncTwoColHeights);
-      requestAnimationFrame(() => updateNoteIconStates());
+      requestAnimationFrame(()=> updateNoteIconStates());
     });
   });
 }
@@ -155,42 +152,37 @@ function initTextareas(root = document) {
 /* ---------------------------
    Page Navigation
 --------------------------- */
-function showSection(id) {
-  qsa(".page-section").forEach((s) => s.classList.remove("active"));
+function showSection(id){
+  qsa(".page-section").forEach(s=> s.classList.remove("active"));
   const target = qs(`#${CSS.escape(id)}`);
   if (target) target.classList.add("active");
 
-  qsa(".nav-btn").forEach((btn) => {
+  qsa(".nav-btn").forEach(btn=>{
     const to =
       btn.getAttribute("data-section") ||
       btn.getAttribute("data-target") ||
-      btn.getAttribute("href")?.replace("#", "") ||
+      btn.getAttribute("href")?.replace("#","") ||
       btn.getAttribute("onclick")?.match(/showSection\(['"]([^'"]+)['"]\)/)?.[1];
     btn.classList.toggle("active", to === id);
   });
 
-  try {
-    localStorage.setItem("mkc:lastPage", id);
-  } catch (e) {}
+  try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
 }
 
-function initNav() {
-  qsa(".nav-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+function initNav(){
+  qsa(".nav-btn").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
       if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
       const id =
         btn.getAttribute("data-section") ||
         btn.getAttribute("data-target") ||
-        btn.getAttribute("href")?.replace("#", "");
+        btn.getAttribute("href")?.replace("#","");
       if (id) showSection(id);
     });
   });
 
   let last = null;
-  try {
-    last = localStorage.getItem("mkc:lastPage");
-  } catch (e) {}
-
+  try{ last = localStorage.getItem("mkc:lastPage"); }catch(e){}
   const first = qsa(".page-section")[0]?.id;
   showSection(last || first || "dealership-info");
 }
@@ -201,12 +193,13 @@ window.initNav = initNav;
 /* ===========================================================
    ✅ Runtime style patches (JS-injected; does NOT replace CSS)
 =========================================================== */
-function injectRuntimePatches() {
+function injectRuntimePatches(){
   if (qs("#mkRuntimePatches")) return;
 
   const style = document.createElement("style");
   style.id = "mkRuntimePatches";
   style.textContent = `
+    /* Table Modal shell */
     #mkTableModal{ position:fixed; inset:0; z-index:99998; display:none; }
     #mkTableModal.open{ display:block; }
     #mkTableModal .mk-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
@@ -221,14 +214,27 @@ function injectRuntimePatches() {
       display:flex; flex-direction:column;
     }
     #mkTableModal .mk-modal-content{ padding:16px 16px 18px; overflow:auto; }
-    #mkTableModal .mk-table-scroll{ width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding:10px 10px 12px; box-sizing:border-box; }
+    #mkTableModal .mk-table-scroll{
+      width:100%;
+      overflow-x:auto; overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      padding:10px 10px 12px;
+      box-sizing:border-box;
+    }
     #mkTableModal .mk-table-scroll table{ width:max-content; min-width:100%; }
     #mkTableModal table input[type="text"],
     #mkTableModal table select,
     #mkTableModal table textarea{ width:100%; max-width:100%; box-sizing:border-box; min-width:0; }
-    table.training-table td.mk-name-cell, #mkTableModal td.mk-name-cell{ display:flex; align-items:center; gap:10px; }
-    table.training-table td.mk-name-cell input[type="checkbox"], #mkTableModal td.mk-name-cell input[type="checkbox"]{ flex:0 0 auto; margin:0; }
-    table.training-table td.mk-name-cell input[type="text"], #mkTableModal td.mk-name-cell input[type="text"]{ flex:1 1 auto; min-width:0; width:auto; }
+
+    /* Name cell layout */
+    table.training-table td.mk-name-cell,
+    #mkTableModal td.mk-name-cell{ display:flex; align-items:center; gap:10px; }
+    table.training-table td.mk-name-cell input[type="checkbox"],
+    #mkTableModal td.mk-name-cell input[type="checkbox"]{ flex:0 0 auto; margin:0; }
+    table.training-table td.mk-name-cell input[type="text"],
+    #mkTableModal td.mk-name-cell input[type="text"]{ flex:1 1 auto; min-width:0; width:auto; }
+
+    /* Modal stack cards */
     #mkTableModal .mk-modal-stack{ display:flex; flex-direction:column; gap:16px; }
     #mkTableModal .mk-modal-notes textarea{ height:220px; max-height:40vh; resize:vertical; }
   `;
@@ -238,18 +244,18 @@ function injectRuntimePatches() {
 /* ---------------------------
    Reset This Page / Clear All
 --------------------------- */
-function resetSection(section) {
+function resetSection(section){
   if (!section) return;
 
-  qsa("input, select, textarea", section).forEach((el) => {
+  qsa("input, select, textarea", section).forEach(el=>{
     if (!isField(el)) return;
 
     clearFieldStorage(el);
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
 
-    if (el.tagName === "SELECT") {
-      if (el.options && el.options.length) el.selectedIndex = 0;
+    if (el.tagName === "SELECT"){
+      if (el.options?.length) el.selectedIndex = 0;
       applySelectGhost(el);
     }
     if (el.type === "date") applyDateGhost(el);
@@ -257,29 +263,29 @@ function resetSection(section) {
   });
 
   // remove clones
-  qsa("[data-clone='true']", section).forEach((n) => n.remove());
+  qsa("[data-clone='true']", section).forEach(n=> n.remove());
 
   // additional trainers container clear
   const atc = qs("#additionalTrainersContainer", section);
   if (atc) atc.innerHTML = "";
 
   // support ticket secondary columns clear + reset base open
-  if (section.id === "support-tickets") {
-    ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach((id) => {
+  if (section.id === "support-tickets"){
+    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"].forEach(id=>{
       const c = qs(`#${id}`, section);
       if (c) c.innerHTML = "";
     });
 
     const open = qs("#openTicketsContainer", section);
-    if (open) {
-      qsa(".ticket-group", open).forEach((card) => {
+    if (open){
+      qsa(".ticket-group", open).forEach(card=>{
         if (card.dataset.base === "true") return;
         card.remove();
       });
 
       const base = qs(".ticket-group[data-base='true']", open);
-      if (base) {
-        qsa("input, textarea, select", base).forEach((el) => {
+      if (base){
+        qsa("input, textarea, select", base).forEach(el=>{
           clearFieldStorage(el);
           if (el.type === "checkbox") el.checked = false;
           else el.value = "";
@@ -289,7 +295,7 @@ function resetSection(section) {
     }
   }
 
-  requestAnimationFrame(() => {
+  requestAnimationFrame(()=>{
     initTextareas(section);
     syncTwoColHeights();
     initNotesExpanders(section);
@@ -301,32 +307,28 @@ function resetSection(section) {
   });
 }
 
-function initResets() {
-  qsa(".clear-page-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
+function initResets(){
+  qsa(".clear-page-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
       const sec = btn.closest(".page-section");
-      if (!sec) return;
-      resetSection(sec);
+      if (sec) resetSection(sec);
     });
   });
 
   const clearAll = qs("#clearAllBtn");
-  if (clearAll) {
-    clearAll.addEventListener("click", () => {
-      try {
+  if (clearAll){
+    clearAll.addEventListener("click", ()=>{
+      try{
         const keys = [];
-        for (let i = 0; i < localStorage.length; i++) {
+        for (let i=0; i<localStorage.length; i++){
           const k = localStorage.key(i);
           if (k && k.startsWith("mkc:")) keys.push(k);
         }
-        keys.forEach((k) => localStorage.removeItem(k));
-      } catch (e) {}
+        keys.forEach(k=> localStorage.removeItem(k));
+      }catch(e){}
 
-      qsa(".page-section").forEach((sec) => resetSection(sec));
-
-      try {
-        localStorage.removeItem("mkc:lastPage");
-      } catch (e) {}
+      qsa(".page-section").forEach(sec=> resetSection(sec));
+      try{ localStorage.removeItem("mkc:lastPage"); }catch(e){}
     });
   }
 }
@@ -334,14 +336,14 @@ function initResets() {
 /* ---------------------------
    Persistence
 --------------------------- */
-function initPersistence() {
-  qsa("input, select, textarea").forEach((el) => {
+function initPersistence(){
+  qsa("input, select, textarea").forEach(el=>{
     if (!isField(el)) return;
     ensureUID(el);
     loadField(el);
   });
 
-  document.addEventListener("input", (e) => {
+  document.addEventListener("input", (e)=>{
     const el = e.target;
     if (!isField(el)) return;
 
@@ -353,10 +355,10 @@ function initPersistence() {
 
     if (el.id === "dealershipNameInput") updateDealershipNameDisplay(el.value);
 
-    requestAnimationFrame(() => updateNoteIconStates());
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
 
-  document.addEventListener("change", (e) => {
+  document.addEventListener("change", (e)=>{
     const el = e.target;
     if (!isField(el)) return;
 
@@ -364,59 +366,54 @@ function initPersistence() {
     if (el.type === "date") applyDateGhost(el);
 
     saveField(el);
-    requestAnimationFrame(() => updateNoteIconStates());
+    requestAnimationFrame(()=> updateNoteIconStates());
   });
 }
 
-function initGhosts() {
+function initGhosts(){
   qsa("select").forEach(applySelectGhost);
   qsa("input[type='date']").forEach(applyDateGhost);
 }
 
 /* ===========================================================
-   ✅ Notes insertion spacing helpers (NEW)
+   ✅ Notes insertion spacing helpers
 =========================================================== */
-function ensureBlankLineBeforeInsert(lines, insertIndex) {
-  // If inserting not at top and previous line isn't blank, insert a blank line.
-  if (insertIndex > 0 && safeTrim(lines[insertIndex - 1]) !== "") {
+function ensureBlankLineBeforeInsert(lines, insertIndex){
+  if (insertIndex > 0 && safeTrim(lines[insertIndex - 1]) !== ""){
     lines.splice(insertIndex, 0, "");
     insertIndex += 1;
   }
   return insertIndex;
 }
 
-function appendWithSpacing(raw, line) {
+function appendWithSpacing(raw, line){
   const t = safeTrim(raw);
   if (!t) return line;
 
-  // ensure there is exactly one blank line before the new bullet
+  // Ensure exactly one blank line before new bullet header
   const endsWithBlankLine = /\n\s*\n\s*$/.test(raw);
-  if (endsWithBlankLine) return raw.replace(/\s*$/, "") + "\n" + line;
-  return raw.replace(/\s*$/, "") + "\n\n" + line;
+  const trimmedEnd = raw.replace(/\s*$/, "");
+  return endsWithBlankLine ? (trimmedEnd + "\n" + line) : (trimmedEnd + "\n\n" + line);
 }
 
-function normalizeNotesBulletSpacing(text) {
+function normalizeNotesBulletSpacing(text){
   const lines = (text || "").split("\n");
   const out = [];
+  const isBulletHeader = (l)=> /^\s*•\s+.+:\s*$/.test(l || "");
+  const isNonEmpty = (l)=> safeTrim(l) !== "";
 
-  const isBulletHeader = (l) => /^\s*•\s+.+:\s*$/.test(l || "");
-  const isNonEmpty = (l) => safeTrim(l) !== "";
-
-  for (let i = 0; i < lines.length; i++) {
+  for (let i=0; i<lines.length; i++){
     const cur = lines[i];
 
-    // If this line is a bullet header and the last output line is ALSO a bullet header
-    // (or a non-empty line), ensure a blank line before it.
-    if (isBulletHeader(cur)) {
-      // Find last meaningful line in out
+    if (isBulletHeader(cur)){
+      // find last meaningful line in out
       let j = out.length - 1;
       while (j >= 0 && !isNonEmpty(out[j])) j--;
 
-      if (j >= 0 && isBulletHeader(out[j])) {
-        // ensure exactly one blank line between bullet headers
+      if (j >= 0 && isBulletHeader(out[j])){
+        // ensure one blank line between bullet headers
         if (out[out.length - 1] !== "") out.push("");
-      } else if (j >= 0 && isNonEmpty(out[j]) && out[out.length - 1] !== "") {
-        // if there is text right before a bullet header, give it breathing room too
+      } else if (j >= 0 && isNonEmpty(out[j]) && out[out.length - 1] !== ""){
         out.push("");
       }
     }
@@ -427,24 +424,24 @@ function normalizeNotesBulletSpacing(text) {
   return out.join("\n");
 }
 
-function applyNotesSpacing(textarea) {
+function applyNotesSpacing(textarea){
   if (!textarea) return;
   const before = textarea.value || "";
-  const after = normalizeNotesBulletSpacing(before);
+  const after  = normalizeNotesBulletSpacing(before);
   if (after !== before) textarea.value = after;
 }
 
 /* ---------------------------
    Training tables: Add Row (+)
 --------------------------- */
-function cloneTrainingRow(row) {
+function cloneTrainingRow(row){
   const clone = row.cloneNode(true);
   clone.dataset.clone = "true";
 
-  qsa("input, select, textarea", clone).forEach((el) => {
+  qsa("input, select, textarea", clone).forEach(el=>{
     if (!isField(el)) return;
-    el.value = "";
     if (el.type === "checkbox") el.checked = false;
+    else el.value = "";
     ensureUID(el);
     applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
@@ -454,26 +451,24 @@ function cloneTrainingRow(row) {
   return clone;
 }
 
-function initTableAddRow() {
-  document.addEventListener("click", (e) => {
+function initTableAddRow(){
+  document.addEventListener("click", (e)=>{
     const btn = e.target.closest(".table-footer .add-row");
     if (!btn) return;
 
     const container = btn.closest(".table-container");
     const table = qs("table.training-table", container);
-    if (!table) return;
-
-    const tbody = qs("tbody", table);
-    if (!tbody) return;
+    const tbody = table?.querySelector("tbody");
+    if (!table || !tbody) return;
 
     const last = tbody.querySelector("tr:last-child");
     if (!last) return;
 
     const clone = cloneTrainingRow(last);
     tbody.appendChild(clone);
-    clone.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(()=>{
       initTextareas(container);
       syncTwoColHeights();
       initNotesExpanders(document);
@@ -489,26 +484,26 @@ function initTableAddRow() {
 /* ---------------------------
    Onsite Training Dates: end defaults to start + 2 days
 --------------------------- */
-function addDaysISO(iso, days) {
+function addDaysISO(iso, days){
   const d = new Date(`${iso}T12:00:00`);
   if (Number.isNaN(d.getTime())) return "";
   d.setDate(d.getDate() + days);
   const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function initOnsiteTrainingDates() {
+function initOnsiteTrainingDates(){
   const start = qs("#onsiteStartDate");
-  const end = qs("#onsiteEndDate");
+  const end   = qs("#onsiteEndDate");
 
-  if (start && end) {
-    start.addEventListener("change", () => {
+  if (start && end){
+    start.addEventListener("change", ()=>{
       if (!start.value) return;
       if (end.value) return;
       const v = addDaysISO(start.value, 2);
-      if (v) {
+      if (v){
         end.value = v;
         applyDateGhost(end);
         saveField(end);
@@ -520,11 +515,9 @@ function initOnsiteTrainingDates() {
 /* ---------------------------
    Trainers page: Additional Trainers (+)
 --------------------------- */
-function initAdditionalTrainers() {
-  document.addEventListener("click", (e) => {
-    const addBtn = e.target.closest(
-      "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
-    );
+function initAdditionalTrainers(){
+  document.addEventListener("click", (e)=>{
+    const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
     if (!addBtn) return;
 
     const page = qs("#trainers-deployment");
@@ -542,17 +535,17 @@ function initAdditionalTrainers() {
     `;
 
     const input = qs("input", newRow);
-    if (input) {
+    if (input){
       ensureUID(input);
       loadField(input);
     }
 
     if (container) container.appendChild(newRow);
-    else if (baseRow && baseRow.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
+    else if (baseRow?.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
 
-    if (input) input.focus();
+    input?.focus();
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(page);
       initTableNotesButtons(page);
       updateNoteIconStates(page);
@@ -565,27 +558,23 @@ function initAdditionalTrainers() {
 /* ---------------------------
    Primary Contacts: Additional POC (+)
 --------------------------- */
-function initAdditionalPOC() {
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(
-      ".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row"
-    );
+function initAdditionalPOC(){
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
     if (!btn) return;
 
     const baseCard = btn.closest(".additional-poc-card");
-    if (!baseCard) return;
-
-    const grid = baseCard.parentElement;
-    if (!grid) return;
+    const grid = baseCard?.parentElement;
+    if (!baseCard || !grid) return;
 
     const clone = baseCard.cloneNode(true);
     clone.dataset.clone = "true";
     clone.removeAttribute("data-base");
 
     const addBtn = qs(".additional-poc-add, .add-row", clone);
-    if (addBtn) addBtn.remove();
+    addBtn?.remove();
 
-    qsa("input, select, textarea", clone).forEach((el) => {
+    qsa("input, select, textarea", clone).forEach(el=>{
       if (!isField(el)) return;
       if (el.type === "checkbox") el.checked = false;
       else el.value = "";
@@ -596,11 +585,9 @@ function initAdditionalPOC() {
     });
 
     grid.appendChild(clone);
+    qs("input, select, textarea", clone)?.focus();
 
-    const firstInput = qs("input, select, textarea", clone);
-    if (firstInput) firstInput.focus();
-
-    requestAnimationFrame(() => {
+    requestAnimationFrame(()=>{
       initNotesLinkingOption2Only(document);
       initTableNotesButtons(document);
       updateNoteIconStates(document);
@@ -613,29 +600,24 @@ function initAdditionalPOC() {
 /* ---------------------------
    Support Tickets
 --------------------------- */
-function statusToContainerId(status) {
-  switch (status) {
-    case "Open":
-      return "openTicketsContainer";
-    case "Tier Two":
-      return "tierTwoTicketsContainer";
-    case "Closed - Resolved":
-      return "closedResolvedTicketsContainer";
-    case "Closed - Feature Not Supported":
-      return "closedFeatureTicketsContainer";
-    default:
-      return "openTicketsContainer";
+function statusToContainerId(status){
+  switch(status){
+    case "Open": return "openTicketsContainer";
+    case "Tier Two": return "tierTwoTicketsContainer";
+    case "Closed - Resolved": return "closedResolvedTicketsContainer";
+    case "Closed - Feature Not Supported": return "closedFeatureTicketsContainer";
+    default: return "openTicketsContainer";
   }
 }
 
-function lockOpenSelect(card) {
+function lockOpenSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
   sel.value = "Open";
   sel.disabled = true;
 }
 
-function unlockStatusSelect(card) {
+function unlockStatusSelect(card){
   const sel = qs(".ticket-status-select", card);
   if (!sel) return;
   sel.disabled = false;
@@ -644,19 +626,19 @@ function unlockStatusSelect(card) {
   saveField(sel);
 }
 
-function isTicketCardComplete(card) {
+function isTicketCardComplete(card){
   const num = safeTrim(qs(".ticket-number-input", card)?.value);
   const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
   const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
   return !!(num && url && sum);
 }
 
-function makeTicketCloneFromBase(baseCard) {
+function makeTicketCloneFromBase(baseCard){
   const clone = baseCard.cloneNode(true);
   clone.dataset.clone = "true";
   clone.removeAttribute("data-base");
 
-  qsa("input, textarea, select", clone).forEach((el) => {
+  qsa("input, textarea, select", clone).forEach(el=>{
     if (!isField(el)) return;
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
@@ -666,11 +648,10 @@ function makeTicketCloneFromBase(baseCard) {
     saveField(el);
   });
 
-  const disc = qs(".ticket-disclaimer", clone);
-  if (disc) disc.remove();
+  qs(".ticket-disclaimer", clone)?.remove();
 
   const addBtn = qs(".add-ticket-btn", clone);
-  if (addBtn) {
+  if (addBtn){
     addBtn.textContent = "×";
     addBtn.title = "Remove Ticket";
     addBtn.classList.add("remove-ticket-btn");
@@ -678,7 +659,7 @@ function makeTicketCloneFromBase(baseCard) {
   }
 
   const sel = qs(".ticket-status-select", clone);
-  if (sel) {
+  if (sel){
     sel.value = "Open";
     applySelectGhost(sel);
     saveField(sel);
@@ -688,31 +669,27 @@ function makeTicketCloneFromBase(baseCard) {
   return clone;
 }
 
-function moveTicketCard(card, newStatus) {
+function moveTicketCard(card, newStatus){
   const page = qs("#support-tickets");
   if (!page || !card) return;
 
-  const destId = statusToContainerId(newStatus);
-  const dest = qs(`#${destId}`, page);
+  const dest = qs(`#${statusToContainerId(newStatus)}`, page);
   if (!dest) return;
 
   dest.appendChild(card);
 
-  if (destId === "openTicketsContainer" && card.dataset.base === "true") {
-    lockOpenSelect(card);
-  } else {
-    unlockStatusSelect(card);
-  }
+  if (dest.id === "openTicketsContainer" && card.dataset.base === "true") lockOpenSelect(card);
+  else unlockStatusSelect(card);
 }
 
-function initSupportTickets() {
+function initSupportTickets(){
   const page = qs("#support-tickets");
   if (!page) return;
 
   const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
   if (openBase) lockOpenSelect(openBase);
 
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", (e)=>{
     const addBtn = e.target.closest(".add-ticket-btn");
     const removeBtn = e.target.closest(".remove-ticket-btn");
     if (!addBtn && !removeBtn) return;
@@ -723,13 +700,13 @@ function initSupportTickets() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (removeBtn) {
-      qsa("input, select, textarea", card).forEach((el) => clearFieldStorage(el));
+    if (removeBtn){
+      qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
       card.remove();
       return;
     }
 
-    if (!isTicketCardComplete(card)) {
+    if (!isTicketCardComplete(card)){
       alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
       return;
     }
@@ -737,15 +714,11 @@ function initSupportTickets() {
     const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
     const newCard = makeTicketCloneFromBase(base);
 
-    const openContainer = qs("#openTicketsContainer", page);
-    if (openContainer) openContainer.appendChild(newCard);
+    qs("#openTicketsContainer", page)?.appendChild(newCard);
 
     // clear base inputs after successful add
-    if (card.dataset.base === "true") {
-      const num = qs(".ticket-number-input", card);
-      const url = qs(".ticket-zendesk-input", card);
-      const sum = qs(".ticket-summary-input", card);
-      [num, url, sum].forEach((el) => {
+    if (card.dataset.base === "true"){
+      [qs(".ticket-number-input", card), qs(".ticket-zendesk-input", card), qs(".ticket-summary-input", card)].forEach(el=>{
         if (!el) return;
         clearFieldStorage(el);
         el.value = "";
@@ -754,17 +727,17 @@ function initSupportTickets() {
       lockOpenSelect(card);
     }
 
-    newCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
   });
 
-  document.addEventListener("change", (e) => {
+  document.addEventListener("change", (e)=>{
     const sel = e.target.closest("#support-tickets .ticket-status-select");
     if (!sel) return;
 
     const card = e.target.closest(".ticket-group");
     if (!card) return;
 
-    if (card.dataset.base === "true") {
+    if (card.dataset.base === "true"){
       lockOpenSelect(card);
       return;
     }
@@ -776,39 +749,32 @@ function initSupportTickets() {
 /* ---------------------------
    Dealership Name display + Map
 --------------------------- */
-function updateDealershipNameDisplay(name) {
+function updateDealershipNameDisplay(name){
   const display = qs("#dealershipNameDisplay");
   if (!display) return;
   display.textContent = safeTrim(name);
-
-  try {
-    localStorage.setItem("mkc:dealershipNameDisplay", display.textContent);
-  } catch (e) {}
+  try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
 }
 
-function restoreDealershipNameDisplay() {
-  try {
+function restoreDealershipNameDisplay(){
+  try{
     const v = localStorage.getItem("mkc:dealershipNameDisplay");
     if (v) updateDealershipNameDisplay(v);
-  } catch (e) {}
+  }catch(e){}
 }
 
-function updateDealershipMap(address) {
+function updateDealershipMap(address){
   const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
   if (!frame) return;
-  const q = encodeURIComponent(address);
-  frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
-
-  try {
-    localStorage.setItem("mkc:dealershipMapAddress", address);
-  } catch (e) {}
+  frame.src = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+  try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
 }
 
-function restoreDealershipMap() {
-  try {
+function restoreDealershipMap(){
+  try{
     const addr = localStorage.getItem("mkc:dealershipMapAddress");
     if (addr) updateDealershipMap(addr);
-  } catch (e) {}
+  }catch(e){}
 }
 
 window.updateDealershipMap = updateDealershipMap;
@@ -817,46 +783,37 @@ window.updateDealershipNameDisplay = updateDealershipNameDisplay;
 /* ---------------------------
    PDF Export
 --------------------------- */
-async function exportAllPagesPDF() {
+async function exportAllPagesPDF(){
   const btn = qs("#savePDF");
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Saving PDF...";
-  }
+  if (btn){ btn.disabled = true; btn.textContent = "Saving PDF..."; }
 
   const sections = qsa(".page-section");
   const activeId = qs(".page-section.active")?.id;
 
-  sections.forEach((s) => s.classList.add("active"));
-  await new Promise((r) => setTimeout(r, 80));
+  sections.forEach(s=> s.classList.add("active"));
+  await new Promise(r=> setTimeout(r, 80));
   syncTwoColHeights();
-  await new Promise((r) => setTimeout(r, 80));
+  await new Promise(r=> setTimeout(r, 80));
 
   const { jsPDF } = window.jspdf || {};
-  if (!jsPDF || !window.html2canvas) {
+  if (!jsPDF || !window.html2canvas){
     alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
-    sections.forEach((s) => s.classList.remove("active"));
+    sections.forEach(s=> s.classList.remove("active"));
     if (activeId) showSection(activeId);
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Save All Pages as PDF";
-    }
+    if (btn){ btn.disabled = false; btn.textContent = "Save All Pages as PDF"; }
     return;
   }
 
-  const pdf = new jsPDF("p", "pt", "letter");
+  const pdf = new jsPDF("p","pt","letter");
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
 
   let first = true;
 
-  for (const sec of sections) {
-    const canvas = await window.html2canvas(sec, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      scrollX: 0,
-      scrollY: -window.scrollY,
+  for (const sec of sections){
+    const canvas = await window.html2canvas(sec,{
+      scale:2, useCORS:true, backgroundColor:"#ffffff",
+      scrollX:0, scrollY:-window.scrollY,
     });
 
     const img = canvas.toDataURL("image/png");
@@ -865,9 +822,9 @@ async function exportAllPagesPDF() {
 
     if (!first) pdf.addPage();
 
-    if (imgH <= pageH) {
-      pdf.addImage(img, "PNG", 0, 0, imgW, imgH);
-    } else {
+    if (imgH <= pageH){
+      pdf.addImage(img,"PNG",0,0,imgW,imgH);
+    }else{
       let remaining = imgH;
       let y = 0;
 
@@ -880,16 +837,14 @@ async function exportAllPagesPDF() {
       sliceCanvas.width = canvas.width;
       sliceCanvas.height = pagePxH;
 
-      while (remaining > 0) {
-        ctx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-        ctx.drawImage(canvas, 0, y * pxPerPt, canvas.width, pagePxH, 0, 0, canvas.width, pagePxH);
+      while (remaining > 0){
+        ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
+        ctx.drawImage(canvas, 0, y*pxPerPt, canvas.width, pagePxH, 0,0, canvas.width, pagePxH);
 
-        const sliceImg = sliceCanvas.toDataURL("image/png");
-        pdf.addImage(sliceImg, "PNG", 0, 0, imgW, pageH);
+        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", 0,0, imgW, pageH);
 
         remaining -= pageH;
         y += pageH;
-
         if (remaining > 0) pdf.addPage();
       }
     }
@@ -899,140 +854,132 @@ async function exportAllPagesPDF() {
 
   pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
 
-  sections.forEach((s) => s.classList.remove("active"));
+  sections.forEach(s=> s.classList.remove("active"));
   if (activeId) showSection(activeId);
 
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = "Save All Pages as PDF";
-  }
+  if (btn){ btn.disabled = false; btn.textContent = "Save All Pages as PDF"; }
 }
 
-function initPDF() {
+function initPDF(){
   const btn = qs("#savePDF");
-  if (!btn) return;
-  btn.addEventListener("click", exportAllPagesPDF);
+  if (btn) btn.addEventListener("click", exportAllPagesPDF);
 }
 
 /* ===========================================================
    ✅ Question Notes Linking: single 📝 icon per checklist row
-   + NEW spacing between inserted bullets
+   + bullet spacing
 =========================================================== */
-function isNotesCard(card) {
+function isNotesCard(card){
   const h2 = card?.querySelector("h2");
-  const t = (h2?.textContent || "").trim().toLowerCase();
+  const t  = (h2?.textContent || "").trim().toLowerCase();
   return t.startsWith("notes");
 }
 
-function isInNotesCard(row) {
+function isInNotesCard(row){
   const card = row.closest(".section-block");
   return isNotesCard(card);
 }
 
-function findNotesTextareaForRow(row) {
+function findNotesTextareaForRow(row){
   const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
   if (!wrap) return null;
 
-  const notesCard = Array.from(wrap.querySelectorAll(".section-block")).find((card) => isNotesCard(card));
+  const notesCard = Array.from(wrap.querySelectorAll(".section-block")).find(card=> isNotesCard(card));
   return notesCard ? notesCard.querySelector("textarea") : null;
 }
 
-function getCleanQuestionText(row) {
+function getCleanQuestionText(row){
   const label = row.querySelector("label");
   if (!label) return "";
   const clone = label.cloneNode(true);
-  clone.querySelectorAll(".note-link-btn, .note-btn").forEach((n) => n.remove());
-  return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n=> n.remove());
+  return (clone.textContent || "").replace(/\s+/g," ").trim();
 }
 
-function makeNoteLine(row) {
+function makeNoteLine(row){
   const q = getCleanQuestionText(row);
   if (!q) return "";
   return `• ${q}:`;
 }
 
-function getAllRowsInThisNotesGroup(row) {
+function getAllRowsInThisNotesGroup(row){
   const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
   if (!wrap) return [];
   return Array.from(wrap.querySelectorAll(".checklist-row"))
-    .filter((r) => !isInNotesCard(r))
-    .filter((r) => r.querySelector("input, select, textarea"));
+    .filter(r=> !isInNotesCard(r))
+    .filter(r=> r.querySelector("input, select, textarea"));
 }
 
-function findExistingNoteLineIndex(lines, baseLine) {
+function findExistingNoteLineIndex(lines, baseLine){
   const k = (baseLine || "").trim();
-  return lines.findIndex((l) => (l || "").trim().startsWith(k));
+  return lines.findIndex(l=> (l || "").trim().startsWith(k));
 }
 
-function insertNoteLineInOrder(textarea, clickedRow) {
+function insertNoteLineInOrder(textarea, clickedRow){
   const allRows = getAllRowsInThisNotesGroup(clickedRow);
-  const orderedKeys = allRows.map((r) => makeNoteLine(r).trim()).filter(Boolean);
+  const orderedKeys = allRows.map(r=> makeNoteLine(r).trim()).filter(Boolean);
 
   const baseLine = makeNoteLine(clickedRow);
-  if (!baseLine) return { didInsert: false, lineStart: 0 };
+  if (!baseLine) return { didInsert:false, lineStart:0 };
 
   const raw = textarea.value || "";
   const lines = raw.split("\n");
 
   const existingIdx = findExistingNoteLineIndex(lines, baseLine);
-  if (existingIdx !== -1) {
+  if (existingIdx !== -1){
     return {
-      didInsert: false,
+      didInsert:false,
       lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0),
     };
   }
 
   const myOrder = orderedKeys.indexOf(baseLine.trim());
-  if (myOrder === -1) {
+  if (myOrder === -1){
     const startPos = (textarea.value || "").length;
     textarea.value = appendWithSpacing(textarea.value || "", baseLine);
-    return { didInsert: true, lineStart: startPos };
+    return { didInsert:true, lineStart:startPos };
   }
 
-  // find first bullet already in textarea that belongs AFTER this one
   let insertBeforeLineIdx = -1;
-
-  for (let i = 0; i < lines.length; i++) {
+  for (let i=0; i<lines.length; i++){
     const t = (lines[i] || "").trim();
     if (!t.startsWith("•")) continue;
-    const matchOrder = orderedKeys.findIndex((k) => t.startsWith(k));
-    if (matchOrder !== -1 && matchOrder > myOrder) {
+    const matchOrder = orderedKeys.findIndex(k=> t.startsWith(k));
+    if (matchOrder !== -1 && matchOrder > myOrder){
       insertBeforeLineIdx = i;
       break;
     }
   }
 
-  if (insertBeforeLineIdx === -1) {
+  if (insertBeforeLineIdx === -1){
     const startPos = (textarea.value || "").length;
     textarea.value = appendWithSpacing(textarea.value || "", baseLine);
-    return { didInsert: true, lineStart: startPos };
+    return { didInsert:true, lineStart:startPos };
   }
 
-  // NEW: ensure blank line before inserted bullet (clear separation)
   insertBeforeLineIdx = ensureBlankLineBeforeInsert(lines, insertBeforeLineIdx);
-
   lines.splice(insertBeforeLineIdx, 0, baseLine);
   textarea.value = lines.join("\n");
 
   const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
-  return { didInsert: true, lineStart: startPos };
+  return { didInsert:true, lineStart:startPos };
 }
 
-function jumpToNoteLine(textarea, lineStart) {
+function jumpToNoteLine(textarea, lineStart){
   if (!textarea) return;
-  textarea.scrollIntoView({ behavior: "smooth", block: "center" });
-  setTimeout(() => {
+  textarea.scrollIntoView({ behavior:"smooth", block:"center" });
+  setTimeout(()=>{
     textarea.focus();
     const v = textarea.value || "";
     const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = lineEnd === -1 ? v.length : lineEnd;
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
     textarea.setSelectionRange(endPos, endPos);
     textarea.classList.add("mk-note-jump");
-    setTimeout(() => textarea.classList.remove("mk-note-jump"), 700);
+    setTimeout(()=> textarea.classList.remove("mk-note-jump"), 700);
   }, 120);
 }
 
-function ensureRowActions(row) {
+function ensureRowActions(row){
   let actions = row.querySelector(":scope > .row-actions");
   if (actions) return actions;
 
@@ -1040,7 +987,7 @@ function ensureRowActions(row) {
   actions.className = "row-actions";
 
   // For integrated-plus rows: keep existing layout (do not wrap field)
-  if (row.classList.contains("integrated-plus")) {
+  if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
   }
@@ -1052,14 +999,11 @@ function ensureRowActions(row) {
   return actions;
 }
 
-/**
- * One 📝 icon per checklist-row (NOT table notes buttons)
- */
-function initNotesLinkingOption2Only(root = document) {
+function initNotesLinkingOption2Only(root=document){
   // Remove only question-note buttons (leave table note buttons alone)
-  qsa(".note-btn, .note-link-btn:not(.mk-table-note-btn)", root).forEach((n) => n.remove());
+  qsa(".note-btn, .note-link-btn:not(.mk-table-note-btn)", root).forEach(n=> n.remove());
 
-  qsa(".checklist-row", root).forEach((row) => {
+  qsa(".checklist-row", root).forEach(row=>{
     if (isInNotesCard(row)) return;
 
     const field = row.querySelector("input, select, textarea");
@@ -1080,16 +1024,24 @@ function initNotesLinkingOption2Only(root = document) {
       </svg>
     `;
 
-   const { didInsert, lineStart } = insertNoteLineInOrder(textarea, row);
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
 
-// enforce spacing every time (even if bullet already existed)
-applyNotesSpacing(textarea);
+      const textarea = findNotesTextareaForRow(row);
+      if (!textarea) return;
 
-saveField(textarea);
-requestAnimationFrame(() => updateNoteIconStates(document));
-requestAnimationFrame(syncTwoColHeights);
+      const { lineStart } = insertNoteLineInOrder(textarea, row);
 
-jumpToNoteLine(textarea, lineStart);
+      // enforce spacing every time (even if bullet already existed)
+      applyNotesSpacing(textarea);
+
+      saveField(textarea);
+      requestAnimationFrame(()=> updateNoteIconStates(document));
+      requestAnimationFrame(syncTwoColHeights);
+
+      jumpToNoteLine(textarea, lineStart);
+    });
 
     actions.appendChild(btn);
   });
@@ -1097,8 +1049,8 @@ jumpToNoteLine(textarea, lineStart);
   updateNoteIconStates(root);
 }
 
-function updateNoteIconStates(root = document) {
-  qsa(".checklist-row", root).forEach((row) => {
+function updateNoteIconStates(root=document){
+  qsa(".checklist-row", root).forEach(row=>{
     const btn = row.querySelector(".note-link-btn:not(.mk-table-note-btn)");
     if (!btn) return;
 
@@ -1112,58 +1064,47 @@ function updateNoteIconStates(root = document) {
 
 /* ===========================================================
    ✅ Table Notes Column + Bullet Insert (Name / Opcode)
-   + NEW spacing between inserted bullets
+   + bullet spacing
 =========================================================== */
-function thText(th) {
-  return (th?.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+function thText(th){
+  return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
 }
 
-function getHeaderCells(table) {
+function getHeaderCells(table){
   return Array.from(table.querySelectorAll("thead tr th"));
 }
 
-function getNotesHeaderIndexes(table) {
+function getNotesHeaderIndexes(table){
   const ths = getHeaderCells(table);
   const idxs = [];
-  ths.forEach((th, i) => {
-    if (thText(th) === "notes") idxs.push(i);
-  });
+  ths.forEach((th,i)=>{ if (thText(th) === "notes") idxs.push(i); });
   return idxs;
 }
 
-function removeColumnByIndex(table, idx) {
-  table.querySelectorAll("thead tr").forEach((tr) => {
-    const cell = tr.children[idx];
-    if (cell) cell.remove();
-  });
-  qsa("tbody tr", table).forEach((tr) => {
-    const cell = tr.children[idx];
-    if (cell) cell.remove();
-  });
+function removeColumnByIndex(table, idx){
+  table.querySelectorAll("thead tr").forEach(tr=> tr.children[idx]?.remove());
+  qsa("tbody tr", table).forEach(tr=> tr.children[idx]?.remove());
 }
 
-function ensureSingleNotesColumn(table) {
+function ensureSingleNotesColumn(table){
   const theadRow = table.querySelector("thead tr");
   if (!theadRow) return null;
 
   const noteIdxs = getNotesHeaderIndexes(table);
 
-  if (noteIdxs.length > 1) {
+  if (noteIdxs.length > 1){
     const keep = noteIdxs[0];
-    noteIdxs
-      .slice(1)
-      .sort((a, b) => b - a)
-      .forEach((idx) => removeColumnByIndex(table, idx));
+    noteIdxs.slice(1).sort((a,b)=> b-a).forEach(idx=> removeColumnByIndex(table, idx));
     return keep;
   }
 
-  if (noteIdxs.length === 0) {
+  if (noteIdxs.length === 0){
     const th = document.createElement("th");
     th.textContent = "Notes";
     th.classList.add("notes-col");
     theadRow.appendChild(th);
 
-    qsa("tbody tr", table).forEach((tr) => {
+    qsa("tbody tr", table).forEach(tr=>{
       const td = document.createElement("td");
       td.classList.add("notes-col");
       tr.appendChild(td);
@@ -1172,14 +1113,12 @@ function ensureSingleNotesColumn(table) {
     return theadRow.children.length - 1;
   }
 
-  // ensure class
   theadRow.children[noteIdxs[0]]?.classList.add("notes-col");
-  qsa("tbody tr", table).forEach((tr) => tr.children[noteIdxs[0]]?.classList.add("notes-col"));
-
+  qsa("tbody tr", table).forEach(tr=> tr.children[noteIdxs[0]]?.classList.add("notes-col"));
   return noteIdxs[0];
 }
 
-function renderTableNoteButton(td) {
+function renderTableNoteButton(td){
   td.classList.add("notes-col");
   td.innerHTML = `
     <button type="button" class="note-link-btn mk-table-note-btn" title="Notes">
@@ -1190,40 +1129,35 @@ function renderTableNoteButton(td) {
   `;
 }
 
-function purgeStrayTableNoteButtons(table, notesIdx) {
-  qsa("tbody tr", table).forEach((tr) => {
-    Array.from(tr.children).forEach((td, idx) => {
+function purgeStrayTableNoteButtons(table, notesIdx){
+  qsa("tbody tr", table).forEach(tr=>{
+    Array.from(tr.children).forEach((td, idx)=>{
       if (idx === notesIdx) return;
-      qsa(".mk-table-note-btn", td).forEach((n) => n.remove());
+      qsa(".mk-table-note-btn", td).forEach(n=> n.remove());
     });
   });
 }
 
-function normalizeFiltersColumn(table) {
+function normalizeFiltersColumn(table){
   const ths = getHeaderCells(table);
-  const filtersIdx = ths.findIndex((th) => thText(th) === "filters");
+  const filtersIdx = ths.findIndex(th=> thText(th) === "filters");
   if (filtersIdx === -1) return;
 
   let templateSelect = null;
-  qsa("tbody tr", table).some((tr) => {
-    const td = tr.children[filtersIdx];
-    const sel = td?.querySelector("select");
-    if (sel) {
-      templateSelect = sel;
-      return true;
-    }
+  qsa("tbody tr", table).some(tr=>{
+    const sel = tr.children[filtersIdx]?.querySelector("select");
+    if (sel){ templateSelect = sel; return true; }
     return false;
   });
 
-  qsa("tbody tr", table).forEach((tr) => {
+  qsa("tbody tr", table).forEach(tr=>{
     const td = tr.children[filtersIdx];
     if (!td) return;
 
-    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach((n) => n.remove());
-
+    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n=> n.remove());
     if (td.querySelector("select")) return;
 
-    if (templateSelect) {
+    if (templateSelect){
       const newSelect = templateSelect.cloneNode(true);
       newSelect.value = "";
       ensureUID(newSelect);
@@ -1244,26 +1178,26 @@ function normalizeFiltersColumn(table) {
   });
 }
 
-function applyNotesButtonsToColumn(table, notesColIdx) {
+function applyNotesButtonsToColumn(table, notesColIdx){
   const headRow = table.querySelector("thead tr");
-  if (headRow && headRow.children[notesColIdx]) {
+  if (headRow?.children[notesColIdx]){
     headRow.children[notesColIdx].textContent = "Notes";
     headRow.children[notesColIdx].classList.add("notes-col");
   }
 
-  qsa("tbody tr", table).forEach((tr) => {
+  qsa("tbody tr", table).forEach(tr=>{
     while (tr.children.length <= notesColIdx) tr.appendChild(document.createElement("td"));
     renderTableNoteButton(tr.children[notesColIdx]);
   });
 }
 
-function findNotesBlockForTable(table) {
+function findNotesBlockForTable(table){
   const section = table.closest(".section");
   if (!section) return null;
 
   let node = section.nextElementSibling;
-  while (node) {
-    if (node.classList?.contains("section-block")) {
+  while (node){
+    if (node.classList?.contains("section-block")){
       const h2 = node.querySelector("h2");
       const t = (h2?.textContent || "").trim().toLowerCase();
       if (t.startsWith("notes")) return node;
@@ -1275,28 +1209,27 @@ function findNotesBlockForTable(table) {
   return null;
 }
 
-function getColumnIndexByHeader(table, headerNames) {
+function getColumnIndexByHeader(table, headerNames){
   const ths = getHeaderCells(table);
-  const targets = headerNames.map((h) => h.toLowerCase());
-  return ths.findIndex((th) => targets.includes(thText(th)));
+  const targets = headerNames.map(h=> h.toLowerCase());
+  return ths.findIndex(th=> targets.includes(thText(th)));
 }
 
-function getCellFieldText(td) {
+function getCellFieldText(td){
   if (!td) return "";
+
   const txts = Array.from(td.querySelectorAll("input[type='text'], input:not([type])"))
-    .map((i) => safeTrim(i.value))
+    .map(i=> safeTrim(i.value))
     .filter(Boolean);
+
   if (txts.length > 1) return txts.join(" ");
   if (txts.length === 1) return txts[0];
 
   const ta = td.querySelector("textarea");
   if (ta) return safeTrim(ta.value);
 
-  applyNotesSpacing(ta);
-saveField(ta);
- 
   const sel = td.querySelector("select");
-  if (sel) {
+  if (sel){
     const opt = sel.selectedOptions?.[0];
     return safeTrim(opt?.textContent || sel.value);
   }
@@ -1304,34 +1237,32 @@ saveField(ta);
   return safeTrim(td.textContent);
 }
 
-function getOpcodeFromRow(table, tr) {
-  const idx = getColumnIndexByHeader(table, ["opcode", "op code", "opcodes"]);
+function getOpcodeFromRow(table, tr){
+  const idx = getColumnIndexByHeader(table, ["opcode","op code","opcodes"]);
   if (idx === -1) return "";
   return getCellFieldText(tr.children[idx]);
 }
 
-function getNameFromRow(table, tr) {
+function getNameFromRow(table, tr){
   let idx = getColumnIndexByHeader(table, ["name"]);
   if (idx === -1) idx = 0;
-  const td = tr.children[idx];
-  if (!td) return "";
-  return getCellFieldText(td);
+  return getCellFieldText(tr.children[idx]);
 }
 
-function getRowKeyForTableContext(contextTable, tr) {
-  const isOpcodes = !!contextTable.closest("#opcodes-pricing");
+function getRowKeyForTableContext(contextTable, tr){
+  const isOpcodes  = !!contextTable.closest("#opcodes-pricing");
   const isTraining = !!contextTable.closest("#training-checklist");
-  if (isOpcodes) return getOpcodeFromRow(contextTable, tr);
+  if (isOpcodes)  return getOpcodeFromRow(contextTable, tr);
   if (isTraining) return getNameFromRow(contextTable, tr);
   return getNameFromRow(contextTable, tr) || getOpcodeFromRow(contextTable, tr) || "";
 }
 
-function getOrderedTableKeys(table) {
+function getOrderedTableKeys(table){
   const keys = [];
   const tbody = table.querySelector("tbody");
   if (!tbody) return keys;
 
-  Array.from(tbody.querySelectorAll("tr")).forEach((tr) => {
+  Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
     const k = safeTrim(getRowKeyForTableContext(table, tr));
     if (k) keys.push(k);
   });
@@ -1339,13 +1270,13 @@ function getOrderedTableKeys(table) {
   return Array.from(new Set(keys));
 }
 
-function findBulletLineIndex(lines, bullet) {
+function findBulletLineIndex(lines, bullet){
   const b = (bullet || "").trim();
-  return lines.findIndex((l) => (l || "").trim().startsWith(b));
+  return lines.findIndex(l=> (l || "").trim().startsWith(b));
 }
 
-function insertBulletLineInOrderForTable(notesTA, table, bulletLine) {
-  if (!notesTA || !table) return { didInsert: false, lineStart: 0 };
+function insertBulletLineInOrderForTable(notesTA, table, bulletLine){
+  if (!notesTA || !table) return { didInsert:false, lineStart:0 };
 
   const orderedKeys = getOrderedTableKeys(table);
   const key = safeTrim(bulletLine.replace(/^•\s*/, "").replace(/:\s*$/, ""));
@@ -1355,98 +1286,98 @@ function insertBulletLineInOrderForTable(notesTA, table, bulletLine) {
   const lines = raw.split("\n");
 
   const existingIdx = findBulletLineIndex(lines, bulletLine);
-  if (existingIdx !== -1) {
+  if (existingIdx !== -1){
     const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    return { didInsert: false, lineStart: start };
+    return { didInsert:false, lineStart:start };
   }
 
-  // if key not found, append with spacing
-  if (myOrder === -1) {
+  // If key not found, append with spacing
+  if (myOrder === -1){
     const startPos = (notesTA.value || "").length;
     notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
-    return { didInsert: true, lineStart: startPos };
+    return { didInsert:true, lineStart:startPos };
   }
 
-  // insert before first existing bullet that belongs AFTER this row
+  // Insert before first existing bullet that belongs AFTER this row
   let insertBefore = -1;
-  for (let i = 0; i < lines.length; i++) {
+  for (let i=0; i<lines.length; i++){
     const t = (lines[i] || "").trim();
     if (!t.startsWith("•")) continue;
 
-    const matchKey = orderedKeys.find((k) => t.startsWith(`• ${k}:`) || t.startsWith(`• ${k}`));
+    const matchKey = orderedKeys.find(k=> t.startsWith(`• ${k}:`) || t.startsWith(`• ${k}`));
     if (!matchKey) continue;
 
     const matchOrder = orderedKeys.indexOf(matchKey);
-    if (matchOrder !== -1 && matchOrder > myOrder) {
+    if (matchOrder !== -1 && matchOrder > myOrder){
       insertBefore = i;
       break;
     }
   }
 
-  if (insertBefore === -1) {
+  if (insertBefore === -1){
     const startPos = (notesTA.value || "").length;
     notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
-    return { didInsert: true, lineStart: startPos };
+    return { didInsert:true, lineStart:startPos };
   }
 
   insertBefore = ensureBlankLineBeforeInsert(lines, insertBefore);
-
   lines.splice(insertBefore, 0, bulletLine);
   notesTA.value = lines.join("\n");
+
   const startPos = lines.slice(0, insertBefore).join("\n").length + (insertBefore > 0 ? 1 : 0);
-  return { didInsert: true, lineStart: startPos };
+  return { didInsert:true, lineStart:startPos };
 }
 
-function insertBulletIntoRealNotes(table, bullet) {
+function insertBulletIntoRealNotes(table, bullet){
   const notesBlock = findNotesBlockForTable(table);
   const ta = notesBlock?.querySelector("textarea");
   if (!ta) return;
 
   const line = bullet.trim();
-  const { didInsert, lineStart } = insertBulletLineInOrderForTable(ta, table, line);
+  const { lineStart } = insertBulletLineInOrderForTable(ta, table, line);
 
-  if (didInsert) saveField(ta);
+  // enforce spacing for readability
+  applyNotesSpacing(ta);
+  saveField(ta);
 
-  notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-  setTimeout(() => {
+  notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
+  setTimeout(()=>{
     ta.focus();
     const v = ta.value || "";
     const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = lineEnd === -1 ? v.length : lineEnd;
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
     ta.setSelectionRange(endPos, endPos);
     ta.classList.add("mk-note-jump");
-    setTimeout(() => ta.classList.remove("mk-note-jump"), 700);
+    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
   }, 150);
 
-  requestAnimationFrame(() => updateNoteIconStates(document));
+  requestAnimationFrame(()=> updateNoteIconStates(document));
 }
 
-function tagNameCellsInTable(table) {
+function tagNameCellsInTable(table){
   const nameIdx = getColumnIndexByHeader(table, ["name"]);
   if (nameIdx === -1) return;
-  qsa("tbody tr", table).forEach((tr) => {
+  qsa("tbody tr", table).forEach(tr=>{
     const td = tr.children[nameIdx];
     if (!td) return;
     td.classList.add("mk-name-cell");
-    Array.from(td.childNodes).forEach((n) => {
-      if (n.nodeName === "BR") n.remove();
-    });
+    Array.from(td.childNodes).forEach(n=>{ if (n.nodeName === "BR") n.remove(); });
   });
 }
 
-function tagNameCellsInTableSection(section) {
+function tagNameCellsInTableSection(section){
   qsa("#training-checklist table.training-table", section).forEach(tagNameCellsInTable);
 }
 
-function tagNameCellsOnLoad() {
+function tagNameCellsOnLoad(){
   qsa("#training-checklist table.training-table").forEach(tagNameCellsInTable);
 }
 
-function initTableNotesButtons(root = document) {
+function initTableNotesButtons(root=document){
   const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
 
-  targets.forEach((sel) => {
-    qsa(sel, root).forEach((table) => {
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=>{
       const notesIdx = ensureSingleNotesColumn(table);
       if (notesIdx === null) return;
 
@@ -1458,25 +1389,21 @@ function initTableNotesButtons(root = document) {
       if (table.dataset.mkNotesWired === "1") return;
       table.dataset.mkNotesWired = "1";
 
-      table.addEventListener(
-        "click",
-        (e) => {
-          const btn = e.target.closest(".mk-table-note-btn");
-          if (!btn) return;
+      table.addEventListener("click", (e)=>{
+        const btn = e.target.closest(".mk-table-note-btn");
+        if (!btn) return;
 
-          e.preventDefault();
-          e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
 
-          const tr = btn.closest("tr");
-          if (!tr) return;
+        const tr = btn.closest("tr");
+        if (!tr) return;
 
-          const key = getRowKeyForTableContext(table, tr);
-          if (!key) return;
+        const key = getRowKeyForTableContext(table, tr);
+        if (!key) return;
 
-          insertBulletIntoRealNotes(table, `• ${key}:`);
-        },
-        { passive: false }
-      );
+        insertBulletIntoRealNotes(table, `• ${key}:`);
+      }, { passive:false });
     });
   });
 }
@@ -1486,7 +1413,7 @@ function initTableNotesButtons(root = document) {
 =========================================================== */
 let _mkNotesModalSourceTA = null;
 
-function ensureNotesModal() {
+function ensureNotesModal(){
   let modal = qs("#mkNotesModal");
   if (modal) return modal;
 
@@ -1504,46 +1431,45 @@ function ensureNotesModal() {
   `;
   document.body.appendChild(modal);
 
-  modal.addEventListener("click", (e) => {
+  modal.addEventListener("click", (e)=>{
     if (e.target.closest("[data-mk-close='1']")) closeNotesModal();
   });
 
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", (e)=>{
     if (e.key === "Escape" && modal.classList.contains("open")) closeNotesModal();
   });
 
   return modal;
 }
 
-function openNotesModal(sourceTA, titleText = "Notes") {
+function openNotesModal(sourceTA, titleText="Notes"){
   const modal = ensureNotesModal();
   const title = qs("#mkNotesModalTitle", modal);
   const bigTA = qs("#mkNotesModalTextarea", modal);
 
   _mkNotesModalSourceTA = sourceTA;
-
   title.textContent = titleText || "Notes";
   bigTA.value = sourceTA?.value || "";
 
-  bigTA.oninput = () => {
+  bigTA.oninput = ()=>{
     if (!_mkNotesModalSourceTA) return;
     _mkNotesModalSourceTA.value = bigTA.value;
     saveField(_mkNotesModalSourceTA);
-    requestAnimationFrame(() => updateNoteIconStates(document));
+    requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   };
 
   modal.classList.add("open");
-  setTimeout(() => bigTA.focus(), 0);
+  setTimeout(()=> bigTA.focus(), 0);
 }
 
-function closeNotesModal() {
+function closeNotesModal(){
   const modal = qs("#mkNotesModal");
   if (!modal) return;
 
-  if (_mkNotesModalSourceTA) {
+  if (_mkNotesModalSourceTA){
     saveField(_mkNotesModalSourceTA);
-    requestAnimationFrame(() => updateNoteIconStates(document));
+    requestAnimationFrame(()=> updateNoteIconStates(document));
     requestAnimationFrame(syncTwoColHeights);
   }
 
@@ -1551,15 +1477,15 @@ function closeNotesModal() {
   _mkNotesModalSourceTA = null;
 }
 
-function initNotesExpanders(root = document) {
+function initNotesExpanders(root=document){
   const notesCards = qsa(".section-block", root).filter(isNotesCard);
 
-  notesCards.forEach((card) => {
+  notesCards.forEach(card=>{
     const ta = qs("textarea", card);
     if (!ta) return;
 
     let wrap = ta.closest(".mk-ta-wrap");
-    if (!wrap) {
+    if (!wrap){
       wrap = document.createElement("div");
       wrap.className = "mk-ta-wrap";
       ta.parentNode.insertBefore(wrap, ta);
@@ -1574,7 +1500,8 @@ function initNotesExpanders(root = document) {
     btn.title = "Expand notes";
     btn.setAttribute("aria-label", "Expand notes");
     btn.textContent = "⤢";
-    btn.addEventListener("click", (e) => {
+
+    btn.addEventListener("click", (e)=>{
       e.preventDefault();
       e.stopPropagation();
       const h2 = qs("h2", card);
@@ -1591,7 +1518,7 @@ function initNotesExpanders(root = document) {
 let _mkTableModalSourceTA = null;
 let _mkTableModalContextTable = null;
 
-function ensureTableModal() {
+function ensureTableModal(){
   let modal = qs("#mkTableModal");
   if (modal) return modal;
 
@@ -1611,18 +1538,18 @@ function ensureTableModal() {
   `;
   document.body.appendChild(modal);
 
-  modal.addEventListener("click", (e) => {
+  modal.addEventListener("click", (e)=>{
     if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
   });
 
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", (e)=>{
     if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
   });
 
   return modal;
 }
 
-function closeTableModal() {
+function closeTableModal(){
   const modal = qs("#mkTableModal");
   if (!modal) return;
   modal.classList.remove("open");
@@ -1630,14 +1557,14 @@ function closeTableModal() {
   _mkTableModalContextTable = null;
 }
 
-function buildCard(titleText) {
+function buildCard(titleText){
   const card = document.createElement("div");
   card.className = "section-block";
   card.innerHTML = `<h2>${titleText}</h2><div class="mk-card-body"></div>`;
   return card;
 }
 
-function mountPopupNotesCard(titleText, sourceTA) {
+function mountPopupNotesCard(titleText, sourceTA){
   const notesCard = buildCard(titleText || "Notes");
   notesCard.classList.add("mk-modal-notes");
 
@@ -1649,69 +1576,71 @@ function mountPopupNotesCard(titleText, sourceTA) {
 
   _mkTableModalSourceTA = sourceTA;
 
-  // sync popup TA -> real TA
-  ta.addEventListener("input", () => {
-    if (_mkTableModalSourceTA) {
-      _mkTableModalSourceTA.value = ta.value;
-      saveField(_mkTableModalSourceTA);
-    }
+  // Sync popup TA -> real TA
+  ta.addEventListener("input", ()=>{
+    if (!_mkTableModalSourceTA) return;
+    _mkTableModalSourceTA.value = ta.value;
+    saveField(_mkTableModalSourceTA);
   });
 
   return { notesCard, notesTA: ta };
 }
 
-function getTbodyRowIndex(tr) {
+function getTbodyRowIndex(tr){
   if (!tr || !tr.parentElement) return -1;
   return Array.from(tr.parentElement.children).indexOf(tr);
 }
 
-function insertBulletIntoPopupNotes(modalNotesTA, bullet) {
+function insertBulletIntoPopupNotes(modalNotesTA, bullet){
   const line = bullet.trim();
   const orderTable = _mkTableModalContextTable || null;
 
-  const { didInsert, lineStart } = orderTable
+  const { lineStart } = orderTable
     ? insertBulletLineInOrderForTable(modalNotesTA, orderTable, line)
     : (() => {
         const startPos = (modalNotesTA.value || "").length;
         modalNotesTA.value = appendWithSpacing(modalNotesTA.value || "", line);
-        return { didInsert: true, lineStart: startPos };
+        return { lineStart:startPos };
       })();
 
+  // enforce spacing in the modal notes box too
+  applyNotesSpacing(modalNotesTA);
+
   // sync to real notes textarea
-  if (_mkTableModalSourceTA) {
+  if (_mkTableModalSourceTA){
     _mkTableModalSourceTA.value = modalNotesTA.value;
     saveField(_mkTableModalSourceTA);
   }
 
   // jump to notes inside modal
-  const notesCard = modalNotesTA.closest(".section-block");
-  if (notesCard) notesCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  modalNotesTA.closest(".section-block")?.scrollIntoView({ behavior:"smooth", block:"start" });
 
-  setTimeout(() => {
+  setTimeout(()=>{
     modalNotesTA.focus();
     const v = modalNotesTA.value || "";
     const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = lineEnd === -1 ? v.length : lineEnd;
+    const endPos = (lineEnd === -1) ? v.length : lineEnd;
     modalNotesTA.setSelectionRange(endPos, endPos);
     modalNotesTA.classList.add("mk-note-jump");
-    setTimeout(() => modalNotesTA.classList.remove("mk-note-jump"), 700);
+    setTimeout(()=> modalNotesTA.classList.remove("mk-note-jump"), 700);
   }, 140);
 
-  if (didInsert) requestAnimationFrame(() => updateNoteIconStates(document));
+  requestAnimationFrame(()=> updateNoteIconStates(document));
 }
 
-function openTableModalForTable(originalTable, titleText) {
+function openTableModalForTable(originalTable, titleText){
   const modal = ensureTableModal();
   const title = qs("#mkTableModalTitle", modal);
   const stack = qs("#mkTableModalStack", modal);
 
+  // Modal header shows the section title
   title.textContent = titleText || "Table";
   stack.innerHTML = "";
 
   _mkTableModalContextTable = originalTable;
 
-  // -------- Table card --------
-  const tableCard = buildCard(titleText || "Table");
+  // -------- Table card (title "Table" so it doesn't duplicate modal header) --------
+  const tableCard = buildCard("Table");
   const tableBody = qs(".mk-card-body", tableCard);
 
   const tableContainer = document.createElement("div");
@@ -1732,35 +1661,37 @@ function openTableModalForTable(originalTable, titleText) {
   tableContainer.appendChild(footer);
   tableBody.appendChild(tableContainer);
 
-  // wire persistence in popup
-  qsa("input, select, textarea", tableClone).forEach((el) => {
+  // Wire persistence in popup
+  qsa("input, select, textarea", tableClone).forEach(el=>{
     ensureUID(el);
     loadField(el);
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-    el.addEventListener("input", () => saveField(el));
-    el.addEventListener("change", () => saveField(el));
+    el.addEventListener("input", ()=> saveField(el));
+    el.addEventListener("change", ()=> saveField(el));
   });
 
+  // Ensure clone has Notes column buttons and name-cell layout
+  initTableNotesButtons(tableCard);
   tagNameCellsInTable(tableClone);
 
-  // modal add-row also adds to real table
-  footer.querySelector(".add-row")?.addEventListener("click", () => {
-    const realTbody = originalTable.tBodies?.[0];
+  // Modal Add Row: adds to BOTH real and clone tables
+  footer.querySelector(".add-row")?.addEventListener("click", ()=>{
+    const realTbody  = originalTable.tBodies?.[0];
     const cloneTbody = tableClone.tBodies?.[0];
     if (!realTbody || !cloneTbody) return;
 
-    const realLast = realTbody.querySelector("tr:last-child");
+    const realLast  = realTbody.querySelector("tr:last-child");
     const cloneLast = cloneTbody.querySelector("tr:last-child");
     if (!realLast || !cloneLast) return;
 
-    const realNew = cloneTrainingRow(realLast);
+    const realNew  = cloneTrainingRow(realLast);
     const cloneNew = cloneTrainingRow(cloneLast);
 
     realTbody.appendChild(realNew);
     cloneTbody.appendChild(cloneNew);
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(()=>{
       initTableNotesButtons(document);
       tagNameCellsInTable(originalTable);
       tagNameCellsInTable(tableClone);
@@ -1768,53 +1699,42 @@ function openTableModalForTable(originalTable, titleText) {
     });
   });
 
-  // -------- Notes card synced to real table notes --------
+  // -------- Notes card synced to the REAL notes textarea --------
   const realNotesBlock = findNotesBlockForTable(originalTable);
   const realTA = realNotesBlock?.querySelector("textarea");
   const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
 
-  // Ensure tableClone has a single Notes column button too
-  initTableNotesButtons(tableCard);
+  // Clicking table-note buttons in the POPUP inserts into the POPUP notes box
+  tableClone.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".mk-table-note-btn");
+    if (!btn) return;
 
-  tableClone.addEventListener(
-    "click",
-    (e) => {
-      const btn = e.target.closest(".mk-table-note-btn");
-      if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
 
-      e.preventDefault();
-      e.stopPropagation();
+    const cloneTr = btn.closest("tr");
+    if (!cloneTr) return;
 
-      const cloneTr = btn.closest("tr");
-      if (!cloneTr) return;
+    // Map clone row index -> original row (source-of-truth)
+    const idx = getTbodyRowIndex(cloneTr);
+    const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
+    if (!origTr) return;
 
-      // IMPORTANT: map clone row index -> original row
-      const idx = getTbodyRowIndex(cloneTr);
-      const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
-      if (!origTr) return;
+    const key = getRowKeyForTableContext(originalTable, origTr);
+    if (!key) return;
 
-      const key = getRowKeyForTableContext(originalTable, origTr);
-      if (!key) return;
+    insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
+  }, { passive:false });
 
-      insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
-    },
-    { passive: false }
-  );
-
-   applyNotesSpacing(modalNotesTA);
-
-if (_mkTableModalSourceTA) {
-  _mkTableModalSourceTA.value = modalNotesTA.value;
-  saveField(_mkTableModalSourceTA);
-}
+  // Enforce spacing on open, too (in case notes already exist)
+  applyNotesSpacing(notesTA);
 
   stack.appendChild(tableCard);
   stack.appendChild(notesCard);
-
   modal.classList.add("open");
 }
 
-function ensureExpandBtnInTableFooter(table) {
+function ensureExpandBtnInTableFooter(table){
   const container = table.closest(".table-container");
   if (!container) return;
 
@@ -1838,26 +1758,28 @@ function ensureExpandBtnInTableFooter(table) {
 
   footer.appendChild(rightWrap);
 
-  btn.addEventListener("click", (e) => {
+  btn.addEventListener("click", (e)=>{
     e.preventDefault();
     e.stopPropagation();
+
+    // Try to use the section header text as the modal title
     const sectionHeader = container.previousElementSibling;
     const t = safeTrim(sectionHeader?.textContent || "Table");
     openTableModalForTable(table, t);
   });
 }
 
-function initTablePopupExpandButtons(root = document) {
+function initTablePopupExpandButtons(root=document){
   const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
-  targets.forEach((sel) => {
-    qsa(sel, root).forEach((table) => ensureExpandBtnInTableFooter(table));
+  targets.forEach(sel=>{
+    qsa(sel, root).forEach(table=> ensureExpandBtnInTableFooter(table));
   });
 }
 
 /* ---------------------------
    Boot
 --------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", ()=>{
   injectRuntimePatches();
 
   initNav();
@@ -1866,7 +1788,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initTextareas(document);
   syncTwoColHeights();
-  window.addEventListener("resize", () => requestAnimationFrame(syncTwoColHeights));
+  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
 
   initResets();
   initTableAddRow();
