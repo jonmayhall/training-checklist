@@ -1,19 +1,24 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — script.js
-   ✅ NOTES FIX (tables + popups)
-   - Notes bubbles work everywhere (questions + tables + popup tables)
-   - Bubble turns ORANGE when notes exist for that row/question
-   - Training tables use the ROW NAME as bullet label
-   - Opcode tables use the ROW OPCODE as bullet label
-   - FIXES the “buttons don’t work after restore/clone” issue by using
-     ONE delegated click handler (no bindOnce on notes buttons)
+   myKaarma Interactive Training Checklist — script.js (FULL)
+   ✅ RESTORES ALL BUTTONS + FIXES NOTES + POPUPS
+   - Nav/menu buttons work
+   - Reset page + Clear all work
+   - Autosave/restore works
+   - Add row (+) tables works (no double add)
+   - Support tickets add/move works
+   - ✅ Notes bubbles everywhere (questions + tables + popups)
+   - ✅ Bubble turns ORANGE when notes exist
+   - ✅ Training tables: bullet label = Name
+   - ✅ Opcode tables: bullet label = Opcode
+   - ✅ Table popups include Add Row button (adds to real table + rerenders popup)
+   - ✅ Uses delegated notes click handler so it still works after restore/clone
 ======================================================= */
 
 (() => {
   "use strict";
 
   /* -----------------------------
-     UTIL
+     KEYS + HELPERS
   ----------------------------- */
   const LS_KEY = "mk_training_checklist_v2";
   const NOTES_KEY = "mk_training_notes_v2";
@@ -41,45 +46,14 @@
   };
 
   /* -----------------------------
-     NOTES BUTTON VISUALS
-  ----------------------------- */
-  function setNotesButtonVisual(btn, filled) {
-    if (!btn) return;
-    btn.dataset.filled = filled ? "true" : "false";
-    btn.classList.toggle("notes-filled", !!filled);
-
-    // inline so it works even if CSS isn’t updated
-    const icon = btn.querySelector(".notes-icon");
-    if (filled) {
-      btn.style.borderColor = "#f57c00";
-      btn.style.background = "rgba(245, 124, 0, 0.14)";
-      if (icon) icon.style.color = "#f57c00";
-    } else {
-      btn.style.borderColor = "";
-      btn.style.background = "";
-      if (icon) icon.style.color = "";
-    }
-  }
-
-  function makeBubbleButton(notesTargetId) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "notes-icon-btn notes-bubble-btn";
-    btn.dataset.notesTarget = notesTargetId;
-    btn.setAttribute("aria-label", "Open Notes");
-    btn.innerHTML = `<span class="notes-icon" aria-hidden="true">💬</span>`;
-    setNotesButtonVisual(btn, false);
-    return btn;
-  }
-
-  /* -----------------------------
-     PLACEHOLDER STYLING
+     PLACEHOLDER / GHOST CLASSING
   ----------------------------- */
   function applyPlaceholderClassToSelect(sel) {
     const opt = sel.selectedOptions?.[0];
     const isGhost = !!opt?.dataset?.ghost || sel.value === "" || opt?.value === "";
     sel.classList.toggle("is-placeholder", isGhost);
   }
+
   function applyPlaceholderClassToInput(inp) {
     if (inp.type === "date") {
       inp.classList.toggle("is-placeholder", !inp.value);
@@ -88,17 +62,19 @@
     const hasPh = !!inp.getAttribute("placeholder");
     if (hasPh) inp.classList.toggle("is-placeholder", !inp.value);
   }
+
   function applyPlaceholderClassToTextarea(ta) {
     const hasPh = !!ta.getAttribute("placeholder");
     if (hasPh) ta.classList.toggle("is-placeholder", !ta.value);
   }
 
   function initPlaceholderStyling() {
-    if (!bindOnce(document.body, "placeholder_global")) return;
-
+    // do not bindOnce here; we want to re-run styling on restore
     $$("select").forEach(applyPlaceholderClassToSelect);
     $$("input").forEach(applyPlaceholderClassToInput);
     $$("textarea").forEach(applyPlaceholderClassToTextarea);
+
+    if (!bindOnce(document.body, "placeholder_events")) return;
 
     document.addEventListener("change", (e) => {
       const t = e.target;
@@ -119,8 +95,12 @@
   /* -----------------------------
      AUTOSAVE / RESTORE
   ----------------------------- */
-  function loadState() { return safeJSONParse(localStorage.getItem(LS_KEY), {}) || {}; }
-  function saveState(state) { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  function loadState() {
+    return safeJSONParse(localStorage.getItem(LS_KEY), {}) || {};
+  }
+  function saveState(state) {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  }
 
   function snapshotTables(state) {
     state.__tables = state.__tables || {};
@@ -187,6 +167,7 @@
 
   function snapshotFormControls(state) {
     state.__controls = state.__controls || {};
+
     $$(".page-section").forEach((sec) => {
       const sectionId = sec.id;
       const controls = $$("input, select, textarea", sec);
@@ -271,7 +252,139 @@
   }
 
   /* -----------------------------
-     TABLE: ADD ROW
+     NAV (menu buttons)
+  ----------------------------- */
+  function initNav() {
+    const navButtons = $$("#sidebar-nav .nav-btn");
+    const sections = $$(".page-section");
+
+    const showSection = (id) => {
+      sections.forEach((s) => s.classList.toggle("active", s.id === id));
+      navButtons.forEach((b) => b.classList.toggle("active", b.dataset.target === id));
+      window.scrollTo({ top: 0, behavior: "auto" });
+    };
+
+    navButtons.forEach((btn) => {
+      if (!bindOnce(btn, "nav")) return;
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        if (!target) return;
+        showSection(target);
+
+        const state = loadState();
+        state.__lastPage = target;
+        saveState(state);
+      });
+    });
+
+    const state = loadState();
+    if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
+  }
+
+  /* -----------------------------
+     RESET PAGE / CLEAR ALL
+  ----------------------------- */
+  function clearSection(sectionEl) {
+    if (!sectionEl) return;
+
+    // clear non-table, non-dynamic
+    $$("input, select, textarea", sectionEl).forEach((el) => {
+      const inTable = !!el.closest("table");
+      const inTickets = !!el.closest("#support-tickets");
+      const inAdditionalTrainer = !!el.closest("#additionalTrainersContainer");
+      const inAdditionalPoc = !!el.closest(".additional-poc-card");
+      if (inTable || inTickets || inAdditionalTrainer || inAdditionalPoc) return;
+
+      if (el.type === "checkbox") el.checked = false;
+      else el.value = "";
+    });
+
+    // tables keep first 1–3 rows
+    $$(".table-container", sectionEl).forEach((tc) => {
+      const table = $("table", tc);
+      const tbody = table?.tBodies?.[0];
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.rows);
+      const keep = Math.max(1, Math.min(3, rows.length));
+      rows.forEach((r, idx) => {
+        if (idx >= keep) r.remove();
+        else {
+          $$("input, select, textarea", r).forEach((el) => {
+            if (el.type === "checkbox") el.checked = false;
+            else el.value = "";
+          });
+        }
+      });
+    });
+
+    // Support tickets reset
+    if (sectionEl.id === "support-tickets") {
+      const open = $("#openTicketsContainer");
+      const base = $(".ticket-group[data-base='true']", open);
+      if (open && base) open.innerHTML = base.outerHTML;
+      if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
+      if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
+      if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
+    }
+
+    initPlaceholderStyling();
+    persistAllDebounced();
+    refreshAllNotesButtons();
+  }
+
+  function initResetButtons() {
+    $$(".clear-page-btn").forEach((btn) => {
+      if (!bindOnce(btn, "reset_page")) return;
+      btn.addEventListener("click", () => {
+        const sec = btn.closest(".page-section");
+        clearSection(sec);
+      });
+    });
+
+    const clearAllBtn = $("#clearAllBtn");
+    if (clearAllBtn && bindOnce(clearAllBtn, "clear_all")) {
+      clearAllBtn.addEventListener("click", () => {
+        localStorage.removeItem(LS_KEY);
+        localStorage.removeItem(NOTES_KEY);
+        closeModal();
+        $$(".page-section").forEach(clearSection);
+        saveState({});
+      });
+    }
+  }
+
+  /* -----------------------------
+     ONSITE DATES: end defaults to start + 2 days
+  ----------------------------- */
+  function initOnsiteDates() {
+    const start = $("#onsiteStartDate");
+    const end = $("#onsiteEndDate");
+    if (!start || !end) return;
+    if (!bindOnce(start, "onsite_date")) return;
+
+    const addDays = (yyyy_mm_dd, days) => {
+      const d = new Date(yyyy_mm_dd + "T00:00:00");
+      if (Number.isNaN(d.getTime())) return "";
+      d.setDate(d.getDate() + days);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    start.addEventListener("change", () => {
+      if (!start.value) return;
+      if (!end.value) {
+        end.value = addDays(start.value, 2);
+        applyPlaceholderClassToInput(end);
+        persistAllDebounced();
+      }
+    });
+  }
+
+  /* -----------------------------
+     TABLE: ADD ROW (+)
   ----------------------------- */
   function clearRowControls(row) {
     $$("input, select, textarea", row).forEach((el) => {
@@ -312,14 +425,39 @@
   }
 
   /* -----------------------------
-     NOTES STATE
+     NOTES STATE + ORANGE BUBBLES
   ----------------------------- */
   function loadNotesState() { return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {}; }
   function saveNotesState(state) { localStorage.setItem(NOTES_KEY, JSON.stringify(state)); }
 
-  // Signature index:
-  // - Table rows: row index in tbody
-  // - Questions: index among notes buttons on that page outside tables
+  function setNotesButtonVisual(btn, filled) {
+    if (!btn) return;
+    btn.dataset.filled = filled ? "true" : "false";
+    btn.classList.toggle("notes-filled", !!filled);
+
+    const icon = btn.querySelector(".notes-icon");
+    if (filled) {
+      btn.style.borderColor = "#f57c00";
+      btn.style.background = "rgba(245, 124, 0, 0.14)";
+      if (icon) icon.style.color = "#f57c00";
+    } else {
+      btn.style.borderColor = "";
+      btn.style.background = "";
+      if (icon) icon.style.color = "";
+    }
+  }
+
+  function makeBubbleButton(notesTargetId) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "notes-icon-btn notes-bubble-btn";
+    btn.dataset.notesTarget = notesTargetId;
+    btn.setAttribute("aria-label", "Open Notes");
+    btn.innerHTML = `<span class="notes-icon" aria-hidden="true">💬</span>`;
+    setNotesButtonVisual(btn, false);
+    return btn;
+  }
+
   function getRowSignatureIndex(btn) {
     const tr = btn.closest("tr");
     if (tr) {
@@ -334,13 +472,8 @@
     return idx >= 0 ? idx : 9999;
   }
 
-  // Bullet label rules:
-  // - Opcode tables: pull opcode text
-  // - Training tables: pull name text
-  // - Questions: use the label text of the checklist-row
-  function isOpcodeTable(btnOrRow) {
-    const row = btnOrRow.closest ? btnOrRow : null;
-    const table = row?.closest?.("table");
+  function isOpcodeTableRow(tr) {
+    const table = tr?.closest?.("table");
     if (!table) return false;
     const headers = $$("thead th", table).map((th) => th.textContent.trim().toLowerCase());
     return headers.includes("opcode");
@@ -349,7 +482,7 @@
   function getBulletLabelForButton(btn) {
     const tr = btn.closest("tr");
     if (tr) {
-      if (isOpcodeTable(tr)) {
+      if (isOpcodeTableRow(tr)) {
         const opcodeInput = tr.querySelector("td:nth-child(2) input[type='text']");
         return opcodeInput?.value?.trim() || "Opcode";
       }
@@ -402,14 +535,11 @@
     if (!ta) return;
     ta.value = buildNotesText(targetId);
     applyPlaceholderClassToTextarea(ta);
-    persistAllDebounced();
   }
 
-  // Bubble orange = item exists AND item.text has content
   function bulletHasNotes(targetId, sigIndex) {
     const notesState = loadNotesState();
-    const block = notesState[targetId];
-    const item = block?.items?.[String(sigIndex)];
+    const item = notesState?.[targetId]?.items?.[String(sigIndex)];
     return !!(item && (item.text || "").trim().length);
   }
 
@@ -427,9 +557,6 @@
     if (modalEl && modalEl.style.display === "block") refreshNotesButtonsForScope(modalEl);
   }
 
-  /* -----------------------------
-     Parse textarea back into state (keeps bubbles accurate)
-  ----------------------------- */
   const parseAndStoreNotesFromTextarea = debounce((ta) => {
     const block = ta.closest(".section-block");
     const id = block?.id;
@@ -473,6 +600,7 @@
 
     saveNotesState(notesState);
     hydrateNotesTextarea(id);
+    persistAllDebounced();
     refreshAllNotesButtons();
   }, 250);
 
@@ -488,82 +616,10 @@
       ta.addEventListener("change", () => parseAndStoreNotesFromTextarea(ta));
     });
 
-    // hydrate from saved
     const notesState = loadNotesState();
     Object.keys(notesState).forEach((id) => {
       if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
     });
-  }
-
-  /* -----------------------------
-     DELEGATED NOTES HANDLERS (KEY FIX)
-     This makes notes buttons work even after restore/clone/popup renders.
-  ----------------------------- */
-  function initDelegatedNotesHandlers() {
-    if (!bindOnce(document.body, "delegated_notes")) return;
-
-    // 1) Click any notes button (questions + tables + popups)
-    document.addEventListener("click", (e) => {
-      const btn = e.target?.closest?.(".notes-icon-btn");
-      if (!btn) return;
-
-      const notesTarget = btn.dataset.notesTarget;
-      if (!notesTarget) return;
-
-      const sigIndex = getRowSignatureIndex(btn);
-      const label = getBulletLabelForButton(btn);
-
-      ensureNotesItem(notesTarget, sigIndex, label);
-      hydrateNotesTextarea(notesTarget);
-
-      // scroll only if it’s not in the modal
-      if (!btn.closest("#mkTableModal")) {
-        const block = $("#" + notesTarget);
-        if (block) block.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-
-      persistAllDebounced();
-      refreshAllNotesButtons();
-    });
-
-    // 2) When user types a Name/Opcode, update that bullet label in state (if it exists)
-    document.addEventListener("input", (e) => {
-      const t = e.target;
-      if (!t || t.tagName !== "INPUT" || t.type !== "text") return;
-
-      const tr = t.closest("tr");
-      if (!tr) return;                 // only table rows matter here
-      const table = tr.closest("table");
-      if (!table) return;
-
-      const btn = tr.querySelector(".notes-icon-btn[data-notes-target]");
-      if (!btn) return;
-      const targetId = btn.dataset.notesTarget;
-      if (!targetId) return;
-
-      const sigIndex = getRowSignatureIndex(btn);
-      const label = getBulletLabelForButton(btn);
-
-      const notesState = loadNotesState();
-      const item = notesState?.[targetId]?.items?.[String(sigIndex)];
-      if (item) {
-        item.label = label;
-        saveNotesState(notesState);
-
-        // keep textarea formatting synced
-        hydrateNotesTextarea(targetId);
-        refreshAllNotesButtons();
-      }
-    });
-  }
-
-  /* -----------------------------
-     AUTO-ADD 💬 TO QUESTION ROWS (not tables)
-  ----------------------------- */
-  function ensureElementId(el, prefix = "auto-notes") {
-    if (el.id) return el.id;
-    el.id = `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now()}`;
-    return el.id;
   }
 
   function findNotesBlockInSection(sectionEl) {
@@ -576,6 +632,13 @@
     }) || null;
   }
 
+  function ensureElementId(el, prefix = "notes-auto") {
+    if (el.id) return el.id;
+    el.id = `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now()}`;
+    return el.id;
+  }
+
+  // ✅ adds bubbles to the non-table questions across the right pages
   function injectNotesBubblesAcrossPages() {
     $$(".page-section").forEach((sec) => {
       const notesBlock = findNotesBlockInSection(sec);
@@ -595,10 +658,62 @@
     });
   }
 
+  // ✅ KEY FIX: delegated handler so notes buttons still work after restore/clone/popup
+  function initDelegatedNotesHandlers() {
+    if (!bindOnce(document.body, "delegated_notes")) return;
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target?.closest?.(".notes-icon-btn");
+      if (!btn) return;
+
+      const notesTarget = btn.dataset.notesTarget;
+      if (!notesTarget) return;
+
+      const sigIndex = getRowSignatureIndex(btn);
+      const label = getBulletLabelForButton(btn);
+
+      ensureNotesItem(notesTarget, sigIndex, label);
+      hydrateNotesTextarea(notesTarget);
+
+      // scroll only if not modal
+      if (!btn.closest("#mkTableModal")) {
+        const block = $("#" + notesTarget);
+        if (block) block.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      persistAllDebounced();
+      refreshAllNotesButtons();
+    });
+
+    // if user changes name/opcode after notes exist, keep bullet header synced
+    document.addEventListener("input", (e) => {
+      const t = e.target;
+      if (!t || t.tagName !== "INPUT" || t.type !== "text") return;
+      const tr = t.closest("tr");
+      if (!tr) return;
+
+      const btn = tr.querySelector(".notes-icon-btn[data-notes-target]");
+      if (!btn) return;
+
+      const targetId = btn.dataset.notesTarget;
+      if (!targetId) return;
+
+      const sigIndex = getRowSignatureIndex(btn);
+      const label = getBulletLabelForButton(btn);
+
+      const notesState = loadNotesState();
+      const item = notesState?.[targetId]?.items?.[String(sigIndex)];
+      if (item) {
+        item.label = label;
+        saveNotesState(notesState);
+        hydrateNotesTextarea(targetId);
+        refreshAllNotesButtons();
+      }
+    });
+  }
+
   /* -----------------------------
-     TABLE POPUP MODAL
-     - Notes buttons inside popup should still target the REAL notes block
-     - Add Row in popup updates REAL table, then re-renders popup
+     TABLE POPUP MODAL (KEEP YOUR PATTERN)
   ----------------------------- */
   let modalEl = null;
 
@@ -671,7 +786,6 @@
     modalEl.style.display = "none";
     const body = $("#mkTableModalBody", modalEl);
     if (body) body.innerHTML = "";
-    modalEl.dataset.tcKey = "";
   }
 
   function findRelatedNotesBlock(tableContainer) {
@@ -683,13 +797,6 @@
     if (!section) return null;
     const all = $$("[id^='notes-'].section-block", section);
     return all[0] || null;
-  }
-
-  function tcKeyFor(tableContainer) {
-    const all = $$(".table-container");
-    const idx = all.indexOf(tableContainer);
-    const sectionId = closestSectionId(tableContainer);
-    return `${sectionId}::tc::${idx}`;
   }
 
   function renderTablePopup(tableContainer) {
@@ -712,17 +819,17 @@
 
     const tableClone = tableContainer.cloneNode(true);
 
-    // remove the expand button inside clone footer (only modal header has expand)
+    // remove expand button from inside clone
     $$(".expand-table-btn", tableClone).forEach((el) => el.remove());
 
-    // IMPORTANT: make sure popup table notes buttons target the REAL notes block
+    // tie popup row-note buttons to the real notes id
     const notesBlock = findRelatedNotesBlock(tableContainer);
     const realNotesId = notesBlock?.id;
     if (realNotesId) {
       $$(".notes-icon-btn", tableClone).forEach((b) => { b.dataset.notesTarget = realNotesId; });
     }
 
-    // contain table scroll
+    // constrain scroll
     const scrollWrap = $(".scroll-wrapper", tableClone);
     if (scrollWrap) {
       scrollWrap.style.maxHeight = "44vh";
@@ -730,12 +837,14 @@
       scrollWrap.style.overflowX = "auto";
     }
 
-    // wire modal Add Row to REAL table, then re-render popup to show it
+    // ✅ Add Row in popup adds to REAL table then rerenders popup
     const modalAdd = $(".table-footer .add-row", tableClone);
     if (modalAdd) {
       modalAdd.textContent = "+";
       modalAdd.title = "Add Row";
-      if (bindOnce(modalAdd, "modal_add_row")) {
+      // do NOT bindOnce across rerenders by dataset key unique to this instance
+      if (!modalAdd.dataset.modalAddBound) {
+        modalAdd.dataset.modalAddBound = "true";
         modalAdd.addEventListener("click", () => {
           const realTable = $("table", tableContainer);
           if (!realTable) return;
@@ -751,9 +860,22 @@
 
     tableCard.appendChild(tableClone);
 
-    // Notes card clone (keeps your UI)
+    // notes card clone + sync textarea
     const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
-    if (notesClone) {
+    if (notesClone && notesBlock) {
+      const realTA = $("textarea", notesBlock);
+      const modalTA = $("textarea", notesClone);
+      if (realTA && modalTA) {
+        modalTA.value = realTA.value;
+        if (!modalTA.dataset.modalSyncBound) {
+          modalTA.dataset.modalSyncBound = "true";
+          modalTA.addEventListener("input", () => {
+            realTA.value = modalTA.value;
+            parseAndStoreNotesFromTextarea(realTA);
+          });
+        }
+      }
+      // kill horizontal scroll in modal notes
       const ta = $("textarea", notesClone);
       if (ta) {
         ta.style.width = "100%";
@@ -762,22 +884,6 @@
         ta.style.overflowX = "hidden";
         ta.style.whiteSpace = "pre-wrap";
         ta.style.wordBreak = "break-word";
-      }
-
-      // sync modal textarea <-> real textarea
-      const realTA = $("textarea", notesBlock);
-      const modalTA = $("textarea", notesClone);
-      if (realTA && modalTA) {
-        modalTA.value = realTA.value;
-
-        if (bindOnce(modalTA, "modal_notes_sync")) {
-          modalTA.addEventListener("input", () => {
-            realTA.value = modalTA.value;
-            applyPlaceholderClassToTextarea(realTA);
-            persistAllDebounced();
-            parseAndStoreNotesFromTextarea(realTA);
-          });
-        }
       }
     }
 
@@ -790,7 +896,6 @@
 
   function openTablePopup(tableContainer) {
     const modal = ensureModal();
-    modal.dataset.tcKey = tcKeyFor(tableContainer);
     renderTablePopup(tableContainer);
     modal.style.display = "block";
   }
@@ -816,27 +921,115 @@
   }
 
   /* -----------------------------
+     SUPPORT TICKETS
+  ----------------------------- */
+  function ticketIsComplete(groupEl) {
+    const num = $(".ticket-number-input", groupEl)?.value?.trim();
+    const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
+    const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
+    return !!num && (!!url || !!summary);
+  }
+
+  function lockBaseOpenStatus(openBaseGroup) {
+    const status = $(".ticket-status-select", openBaseGroup);
+    if (status) {
+      status.value = "Open";
+      status.disabled = true;
+    }
+  }
+
+  function bindTicketStatusMover(groupEl) {
+    const status = $(".ticket-status-select", groupEl);
+    if (!status) return;
+    if (!bindOnce(status, "ticket_move")) return;
+
+    status.addEventListener("change", () => {
+      const val = status.value;
+      const open = $("#openTicketsContainer");
+      const t2 = $("#tierTwoTicketsContainer");
+      const cr = $("#closedResolvedTicketsContainer");
+      const cf = $("#closedFeatureTicketsContainer");
+      if (!open || !t2 || !cr || !cf) return;
+
+      if (val === "Open") open.appendChild(groupEl);
+      else if (val === "Tier Two") t2.appendChild(groupEl);
+      else if (val === "Closed - Resolved") cr.appendChild(groupEl);
+      else if (val === "Closed - Feature Not Supported") cf.appendChild(groupEl);
+
+      persistAllDebounced();
+    });
+  }
+
+  function initSupportTickets() {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const base = $(".ticket-group[data-base='true']", openContainer);
+    if (base) lockBaseOpenStatus(base);
+
+    const addBtn = $(".add-ticket-btn", base || openContainer);
+    if (addBtn && bindOnce(addBtn, "add_ticket")) {
+      addBtn.addEventListener("click", () => {
+        const baseGroup = $(".ticket-group[data-base='true']", openContainer);
+        if (!baseGroup) return;
+        if (!ticketIsComplete(baseGroup)) {
+          $(".ticket-number-input", baseGroup)?.focus();
+          return;
+        }
+
+        const clone = baseGroup.cloneNode(true);
+        clone.dataset.base = "false";
+        $$(".ticket-disclaimer", clone).forEach((el) => el.remove());
+
+        const status = $(".ticket-status-select", clone);
+        if (status) {
+          status.disabled = false;
+          status.value = "Open";
+        }
+
+        openContainer.appendChild(clone);
+
+        $$("input, textarea", baseGroup).forEach((el) => (el.value = ""));
+        persistAllDebounced();
+
+        bindTicketStatusMover(clone);
+      });
+    }
+
+    [openContainer, $("#tierTwoTicketsContainer"), $("#closedResolvedTicketsContainer"), $("#closedFeatureTicketsContainer")]
+      .filter(Boolean)
+      .forEach((cont) => {
+        $$(".ticket-group", cont).forEach((g) => {
+          if (g.dataset.base === "true") lockBaseOpenStatus(g);
+          else bindTicketStatusMover(g);
+        });
+      });
+  }
+
+  /* -----------------------------
      BOOT
   ----------------------------- */
   function boot() {
     restoreAll();
 
+    initNav();                 // ✅ menu buttons back
     initPlaceholderStyling();
     initAutosave();
+    initResetButtons();
+    initOnsiteDates();
 
     initTableAddRowButtons();
     initTableExpandButtons();
 
-    // inject bubbles for question rows only (tables already have buttons in your HTML)
-    injectNotesBubblesAcrossPages();
-
-    // ✅ THE IMPORTANT PART: one delegated handler makes notes buttons work
-    // even after restoreTables() replaced tbody HTML (event listeners would otherwise be lost)
-    initDelegatedNotesHandlers();
-
+    // Notes
+    injectNotesBubblesAcrossPages();   // ✅ bubbles on question rows again
+    initDelegatedNotesHandlers();      // ✅ makes notes work after restore/clone/popup
     initNotesTextareaParsing();
 
-    // initial orange state
+    initSupportTickets();
+
+    // final
+    initPlaceholderStyling();
     refreshAllNotesButtons();
   }
 
