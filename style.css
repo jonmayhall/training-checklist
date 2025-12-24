@@ -1634,34 +1634,35 @@ main{
     flex:0 0 auto;
   }
 
+     .training-table{ min-width:760px; }
+}
+
 /* =======================================================
-   DEALERSHIP ADDRESS — FORCE wide textbox
-   (put at VERY bottom of CSS)
+   DEALERSHIP ADDRESS — make textbox actually wider
+   (fix: grid column cannot be "auto")
 ======================================================= */
 #dealership-address-card .checklist-row{
   display:grid !important;
-  /* force the right side to actually be wide (not "auto") */
-  grid-template-columns: minmax(260px, 1fr) minmax(720px, 2fr) !important;
+  grid-template-columns: 260px 1fr !important; /* was: ... auto (prevents growth) */
   column-gap:18px !important;
   align-items:center !important;
 }
 
-/* let the wrapper fill the full right column */
+/* Let the wrap fill the entire 2nd column */
 #dealership-address-card .address-input-wrap{
   width:100% !important;
   max-width:none !important;
-  margin-left:auto !important;
+  margin-left:0 !important;
 
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
 }
 
-/* input fills the available space */
+/* Input fills available space (big) */
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
-  max-width:none !important;
   min-width:0 !important;
 
   height:34px !important;
@@ -1676,6 +1677,21 @@ main{
   border-bottom-right-radius:0 !important;
 }
 
+/* Map button stays attached */
+#dealership-address-card .address-input-wrap .small-map-btn{
+  flex:0 0 44px !important;
+  width:44px !important;
+  min-width:44px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+}
 
-  .training-table{ min-width:760px; }
+/* Mobile: stack nicely */
+@media (max-width:900px){
+  #dealership-address-card .checklist-row{
+    grid-template-columns:1fr !important;
+  }
+  #dealership-address-card .address-input-wrap{
+    width:100% !important;
+  }
 }
