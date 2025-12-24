@@ -533,9 +533,11 @@ main{
 }
 
 /* =======================================================
-   DEALERSHIP INFO PAGE FIXES
+   DEALERSHIP INFO PAGE FIXES  ✅ REPLACEMENT BLOCK
    - Training Dates inputs match everything else (width + look)
-   - Primary Contacts: stable spacing + widths
+   - Primary Contacts: UNIFORM spacing on all sides
+     (center gap = top/bottom gap = outer border gap)
+   - NO “1/8 longer” changes
 ======================================================= */
 
 /* Training dates rows align like normal rows */
@@ -581,32 +583,56 @@ main{
   box-shadow:none !important;
 }
 
-/* Primary Contacts grid */
-.primary-contacts-grid{
+/* =======================================================
+   PRIMARY CONTACTS — UNIFORM SPACING
+   Goal:
+   - double the center gap by making cards smaller
+   - same gap above/below cards
+   - same gap around the outside from the larger border
+======================================================= */
+
+#dealership-info{
+  --di-input-width:225px;  /* keep your field width */
+  --pc-gap:52px;           /* ✅ uniform spacing everywhere (double-ish) */
+}
+
+/* Grid provides ALL spacing: between cards AND around the edges */
+#dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
+  gap:var(--pc-gap) !important;          /* center gap + vertical gap */
+  padding:var(--pc-gap) !important;      /* outer gap matches center gap */
   margin-top:10px;
+  align-items:start;
+  justify-items:stretch;
+  box-sizing:border-box;
 }
 
 /* Card */
-.mini-card{
+#dealership-info .primary-contacts-grid .mini-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
+
+  /* keep original feel (NOT taller) */
   padding:14px 14px 6px;
+
+  width:100%;
+  max-width:none;          /* ✅ remove “card gets centered/narrowed” behavior */
+  justify-self:stretch;
+  min-width:0;
 }
 
 /* keep mini-card rows consistent */
-.mini-card .checklist-row{
+#dealership-info .primary-contacts-grid .mini-card .checklist-row{
   padding-left:18px;
   padding-right:18px;
 }
 
-.contact-card,
-.additional-poc-card{
+#dealership-info .primary-contacts-grid .contact-card,
+#dealership-info .primary-contacts-grid .additional-poc-card{
   width:100%;
   min-width:0;
 }
@@ -620,22 +646,6 @@ main{
 }
 
 /* ---- Contact-card field widths (ONLY inside primary contacts grid) ---- */
-#dealership-info{
-  --di-input-width:225px;
-  --di-gap:26px;
-}
-#dealership-info .primary-contacts-grid{
-  gap:var(--di-gap);
-}
-
-/* Primary Contact cards — +1/8 wider */
-#dealership-info .primary-contacts-grid .mini-card{
-  max-width:585px;        /* was 520px */
-  width:100%;
-  justify-self:center;
-}
-
-/* All right-side fields in contact cards */
 #dealership-info .primary-contacts-grid
   .checklist-row input[type="text"],
 #dealership-info .primary-contacts-grid
