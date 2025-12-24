@@ -1,9 +1,11 @@
- /* =======================================================
+/* =======================================================
    myKaarma Interactive Training Checklist — CLEANED CSS
    ✅ Single source of truth
    ✅ Preserves: Support Tickets + DMS + Primary Contacts + Equal-height 2-col cards
    ✅ Preserves: Notes Linking (📝) + Notes Pop-out Expander (⤢) + Modal
    ✅ Preserves: Table Notes column + Table Popup Expand (⤢)
+   ✅ FIXED: Dealership Address + Map button styling + Map sizing
+   ✅ FIXED: Training Date inputs match all other text inputs (size + look)
    ======================================================= */
 
 /* =======================
@@ -253,10 +255,7 @@ main{
   font-size:13px;
   color:#555;
 }
-
-#dms-integration .page-subtitle{
-  margin-bottom:40px;
-}
+#dms-integration .page-subtitle{ margin-bottom:40px; }
 
 /* Reset This Page */
 .page-section .clear-page-btn{
@@ -393,6 +392,13 @@ main{
   height:34px;
 }
 
+/* Make DATE inputs render like the others (no native “pill”/weird padding) */
+.section-block .checklist-row input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  box-shadow:none;
+}
+
 /* Textareas */
 .section-block textarea{
   width:100% !important;
@@ -434,12 +440,6 @@ main{
   width:auto !important;
   max-width:none !important;
 }
-
-/* IMPORTANT:
-   We do NOT hide row-actions globally, because that would remove 📝
-   for any row that gets wrapped. Only hide on rows you explicitly mark.
-*/
-/* Integrated-plus rows still need row-actions for 📝 */
 .checklist-row.integrated-plus > .row-actions{
   display:inline-flex !important;
   align-items:center !important;
@@ -479,7 +479,6 @@ main{
   border-color:var(--orange);
   background:#fff;
 }
-
 .mk-note-jump{
   box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
   transition:box-shadow .2s ease;
@@ -514,7 +513,7 @@ main{
   flex:0 0 34px;
   width:34px;
   height:34px;
-  margin-left:-1px;
+  margin-left:-1px; /* keep attached */
   background:var(--orange);
   color:#fff;
   border:1px solid var(--orange);
@@ -533,51 +532,113 @@ main{
   transform:translateY(-1px);
 }
 
-/* ============================
-   DEALERSHIP INFO — Card sizing + field widths (FINAL)
-============================ */
+/* =======================================================
+   DEALERSHIP INFO PAGE FIXES
+   - Training Dates inputs match everything else (width + look)
+   - Primary Contacts: stable spacing + widths
+   - Dealership Address: input + Map button styled/attached + map sized
+======================================================= */
 
-#dealership-info{
-  /* 33% wider than before */
-  --di-input-width:225px;     /* was ~170px */
-  --di-gap:28px;
+/* Training dates rows align like normal rows */
+.training-dates-row,
+.onsite-training-dates-row{
+  align-items:flex-start !important;
+}
+.training-dates-row label,
+.onsite-training-dates-row label{
+  padding-top:7px !important;
+}
+
+/* Date stack uses the SAME width as other right-side fields on the page */
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+
+/* Date inputs look/size exactly like other inputs */
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important;
+
+  background:#f7f7f7 !important;
+  color:var(--ink) !important;
+
+  font-size:13px !important;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-shadow:none !important;
 }
 
 /* Primary Contacts grid */
-#dealership-info .primary-contacts-grid{
+.primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:var(--di-gap);
-  padding:var(--di-gap);
+  gap:18px;
   margin-top:10px;
 }
 
-/* Card size + inner spacing */
-#dealership-info .primary-contacts-grid .mini-card{
-  width:100%;
-  max-width:520px;
-  justify-self:center;
-
-  padding:10px 12px 6px;
+/* Card */
+.mini-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
+  padding:14px 14px 6px;
 }
 
-/* Reduce indentation inside cards */
+/* keep mini-card rows consistent */
+.mini-card .checklist-row{
+  padding-left:18px;
+  padding-right:18px;
+}
+
+.contact-card,
+.additional-poc-card{
+  width:100%;
+  min-width:0;
+}
+
+/* ---- Primary contacts indentation (scoped) ---- */
 #dealership-info .primary-contacts-grid .checklist-row{
-  padding-left:12px !important;
-  padding-right:12px !important;
+  padding-left:16px !important;
 }
 #dealership-info .primary-contacts-grid .checklist-row.indent-sub{
-  padding-left:24px !important;
+  padding-left:30px !important;
 }
 
-/* ============================
-   CONTACT CARD INPUT WIDTHS
-============================ */
+/* ---- Contact-card field widths (ONLY inside primary contacts grid) ---- */
+#dealership-info{
+  --di-input-width:225px; /* your “1/3 bigger” contact-card field width */
+  --di-gap:26px;          /* slightly tighter, cleaner */
+}
+#dealership-info .primary-contacts-grid{
+  gap:var(--di-gap);
+}
+
+/* Make the cards a touch narrower (more breathing room between them) */
+#dealership-info .primary-contacts-grid .mini-card{
+  max-width:520px;
+  justify-self:center;
+}
 
 /* All right-side fields in contact cards */
 #dealership-info .primary-contacts-grid
@@ -588,70 +649,29 @@ main{
   .checklist-row input[type="tel"],
 #dealership-info .primary-contacts-grid
   .checklist-row select{
-
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
-
-  height:34px !important;        /* unchanged */
-}
-
-/* Base Additional POC (with + button) */
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-
-  flex:0 0 calc(var(--di-input-width) - 34px) !important;
-  width:calc(var(--di-input-width) - 34px) !important;
-  max-width:calc(var(--di-input-width) - 34px) !important;
-}
-
-/* ============================
-   TRAINING DATES — MATCH CONTACT INPUTS
-============================ */
-
-#dealership-info .training-dates-row .date-stack,
-#dealership-info .onsite-training-dates-row .date-stack{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  margin-left:auto !important;
-}
-
-#dealership-info .training-dates-row .date-stack input[type="date"],
-#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
   height:34px !important;
 }
 
-/* Responsive */
-@media (max-width:900px){
-  #dealership-info .primary-contacts-grid{
-    grid-template-columns:1fr;
-  }
-}
-
-/* -------------------------------------------------------
-   Additional POC BASE row (has + button)
-   Keep input + button perfectly connected
-------------------------------------------------------- */
+/* Base Additional POC (with + button) — keep attached and same visual width */
 #dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus input[type="text"]{
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
   flex:0 0 calc(var(--di-input-width) - 34px) !important;
   width:calc(var(--di-input-width) - 34px) !important;
   max-width:calc(var(--di-input-width) - 34px) !important;
 }
-
 #dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"] .checklist-row.integrated-plus > .add-row{
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus > .add-row{
   flex:0 0 34px !important;
   width:34px !important;
-  margin-left:-1px !important;     /* ensures no “separation” gap */
+  margin-left:-1px !important; /* no separation */
 }
 
-/* -------------------------------------------------------
-   Additional POC CLONES (no + button): fully rounded
-------------------------------------------------------- */
+/* Additional POC clones (no + button): fully rounded */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
 #dealership-info .primary-contacts-grid
@@ -668,41 +688,99 @@ main{
   height:34px !important;
 }
 
-/* -------------------------------------------------------
-   Responsive: stack cards on small screens
-------------------------------------------------------- */
-@media (max-width:900px){
-  #dealership-info .primary-contacts-grid{
-    grid-template-columns:1fr;
-  }
+/* =======================
+   DEALERSHIP ADDRESS (FIXED)
+   - Map button styled + attached
+   - Map fills the card nicely
+======================= */
+#dealership-address-card .checklist-row{
+  display:grid !important;
+  grid-template-columns:minmax(260px, 1fr) auto !important;
+  column-gap:18px !important;
+  align-items:center !important;
 }
 
-/* =========================================
-   DEALERSHIP INFO — Make DATE inputs match all other inputs
-   (size, background, border, radius, padding)
-========================================= */
-#dealership-info .training-dates-row .date-stack input[type="date"],
-#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
+/* keep input+button from stretching weirdly */
+#dealership-address-card .address-input-wrap{
+  width:min(520px, 100%) !important;
+  max-width:520px !important;
+  margin-left:auto !important;
 
-  width:100% !important;                /* uses the date-stack width */
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+
+  height:34px !important;
   padding:7px 10px !important;
 
   border:1px solid var(--border) !important;
-  border-radius:var(--radius-sm) !important;
-
   background:#f7f7f7 !important;
-  color:var(--ink) !important;
 
-  font-size:13px !important;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
 
-  /* remove the “pill / native” look */
-  -webkit-appearance:none !important;
-  appearance:none !important;
-  box-shadow:none !important;
+/* Map button — force the orange style (this is what broke on you) */
+#dealership-address-card .address-input-wrap .small-map-btn,
+#dealership-address-card .address-input-wrap button{
+  flex:0 0 44px !important;
+  width:44px !important;
+  min-width:44px !important;
+  height:34px !important;
+
+  margin-left:-1px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  cursor:pointer !important;
+  padding:0 !important;
+
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+}
+#dealership-address-card .address-input-wrap .small-map-btn:hover,
+#dealership-address-card .address-input-wrap button:hover{
+  background:#ff8b42 !important;
+}
+
+/* Map wrapper + iframe (works even if your iframe lacks .map-frame class) */
+#dealership-address-card .map-wrapper{
+  margin:16px 0 8px !important;
+  border-radius:var(--radius-lg) !important;
+  overflow:hidden !important;
+  border:1px solid var(--border) !important;
+  background:#f8f8f8 !important;
+}
+#dealership-address-card .map-frame,
+#dealership-address-card .map-wrapper iframe{
+  width:100% !important;
+  height:440px !important;
+  border:0 !important;
+  display:block !important;
+}
+
+.map-helper-text{
+  margin:6px 10px 10px;
+  font-size:12px;
+  color:#555;
 }
 
 /* =======================
@@ -747,29 +825,22 @@ main{
 
 /* =======================================================
    TRAINERS — Additional Trainer clones
-   - cloned rows have NO + button, so input should be fully rounded
-   - match size/width to other right-side fields
 ======================================================= */
-
-/* Any additional trainer row you add (cloned) */
 #trainers-deployment .trainer-clone input[type="text"],
 #trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   height:34px !important;
   min-height:34px !important;
   max-height:34px !important;
 
-  /* full pill/rounded like other inputs */
   border-top-right-radius:var(--radius-sm) !important;
   border-bottom-right-radius:var(--radius-sm) !important;
   border-top-left-radius:var(--radius-sm) !important;
   border-bottom-left-radius:var(--radius-sm) !important;
 
-  /* match other right-side field sizing */
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
 
-  /* same look as your other inputs */
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
@@ -870,7 +941,7 @@ main{
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
-/* Table footer: left + right */
+/* Table footer */
 .table-footer{
   width:100%;
   background:#f5f5f5;
@@ -962,15 +1033,10 @@ main{
   text-align:center !important;
   vertical-align:middle;
 }
-
-/* Use same bubble button style as note-link-btn */
-.training-table .mk-table-note-btn{
-  width:20px;
-  height:20px;
-}
+.training-table .mk-table-note-btn{ width:20px; height:20px; }
 
 /* =======================
-   TABLE EXPAND (⤢) button in footer
+   TABLE EXPAND (⤢)
 ======================= */
 .mk-table-expand-btn{
   width:16px;
@@ -1027,6 +1093,21 @@ main{
 #support-tickets .ticket-group-inner,
 #support-tickets .ticket-group-inner *{ font-weight:400; }
 #support-tickets .ticket-row label{ font-weight:500 !important; }
+
+#support-tickets .ticket-group-inner{
+  font-size:13px;
+  line-height:1.4;
+}
+#support-tickets .ticket-row label{
+  font-size:13px !important;
+  font-weight:500 !important;
+  color:#222;
+}
+#support-tickets input[type="text"],
+#support-tickets select,
+#support-tickets textarea{
+  font-size:13px !important;
+}
 
 #support-tickets .ticket-row{
   display:grid;
@@ -1103,10 +1184,11 @@ main{
   align-items:start;
   border-bottom:none;
   padding:10px 0 18px;
+  margin-top:10px;
 }
 #support-tickets .ticket-row.ticket-summary-row label{
   display:block;
-  margin:0 0 8px 0;
+  margin:0 0 6px 0;
 }
 #support-tickets .ticket-row.ticket-summary-row textarea{
   width:100%;
@@ -1119,25 +1201,9 @@ main{
   background:#f7f7f7;
   resize:vertical;
   margin:0 0 18px 0 !important;
-}
-
-/* =======================================================
-   SUPPORT TICKETS — Summary spacing fix
-======================================================= */
-
-#support-tickets .ticket-row.ticket-summary-row{
-  margin-top:10px;             /* match spacing above other rows */
-}
-
-#support-tickets .ticket-row.ticket-summary-row label{
-  margin-bottom:6px;           /* consistent label → field spacing */
-}
-
-#support-tickets .ticket-row.ticket-summary-row textarea{
   margin-top:0 !important;
 }
 
-/* Disclaimer */
 #support-tickets .ticket-disclaimer{
   margin:18px 0 0 !important;
   font-size:12px;
@@ -1149,51 +1215,26 @@ main{
   cursor:not-allowed;
 }
 
-/* =======================================================
-   SUPPORT TICKETS — Typography cleanup
-   Reduce visual noise & match rest of app
-======================================================= */
-
-#support-tickets .ticket-group-inner{
-  font-size:13px;              /* match checklist/table text */
-  line-height:1.4;
-}
-
-#support-tickets .ticket-row label{
-  font-size:13px !important;
-  font-weight:500 !important;  /* lighter than default */
-  color:#222;
-}
-
-#support-tickets input[type="text"],
-#support-tickets select,
-#support-tickets textarea{
-  font-size:13px !important;
-}
-
 /* =======================
    DMS INTEGRATION
 ======================= */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:48px;                 /* ~1 inch gap H + V */
+  gap:48px;
   margin-top:14px;
-  align-items:start;        /* prevents stretch weirdness */
+  align-items:start;
 }
-
-/* bring card structure back + make skinnier */
 #dms-integration .dms-card{
-  width:520px;              /* skinnier card */
+  width:520px;
   max-width:100%;
-  margin:0 auto;            /* centers in each column */
+  margin:0 auto;
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   background:#fff;
   box-shadow:var(--shadow);
   overflow:hidden;
 }
-
 #dms-integration .dms-card-header{
   background:var(--orange) !important;
   color:#fff !important;
@@ -1204,15 +1245,12 @@ main{
   gap:12px !important;
   border-bottom:1px solid var(--border) !important;
 }
-
 #dms-integration .dms-name{
   font-weight:900 !important;
   font-size:16px !important;
   color:#fff !important;
   letter-spacing:.3px;
 }
-
-/* Header chips */
 #dms-integration .dms-chip{
   font-size:11px !important;
   font-weight:900 !important;
@@ -1223,16 +1261,13 @@ main{
   border:1px solid rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-
 #dms-integration .dms-chip-push{
   background:rgba(255,255,255,0.18) !important;
   border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-
-/* Stronger + higher-specificity Pull header chip */
 #dms-integration .dms-card-header .dms-chip.dms-chip-pull{
-  background:rgba(205,220,57,0.45) !important;  /* more visible green */
+  background:rgba(205,220,57,0.45) !important;
   border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
@@ -1242,64 +1277,39 @@ main{
   padding:10px 12px 14px;
   margin:0;
 }
-
-/* Each row */
 #dms-integration .dms-list li{
   position:relative;
   padding:10px 10px;
-  padding-right:160px;      /* reserve a fixed badge lane */
+  padding-right:160px;
   border-bottom:1px solid #efefef;
 }
 #dms-integration .dms-list li:last-child{ border-bottom:none; }
+#dms-integration .dms-row-top{ display:block; margin-bottom:4px; }
+#dms-integration .dms-field{ font-weight:800; color:#111827; font-size:13px; }
+#dms-integration .dms-list p{ margin:0; font-size:12px; color:#6b7280; }
 
-#dms-integration .dms-row-top{
-  display:block;
-  margin-bottom:4px;
-}
-
-#dms-integration .dms-field{
-  font-weight:800;
-  color:#111827;
-  font-size:13px;
-}
-
-#dms-integration .dms-list p{
-  margin:0;
-  font-size:12px;
-  color:#6b7280;
-}
-
-/* =======================================================
-   BODY BADGES (right side)
-   - fixed-width lane so every badge lines up perfectly
-   - center text inside each badge
-======================================================= */
+/* BODY BADGES */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
-  right:52px;                 /* center of the badge lane */
+  right:52px;
   top:50%;
   transform:translate(50%, -50%);
-
   display:inline-flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-
-  padding:3px 8px;            /* original badge size */
+  padding:3px 8px;
   font-size:10px;
   font-weight:600;
   letter-spacing:0.02em;
   text-transform:uppercase;
-
   border-radius:999px;
   border:1px solid var(--border);
   background:#f7f7f7;
   color:#111827;
-
   white-space:nowrap;
 }
 
-/* Light color variants (BODY ONLY) */
 #dms-integration .dms-list .dms-tag-auto{
   border-color:rgba(34,197,94,0.35);
   background:rgba(34,197,94,0.12);
@@ -1404,7 +1414,6 @@ main{
   z-index:99999;
 }
 #mkNotesModal.open{ display:block; }
-
 #mkNotesModal .mk-modal-backdrop{
   position:absolute;
   inset:0;
@@ -1468,7 +1477,6 @@ main{
 
 /* =======================
    TABLE MODAL (mkTableModal)
-   (JS also injects patches for sizing/scroll)
 ======================= */
 #mkTableModal{
   position:fixed;
@@ -1477,7 +1485,6 @@ main{
   z-index:99998;
 }
 #mkTableModal.open{ display:block; }
-
 #mkTableModal .mk-modal-backdrop{
   position:absolute;
   inset:0;
@@ -1526,7 +1533,6 @@ main{
   line-height:1;
 }
 #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
-
 #mkTableModal .mk-modal-content{
   padding:16px 16px 18px;
   overflow:auto;
@@ -1537,8 +1543,6 @@ main{
   flex-direction:column;
   gap:18px;
 }
-
-/* Make popup table scroll horizontally like page */
 #mkTableModal .mk-table-scroll{
   width:100%;
   overflow-x:auto;
@@ -1551,8 +1555,6 @@ main{
   width:max-content;
   min-width:100%;
 }
-
-/* Popup notes card textarea */
 #mkTableModal .mk-modal-notes textarea{
   width:100% !important;
   min-height:220px;
@@ -1579,7 +1581,7 @@ main{
     grid-template-columns:1fr;
   }
 
-  .primary-contacts-grid{ grid-template-columns:1fr; }
+  #dealership-info .primary-contacts-grid{ grid-template-columns:1fr; }
   #dms-integration .dms-grid{ grid-template-columns:1fr; }
 
   #support-tickets #openTicketsContainer,
