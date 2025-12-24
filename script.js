@@ -1734,7 +1734,7 @@ function openTableModalForTable(originalTable, titleText){
   modal.classList.add("open");
 }
 
-function ensureExpandBtnInTableFooter(table){
+function ensureExpandBtnInTableFooter(table) {
   const container = table.closest(".table-container");
   if (!container) return;
 
@@ -1758,15 +1758,131 @@ function ensureExpandBtnInTableFooter(table){
 
   footer.appendChild(rightWrap);
 
-  btn.addEventListener("click", (e)=>{
+  btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Try to use the section header text as the modal title
-    const sectionHeader = container.previousElementSibling;
-    const t = safeTrim(sectionHeader?.textContent || "Table");
-    openTableModalForTable(table, t);
-  });
+    // ✅ Use the actual card title (h2) as the popup title
+    const card = container.closest(".section-block");
+    const h2 = qs("h2", card);
+    const title = safeTrim(h2?.textContent || "Table");
+
+  function openTableModalForTable(originalTable, titleText) {
+  const modal = ensureTableModal();
+  const title = qs("#mkTableModalTitle", modal);
+  const stack = qs("#mkTableModalStack", modal);
+
+  title.textContent = titleText || "Table";
+  stack.innerHTML = "";
+
+  _mkTableModalContextTable = originalTable;
+
+  // ✅ Card title should match the actual table title (NOT "Table")
+  const tableCard = buildCard(titleText || "Table");
+  const tableBody = qs(".mk-card-body", tableCard);
+
+  // ✅ Clone the FULL table container so it sits correctly inside the card
+  const originalContainer = originalTable.closest(".table-container");
+  let containerClone;
+
+  if (originalContainer) {
+    containerClone = originalContainer.cloneNode(true);
+  } else {
+    // fallback (shouldn't happen, but keeps it safe)
+    containerClone = document.createElement("div");
+    containerClone.className = "table-container";
+    containerClone.appendChild(originalTable.cloneNode(true));
+  }
+
+  // Grab the cloned table inside the cloned container
+  const tableClone = qs("table", containerClone);
+  if (tableClone) {
+    tableClone.classList.add("training-table", "mk-popup-table");
+  }
+
+  // Put clone into the card body
+  tableBody.appendChild(containerClone);
+
+  // Re-wire persistence in popup clone
+  if (tableClone) {
+    qsa("input, select, textarea", tableClone).forEach((el) => {
+      ensureUID(el);
+      loadField(el);
+      if (el.tagName === "SELECT") applySelectGhost(el);
+      if (el.type === "date") applyDateGhost(el);
+      el.addEventListener("input", () => saveField(el));
+      el.addEventListener("change", () => saveField(el));
+    });
+
+    tagNameCellsInTable(tableClone);
+  }
+
+  // Ensure notes column/buttons exist in the popup table
+  initTableNotesButtons(tableCard);
+
+  // ✅ Popup "+" should add row to BOTH real + popup table
+  const popupAddBtn = qs(".table-footer .add-row", containerClone);
+  if (popupAddBtn && tableClone) {
+    popupAddBtn.addEventListener("click", () => {
+      const realTbody = originalTable.tBodies?.[0];
+      const cloneTbody = tableClone.tBodies?.[0];
+      if (!realTbody || !cloneTbody) return;
+
+      const realLast = realTbody.querySelector("tr:last-child");
+      const cloneLast = cloneTbody.querySelector("tr:last-child");
+      if (!realLast || !cloneLast) return;
+
+      const realNew = cloneTrainingRow(realLast);
+      const cloneNew = cloneTrainingRow(cloneLast);
+
+      realTbody.appendChild(realNew);
+      cloneTbody.appendChild(cloneNew);
+
+      requestAnimationFrame(() => {
+        initTableNotesButtons(document);
+        tagNameCellsInTable(originalTable);
+        tagNameCellsInTable(tableClone);
+        updateNoteIconStates(document);
+      });
+    });
+  }
+
+  // -------- Notes card synced to real notes --------
+  const realNotesBlock = findNotesBlockForTable(originalTable);
+  const realTA = realNotesBlock?.querySelector("textarea");
+  const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
+
+  // Clicking bubble in popup table inserts into popup notes (ordered by real table)
+  if (tableClone) {
+    tableClone.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target.closest(".mk-table-note-btn");
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const cloneTr = btn.closest("tr");
+        if (!cloneTr) return;
+
+        const idx = getTbodyRowIndex(cloneTr);
+        const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
+        if (!origTr) return;
+
+        const key = getRowKeyForTableContext(originalTable, origTr);
+        if (!key) return;
+
+        insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
+      },
+      { passive: false }
+    );
+  }
+
+  stack.appendChild(tableCard);
+  stack.appendChild(notesCard);
+
+  modal.classList.add("open");
 }
 
 function initTablePopupExpandButtons(root=document){
