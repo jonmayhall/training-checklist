@@ -723,10 +723,14 @@ main{
 
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
+  font-size:13px !important;
 
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
   border-top-right-radius:0 !important;
   border-bottom-right-radius:0 !important;
 }
+
 
 /* Map button — force the orange style (this is what broke on you) */
 #dealership-address-card .address-input-wrap .small-map-btn,
