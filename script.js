@@ -1,9 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — script.js
    ✅ FIXED
-   - No double-binding (no "adds two" bug)
+   - No double-binding (stops "adds two" bug + duplicate global listeners)
    - No delete buttons added
-   - Table popups clone REAL table card + REAL notes card (same look)
+   - Table popups: clean modal + TWO real cards inside (Table card + Notes card)
+     * Fits screen (no run-off)
+     * Table scrolls horizontally INSIDE table card only
+     * Notes never cause right-scroll
    - Adds 📝 buttons to 2x2 checklist rows (auto)
    - Notes bullets ordered + spaced
    - Training tables: bullet label = Name
@@ -73,7 +76,6 @@
 
   /* -----------------------------
      PLACEHOLDER / GHOST CLASSING
-     (Your CSS should style .is-placeholder light grey)
   ----------------------------- */
   function applyPlaceholderClassToSelect(sel) {
     const opt = sel.selectedOptions?.[0];
@@ -96,6 +98,9 @@
   }
 
   function initPlaceholderStyling() {
+    // ✅ Prevent global listeners from being bound twice (this was a common source of double-actions)
+    if (!bindOnce(document.body, "placeholder_global")) return;
+
     $$("select").forEach(applyPlaceholderClassToSelect);
     $$("input").forEach(applyPlaceholderClassToInput);
     $$("textarea").forEach(applyPlaceholderClassToTextarea);
@@ -498,179 +503,225 @@
   }
 
   /* -----------------------------
-     TABLE POPUP MODAL — CLONE REAL CARD LOOK
-     - Clones the real .table-container and the real related notes .section-block
-     - Uses your classes (so it matches exactly)
+     TABLE POPUP MODAL — CLEAN + FITS SCREEN
+     (Keep this function name + modalEl var)
   ----------------------------- */
   let modalEl = null;
 
- function ensureModal() {
-  if (modalEl) return modalEl;
+  function ensureModal() {
+    if (modalEl) return modalEl;
 
-  modalEl = document.createElement("div");
-  modalEl.id = "mkTableModal";
-  modalEl.style.position = "fixed";
-  modalEl.style.inset = "0";
-  modalEl.style.zIndex = "9999";
-  modalEl.style.display = "none";
-  modalEl.style.background = "rgba(0,0,0,0.55)";
-  modalEl.style.padding = "18px";
-  modalEl.style.overflow = "auto";
+    modalEl = document.createElement("div");
+    modalEl.id = "mkTableModal";
+    modalEl.style.position = "fixed";
+    modalEl.style.inset = "0";
+    modalEl.style.zIndex = "9999";
+    modalEl.style.display = "none";
+    modalEl.style.background = "rgba(0,0,0,0.55)";
+    modalEl.style.padding = "18px";
+    modalEl.style.boxSizing = "border-box";
 
-  modalEl.innerHTML = `
-    <div id="mkTableModalShell" style="
-      max-width: 1400px;
-      margin: 0 auto;
-    ">
-      <!-- Title bar (simple) -->
-      <div id="mkTableModalBar" style="
-        background:#fff;
-        border-radius:16px;
-        padding:14px 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        margin-bottom:14px;
+    // Centered modal container; the CONTENT area scrolls vertically
+    modalEl.innerHTML = `
+      <div id="mkTableModalCenter" style="
+        width: 100%;
+        min-height: calc(100vh - 36px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       ">
-        <div id="mkTableModalTitle" style="font-weight:800; font-size:22px;"></div>
-        <div style="display:flex; gap:10px;">
-          <button type="button" id="mkTableModalExpand" title="Expand" style="
-            width:40px;height:40px;border-radius:12px;
-            border:1px solid rgba(0,0,0,0.12);
-            background:#fff;cursor:pointer;
-            font-size:18px;
-          ">↗</button>
-          <button type="button" id="mkTableModalClose" title="Close" style="
-            width:40px;height:40px;border-radius:12px;
-            border:1px solid rgba(0,0,0,0.12);
-            background:#fff;cursor:pointer;
-            font-size:22px; line-height:1;
-          ">×</button>
+        <div id="mkTableModalPanel" style="
+          width: min(1400px, 96vw);
+          max-height: 90vh;
+          background: #ffffff;
+          border-radius: 18px;
+          box-shadow: 0 18px 60px rgba(0,0,0,.35);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        ">
+          <!-- Header -->
+          <div id="mkTableModalBar" style="
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+          ">
+            <div id="mkTableModalTitle" style="font-weight: 800; font-size: 20px;"></div>
+            <div style="display:flex; gap:10px;">
+              <button type="button" id="mkTableModalExpand" title="Expand" style="
+                width:40px;height:40px;border-radius:12px;
+                border:1px solid rgba(0,0,0,0.12);
+                background:#fff;cursor:pointer;
+                font-size:18px;
+              ">⤢</button>
+              <button type="button" id="mkTableModalClose" title="Close" style="
+                width:40px;height:40px;border-radius:12px;
+                border:1px solid rgba(0,0,0,0.12);
+                background:#fff;cursor:pointer;
+                font-size:22px; line-height:1;
+              ">×</button>
+            </div>
+          </div>
+
+          <!-- Body: vertical scroll; holds TWO cards -->
+          <div id="mkTableModalBody" style="
+            padding: 16px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          "></div>
         </div>
       </div>
+    `;
 
-      <!-- IMPORTANT: This is NOT a new “card”.
-           We let your real .section-block cards be the UI. -->
-      <div id="mkTableModalCards" style="display:grid; gap:16px;"></div>
-    </div>
-  `;
+    document.body.appendChild(modalEl);
 
-  document.body.appendChild(modalEl);
+    $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
 
-  $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
+    $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
+      const panel = $("#mkTableModalPanel", modalEl);
+      if (!panel) return;
+      const full = panel.dataset.full === "true";
+      panel.dataset.full = (!full).toString();
+      panel.style.width = full ? "min(1400px, 96vw)" : "98vw";
+      panel.style.maxHeight = full ? "90vh" : "95vh";
+    });
 
-  $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
-    const shell = $("#mkTableModalShell", modalEl);
-    if (!shell) return;
-    const full = shell.dataset.full === "true";
-    shell.dataset.full = (!full).toString();
-    shell.style.maxWidth = full ? "1400px" : "96vw";
-  });
+    modalEl.addEventListener("click", (e) => {
+      if (e.target === modalEl) closeModal();
+    });
 
-  modalEl.addEventListener("click", (e) => {
-    if (e.target === modalEl) closeModal();
-  });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
+    });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
-  });
-
-  return modalEl;
-}
+    return modalEl;
+  }
 
   function closeModal() {
     if (!modalEl) return;
     modalEl.style.display = "none";
-    const cards = $("#mkTableModalCards", modalEl);
-    if (cards) cards.innerHTML = "";
+    const body = $("#mkTableModalBody", modalEl);
+    if (body) body.innerHTML = "";
   }
 
   function findRelatedNotesBlock(tableContainer) {
-    // Prefer data-notes-target from the notes icon buttons in this table
     const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
     const id = btn?.dataset?.notesTarget;
     if (id && $("#" + id)) return $("#" + id);
 
-    // fallback: within same page-section, pick the nearest notes block after this table
     const section = tableContainer.closest(".page-section");
     if (!section) return null;
     const all = $$("[id^='notes-'].section-block", section);
     return all[0] || null;
   }
 
- function openTablePopup(tableContainer) {
-  const modal = ensureModal();
-  const cards = $("#mkTableModalCards", modal);
-  const titleEl = $("#mkTableModalTitle", modal);
-  if (!cards || !titleEl) return;
+  function openTablePopup(tableContainer) {
+    const modal = ensureModal();
+    const body = $("#mkTableModalBody", modal);
+    const titleEl = $("#mkTableModalTitle", modal);
+    if (!body || !titleEl) return;
 
-  // Title = same label you see above the table on the page
-  const header =
-    tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
-    tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
-    tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
-    "Table";
+    const header =
+      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
+      tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
+      tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
+      "Table";
 
-  titleEl.textContent = header;
+    titleEl.textContent = header;
 
-  // 1) Build a REAL "section-block" card for the TABLE (so it matches page)
-  const tableCard = document.createElement("div");
-  tableCard.className = "section-block";
-  tableCard.innerHTML = `<h2>${header}</h2>`;
+    // ---------- Card 1: TABLE (real look via your section-block/table styles) ----------
+    const tableCard = document.createElement("div");
+    tableCard.className = "section-block";
 
-  // Clone the actual table-container (keeps your table styling)
-  const tableClone = tableContainer.cloneNode(true);
+    const h2 = document.createElement("h2");
+    h2.textContent = header;
+    tableCard.appendChild(h2);
 
-  // Remove footer controls in popup (no add/expand inside popup)
-  $$(".table-footer", tableClone).forEach((el) => el.remove());
+    const tableClone = tableContainer.cloneNode(true);
 
-  // Give scroll-wrapper a sane height in popup, but keep your styling
-  const scrollWrap = $(".scroll-wrapper", tableClone);
-  if (scrollWrap) {
-    scrollWrap.style.maxHeight = "45vh";
-    scrollWrap.style.overflow = "auto";
-  }
+    // Remove footer controls in popup (no add/expand inside popup)
+    $$(".table-footer", tableClone).forEach((el) => el.remove());
 
-  tableCard.appendChild(tableClone);
-
-  // 2) Clone the REAL related notes card (your section-block already)
-  const notesBlock = findRelatedNotesBlock(tableContainer);
-  const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
-
-  // Link popup notes textarea <-> real textarea (2-way)
-  if (notesBlock && notesClone) {
-    const realTA = $("textarea", notesBlock);
-    const modalTA = $("textarea", notesClone);
-    if (realTA && modalTA) {
-      modalTA.value = realTA.value;
-
-      modalTA.addEventListener("input", () => {
-        realTA.value = modalTA.value;
-        applyPlaceholderClassToTextarea(realTA);
-        persistAllDebounced();
-      });
-
-      const syncBack = () => {
-        if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
-      };
-      realTA.addEventListener("input", syncBack);
-      realTA.addEventListener("change", syncBack);
+    // Make ONLY table area horizontally scrollable and contained
+    const scrollWrap = $(".scroll-wrapper", tableClone);
+    if (scrollWrap) {
+      scrollWrap.style.maxHeight = "44vh";
+      scrollWrap.style.overflowY = "auto";
+      scrollWrap.style.overflowX = "auto";         // ✅ horizontal only within table
+      scrollWrap.style.paddingBottom = "6px";
+    } else {
+      // fallback: if no scroll-wrapper, prevent blowout
+      tableClone.style.overflowX = "auto";
     }
+
+    // Prevent table from forcing the modal wider than the screen
+    const tbl = $("table", tableClone);
+    if (tbl) {
+      tbl.style.width = "max-content";
+      tbl.style.minWidth = "100%";
+    }
+
+    tableCard.appendChild(tableClone);
+
+    // ---------- Card 2: NOTES (real notes card clone; NO horizontal scroll) ----------
+    const notesBlock = findRelatedNotesBlock(tableContainer);
+    const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
+
+    if (notesClone) {
+      // hard-stop any right scroll from notes
+      notesClone.style.overflow = "hidden";
+      const ta = $("textarea", notesClone);
+      if (ta) {
+        ta.style.width = "100%";
+        ta.style.maxWidth = "100%";
+        ta.style.boxSizing = "border-box";
+        ta.style.overflowX = "hidden";
+        ta.style.whiteSpace = "pre-wrap";
+        ta.style.wordBreak = "break-word";
+      }
+    }
+
+    // Link popup notes textarea <-> real textarea (2-way)
+    if (notesBlock && notesClone) {
+      const realTA = $("textarea", notesBlock);
+      const modalTA = $("textarea", notesClone);
+      if (realTA && modalTA) {
+        modalTA.value = realTA.value;
+
+        if (bindOnce(modalTA, "modal_notes_sync")) {
+          modalTA.addEventListener("input", () => {
+            realTA.value = modalTA.value;
+            applyPlaceholderClassToTextarea(realTA);
+            persistAllDebounced();
+          });
+
+          const syncBack = () => {
+            if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
+          };
+          if (bindOnce(realTA, "real_notes_syncback")) {
+            realTA.addEventListener("input", syncBack);
+            realTA.addEventListener("change", syncBack);
+          }
+        }
+      }
+    }
+
+    // Render
+    body.innerHTML = "";
+    body.appendChild(tableCard);
+    if (notesClone) body.appendChild(notesClone);
+
+    // Notes buttons inside popup should still write to REAL notes target
+    const realNotesId = notesBlock?.id;
+    bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
+
+    modal.style.display = "block";
   }
-
-  // Render
-  cards.innerHTML = "";
-  cards.appendChild(tableCard);
-  if (notesClone) cards.appendChild(notesClone);
-
-  // Notes buttons in popup should still write to the REAL notes target
-  const realNotesId = notesBlock?.id;
-  bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
-
-  modal.style.display = "block";
-}
 
   function initTableExpandButtons() {
     $$(".table-container").forEach((tc) => {
@@ -684,7 +735,7 @@
         expandBtn.type = "button";
         expandBtn.className = "expand-table-btn";
         expandBtn.title = "Expand table";
-        expandBtn.textContent = "↗";
+        expandBtn.textContent = "⤢";
         footer.appendChild(expandBtn);
       }
 
@@ -731,7 +782,6 @@
         return opcode || "Opcode";
       }
 
-      // Training tables: Name is first text input in the row
       const nameInput = tr.querySelector("td input[type='text']");
       const name = nameInput?.value?.trim();
       return name || "Name";
@@ -811,8 +861,6 @@
 
   /* -----------------------------
      AUTO-ADD 📝 BUTTONS TO 2x2 CARDS
-     - Only for .checklist-row that are NOT tables and NOT inside notes cards
-     - Targets the matching "Notes — ..." card in the same two-col grid
   ----------------------------- */
   function ensureElementId(el, prefix = "auto-notes") {
     if (el.id) return el.id;
@@ -835,15 +883,17 @@
       const notesTA = $("textarea", notesBlock);
       if (!notesTA) return;
 
-      // Left block (questions) = first non-notes block
       const questionBlock = blocks.find((b) => b !== notesBlock);
       if (!questionBlock) return;
 
       $$(".checklist-row", questionBlock).forEach((row) => {
-        if (row.querySelector(".notes-icon-btn")) return;       // already has
-        if (row.closest("table")) return;                       // no tables
-        if (row.closest(".notes-block")) return;                // don’t add inside notes
-        // Insert a notes button at far right
+        // skip “header-only” rows that have no input/select (usually just labels)
+        const hasControl = !!row.querySelector("input, select, textarea");
+        if (!hasControl) return;
+
+        if (row.querySelector(".notes-icon-btn")) return;
+        if (row.closest("table")) return;
+
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "notes-icon-btn";
@@ -851,12 +901,10 @@
         btn.setAttribute("aria-label", "Open Notes");
         btn.innerHTML = `<span class="notes-icon" aria-hidden="true">📝</span>`;
 
-        // Put at end of row
         row.appendChild(btn);
       });
     });
 
-    // bind newly injected buttons
     bindNotesButtonsWithin(document);
   }
 
@@ -915,7 +963,6 @@
       ta.addEventListener("change", parseAndStore);
     });
 
-    // hydrate from state on load
     const notesState = loadNotesState();
     Object.keys(notesState).forEach((id) => {
       if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
@@ -923,7 +970,7 @@
   }
 
   /* -----------------------------
-     SUPPORT TICKETS (kept simple)
+     SUPPORT TICKETS
   ----------------------------- */
   function ticketIsComplete(groupEl) {
     const num = $(".ticket-number-input", groupEl)?.value?.trim();
@@ -1009,10 +1056,11 @@
   }
 
   /* -----------------------------
-     BOOT (IMPORTANT: restore first, then bind once)
+     BOOT (restore first, then bind once)
   ----------------------------- */
   function boot() {
-    restoreAll();                 // ✅ restore first
+    restoreAll();
+
     initNav();
     initPlaceholderStyling();
     initAutosave();
@@ -1026,13 +1074,15 @@
     initTableExpandButtons();
 
     bindNotesButtonsWithin(document);
-    injectNotesButtonsIntoTwoColCards();   // ✅ adds missing 📝 on 2x2 cards
+    injectNotesButtonsIntoTwoColCards();
     initNotesTextareaParsing();
 
     initSupportTickets();
 
-    // final placeholder refresh after restores/injections
-    initPlaceholderStyling();
+    // refresh placeholder classes once after restore/injections
+    $$("select").forEach(applyPlaceholderClassToSelect);
+    $$("input").forEach(applyPlaceholderClassToInput);
+    $$("textarea").forEach(applyPlaceholderClassToTextarea);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
