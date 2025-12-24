@@ -19,8 +19,10 @@
    - ✅ Table Popup Expand (⤢) in footer right
    - ✅ Popup scroll left/right restored
    - ✅ Popup header cleanup:
-       - Modal header shows the section title
+       - Modal header shows the actual table card title
        - Inside cards use "Table" + "Notes" (no duplicate big title twice)
+   - ✅ Popup table is INSIDE the card (no floating on top)
+   - ✅ Notes buttons preserved everywhere
    - ✅ Training name cell layout fixed (checkbox left of input)
    ======================================================= */
 
@@ -867,7 +869,6 @@ function initPDF(){
 
 /* ===========================================================
    ✅ Question Notes Linking: single 📝 icon per checklist row
-   + bullet spacing
 =========================================================== */
 function isNotesCard(card){
   const h2 = card?.querySelector("h2");
@@ -986,13 +987,11 @@ function ensureRowActions(row){
   actions = document.createElement("div");
   actions.className = "row-actions";
 
-  // For integrated-plus rows: keep existing layout (do not wrap field)
   if (row.classList.contains("integrated-plus")){
     row.appendChild(actions);
     return actions;
   }
 
-  // For normal rows: move the right-side field into row-actions and append the button
   const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
   if (field) actions.appendChild(field);
   row.appendChild(actions);
@@ -1032,8 +1031,6 @@ function initNotesLinkingOption2Only(root=document){
       if (!textarea) return;
 
       const { lineStart } = insertNoteLineInOrder(textarea, row);
-
-      // enforce spacing every time (even if bullet already existed)
       applyNotesSpacing(textarea);
 
       saveField(textarea);
@@ -1064,7 +1061,6 @@ function updateNoteIconStates(root=document){
 
 /* ===========================================================
    ✅ Table Notes Column + Bullet Insert (Name / Opcode)
-   + bullet spacing
 =========================================================== */
 function thText(th){
   return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
@@ -1291,14 +1287,12 @@ function insertBulletLineInOrderForTable(notesTA, table, bulletLine){
     return { didInsert:false, lineStart:start };
   }
 
-  // If key not found, append with spacing
   if (myOrder === -1){
     const startPos = (notesTA.value || "").length;
     notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
     return { didInsert:true, lineStart:startPos };
   }
 
-  // Insert before first existing bullet that belongs AFTER this row
   let insertBefore = -1;
   for (let i=0; i<lines.length; i++){
     const t = (lines[i] || "").trim();
@@ -1336,7 +1330,6 @@ function insertBulletIntoRealNotes(table, bullet){
   const line = bullet.trim();
   const { lineStart } = insertBulletLineInOrderForTable(ta, table, line);
 
-  // enforce spacing for readability
   applyNotesSpacing(ta);
   saveField(ta);
 
@@ -1576,7 +1569,6 @@ function mountPopupNotesCard(titleText, sourceTA){
 
   _mkTableModalSourceTA = sourceTA;
 
-  // Sync popup TA -> real TA
   ta.addEventListener("input", ()=>{
     if (!_mkTableModalSourceTA) return;
     _mkTableModalSourceTA.value = ta.value;
@@ -1603,16 +1595,13 @@ function insertBulletIntoPopupNotes(modalNotesTA, bullet){
         return { lineStart:startPos };
       })();
 
-  // enforce spacing in the modal notes box too
   applyNotesSpacing(modalNotesTA);
 
-  // sync to real notes textarea
   if (_mkTableModalSourceTA){
     _mkTableModalSourceTA.value = modalNotesTA.value;
     saveField(_mkTableModalSourceTA);
   }
 
-  // jump to notes inside modal
   modalNotesTA.closest(".section-block")?.scrollIntoView({ behavior:"smooth", block:"start" });
 
   setTimeout(()=>{
@@ -1633,196 +1622,45 @@ function openTableModalForTable(originalTable, titleText){
   const title = qs("#mkTableModalTitle", modal);
   const stack = qs("#mkTableModalStack", modal);
 
-  // Modal header shows the section title
   title.textContent = titleText || "Table";
   stack.innerHTML = "";
 
   _mkTableModalContextTable = originalTable;
 
-  // -------- Table card (title "Table" so it doesn't duplicate modal header) --------
+  // Card title is "Table" (prevents duplicate big title twice)
   const tableCard = buildCard("Table");
   const tableBody = qs(".mk-card-body", tableCard);
 
-  const tableContainer = document.createElement("div");
-  tableContainer.className = "table-container";
+  // ✅ Clone FULL table container so it sits INSIDE the card and matches styling
+  const originalContainer = originalTable.closest(".table-container");
+  const containerClone = originalContainer ? originalContainer.cloneNode(true) : null;
+  if (!containerClone) return;
 
-  const tableClone = originalTable.cloneNode(true);
+  const tableClone = qs("table", containerClone);
+  if (!tableClone) return;
+
   tableClone.classList.add("training-table", "mk-popup-table");
 
-  const scrollWrap = document.createElement("div");
-  scrollWrap.className = "mk-table-scroll";
-  scrollWrap.appendChild(tableClone);
+  tableBody.appendChild(containerClone);
 
-  const footer = document.createElement("div");
-  footer.className = "table-footer";
-  footer.innerHTML = `<button type="button" class="add-row" title="Add Row">+</button>`;
-
-  tableContainer.appendChild(scrollWrap);
-  tableContainer.appendChild(footer);
-  tableBody.appendChild(tableContainer);
-
-  // Wire persistence in popup
-  qsa("input, select, textarea", tableClone).forEach(el=>{
+  // Re-wire persistence in popup clone
+  qsa("input, select, textarea", tableClone).forEach((el) => {
     ensureUID(el);
     loadField(el);
     if (el.tagName === "SELECT") applySelectGhost(el);
     if (el.type === "date") applyDateGhost(el);
-    el.addEventListener("input", ()=> saveField(el));
-    el.addEventListener("change", ()=> saveField(el));
+    el.addEventListener("input", () => saveField(el));
+    el.addEventListener("change", () => saveField(el));
   });
 
-  // Ensure clone has Notes column buttons and name-cell layout
-  initTableNotesButtons(tableCard);
   tagNameCellsInTable(tableClone);
 
-  // Modal Add Row: adds to BOTH real and clone tables
-  footer.querySelector(".add-row")?.addEventListener("click", ()=>{
-    const realTbody  = originalTable.tBodies?.[0];
-    const cloneTbody = tableClone.tBodies?.[0];
-    if (!realTbody || !cloneTbody) return;
-
-    const realLast  = realTbody.querySelector("tr:last-child");
-    const cloneLast = cloneTbody.querySelector("tr:last-child");
-    if (!realLast || !cloneLast) return;
-
-    const realNew  = cloneTrainingRow(realLast);
-    const cloneNew = cloneTrainingRow(cloneLast);
-
-    realTbody.appendChild(realNew);
-    cloneTbody.appendChild(cloneNew);
-
-    requestAnimationFrame(()=>{
-      initTableNotesButtons(document);
-      tagNameCellsInTable(originalTable);
-      tagNameCellsInTable(tableClone);
-      updateNoteIconStates(document);
-    });
-  });
-
-  // -------- Notes card synced to the REAL notes textarea --------
-  const realNotesBlock = findNotesBlockForTable(originalTable);
-  const realTA = realNotesBlock?.querySelector("textarea");
-  const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
-
-  // Clicking table-note buttons in the POPUP inserts into the POPUP notes box
-  tableClone.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".mk-table-note-btn");
-    if (!btn) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const cloneTr = btn.closest("tr");
-    if (!cloneTr) return;
-
-    // Map clone row index -> original row (source-of-truth)
-    const idx = getTbodyRowIndex(cloneTr);
-    const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
-    if (!origTr) return;
-
-    const key = getRowKeyForTableContext(originalTable, origTr);
-    if (!key) return;
-
-    insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
-  }, { passive:false });
-
-  // Enforce spacing on open, too (in case notes already exist)
-  applyNotesSpacing(notesTA);
-
-  stack.appendChild(tableCard);
-  stack.appendChild(notesCard);
-  modal.classList.add("open");
-}
-
-function ensureExpandBtnInTableFooter(table) {
-  const container = table.closest(".table-container");
-  if (!container) return;
-
-  const footer = qs(".table-footer", container);
-  if (!footer) return;
-
-  if (qs(".mk-table-expand-btn", footer)) return;
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mk-ta-expand mk-table-expand-btn";
-  btn.title = "Expand table";
-  btn.setAttribute("aria-label", "Expand table");
-  btn.textContent = "⤢";
-
-  const rightWrap = document.createElement("div");
-  rightWrap.style.marginLeft = "auto";
-  rightWrap.style.display = "flex";
-  rightWrap.style.alignItems = "center";
-  rightWrap.appendChild(btn);
-
-  footer.appendChild(rightWrap);
-
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // ✅ Use the actual card title (h2) as the popup title
-    const card = container.closest(".section-block");
-    const h2 = qs("h2", card);
-    const title = safeTrim(h2?.textContent || "Table");
-
-  function openTableModalForTable(originalTable, titleText) {
-  const modal = ensureTableModal();
-  const title = qs("#mkTableModalTitle", modal);
-  const stack = qs("#mkTableModalStack", modal);
-
-  title.textContent = titleText || "Table";
-  stack.innerHTML = "";
-
-  _mkTableModalContextTable = originalTable;
-
-  // ✅ Card title should match the actual table title (NOT "Table")
-  const tableCard = buildCard(titleText || "Table");
-  const tableBody = qs(".mk-card-body", tableCard);
-
-  // ✅ Clone the FULL table container so it sits correctly inside the card
-  const originalContainer = originalTable.closest(".table-container");
-  let containerClone;
-
-  if (originalContainer) {
-    containerClone = originalContainer.cloneNode(true);
-  } else {
-    // fallback (shouldn't happen, but keeps it safe)
-    containerClone = document.createElement("div");
-    containerClone.className = "table-container";
-    containerClone.appendChild(originalTable.cloneNode(true));
-  }
-
-  // Grab the cloned table inside the cloned container
-  const tableClone = qs("table", containerClone);
-  if (tableClone) {
-    tableClone.classList.add("training-table", "mk-popup-table");
-  }
-
-  // Put clone into the card body
-  tableBody.appendChild(containerClone);
-
-  // Re-wire persistence in popup clone
-  if (tableClone) {
-    qsa("input, select, textarea", tableClone).forEach((el) => {
-      ensureUID(el);
-      loadField(el);
-      if (el.tagName === "SELECT") applySelectGhost(el);
-      if (el.type === "date") applyDateGhost(el);
-      el.addEventListener("input", () => saveField(el));
-      el.addEventListener("change", () => saveField(el));
-    });
-
-    tagNameCellsInTable(tableClone);
-  }
-
-  // Ensure notes column/buttons exist in the popup table
+  // Ensure Notes column/buttons exist in popup clone table
   initTableNotesButtons(tableCard);
 
-  // ✅ Popup "+" should add row to BOTH real + popup table
+  // "+" in popup adds row to BOTH real + popup
   const popupAddBtn = qs(".table-footer .add-row", containerClone);
-  if (popupAddBtn && tableClone) {
+  if (popupAddBtn) {
     popupAddBtn.addEventListener("click", () => {
       const realTbody = originalTable.tBodies?.[0];
       const cloneTbody = tableClone.tBodies?.[0];
@@ -1847,42 +1685,78 @@ function ensureExpandBtnInTableFooter(table) {
     });
   }
 
-  // -------- Notes card synced to real notes --------
+  // Notes card synced to real notes textarea
   const realNotesBlock = findNotesBlockForTable(originalTable);
   const realTA = realNotesBlock?.querySelector("textarea");
   const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
 
-  // Clicking bubble in popup table inserts into popup notes (ordered by real table)
-  if (tableClone) {
-    tableClone.addEventListener(
-      "click",
-      (e) => {
-        const btn = e.target.closest(".mk-table-note-btn");
-        if (!btn) return;
+  // Clicking bubble in popup inserts into popup notes (ordered by real table)
+  tableClone.addEventListener(
+    "click",
+    (e) => {
+      const btn = e.target.closest(".mk-table-note-btn");
+      if (!btn) return;
 
-        e.preventDefault();
-        e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
 
-        const cloneTr = btn.closest("tr");
-        if (!cloneTr) return;
+      const cloneTr = btn.closest("tr");
+      if (!cloneTr) return;
 
-        const idx = getTbodyRowIndex(cloneTr);
-        const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
-        if (!origTr) return;
+      const idx = getTbodyRowIndex(cloneTr);
+      const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
+      if (!origTr) return;
 
-        const key = getRowKeyForTableContext(originalTable, origTr);
-        if (!key) return;
+      const key = getRowKeyForTableContext(originalTable, origTr);
+      if (!key) return;
 
-        insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
-      },
-      { passive: false }
-    );
-  }
+      insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
+    },
+    { passive: false }
+  );
+
+  applyNotesSpacing(notesTA);
 
   stack.appendChild(tableCard);
   stack.appendChild(notesCard);
-
   modal.classList.add("open");
+}
+
+function ensureExpandBtnInTableFooter(table){
+  const container = table.closest(".table-container");
+  if (!container) return;
+
+  const footer = qs(".table-footer", container);
+  if (!footer) return;
+
+  if (qs(".mk-table-expand-btn", footer)) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "mk-ta-expand mk-table-expand-btn";
+  btn.title = "Expand table";
+  btn.setAttribute("aria-label", "Expand table");
+  btn.textContent = "⤢";
+
+  const rightWrap = document.createElement("div");
+  rightWrap.style.marginLeft = "auto";
+  rightWrap.style.display = "flex";
+  rightWrap.style.alignItems = "center";
+  rightWrap.appendChild(btn);
+
+  footer.appendChild(rightWrap);
+
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+
+    // ✅ Use the actual card title (h2) as the popup title
+    const card = container.closest(".section-block");
+    const h2 = qs("h2", card);
+    const popupTitle = safeTrim(h2?.textContent || "Table");
+
+    openTableModalForTable(table, popupTitle);
+  });
 }
 
 function initTablePopupExpandButtons(root=document){
