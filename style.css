@@ -592,8 +592,8 @@ main{
 ======================================================= */
 
 #dealership-info{
-  --di-input-width:225px;  /* keep your field width */
-  --pc-gap:52px;           /* ✅ uniform spacing everywhere (double-ish) */
+  --di-input-width:225px;
+  --pc-gap:39px; /* 25% smaller than before */
 }
 
 /* Grid provides ALL spacing: between cards AND around the edges */
