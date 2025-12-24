@@ -425,6 +425,68 @@ main{
   background:#fff9f5;
 }
 
+/* =========================
+   Notes bubble button
+========================= */
+.notes-icon-btn{
+  width: 38px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  padding: 0;
+}
+
+.notes-icon-btn:hover{
+  border-color: rgba(0,0,0,.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,.10);
+}
+
+.notes-icon-btn:active{
+  transform: translateY(1px);
+}
+
+.notes-icon-btn .notes-bubble{
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: rgba(0,0,0,.55);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notes-icon-btn .notes-bubble .dots{
+  stroke-width: 2.2;
+  stroke: rgba(0,0,0,.45);
+}
+
+/* ACTIVE (notes exist) */
+.notes-icon-btn.has-notes{
+  background: rgba(255, 122, 0, .12);
+  border-color: rgba(255, 122, 0, .55);
+  box-shadow: 0 10px 22px rgba(255, 122, 0, .18);
+}
+
+.notes-icon-btn.has-notes .notes-bubble{
+  stroke: rgba(255, 122, 0, 1);
+}
+.notes-icon-btn.has-notes .notes-bubble .dots{
+  stroke: rgba(255, 122, 0, 1);
+}
+
+/* smaller inside table cells */
+td.notes-col-cell .notes-icon-btn{
+  width: 34px;
+  height: 32px;
+  border-radius: 9px;
+}
+
 /* Indents */
 .indent-sub{ padding-left:60px !important; }
 
