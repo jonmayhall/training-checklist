@@ -1610,3 +1610,92 @@ main{
     margin-left:0 !important;
   }
 }
+
+/* =======================================================
+   DEALERSHIP ADDRESS — shrink textbox by ~1/3 (REAL)
+   (limits the GRID column itself, not just the input)
+======================================================= */
+
+#dealership-address-card .checklist-row{
+  display:grid !important;
+  grid-template-columns:260px minmax(0,1fr) !important;
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+/* Make the 2nd column (the input/button area) only 66% width */
+#dealership-address-card .checklist-row > :last-child{
+  width:66.666% !important;     /* <-- take off 1/3 */
+  justify-self:end !important;  /* keep it aligned right */
+}
+
+/* Wrap fills that reduced column */
+#dealership-address-card .address-input-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+#dealership-address-card .address-input-wrap .small-map-btn,
+#dealership-address-card .address-input-wrap button{
+  flex:0 0 44px !important;
+  width:44px !important;
+  min-width:44px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  padding:0 !important;
+}
+
+/* Keep map working */
+#dealership-address-card .map-wrapper{
+  margin:16px 0 8px !important;
+  border-radius:var(--radius-lg) !important;
+  overflow:hidden !important;
+  border:1px solid var(--border) !important;
+  background:#f8f8f8 !important;
+}
+#dealership-address-card .map-frame,
+#dealership-address-card .map-wrapper iframe{
+  width:100% !important;
+  height:440px !important;
+  border:0 !important;
+  display:block !important;
+}
+
+/* Mobile */
+@media (max-width:900px){
+  #dealership-address-card .checklist-row{
+    grid-template-columns:1fr !important;
+  }
+  #dealership-address-card .checklist-row > :last-child{
+    width:100% !important;
+    justify-self:stretch !important;
+  }
+}
+
