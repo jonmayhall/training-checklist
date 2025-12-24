@@ -1,16 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — script.js
-   ✅ FIXED
-   - No double-binding (stops "adds two" bug + duplicate global listeners)
-   - No delete buttons added
-   - Table popups: clean modal + TWO real cards inside (Table card + Notes card)
-     * Fits screen (no run-off)
-     * Table scrolls horizontally INSIDE table card only
-     * Notes never cause right-scroll
-   - Adds 📝 buttons to 2x2 checklist rows (auto)
-   - Notes bullets ordered + spaced
-   - Training tables: bullet label = Name
-   - Opcodes table: bullet label = Opcode
+   ✅ UPDATED (per your notes bubble requests)
+   - Notes buttons (💬 bubble) are back on the right pages/questions
+   - Bubble turns ORANGE when notes exist (works in page + in table popups)
+   - Table popups INCLUDE the + Add Row button
+     * Add Row in popup adds to the REAL table + refreshes popup
+   - Still no delete buttons added
+   - Still no double-binding
 ======================================================= */
 
 (() => {
@@ -43,6 +39,38 @@
     el.dataset[k] = "true";
     return true;
   };
+
+  /* -----------------------------
+     NOTES BUTTON VISUALS (orange when filled)
+  ----------------------------- */
+  function setNotesButtonVisual(btn, filled) {
+    if (!btn) return;
+    btn.dataset.filled = filled ? "true" : "false";
+    btn.classList.toggle("notes-filled", !!filled);
+
+    // Inline styling so it works immediately even if CSS isn’t updated
+    const icon = btn.querySelector(".notes-icon");
+    if (filled) {
+      btn.style.borderColor = "#f57c00";
+      btn.style.background = "rgba(245, 124, 0, 0.14)";
+      if (icon) icon.style.color = "#f57c00";
+    } else {
+      btn.style.borderColor = "";
+      btn.style.background = "";
+      if (icon) icon.style.color = "";
+    }
+  }
+
+  function makeBubbleButton(notesTargetId) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "notes-icon-btn notes-bubble-btn";
+    btn.dataset.notesTarget = notesTargetId;
+    btn.setAttribute("aria-label", "Open Notes");
+    btn.innerHTML = `<span class="notes-icon" aria-hidden="true">💬</span>`;
+    setNotesButtonVisual(btn, false);
+    return btn;
+  }
 
   /* -----------------------------
      NAV
@@ -98,7 +126,6 @@
   }
 
   function initPlaceholderStyling() {
-    // ✅ Prevent global listeners from being bound twice (this was a common source of double-actions)
     if (!bindOnce(document.body, "placeholder_global")) return;
 
     $$("select").forEach(applyPlaceholderClassToSelect);
@@ -355,6 +382,7 @@
       btn.addEventListener("click", () => {
         const sec = btn.closest(".page-section");
         clearSection(sec);
+        refreshAllNotesButtons(); // keep bubbles accurate after reset
       });
     });
 
@@ -366,6 +394,7 @@
         closeModal();
         $$(".page-section").forEach(clearSection);
         saveState({});
+        refreshAllNotesButtons();
       });
     }
   }
@@ -418,9 +447,7 @@
       const inp = $("input[type='text']", clone);
       if (inp) inp.value = "";
 
-      // remove the + button from clones (only base has +)
       $$(".add-row", clone).forEach((b) => b.remove());
-
       container.appendChild(clone);
 
       if (inp) applyPlaceholderClassToInput(inp);
@@ -445,10 +472,7 @@
       clone.dataset.base = "false";
 
       $$("input", clone).forEach((inp) => (inp.value = ""));
-
-      // remove + button from clones
       $$(".additional-poc-add", clone).forEach((b) => b.remove());
-
       grid.appendChild(clone);
 
       $$("input, select, textarea", clone).forEach((el) => {
@@ -462,7 +486,7 @@
   }
 
   /* -----------------------------
-     TABLE: ADD ROW (+) — NO DOUBLE
+     TABLE: ADD ROW (+)
   ----------------------------- */
   function clearRowControls(row) {
     $$("input, select, textarea", row).forEach((el) => {
@@ -497,14 +521,16 @@
         if (newRow) {
           bindNotesButtonsWithin(newRow);
           persistAllDebounced();
+          refreshAllNotesButtons();
         }
       });
     });
   }
 
   /* -----------------------------
-     TABLE POPUP MODAL — CLEAN + FITS SCREEN
-     (Keep this function name + modalEl var)
+     TABLE POPUP MODAL (keep ensureModal + modalEl)
+     - includes Add Row button
+     - Add Row in modal updates REAL table + refreshes modal UI
   ----------------------------- */
   let modalEl = null;
 
@@ -521,7 +547,6 @@
     modalEl.style.padding = "18px";
     modalEl.style.boxSizing = "border-box";
 
-    // Centered modal container; the CONTENT area scrolls vertically
     modalEl.innerHTML = `
       <div id="mkTableModalCenter" style="
         width: 100%;
@@ -540,7 +565,6 @@
           display: flex;
           flex-direction: column;
         ">
-          <!-- Header -->
           <div id="mkTableModalBar" style="
             padding: 14px 16px;
             border-bottom: 1px solid rgba(0,0,0,0.08);
@@ -566,7 +590,6 @@
             </div>
           </div>
 
-          <!-- Body: vertical scroll; holds TWO cards -->
           <div id="mkTableModalBody" style="
             padding: 16px;
             overflow: auto;
@@ -607,6 +630,7 @@
     modalEl.style.display = "none";
     const body = $("#mkTableModalBody", modalEl);
     if (body) body.innerHTML = "";
+    modalEl.dataset.tcKey = "";
   }
 
   function findRelatedNotesBlock(tableContainer) {
@@ -620,7 +644,24 @@
     return all[0] || null;
   }
 
-  function openTablePopup(tableContainer) {
+  function tcKeyFor(tableContainer) {
+    // Stable-ish identity for modal refresh
+    const all = $$(".table-container");
+    const idx = all.indexOf(tableContainer);
+    const sectionId = closestSectionId(tableContainer);
+    return `${sectionId}::tc::${idx}`;
+  }
+
+  function resolveTcFromKey(key) {
+    if (!key) return null;
+    const m = key.match(/^(.+)::tc::(\d+)$/);
+    if (!m) return null;
+    const idx = Number(m[2]);
+    const all = $$(".table-container");
+    return all[idx] || null;
+  }
+
+  function renderTablePopup(tableContainer) {
     const modal = ensureModal();
     const body = $("#mkTableModalBody", modal);
     const titleEl = $("#mkTableModalTitle", modal);
@@ -634,46 +675,60 @@
 
     titleEl.textContent = header;
 
-    // ---------- Card 1: TABLE (real look via your section-block/table styles) ----------
+    // Card 1: Table (clone) + footer with Add Row
     const tableCard = document.createElement("div");
     tableCard.className = "section-block";
-
-    const h2 = document.createElement("h2");
-    h2.textContent = header;
-    tableCard.appendChild(h2);
+    tableCard.innerHTML = `<h2>${header}</h2>`;
 
     const tableClone = tableContainer.cloneNode(true);
 
-    // Remove footer controls in popup (no add/expand inside popup)
-    $$(".table-footer", tableClone).forEach((el) => el.remove());
+    // ✅ In popup: keep Add Row button, but remove the expand button inside the footer (if present)
+    $$(".expand-table-btn", tableClone).forEach((el) => el.remove());
 
-    // Make ONLY table area horizontally scrollable and contained
+    // Contain scroll inside the table card
     const scrollWrap = $(".scroll-wrapper", tableClone);
     if (scrollWrap) {
       scrollWrap.style.maxHeight = "44vh";
       scrollWrap.style.overflowY = "auto";
-      scrollWrap.style.overflowX = "auto";         // ✅ horizontal only within table
+      scrollWrap.style.overflowX = "auto";
       scrollWrap.style.paddingBottom = "6px";
-    } else {
-      // fallback: if no scroll-wrapper, prevent blowout
-      tableClone.style.overflowX = "auto";
     }
-
-    // Prevent table from forcing the modal wider than the screen
     const tbl = $("table", tableClone);
     if (tbl) {
       tbl.style.width = "max-content";
       tbl.style.minWidth = "100%";
     }
 
+    // Wire modal Add Row to REAL table, then refresh modal
+    const modalAdd = $(".table-footer .add-row", tableClone);
+    if (modalAdd) {
+      modalAdd.textContent = "+";
+      modalAdd.title = "Add Row";
+      modalAdd.style.cursor = "pointer";
+
+      if (bindOnce(modalAdd, "modal_add_row")) {
+        modalAdd.addEventListener("click", () => {
+          const realTable = $("table", tableContainer);
+          if (!realTable) return;
+          const newRow = cloneLastRow(realTable);
+          if (newRow) {
+            bindNotesButtonsWithin(newRow);
+            persistAllDebounced();
+            refreshAllNotesButtons();
+            // Re-render modal content to reflect the new row
+            renderTablePopup(tableContainer);
+          }
+        });
+      }
+    }
+
     tableCard.appendChild(tableClone);
 
-    // ---------- Card 2: NOTES (real notes card clone; NO horizontal scroll) ----------
+    // Card 2: Notes
     const notesBlock = findRelatedNotesBlock(tableContainer);
     const notesClone = notesBlock ? notesBlock.cloneNode(true) : null;
 
     if (notesClone) {
-      // hard-stop any right scroll from notes
       notesClone.style.overflow = "hidden";
       const ta = $("textarea", notesClone);
       if (ta) {
@@ -686,7 +741,7 @@
       }
     }
 
-    // Link popup notes textarea <-> real textarea (2-way)
+    // Sync modal notes textarea with real
     if (notesBlock && notesClone) {
       const realTA = $("textarea", notesBlock);
       const modalTA = $("textarea", notesClone);
@@ -698,28 +753,36 @@
             realTA.value = modalTA.value;
             applyPlaceholderClassToTextarea(realTA);
             persistAllDebounced();
+            // notes changed: update bubble orange state everywhere
+            parseAndStoreNotesFromTextarea(realTA);
+            refreshAllNotesButtons();
           });
+        }
 
+        if (bindOnce(realTA, "real_notes_syncback")) {
           const syncBack = () => {
             if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
           };
-          if (bindOnce(realTA, "real_notes_syncback")) {
-            realTA.addEventListener("input", syncBack);
-            realTA.addEventListener("change", syncBack);
-          }
+          realTA.addEventListener("input", syncBack);
+          realTA.addEventListener("change", syncBack);
         }
       }
     }
 
-    // Render
     body.innerHTML = "";
     body.appendChild(tableCard);
     if (notesClone) body.appendChild(notesClone);
 
-    // Notes buttons inside popup should still write to REAL notes target
+    // Ensure notes buttons inside modal work + show filled state
     const realNotesId = notesBlock?.id;
     bindNotesButtonsWithin(tableCard, { overrideNotesTarget: realNotesId, fromModal: true });
+    refreshNotesButtonsForScope(tableCard);
+  }
 
+  function openTablePopup(tableContainer) {
+    const modal = ensureModal();
+    modal.dataset.tcKey = tcKeyFor(tableContainer);
+    renderTablePopup(tableContainer);
     modal.style.display = "block";
   }
 
@@ -728,7 +791,6 @@
       const footer = $(".table-footer", tc);
       if (!footer) return;
 
-      // Add expand button only once
       let expandBtn = $(".expand-table-btn", footer);
       if (!expandBtn) {
         expandBtn = document.createElement("button");
@@ -745,7 +807,7 @@
   }
 
   /* -----------------------------
-     NOTES SYSTEM — ORDERED + SPACING
+     NOTES SYSTEM — ordered + bubble filled state
   ----------------------------- */
   function loadNotesState() {
     return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {};
@@ -819,7 +881,7 @@
       parts.push(`• ${v.label}:`);
       const body = (v.text || "").trim();
       if (body) parts.push(body);
-      parts.push(""); // blank line between bullets
+      parts.push("");
     });
 
     while (parts.length && parts[parts.length - 1] === "") parts.pop();
@@ -833,6 +895,59 @@
     applyPlaceholderClassToTextarea(ta);
     persistAllDebounced();
   }
+
+  // ---- Parse notes textarea to store per-bullet text (and drive bubble orange state)
+  const parseAndStoreNotesFromTextarea = debounce((ta) => {
+    const block = ta.closest(".section-block");
+    const id = block?.id;
+    if (!id) return;
+
+    const raw = ta.value || "";
+    const lines = raw.split("\n");
+    const parsed = [];
+    let current = null;
+
+    for (const line of lines) {
+      const m = line.match(/^•\s(.+):\s*$/);
+      if (m) {
+        if (current) parsed.push(current);
+        current = { label: m[1], textLines: [] };
+      } else if (current) {
+        current.textLines.push(line);
+      }
+    }
+    if (current) parsed.push(current);
+
+    const notesState = loadNotesState();
+    notesState[id] = notesState[id] || { items: {} };
+    const existing = notesState[id].items || {};
+
+    // keep keys stable when possible by matching labels
+    const labelToKey = new Map();
+    Object.entries(existing).forEach(([k, v]) => {
+      if (v?.label) labelToKey.set(v.label, k);
+    });
+
+    let maxKey = Math.max(-1, ...Object.keys(existing).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
+    parsed.forEach((it) => {
+      let key = labelToKey.get(it.label);
+      if (key == null) {
+        maxKey += 1;
+        key = String(maxKey);
+        notesState[id].items[key] = { label: it.label, text: "" };
+      }
+      notesState[id].items[key].label = it.label;
+      notesState[id].items[key].text = it.textLines.join("\n").trim();
+    });
+
+    saveNotesState(notesState);
+
+    // keep textarea formatted with bullets/spacers (nice UX)
+    hydrateNotesTextarea(id);
+
+    // update bubbles
+    refreshAllNotesButtons();
+  }, 250);
 
   function bindNotesButton(btn, options = {}) {
     if (!btn) return;
@@ -848,10 +963,14 @@
       ensureNotesItem(notesTarget, sig.index, label);
       hydrateNotesTextarea(notesTarget);
 
+      // Scroll to notes when on-page (not modal)
       const block = $("#" + notesTarget);
       if (block && !options.fromModal) block.scrollIntoView({ behavior: "smooth", block: "start" });
 
       persistAllDebounced();
+
+      // bubble should turn orange if notes already exist for that bullet
+      refreshNotesButtonsForScope(document);
     });
   }
 
@@ -860,7 +979,9 @@
   }
 
   /* -----------------------------
-     AUTO-ADD 📝 BUTTONS TO 2x2 CARDS
+     AUTO-ADD 💬 BUBBLES ON PAGES + QUESTIONS
+     - For each page-section: find a notes card, then add bubble to each .checklist-row question
+     - Also keeps your existing manual notes buttons (tables, etc.)
   ----------------------------- */
   function ensureElementId(el, prefix = "auto-notes") {
     if (el.id) return el.id;
@@ -868,39 +989,37 @@
     return el.id;
   }
 
-  function injectNotesButtonsIntoTwoColCards() {
-    $$(".cards-grid.two-col").forEach((grid) => {
-      const blocks = $$(".section-block", grid);
-      if (blocks.length < 2) return;
+  function findNotesBlockInSection(sectionEl) {
+    // prefer explicit notes-* ids
+    const explicit = $$("[id^='notes-'].section-block", sectionEl).find((b) => b.querySelector("textarea"));
+    if (explicit) return explicit;
 
-      const notesBlock = blocks.find((b) => {
-        const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
-        return h2.startsWith("notes");
-      });
+    // fallback: any section-block whose h2 starts with Notes
+    return $$(".section-block", sectionEl).find((b) => {
+      const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
+      return h2.startsWith("notes") && b.querySelector("textarea");
+    }) || null;
+  }
+
+  function injectNotesBubblesAcrossPages() {
+    $$(".page-section").forEach((sec) => {
+      const notesBlock = findNotesBlockInSection(sec);
       if (!notesBlock) return;
 
-      const notesId = ensureElementId(notesBlock, "notes-card");
-      const notesTA = $("textarea", notesBlock);
-      if (!notesTA) return;
+      const notesId = ensureElementId(notesBlock, "notes-auto");
 
-      const questionBlock = blocks.find((b) => b !== notesBlock);
-      if (!questionBlock) return;
+      // Add bubble to checklist rows that are “questions” (not tables, not inside notes block)
+      $$(".checklist-row", sec).forEach((row) => {
+        if (row.closest("table")) return;
+        if (row.closest(".section-block") === notesBlock) return;
 
-      $$(".checklist-row", questionBlock).forEach((row) => {
-        // skip “header-only” rows that have no input/select (usually just labels)
+        // must have a control (skip label-only headings)
         const hasControl = !!row.querySelector("input, select, textarea");
         if (!hasControl) return;
 
-        if (row.querySelector(".notes-icon-btn")) return;
-        if (row.closest("table")) return;
+        if (row.querySelector(".notes-icon-btn")) return; // already has one
 
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "notes-icon-btn";
-        btn.dataset.notesTarget = notesId;
-        btn.setAttribute("aria-label", "Open Notes");
-        btn.innerHTML = `<span class="notes-icon" aria-hidden="true">📝</span>`;
-
+        const btn = makeBubbleButton(notesId);
         row.appendChild(btn);
       });
     });
@@ -908,65 +1027,54 @@
     bindNotesButtonsWithin(document);
   }
 
+  /* -----------------------------
+     NOTES TEXTAREAS: bind parsing + hydrate
+  ----------------------------- */
   function initNotesTextareaParsing() {
     $$("textarea").forEach((ta) => {
       const block = ta.closest(".section-block");
       const id = block?.id;
       if (!id) return;
-      if (!id.startsWith("notes-") && !id.startsWith("notes-card-")) return;
+      if (!id.startsWith("notes-") && !id.startsWith("notes-auto-") && !id.startsWith("notes-card-")) return;
       if (!bindOnce(ta, "notes_parse")) return;
 
-      const parseAndStore = debounce(() => {
-        const raw = ta.value || "";
-        const lines = raw.split("\n");
-        const items = [];
-        let current = null;
-
-        for (const line of lines) {
-          const m = line.match(/^•\s(.+):\s*$/);
-          if (m) {
-            if (current) items.push(current);
-            current = { label: m[1], textLines: [] };
-          } else if (current) {
-            current.textLines.push(line);
-          }
-        }
-        if (current) items.push(current);
-
-        const notesState = loadNotesState();
-        notesState[id] = notesState[id] || { items: {} };
-
-        const existing = notesState[id].items || {};
-        const labelToKey = new Map();
-        Object.entries(existing).forEach(([k, v]) => {
-          if (v?.label) labelToKey.set(v.label, k);
-        });
-
-        let maxKey = Math.max(-1, ...Object.keys(existing).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
-        items.forEach((it) => {
-          let key = labelToKey.get(it.label);
-          if (key == null) {
-            maxKey += 1;
-            key = String(maxKey);
-            notesState[id].items[key] = { label: it.label, text: "" };
-          }
-          notesState[id].items[key].label = it.label;
-          notesState[id].items[key].text = it.textLines.join("\n").trim();
-        });
-
-        saveNotesState(notesState);
-        hydrateNotesTextarea(id);
-        persistAllDebounced();
-      }, 350);
-
-      ta.addEventListener("input", parseAndStore);
-      ta.addEventListener("change", parseAndStore);
+      ta.addEventListener("input", () => parseAndStoreNotesFromTextarea(ta));
+      ta.addEventListener("change", () => parseAndStoreNotesFromTextarea(ta));
     });
 
+    // hydrate all notes blocks from state on load
     const notesState = loadNotesState();
     Object.keys(notesState).forEach((id) => {
       if ($("#" + id)?.querySelector?.("textarea")) hydrateNotesTextarea(id);
     });
+  }
+
+  /* -----------------------------
+     BUBBLE ORANGE STATE: compute and apply
+  ----------------------------- */
+  function bulletHasNotes(targetId, sigIndex) {
+    const notesState = loadNotesState();
+    const block = notesState[targetId];
+    if (!block?.items) return false;
+    const item = block.items[String(sigIndex)];
+    return !!(item && (item.text || "").trim().length);
+  }
+
+  function refreshNotesButtonsForScope(root) {
+    $$(".notes-icon-btn", root).forEach((btn) => {
+      const targetId = btn.dataset.notesTarget;
+      if (!targetId) return;
+
+      const sig = getRowSignature(btn);
+      const filled = bulletHasNotes(targetId, sig.index);
+      setNotesButtonVisual(btn, filled);
+    });
+  }
+
+  function refreshAllNotesButtons() {
+    refreshNotesButtonsForScope(document);
+    // also if modal is open, refresh in modal too
+    if (modalEl && modalEl.style.display === "block") refreshNotesButtonsForScope(modalEl);
   }
 
   /* -----------------------------
@@ -1056,7 +1164,7 @@
   }
 
   /* -----------------------------
-     BOOT (restore first, then bind once)
+     BOOT
   ----------------------------- */
   function boot() {
     restoreAll();
@@ -1073,16 +1181,20 @@
     initTableAddRowButtons();
     initTableExpandButtons();
 
+    // Notes: inject bubbles across pages, then bind + parse
+    injectNotesBubblesAcrossPages();
     bindNotesButtonsWithin(document);
-    injectNotesButtonsIntoTwoColCards();
     initNotesTextareaParsing();
 
     initSupportTickets();
 
-    // refresh placeholder classes once after restore/injections
+    // placeholder refresh after restores/injections
     $$("select").forEach(applyPlaceholderClassToSelect);
     $$("input").forEach(applyPlaceholderClassToInput);
     $$("textarea").forEach(applyPlaceholderClassToTextarea);
+
+    // initial bubble orange state
+    refreshAllNotesButtons();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
