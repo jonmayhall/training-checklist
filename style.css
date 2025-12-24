@@ -1634,5 +1634,48 @@ main{
     flex:0 0 auto;
   }
 
+/* =======================================================
+   DEALERSHIP ADDRESS — FORCE wide textbox
+   (put at VERY bottom of CSS)
+======================================================= */
+#dealership-address-card .checklist-row{
+  display:grid !important;
+  /* force the right side to actually be wide (not "auto") */
+  grid-template-columns: minmax(260px, 1fr) minmax(720px, 2fr) !important;
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+/* let the wrapper fill the full right column */
+#dealership-address-card .address-input-wrap{
+  width:100% !important;
+  max-width:none !important;
+  margin-left:auto !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+/* input fills the available space */
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+
+
   .training-table{ min-width:760px; }
 }
