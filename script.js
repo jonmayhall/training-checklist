@@ -1,1818 +1,1099 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
    ✅ Stable + Clean + Fixed
-   - Nav clicks work
-   - Add Row (+) for tables
+   - Nav clicks work (sidebar -> section)
+   - Add Row (+) for tables (clones last row, preserves Notes icon)
    - Additional Trainers (+)
    - Additional POC (+)
    - Support Tickets: add/remove, move by status, base locked to Open
-   - Autosave + Reset Page + Clear All
+   - Autosave (localStorage) + Reset Page + Clear All
    - Onsite dates: end defaults to start + 2 days
-   - PDF export (all pages)
-   - ✅ Question Notes Linking: single 📝 icon per checklist row -> inserts "• <Question>:"
-   - ✅ Notes spacing: adds a blank line between bullet headers so new notes are obvious
-   - ✅ Table Notes Column: single Notes column, bubble button on every row
-   - ✅ Table Notes Bullet Insert:
-       - Training Checklist inserts "• <Name>:"
-       - Opcodes inserts "• <Opcode>:"
-     + ✅ Notes spacing applies here too
-   - ✅ Table Popup Expand (⤢) in footer right
-   - ✅ Popup scroll left/right restored
-   - ✅ Popup header cleanup:
-       - Modal header shows the actual table card title
-       - Inside cards use "Table" + "Notes" (no duplicate big title twice)
-   - ✅ Popup table is INSIDE the card (no floating on top)
-   - ✅ Notes buttons preserved everywhere
-   - ✅ Training name cell layout fixed (checkbox left of input)
-   ======================================================= */
+   - PDF export (all pages)  ⚠️ requires jsPDF/html2canvas on page
+   - ✅ Notes Linking (📝 icon -> scroll/focus matching Notes block)
+   - ✅ Notes bullet insert + spacing (tables + checklist rows)
+   - ✅ Table Expand (⤢) opens modal with real table (no cloning)
+======================================================= */
 
-/* ---------------------------
-   Tiny helpers
---------------------------- */
-const qs  = (sel, root=document) => root.querySelector(sel);
-const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+(() => {
+  "use strict";
 
-function isField(el){
-  if (!el) return false;
-  const t = el.tagName;
-  return t === "INPUT" || t === "SELECT" || t === "TEXTAREA";
-}
+  /* =========================
+     CONFIG
+  ========================= */
+  const STORAGE_KEY = "mkInteractiveChecklist_v1";
+  const STORAGE_META_KEY = "mkInteractiveChecklist_meta_v1";
+  const AUTOSAVE_DEBOUNCE_MS = 450;
 
-function uid(){
-  return "id_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
-}
+  /* =========================
+     BOOT
+  ========================= */
+  document.addEventListener("DOMContentLoaded", () => {
+    initSidebarNav();
+    initDealershipNameMirror();
+    initOnsiteDatesAutoEnd();
 
-function safeTrim(v){
-  return (v ?? "").toString().trim();
-}
+    initDynamicAdditionalTrainers();
+    initDynamicAdditionalPOCs();
 
-/* ---------------------------
-   Storage keying
---------------------------- */
-function ensureUID(el){
-  if (!el) return null;
-  if (el.dataset?.uid) return el.dataset.uid;
-  const id = uid();
-  el.dataset.uid = id;
-  return id;
-}
+    initTablesAddRowButtons();
+    initNotesIconLinking();
+    initNotesBulletInsertForTables();
 
-function getFieldKey(el){
-  if (el.id) return `mkc:${el.id}`;
-  if (el.name) return `mkc:${el.name}`;
-  const dk = el.getAttribute("data-key");
-  if (dk) return `mkc:${dk}`;
-  return `mkc:uid:${ensureUID(el)}`;
-}
+    initSupportTickets();
 
-function saveField(el){
-  try{
-    const key = getFieldKey(el);
-    const val = (el.type === "checkbox") ? (el.checked ? "1" : "0") : (el.value ?? "");
-    localStorage.setItem(key, val);
-  }catch(e){}
-}
+    initResetPageButtons();
+    initClearAllButton();
 
-function loadField(el){
-  try{
-    const key = getFieldKey(el);
-    const stored = localStorage.getItem(key);
-    if (stored === null) return;
+    initAutosave();
+    restoreFromAutosave(); // restore after handlers exist
 
-    if (el.type === "checkbox") el.checked = stored === "1";
-    else el.value = stored;
+    initPdfExportButton();
 
-    if (el.tagName === "SELECT") applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-  }catch(e){}
-}
-
-function clearFieldStorage(el){
-  try{
-    const key = getFieldKey(el);
-    localStorage.removeItem(key);
-  }catch(e){}
-}
-
-/* ---------------------------
-   Ghost placeholder support
---------------------------- */
-function applySelectGhost(sel){
-  if (!sel || sel.tagName !== "SELECT") return;
-  const opt = sel.selectedOptions && sel.selectedOptions[0];
-  const ghost = !sel.value || (opt?.dataset?.ghost === "true");
-  sel.classList.toggle("is-placeholder", !!ghost);
-}
-
-function applyDateGhost(input){
-  if (!input || input.type !== "date") return;
-  input.classList.toggle("is-placeholder", !input.value);
-}
-
-/* ---------------------------
-   Optional 2-col height sync
---------------------------- */
-function syncTwoColHeights(){
-  const grids = qsa(".cards-grid.two-col, .two-col-grid");
-  grids.forEach(grid=>{
-    const cards = qsa(":scope > .section-block", grid);
-    if (cards.length < 2) return;
-
-    cards.forEach(c => (c.style.minHeight = ""));
-
-    for (let i=0; i<cards.length; i+=2){
-      const a = cards[i], b = cards[i+1];
-      if (!a || !b) continue;
-      const h = Math.max(a.offsetHeight, b.offsetHeight);
-      a.style.minHeight = h + "px";
-      b.style.minHeight = h + "px";
-    }
-  });
-}
-
-/* ---------------------------
-   Textarea auto-grow
---------------------------- */
-function autoGrowTA(ta){
-  if (!ta) return;
-  ta.style.height = "auto";
-  ta.style.height = (ta.scrollHeight + 2) + "px";
-}
-
-function initTextareas(root=document){
-  qsa("textarea", root).forEach(ta=>{
-    autoGrowTA(ta);
-    ta.addEventListener("input", ()=>{
-      autoGrowTA(ta);
-      saveField(ta);
-      requestAnimationFrame(syncTwoColHeights);
-      requestAnimationFrame(()=> updateNoteIconStates());
-    });
-  });
-}
-
-/* ---------------------------
-   Page Navigation
---------------------------- */
-function showSection(id){
-  qsa(".page-section").forEach(s=> s.classList.remove("active"));
-  const target = qs(`#${CSS.escape(id)}`);
-  if (target) target.classList.add("active");
-
-  qsa(".nav-btn").forEach(btn=>{
-    const to =
-      btn.getAttribute("data-section") ||
-      btn.getAttribute("data-target") ||
-      btn.getAttribute("href")?.replace("#","") ||
-      btn.getAttribute("onclick")?.match(/showSection\(['"]([^'"]+)['"]\)/)?.[1];
-    btn.classList.toggle("active", to === id);
+    initTableExpandFeature();
   });
 
-  try{ localStorage.setItem("mkc:lastPage", id); }catch(e){}
-}
-
-function initNav(){
-  qsa(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click", (e)=>{
-      if (btn.tagName === "A" || btn.getAttribute("href")) e.preventDefault();
-      const id =
-        btn.getAttribute("data-section") ||
-        btn.getAttribute("data-target") ||
-        btn.getAttribute("href")?.replace("#","");
-      if (id) showSection(id);
-    });
-  });
-
-  let last = null;
-  try{ last = localStorage.getItem("mkc:lastPage"); }catch(e){}
-  const first = qsa(".page-section")[0]?.id;
-  showSection(last || first || "dealership-info");
-}
-
-window.showSection = showSection;
-window.initNav = initNav;
-
-/* ===========================================================
-   ✅ Runtime style patches (JS-injected; does NOT replace CSS)
-=========================================================== */
-function injectRuntimePatches(){
-  if (qs("#mkRuntimePatches")) return;
-
-  const style = document.createElement("style");
-  style.id = "mkRuntimePatches";
-  style.textContent = `
-    /* Table Modal shell */
-    #mkTableModal{ position:fixed; inset:0; z-index:99998; display:none; }
-    #mkTableModal.open{ display:block; }
-    #mkTableModal .mk-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-    #mkTableModal .mk-modal-panel{
-      position:absolute; left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      width:min(1200px, calc(100vw - 60px));
-      max-height:calc(100vh - 60px);
-      background:#fff; border-radius:22px;
-      box-shadow:0 10px 40px rgba(0,0,0,.35);
-      overflow:hidden;
-      display:flex; flex-direction:column;
-    }
-    #mkTableModal .mk-modal-content{ padding:16px 16px 18px; overflow:auto; }
-    #mkTableModal .mk-table-scroll{
-      width:100%;
-      overflow-x:auto; overflow-y:hidden;
-      -webkit-overflow-scrolling:touch;
-      padding:10px 10px 12px;
-      box-sizing:border-box;
-    }
-    #mkTableModal .mk-table-scroll table{ width:max-content; min-width:100%; }
-    #mkTableModal table input[type="text"],
-    #mkTableModal table select,
-    #mkTableModal table textarea{ width:100%; max-width:100%; box-sizing:border-box; min-width:0; }
-
-    /* Name cell layout */
-    table.training-table td.mk-name-cell,
-    #mkTableModal td.mk-name-cell{ display:flex; align-items:center; gap:10px; }
-    table.training-table td.mk-name-cell input[type="checkbox"],
-    #mkTableModal td.mk-name-cell input[type="checkbox"]{ flex:0 0 auto; margin:0; }
-    table.training-table td.mk-name-cell input[type="text"],
-    #mkTableModal td.mk-name-cell input[type="text"]{ flex:1 1 auto; min-width:0; width:auto; }
-
-    /* Modal stack cards */
-    #mkTableModal .mk-modal-stack{ display:flex; flex-direction:column; gap:16px; }
-    #mkTableModal .mk-modal-notes textarea{ height:220px; max-height:40vh; resize:vertical; }
-  `;
-  document.head.appendChild(style);
-}
-
-/* ---------------------------
-   Reset This Page / Clear All
---------------------------- */
-function resetSection(section){
-  if (!section) return;
-
-  qsa("input, select, textarea", section).forEach(el=>{
-    if (!isField(el)) return;
-
-    clearFieldStorage(el);
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-
-    if (el.tagName === "SELECT"){
-      if (el.options?.length) el.selectedIndex = 0;
-      applySelectGhost(el);
-    }
-    if (el.type === "date") applyDateGhost(el);
-    if (el.tagName === "TEXTAREA") autoGrowTA(el);
-  });
-
-  // remove clones
-  qsa("[data-clone='true']", section).forEach(n=> n.remove());
-
-  // additional trainers container clear
-  const atc = qs("#additionalTrainersContainer", section);
-  if (atc) atc.innerHTML = "";
-
-  // support ticket secondary columns clear + reset base open
-  if (section.id === "support-tickets"){
-    ["tierTwoTicketsContainer","closedResolvedTicketsContainer","closedFeatureTicketsContainer"].forEach(id=>{
-      const c = qs(`#${id}`, section);
-      if (c) c.innerHTML = "";
-    });
-
-    const open = qs("#openTicketsContainer", section);
-    if (open){
-      qsa(".ticket-group", open).forEach(card=>{
-        if (card.dataset.base === "true") return;
-        card.remove();
-      });
-
-      const base = qs(".ticket-group[data-base='true']", open);
-      if (base){
-        qsa("input, textarea, select", base).forEach(el=>{
-          clearFieldStorage(el);
-          if (el.type === "checkbox") el.checked = false;
-          else el.value = "";
-          if (el.tagName === "SELECT") applySelectGhost(el);
-        });
-      }
-    }
-  }
-
-  requestAnimationFrame(()=>{
-    initTextareas(section);
-    syncTwoColHeights();
-    initNotesExpanders(section);
-    initNotesLinkingOption2Only(section);
-    initTableNotesButtons(section);
-    initTablePopupExpandButtons(section);
-    updateNoteIconStates(section);
-    tagNameCellsInTableSection(section);
-  });
-}
-
-function initResets(){
-  qsa(".clear-page-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const sec = btn.closest(".page-section");
-      if (sec) resetSection(sec);
-    });
-  });
-
-  const clearAll = qs("#clearAllBtn");
-  if (clearAll){
-    clearAll.addEventListener("click", ()=>{
-      try{
-        const keys = [];
-        for (let i=0; i<localStorage.length; i++){
-          const k = localStorage.key(i);
-          if (k && k.startsWith("mkc:")) keys.push(k);
-        }
-        keys.forEach(k=> localStorage.removeItem(k));
-      }catch(e){}
-
-      qsa(".page-section").forEach(sec=> resetSection(sec));
-      try{ localStorage.removeItem("mkc:lastPage"); }catch(e){}
-    });
-  }
-}
-
-/* ---------------------------
-   Persistence
---------------------------- */
-function initPersistence(){
-  qsa("input, select, textarea").forEach(el=>{
-    if (!isField(el)) return;
-    ensureUID(el);
-    loadField(el);
-  });
-
-  document.addEventListener("input", (e)=>{
-    const el = e.target;
-    if (!isField(el)) return;
-
-    if (el.tagName === "TEXTAREA") autoGrowTA(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-
-    saveField(el);
-
-    if (el.id === "dealershipNameInput") updateDealershipNameDisplay(el.value);
-
-    requestAnimationFrame(()=> updateNoteIconStates());
-  });
-
-  document.addEventListener("change", (e)=>{
-    const el = e.target;
-    if (!isField(el)) return;
-
-    if (el.tagName === "SELECT") applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-
-    saveField(el);
-    requestAnimationFrame(()=> updateNoteIconStates());
-  });
-}
-
-function initGhosts(){
-  qsa("select").forEach(applySelectGhost);
-  qsa("input[type='date']").forEach(applyDateGhost);
-}
-
-/* ===========================================================
-   ✅ Notes insertion spacing helpers
-=========================================================== */
-function ensureBlankLineBeforeInsert(lines, insertIndex){
-  if (insertIndex > 0 && safeTrim(lines[insertIndex - 1]) !== ""){
-    lines.splice(insertIndex, 0, "");
-    insertIndex += 1;
-  }
-  return insertIndex;
-}
-
-function appendWithSpacing(raw, line){
-  const t = safeTrim(raw);
-  if (!t) return line;
-
-  // Ensure exactly one blank line before new bullet header
-  const endsWithBlankLine = /\n\s*\n\s*$/.test(raw);
-  const trimmedEnd = raw.replace(/\s*$/, "");
-  return endsWithBlankLine ? (trimmedEnd + "\n" + line) : (trimmedEnd + "\n\n" + line);
-}
-
-function normalizeNotesBulletSpacing(text){
-  const lines = (text || "").split("\n");
-  const out = [];
-  const isBulletHeader = (l)=> /^\s*•\s+.+:\s*$/.test(l || "");
-  const isNonEmpty = (l)=> safeTrim(l) !== "";
-
-  for (let i=0; i<lines.length; i++){
-    const cur = lines[i];
-
-    if (isBulletHeader(cur)){
-      // find last meaningful line in out
-      let j = out.length - 1;
-      while (j >= 0 && !isNonEmpty(out[j])) j--;
-
-      if (j >= 0 && isBulletHeader(out[j])){
-        // ensure one blank line between bullet headers
-        if (out[out.length - 1] !== "") out.push("");
-      } else if (j >= 0 && isNonEmpty(out[j]) && out[out.length - 1] !== ""){
-        out.push("");
-      }
-    }
-
-    out.push(cur);
-  }
-
-  return out.join("\n");
-}
-
-function applyNotesSpacing(textarea){
-  if (!textarea) return;
-  const before = textarea.value || "";
-  const after  = normalizeNotesBulletSpacing(before);
-  if (after !== before) textarea.value = after;
-}
-
-/* ---------------------------
-   Training tables: Add Row (+)
---------------------------- */
-function cloneTrainingRow(row){
-  const clone = row.cloneNode(true);
-  clone.dataset.clone = "true";
-
-  qsa("input, select, textarea", clone).forEach(el=>{
-    if (!isField(el)) return;
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-    ensureUID(el);
-    applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-    saveField(el);
-  });
-
-  return clone;
-}
-
-function initTableAddRow(){
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".table-footer .add-row");
-    if (!btn) return;
-
-    const container = btn.closest(".table-container");
-    const table = qs("table.training-table", container);
-    const tbody = table?.querySelector("tbody");
-    if (!table || !tbody) return;
-
-    const last = tbody.querySelector("tr:last-child");
-    if (!last) return;
-
-    const clone = cloneTrainingRow(last);
-    tbody.appendChild(clone);
-    clone.scrollIntoView({ behavior:"smooth", block:"nearest" });
-
-    requestAnimationFrame(()=>{
-      initTextareas(container);
-      syncTwoColHeights();
-      initNotesExpanders(document);
-      initNotesLinkingOption2Only(document);
-      initTableNotesButtons(document);
-      initTablePopupExpandButtons(document);
-      updateNoteIconStates(document);
-      tagNameCellsInTable(table);
-    });
-  });
-}
-
-/* ---------------------------
-   Onsite Training Dates: end defaults to start + 2 days
---------------------------- */
-function addDaysISO(iso, days){
-  const d = new Date(`${iso}T12:00:00`);
-  if (Number.isNaN(d.getTime())) return "";
-  d.setDate(d.getDate() + days);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function initOnsiteTrainingDates(){
-  const start = qs("#onsiteStartDate");
-  const end   = qs("#onsiteEndDate");
-
-  if (start && end){
-    start.addEventListener("change", ()=>{
-      if (!start.value) return;
-      if (end.value) return;
-      const v = addDaysISO(start.value, 2);
-      if (v){
-        end.value = v;
-        applyDateGhost(end);
-        saveField(end);
-      }
-    });
-  }
-}
-
-/* ---------------------------
-   Trainers page: Additional Trainers (+)
---------------------------- */
-function initAdditionalTrainers(){
-  document.addEventListener("click", (e)=>{
-    const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
-    if (!addBtn) return;
-
-    const page = qs("#trainers-deployment");
-    if (!page) return;
-
-    const baseRow = addBtn.closest(".checklist-row.integrated-plus[data-base='true']");
-    const container = qs("#additionalTrainersContainer", page);
-
-    const newRow = document.createElement("div");
-    newRow.className = "checklist-row integrated-plus indent-sub trainer-clone";
-    newRow.dataset.clone = "true";
-    newRow.innerHTML = `
-      <label>Additional Trainer</label>
-      <input type="text" placeholder="Enter additional trainer name">
-    `;
-
-    const input = qs("input", newRow);
-    if (input){
-      ensureUID(input);
-      loadField(input);
-    }
-
-    if (container) container.appendChild(newRow);
-    else if (baseRow?.parentNode) baseRow.parentNode.insertBefore(newRow, baseRow.nextSibling);
-
-    input?.focus();
-
-    requestAnimationFrame(()=>{
-      initNotesLinkingOption2Only(page);
-      initTableNotesButtons(page);
-      updateNoteIconStates(page);
-      syncTwoColHeights();
-      initNotesExpanders(page);
-    });
-  });
-}
-
-/* ---------------------------
-   Primary Contacts: Additional POC (+)
---------------------------- */
-function initAdditionalPOC(){
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".additional-poc-card[data-base='true'] .additional-poc-add, .additional-poc-card[data-base='true'] .add-row");
-    if (!btn) return;
-
-    const baseCard = btn.closest(".additional-poc-card");
-    const grid = baseCard?.parentElement;
-    if (!baseCard || !grid) return;
-
-    const clone = baseCard.cloneNode(true);
-    clone.dataset.clone = "true";
-    clone.removeAttribute("data-base");
-
-    const addBtn = qs(".additional-poc-add, .add-row", clone);
-    addBtn?.remove();
-
-    qsa("input, select, textarea", clone).forEach(el=>{
-      if (!isField(el)) return;
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-      ensureUID(el);
-      applySelectGhost(el);
-      if (el.type === "date") applyDateGhost(el);
-      saveField(el);
-    });
-
-    grid.appendChild(clone);
-    qs("input, select, textarea", clone)?.focus();
-
-    requestAnimationFrame(()=>{
-      initNotesLinkingOption2Only(document);
-      initTableNotesButtons(document);
-      updateNoteIconStates(document);
-      syncTwoColHeights();
-      initNotesExpanders(document);
-    });
-  });
-}
-
-/* ---------------------------
-   Support Tickets
---------------------------- */
-function statusToContainerId(status){
-  switch(status){
-    case "Open": return "openTicketsContainer";
-    case "Tier Two": return "tierTwoTicketsContainer";
-    case "Closed - Resolved": return "closedResolvedTicketsContainer";
-    case "Closed - Feature Not Supported": return "closedFeatureTicketsContainer";
-    default: return "openTicketsContainer";
-  }
-}
-
-function lockOpenSelect(card){
-  const sel = qs(".ticket-status-select", card);
-  if (!sel) return;
-  sel.value = "Open";
-  sel.disabled = true;
-}
-
-function unlockStatusSelect(card){
-  const sel = qs(".ticket-status-select", card);
-  if (!sel) return;
-  sel.disabled = false;
-  if (!sel.value) sel.value = "Open";
-  applySelectGhost(sel);
-  saveField(sel);
-}
-
-function isTicketCardComplete(card){
-  const num = safeTrim(qs(".ticket-number-input", card)?.value);
-  const url = safeTrim(qs(".ticket-zendesk-input", card)?.value);
-  const sum = safeTrim(qs(".ticket-summary-input", card)?.value);
-  return !!(num && url && sum);
-}
-
-function makeTicketCloneFromBase(baseCard){
-  const clone = baseCard.cloneNode(true);
-  clone.dataset.clone = "true";
-  clone.removeAttribute("data-base");
-
-  qsa("input, textarea, select", clone).forEach(el=>{
-    if (!isField(el)) return;
-    if (el.type === "checkbox") el.checked = false;
-    else el.value = "";
-    ensureUID(el);
-    applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-    saveField(el);
-  });
-
-  qs(".ticket-disclaimer", clone)?.remove();
-
-  const addBtn = qs(".add-ticket-btn", clone);
-  if (addBtn){
-    addBtn.textContent = "×";
-    addBtn.title = "Remove Ticket";
-    addBtn.classList.add("remove-ticket-btn");
-    addBtn.classList.remove("add-ticket-btn");
-  }
-
-  const sel = qs(".ticket-status-select", clone);
-  if (sel){
-    sel.value = "Open";
-    applySelectGhost(sel);
-    saveField(sel);
-  }
-
-  unlockStatusSelect(clone);
-  return clone;
-}
-
-function moveTicketCard(card, newStatus){
-  const page = qs("#support-tickets");
-  if (!page || !card) return;
-
-  const dest = qs(`#${statusToContainerId(newStatus)}`, page);
-  if (!dest) return;
-
-  dest.appendChild(card);
-
-  if (dest.id === "openTicketsContainer" && card.dataset.base === "true") lockOpenSelect(card);
-  else unlockStatusSelect(card);
-}
-
-function initSupportTickets(){
-  const page = qs("#support-tickets");
-  if (!page) return;
-
-  const openBase = qs("#openTicketsContainer .ticket-group[data-base='true']", page);
-  if (openBase) lockOpenSelect(openBase);
-
-  document.addEventListener("click", (e)=>{
-    const addBtn = e.target.closest(".add-ticket-btn");
-    const removeBtn = e.target.closest(".remove-ticket-btn");
-    if (!addBtn && !removeBtn) return;
-
-    const card = e.target.closest(".ticket-group");
-    if (!card) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (removeBtn){
-      qsa("input, select, textarea", card).forEach(el=> clearFieldStorage(el));
-      card.remove();
-      return;
-    }
-
-    if (!isTicketCardComplete(card)){
-      alert("Complete Ticket Number, Zendesk URL, and Summary before adding another ticket.");
-      return;
-    }
-
-    const base = qs("#openTicketsContainer .ticket-group[data-base='true']", page) || card;
-    const newCard = makeTicketCloneFromBase(base);
-
-    qs("#openTicketsContainer", page)?.appendChild(newCard);
-
-    // clear base inputs after successful add
-    if (card.dataset.base === "true"){
-      [qs(".ticket-number-input", card), qs(".ticket-zendesk-input", card), qs(".ticket-summary-input", card)].forEach(el=>{
-        if (!el) return;
-        clearFieldStorage(el);
-        el.value = "";
-        saveField(el);
-      });
-      lockOpenSelect(card);
-    }
-
-    newCard.scrollIntoView({ behavior:"smooth", block:"center" });
-  });
-
-  document.addEventListener("change", (e)=>{
-    const sel = e.target.closest("#support-tickets .ticket-status-select");
-    if (!sel) return;
-
-    const card = e.target.closest(".ticket-group");
-    if (!card) return;
-
-    if (card.dataset.base === "true"){
-      lockOpenSelect(card);
-      return;
-    }
-
-    moveTicketCard(card, sel.value);
-  });
-}
-
-/* ---------------------------
-   Dealership Name display + Map
---------------------------- */
-function updateDealershipNameDisplay(name){
-  const display = qs("#dealershipNameDisplay");
-  if (!display) return;
-  display.textContent = safeTrim(name);
-  try{ localStorage.setItem("mkc:dealershipNameDisplay", display.textContent); }catch(e){}
-}
-
-function restoreDealershipNameDisplay(){
-  try{
-    const v = localStorage.getItem("mkc:dealershipNameDisplay");
-    if (v) updateDealershipNameDisplay(v);
-  }catch(e){}
-}
-
-function updateDealershipMap(address){
-  const frame = qs("#dealershipMapFrame") || qs("iframe.map-frame");
-  if (!frame) return;
-  frame.src = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
-  try{ localStorage.setItem("mkc:dealershipMapAddress", address); }catch(e){}
-}
-
-function restoreDealershipMap(){
-  try{
-    const addr = localStorage.getItem("mkc:dealershipMapAddress");
-    if (addr) updateDealershipMap(addr);
-  }catch(e){}
-}
-
-window.updateDealershipMap = updateDealershipMap;
-window.updateDealershipNameDisplay = updateDealershipNameDisplay;
-
-/* ---------------------------
-   PDF Export
---------------------------- */
-async function exportAllPagesPDF(){
-  const btn = qs("#savePDF");
-  if (btn){ btn.disabled = true; btn.textContent = "Saving PDF..."; }
-
-  const sections = qsa(".page-section");
-  const activeId = qs(".page-section.active")?.id;
-
-  sections.forEach(s=> s.classList.add("active"));
-  await new Promise(r=> setTimeout(r, 80));
-  syncTwoColHeights();
-  await new Promise(r=> setTimeout(r, 80));
-
-  const { jsPDF } = window.jspdf || {};
-  if (!jsPDF || !window.html2canvas){
-    alert("PDF tools missing. Make sure jsPDF and html2canvas are loaded.");
-    sections.forEach(s=> s.classList.remove("active"));
-    if (activeId) showSection(activeId);
-    if (btn){ btn.disabled = false; btn.textContent = "Save All Pages as PDF"; }
-    return;
-  }
-
-  const pdf = new jsPDF("p","pt","letter");
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-
-  let first = true;
-
-  for (const sec of sections){
-    const canvas = await window.html2canvas(sec,{
-      scale:2, useCORS:true, backgroundColor:"#ffffff",
-      scrollX:0, scrollY:-window.scrollY,
-    });
-
-    const img = canvas.toDataURL("image/png");
-    const imgW = pageW;
-    const imgH = (canvas.height * imgW) / canvas.width;
-
-    if (!first) pdf.addPage();
-
-    if (imgH <= pageH){
-      pdf.addImage(img,"PNG",0,0,imgW,imgH);
-    }else{
-      let remaining = imgH;
-      let y = 0;
-
-      const sliceCanvas = document.createElement("canvas");
-      const ctx = sliceCanvas.getContext("2d");
-
-      const pxPerPt = canvas.width / imgW;
-      const pagePxH = Math.floor(pageH * pxPerPt);
-
-      sliceCanvas.width = canvas.width;
-      sliceCanvas.height = pagePxH;
-
-      while (remaining > 0){
-        ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
-        ctx.drawImage(canvas, 0, y*pxPerPt, canvas.width, pagePxH, 0,0, canvas.width, pagePxH);
-
-        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", 0,0, imgW, pageH);
-
-        remaining -= pageH;
-        y += pageH;
-        if (remaining > 0) pdf.addPage();
-      }
-    }
-
-    first = false;
-  }
-
-  pdf.save("myKaarma_Interactive_Training_Checklist.pdf");
-
-  sections.forEach(s=> s.classList.remove("active"));
-  if (activeId) showSection(activeId);
-
-  if (btn){ btn.disabled = false; btn.textContent = "Save All Pages as PDF"; }
-}
-
-function initPDF(){
-  const btn = qs("#savePDF");
-  if (btn) btn.addEventListener("click", exportAllPagesPDF);
-}
-
-/* ===========================================================
-   ✅ Question Notes Linking: single 📝 icon per checklist row
-=========================================================== */
-function isNotesCard(card){
-  const h2 = card?.querySelector("h2");
-  const t  = (h2?.textContent || "").trim().toLowerCase();
-  return t.startsWith("notes");
-}
-
-function isInNotesCard(row){
-  const card = row.closest(".section-block");
-  return isNotesCard(card);
-}
-
-function findNotesTextareaForRow(row){
-  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
-  if (!wrap) return null;
-
-  const notesCard = Array.from(wrap.querySelectorAll(".section-block")).find(card=> isNotesCard(card));
-  return notesCard ? notesCard.querySelector("textarea") : null;
-}
-
-function getCleanQuestionText(row){
-  const label = row.querySelector("label");
-  if (!label) return "";
-  const clone = label.cloneNode(true);
-  clone.querySelectorAll(".note-link-btn, .note-btn").forEach(n=> n.remove());
-  return (clone.textContent || "").replace(/\s+/g," ").trim();
-}
-
-function makeNoteLine(row){
-  const q = getCleanQuestionText(row);
-  if (!q) return "";
-  return `• ${q}:`;
-}
-
-function getAllRowsInThisNotesGroup(row){
-  const wrap = row.closest(".cards-grid.two-col") || row.closest(".two-col-grid") || row.closest(".grid-2");
-  if (!wrap) return [];
-  return Array.from(wrap.querySelectorAll(".checklist-row"))
-    .filter(r=> !isInNotesCard(r))
-    .filter(r=> r.querySelector("input, select, textarea"));
-}
-
-function findExistingNoteLineIndex(lines, baseLine){
-  const k = (baseLine || "").trim();
-  return lines.findIndex(l=> (l || "").trim().startsWith(k));
-}
-
-function insertNoteLineInOrder(textarea, clickedRow){
-  const allRows = getAllRowsInThisNotesGroup(clickedRow);
-  const orderedKeys = allRows.map(r=> makeNoteLine(r).trim()).filter(Boolean);
-
-  const baseLine = makeNoteLine(clickedRow);
-  if (!baseLine) return { didInsert:false, lineStart:0 };
-
-  const raw = textarea.value || "";
-  const lines = raw.split("\n");
-
-  const existingIdx = findExistingNoteLineIndex(lines, baseLine);
-  if (existingIdx !== -1){
-    return {
-      didInsert:false,
-      lineStart: lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0),
-    };
-  }
-
-  const myOrder = orderedKeys.indexOf(baseLine.trim());
-  if (myOrder === -1){
-    const startPos = (textarea.value || "").length;
-    textarea.value = appendWithSpacing(textarea.value || "", baseLine);
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  let insertBeforeLineIdx = -1;
-  for (let i=0; i<lines.length; i++){
-    const t = (lines[i] || "").trim();
-    if (!t.startsWith("•")) continue;
-    const matchOrder = orderedKeys.findIndex(k=> t.startsWith(k));
-    if (matchOrder !== -1 && matchOrder > myOrder){
-      insertBeforeLineIdx = i;
-      break;
-    }
-  }
-
-  if (insertBeforeLineIdx === -1){
-    const startPos = (textarea.value || "").length;
-    textarea.value = appendWithSpacing(textarea.value || "", baseLine);
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  insertBeforeLineIdx = ensureBlankLineBeforeInsert(lines, insertBeforeLineIdx);
-  lines.splice(insertBeforeLineIdx, 0, baseLine);
-  textarea.value = lines.join("\n");
-
-  const startPos = lines.slice(0, insertBeforeLineIdx).join("\n").length + (insertBeforeLineIdx > 0 ? 1 : 0);
-  return { didInsert:true, lineStart:startPos };
-}
-
-function jumpToNoteLine(textarea, lineStart){
-  if (!textarea) return;
-  textarea.scrollIntoView({ behavior:"smooth", block:"center" });
-  setTimeout(()=>{
-    textarea.focus();
-    const v = textarea.value || "";
-    const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = (lineEnd === -1) ? v.length : lineEnd;
-    textarea.setSelectionRange(endPos, endPos);
-    textarea.classList.add("mk-note-jump");
-    setTimeout(()=> textarea.classList.remove("mk-note-jump"), 700);
-  }, 120);
-}
-
-function ensureRowActions(row){
-  let actions = row.querySelector(":scope > .row-actions");
-  if (actions) return actions;
-
-  actions = document.createElement("div");
-  actions.className = "row-actions";
-
-  if (row.classList.contains("integrated-plus")){
-    row.appendChild(actions);
-    return actions;
-  }
-
-  const field = row.querySelector(":scope > input, :scope > select, :scope > textarea");
-  if (field) actions.appendChild(field);
-  row.appendChild(actions);
-  return actions;
-}
-
-function initNotesLinkingOption2Only(root=document){
-  // Remove only question-note buttons (leave table note buttons alone)
-  qsa(".note-btn, .note-link-btn:not(.mk-table-note-btn)", root).forEach(n=> n.remove());
-
-  qsa(".checklist-row", root).forEach(row=>{
-    if (isInNotesCard(row)) return;
-
-    const field = row.querySelector("input, select, textarea");
-    if (!field) return;
-
-    const ta = findNotesTextareaForRow(row);
-    if (!ta) return;
-
-    const actions = ensureRowActions(row);
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "note-link-btn";
-    btn.title = "Add this question to Notes";
-    btn.innerHTML = `
-      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4h16v12H7l-3 3V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      </svg>
-    `;
-
-    btn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-
-      const textarea = findNotesTextareaForRow(row);
-      if (!textarea) return;
-
-      const { lineStart } = insertNoteLineInOrder(textarea, row);
-      applyNotesSpacing(textarea);
-
-      saveField(textarea);
-      requestAnimationFrame(()=> updateNoteIconStates(document));
-      requestAnimationFrame(syncTwoColHeights);
-
-      jumpToNoteLine(textarea, lineStart);
-    });
-
-    actions.appendChild(btn);
-  });
-
-  updateNoteIconStates(root);
-}
-
-function updateNoteIconStates(root=document){
-  qsa(".checklist-row", root).forEach(row=>{
-    const btn = row.querySelector(".note-link-btn:not(.mk-table-note-btn)");
-    if (!btn) return;
-
-    const ta = findNotesTextareaForRow(row);
-    if (!ta) return;
-
-    const line = makeNoteLine(row).trim();
-    btn.classList.toggle("has-note", !!line && (ta.value || "").includes(line));
-  });
-}
-
-/* ===========================================================
-   ✅ Table Notes Column + Bullet Insert (Name / Opcode)
-=========================================================== */
-function thText(th){
-  return (th?.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
-}
-
-function getHeaderCells(table){
-  return Array.from(table.querySelectorAll("thead tr th"));
-}
-
-function getNotesHeaderIndexes(table){
-  const ths = getHeaderCells(table);
-  const idxs = [];
-  ths.forEach((th,i)=>{ if (thText(th) === "notes") idxs.push(i); });
-  return idxs;
-}
-
-function removeColumnByIndex(table, idx){
-  table.querySelectorAll("thead tr").forEach(tr=> tr.children[idx]?.remove());
-  qsa("tbody tr", table).forEach(tr=> tr.children[idx]?.remove());
-}
-
-function ensureSingleNotesColumn(table){
-  const theadRow = table.querySelector("thead tr");
-  if (!theadRow) return null;
-
-  const noteIdxs = getNotesHeaderIndexes(table);
-
-  if (noteIdxs.length > 1){
-    const keep = noteIdxs[0];
-    noteIdxs.slice(1).sort((a,b)=> b-a).forEach(idx=> removeColumnByIndex(table, idx));
-    return keep;
-  }
-
-  if (noteIdxs.length === 0){
-    const th = document.createElement("th");
-    th.textContent = "Notes";
-    th.classList.add("notes-col");
-    theadRow.appendChild(th);
-
-    qsa("tbody tr", table).forEach(tr=>{
-      const td = document.createElement("td");
-      td.classList.add("notes-col");
-      tr.appendChild(td);
-    });
-
-    return theadRow.children.length - 1;
-  }
-
-  theadRow.children[noteIdxs[0]]?.classList.add("notes-col");
-  qsa("tbody tr", table).forEach(tr=> tr.children[noteIdxs[0]]?.classList.add("notes-col"));
-  return noteIdxs[0];
-}
-
-function renderTableNoteButton(td){
-  td.classList.add("notes-col");
-  td.innerHTML = `
-    <button type="button" class="note-link-btn mk-table-note-btn" title="Notes">
-      <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4h16v12H7l-3 3V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      </svg>
-    </button>
-  `;
-}
-
-function purgeStrayTableNoteButtons(table, notesIdx){
-  qsa("tbody tr", table).forEach(tr=>{
-    Array.from(tr.children).forEach((td, idx)=>{
-      if (idx === notesIdx) return;
-      qsa(".mk-table-note-btn", td).forEach(n=> n.remove());
-    });
-  });
-}
-
-function normalizeFiltersColumn(table){
-  const ths = getHeaderCells(table);
-  const filtersIdx = ths.findIndex(th=> thText(th) === "filters");
-  if (filtersIdx === -1) return;
-
-  let templateSelect = null;
-  qsa("tbody tr", table).some(tr=>{
-    const sel = tr.children[filtersIdx]?.querySelector("select");
-    if (sel){ templateSelect = sel; return true; }
-    return false;
-  });
-
-  qsa("tbody tr", table).forEach(tr=>{
-    const td = tr.children[filtersIdx];
-    if (!td) return;
-
-    qsa("button, .note-link-btn, .note-btn, .mk-table-note-btn", td).forEach(n=> n.remove());
-    if (td.querySelector("select")) return;
-
-    if (templateSelect){
-      const newSelect = templateSelect.cloneNode(true);
-      newSelect.value = "";
-      ensureUID(newSelect);
-      loadField(newSelect);
-      applySelectGhost(newSelect);
-      td.innerHTML = "";
-      td.appendChild(newSelect);
-      return;
-    }
-
-    const fallback = document.createElement("select");
-    fallback.innerHTML = `<option></option>`;
-    ensureUID(fallback);
-    loadField(fallback);
-    applySelectGhost(fallback);
-    td.innerHTML = "";
-    td.appendChild(fallback);
-  });
-}
-
-function applyNotesButtonsToColumn(table, notesColIdx){
-  const headRow = table.querySelector("thead tr");
-  if (headRow?.children[notesColIdx]){
-    headRow.children[notesColIdx].textContent = "Notes";
-    headRow.children[notesColIdx].classList.add("notes-col");
-  }
-
-  qsa("tbody tr", table).forEach(tr=>{
-    while (tr.children.length <= notesColIdx) tr.appendChild(document.createElement("td"));
-    renderTableNoteButton(tr.children[notesColIdx]);
-  });
-}
-
-function findNotesBlockForTable(table){
-  const section = table.closest(".section");
-  if (!section) return null;
-
-  let node = section.nextElementSibling;
-  while (node){
-    if (node.classList?.contains("section-block")){
-      const h2 = node.querySelector("h2");
-      const t = (h2?.textContent || "").trim().toLowerCase();
-      if (t.startsWith("notes")) return node;
-      return null;
-    }
-    if (node.classList?.contains("section")) return null;
-    node = node.nextElementSibling;
-  }
-  return null;
-}
-
-function getColumnIndexByHeader(table, headerNames){
-  const ths = getHeaderCells(table);
-  const targets = headerNames.map(h=> h.toLowerCase());
-  return ths.findIndex(th=> targets.includes(thText(th)));
-}
-
-function getCellFieldText(td){
-  if (!td) return "";
-
-  const txts = Array.from(td.querySelectorAll("input[type='text'], input:not([type])"))
-    .map(i=> safeTrim(i.value))
-    .filter(Boolean);
-
-  if (txts.length > 1) return txts.join(" ");
-  if (txts.length === 1) return txts[0];
-
-  const ta = td.querySelector("textarea");
-  if (ta) return safeTrim(ta.value);
-
-  const sel = td.querySelector("select");
-  if (sel){
-    const opt = sel.selectedOptions?.[0];
-    return safeTrim(opt?.textContent || sel.value);
-  }
-
-  return safeTrim(td.textContent);
-}
-
-function getOpcodeFromRow(table, tr){
-  const idx = getColumnIndexByHeader(table, ["opcode","op code","opcodes"]);
-  if (idx === -1) return "";
-  return getCellFieldText(tr.children[idx]);
-}
-
-function getNameFromRow(table, tr){
-  let idx = getColumnIndexByHeader(table, ["name"]);
-  if (idx === -1) idx = 0;
-  return getCellFieldText(tr.children[idx]);
-}
-
-function getRowKeyForTableContext(contextTable, tr){
-  const isOpcodes  = !!contextTable.closest("#opcodes-pricing");
-  const isTraining = !!contextTable.closest("#training-checklist");
-  if (isOpcodes)  return getOpcodeFromRow(contextTable, tr);
-  if (isTraining) return getNameFromRow(contextTable, tr);
-  return getNameFromRow(contextTable, tr) || getOpcodeFromRow(contextTable, tr) || "";
-}
-
-function getOrderedTableKeys(table){
-  const keys = [];
-  const tbody = table.querySelector("tbody");
-  if (!tbody) return keys;
-
-  Array.from(tbody.querySelectorAll("tr")).forEach(tr=>{
-    const k = safeTrim(getRowKeyForTableContext(table, tr));
-    if (k) keys.push(k);
-  });
-
-  return Array.from(new Set(keys));
-}
-
-function findBulletLineIndex(lines, bullet){
-  const b = (bullet || "").trim();
-  return lines.findIndex(l=> (l || "").trim().startsWith(b));
-}
-
-function insertBulletLineInOrderForTable(notesTA, table, bulletLine){
-  if (!notesTA || !table) return { didInsert:false, lineStart:0 };
-
-  const orderedKeys = getOrderedTableKeys(table);
-  const key = safeTrim(bulletLine.replace(/^•\s*/, "").replace(/:\s*$/, ""));
-  const myOrder = orderedKeys.indexOf(key);
-
-  const raw = notesTA.value || "";
-  const lines = raw.split("\n");
-
-  const existingIdx = findBulletLineIndex(lines, bulletLine);
-  if (existingIdx !== -1){
-    const start = lines.slice(0, existingIdx).join("\n").length + (existingIdx > 0 ? 1 : 0);
-    return { didInsert:false, lineStart:start };
-  }
-
-  if (myOrder === -1){
-    const startPos = (notesTA.value || "").length;
-    notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  let insertBefore = -1;
-  for (let i=0; i<lines.length; i++){
-    const t = (lines[i] || "").trim();
-    if (!t.startsWith("•")) continue;
-
-    const matchKey = orderedKeys.find(k=> t.startsWith(`• ${k}:`) || t.startsWith(`• ${k}`));
-    if (!matchKey) continue;
-
-    const matchOrder = orderedKeys.indexOf(matchKey);
-    if (matchOrder !== -1 && matchOrder > myOrder){
-      insertBefore = i;
-      break;
-    }
-  }
-
-  if (insertBefore === -1){
-    const startPos = (notesTA.value || "").length;
-    notesTA.value = appendWithSpacing(notesTA.value || "", bulletLine);
-    return { didInsert:true, lineStart:startPos };
-  }
-
-  insertBefore = ensureBlankLineBeforeInsert(lines, insertBefore);
-  lines.splice(insertBefore, 0, bulletLine);
-  notesTA.value = lines.join("\n");
-
-  const startPos = lines.slice(0, insertBefore).join("\n").length + (insertBefore > 0 ? 1 : 0);
-  return { didInsert:true, lineStart:startPos };
-}
-
-function insertBulletIntoRealNotes(table, bullet){
-  const notesBlock = findNotesBlockForTable(table);
-  const ta = notesBlock?.querySelector("textarea");
-  if (!ta) return;
-
-  const line = bullet.trim();
-  const { lineStart } = insertBulletLineInOrderForTable(ta, table, line);
-
-  applyNotesSpacing(ta);
-  saveField(ta);
-
-  notesBlock.scrollIntoView({ behavior:"smooth", block:"start" });
-  setTimeout(()=>{
-    ta.focus();
-    const v = ta.value || "";
-    const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = (lineEnd === -1) ? v.length : lineEnd;
-    ta.setSelectionRange(endPos, endPos);
-    ta.classList.add("mk-note-jump");
-    setTimeout(()=> ta.classList.remove("mk-note-jump"), 700);
-  }, 150);
-
-  requestAnimationFrame(()=> updateNoteIconStates(document));
-}
-
-// attaching to each "Name" column
-function tagNameCellsInTable(table) {
-  const nameIdx = getColumnIndexByHeader(table, ["name"]);
-  if (nameIdx === -1) return;
-  qsa("tbody tr", table).forEach(tr=>{
-    const td = tr.children[nameIdx];
-    if (!td) return;
-    td.classList.add("mk-name-cell");
-    Array.from(td.childNodes).forEach(n=>{ if (n.nodeName === "BR") n.remove(); });
-  });
-}
-
-function tagNameCellsInTableSection(section){
-  qsa("#training-checklist table.training-table", section).forEach(tagNameCellsInTable);
-}
-
-function tagNameCellsOnLoad(){
-  qsa("#training-checklist table.training-table").forEach(tagNameCellsInTable);
-}
-
-function initTableNotesButtons(root=document){
-  const targets = ["#training-checklist table.training-table", "#opcodes-pricing table.training-table"];
-
-  targets.forEach(sel=>{
-    qsa(sel, root).forEach(table=>{
-      const notesIdx = ensureSingleNotesColumn(table);
-      if (notesIdx === null) return;
-
-      purgeStrayTableNoteButtons(table, notesIdx);
-      normalizeFiltersColumn(table);
-      applyNotesButtonsToColumn(table, notesIdx);
-      tagNameCellsInTable(table);
-
-      if (table.dataset.mkNotesWired === "1") return;
-      table.dataset.mkNotesWired = "1";
-
-      table.addEventListener("click", (e)=>{
-        const btn = e.target.closest(".mk-table-note-btn");
-        if (!btn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const tr = btn.closest("tr");
-        if (!tr) return;
-
-        const key = getRowKeyForTableContext(table, tr);
-        if (!key) return;
-
-        insertBulletIntoRealNotes(table, `• ${key}:`);
-      }, { passive:false });
-    });
-  });
-}
-
-/* ===========================================================
-   Notes POP-OUT (Notes textarea expander)
-=========================================================== */
-let _mkNotesModalSourceTA = null;
-
-function ensureNotesModal(){
-  let modal = qs("#mkNotesModal");
-  if (modal) return modal;
-
-  modal = document.createElement("div");
-  modal.id = "mkNotesModal";
-  modal.innerHTML = `
-    <div class="mk-modal-backdrop" data-mk-close="1"></div>
-    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Notes">
-      <div class="mk-modal-header">
-        <div class="mk-modal-title" id="mkNotesModalTitle">Notes</div>
-        <button type="button" class="mk-modal-close" data-mk-close="1" aria-label="Close">×</button>
-      </div>
-      <textarea class="mk-modal-textarea" id="mkNotesModalTextarea"></textarea>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e)=>{
-    if (e.target.closest("[data-mk-close='1']")) closeNotesModal();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape" && modal.classList.contains("open")) closeNotesModal();
-  });
-
-  return modal;
-}
-
-function openNotesModal(sourceTA, titleText="Notes"){
-  const modal = ensureNotesModal();
-  const title = qs("#mkNotesModalTitle", modal);
-  const bigTA = qs("#mkNotesModalTextarea", modal);
-
-  _mkNotesModalSourceTA = sourceTA;
-  title.textContent = titleText || "Notes";
-  bigTA.value = sourceTA?.value || "";
-
-  bigTA.oninput = ()=>{
-    if (!_mkNotesModalSourceTA) return;
-    _mkNotesModalSourceTA.value = bigTA.value;
-    saveField(_mkNotesModalSourceTA);
-    requestAnimationFrame(()=> updateNoteIconStates(document));
-    requestAnimationFrame(syncTwoColHeights);
-  };
-
-  modal.classList.add("open");
-  setTimeout(()=> bigTA.focus(), 0);
-}
-
-function closeNotesModal(){
-  const modal = qs("#mkNotesModal");
-  if (!modal) return;
-
-  if (_mkNotesModalSourceTA){
-    saveField(_mkNotesModalSourceTA);
-    requestAnimationFrame(()=> updateNoteIconStates(document));
-    requestAnimationFrame(syncTwoColHeights);
-  }
-
-  modal.classList.remove("open");
-  _mkNotesModalSourceTA = null;
-}
-
-function initNotesExpanders(root=document){
-  const notesCards = qsa(".section-block", root).filter(isNotesCard);
-
-  notesCards.forEach(card=>{
-    const ta = qs("textarea", card);
-    if (!ta) return;
-
-    let wrap = ta.closest(".mk-ta-wrap");
-    if (!wrap){
-      wrap = document.createElement("div");
-      wrap.className = "mk-ta-wrap";
-      ta.parentNode.insertBefore(wrap, ta);
-      wrap.appendChild(ta);
-    }
-
-    if (qs(".mk-ta-expand", wrap)) return;
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "mk-ta-expand";
-    btn.title = "Expand notes";
-    btn.setAttribute("aria-label", "Expand notes");
-    btn.textContent = "⤢";
-
-    btn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      const h2 = qs("h2", card);
-      openNotesModal(ta, (h2?.textContent || "Notes").trim());
-    });
-
-    wrap.appendChild(btn);
-  });
-}
-
-/* ===========================================================
-   ✅ Table Popup Expand (⤢ in footer right)
-=========================================================== */
-let _mkTableModalSourceTA = null;
-let _mkTableModalContextTable = null;
-
-function ensureTableModal(){
-  let modal = qs("#mkTableModal");
-  if (modal) return modal;
-
-  modal = document.createElement("div");
-  modal.id = "mkTableModal";
-  modal.innerHTML = `
-    <div class="mk-modal-backdrop" data-mk-table-close="1"></div>
-    <div class="mk-modal-panel" role="dialog" aria-modal="true" aria-label="Expanded Table">
-      <div class="mk-modal-header">
-        <div class="mk-modal-title" id="mkTableModalTitle">Table</div>
-        <button type="button" class="mk-modal-close" data-mk-table-close="1" aria-label="Close">×</button>
-      </div>
-      <div class="mk-modal-content">
-        <div class="mk-modal-stack" id="mkTableModalStack"></div>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e)=>{
-    if (e.target.closest("[data-mk-table-close='1']")) closeTableModal();
-  });
-
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape" && modal.classList.contains("open")) closeTableModal();
-  });
-
-  return modal;
-}
-
-function closeTableModal(){
-  const modal = qs("#mkTableModal");
-  if (!modal) return;
-  modal.classList.remove("open");
-  _mkTableModalSourceTA = null;
-  _mkTableModalContextTable = null;
-}
-
-function buildCard(titleText){
-  const card = document.createElement("div");
-  card.className = "section-block";
-  card.innerHTML = `<h2>${titleText}</h2><div class="mk-card-body"></div>`;
-  return card;
-}
-
-function mountPopupNotesCard(titleText, sourceTA){
-  const notesCard = buildCard(titleText || "Notes");
-  notesCard.classList.add("mk-modal-notes");
-
-  const body = qs(".mk-card-body", notesCard);
-  const ta = document.createElement("textarea");
-  ta.placeholder = "Notes for this table...";
-  ta.value = sourceTA?.value || "";
-  body.appendChild(ta);
-
-  _mkTableModalSourceTA = sourceTA;
-
-  ta.addEventListener("input", ()=>{
-    if (!_mkTableModalSourceTA) return;
-    _mkTableModalSourceTA.value = ta.value;
-    saveField(_mkTableModalSourceTA);
-  });
-
-  return { notesCard, notesTA: ta };
-}
-
-function getTbodyRowIndex(tr){
-  if (!tr || !tr.parentElement) return -1;
-  return Array.from(tr.parentElement.children).indexOf(tr);
-}
-
-function insertBulletIntoPopupNotes(modalNotesTA, bullet){
-  const line = bullet.trim();
-  const orderTable = _mkTableModalContextTable || null;
-
-  const { lineStart } = orderTable
-    ? insertBulletLineInOrderForTable(modalNotesTA, orderTable, line)
-    : (() => {
-        const startPos = (modalNotesTA.value || "").length;
-        modalNotesTA.value = appendWithSpacing(modalNotesTA.value || "", line);
-        return { lineStart:startPos };
-      })();
-
-  applyNotesSpacing(modalNotesTA);
-
-  if (_mkTableModalSourceTA){
-    _mkTableModalSourceTA.value = modalNotesTA.value;
-    saveField(_mkTableModalSourceTA);
-  }
-
-  modalNotesTA.closest(".section-block")?.scrollIntoView({ behavior:"smooth", block:"start" });
-
-  setTimeout(()=>{
-    modalNotesTA.focus();
-    const v = modalNotesTA.value || "";
-    const lineEnd = v.indexOf("\n", lineStart);
-    const endPos = (lineEnd === -1) ? v.length : lineEnd;
-    modalNotesTA.setSelectionRange(endPos, endPos);
-    modalNotesTA.classList.add("mk-note-jump");
-    setTimeout(()=> modalNotesTA.classList.remove("mk-note-jump"), 700);
-  }, 140);
-
-  requestAnimationFrame(()=> updateNoteIconStates(document));
-}
-
-function openTableModalForTable(originalTable, titleText){
-  const modal = ensureTableModal();
-  const title = qs("#mkTableModalTitle", modal);
-  const stack = qs("#mkTableModalStack", modal);
-
-  title.textContent = titleText || "Table";
-  stack.innerHTML = "";
-
-  _mkTableModalContextTable = originalTable;
-
-  // Card title is "Table" (prevents duplicate big title twice)
-  const tableCard = buildCard("Table");
-  const tableBody = qs(".mk-card-body", tableCard);
-
-  // ✅ Clone FULL table container so it sits INSIDE the card and matches styling
-  const originalContainer = originalTable.closest(".table-container");
-  const containerClone = originalContainer ? originalContainer.cloneNode(true) : null;
-  if (!containerClone) return;
-
-  const tableClone = qs("table", containerClone);
-  if (!tableClone) return;
-
-  tableClone.classList.add("training-table", "mk-popup-table");
-
-  tableBody.appendChild(containerClone);
-
-  // Re-wire persistence in popup clone
-  qsa("input, select, textarea", tableClone).forEach((el) => {
-    ensureUID(el);
-    loadField(el);
-    if (el.tagName === "SELECT") applySelectGhost(el);
-    if (el.type === "date") applyDateGhost(el);
-    el.addEventListener("input", () => saveField(el));
-    el.addEventListener("change", () => saveField(el));
-  });
-
-  tagNameCellsInTable(tableClone);
-
-  // Ensure Notes column/buttons exist in popup clone table
-  initTableNotesButtons(tableCard);
-
-  // "+" in popup adds row to BOTH real + popup
-  const popupAddBtn = qs(".table-footer .add-row", containerClone);
-  if (popupAddBtn) {
-    popupAddBtn.addEventListener("click", () => {
-      const realTbody = originalTable.tBodies?.[0];
-      const cloneTbody = tableClone.tBodies?.[0];
-      if (!realTbody || !cloneTbody) return;
-
-      const realLast = realTbody.querySelector("tr:last-child");
-      const cloneLast = cloneTbody.querySelector("tr:last-child");
-      if (!realLast || !cloneLast) return;
-
-      const realNew = cloneTrainingRow(realLast);
-      const cloneNew = cloneTrainingRow(cloneLast);
-
-      realTbody.appendChild(realNew);
-      cloneTbody.appendChild(cloneNew);
-
-      requestAnimationFrame(() => {
-        initTableNotesButtons(document);
-        tagNameCellsInTable(originalTable);
-        tagNameCellsInTable(tableClone);
-        updateNoteIconStates(document);
-      });
-    });
-  }
-
-  // Notes card synced to real notes textarea
-  const realNotesBlock = findNotesBlockForTable(originalTable);
-  const realTA = realNotesBlock?.querySelector("textarea");
-  const { notesCard, notesTA } = mountPopupNotesCard("Notes", realTA);
-
-  // Clicking bubble in popup inserts into popup notes (ordered by real table)
-  tableClone.addEventListener(
-    "click",
-    (e) => {
-      const btn = e.target.closest(".mk-table-note-btn");
+  /* ======================================================
+     NAV
+  ====================================================== */
+  function initSidebarNav() {
+    const nav = document.getElementById("sidebar-nav");
+    if (!nav) return;
+
+    nav.addEventListener("click", (e) => {
+      const btn = e.target.closest(".nav-btn");
       if (!btn) return;
 
-      e.preventDefault();
-      e.stopPropagation();
+      const targetId = btn.getAttribute("data-target");
+      if (!targetId) return;
 
-      const cloneTr = btn.closest("tr");
-      if (!cloneTr) return;
+      // active button
+      nav.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
 
-      const idx = getTbodyRowIndex(cloneTr);
-      const origTr = originalTable.tBodies?.[0]?.rows?.[idx];
-      if (!origTr) return;
+      // show section
+      document.querySelectorAll(".page-section").forEach((sec) => sec.classList.remove("active"));
+      const section = document.getElementById(targetId);
+      if (section) section.classList.add("active");
 
-      const key = getRowKeyForTableContext(originalTable, origTr);
-      if (!key) return;
+      // scroll top of main content on nav
+      const main = document.querySelector("main");
+      if (main) main.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 
-      insertBulletIntoPopupNotes(notesTA, `• ${key}:`);
-    },
-    { passive: false }
-  );
+  /* ======================================================
+     Dealership Name -> Topbar display
+  ====================================================== */
+  function initDealershipNameMirror() {
+    const input = document.getElementById("dealershipNameInput");
+    const display = document.getElementById("dealershipNameDisplay");
+    if (!input || !display) return;
 
-  applyNotesSpacing(notesTA);
+    const render = () => {
+      const v = (input.value || "").trim();
+      display.textContent = v ? v : "";
+    };
 
-  stack.appendChild(tableCard);
-  stack.appendChild(notesCard);
-  modal.classList.add("open");
-}
+    input.addEventListener("input", render);
+    render();
+  }
 
-function ensureExpandBtnInTableFooter(table) {
-  const container = table.closest(".table-container");
-  if (!container) return;
+  /* ======================================================
+     Onsite Dates: end defaults to start + 2 days
+  ====================================================== */
+  function initOnsiteDatesAutoEnd() {
+    const start = document.getElementById("onsiteStartDate");
+    const end = document.getElementById("onsiteEndDate");
+    if (!start || !end) return;
 
-  const footer = qs(".table-footer", container);
-  if (!footer) return;
+    const setPlaceholderClass = (el) => {
+      if (!el) return;
+      if (el.value) el.classList.remove("is-placeholder");
+      else el.classList.add("is-placeholder");
+    };
 
-  // avoid duplicates
-  if (qs(".mk-table-expand-btn", footer)) return;
+    const addDays = (yyyyMmDd, days) => {
+      if (!yyyyMmDd) return "";
+      const [y, m, d] = yyyyMmDd.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() + days);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+    };
 
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mk-ta-expand mk-table-expand-btn";
-  btn.title = "Expand table";
-  btn.setAttribute("aria-label", "Expand table");
-  btn.textContent = "⤢";
+    start.addEventListener("change", () => {
+      setPlaceholderClass(start);
 
-  // push to right
-  const rightWrap = document.createElement("div");
-  rightWrap.className = "mk-table-expand-wrap";
-  rightWrap.style.marginLeft = "auto";
-  rightWrap.style.display = "flex";
-  rightWrap.style.alignItems = "center";
-  rightWrap.appendChild(btn);
+      // only auto-set end if empty or before start
+      if (!end.value) {
+        end.value = addDays(start.value, 2);
+      } else {
+        const s = new Date(start.value);
+        const e = new Date(end.value);
+        if (e < s) end.value = addDays(start.value, 2);
+      }
+      setPlaceholderClass(end);
+      triggerAutosaveSoon();
+    });
 
-  footer.appendChild(rightWrap);
+    end.addEventListener("change", () => {
+      setPlaceholderClass(end);
+      triggerAutosaveSoon();
+    });
 
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    setPlaceholderClass(start);
+    setPlaceholderClass(end);
+  }
 
-    // use the card title as popup title
-    const card = container.closest(".section-block");
-    const h2 = qs("h2", card);
-    const popupTitle = safeTrim(h2?.textContent || "Table");
+  /* ======================================================
+     Additional Trainers (+)
+     Base row has: .checklist-row.integrated-plus.indent-sub[data-base="true"]
+     Container: #additionalTrainersContainer
+  ====================================================== */
+  function initDynamicAdditionalTrainers() {
+    const container = document.getElementById("additionalTrainersContainer");
+    const baseRow = document.querySelector('#trainers-deployment .checklist-row[data-base="true"]');
+    if (!container || !baseRow) return;
 
-    if (typeof openTableModalForTable !== "function") {
-      console.error("openTableModalForTable is not defined.");
+    baseRow.addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-row");
+      if (!btn) return;
+
+      const input = baseRow.querySelector('input[type="text"]');
+      if (!input) return;
+
+      // Require base filled before adding
+      if (!input.value.trim()) {
+        input.focus();
+        return;
+      }
+
+      const newRow = baseRow.cloneNode(true);
+      newRow.removeAttribute("data-base");
+      newRow.classList.add("is-clone");
+
+      // remove + button from clones and replace with remove
+      const plus = newRow.querySelector(".add-row");
+      if (plus) {
+        plus.textContent = "–";
+        plus.title = "Remove trainer";
+        plus.classList.add("remove-row");
+        plus.classList.remove("add-row");
+      }
+
+      // Clear cloned input
+      const newInput = newRow.querySelector('input[type="text"]');
+      if (newInput) newInput.value = "";
+
+      container.appendChild(newRow);
+      triggerAutosaveSoon();
+    });
+
+    // delegated remove
+    container.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".remove-row");
+      if (!removeBtn) return;
+      const row = removeBtn.closest(".checklist-row");
+      if (row) row.remove();
+      triggerAutosaveSoon();
+    });
+  }
+
+  /* ======================================================
+     Additional POC (+)
+     Base card: .mini-card.additional-poc-card[data-base="true"]
+     Button: .additional-poc-add (inside base)
+  ====================================================== */
+  function initDynamicAdditionalPOCs() {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    const grid = document.querySelector(".primary-contacts-grid");
+    if (!base || !grid) return;
+
+    base.addEventListener("click", (e) => {
+      const btn = e.target.closest(".additional-poc-add");
+      if (!btn) return;
+
+      // Require base name field filled before adding
+      const nameInput = base.querySelector('.checklist-row input[type="text"]');
+      if (nameInput && !nameInput.value.trim()) {
+        nameInput.focus();
+        return;
+      }
+
+      const clone = base.cloneNode(true);
+      clone.removeAttribute("data-base");
+      clone.classList.add("is-clone");
+
+      // Change + to remove
+      const plus = clone.querySelector(".additional-poc-add");
+      if (plus) {
+        plus.textContent = "–";
+        plus.title = "Remove contact";
+        plus.classList.add("remove-poc");
+        plus.classList.remove("additional-poc-add");
+      }
+
+      // Clear inputs in clone
+      clone.querySelectorAll("input").forEach((i) => (i.value = ""));
+      grid.appendChild(clone);
+      triggerAutosaveSoon();
+    });
+
+    // delegated remove
+    grid.addEventListener("click", (e) => {
+      const btn = e.target.closest(".remove-poc");
+      if (!btn) return;
+      const card = btn.closest(".mini-card");
+      if (card) card.remove();
+      triggerAutosaveSoon();
+    });
+  }
+
+  /* ======================================================
+     TABLES: Add Row (+)
+     - footer button: .table-footer .add-row
+     - clones last <tr> in <tbody>
+     - clears inputs/selects
+     - keeps Notes icon cell
+  ====================================================== */
+  function initTablesAddRowButtons() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".table-footer .add-row");
+      if (!btn) return;
+
+      const tableContainer = btn.closest(".table-container");
+      const table = tableContainer?.querySelector("table");
+      const tbody = table?.querySelector("tbody");
+      if (!table || !tbody) return;
+
+      const lastRow = tbody.querySelector("tr:last-child");
+      if (!lastRow) return;
+
+      const newRow = lastRow.cloneNode(true);
+
+      // Clear values
+      newRow.querySelectorAll("input, textarea, select").forEach((el) => {
+        if (el.tagName === "SELECT") {
+          el.selectedIndex = 0;
+        } else if (el.type === "checkbox" || el.type === "radio") {
+          el.checked = false;
+        } else {
+          el.value = "";
+        }
+      });
+
+      tbody.appendChild(newRow);
+      triggerAutosaveSoon();
+    });
+  }
+
+  /* ======================================================
+     Notes icon linking:
+     button.notes-icon-btn[data-notes-target="notes-techs"]
+     scroll to target and focus textarea
+  ====================================================== */
+  function initNotesIconLinking() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".notes-icon-btn");
+      if (!btn) return;
+
+      const targetId = btn.getAttribute("data-notes-target");
+      if (!targetId) return;
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // focus textarea after small delay
+      setTimeout(() => {
+        const ta = target.querySelector("textarea");
+        if (ta) ta.focus();
+      }, 250);
+    });
+  }
+
+  /* ======================================================
+     Notes bullet insert + spacing for TABLE notes icons
+     - Inserts "• <Name>:" (Training tables)
+     - Inserts "• <Opcode>:" (Opcodes table)
+     - Adds a blank line between bullet headers
+  ====================================================== */
+  function initNotesBulletInsertForTables() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".notes-icon-btn");
+      if (!btn) return;
+
+      const targetId = btn.getAttribute("data-notes-target");
+      const notesBlock = targetId ? document.getElementById(targetId) : null;
+      const textarea = notesBlock?.querySelector("textarea");
+      if (!textarea) return;
+
+      const row = btn.closest("tr");
+      if (!row) return;
+
+      // Determine label from first text input cell (Name/Opcode)
+      const firstText = row.querySelector('input[type="text"]');
+      const token = (firstText?.value || "").trim();
+
+      let header = "";
+      if (targetId === "notes-opcodes") {
+        header = token ? `• ${token}:` : "• Opcode:";
+      } else if (targetId && targetId.startsWith("notes-")) {
+        header = token ? `• ${token}:` : "• Name:";
+      }
+
+      if (!header) return;
+
+      insertBulletHeaderWithSpacing(textarea, header);
+      triggerAutosaveSoon();
+    });
+  }
+
+  function insertBulletHeaderWithSpacing(textarea, headerLine) {
+    const existing = textarea.value || "";
+    const trimmed = existing.replace(/\s+$/g, "");
+
+    // If already contains this exact header, just scroll caret there
+    if (trimmed.includes(headerLine)) {
+      const idx = trimmed.indexOf(headerLine);
+      textarea.focus();
+      textarea.setSelectionRange(idx, idx + headerLine.length);
       return;
     }
 
-    openTableModalForTable(table, popupTitle);
-  });
-}
+    // Ensure blank line separation between headers
+    const needsBreak = trimmed.length ? "\n\n" : "";
+    const newText = trimmed + needsBreak + headerLine + "\n";
 
-function initTablePopupExpandButtons(root = document) {
-  const targets = [
-    "#training-checklist table.training-table",
-    "#opcodes-pricing table.training-table",
-  ];
+    textarea.value = newText;
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  }
 
-  targets.forEach((sel) => {
-    qsa(sel, root).forEach((table) => ensureExpandBtnInTableFooter(table));
-  });
-}
+  /* ======================================================
+     SUPPORT TICKETS
+     - Base card stays in Open container
+     - Base status locked to Open
+     - Add Ticket (+) only works when base is completed
+     - Status change moves cards between containers
+  ====================================================== */
+  function initSupportTickets() {
+    const openC = document.getElementById("openTicketsContainer");
+    const tierTwoC = document.getElementById("tierTwoTicketsContainer");
+    const closedResC = document.getElementById("closedResolvedTicketsContainer");
+    const closedFeatC = document.getElementById("closedFeatureTicketsContainer");
+    if (!openC || !tierTwoC || !closedResC || !closedFeatC) return;
 
-/* ---------------------------
-   Boot
---------------------------- */
-document.addEventListener("DOMContentLoaded", ()=>{
-  injectRuntimePatches();
+    // lock base status to Open
+    const base = openC.querySelector('.ticket-group[data-base="true"]');
+    if (base) {
+      const status = base.querySelector(".ticket-status-select");
+      if (status) {
+        status.value = "Open";
+        status.disabled = true;
+      }
+    }
 
-  initNav();
-  initGhosts();
-  initPersistence();
+    // Add ticket (+)
+    openC.addEventListener("click", (e) => {
+      const addBtn = e.target.closest(".add-ticket-btn");
+      if (!addBtn) return;
 
-  initTextareas(document);
-  syncTwoColHeights();
-  window.addEventListener("resize", ()=> requestAnimationFrame(syncTwoColHeights));
+      const group = addBtn.closest(".ticket-group");
+      if (!group) return;
 
-  initResets();
-  initTableAddRow();
+      // Base card completion requirement
+      if (group.getAttribute("data-base") === "true") {
+        const ok = isTicketCardComplete(group);
+        if (!ok) {
+          // focus first missing field
+          focusFirstMissingTicketField(group);
+          return;
+        }
+      }
 
-  initAdditionalTrainers();
-  initAdditionalPOC();
-  initSupportTickets();
-  initOnsiteTrainingDates();
+      const newCard = (base || group).cloneNode(true);
+      newCard.removeAttribute("data-base");
 
-  restoreDealershipNameDisplay();
-  restoreDealershipMap();
+      // unlock status on clones
+      const status = newCard.querySelector(".ticket-status-select");
+      if (status) {
+        status.disabled = false;
+        status.value = "Open";
+      }
 
-  initPDF();
+      // remove disclaimer on clones
+      const disc = newCard.querySelector(".ticket-disclaimer");
+      if (disc) disc.remove();
 
-  // Notes + tables
-  initNotesExpanders(document);
-  initNotesLinkingOption2Only(document);
-  initTableNotesButtons(document);
-  initTablePopupExpandButtons(document);
-  updateNoteIconStates(document);
+      // swap + button to remove button on clones
+      const plus = newCard.querySelector(".add-ticket-btn");
+      if (plus) {
+        plus.textContent = "–";
+        plus.title = "Remove Ticket";
+        plus.classList.add("remove-ticket-btn");
+        plus.classList.remove("add-ticket-btn");
+      }
 
-  // Name cell layout fix
-  tagNameCellsOnLoad();
-});
+      // clear fields
+      newCard.querySelectorAll("input, textarea").forEach((el) => (el.value = ""));
+
+      openC.appendChild(newCard);
+      triggerAutosaveSoon();
+    });
+
+    // Remove ticket
+    document.addEventListener("click", (e) => {
+      const rm = e.target.closest(".remove-ticket-btn");
+      if (!rm) return;
+      const card = rm.closest(".ticket-group");
+      if (card) card.remove();
+      triggerAutosaveSoon();
+    });
+
+    // Move cards by status
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest(".ticket-status-select");
+      if (!sel) return;
+
+      const card = sel.closest(".ticket-group");
+      if (!card) return;
+
+      // base cannot move
+      if (card.getAttribute("data-base") === "true") {
+        sel.value = "Open";
+        return;
+      }
+
+      const v = sel.value;
+      if (v === "Open") openC.appendChild(card);
+      else if (v === "Tier Two") tierTwoC.appendChild(card);
+      else if (v === "Closed - Resolved") closedResC.appendChild(card);
+      else if (v === "Closed - Feature Not Supported") closedFeatC.appendChild(card);
+
+      triggerAutosaveSoon();
+    });
+  }
+
+  function isTicketCardComplete(card) {
+    const num = card.querySelector(".ticket-number-input");
+    const url = card.querySelector(".ticket-zendesk-input");
+    const sum = card.querySelector(".ticket-summary-input");
+
+    return (
+      !!(num && num.value.trim()) &&
+      !!(url && url.value.trim()) &&
+      !!(sum && sum.value.trim())
+    );
+  }
+
+  function focusFirstMissingTicketField(card) {
+    const fields = [
+      card.querySelector(".ticket-number-input"),
+      card.querySelector(".ticket-zendesk-input"),
+      card.querySelector(".ticket-summary-input"),
+    ].filter(Boolean);
+
+    for (const f of fields) {
+      if (!f.value.trim()) {
+        f.focus();
+        return;
+      }
+    }
+  }
+
+  /* ======================================================
+     RESET PAGE (Reset This Page)
+  ====================================================== */
+  function initResetPageButtons() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".clear-page-btn");
+      if (!btn) return;
+
+      const section = btn.closest(".page-section");
+      if (!section) return;
+
+      resetSection(section);
+      triggerAutosaveSoon();
+    });
+  }
+
+  function resetSection(section) {
+    // Reset form elements in this section
+    section.querySelectorAll("input, textarea, select").forEach((el) => {
+      if (el.tagName === "SELECT") {
+        el.selectedIndex = 0;
+      } else if (el.type === "checkbox" || el.type === "radio") {
+        el.checked = false;
+      } else {
+        el.value = "";
+      }
+    });
+
+    // Remove cloned additional trainers
+    const addTrainers = section.querySelector("#additionalTrainersContainer");
+    if (addTrainers) addTrainers.innerHTML = "";
+
+    // Remove cloned additional POCs (keep base)
+    section
+      .querySelectorAll(".additional-poc-card.is-clone, .additional-poc-card:not([data-base='true'])")
+      .forEach((c) => c.remove());
+
+    // Support tickets: remove all non-base ticket cards, clear base fields
+    if (section.id === "support-tickets") {
+      const openC = document.getElementById("openTicketsContainer");
+      if (openC) {
+        openC.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((c) => c.remove());
+        const base = openC.querySelector('.ticket-group[data-base="true"]');
+        if (base) {
+          base.querySelectorAll("input, textarea").forEach((el) => (el.value = ""));
+          const status = base.querySelector(".ticket-status-select");
+          if (status) {
+            status.value = "Open";
+            status.disabled = true;
+          }
+        }
+      }
+      ["tierTwoTicketsContainer", "closedResolvedTicketsContainer", "closedFeatureTicketsContainer"].forEach(
+        (id) => {
+          const c = document.getElementById(id);
+          if (c) c.innerHTML = "";
+        }
+      );
+    }
+  }
+
+  /* ======================================================
+     CLEAR ALL
+  ====================================================== */
+  function initClearAllButton() {
+    const btn = document.getElementById("clearAllBtn");
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".page-section").forEach((sec) => resetSection(sec));
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_META_KEY);
+      // update topbar dealership name display
+      const disp = document.getElementById("dealershipNameDisplay");
+      if (disp) disp.textContent = "";
+      triggerAutosaveSoon();
+    });
+  }
+
+  /* ======================================================
+     AUTOSAVE (localStorage)
+  ====================================================== */
+  let autosaveTimer = null;
+
+  function initAutosave() {
+    // Save on input/change in any form field
+    document.addEventListener("input", (e) => {
+      if (e.target.closest("input, textarea, select")) triggerAutosaveSoon();
+    });
+    document.addEventListener("change", (e) => {
+      if (e.target.closest("input, textarea, select")) triggerAutosaveSoon();
+    });
+  }
+
+  function triggerAutosaveSoon() {
+    if (autosaveTimer) clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveToAutosave, AUTOSAVE_DEBOUNCE_MS);
+  }
+
+  function saveToAutosave() {
+    const data = collectState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(
+      STORAGE_META_KEY,
+      JSON.stringify({ savedAt: new Date().toISOString() })
+    );
+  }
+
+  function restoreFromAutosave() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const data = JSON.parse(raw);
+      applyState(data);
+    } catch {
+      // ignore
+    }
+  }
+
+  function collectState() {
+    // Store values by stable selector strategy:
+    // 1) all inputs/textareas/selects with ids => {id: value}
+    // 2) everything else by DOM path index (best-effort)
+    const state = {
+      ids: {},
+      nodes: [],
+      html: {
+        additionalTrainers: "",
+        additionalPOCs: "",
+        ticketsTierTwo: "",
+        ticketsClosedResolved: "",
+        ticketsClosedFeature: "",
+        ticketsOpenClones: "",
+      },
+    };
+
+    document.querySelectorAll("input[id], textarea[id], select[id]").forEach((el) => {
+      state.ids[el.id] = serializeEl(el);
+    });
+
+    // Capture dynamic containers HTML
+    const addTrainers = document.getElementById("additionalTrainersContainer");
+    if (addTrainers) state.html.additionalTrainers = addTrainers.innerHTML;
+
+    const pocGrid = document.querySelector(".primary-contacts-grid");
+    if (pocGrid) {
+      // store only non-base additional POCs
+      const clones = [...pocGrid.querySelectorAll(".additional-poc-card:not([data-base='true'])")];
+      state.html.additionalPOCs = clones.map((c) => c.outerHTML).join("");
+    }
+
+    // Support ticket containers
+    const openC = document.getElementById("openTicketsContainer");
+    if (openC) {
+      const clones = [...openC.querySelectorAll(".ticket-group:not([data-base='true'])")];
+      state.html.ticketsOpenClones = clones.map((c) => c.outerHTML).join("");
+    }
+    const t2 = document.getElementById("tierTwoTicketsContainer");
+    if (t2) state.html.ticketsTierTwo = t2.innerHTML;
+    const cr = document.getElementById("closedResolvedTicketsContainer");
+    if (cr) state.html.ticketsClosedResolved = cr.innerHTML;
+    const cf = document.getElementById("closedFeatureTicketsContainer");
+    if (cf) state.html.ticketsClosedFeature = cf.innerHTML;
+
+    // Best-effort for other fields (index-based)
+    const all = [...document.querySelectorAll("main input, main textarea, main select")];
+    state.nodes = all.map((el) => serializeEl(el));
+
+    return state;
+  }
+
+  function applyState(state) {
+    if (!state) return;
+
+    // Restore ID-bound fields first
+    if (state.ids) {
+      Object.entries(state.ids).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) deserializeEl(el, val);
+      });
+    }
+
+    // Restore dynamic HTML containers then rebind behaviors automatically via delegation
+    const addTrainers = document.getElementById("additionalTrainersContainer");
+    if (addTrainers && state.html?.additionalTrainers != null) {
+      addTrainers.innerHTML = state.html.additionalTrainers;
+      // ensure remove buttons exist on restored clones
+      addTrainers.querySelectorAll(".checklist-row").forEach((row) => {
+        if (row.getAttribute("data-base") === "true") return;
+        const btn = row.querySelector("button");
+        if (btn && btn.textContent.trim() === "+") {
+          btn.textContent = "–";
+          btn.classList.add("remove-row");
+          btn.classList.remove("add-row");
+        }
+      });
+    }
+
+    const pocGrid = document.querySelector(".primary-contacts-grid");
+    if (pocGrid && state.html?.additionalPOCs != null) {
+      // remove any existing non-base
+      pocGrid.querySelectorAll(".additional-poc-card:not([data-base='true'])").forEach((c) => c.remove());
+      // append restored
+      const temp = document.createElement("div");
+      temp.innerHTML = state.html.additionalPOCs;
+      temp.querySelectorAll(".additional-poc-card").forEach((card) => {
+        // normalize remove button
+        const b = card.querySelector("button");
+        if (b) {
+          b.textContent = "–";
+          b.title = "Remove contact";
+          b.classList.add("remove-poc");
+          b.classList.remove("additional-poc-add");
+        }
+        card.classList.add("is-clone");
+        pocGrid.appendChild(card);
+      });
+    }
+
+    // Support tickets restore
+    const openC = document.getElementById("openTicketsContainer");
+    if (openC && state.html?.ticketsOpenClones != null) {
+      openC.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((c) => c.remove());
+      const temp = document.createElement("div");
+      temp.innerHTML = state.html.ticketsOpenClones;
+      temp.querySelectorAll(".ticket-group").forEach((card) => openC.appendChild(card));
+    }
+    const t2 = document.getElementById("tierTwoTicketsContainer");
+    if (t2 && state.html?.ticketsTierTwo != null) t2.innerHTML = state.html.ticketsTierTwo;
+    const cr = document.getElementById("closedResolvedTicketsContainer");
+    if (cr && state.html?.ticketsClosedResolved != null) cr.innerHTML = state.html.ticketsClosedResolved;
+    const cf = document.getElementById("closedFeatureTicketsContainer");
+    if (cf && state.html?.ticketsClosedFeature != null) cf.innerHTML = state.html.ticketsClosedFeature;
+
+    // Normalize ticket clone buttons + status locks
+    normalizeTicketsAfterRestore();
+
+    // Restore index-based values as fallback (keeps most things even without IDs)
+    if (Array.isArray(state.nodes)) {
+      const all = [...document.querySelectorAll("main input, main textarea, main select")];
+      for (let i = 0; i < Math.min(all.length, state.nodes.length); i++) {
+        deserializeEl(all[i], state.nodes[i]);
+      }
+    }
+
+    // update dealership display
+    const dn = document.getElementById("dealershipNameInput");
+    const disp = document.getElementById("dealershipNameDisplay");
+    if (dn && disp) disp.textContent = (dn.value || "").trim();
+
+    // placeholder classes for dates
+    const s = document.getElementById("onsiteStartDate");
+    const e = document.getElementById("onsiteEndDate");
+    if (s) s.classList.toggle("is-placeholder", !s.value);
+    if (e) e.classList.toggle("is-placeholder", !e.value);
+  }
+
+  function normalizeTicketsAfterRestore() {
+    const openC = document.getElementById("openTicketsContainer");
+    if (!openC) return;
+
+    // lock base
+    const base = openC.querySelector('.ticket-group[data-base="true"]');
+    if (base) {
+      const status = base.querySelector(".ticket-status-select");
+      if (status) {
+        status.value = "Open";
+        status.disabled = true;
+      }
+    }
+
+    // normalize clones remove btn and disclaimer
+    document.querySelectorAll(".ticket-group:not([data-base='true'])").forEach((card) => {
+      const disc = card.querySelector(".ticket-disclaimer");
+      if (disc) disc.remove();
+
+      const plus = card.querySelector(".add-ticket-btn");
+      if (plus) {
+        plus.textContent = "–";
+        plus.title = "Remove Ticket";
+        plus.classList.add("remove-ticket-btn");
+        plus.classList.remove("add-ticket-btn");
+      }
+      const status = card.querySelector(".ticket-status-select");
+      if (status) status.disabled = false;
+    });
+  }
+
+  function serializeEl(el) {
+    if (!el) return null;
+    if (el.tagName === "SELECT") return { t: "select", v: el.value };
+    if (el.type === "checkbox") return { t: "checkbox", v: !!el.checked };
+    if (el.type === "radio") return { t: "radio", v: !!el.checked, name: el.name, value: el.value };
+    return { t: "value", v: el.value };
+  }
+
+  function deserializeEl(el, data) {
+    if (!el || !data) return;
+
+    if (data.t === "select") el.value = data.v ?? "";
+    else if (data.t === "checkbox") el.checked = !!data.v;
+    else if (data.t === "value") el.value = data.v ?? "";
+    else if (data.t === "radio") {
+      // best effort
+      el.checked = !!data.v;
+    }
+  }
+
+  /* ======================================================
+     PDF EXPORT (Save All Pages as PDF)
+     ⚠️ Requires:
+        - jsPDF available as window.jspdf.jsPDF
+        - html2canvas available as window.html2canvas
+     If missing, shows an alert.
+  ====================================================== */
+  function initPdfExportButton() {
+    const btn = document.getElementById("savePDF");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+      const jsPDF = window.jspdf?.jsPDF;
+      const html2canvas = window.html2canvas;
+
+      if (!jsPDF || !html2canvas) {
+        alert("PDF export requires jsPDF + html2canvas to be loaded.");
+        return;
+      }
+
+      const sections = [...document.querySelectorAll(".page-section")];
+      if (!sections.length) return;
+
+      const active = document.querySelector(".page-section.active");
+      const doc = new jsPDF("p", "pt", "letter");
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      // temporarily show each section to capture
+      for (let i = 0; i < sections.length; i++) {
+        sections.forEach((s) => s.classList.remove("active"));
+        sections[i].classList.add("active");
+
+        // allow layout settle
+        await wait(120);
+
+        const canvas = await html2canvas(sections[i], { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL("image/png");
+
+        // fit into page
+        const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+        const imgW = canvas.width * ratio;
+        const imgH = canvas.height * ratio;
+
+        if (i > 0) doc.addPage();
+        doc.addImage(imgData, "PNG", (pageW - imgW) / 2, 24, imgW, imgH);
+      }
+
+      // restore active
+      sections.forEach((s) => s.classList.remove("active"));
+      if (active) active.classList.add("active");
+      else sections[0].classList.add("active");
+
+      doc.save("myKaarma-Training-Checklist.pdf");
+    });
+  }
+
+  function wait(ms) {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
+  /* ======================================================
+     TABLE EXPAND (⤢) — moves real table into modal + back
+     - Preserves all inputs/selects/checkboxes (no cloning)
+     - Keeps horizontal/vertical scroll
+  ====================================================== */
+  function initTableExpandFeature() {
+    ensureTableExpandStyles();
+    const modal = ensureTableExpandModal();
+
+    // Add expand buttons to every table footer (unless already present)
+    document.querySelectorAll(".table-container").forEach((container) => {
+      const footer = container.querySelector(".table-footer");
+      if (!footer) return;
+
+      let btn = footer.querySelector(".table-expand-btn");
+      if (!btn) {
+        btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "table-expand-btn";
+        btn.title = "Expand table";
+        btn.setAttribute("aria-label", "Expand table");
+        btn.textContent = "⤢";
+        footer.appendChild(btn);
+      }
+
+      btn.addEventListener("click", () => openTableInModal(container, modal));
+    });
+  }
+
+  function ensureTableExpandModal() {
+    let overlay = document.getElementById("tableExpandOverlay");
+    if (overlay) return overlay;
+
+    overlay = document.createElement("div");
+    overlay.id = "tableExpandOverlay";
+    overlay.className = "table-expand-overlay";
+    overlay.innerHTML = `
+      <div class="table-expand-modal" role="dialog" aria-modal="true" aria-label="Expanded table">
+        <div class="table-expand-header">
+          <div class="table-expand-title" id="tableExpandTitle">Expanded Table</div>
+          <button type="button" class="table-expand-close" aria-label="Close expanded table" title="Close">✕</button>
+        </div>
+        <div class="table-expand-body">
+          <div class="table-expand-scroll"></div>
+        </div>
+        <div class="table-expand-footer">
+          <button type="button" class="table-expand-close secondary">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // close handlers
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeExpandedTable(overlay);
+    });
+    overlay.querySelectorAll(".table-expand-close").forEach((b) => {
+      b.addEventListener("click", () => closeExpandedTable(overlay));
+    });
+
+    // ESC closes
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.classList.contains("open")) {
+        closeExpandedTable(overlay);
+      }
+    });
+
+    return overlay;
+  }
+
+  function openTableInModal(tableContainer, overlay) {
+    // Prevent double-open
+    if (overlay.__active) return;
+
+    const table = tableContainer.querySelector("table");
+    if (!table) return;
+
+    const titleEl = overlay.querySelector("#tableExpandTitle");
+
+    // Try to pull a title: nearest .section-header or h2 above the table container
+    const sectionHeader =
+      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
+      tableContainer.closest(".section-block")?.querySelector("h2")?.textContent?.trim() ||
+      "Expanded Table";
+    titleEl.textContent = sectionHeader;
+
+    // Save where the table came from
+    overlay.__active = {
+      table,
+      originalParent: table.parentNode,
+      originalNextSibling: table.nextSibling,
+    };
+
+    // Move actual table into modal scroll area
+    const scrollHost = overlay.querySelector(".table-expand-scroll");
+    scrollHost.innerHTML = "";
+    scrollHost.appendChild(table);
+
+    overlay.classList.add("open");
+    document.body.classList.add("no-scroll");
+
+    overlay.querySelector(".table-expand-close")?.focus();
+  }
+
+  function closeExpandedTable(overlay) {
+    if (!overlay.__active) {
+      overlay.classList.remove("open");
+      document.body.classList.remove("no-scroll");
+      return;
+    }
+
+    const { table, originalParent, originalNextSibling } = overlay.__active;
+
+    // Restore table exactly where it was
+    if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
+      originalParent.insertBefore(table, originalNextSibling);
+    } else {
+      originalParent.appendChild(table);
+    }
+
+    overlay.__active = null;
+    overlay.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+  }
+
+  function ensureTableExpandStyles() {
+    if (document.getElementById("tableExpandStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "tableExpandStyles";
+    style.textContent = `
+      .table-expand-btn{
+        margin-left: 10px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06);
+        color: inherit;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+      }
+      .table-expand-btn:hover{ background: rgba(255,255,255,0.10); }
+
+      .table-expand-overlay{
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.62);
+        z-index: 9999;
+        padding: 18px;
+      }
+      .table-expand-overlay.open{ display: flex; }
+
+      .table-expand-modal{
+        width: min(1400px, 96vw);
+        height: min(820px, 92vh);
+        background: rgba(13,18,32,0.98);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 18px;
+        box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .table-expand-header{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+      }
+      .table-expand-title{
+        font-weight: 700;
+        font-size: 14px;
+        opacity: 0.95;
+      }
+      .table-expand-close{
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.06);
+        color: inherit;
+        border-radius: 10px;
+        padding: 6px 10px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .table-expand-close:hover{ background: rgba(255,255,255,0.10); }
+
+      .table-expand-body{
+        flex: 1;
+        overflow: hidden;
+        padding: 12px;
+      }
+      .table-expand-scroll{
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+      }
+
+      .table-expand-footer{
+        padding: 10px 14px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .table-expand-close.secondary{
+        font-size: 13px;
+        padding: 8px 12px;
+      }
+
+      body.no-scroll{ overflow: hidden !important; }
+    `;
+    document.head.appendChild(style);
+  }
+})();
