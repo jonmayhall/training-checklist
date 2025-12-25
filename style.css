@@ -622,6 +622,29 @@ main{
 
 /* default icon color */
 .notes-icon-btn{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  line-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.notes-icon-btn:focus{
+  outline: none !important; /* removes focus ring if you want it gone */
+}
+
+.notes-icon-btn svg,
+.notes-icon-btn img{
+  display: block;
+  width: 20px;   /* adjust to match your screenshot */
+  height: 20px;
+}
+{
   color: rgba(0,0,0,.45);
 }
 
