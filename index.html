@@ -374,737 +374,259 @@
 
 </section>
 
-<!-- ========================================================= -->
-<!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
-<!-- ========================================================= -->
+<!-- =======================================================
+     PAGE 3 — PRE-TRAINING  (with correct notes buttons)
+     Drop this in place of your existing #pre-training section
+======================================================= -->
 <section id="pre-training" class="page-section">
-  <h1>Pre-Training Checklist</h1>
-  <p class="page-subtitle">
-    Validate products, integrations, Salesforce notes, and readiness one weeks before onsite training.
-  </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+  <button type="button" class="clear-page-btn">Reset This Page</button>
 
-  <!-- ROW 1 (Side-by-side): Salesforce Notes + Notes -->
+  <h1>Pre-Training</h1>
+  <p class="page-subtitle">Complete these items before arriving onsite. Use 🗨️ notes buttons to capture details.</p>
+
   <div class="cards-grid two-col">
-    <!-- Salesforce Notes -->
-    <div class="section-block">
-      <h2>Salesforce Notes</h2>
+    <!-- LEFT: QUESTIONS -->
+    <div class="section-block orange-outline-card">
+      <h2>Pre-Training Checklist</h2>
 
       <div class="checklist-row">
-        <label>Have you reviewed the following Salesforce notes?</label>
+        <label for="pt-dealership-setup">Dealership setup confirmed (roles, permissions, user lists)</label>
+        <div class="row-actions">
+          <select id="pt-dealership-setup" name="pt-dealership-setup" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
+
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="pt-scheduler-confirm">Scheduler workflow confirmed (advisor/tech based, quick-lube/main shop)</label>
+        <div class="row-actions">
+          <select id="pt-scheduler-confirm" name="pt-scheduler-confirm" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
+
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
-        <label>ServiceCart</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
+        <label for="pt-scheduler-notes">Scheduler specifics (rules/teams/loaders) captured</label>
+        <div class="row-actions">
+          <input id="pt-scheduler-notes" name="pt-scheduler-notes" type="text" placeholder="Short note" />
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div class="checklist-row indent-sub">
-        <label>Scheduler</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
+      <div class="checklist-row">
+        <label for="pt-mpi-ready">MPI forms reviewed / ready (required fields, left/right, tire depth/age, etc.)</label>
+        <div class="row-actions">
+          <select id="pt-mpi-ready" name="pt-mpi-ready" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
+
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div class="checklist-row indent-sub">
-        <label>Deployment</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
-      </div>
+      <div class="checklist-row">
+        <label for="pt-opcodes-reviewed">Opcodes / pricing mapping reviewed (parts pricing, price-six, etc.)</label>
+        <div class="row-actions">
+          <select id="pt-opcodes-reviewed" name="pt-opcodes-reviewed" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
 
-      <div class="checklist-row indent-sub">
-        <label>Remote Training</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Sales</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Dealership contract/listed Salesforce products</label>
-        <select>
-          <option value="" data-ghost="true">Reviewed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Not Available</option>
-        </select>
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Notes — Salesforce Notes -->
-    <div class="section-block">
-      <h2>Notes — Salesforce Notes</h2>
-      <textarea placeholder="Comments or concerns about Salesforce notes and product expectations"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 2 (Side-by-side): Communications + Notes -->
-  <div class="cards-grid two-col">
-    <!-- Communications -->
-    <div class="section-block">
-      <h2>Communications</h2>
-
-      <div class="checklist-row">
-        <label>Customer information present? <span class="muted-note">(historical pull)</span></label>
-        <select>
-          <option value="" data-ghost="true">Customer info</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
+    <!-- RIGHT: NOTES -->
+    <div class="section-block" id="notes-pre-training">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the 🗨️ buttons to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
       </div>
-
-      <div class="checklist-row">
-        <label>Texting, email, &amp; calls errors?</label>
-        <select>
-          <option value="" data-ghost="true">Errors</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Text &amp; email signatures activated?</label>
-        <select>
-          <option value="" data-ghost="true">Signature</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Area code match the local area?</label>
-        <select>
-          <option value="" data-ghost="true">Area code</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Communications -->
-    <div class="section-block">
-      <h2>Notes — Communications</h2>
-      <textarea placeholder="Notes on communication deliverability, complaints, and exceptions"></textarea>
     </div>
   </div>
-
-  <!-- ROW 3 (Side-by-side): Payments + Notes -->
-  <div class="cards-grid two-col">
-    <!-- Payments -->
-    <div class="section-block">
-      <h2>Payments</h2>
-
-      <div class="checklist-row">
-        <label>Payments activated?</label>
-        <select>
-          <option value="" data-ghost="true">Payment types</option>
-          <option>Online</option>
-          <option>Retail</option>
-          <option>Online &amp; Retail</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-       <div class="checklist-row">
-        <label>Who has refund access?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Managers</option>
-          <option>Managers & Cashiers</option>
-          <option>Managers, Advisors, & Cashiers</option>
-          <option>Managers, Advisors, Parts & Cashiers</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Customer invoices appear correctly?</label>
-        <select>
-          <option value="" data-ghost="true">Invoices</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Payment requests errors?</label>
-        <select>
-          <option value="" data-ghost="true">Errors</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Payments -->
-    <div class="section-block">
-      <h2>Notes — Payments</h2>
-      <textarea placeholder="Notes about payment setup, invoice behavior, and issues"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 4 (Side-by-side): Opcodes + Notes -->
-  <div class="cards-grid two-col">
-    <!-- Opcodes -->
-    <div class="section-block">
-      <h2>Opcodes</h2>
-
-      <div class="checklist-row">
-        <label>Review flagged opcode for MCI, ServiceCart, &amp; scheduler.</label>
-        <select>
-          <option value="" data-ghost="true">Opcodes reviewed</option>
-          <option>Completed</option>
-          <option>Not Completed</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Correct opcodes correspond with the inspection?</label>
-        <select>
-          <option value="" data-ghost="true">Corresponding opcodes</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Parts/labor pricing showing in opcodes?</label>
-        <select>
-          <option value="" data-ghost="true">Pricing present</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Opcodes -->
-    <div class="section-block">
-      <h2>Notes — Opcodes</h2>
-      <textarea placeholder="Notes about opcode setup, pricing, and catalog links"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 5 (Side-by-side): ServiceCart + Notes -->
-  <div class="cards-grid two-col">
-    <!-- ServiceCart -->
-    <div class="section-block">
-      <h2>ServiceCart</h2>
-
-      <div class="checklist-row">
-        <label>User authorities align with SC notes?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>User authorities consistent and accurate across all users?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Manager emails added to ServiceCart Reporting?</label>
-        <select>
-          <option value="" data-ghost="true">Emails added</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Are notifications set up on each status?</label>
-        <select>
-          <option value="" data-ghost="true">Correct notifications</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Tech video access removed from all techs?</label>
-        <select>
-          <option value="" data-ghost="true">Tech video removed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>"Add Lines To DMS" button removed for Non-ROWB stores?</label>
-        <select>
-          <option value="" data-ghost="true">ROWB removed</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Is the dealer logo present?</label>
-        <select>
-          <option value="" data-ghost="true">Logo appears</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes – ServiceCart -->
-    <div class="section-block">
-      <h2>Notes – ServiceCart</h2>
-      <textarea rows="5" placeholder="Notes about ServiceCart setup, concerns, or findings"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 6 (Side-by-side): Scheduler + Notes -->
-  <div class="cards-grid two-col">
-    <!-- Scheduler -->
-    <div class="section-block">
-      <h2>Scheduler</h2>
-
-      <div class="checklist-row">
-        <label>Appointments pull correctly?</label>
-        <select>
-          <option value="" data-ghost="true">Appointments pulling</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Scheduler setup correct?
-          <span class="muted-note">(time slots, hours, capacity, opcodes, labor codes, etc.)</span>
-        </label>
-        <select>
-          <option value="" data-ghost="true">Scheduler setup</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-       <div class="checklist-row">
-        <label>User authorities consistent and accurate across all users?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Is the shop divided by teams?</label>
-        <select>
-          <option value="" data-ghost="true">Divided teams</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Assignment rules in place?</label>
-        <select>
-          <option value="" data-ghost="true">Asignment rules</option>
-          <option>Yes</option>
-          <option>Yes, team assignmet rules</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Transportation options set up?</label>
-        <select>
-          <option value="" data-ghost="true">Transportation options</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Scheduler -->
-    <div class="section-block">
-      <h2>Notes — Scheduler</h2>
-      <textarea placeholder="Comments for Scheduler setup, gaps, and follow-ups"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 7 (Side-by-side): MCI + Notes -->
-  <div class="cards-grid two-col">
-    <!-- MCI -->
-    <div class="section-block">
-      <h2>Mobile Check-in (MCI)</h2>
-
-      <div class="checklist-row">
-        <label>Is MCI configured and enabled?</label>
-        <select>
-          <option value="" data-ghost="true">MCI setup</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>In Progress</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Correct MPI forms &amp; opcodes tied to MCI?</label>
-        <select>
-          <option value="" data-ghost="true">MPI/MCI setup</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>Partial</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-       <div class="checklist-row">
-        <label>User authorities consistent and accurate across all users?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — MCI -->
-    <div class="section-block">
-      <h2>Notes — Mobile Check-in (MCI)</h2>
-      <textarea placeholder="Notes specific to MCI setup and workflow"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 8 (Side-by-side): ServiceConnect/Declined Services + Notes -->
-  <div class="cards-grid two-col">
-    <div class="section-block">
-      <h2>ServiceConnect &amp; Declined Services</h2>
-
-      <div class="checklist-row">
-        <label>Automation Rules setup?</label>
-        <select>
-          <option value="" data-ghost="true">Automation rules</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>CSV files uploaded?</label>
-        <select>
-          <option value="" data-ghost="true">CSV files</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Automations activated?</label>
-        <select>
-          <option value="" data-ghost="true">Automations</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-       <div class="checklist-row">
-        <label>User authorities consistent and accurate across all users?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="section-block">
-      <h2>Notes — ServiceConnect &amp; Declined Services</h2>
-      <textarea placeholder="Notes for ServiceConnect &amp; Declined Services configuration and expectations"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 9 (Side-by-side): PU&D + Notes -->
-  <div class="cards-grid two-col">
-    <!-- Pickup & Delivery -->
-    <div class="section-block">
-      <h2>Pickup &amp; Delivery</h2>
-
-      <div class="checklist-row">
-        <label>DSOs activated for correct users?</label>
-        <select>
-          <option value="" data-ghost="true">PU&amp;D DSO</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Dispaatcher &amp; drivers setup?</label>
-        <select>
-          <option value="" data-ghost="true">PU&amp;D users</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row">
-        <label>Scheduler integration DSO activated for PU&amp;D?</label>
-        <select>
-          <option value="" data-ghost="true">PU&amp;D DSO</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-       <div class="checklist-row">
-        <label>User authorities consistent and accurate across all users?</label>
-        <select>
-          <option value="" data-ghost="true">UAs align</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — PU&D -->
-    <div class="section-block">
-      <h2>Notes — Pickup &amp; Delivery</h2>
-      <textarea placeholder="Notes for Pickup &amp; Delivery configuration and expectations"></textarea>
-    </div>
-  </div>
-
 </section>
 
-  <!-- ========================================================= -->
-<!-- PAGE 4: MONDAY VISIT                                      -->
-<!-- ========================================================= -->
+
+<!-- =======================================================
+     PAGE 4 — MONDAY VISIT  (with correct notes buttons)
+     Drop this in place of your existing #monday-visit section
+======================================================= -->
 <section id="monday-visit" class="page-section">
+  <button type="button" class="clear-page-btn">Reset This Page</button>
+
   <h1>Monday Visit</h1>
-  <p class="page-subtitle">
-    Confirm expectations, MCI usage, and device readiness with the Service Manager.
-  </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+  <p class="page-subtitle">Day 1 onsite items. Use 🗨️ notes buttons to capture decisions, blockers, and action items.</p>
 
-  <!-- ROW 1 (Side-by-side): Service Manager Review + Notes -->
   <div class="cards-grid two-col">
-    <!-- SERVICE MANAGER REVIEW (Questions) -->
-    <div class="section-block">
-      <h2>Service Manager Review</h2>
+    <!-- LEFT: QUESTIONS -->
+    <div class="section-block orange-outline-card">
+      <h2>Onsite Kickoff</h2>
 
       <div class="checklist-row">
-        <label>Did you review the following with the Service Manager?</label>
-      </div>
+        <label for="mv-kickoff-complete">Kickoff completed (expectations, timeline, success criteria)</label>
+        <div class="row-actions">
+          <select id="mv-kickoff-complete" name="mv-kickoff-complete" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
 
-      <div class="checklist-row indent-sub">
-        <label>On-site training agenda</label>
-        <select>
-          <option value="" data-ghost="true">Training agenda</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Settings tab</label>
-        <select>
-          <option value="" data-ghost="true">Settings</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Workflow setup</label>
-        <select>
-          <option value="" data-ghost="true">Workflow</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>MPI setup</label>
-        <select>
-          <option value="" data-ghost="true">MPI</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Parts &amp; labor pricing</label>
-        <select>
-          <option value="" data-ghost="true">Pricing</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Dealership using MCI?</label>
-        <select>
-          <option value="" data-ghost="true">MCI users</option>
-          <option>Advisors</option>
-          <option>Porters</option>
-          <option>Advisors &amp; Porters</option>
-          <option>no</option>
-          <option>Other</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Service Manager Review -->
-    <div class="section-block notes-block">
-      <h2>Notes — Service Manager Review</h2>
-      <textarea placeholder="Notes from the Service Manager review and expectations"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 2 (Side-by-side): Service Manager Alignment + Notes -->
-  <div class="cards-grid two-col">
-    <!-- SERVICE MANAGER ALIGNMENT (Questions) -->
-    <div class="section-block">
-      <h2>Service Manager Alignment</h2>
-
-      <div class="checklist-row">
-        <label>Did the service manager agree to the following?</label>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>myKaarma daily arrival</label>
-        <select>
-          <option value="" data-ghost="true">Select arrival time</option>
-          <option>7:00 am</option>
-          <option>8:00 am</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>myKaarma daily departure</label>
-        <select>
-          <option value="" data-ghost="true">Select departure time</option>
-          <option>Yes, 5:00 pm</option>
-          <option>Different time</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Daily morning meetings with managers, techs, &amp; advisors</label>
-        <select>
-          <option value="" data-ghost="true">Morning meetings</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Notes — Service Manager Alignment -->
-    <div class="section-block notes-block">
-      <h2>Notes — Service Manager Alignment</h2>
-      <textarea placeholder="Notes about ongoing alignment with the Service Manager"></textarea>
-    </div>
-  </div>
-
-  <!-- ROW 3 (Side-by-side): Devices & Access + Notes -->
-  <div class="cards-grid two-col">
-    <!-- DEVICES & ACCESS (Questions) -->
-    <div class="section-block">
-      <h2>Devices &amp; Access</h2>
-
-      <div class="checklist-row">
-        <label>All technicians have iOS devices?</label>
-        <select>
-          <option value="" data-ghost="true">iOS devices</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>If no, how many iOS devices short?</label>
-        <input type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices">
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>How many techs are using Android devices?</label>
-        <input type="number" min="0" max="50" placeholder="Enter number of techs on Android">
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
-        <label>All advisors have iOS devices?</label>
-        <select>
-          <option value="" data-ghost="true">iOS devices</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
-      </div>
+        <label for="mv-logins-verified">Logins verified for all roles (advisors/techs/parts/managers)</label>
+        <div class="row-actions">
+          <select id="mv-logins-verified" name="mv-logins-verified" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
 
-      <div class="checklist-row indent-sub">
-        <label>If no, how many iOS devices short?</label>
-        <input type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices">
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
-        <label>Any device or app-access issues that could block training?</label>
-        <select>
-          <option value="" data-ghost="true">Risk</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
+        <label for="mv-workflows-validated">Workflows validated in live environment (RO creation, MPI, media, approvals)</label>
+        <div class="row-actions">
+          <select id="mv-workflows-validated" name="mv-workflows-validated" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="In Progress">In Progress</option>
+            <option value="No">No</option>
+          </select>
+
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label for="mv-blockers">Any blockers identified (scheduler, DMS, pricing, forms)</label>
+        <div class="row-actions">
+          <input id="mv-blockers" name="mv-blockers" type="text" placeholder="Short note" />
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="mv-next-steps">Next steps agreed (owners + dates)</label>
+        <div class="row-actions">
+          <input id="mv-next-steps" name="mv-next-steps" type="text" placeholder="Owner / date" />
+          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
+            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Notes — Devices -->
-    <div class="section-block">
-      <h2>Notes — Devices</h2>
-      <textarea placeholder="Comments for iOS/Android devices, WiFi, VPN, firewalls, or app store access"></textarea>
+    <!-- RIGHT: NOTES -->
+    <div class="section-block" id="notes-monday-visit">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the 🗨️ buttons to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
     </div>
   </div>
 </section>
