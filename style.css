@@ -561,100 +561,73 @@ main{
   padding-left:44px !important;   /* was 60px (still +28 from the main line) */
 }
 
-/* =======================
-   Notes link button (📝)
-======================= */
-.note-link-btn{
-  width:20px;
-  height:20px;
-  border-radius:999px;
-  border:1px solid #d1d5db;
-  background:#fff;
-  color:#9ca3af;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  transition:color .15s, border-color .15s, background .15s, transform .12s;
-}
-.note-link-btn:hover{
-  color:#6b7280;
-  border-color:#9ca3af;
-  transform:translateY(-1px);
-}
-.note-link-btn .note-icon{
-  width:14px;
-  height:14px;
-  display:block;
-}
-.note-link-btn.has-note{
-  color:var(--orange);
-  border-color:var(--orange);
-  background:#fff;
-}
+/* =========================
+   NOTES ICON BUTTON — PNG MASK (ICON ONLY)
+   Replaces:
+   - .note-link-btn (📝)
+   - old SVG-based .notes-icon-btn styles
+   Keeps:
+   - .mk-note-jump (used for the jump highlight)
+   Behavior:
+   - No border / no square / no background box
+   - Default gray icon
+   - Turns orange when JS adds .has-notes
+========================= */
+
+/* keep your jump highlight (do NOT remove) */
 .mk-note-jump{
   box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
   transition:box-shadow .2s ease;
 }
 
-/* ICON-ONLY notes button (no border, no square, no background) */
+/* embed your exact icon ONCE as a mask */
+:root{
+  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgABAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAExAAIAAAARAAAAWgEyAAIAAAAUAAAAawITAAMAAAABAAEAAIdpAAQAAAABAAAAfAAAANoAAAABAAAAAQAAANoAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAASuPp3QAABbZJREFUeJzt3TGO4zYQBVFv//+zv7lA2oQk0oGxw1d0v1d7qQm8fEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPyq9d5jv7w0m7zv7kYb9u0m8t0y4l8qk+u9eZx8k3u9m1Yf2r3yqv3m9n3j9m7g6b5k5o9b0b8l6m3m7f7cP5k7l5b9o+q7t2x9m0m7b7u7n0d3m7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4H/8Bv2m1fQwQG1oAAAAASUVORK5CYII=");
+}
+
+/* the button IS the icon (no box) */
 .notes-icon-btn{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  line-height: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  box-shadow: none !important;
+  width:20px;
+  height:20px;
+  border:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  line-height:0 !important;
+  display:inline-block;
+  cursor:pointer !important;
+
+  /* default icon color */
+  background: rgba(0,0,0,.45);
+
+  /* render the PNG as a mask so color is controlled by background */
+  -webkit-mask: var(--notes-mask) center / contain no-repeat;
+  mask: var(--notes-mask) center / contain no-repeat;
+
+  box-shadow:none !important;
+  outline:none !important;
 }
 
-/* make the SVG behave like an icon */
-.notes-icon-btn .notes-bubble{
-  width: 20px;
-  height: 20px;
-  display: block;
-  fill: currentColor;            /* key: lets JS toggle via color */
+/* no focus ring */
+.notes-icon-btn:focus,
+.notes-icon-btn:focus-visible{
+  outline:none !important;
+  box-shadow:none !important;
 }
 
-/* default icon color */
-.notes-icon-btn{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  box-shadow: none !important;
-  line-height: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
+/* orange when JS adds .has-notes */
+.notes-icon-btn.has-notes{
+  background: var(--orange);
 }
 
-.notes-icon-btn:focus{
-  outline: none !important; /* removes focus ring if you want it gone */
-}
+.notes-icon-btn:hover{ opacity:.85; }
+.notes-icon-btn:active{ opacity:.75; }
 
+/* if any old SVG/img is still inside buttons, hide it (safe cleanup) */
 .notes-icon-btn svg,
 .notes-icon-btn img{
-  display: block;
-  width: 20px;   /* adjust to match your screenshot */
-  height: 20px;
-}
-{
-  color: rgba(0,0,0,.45);
+  display:none !important;
 }
 
-/* when JS adds .has-notes, turn orange */
-.notes-icon-btn.has-notes{
-  color: var(--orange);
-}
-
-.notes-icon-btn:hover{ opacity: .85; }
-.notes-icon-btn:active{ opacity: .75; }
 
 /* =======================
    Integrated “+” rows
