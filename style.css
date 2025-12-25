@@ -1,11 +1,9 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN CSS
-   ✅ Single source of truth (no duplicate blocks)
-   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables
-   ✅ Dealership Address: input + MAP button attached + map restored
-   ✅ Dealership Address textbox: ~1/3 shorter
-   ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
-   ✅ Training Date inputs match all other inputs
+   myKaarma Interactive Training Checklist — CLEAN CSS (FULL)
+   ✅ Cleaned: removed duplicate blocks + fixed syntax issues
+   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables + Address Map
+   ✅ Notes buttons: EXACT icon (PNG mask), icon-only (NO border / NO square / NO background)
+   ✅ Keeps: .mk-note-jump highlight
    ======================================================= */
 
 /* =======================
@@ -29,6 +27,9 @@
 
   /* default (single-column pages) */
   --input-width:340px;
+
+  /* ✅ EXACT notes icon (PNG) as mask so color can be controlled */
+  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgABAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAExAAIAAAARAAAAWgEyAAIAAAAUAAAAawITAAMAAAABAAEAAIdpAAQAAAABAAAAfAAAANoAAAABAAAAAQAAANoAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAASuPp3QAAA0lJREFUeJzt3EENACAQwDAH//9yQ4kQ0kDk5ZJv0wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwqv8cBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4D3wAAcJr7cYAAAAASUVORK5CYII=");
 }
 
 /* =======================
@@ -307,7 +308,7 @@ main{
   margin-left:-22px;
   margin-right:-22px;
 }
-.orange-outline-card{ border:2px solid var(--orange); }
+.orange-outline-card{ border:2px solid var(--orange); } /* optional class; not applied automatically */
 
 /* =======================
    LAYOUT HELPERS
@@ -425,71 +426,13 @@ main{
   background:#fff9f5;
 }
 
-/* =========================
-   Notes bubble button (single icon, turns orange when active)
-========================= */
-
-/* the button itself */
-.notes-bubble-btn{
-  width:34px;
-  height:32px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  border:1px solid rgba(0,0,0,.14);
-  background:#fff;
-  cursor:pointer;
-  padding:0;
-  transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.notes-bubble-btn:hover{
-  border-color:rgba(0,0,0,.22);
-  box-shadow:0 6px 16px rgba(0,0,0,.10);
-}
-
-.notes-bubble-btn:active{
-  transform:translateY(1px);
-}
-
-/* the icon (SVG uses currentColor) */
-.notes-bubble-btn .notes-bubble-ico{
-  width:18px;
-  height:18px;
-  color:rgba(17,24,39,.55);
-}
-
-/* ACTIVE */
-.notes-bubble-btn.is-active{
-  background:rgba(239,109,34,.12);
-  border-color:rgba(239,109,34,.55);
-  box-shadow:0 10px 22px rgba(239,109,34,.18);
-}
-.notes-bubble-btn.is-active .notes-bubble-ico{
-  color:rgba(239,109,34,1);
-}
-
-/* table notes column cell */
-.training-table td.notes-col{
-  padding:6px 6px;
-}
-.training-table td.notes-col .notes-bubble-btn{
-  margin:0 auto;
-}
-
-/* DO NOT allow multiple buttons */
-.training-table td.notes-col .notes-bubble-btn + .notes-bubble-btn{
-  display:none !important;
-}
-
 /* =======================
    Notes linking layout (row-actions)
 ======================= */
 .checklist-row .row-actions{
   display:inline-flex !important;
   align-items:center !important;
-  gap:6px !important;
+  gap:10px !important;
   margin-left:auto !important;
   flex:0 0 auto !important;
   width:auto !important;
@@ -498,47 +441,28 @@ main{
 .checklist-row.integrated-plus > .row-actions{
   display:inline-flex !important;
   align-items:center !important;
-  gap:6px !important;
+  gap:10px !important;
   margin-left:8px !important;
 }
 
 /* =======================================================
    INDENTED Q&A ROWS — bring inputs in to match non-indented padding
-   Applies to stacked/normal question cards (non-table rows)
 ======================================================= */
+.section-block .checklist-row{ padding-right:22px; }
 
-/* Non-indented rows: lock a consistent "content width" baseline */
-.section-block .checklist-row{
-  padding-right:22px;                 /* matches your section-block side feel */
-}
-
-/* Indented rows: input should NOT stay pinned to the far right */
-.section-block .checklist-row.indent-sub input[type="text"],
-.section-block .checklist-row.indent-sub input[type="number"],
-.section-block .checklist-row.indent-sub input[type="email"],
-.section-block .checklist-row.indent-sub input[type="tel"],
-.section-block .checklist-row.indent-sub input[type="date"],
-.section-block .checklist-row.indent-sub select{
-  margin-left:0 !important;           /* stop the "push to far right" */
-}
-
-/* Give the indented row its own right-side alignment that matches non-indented */
 .section-block .checklist-row.indent-sub{
-  padding-right:22px !important;      /* same as normal row */
+  padding-right:22px !important;
 }
-
-/* Make label take the remaining space and keep input aligned */
 .section-block .checklist-row.indent-sub label{
   flex:1 1 auto !important;
 }
-
-/* Ensure input stays a fixed width but sits "in" with the content */
 .section-block .checklist-row.indent-sub input[type="text"],
 .section-block .checklist-row.indent-sub input[type="number"],
 .section-block .checklist-row.indent-sub input[type="email"],
 .section-block .checklist-row.indent-sub input[type="tel"],
 .section-block .checklist-row.indent-sub input[type="date"],
 .section-block .checklist-row.indent-sub select{
+  margin-left:0 !important;
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
 }
@@ -546,88 +470,89 @@ main{
 /* =======================================================
    2x2 CARDS (two-col cards grid) — shift questions LEFT
    (NOT contact cards, NOT DMS cards)
-   Keeps indent-sub offset relative to the main line.
 ======================================================= */
-
-/* Base question lines in 2-col cards: move left */
 .page-section:not(#dealership-info):not(#dms-integration)
   .cards-grid.two-col > .section-block .checklist-row{
-  padding-left:16px !important;   /* was 32px */
+  padding-left:16px !important;
 }
-
-/* Sub/indented lines: move left the same amount, keep the indent difference */
 .page-section:not(#dealership-info):not(#dms-integration)
   .cards-grid.two-col > .section-block .checklist-row.indent-sub{
-  padding-left:44px !important;   /* was 60px (still +28 from the main line) */
+  padding-left:44px !important;
 }
 
-/* =========================
-   NOTES ICON BUTTON — PNG MASK (ICON ONLY)
-   Replaces:
-   - .note-link-btn (📝)
-   - old SVG-based .notes-icon-btn styles
-   Keeps:
-   - .mk-note-jump (used for the jump highlight)
-   Behavior:
+/* =======================================================
+   ✅ NOTES ICON BUTTON — EXACT ICON (ICON ONLY)
    - No border / no square / no background box
    - Default gray icon
    - Turns orange when JS adds .has-notes
-========================= */
-
-/* keep your jump highlight (do NOT remove) */
+   - Keeps .mk-note-jump highlight
+======================================================= */
 .mk-note-jump{
   box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
   transition:box-shadow .2s ease;
 }
 
-/* embed your exact icon ONCE as a mask */
-:root{
-  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgABAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAExAAIAAAARAAAAWgEyAAIAAAAUAAAAawITAAMAAAABAAEAAIdpAAQAAAABAAAAfAAAANoAAAABAAAAAQAAANoAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAASuPp3QAABbZJREFUeJzt3TGO4zYQBVFv//+zv7lA2oQk0oGxw1d0v1d7qQm8fEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPyq9d5jv7w0m7zv7kYb9u0m8t0y4l8qk+u9eZx8k3u9m1Yf2r3yqv3m9n3j9m7g6b5k5o9b0b8l6m3m7f7cP5k7l5b9o+q7t2x9m0m7b7u7n0d3m7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4H/8Bv2m1fQwQG1oAAAAASUVORK5CYII=");
-}
-
-/* the button IS the icon (no box) */
-.notes-icon-btn{
+/* the button IS the icon */
+.notes-icon-btn,
+.notes-bubble-btn{ /* alias so any old usage still looks right */
   width:20px;
   height:20px;
   border:0 !important;
   padding:0 !important;
   margin:0 !important;
-  line-height:0 !important;
-  display:inline-block;
+  background:rgba(0,0,0,.45); /* icon color */
   cursor:pointer !important;
+  display:inline-block;
+  line-height:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+  border-radius:0 !important; /* make sure NOTHING rounds into a box */
+  -webkit-appearance:none;
+  appearance:none;
 
-  /* default icon color */
-  background: rgba(0,0,0,.45);
-
-  /* render the PNG as a mask so color is controlled by background */
+  /* render PNG as mask; background color becomes the icon color */
   -webkit-mask: var(--notes-mask) center / contain no-repeat;
   mask: var(--notes-mask) center / contain no-repeat;
-
-  box-shadow:none !important;
-  outline:none !important;
 }
 
-/* no focus ring */
 .notes-icon-btn:focus,
-.notes-icon-btn:focus-visible{
+.notes-icon-btn:focus-visible,
+.notes-bubble-btn:focus,
+.notes-bubble-btn:focus-visible{
   outline:none !important;
   box-shadow:none !important;
 }
 
-/* orange when JS adds .has-notes */
-.notes-icon-btn.has-notes{
-  background: var(--orange);
+/* orange when active */
+.notes-icon-btn.has-notes,
+.notes-bubble-btn.has-notes,
+.notes-icon-btn.is-active,
+.notes-bubble-btn.is-active{
+  background:var(--orange);
 }
 
-.notes-icon-btn:hover{ opacity:.85; }
-.notes-icon-btn:active{ opacity:.75; }
+.notes-icon-btn:hover,
+.notes-bubble-btn:hover{ opacity:.85; }
+
+.notes-icon-btn:active,
+.notes-bubble-btn:active{ opacity:.75; }
 
 /* if any old SVG/img is still inside buttons, hide it (safe cleanup) */
 .notes-icon-btn svg,
-.notes-icon-btn img{
+.notes-icon-btn img,
+.notes-bubble-btn svg,
+.notes-bubble-btn img{
   display:none !important;
 }
 
+/* table notes column cell */
+.training-table td.notes-col{
+  padding:6px 6px;
+}
+.training-table td.notes-col .notes-icon-btn,
+.training-table td.notes-col .notes-bubble-btn{
+  margin:0 auto;
+}
 
 /* =======================
    Integrated “+” rows
@@ -658,7 +583,7 @@ main{
   flex:0 0 34px;
   width:34px;
   height:34px;
-  margin-left:-1px; /* keep attached */
+  margin-left:-1px;
   background:var(--orange);
   color:#fff;
   border:1px solid var(--orange);
@@ -679,11 +604,7 @@ main{
 
 /* =======================================================
    DEALERSHIP INFO PAGE FIXES
-   - Training Dates inputs match everything else (width + look)
-   - Primary Contacts: uniform spacing around + between cards
 ======================================================= */
-
-/* Training dates rows align like normal rows */
 .training-dates-row,
 .onsite-training-dates-row{
   align-items:flex-start !important;
@@ -693,39 +614,28 @@ main{
   padding-top:7px !important;
 }
 
-/* Date stack uses SAME width as other right-side fields */
 .training-dates-row .date-stack,
 .onsite-training-dates-row .date-stack{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
   margin-left:auto !important;
-
   display:flex !important;
   flex-direction:column !important;
   gap:8px !important;
   align-items:stretch !important;
 }
-
-/* Date inputs look/size exactly like other inputs */
 .training-dates-row .date-stack input[type="date"],
 .onsite-training-dates-row .date-stack input[type="date"]{
   width:100% !important;
   height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-
   padding:7px 10px !important;
-
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
-
   background:#f7f7f7 !important;
   color:var(--ink) !important;
-
   font-size:13px !important;
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
-
   -webkit-appearance:none !important;
   appearance:none !important;
   box-shadow:none !important;
@@ -734,55 +644,42 @@ main{
 /* =============== PRIMARY CONTACTS (uniform gap) =============== */
 #dealership-info{
   --di-input-width:225px;
-  --pc-gap:30px; /* uniform spacing (reduced ~25% from the larger gap) */
+  --pc-gap:30px;
 }
-
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:var(--pc-gap) !important;       /* between cards */
-  padding:var(--pc-gap) !important;   /* outside matches between */
+  gap:var(--pc-gap) !important;
+  padding:var(--pc-gap) !important;
   margin-top:10px;
   align-items:start;
   justify-items:stretch;
-  box-sizing:border-box;
 }
-
-/* Card */
 #dealership-info .primary-contacts-grid .mini-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
-  padding:14px 14px 6px; /* keep original height feel */
+  padding:14px 14px 6px;
   width:100%;
-  max-width:none;
-  justify-self:stretch;
   min-width:0;
 }
-
-/* keep mini-card rows consistent */
 #dealership-info .primary-contacts-grid .mini-card .checklist-row{
   padding-left:18px;
   padding-right:18px;
 }
-
 #dealership-info .primary-contacts-grid .contact-card,
 #dealership-info .primary-contacts-grid .additional-poc-card{
   width:100%;
   min-width:0;
 }
-
-/* indentation (scoped) */
 #dealership-info .primary-contacts-grid .checklist-row{
   padding-left:16px !important;
 }
 #dealership-info .primary-contacts-grid .checklist-row.indent-sub{
   padding-left:30px !important;
 }
-
-/* field widths inside contact cards */
 #dealership-info .primary-contacts-grid
   .checklist-row input[type="text"],
 #dealership-info .primary-contacts-grid
@@ -796,8 +693,6 @@ main{
   max-width:var(--di-input-width) !important;
   height:34px !important;
 }
-
-/* Base Additional POC (with +) */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus input[type="text"]{
@@ -812,8 +707,6 @@ main{
   width:34px !important;
   margin-left:-1px !important;
 }
-
-/* Additional POC clones */
 #dealership-info .primary-contacts-grid
   .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
 #dealership-info .primary-contacts-grid
@@ -865,12 +758,9 @@ main{
 }
 #trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
 
-/* Additional Trainer clones */
 #trainers-deployment .trainer-clone input[type="text"],
 #trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
   border-radius:var(--radius-sm) !important;
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
@@ -937,32 +827,15 @@ main{
   top:0;
   z-index:3;
 }
-
-/* ✅ ADD IT RIGHT HERE */
-.training-table thead tr{
-  height:auto !important;
-}
-.training-table thead th{
-  padding-top:8px;
-  padding-bottom:8px;
-}
+.training-table thead tr{ height:auto !important; }
+.training-table thead th{ padding-top:8px; padding-bottom:8px; }
 .training-table thead input,
 .training-table thead select,
 .training-table thead button{
   display:none !important;
 }
 
-/* Sticky first column */
-.training-table th:first-child,
-.training-table td:first-child{
-  position:sticky;
-  left:0;
-  z-index:4;
-  background:#fff;
-  padding-left:10px;
-}
-
-/* Sticky first column */
+/* Sticky first column (single source) */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -995,7 +868,6 @@ main{
   text-align:center;
   height:32px;
 }
-
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
@@ -1081,9 +953,7 @@ main{
   text-align:center !important;
 }
 
-/* =======================
-   TABLE NOTES COLUMN
-======================= */
+/* TABLE NOTES COLUMN */
 .training-table th.notes-col,
 .training-table td.notes-col{
   width:60px;
@@ -1091,11 +961,8 @@ main{
   text-align:center !important;
   vertical-align:middle;
 }
-.training-table .mk-table-note-btn{ width:20px; height:20px; }
 
-/* =======================
-   TABLE EXPAND (⤢)
-======================= */
+/* TABLE EXPAND (⤢) */
 .mk-table-expand-btn{
   width:16px;
   height:16px;
@@ -1261,7 +1128,6 @@ main{
   margin:0 0 18px 0 !important;
   margin-top:0 !important;
 }
-
 #support-tickets .ticket-disclaimer{
   margin:18px 0 0 !important;
   font-size:12px;
@@ -1367,7 +1233,6 @@ main{
   color:#111827;
   white-space:nowrap;
 }
-
 #dms-integration .dms-list .dms-tag-auto{
   border-color:rgba(34,197,94,0.35);
   background:rgba(34,197,94,0.12);
@@ -1532,38 +1397,26 @@ main{
   font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
   resize:none;
 }
+
 /* =========================
    Table Popup (Modal) — force clean card + no right overflow
 ========================= */
-#mkTableModal{
-  overflow: hidden !important;
-}
-
-#mkTableModalShell{
-  width: 100%;
-}
-
-#mkTableModalCards{
-  width: 100%;
-}
-
+#mkTableModal{ overflow:hidden !important; }
+#mkTableModalShell{ width:100%; }
+#mkTableModalCards{ width:100%; }
 #mkTableModalCards .section-block{
-  width: 100%;
-  overflow: hidden;          /* prevents “flows off right side” */
+  width:100%;
+  overflow:hidden;
 }
-
-/* Keep table scrolling inside scroll-wrapper like normal */
 #mkTableModalCards .scroll-wrapper{
-  overflow: auto !important;
-  max-width: 100% !important;
+  overflow:auto !important;
+  max-width:100% !important;
 }
-
-/* Notes card should never scroll left/right */
 #mkTableModalCards .section-block textarea{
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-  resize: vertical;
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+  resize:vertical;
 }
 
 /* =======================
@@ -1659,9 +1512,6 @@ main{
 
 /* =======================================================
    DEALERSHIP ADDRESS — single source of truth
-   - Input + MAP button attached + styled
-   - MAP restored
-   - Textbox ~1/3 shorter
 ======================================================= */
 #dealership-address-card .checklist-row{
   display:grid !important;
@@ -1670,32 +1520,26 @@ main{
   align-items:center !important;
 }
 
-/* This is the ONLY width control you need */
+/* ONLY width control you need */
 #dealership-address-card .address-input-wrap{
   width:100% !important;
-  max-width:450px !important;        /* ✅ ~1/3 shorter than the old 680 */
+  max-width:450px !important;
   justify-self:end !important;
   margin-left:auto !important;
-
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
 }
-
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
   min-width:0 !important;
-
   height:34px !important;
   padding:7px 10px !important;
-
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
-
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
-
 #dealership-address-card .address-input-wrap .small-map-btn,
 #dealership-address-card .address-input-wrap button{
   flex:0 0 44px !important;
@@ -1703,23 +1547,19 @@ main{
   min-width:44px !important;
   height:34px !important;
   margin-left:-1px !important;
-
   background:var(--orange) !important;
   color:#fff !important;
   border:1px solid var(--orange) !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-
   font-size:11px !important;
   font-weight:900 !important;
   letter-spacing:0.08em !important;
   text-transform:uppercase !important;
-
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
   cursor:pointer !important;
   padding:0 !important;
-
   box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
 }
 #dealership-address-card .address-input-wrap .small-map-btn:hover,
