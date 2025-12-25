@@ -598,6 +598,41 @@ main{
   transition:box-shadow .2s ease;
 }
 
+/* ICON-ONLY notes button (no border, no square, no background) */
+.notes-icon-btn{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+/* make the SVG behave like an icon */
+.notes-icon-btn .notes-bubble{
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: currentColor;            /* key: lets JS toggle via color */
+}
+
+/* default icon color */
+.notes-icon-btn{
+  color: rgba(0,0,0,.45);
+}
+
+/* when JS adds .has-notes, turn orange */
+.notes-icon-btn.has-notes{
+  color: var(--orange);
+}
+
+.notes-icon-btn:hover{ opacity: .85; }
+.notes-icon-btn:active{ opacity: .75; }
+
 /* =======================
    Integrated “+” rows
 ======================= */
