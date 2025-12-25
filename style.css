@@ -429,71 +429,115 @@ main{
 }
 
 /* =========================
-   ✅ NOTES ICON BUTTON — EXACT ICON (ICON ONLY)
-   - No border
-   - No square
-   - No background box
-   - Default gray, turns orange with .has-notes
+   NOTES ICON BUTTON (SMALL)
+   - Works even when button has no inner HTML
+   - Uses CSS mask icon if available
+   - Falls back to 📝 if not
 ========================= */
 
-/* keep your jump highlight (do NOT remove) */
-.mk-note-jump{
-  box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
-  transition:box-shadow .2s ease;
+:root{
+  --notes-btn-size: 26px;        /* 👈 small */
+  --notes-icon-size: 16px;
+  --notes-btn-bg: #f4f4f4;
+  --notes-btn-border: #d6d6d6;
+  --notes-btn-hover-bg: #ececec;
+  --notes-btn-active-bg: #e2e2e2;
+
+  /* If you have your icon file, set this to your path: */
+  --notes-icon-url: url("notes-icon.svg"); /* 👈 change file name/path */
 }
 
-/* the button IS the icon (no box) */
-.notes-icon-btn,
-.mk-table-note-btn{
-  width:20px;
-  height:20px;
-
-  border:0 !important;
-  padding:0 !important;
-  margin:0 !important;
-  line-height:0 !important;
-
-  display:inline-block !important;
-  vertical-align:middle;
-  cursor:pointer !important;
-
-  /* default icon color (masked) */
-  background: rgba(0,0,0,.45);
-
-  /* render your PNG as a mask so "background" becomes the icon color */
-  -webkit-mask: var(--notes-mask) center / contain no-repeat;
-  mask: var(--notes-mask) center / contain no-repeat;
-
-  box-shadow:none !important;
-  outline:none !important;
+/* keeps select + notes button aligned nicely */
+.row-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
-/* remove focus ring */
-.notes-icon-btn:focus,
-.notes-icon-btn:focus-visible,
-.mk-table-note-btn:focus,
-.mk-table-note-btn:focus-visible{
-  outline:none !important;
-  box-shadow:none !important;
+/* base button */
+.notes-icon-btn{
+  width: var(--notes-btn-size);
+  height: var(--notes-btn-size);
+  min-width: var(--notes-btn-size);
+  min-height: var(--notes-btn-size);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border: 1px solid var(--notes-btn-border);
+  background: var(--notes-btn-bg);
+  border-radius: 8px;
+  cursor: pointer;
+
+  padding:0;
+  line-height:1;
+  user-select:none;
+
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
 }
 
-/* orange when JS adds .has-notes */
-.notes-icon-btn.has-notes,
-.mk-table-note-btn.has-notes{
-  background: var(--orange);
+.notes-icon-btn:hover{
+  background: var(--notes-btn-hover-bg);
 }
 
-.notes-icon-btn:hover,
-.mk-table-note-btn:hover{ opacity:.85; }
-.notes-icon-btn:active,
-.mk-table-note-btn:active{ opacity:.75; }
+.notes-icon-btn:active{
+  background: var(--notes-btn-active-bg);
+  transform: translateY(1px);
+}
 
-/* if any old SVG/img is still inside buttons, hide it (safe cleanup) */
-.notes-icon-btn svg,
-.notes-icon-btn img,
-.mk-table-note-btn svg,
-.mk-table-note-btn img{
-  display:none !important;
+.notes-icon-btn:focus-visible{
+  outline: 2px solid rgba(239,109,34,.55); /* your orange */
+  outline-offset: 2px;
+}
+
+/* If the button is empty, we draw the icon with ::before */
+.notes-icon-btn::before{
+  content:"";
+  width: var(--notes-icon-size);
+  height: var(--notes-icon-size);
+  display:block;
+
+  /* mask icon (best) */
+  -webkit-mask-image: var(--notes-icon-url);
+  mask-image: var(--notes-icon-url);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  background: #666; /* icon color */
+}
+
+/* Fallback: if you still use <span class="notes-icon">📝</span> in some places */
+.notes-icon-btn .notes-icon{
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* If the icon file path isn't valid, the mask can appear blank.
+   This makes emoji fallback visible for EMPTY buttons by using text content instead. */
+.notes-icon-btn[data-emoji="true"]::before{
+  content:"📝";
+  background: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+  width:auto;
+  height:auto;
+  font-size: 16px;
+}
+
+/* Table notes column tighter */
+.notes-col-head,
+.notes-col-cell{
+  width: 54px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.notes-col-cell .notes-icon-btn{
+  margin: 0 auto;
 }
 
 /* =======================
