@@ -374,146 +374,36 @@
 
 </section>
 
-<!-- =======================================================
-     PAGE 3 — PRE-TRAINING (FULL SECTION HTML)
-     ✅ Includes EVERYTHING for this page section:
-     - Title + subtitle + Reset button
-     - 2x2 card rows (Question card + Notes card) in the exact structure your JS expects
-     - Correct notes buttons: .notes-icon-btn + data-notes-target + NOTES_SVG
-     - Notes cards have IDs that START WITH "notes-" so your JS parses + saves correctly
-======================================================= -->
+<!-- ========================================================= -->
+<!-- PAGE 3: PRE-TRAINING CHECKLIST                            -->
+<!-- ========================================================= -->
 <section id="pre-training" class="page-section">
-  <button type="button" class="clear-page-btn">Reset This Page</button>
+  <h1>Pre-Training Checklist</h1>
+  <p class="page-subtitle">
+    Validate products, integrations, Salesforce notes, and readiness one weeks before onsite training.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <h1>Pre-Training</h1>
-  <p class="page-subtitle">Complete these items before arriving onsite. Use the notes bubble to capture details.</p>
-
-  <!-- ROW 1 -->
+  <!-- ROW 1 (Side-by-side): Salesforce Notes + Notes -->
   <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="pretraining-kickoff-card">
-      <h2>Pre-Training — Setup & Access</h2>
+    <!-- Salesforce Notes -->
+    <div class="section-block">
+      <h2>Salesforce Notes</h2>
 
       <div class="checklist-row">
-        <label for="pt-roles-confirmed">Roles/permissions confirmed for all users</label>
-        <div class="row-actions">
-          <select id="pt-roles-confirmed" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
+        <label>Have you reviewed the following Salesforce notes?</label>
       </div>
 
-      <div class="checklist-row">
-        <label for="pt-logins-tested">Logins tested (Advisor / Tech / Parts / Managers)</label>
+      <div class="checklist-row indent-sub">
+        <label>ServiceCart</label>
         <div class="row-actions">
-          <select id="pt-logins-tested" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
-            <option>In Progress</option>
             <option>No</option>
+            <option>Not Available</option>
           </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="pt-mobile-ready">Mobile app readiness confirmed (logins + permissions)</label>
-        <div class="row-actions">
-          <select id="pt-mobile-ready" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-pre-training-setup">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 2 -->
-  <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="pretraining-scheduler-card">
-      <h2>Pre-Training — Scheduler & Workflow</h2>
-
-      <div class="checklist-row">
-        <label for="pt-scheduler-confirmed">Scheduler approach confirmed (Advisor-based vs Tech-based)</label>
-        <div class="row-actions">
-          <select id="pt-scheduler-confirmed" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="pt-workflows-mapped">Workflows mapped (Main Shop vs Quick Lube)</label>
-        <div class="row-actions">
-          <select id="pt-workflows-mapped" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -527,10 +417,103 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label for="pt-scheduler-specifics">Scheduler specifics captured (teams/rules/loaders)</label>
+        <label>Scheduler</label>
         <div class="row-actions">
-          <input id="pt-scheduler-specifics" type="text" placeholder="Short detail" />
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Not Available</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Deployment</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Not Available</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Remote Training</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Not Available</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Sales</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Not Available</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Dealership contract/listed Salesforce products</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Reviewed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Not Available</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -544,33 +527,28 @@
       </div>
     </div>
 
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-pre-training-scheduler">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
-      </div>
+    <!-- Notes — Salesforce Notes -->
+    <div class="section-block" id="notes-salesforce-notes">
+      <h2>Notes — Salesforce Notes</h2>
+      <textarea placeholder="Comments or concerns about Salesforce notes and product expectations"></textarea>
     </div>
   </div>
 
-  <!-- ROW 3 -->
+  <!-- ROW 2 (Side-by-side): Communications + Notes -->
   <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="pretraining-forms-card">
-      <h2>Pre-Training — MPI & Forms</h2>
+    <!-- Communications -->
+    <div class="section-block">
+      <h2>Communications</h2>
 
       <div class="checklist-row">
-        <label for="pt-mpi-fields-ready">MPI fields confirmed (tire depth/size/pressure/age, L/R items)</label>
+        <label>Customer information present? <span class="muted-note">(historical pull)</span></label>
         <div class="row-actions">
-          <select id="pt-mpi-fields-ready" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
+          <select>
+            <option value="" data-ghost="true">Customer info</option>
             <option>Yes</option>
-            <option>In Progress</option>
             <option>No</option>
           </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-forms" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-communications" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -584,16 +562,56 @@
       </div>
 
       <div class="checklist-row">
-        <label for="pt-mpi-templates-approved">Inspection templates approved (shop + quick lube)</label>
+        <label>Texting, email, &amp; calls errors?</label>
         <div class="row-actions">
-          <select id="pt-mpi-templates-approved" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
+          <select>
+            <option value="" data-ghost="true">Errors</option>
             <option>Yes</option>
-            <option>In Progress</option>
             <option>No</option>
           </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-communications" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
 
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-forms" aria-label="Add/View Notes">
+      <div class="checklist-row">
+        <label>Text &amp; email signatures activated?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Signature</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-communications" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Area code match the local area?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Area code</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-communications" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -607,33 +625,30 @@
       </div>
     </div>
 
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-pre-training-forms">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
-      </div>
+    <!-- Notes — Communications -->
+    <div class="section-block" id="notes-communications">
+      <h2>Notes — Communications</h2>
+      <textarea placeholder="Notes on communication deliverability, complaints, and exceptions"></textarea>
     </div>
   </div>
 
-  <!-- ROW 4 -->
+  <!-- ROW 3 (Side-by-side): Payments + Notes -->
   <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="pretraining-opcodes-card">
-      <h2>Pre-Training — Opcodes & Pricing</h2>
+    <!-- Payments -->
+    <div class="section-block">
+      <h2>Payments</h2>
 
       <div class="checklist-row">
-        <label for="pt-opcodes-reviewed">Opcodes reviewed (labor ops present + correct)</label>
+        <label>Payments activated?</label>
         <div class="row-actions">
-          <select id="pt-opcodes-reviewed" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
+          <select>
+            <option value="" data-ghost="true">Payment types</option>
+            <option>Online</option>
+            <option>Retail</option>
+            <option>Online &amp; Retail</option>
+            <option>N/A</option>
           </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-opcodes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-payments" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -647,16 +662,61 @@
       </div>
 
       <div class="checklist-row">
-        <label for="pt-pricing-mapped">Pricing mapped correctly (e.g., price-six, parts pricing not zero)</label>
+        <label>Who has refund access?</label>
         <div class="row-actions">
-          <select id="pt-pricing-mapped" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Managers</option>
+            <option>Managers &amp; Cashiers</option>
+            <option>Managers, Advisors, &amp; Cashiers</option>
+            <option>Managers, Advisors, Parts &amp; Cashiers</option>
+            <option>N/A</option>
           </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-payments" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
 
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-opcodes" aria-label="Add/View Notes">
+      <div class="checklist-row">
+        <label>Customer invoices appear correctly?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Invoices</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-payments" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Payment requests errors?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Errors</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-payments" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -670,180 +730,717 @@
       </div>
     </div>
 
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-pre-training-opcodes">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+    <!-- Notes — Payments -->
+    <div class="section-block" id="notes-payments">
+      <h2>Notes — Payments</h2>
+      <textarea placeholder="Notes about payment setup, invoice behavior, and issues"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 4 (Side-by-side): Opcodes + Notes -->
+  <div class="cards-grid two-col">
+    <!-- Opcodes -->
+    <div class="section-block">
+      <h2>Opcodes</h2>
+
+      <div class="checklist-row">
+        <label>Review flagged opcode for MCI, ServiceCart, &amp; scheduler.</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Opcodes reviewed</option>
+            <option>Completed</option>
+            <option>Not Completed</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <div class="checklist-row">
+        <label>Correct opcodes correspond with the inspection?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Corresponding opcodes</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Parts/labor pricing showing in opcodes?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Pricing present</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes — Opcodes -->
+    <div class="section-block" id="notes-opcodes">
+      <h2>Notes — Opcodes</h2>
+      <textarea placeholder="Notes about opcode setup, pricing, and catalog links"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 5 (Side-by-side): ServiceCart + Notes -->
+  <div class="cards-grid two-col">
+    <!-- ServiceCart -->
+    <div class="section-block">
+      <h2>ServiceCart</h2>
+
+      <div class="checklist-row">
+        <label>User authorities align with SC notes?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>User authorities consistent and accurate across all users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Manager emails added to ServiceCart Reporting?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Emails added</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Are notifications set up on each status?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Correct notifications</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Tech video access removed from all techs?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Tech video removed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>"Add Lines To DMS" button removed for Non-ROWB stores?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">ROWB removed</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Is the dealer logo present?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Logo appears</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes – ServiceCart -->
+    <div class="section-block" id="notes-servicecart">
+      <h2>Notes – ServiceCart</h2>
+      <textarea rows="5" placeholder="Notes about ServiceCart setup, concerns, or findings"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 6 (Side-by-side): Scheduler + Notes -->
+  <div class="cards-grid two-col">
+    <!-- Scheduler -->
+    <div class="section-block">
+      <h2>Scheduler</h2>
+
+      <div class="checklist-row">
+        <label>Appointments pull correctly?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Appointments pulling</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Scheduler setup correct?
+          <span class="muted-note">(time slots, hours, capacity, opcodes, labor codes, etc.)</span>
+        </label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Scheduler setup</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>User authorities consistent and accurate across all users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Is the shop divided by teams?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Divided teams</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Assignment rules in place?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Asignment rules</option>
+            <option>Yes</option>
+            <option>Yes, team assignmet rules</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Transportation options set up?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Transportation options</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes — Scheduler -->
+    <div class="section-block" id="notes-scheduler">
+      <h2>Notes — Scheduler</h2>
+      <textarea placeholder="Comments for Scheduler setup, gaps, and follow-ups"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 7 (Side-by-side): MCI + Notes -->
+  <div class="cards-grid two-col">
+    <!-- MCI -->
+    <div class="section-block">
+      <h2>Mobile Check-in (MCI)</h2>
+
+      <div class="checklist-row">
+        <label>Is MCI configured and enabled?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MCI setup</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>In Progress</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-mci" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Correct MPI forms &amp; opcodes tied to MCI?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MPI/MCI setup</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Partial</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-mci" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>User authorities consistent and accurate across all users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-mci" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes — MCI -->
+    <div class="section-block" id="notes-mci">
+      <h2>Notes — Mobile Check-in (MCI)</h2>
+      <textarea placeholder="Notes specific to MCI setup and workflow"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 8 (Side-by-side): ServiceConnect/Declined Services + Notes -->
+  <div class="cards-grid two-col">
+    <div class="section-block">
+      <h2>ServiceConnect &amp; Declined Services</h2>
+
+      <div class="checklist-row">
+        <label>Automation Rules setup?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Automation rules</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>CSV files uploaded?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">CSV files</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Automations activated?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Automations</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>User authorities consistent and accurate across all users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block" id="notes-serviceconnect">
+      <h2>Notes — ServiceConnect &amp; Declined Services</h2>
+      <textarea placeholder="Notes for ServiceConnect &amp; Declined Services configuration and expectations"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 9 (Side-by-side): PU&D + Notes -->
+  <div class="cards-grid two-col">
+    <!-- Pickup & Delivery -->
+    <div class="section-block">
+      <h2>Pickup &amp; Delivery</h2>
+
+      <div class="checklist-row">
+        <label>DSOs activated for correct users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">PU&amp;D DSO</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pud" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Dispaatcher &amp; drivers setup?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">PU&amp;D users</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pud" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Scheduler integration DSO activated for PU&amp;D?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">PU&amp;D DSO</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pud" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>User authorities consistent and accurate across all users?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">UAs align</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pud" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes — PU&D -->
+    <div class="section-block" id="notes-pud">
+      <h2>Notes — Pickup &amp; Delivery</h2>
+      <textarea placeholder="Notes for Pickup &amp; Delivery configuration and expectations"></textarea>
     </div>
   </div>
 </section>
 
 
-<!-- =======================================================
-     PAGE 4 — MONDAY VISIT (FULL SECTION HTML)
-     ✅ Includes EVERYTHING for this page section:
-     - Title + subtitle + Reset button
-     - 2x2 card rows (Question card + Notes card) like your last stable look
-     - Correct notes buttons + correct notes IDs
-======================================================= -->
+<!-- ========================================================= -->
+<!-- PAGE 4: MONDAY VISIT                                      -->
+<!-- ========================================================= -->
 <section id="monday-visit" class="page-section">
-  <button type="button" class="clear-page-btn">Reset This Page</button>
-
   <h1>Monday Visit</h1>
-  <p class="page-subtitle">Day 1 onsite items. Capture decisions, blockers, and action items with the notes bubble.</p>
+  <p class="page-subtitle">
+    Confirm expectations, MCI usage, and device readiness with the Service Manager.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ROW 1 -->
+  <!-- ROW 1 (Side-by-side): Service Manager Review + Notes -->
   <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="monday-kickoff-card">
-      <h2>Monday — Kickoff</h2>
+    <!-- SERVICE MANAGER REVIEW (Questions) -->
+    <div class="section-block">
+      <h2>Service Manager Review</h2>
 
       <div class="checklist-row">
-        <label for="mv-kickoff-complete">Kickoff completed (expectations, timeline, success criteria)</label>
-        <div class="row-actions">
-          <select id="mv-kickoff-complete" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
+        <label>Did you review the following with the Service Manager?</label>
       </div>
 
-      <div class="checklist-row">
-        <label for="mv-stakeholders-present">Key stakeholders present (SM/PM/Dispatch/IT)</label>
+      <div class="checklist-row indent-sub">
+        <label>On-site training agenda</label>
         <div class="row-actions">
-          <select id="mv-stakeholders-present" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
+          <select>
+            <option value="" data-ghost="true">Training agenda</option>
             <option>Yes</option>
-            <option>In Progress</option>
             <option>No</option>
           </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="mv-success-criteria">Success criteria agreed + documented</label>
-        <div class="row-actions">
-          <select id="mv-success-criteria" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-monday-kickoff">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 2 -->
-  <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="monday-access-card">
-      <h2>Monday — Access & Environment</h2>
-
-      <div class="checklist-row">
-        <label for="mv-logins-verified">All logins verified onsite (desktop + mobile)</label>
-        <div class="row-actions">
-          <select id="mv-logins-verified" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="mv-ro-flow">RO flow validated (create/assign/dispatch, statuses)</label>
-        <div class="row-actions">
-          <select id="mv-ro-flow" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
-            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
-              <g class="dots">
-                <path d="M9 11.2h0"/>
-                <path d="M12 11.2h0"/>
-                <path d="M15 11.2h0"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="mv-mpi-flow">MPI flow validated (photos/video, customer view, approvals)</label>
-        <div class="row-actions">
-          <select id="mv-mpi-flow" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
-
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -857,10 +1454,101 @@
       </div>
 
       <div class="checklist-row indent-sub">
-        <label for="mv-blockers">Blockers identified + owner assigned</label>
+        <label>Settings tab</label>
         <div class="row-actions">
-          <input id="mv-blockers" type="text" placeholder="Owner / detail" />
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+          <select>
+            <option value="" data-ghost="true">Settings</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Workflow setup</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Workflow</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>MPI setup</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MPI</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Parts &amp; labor pricing</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Pricing</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Dealership using MCI?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MCI users</option>
+            <option>Advisors</option>
+            <option>Porters</option>
+            <option>Advisors &amp; Porters</option>
+            <option>no</option>
+            <option>Other</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-review" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -874,33 +1562,32 @@
       </div>
     </div>
 
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-monday-access">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
-      </div>
+    <!-- Notes — Service Manager Review -->
+    <div class="section-block notes-block" id="notes-sm-review">
+      <h2>Notes — Service Manager Review</h2>
+      <textarea placeholder="Notes from the Service Manager review and expectations"></textarea>
     </div>
   </div>
 
-  <!-- ROW 3 -->
+  <!-- ROW 2 (Side-by-side): Service Manager Alignment + Notes -->
   <div class="cards-grid two-col">
-    <!-- QUESTIONS CARD -->
-    <div class="section-block orange-outline-card" id="monday-plan-card">
-      <h2>Monday — Plan & Next Steps</h2>
+    <!-- SERVICE MANAGER ALIGNMENT (Questions) -->
+    <div class="section-block">
+      <h2>Service Manager Alignment</h2>
 
       <div class="checklist-row">
-        <label for="mv-agenda-confirmed">Training agenda confirmed with managers</label>
-        <div class="row-actions">
-          <select id="mv-agenda-confirmed" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option>Yes</option>
-            <option>In Progress</option>
-            <option>No</option>
-          </select>
+        <label>Did the service manager agree to the following?</label>
+      </div>
 
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-plan" aria-label="Add/View Notes">
+      <div class="checklist-row indent-sub">
+        <label>myKaarma daily arrival</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select arrival time</option>
+            <option>7:00 am</option>
+            <option>8:00 am</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-alignment" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -913,11 +1600,36 @@
         </div>
       </div>
 
-      <div class="checklist-row">
-        <label for="mv-next-steps">Next steps agreed (owner + date)</label>
+      <div class="checklist-row indent-sub">
+        <label>myKaarma daily departure</label>
         <div class="row-actions">
-          <input id="mv-next-steps" type="text" placeholder="Owner / date" />
-          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-plan" aria-label="Add/View Notes">
+          <select>
+            <option value="" data-ghost="true">Select departure time</option>
+            <option>Yes, 5:00 pm</option>
+            <option>Different time</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-alignment" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Daily morning meetings with managers, techs, &amp; advisors</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Morning meetings</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-sm-alignment" aria-label="Add/View Notes">
             <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
               <g class="dots">
@@ -931,13 +1643,140 @@
       </div>
     </div>
 
-    <!-- NOTES CARD -->
-    <div class="section-block" id="notes-monday-plan">
-      <h2>Notes</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
-        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+    <!-- Notes — Service Manager Alignment -->
+    <div class="section-block notes-block" id="notes-sm-alignment">
+      <h2>Notes — Service Manager Alignment</h2>
+      <textarea placeholder="Notes about ongoing alignment with the Service Manager"></textarea>
+    </div>
+  </div>
+
+  <!-- ROW 3 (Side-by-side): Devices & Access + Notes -->
+  <div class="cards-grid two-col">
+    <!-- DEVICES & ACCESS (Questions) -->
+    <div class="section-block">
+      <h2>Devices &amp; Access</h2>
+
+      <div class="checklist-row">
+        <label>All technicians have iOS devices?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">iOS devices</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <div class="checklist-row indent-sub">
+        <label>If no, how many iOS devices short?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>How many techs are using Android devices?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of techs on Android">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>All advisors have iOS devices?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">iOS devices</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>If no, how many iOS devices short?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices">
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Any device or app-access issues that could block training?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Risk</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-devices" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes — Devices -->
+    <div class="section-block" id="notes-devices">
+      <h2>Notes — Devices</h2>
+      <textarea placeholder="Comments for iOS/Android devices, WiFi, VPN, firewalls, or app store access"></textarea>
     </div>
   </div>
 </section>
