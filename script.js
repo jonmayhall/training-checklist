@@ -1,9 +1,10 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   ✅ FIXED / RESTORED
+   ✅ FIXED / RESTORED (MASK ICON VERSION)
    - Menu + buttons working again (event delegation; no dead bindings after restore)
    - No double-add / no double-binding
-   - Notes bubble icon (circle-only SVG) turns orange once clicked / notes exist (.is-active)
+   - ✅ Notes icon-only button uses YOUR PNG mask via CSS (.notes-icon-btn)
+   - ✅ Turns orange when notes exist (.has-notes)
    - Notes buttons ONLY added where there is an input/select/textarea (no blank label rows)
    - Training tables bullet label = Name (first text input in row)
    - Opcode tables bullet label = Opcode (2nd column text input)
@@ -51,27 +52,17 @@
   };
 
   /* -----------------------------
-     NOTES SVG (uses currentColor)
-     - CSS should style .notes-bubble-btn + .is-active
+     NOTES BUTTON (ICON MASK)
+     - CSS provides icon via mask on .notes-icon-btn
+     - JS toggles .has-notes (orange)
   ----------------------------- */
-  const NOTES_SVG = `
-    <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-      <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-        stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-      <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-      <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-      <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  `.trim();
-
   function makeNotesButton(targetId) {
     const btn = document.createElement("button");
     btn.type = "button";
-    // ✅ match your current CSS
-    btn.className = "notes-bubble-btn mk-table-note-btn";
+    btn.className = "notes-icon-btn mk-table-note-btn";
     btn.dataset.notesTarget = targetId;
     btn.setAttribute("aria-label", "Add notes");
-    btn.innerHTML = NOTES_SVG;
+    // no inner SVG/img/text — CSS mask renders icon
     return btn;
   }
 
@@ -323,11 +314,11 @@
   }
 
   function refreshAllNotesButtons(root = document) {
-    $$(".notes-bubble-btn[data-notes-target]", root).forEach((btn) => {
+    $$(".notes-icon-btn[data-notes-target]", root).forEach((btn) => {
       const targetId = btn.dataset.notesTarget;
       if (!targetId) return;
       const sig = getRowSignature(btn);
-      btn.classList.toggle("is-active", buttonIsActive(targetId, sig.index));
+      btn.classList.toggle("has-notes", buttonIsActive(targetId, sig.index));
     });
   }
 
@@ -370,7 +361,7 @@
     const row = btn.closest(".checklist-row");
     if (row) {
       const sec = row.closest(".page-section") || document;
-      const all = $$(".notes-bubble-btn", sec).filter((b) => !b.closest("table"));
+      const all = $$(".notes-icon-btn", sec).filter((b) => !b.closest("table"));
       const idx = all.indexOf(btn);
       return { kind: "question", index: idx >= 0 ? idx : 9999 };
     }
@@ -416,12 +407,9 @@
 
   function rowHasControls(tr, notesIdx) {
     // ignore controls living in the notes column itself
-    const tds = Array.from(tr.cells);
     const cloned = tr.cloneNode(true);
-
     const clonedCells = Array.from(cloned.cells);
     if (notesIdx >= 0 && clonedCells[notesIdx]) clonedCells[notesIdx].innerHTML = "";
-
     return !!cloned.querySelector("input, select, textarea");
   }
 
@@ -438,17 +426,17 @@
         while (tr.cells.length <= notesIdx) tr.insertCell(-1);
 
         const notesCell = tr.cells[notesIdx];
-        notesCell.classList.add("notes-col-cell");
+        notesCell.classList.add("notes-col", "notes-col-cell");
 
         // move any buttons into notes cell, remove duplicates
-        const allBtns = $$(".notes-bubble-btn", tr);
+        const allBtns = $$(".notes-icon-btn", tr);
         if (allBtns.length) {
           allBtns.forEach((b) => {
             if (b.closest("td") !== notesCell) notesCell.appendChild(b);
           });
 
-          const keep = $(".notes-bubble-btn", notesCell);
-          $$(".notes-bubble-btn", notesCell).forEach((b) => { if (b !== keep) b.remove(); });
+          const keep = $(".notes-icon-btn", notesCell);
+          $$(".notes-icon-btn", notesCell).forEach((b) => { if (b !== keep) b.remove(); });
         }
       });
     });
@@ -462,7 +450,7 @@
 
   function findRelatedNotesBlock(tableContainer) {
     // if a notes button already exists, use its target
-    const btn = $(".notes-bubble-btn[data-notes-target]", tableContainer);
+    const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
     const id = btn?.dataset?.notesTarget;
     if (id && $("#" + id)) return $("#" + id);
 
@@ -492,18 +480,18 @@
 
         while (tr.cells.length <= notesIdx) tr.insertCell(-1);
         const cell = tr.cells[notesIdx];
-        cell.classList.add("notes-col-cell");
+        cell.classList.add("notes-col", "notes-col-cell");
 
         // remove extras, ensure exactly one
-        const existing = $(".notes-bubble-btn", cell);
+        const existing = $(".notes-icon-btn", cell);
         if (existing) {
-          // also remove any stray duplicates in row
-          $$(".notes-bubble-btn", tr).forEach((b) => { if (!cell.contains(b)) b.remove(); });
+          // remove any stray duplicates elsewhere in row
+          $$(".notes-icon-btn", tr).forEach((b) => { if (!cell.contains(b)) b.remove(); });
           return;
         }
 
-        // also remove any stray duplicates in row before adding
-        $$(".notes-bubble-btn", tr).forEach((b) => b.remove());
+        // remove any stray duplicates in row before adding
+        $$(".notes-icon-btn", tr).forEach((b) => b.remove());
 
         const btn = makeNotesButton(notesId);
         cell.appendChild(btn);
@@ -517,6 +505,7 @@
      NOTES BUTTON PLACEMENT (RIGHT-SIDE NOTES PAGES)
      - two-col cards: one card is Notes, one is Questions
      - only add button on rows with control
+     - place into .row-actions (create if missing)
   ----------------------------- */
   function injectNotesButtonsIntoTwoColCards(root = document) {
     $$(".cards-grid.two-col", root).forEach((grid) => {
@@ -537,15 +526,22 @@
       if (!questionBlock) return;
 
       $$(".checklist-row", questionBlock).forEach((row) => {
-        // only rows with input/select/textarea
         const hasControl = row.querySelector("input, select, textarea");
         if (!hasControl) return;
 
         // prevent duplicates
-        if (row.querySelector(".notes-bubble-btn")) return;
+        if (row.querySelector(".notes-icon-btn")) return;
 
         const btn = makeNotesButton(notesId);
-        row.appendChild(btn);
+
+        // Prefer a dedicated actions container (keeps layout stable)
+        let actions = row.querySelector(".row-actions");
+        if (!actions) {
+          actions = document.createElement("div");
+          actions.className = "row-actions";
+          row.appendChild(actions);
+        }
+        actions.appendChild(btn);
       });
     });
   }
@@ -580,7 +576,6 @@
     for (const line of lines) {
       const m = line.match(/^•\s(.+):\s*$/);
       if (m) {
-        // flush previous
         flush();
         buf = [];
         currentLabel = m[1];
@@ -598,7 +593,6 @@
   }
 
   function initNotesTextareaParsing(root = document) {
-    // bind to notes textareas inside notes cards
     $$("textarea", root).forEach((ta) => {
       const block = ta.closest(".section-block");
       const id = block?.id;
@@ -769,7 +763,7 @@
 
     const tableCloneContainer = tableContainer.cloneNode(true);
 
-    // remove any nested expand buttons inside the popup clone footer (we don't want expand-inside-expand)
+    // remove any nested expand buttons inside the popup clone footer
     const footer = $(".table-footer", tableCloneContainer);
     if (footer) $$(".mk-table-expand-btn, .expand-table-btn", footer).forEach((b) => b.remove());
 
@@ -783,14 +777,13 @@
 
     tableCard.appendChild(tableCloneContainer);
 
-    // NOTES CARD (use the REAL notes block, not a clone, so it never desyncs)
+    // NOTES CARD (clone, but keep synced to real)
     let notesCard = null;
     if (notesBlock) {
       notesCard = notesBlock.cloneNode(true);
       notesCard.style.width = "100%";
       notesCard.style.overflow = "hidden";
 
-      // keep textarea synced to the REAL one
       const realTA = $("textarea", notesBlock);
       const modalTA = $("textarea", notesCard);
       if (realTA && modalTA) {
@@ -798,7 +791,7 @@
         modalTA.style.width = "100%";
         modalTA.style.maxWidth = "100%";
         modalTA.style.overflowX = "hidden";
-        modalTA.style.minHeight = "240px"; // ✅ bigger notes box
+        modalTA.style.minHeight = "240px";
 
         const syncToReal = () => {
           realTA.value = modalTA.value;
@@ -810,7 +803,6 @@
         modalTA.addEventListener("input", syncToReal);
         modalTA.addEventListener("change", syncToReal);
 
-        // keep modal updated if real changes
         const syncToModal = () => {
           if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
         };
@@ -823,7 +815,6 @@
     cards.appendChild(tableCard);
     if (notesCard) cards.appendChild(notesCard);
 
-    // fix polluted header rows in the clone
     sanitizeTableHeaders(tableCard);
 
     // inject notes buttons into popup clone table
@@ -834,7 +825,6 @@
   }
 
   function initTableExpandButtons() {
-    // ensure footer expand button exists and is consistent
     $$(".table-container").forEach((tc) => {
       const footer = $(".table-footer", tc);
       if (!footer) return;
@@ -848,7 +838,6 @@
         expandBtn.textContent = "⤢";
         footer.appendChild(expandBtn);
       } else {
-        // normalize classes
         expandBtn.classList.add("mk-table-expand-btn", "expand-table-btn");
       }
     });
@@ -894,7 +883,6 @@
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (base) lockBaseOpenStatus(base);
 
-    // normalize status enable/disable on restored groups
     [openContainer, $("#tierTwoTicketsContainer"), $("#closedResolvedTicketsContainer"), $("#closedFeatureTicketsContainer")]
       .filter(Boolean)
       .forEach((cont) => {
@@ -910,7 +898,6 @@
 
   /* -----------------------------
      ADDITIONAL TRAINERS / ADDITIONAL POC (+)
-     - generic clone for integrated-plus rows/cards
   ----------------------------- */
   function cloneAndClear(el) {
     const c = el.cloneNode(true);
@@ -931,9 +918,7 @@
       const clone = cloneAndClear(pocCardBase);
       clone.dataset.base = "false";
       clone.dataset.clone = "true";
-      // remove + button from clone
       $$(".add-row", clone).forEach((b) => b.remove());
-      // append after base
       pocCardBase.parentElement?.insertBefore(clone, pocCardBase.nextSibling);
       initPlaceholderStyling(clone);
       persistAllDebounced();
@@ -949,7 +934,6 @@
       const clone = cloneAndClear(baseRow);
       clone.classList.add("trainer-clone");
       clone.dataset.base = "false";
-      // remove + button on clone
       $$(".add-row", clone).forEach((b) => b.remove());
       trainersContainer.appendChild(clone);
       initPlaceholderStyling(clone);
@@ -962,7 +946,6 @@
 
   /* -----------------------------
      RESET PAGE / CLEAR ALL
-     - clears notes state for that page to prevent “old bullets” coming back
   ----------------------------- */
   function clearNotesForSection(sectionEl) {
     const notesIds = $$(".section-block[id^='notes-'], .section-block[id^='notes-card-']", sectionEl)
@@ -979,7 +962,6 @@
   function clearSection(sectionEl) {
     if (!sectionEl) return;
 
-    // clear normal controls (not tables / not tickets)
     $$("input, select, textarea", sectionEl).forEach((el) => {
       const inTable = !!el.closest("table");
       const inTickets = !!el.closest("#support-tickets");
@@ -1016,13 +998,11 @@
       if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
     }
 
-    // ✅ clear notes state for this page so old bullets don’t return
     clearNotesForSection(sectionEl);
 
     initPlaceholderStyling(sectionEl);
     persistAllDebounced();
 
-    // rebuild notes buttons + refresh orange state
     injectNotesButtonsIntoTwoColCards(sectionEl);
     injectTableNotesButtons(sectionEl);
     refreshAllNotesButtons(sectionEl);
@@ -1051,7 +1031,6 @@
 
   /* -----------------------------
      GLOBAL CLICK HANDLER
-     - restores all buttons after restore/clone
   ----------------------------- */
   function initGlobalClicks() {
     if (!bindOnce(document.body, "global_clicks")) return;
@@ -1108,8 +1087,8 @@
         if (handleIntegratedPlusClick(plusBtn)) return;
       }
 
-      // Notes bubble click
-      const notesBtn = t.closest?.(".notes-bubble-btn");
+      // Notes icon click
+      const notesBtn = t.closest?.(".notes-icon-btn");
       if (notesBtn) {
         const targetId = notesBtn.dataset.notesTarget;
         if (!targetId) return;
@@ -1120,7 +1099,6 @@
         ensureNotesItem(targetId, sig.index, label);
         insertBulletHeaderIfMissing(targetId, label);
 
-        // ✅ no scroll / no jump
         refreshAllNotesButtons();
         return;
       }
@@ -1149,7 +1127,6 @@
           status.value = "Open";
         }
 
-        // ensure clone has a remove button
         if (!$(".remove-ticket-btn", clone)) {
           const wrap = $(".ticket-number-wrap", clone);
           if (wrap) {
@@ -1163,7 +1140,6 @@
 
         openContainer.appendChild(clone);
 
-        // reset base fields
         $$("input, textarea", baseGroup).forEach((el) => (el.value = ""));
         persistAllDebounced();
         return;
@@ -1174,7 +1150,7 @@
       if (removeTicketBtn) {
         const group = removeTicketBtn.closest(".ticket-group");
         if (!group) return;
-        if (group.dataset.base === "true") return; // never remove base
+        if (group.dataset.base === "true") return;
         group.remove();
         persistAllDebounced();
         return;
@@ -1190,7 +1166,6 @@
       const group = sel.closest(".ticket-group");
       if (!group) return;
 
-      // base must stay locked open
       if (group.dataset.base === "true") {
         sel.value = "Open";
         sel.disabled = true;
@@ -1220,7 +1195,6 @@
     injectTableNotesButtons();
     normalizeNotesColumns();
 
-    // keep state in sync
     initNotesTextareaParsing();
 
     refreshAllNotesButtons();
