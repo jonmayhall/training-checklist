@@ -481,77 +481,117 @@ main{
 }
 
 /* =======================================================
-   ✅ NOTES ICON BUTTON — EXACT ICON (ICON ONLY)
-   - No border / no square / no background box
-   - Default gray icon
-   - Turns orange when JS adds .has-notes
-   - Keeps .mk-note-jump highlight
+   NOTES BUTTONS
+   - .notes-bubble-btn  = boxed button (rounded square like your screenshot)
+   - .notes-icon-btn    = icon-only (your exact PNG mask)
+   - .mk-note-jump      = keep highlight
 ======================================================= */
+
+/* keep your jump highlight (do NOT remove) */
 .mk-note-jump{
   box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
   transition:box-shadow .2s ease;
 }
 
-/* the button IS the icon */
-.notes-icon-btn,
-.notes-bubble-btn{ /* alias so any old usage still looks right */
-  width:20px;
-  height:20px;
-  border:0 !important;
-  padding:0 !important;
-  margin:0 !important;
-  background:rgba(0,0,0,.45); /* icon color */
-  cursor:pointer !important;
-  display:inline-block;
-  line-height:0 !important;
-  box-shadow:none !important;
-  outline:none !important;
-  border-radius:0 !important; /* make sure NOTHING rounds into a box */
-  -webkit-appearance:none;
-  appearance:none;
-
-  /* render PNG as mask; background color becomes the icon color */
-  -webkit-mask: var(--notes-mask) center / contain no-repeat;
-  mask: var(--notes-mask) center / contain no-repeat;
+/* -----------------------
+   1) BOXED notes button
+   (this is the one in your screenshot)
+------------------------ */
+.notes-bubble-btn{
+  width:44px;                 /* ✅ screenshot-style button footprint */
+  height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  border:2px solid rgba(0,0,0,.14);
+  background:#fff;
+  cursor:pointer;
+  padding:0;
+  transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
 }
+.notes-bubble-btn:hover{
+  border-color:rgba(0,0,0,.22);
+  box-shadow:0 8px 18px rgba(0,0,0,.10);
+}
+.notes-bubble-btn:active{ transform:translateY(1px); }
 
-.notes-icon-btn:focus,
-.notes-icon-btn:focus-visible,
 .notes-bubble-btn:focus,
 .notes-bubble-btn:focus-visible{
   outline:none !important;
   box-shadow:none !important;
 }
 
-/* orange when active */
-.notes-icon-btn.has-notes,
-.notes-bubble-btn.has-notes,
-.notes-icon-btn.is-active,
-.notes-bubble-btn.is-active{
-  background:var(--orange);
+/* icon inside the boxed button (SVG should use currentColor) */
+.notes-bubble-btn .notes-bubble-ico{
+  width:20px;
+  height:20px;
+  color:rgba(17,24,39,.55);
+  display:block;
 }
 
-.notes-icon-btn:hover,
-.notes-bubble-btn:hover{ opacity:.85; }
-
-.notes-icon-btn:active,
-.notes-bubble-btn:active{ opacity:.75; }
-
-/* if any old SVG/img is still inside buttons, hide it (safe cleanup) */
-.notes-icon-btn svg,
-.notes-icon-btn img,
-.notes-bubble-btn svg,
-.notes-bubble-btn img{
-  display:none !important;
+/* ACTIVE (orange) */
+.notes-bubble-btn.is-active,
+.notes-bubble-btn.has-notes{
+  background:rgba(239,109,34,.10);
+  border-color:rgba(239,109,34,.55);
+  box-shadow:0 10px 22px rgba(239,109,34,.18);
+}
+.notes-bubble-btn.is-active .notes-bubble-ico,
+.notes-bubble-btn.has-notes .notes-bubble-ico{
+  color:rgba(239,109,34,1);
 }
 
 /* table notes column cell */
 .training-table td.notes-col{
   padding:6px 6px;
 }
-.training-table td.notes-col .notes-icon-btn,
 .training-table td.notes-col .notes-bubble-btn{
   margin:0 auto;
+}
+
+/* -----------------------
+   2) ICON-ONLY exact PNG button
+   (no border, no square, no background box)
+------------------------ */
+.notes-icon-btn{
+  width:20px;
+  height:20px;
+  border:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  line-height:0 !important;
+  display:inline-block;
+  cursor:pointer !important;
+  box-shadow:none !important;
+  outline:none !important;
+  border-radius:0 !important;
+
+  /* default icon color */
+  background: rgba(0,0,0,.45);
+
+  /* render the PNG as a mask so color is controlled by background */
+  -webkit-mask: var(--notes-mask) center / contain no-repeat;
+  mask: var(--notes-mask) center / contain no-repeat;
+}
+
+.notes-icon-btn:focus,
+.notes-icon-btn:focus-visible{
+  outline:none !important;
+  box-shadow:none !important;
+}
+
+/* orange when JS adds .has-notes */
+.notes-icon-btn.has-notes{
+  background: var(--orange);
+}
+.notes-icon-btn:hover{ opacity:.85; }
+.notes-icon-btn:active{ opacity:.75; }
+
+/* safety: if any old SVG/img is inside icon-only buttons, hide it */
+.notes-icon-btn svg,
+.notes-icon-btn img{
+  display:none !important;
 }
 
 /* =======================
