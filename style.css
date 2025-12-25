@@ -1,11 +1,14 @@
+here is my css. my nots buttons arent what I asked them to look like and there are now two buttons in the table. the tech table still has the random line with a notes button in it in the header. clean it up and send me full css
+
 /* =======================================================
    myKaarma Interactive Training Checklist — CLEAN CSS
-   ✅ Single source of truth
-   ✅ Notes bubble icon matches new JS: .notes-icon-btn (circle-only)
-   ✅ Prevents duplicate table note buttons
-   ✅ Kills phantom header rows containing buttons/inputs
-   ✅ Popup tables never overflow right; table scrolls like original
-======================================================= */
+   ✅ Single source of truth (no duplicate blocks)
+   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables
+   ✅ Dealership Address: input + MAP button attached + map restored
+   ✅ Dealership Address textbox: ~1/3 shorter
+   ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
+   ✅ Training Date inputs match all other inputs
+   ======================================================= */
 
 /* =======================
    CSS VARIABLES
@@ -26,6 +29,7 @@
 
   --shadow:0 2px 8px rgba(0,0,0,0.10);
 
+  /* default (single-column pages) */
   --input-width:340px;
 }
 
@@ -338,7 +342,7 @@ main{
   gap:18px;
 }
 
-/* side-by-side layouts */
+/* side-by-side layouts: shrink default right-side input width */
 .cards-grid,
 .two-col-grid{
   --input-width:150px;
@@ -389,6 +393,8 @@ main{
   font-size:13px;
   height:34px;
 }
+
+/* Make DATE inputs render like the others */
 .section-block .checklist-row input[type="date"]{
   -webkit-appearance:none;
   appearance:none;
@@ -422,69 +428,58 @@ main{
 }
 
 /* =========================
-   ✅ NOTES BUBBLE BUTTON — THE ONLY ONE USED
-   JS uses: .notes-icon-btn + .has-notes
+   Notes bubble button (NEW JS)
 ========================= */
-.notes-icon-btn{
-  width:38px;
-  height:34px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.14);
-  background:#fff;
-  cursor:pointer;
-  padding:0;
-  transition:transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
-}
-.notes-icon-btn:hover{
-  border-color:rgba(0,0,0,.26);
-  box-shadow:0 6px 16px rgba(0,0,0,.10);
-}
-.notes-icon-btn:active{ transform:translateY(1px); }
-
-.notes-icon-btn .notes-bubble{
-  width:20px;
-  height:20px;
-  fill:none;
-  stroke:rgba(0,0,0,.55);
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.notes-icon-btn .notes-bubble .dots{
-  stroke-width:2.2;
-  stroke:rgba(0,0,0,.45);
+.notes-bubble-btn{
+  width: 38px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  padding: 0;
 }
 
-/* ORANGE when notes exist */
-.notes-icon-btn.has-notes{
-  background:rgba(255,122,0,.12);
-  border-color:rgba(255,122,0,.55);
-  box-shadow:0 10px 22px rgba(255,122,0,.18);
+.notes-bubble-btn:hover{
+  border-color: rgba(0,0,0,.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,.10);
 }
-.notes-icon-btn.has-notes .notes-bubble{
-  stroke:rgba(255,122,0,1);
+
+.notes-bubble-btn:active{
+  transform: translateY(1px);
 }
-.notes-icon-btn.has-notes .notes-bubble .dots{
-  stroke:rgba(255,122,0,1);
+
+/* the svg in the new JS */
+.notes-bubble-btn .notes-bubble-ico{
+  width: 20px;
+  height: 20px;
+  color: rgba(0,0,0,.55); /* uses currentColor */
+}
+
+/* ACTIVE (notes exist) */
+.notes-bubble-btn.is-active{
+  background: rgba(255, 122, 0, .12);
+  border-color: rgba(255, 122, 0, .55);
+  box-shadow: 0 10px 22px rgba(255, 122, 0, .18);
+}
+
+.notes-bubble-btn.is-active .notes-bubble-ico{
+  color: rgba(255, 122, 0, 1);
 }
 
 /* smaller inside table cells */
-td.notes-col-cell .notes-icon-btn,
-td.notes-col .notes-icon-btn{
-  width:34px;
-  height:32px;
-  border-radius:10px;
+td.notes-col-cell .notes-bubble-btn{
+  width: 34px;
+  height: 32px;
+  border-radius: 9px;
 }
 
-/* ✅ hide legacy note buttons if any are still in HTML */
-.note-link-btn,
-.mk-table-note-btn,
-.mk-table-note-btn *{
-  display:none !important;
-}
+/* Indents */
+.indent-sub{ padding-left:60px !important; }
 
 /* =======================
    Notes linking layout (row-actions)
@@ -498,9 +493,359 @@ td.notes-col .notes-icon-btn{
   width:auto !important;
   max-width:none !important;
 }
+.checklist-row.integrated-plus > .row-actions{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-left:8px !important;
+}
 
-/* Indents */
-.indent-sub{ padding-left:60px !important; }
+/* =======================================================
+   INDENTED Q&A ROWS — bring inputs in to match non-indented padding
+   Applies to stacked/normal question cards (non-table rows)
+======================================================= */
+
+/* Non-indented rows: lock a consistent "content width" baseline */
+.section-block .checklist-row{
+  padding-right:22px;                 /* matches your section-block side feel */
+}
+
+/* Indented rows: input should NOT stay pinned to the far right */
+.section-block .checklist-row.indent-sub input[type="text"],
+.section-block .checklist-row.indent-sub input[type="number"],
+.section-block .checklist-row.indent-sub input[type="email"],
+.section-block .checklist-row.indent-sub input[type="tel"],
+.section-block .checklist-row.indent-sub input[type="date"],
+.section-block .checklist-row.indent-sub select{
+  margin-left:0 !important;           /* stop the "push to far right" */
+}
+
+/* Give the indented row its own right-side alignment that matches non-indented */
+.section-block .checklist-row.indent-sub{
+  padding-right:22px !important;      /* same as normal row */
+}
+
+/* Make label take the remaining space and keep input aligned */
+.section-block .checklist-row.indent-sub label{
+  flex:1 1 auto !important;
+}
+
+/* Ensure input stays a fixed width but sits "in" with the content */
+.section-block .checklist-row.indent-sub input[type="text"],
+.section-block .checklist-row.indent-sub input[type="number"],
+.section-block .checklist-row.indent-sub input[type="email"],
+.section-block .checklist-row.indent-sub input[type="tel"],
+.section-block .checklist-row.indent-sub input[type="date"],
+.section-block .checklist-row.indent-sub select{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+}
+
+/* =======================================================
+   2x2 CARDS (two-col cards grid) — shift questions LEFT
+   (NOT contact cards, NOT DMS cards)
+   Keeps indent-sub offset relative to the main line.
+======================================================= */
+
+/* Base question lines in 2-col cards: move left */
+.page-section:not(#dealership-info):not(#dms-integration)
+  .cards-grid.two-col > .section-block .checklist-row{
+  padding-left:16px !important;   /* was 32px */
+}
+
+/* Sub/indented lines: move left the same amount, keep the indent difference */
+.page-section:not(#dealership-info):not(#dms-integration)
+  .cards-grid.two-col > .section-block .checklist-row.indent-sub{
+  padding-left:44px !important;   /* was 60px (still +28 from the main line) */
+}
+
+/* =======================
+   Notes link button (📝)
+======================= */
+.note-link-btn{
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  border:1px solid #d1d5db;
+  background:#fff;
+  color:#9ca3af;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  transition:color .15s, border-color .15s, background .15s, transform .12s;
+}
+.note-link-btn:hover{
+  color:#6b7280;
+  border-color:#9ca3af;
+  transform:translateY(-1px);
+}
+.note-link-btn .note-icon{
+  width:14px;
+  height:14px;
+  display:block;
+}
+.note-link-btn.has-note{
+  color:var(--orange);
+  border-color:var(--orange);
+  background:#fff;
+}
+.mk-note-jump{
+  box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
+  transition:box-shadow .2s ease;
+}
+
+/* =======================
+   Integrated “+” rows
+======================= */
+.section-block .checklist-row.integrated-plus{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+}
+.section-block .checklist-row.integrated-plus label{
+  flex:1 1 auto;
+  padding-right:16px;
+  display:flex;
+  align-items:center;
+}
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"]{
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+  height:34px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
+}
+.section-block .checklist-row.integrated-plus > .add-row{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  margin-left:-1px; /* keep attached */
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 4px rgba(239,109,34,0.25);
+  padding:0;
+}
+.section-block .checklist-row.integrated-plus > .add-row:hover{
+  background:#ff8b42;
+  transform:translateY(-1px);
+}
+
+/* =======================================================
+   DEALERSHIP INFO PAGE FIXES
+   - Training Dates inputs match everything else (width + look)
+   - Primary Contacts: uniform spacing around + between cards
+======================================================= */
+
+/* Training dates rows align like normal rows */
+.training-dates-row,
+.onsite-training-dates-row{
+  align-items:flex-start !important;
+}
+.training-dates-row label,
+.onsite-training-dates-row label{
+  padding-top:7px !important;
+}
+
+/* Date stack uses SAME width as other right-side fields */
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+
+/* Date inputs look/size exactly like other inputs */
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important;
+
+  background:#f7f7f7 !important;
+  color:var(--ink) !important;
+
+  font-size:13px !important;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
+
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-shadow:none !important;
+}
+
+/* =============== PRIMARY CONTACTS (uniform gap) =============== */
+#dealership-info{
+  --di-input-width:225px;
+  --pc-gap:30px; /* uniform spacing (reduced ~25% from the larger gap) */
+}
+
+#dealership-info .primary-contacts-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:var(--pc-gap) !important;       /* between cards */
+  padding:var(--pc-gap) !important;   /* outside matches between */
+  margin-top:10px;
+  align-items:start;
+  justify-items:stretch;
+  box-sizing:border-box;
+}
+
+/* Card */
+#dealership-info .primary-contacts-grid .mini-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  background:#fff;
+  overflow:hidden;
+  padding:14px 14px 6px; /* keep original height feel */
+  width:100%;
+  max-width:none;
+  justify-self:stretch;
+  min-width:0;
+}
+
+/* keep mini-card rows consistent */
+#dealership-info .primary-contacts-grid .mini-card .checklist-row{
+  padding-left:18px;
+  padding-right:18px;
+}
+
+#dealership-info .primary-contacts-grid .contact-card,
+#dealership-info .primary-contacts-grid .additional-poc-card{
+  width:100%;
+  min-width:0;
+}
+
+/* indentation (scoped) */
+#dealership-info .primary-contacts-grid .checklist-row{
+  padding-left:16px !important;
+}
+#dealership-info .primary-contacts-grid .checklist-row.indent-sub{
+  padding-left:30px !important;
+}
+
+/* field widths inside contact cards */
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="text"],
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="email"],
+#dealership-info .primary-contacts-grid
+  .checklist-row input[type="tel"],
+#dealership-info .primary-contacts-grid
+  .checklist-row select{
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  height:34px !important;
+}
+
+/* Base Additional POC (with +) */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--di-input-width) - 34px) !important;
+  width:calc(var(--di-input-width) - 34px) !important;
+  max-width:calc(var(--di-input-width) - 34px) !important;
+}
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus > .add-row{
+  flex:0 0 34px !important;
+  width:34px !important;
+  margin-left:-1px !important;
+}
+
+/* Additional POC clones */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
+#dealership-info .primary-contacts-grid
+  .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
+  border-radius:var(--radius-sm) !important;
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  height:34px !important;
+}
+
+/* =======================
+   Notes cards textarea fill (2-col layouts)
+======================= */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.grid-2 > .section-block{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea,
+.grid-2 > .section-block textarea{
+  flex:1 1 auto;
+  width:100% !important;
+  max-width:100% !important;
+  min-height:220px;
+  resize:none;
+  overflow:auto;
+}
+
+/* =======================
+   TRAINERS PAGE
+======================= */
+#trainers-deployment .grid-2{ grid-template-columns:1fr !important; }
+#trainers-deployment .grid-2 > .section-block{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+#trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
+  flex:0 0 calc(var(--input-width) - 34px) !important;
+  width:calc(var(--input-width) - 34px) !important;
+  margin-left:auto !important;
+}
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  padding-left:60px !important;
+}
+#trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
+
+/* Additional Trainer clones */
+#trainers-deployment .trainer-clone input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  border-radius:var(--radius-sm) !important;
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+}
 
 /* =======================
    TABLES
@@ -528,8 +873,6 @@ td.notes-col .notes-icon-btn{
   padding:0;
   max-width:100%;
 }
-
-/* scroll wrapper must behave exactly like original */
 .scroll-wrapper{
   display:block;
   width:100%;
@@ -539,18 +882,6 @@ td.notes-col .notes-icon-btn{
   padding-bottom:4px;
   -webkit-overflow-scrolling:touch;
 }
-
-/* ✅ KILL the phantom header row / textbox / notes button row:
-   Hide any THEAD row that contains controls */
-.training-table thead tr:has(input),
-.training-table thead tr:has(select),
-.training-table thead tr:has(textarea),
-.training-table thead tr:has(button),
-.training-table thead tr:has(.notes-icon-btn){
-  display:none !important;
-}
-
-/* base table */
 .training-table{
   border-collapse:collapse;
   width:max-content;
@@ -610,22 +941,6 @@ td.notes-col .notes-icon-btn{
 
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
-
-/* ✅ NOTES COLUMN — allow only one button and center it */
-.training-table th.notes-col,
-.training-table td.notes-col,
-td.notes-col-cell{
-  width:66px;
-  min-width:66px;
-  text-align:center !important;
-  vertical-align:middle;
-}
-td.notes-col-cell{
-  position:relative;
-}
-td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
-  display:none !important; /* hard-prevent duplicates */
-}
 
 /* Table footer */
 .table-footer{
@@ -710,25 +1025,41 @@ td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
 }
 
 /* =======================
-   TABLE EXPAND BUTTON
+   TABLE NOTES COLUMN
 ======================= */
-.expand-table-btn,
+.training-table th.notes-col,
+.training-table td.notes-col{
+  width:60px;
+  min-width:60px;
+  text-align:center !important;
+  vertical-align:middle;
+}
+.training-table .mk-table-note-btn{ width:20px; height:20px; }
+
+/* =======================
+   TABLE EXPAND (⤢)
+======================= */
 .mk-table-expand-btn{
-  width:40px;
-  height:34px;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,0.12);
-  background:#fff;
+  width:16px;
+  height:16px;
+  padding:0;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  background:#ffffffee;
+  color:#111827;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
+  font-size:10px;
   line-height:1;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  transition:border-color .12s, background .12s, transform .12s;
 }
-.expand-table-btn:hover,
 .mk-table-expand-btn:hover{
   border-color:var(--orange);
+  background:#fff;
+  transform:translateY(-1px);
 }
 
 /* =======================
@@ -980,30 +1311,384 @@ td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
   white-space:nowrap;
 }
 
+#dms-integration .dms-list .dms-tag-auto{
+  border-color:rgba(34,197,94,0.35);
+  background:rgba(34,197,94,0.12);
+  color:#14532d;
+}
+#dms-integration .dms-list .dms-tag-ondemand{
+  border-color:rgba(245,158,11,0.35);
+  background:rgba(245,158,11,0.14);
+  color:#78350f;
+}
+#dms-integration .dms-list .dms-tag-withro{
+  border-color:rgba(59,130,246,0.35);
+  background:rgba(59,130,246,0.12);
+  color:#1e3a8a;
+}
+#dms-integration .dms-list .dms-tag-planned{
+  border-color:rgba(99,102,241,0.35);
+  background:rgba(99,102,241,0.12);
+  color:#312e81;
+}
+#dms-integration .dms-list .dms-tag-na{
+  border-color:rgba(156,163,175,0.45);
+  background:rgba(156,163,175,0.18);
+  color:#374151;
+}
+
+/* =======================
+   EQUAL-HEIGHT 2-COL ROWS
+======================= */
+#pre-training .cards-grid.two-col,
+#monday-visit .cards-grid.two-col,
+#post-training .cards-grid.two-col{
+  align-items:stretch !important;
+}
+#pre-training .cards-grid.two-col > .section-block,
+#monday-visit .cards-grid.two-col > .section-block,
+#post-training .cards-grid.two-col > .section-block{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0;
+}
+#pre-training .cards-grid.two-col > .section-block textarea,
+#monday-visit .cards-grid.two-col > .section-block textarea,
+#post-training .cards-grid.two-col > .section-block textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  resize:none !important;
+}
+
+/* =======================
+   NOTES POP-OUT EXPANDER (⤢)
+======================= */
+.mk-ta-wrap{
+  position:relative;
+  height:100%;
+  flex:1 1 auto;
+  display:flex;
+  min-height:0;
+}
+.mk-ta-wrap > textarea{
+  flex:1 1 auto;
+  width:100% !important;
+  height:100% !important;
+  min-height:220px;
+  resize:none;
+  padding-right:30px !important;
+}
+.mk-ta-wrap .mk-ta-expand{
+  position:absolute;
+  right:6px;
+  bottom:16px;
+  width:16px;
+  height:16px;
+  padding:0;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  background:#ffffffee;
+  color:#111827;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  line-height:1;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  z-index:10;
+}
+.mk-ta-wrap .mk-ta-expand:hover{
+  border-color:var(--orange);
+  background:#fff;
+}
+
+/* =======================
+   NOTES MODAL
+======================= */
+#mkNotesModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+#mkNotesModal.open{ display:block; }
+#mkNotesModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+}
+#mkNotesModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(980px, calc(100vw - 40px));
+  height:min(80vh, 720px);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#mkNotesModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+#mkNotesModal .mk-modal-title{
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:.3px;
+}
+#mkNotesModal .mk-modal-close{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+#mkNotesModal .mk-modal-close:hover{
+  background:rgba(255,255,255,0.25);
+}
+#mkNotesModal .mk-modal-textarea{
+  flex:1 1 auto;
+  width:100%;
+  border:0;
+  outline:none;
+  padding:14px 16px;
+  font-size:13px;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  resize:none;
+}
 /* =========================
    Table Popup (Modal) — force clean card + no right overflow
 ========================= */
 #mkTableModal{
-  overflow:hidden !important;
+  overflow: hidden !important;
 }
-#mkTableModalShell,
+
+#mkTableModalShell{
+  width: 100%;
+}
+
 #mkTableModalCards{
-  width:100%;
+  width: 100%;
 }
+
 #mkTableModalCards .section-block{
-  width:100%;
+  width: 100%;
+  overflow: hidden;          /* prevents “flows off right side” */
+}
+
+/* Keep table scrolling inside scroll-wrapper like normal */
+#mkTableModalCards .scroll-wrapper{
+  overflow: auto !important;
+  max-width: 100% !important;
+}
+
+/* Notes card should never scroll left/right */
+#mkTableModalCards .section-block textarea{
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  resize: vertical;
+}
+
+/* =======================
+   TABLE MODAL (mkTableModal)
+======================= */
+#mkTableModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99998;
+}
+#mkTableModal.open{ display:block; }
+#mkTableModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+}
+#mkTableModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1400px, calc(100vw - 28px));
+  max-height:90vh;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
   overflow:hidden;
 }
-#mkTableModalCards .scroll-wrapper{
-  overflow:auto !important;
-  max-width:100% !important;
+#mkTableModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 }
-#mkTableModalCards .section-block textarea{
+#mkTableModal .mk-modal-title{
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:.3px;
+}
+#mkTableModal .mk-modal-close{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
+#mkTableModal .mk-modal-content{
+  padding:16px 16px 18px;
+  overflow:auto;
+  background:#fff;
+}
+#mkTableModal .mk-modal-stack{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+#mkTableModal .mk-table-scroll{
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:10px 10px 12px;
+  box-sizing:border-box;
+}
+#mkTableModal .mk-table-scroll table.training-table{
+  width:max-content;
+  min-width:100%;
+}
+#mkTableModal .mk-modal-notes textarea{
   width:100% !important;
-  max-width:100% !important;
-  overflow-x:hidden !important;
-  white-space:pre-wrap;
-  word-break:break-word;
+  min-height:220px;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  resize:vertical;
+}
+
+/* =======================================================
+   DEALERSHIP ADDRESS — single source of truth
+   - Input + MAP button attached + styled
+   - MAP restored
+   - Textbox ~1/3 shorter
+======================================================= */
+#dealership-address-card .checklist-row{
+  display:grid !important;
+  grid-template-columns:260px minmax(0,1fr) !important;
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+/* This is the ONLY width control you need */
+#dealership-address-card .address-input-wrap{
+  width:100% !important;
+  max-width:450px !important;        /* ✅ ~1/3 shorter than the old 680 */
+  justify-self:end !important;
+  margin-left:auto !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+}
+
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+#dealership-address-card .address-input-wrap .small-map-btn,
+#dealership-address-card .address-input-wrap button{
+  flex:0 0 44px !important;
+  width:44px !important;
+  min-width:44px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  cursor:pointer !important;
+  padding:0 !important;
+
+  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
+}
+#dealership-address-card .address-input-wrap .small-map-btn:hover,
+#dealership-address-card .address-input-wrap button:hover{
+  background:#ff8b42 !important;
+}
+
+/* map restored */
+#dealership-address-card .map-wrapper{
+  margin:16px 0 8px !important;
+  border-radius:var(--radius-lg) !important;
+  overflow:hidden !important;
+  border:1px solid var(--border) !important;
+  background:#f8f8f8 !important;
+}
+#dealership-address-card .map-frame,
+#dealership-address-card .map-wrapper iframe{
+  width:100% !important;
+  height:440px !important;
+  border:0 !important;
+  display:block !important;
+}
+.map-helper-text{
+  margin:6px 10px 10px;
+  font-size:12px;
+  color:#555;
 }
 
 /* =======================
@@ -1021,6 +1706,9 @@ td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
     grid-template-columns:1fr;
   }
 
+  #dealership-info .primary-contacts-grid{
+    grid-template-columns:1fr;
+  }
   #dms-integration .dms-grid{ grid-template-columns:1fr; }
 
   #support-tickets #openTicketsContainer,
@@ -1028,6 +1716,17 @@ td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
   #support-tickets #closedResolvedTicketsContainer,
   #support-tickets #closedFeatureTicketsContainer{
     grid-template-columns:1fr;
+  }
+
+  /* Address stacks */
+  #dealership-address-card .checklist-row{
+    grid-template-columns:1fr !important;
+    align-items:flex-start !important;
+  }
+  #dealership-address-card .address-input-wrap{
+    max-width:100% !important;
+    justify-self:stretch !important;
+    margin-left:0 !important;
   }
 }
 
@@ -1057,4 +1756,109 @@ td.notes-col-cell .notes-icon-btn + .notes-icon-btn{
   }
 
   .training-table{ min-width:760px; }
+}
+
+/* =========================
+   TABLE MODAL — CLEAN LAYOUT
+========================= */
+.table-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.table-modal{
+  background: #fff;
+  width: min(1200px, 96vw);
+  max-height: 90vh;
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.35);
+  overflow: hidden; /* keeps header + body clean */
+  display: flex;
+  flex-direction: column;
+}
+
+.table-modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+}
+
+.table-modal-title{
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.table-modal-actions{
+  display: flex;
+  gap: 10px;
+}
+
+.table-modal-iconbtn{
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  cursor: pointer;
+}
+
+.table-modal-body{
+  padding: 16px;
+  overflow: auto;           /* the modal scrolls vertically */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;                /* space between the two cards */
+}
+
+/* Inner cards (table card + notes card) */
+.table-modal-card{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+/* Card headers should match your app style (clean, not orange bar) */
+.table-modal-card .section-header,
+.table-modal-card h2{
+  margin: 0;
+}
+
+/* TABLE CARD: allow horizontal scroll for the TABLE only */
+.table-modal-tablewrap{
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px;
+}
+
+/* Important: keep table from exploding layout */
+.table-modal-tablewrap table{
+  min-width: 980px; /* adjust if needed */
+}
+
+/* NOTES CARD: absolutely no right scroll */
+.table-modal-noteswrap{
+  padding: 12px;
+  overflow: hidden;
+}
+
+.table-modal-noteswrap textarea{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
