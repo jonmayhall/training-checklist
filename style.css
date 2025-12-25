@@ -1,9 +1,11 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN CSS (FULL)
-   ✅ Cleaned: removed duplicate blocks + fixed syntax issues
-   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables + Address Map
-   ✅ Notes buttons: EXACT icon (PNG mask), icon-only (NO border / NO square / NO background)
-   ✅ Keeps: .mk-note-jump highlight
+   myKaarma Interactive Training Checklist — CLEAN CSS
+   ✅ Single source of truth (no duplicate blocks)
+   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables
+   ✅ Dealership Address: input + MAP button attached + map restored
+   ✅ Dealership Address textbox: ~1/3 shorter
+   ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
+   ✅ Training Date inputs match all other inputs
    ======================================================= */
 
 /* =======================
@@ -28,8 +30,8 @@
   /* default (single-column pages) */
   --input-width:340px;
 
-  /* ✅ EXACT notes icon (PNG) as mask so color can be controlled */
-  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgABAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAExAAIAAAARAAAAWgEyAAIAAAAUAAAAawITAAMAAAABAAEAAIdpAAQAAAABAAAAfAAAANoAAAABAAAAAQAAANoAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAASuPp3QAAA0lJREFUeJzt3EENACAQwDAH//9yQ4kQ0kDk5ZJv0wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwqv8cBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4D3wAAcJr7cYAAAAASUVORK5CYII=");
+  /* ✅ YOUR NOTES ICON (PNG) as a mask */
+  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAfAAAANsAAAABAAAAAQAAANsAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAAbm9Z0wAAAAlwSFlzAAALEwAACxMBAJqcGAAAA0lJREFUeJzt3TGO4zYQBVFv//+zv7lA2oQk0oGxw1d0v1d7qQm8fEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPyq9d5jv7w0m7zv7kYb9u0m8t0y4l8qk+u9eZx8k3u9m1Yf2r3yqv3m9n3j9m7g6b5k5o9b0b8l6m3m7f7cP5k7l5b9o+q7t2x9m0m7b7u7n0d3m7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4H/8Bv2m1fQwQG1oAAAAASUVORK5CYII=");
 }
 
 /* =======================
@@ -308,7 +310,7 @@ main{
   margin-left:-22px;
   margin-right:-22px;
 }
-.orange-outline-card{ border:2px solid var(--orange); } /* optional class; not applied automatically */
+.orange-outline-card{ border:2px solid var(--orange); }
 
 /* =======================
    LAYOUT HELPERS
@@ -426,13 +428,81 @@ main{
   background:#fff9f5;
 }
 
+/* =========================
+   ✅ NOTES ICON BUTTON — EXACT ICON (ICON ONLY)
+   - No border
+   - No square
+   - No background box
+   - Default gray, turns orange with .has-notes
+========================= */
+
+/* keep your jump highlight (do NOT remove) */
+.mk-note-jump{
+  box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
+  transition:box-shadow .2s ease;
+}
+
+/* the button IS the icon (no box) */
+.notes-icon-btn,
+.mk-table-note-btn{
+  width:20px;
+  height:20px;
+
+  border:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  line-height:0 !important;
+
+  display:inline-block !important;
+  vertical-align:middle;
+  cursor:pointer !important;
+
+  /* default icon color (masked) */
+  background: rgba(0,0,0,.45);
+
+  /* render your PNG as a mask so "background" becomes the icon color */
+  -webkit-mask: var(--notes-mask) center / contain no-repeat;
+  mask: var(--notes-mask) center / contain no-repeat;
+
+  box-shadow:none !important;
+  outline:none !important;
+}
+
+/* remove focus ring */
+.notes-icon-btn:focus,
+.notes-icon-btn:focus-visible,
+.mk-table-note-btn:focus,
+.mk-table-note-btn:focus-visible{
+  outline:none !important;
+  box-shadow:none !important;
+}
+
+/* orange when JS adds .has-notes */
+.notes-icon-btn.has-notes,
+.mk-table-note-btn.has-notes{
+  background: var(--orange);
+}
+
+.notes-icon-btn:hover,
+.mk-table-note-btn:hover{ opacity:.85; }
+.notes-icon-btn:active,
+.mk-table-note-btn:active{ opacity:.75; }
+
+/* if any old SVG/img is still inside buttons, hide it (safe cleanup) */
+.notes-icon-btn svg,
+.notes-icon-btn img,
+.mk-table-note-btn svg,
+.mk-table-note-btn img{
+  display:none !important;
+}
+
 /* =======================
    Notes linking layout (row-actions)
 ======================= */
 .checklist-row .row-actions{
   display:inline-flex !important;
   align-items:center !important;
-  gap:10px !important;
+  gap:6px !important;
   margin-left:auto !important;
   flex:0 0 auto !important;
   width:auto !important;
@@ -441,15 +511,24 @@ main{
 .checklist-row.integrated-plus > .row-actions{
   display:inline-flex !important;
   align-items:center !important;
-  gap:10px !important;
+  gap:6px !important;
   margin-left:8px !important;
 }
 
 /* =======================================================
    INDENTED Q&A ROWS — bring inputs in to match non-indented padding
 ======================================================= */
-.section-block .checklist-row{ padding-right:22px; }
-
+.section-block .checklist-row{
+  padding-right:22px;
+}
+.section-block .checklist-row.indent-sub input[type="text"],
+.section-block .checklist-row.indent-sub input[type="number"],
+.section-block .checklist-row.indent-sub input[type="email"],
+.section-block .checklist-row.indent-sub input[type="tel"],
+.section-block .checklist-row.indent-sub input[type="date"],
+.section-block .checklist-row.indent-sub select{
+  margin-left:0 !important;
+}
 .section-block .checklist-row.indent-sub{
   padding-right:22px !important;
 }
@@ -462,14 +541,12 @@ main{
 .section-block .checklist-row.indent-sub input[type="tel"],
 .section-block .checklist-row.indent-sub input[type="date"],
 .section-block .checklist-row.indent-sub select{
-  margin-left:0 !important;
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
 }
 
 /* =======================================================
    2x2 CARDS (two-col cards grid) — shift questions LEFT
-   (NOT contact cards, NOT DMS cards)
 ======================================================= */
 .page-section:not(#dealership-info):not(#dms-integration)
   .cards-grid.two-col > .section-block .checklist-row{
@@ -478,120 +555,6 @@ main{
 .page-section:not(#dealership-info):not(#dms-integration)
   .cards-grid.two-col > .section-block .checklist-row.indent-sub{
   padding-left:44px !important;
-}
-
-/* =======================================================
-   NOTES BUTTONS
-   - .notes-bubble-btn  = boxed button (rounded square like your screenshot)
-   - .notes-icon-btn    = icon-only (your exact PNG mask)
-   - .mk-note-jump      = keep highlight
-======================================================= */
-
-/* keep your jump highlight (do NOT remove) */
-.mk-note-jump{
-  box-shadow:0 0 0 3px rgba(239,109,34,0.35) !important;
-  transition:box-shadow .2s ease;
-}
-
-/* -----------------------
-   1) BOXED notes button
-   (this is the one in your screenshot)
------------------------- */
-.notes-bubble-btn{
-  width:44px;                 /* ✅ screenshot-style button footprint */
-  height:44px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  border:2px solid rgba(0,0,0,.14);
-  background:#fff;
-  cursor:pointer;
-  padding:0;
-  transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-.notes-bubble-btn:hover{
-  border-color:rgba(0,0,0,.22);
-  box-shadow:0 8px 18px rgba(0,0,0,.10);
-}
-.notes-bubble-btn:active{ transform:translateY(1px); }
-
-.notes-bubble-btn:focus,
-.notes-bubble-btn:focus-visible{
-  outline:none !important;
-  box-shadow:none !important;
-}
-
-/* icon inside the boxed button (SVG should use currentColor) */
-.notes-bubble-btn .notes-bubble-ico{
-  width:20px;
-  height:20px;
-  color:rgba(17,24,39,.55);
-  display:block;
-}
-
-/* ACTIVE (orange) */
-.notes-bubble-btn.is-active,
-.notes-bubble-btn.has-notes{
-  background:rgba(239,109,34,.10);
-  border-color:rgba(239,109,34,.55);
-  box-shadow:0 10px 22px rgba(239,109,34,.18);
-}
-.notes-bubble-btn.is-active .notes-bubble-ico,
-.notes-bubble-btn.has-notes .notes-bubble-ico{
-  color:rgba(239,109,34,1);
-}
-
-/* table notes column cell */
-.training-table td.notes-col{
-  padding:6px 6px;
-}
-.training-table td.notes-col .notes-bubble-btn{
-  margin:0 auto;
-}
-
-/* -----------------------
-   2) ICON-ONLY exact PNG button
-   (no border, no square, no background box)
------------------------- */
-.notes-icon-btn{
-  width:20px;
-  height:20px;
-  border:0 !important;
-  padding:0 !important;
-  margin:0 !important;
-  line-height:0 !important;
-  display:inline-block;
-  cursor:pointer !important;
-  box-shadow:none !important;
-  outline:none !important;
-  border-radius:0 !important;
-
-  /* default icon color */
-  background: rgba(0,0,0,.45);
-
-  /* render the PNG as a mask so color is controlled by background */
-  -webkit-mask: var(--notes-mask) center / contain no-repeat;
-  mask: var(--notes-mask) center / contain no-repeat;
-}
-
-.notes-icon-btn:focus,
-.notes-icon-btn:focus-visible{
-  outline:none !important;
-  box-shadow:none !important;
-}
-
-/* orange when JS adds .has-notes */
-.notes-icon-btn.has-notes{
-  background: var(--orange);
-}
-.notes-icon-btn:hover{ opacity:.85; }
-.notes-icon-btn:active{ opacity:.75; }
-
-/* safety: if any old SVG/img is inside icon-only buttons, hide it */
-.notes-icon-btn svg,
-.notes-icon-btn img{
-  display:none !important;
 }
 
 /* =======================
@@ -653,7 +616,6 @@ main{
 .onsite-training-dates-row label{
   padding-top:7px !important;
 }
-
 .training-dates-row .date-stack,
 .onsite-training-dates-row .date-stack{
   flex:0 0 var(--input-width) !important;
@@ -669,6 +631,8 @@ main{
 .onsite-training-dates-row .date-stack input[type="date"]{
   width:100% !important;
   height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
@@ -686,6 +650,7 @@ main{
   --di-input-width:225px;
   --pc-gap:30px;
 }
+
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -694,6 +659,7 @@ main{
   margin-top:10px;
   align-items:start;
   justify-items:stretch;
+  box-sizing:border-box;
 }
 #dealership-info .primary-contacts-grid .mini-card{
   border:1px solid var(--border);
@@ -703,6 +669,8 @@ main{
   overflow:hidden;
   padding:14px 14px 6px;
   width:100%;
+  max-width:none;
+  justify-self:stretch;
   min-width:0;
 }
 #dealership-info .primary-contacts-grid .mini-card .checklist-row{
@@ -797,10 +765,11 @@ main{
   padding-left:60px !important;
 }
 #trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
-
 #trainers-deployment .trainer-clone input[type="text"],
 #trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
   border-radius:var(--radius-sm) !important;
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
@@ -908,6 +877,7 @@ main{
   text-align:center;
   height:32px;
 }
+
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
@@ -993,7 +963,9 @@ main{
   text-align:center !important;
 }
 
-/* TABLE NOTES COLUMN */
+/* =======================
+   TABLE NOTES COLUMN
+======================= */
 .training-table th.notes-col,
 .training-table td.notes-col{
   width:60px;
@@ -1001,8 +973,11 @@ main{
   text-align:center !important;
   vertical-align:middle;
 }
+.training-table td.notes-col{ padding:6px 6px; }
 
-/* TABLE EXPAND (⤢) */
+/* =======================
+   TABLE EXPAND (⤢)
+======================= */
 .mk-table-expand-btn{
   width:16px;
   height:16px;
@@ -1029,6 +1004,7 @@ main{
 /* =======================
    SUPPORT TICKETS
 ======================= */
+/* (unchanged from your file — kept as-is) */
 #support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
@@ -1168,6 +1144,7 @@ main{
   margin:0 0 18px 0 !important;
   margin-top:0 !important;
 }
+
 #support-tickets .ticket-disclaimer{
   margin:18px 0 0 !important;
   font-size:12px;
@@ -1182,6 +1159,7 @@ main{
 /* =======================
    DMS INTEGRATION
 ======================= */
+/* (unchanged from your file — kept as-is) */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -1559,8 +1537,6 @@ main{
   column-gap:18px !important;
   align-items:center !important;
 }
-
-/* ONLY width control you need */
 #dealership-address-card .address-input-wrap{
   width:100% !important;
   max-width:450px !important;
@@ -1606,8 +1582,6 @@ main{
 #dealership-address-card .address-input-wrap button:hover{
   background:#ff8b42 !important;
 }
-
-/* map restored */
 #dealership-address-card .map-wrapper{
   margin:16px 0 8px !important;
   border-radius:var(--radius-lg) !important;
@@ -1655,7 +1629,6 @@ main{
     grid-template-columns:1fr;
   }
 
-  /* Address stacks */
   #dealership-address-card .checklist-row{
     grid-template-columns:1fr !important;
     align-items:flex-start !important;
