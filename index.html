@@ -375,130 +375,306 @@
 </section>
 
 <!-- =======================================================
-     PAGE 3 — PRE-TRAINING  (with correct notes buttons)
-     Drop this in place of your existing #pre-training section
+     PAGE 3 — PRE-TRAINING (FULL SECTION HTML)
+     ✅ Includes EVERYTHING for this page section:
+     - Title + subtitle + Reset button
+     - 2x2 card rows (Question card + Notes card) in the exact structure your JS expects
+     - Correct notes buttons: .notes-icon-btn + data-notes-target + NOTES_SVG
+     - Notes cards have IDs that START WITH "notes-" so your JS parses + saves correctly
 ======================================================= -->
 <section id="pre-training" class="page-section">
   <button type="button" class="clear-page-btn">Reset This Page</button>
 
   <h1>Pre-Training</h1>
-  <p class="page-subtitle">Complete these items before arriving onsite. Use 🗨️ notes buttons to capture details.</p>
+  <p class="page-subtitle">Complete these items before arriving onsite. Use the notes bubble to capture details.</p>
 
+  <!-- ROW 1 -->
   <div class="cards-grid two-col">
-    <!-- LEFT: QUESTIONS -->
-    <div class="section-block orange-outline-card">
-      <h2>Pre-Training Checklist</h2>
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="pretraining-kickoff-card">
+      <h2>Pre-Training — Setup & Access</h2>
 
       <div class="checklist-row">
-        <label for="pt-dealership-setup">Dealership setup confirmed (roles, permissions, user lists)</label>
+        <label for="pt-roles-confirmed">Roles/permissions confirmed for all users</label>
         <div class="row-actions">
-          <select id="pt-dealership-setup" name="pt-dealership-setup" class="is-placeholder">
+          <select id="pt-roles-confirmed" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
 
       <div class="checklist-row">
-        <label for="pt-scheduler-confirm">Scheduler workflow confirmed (advisor/tech based, quick-lube/main shop)</label>
+        <label for="pt-logins-tested">Logins tested (Advisor / Tech / Parts / Managers)</label>
         <div class="row-actions">
-          <select id="pt-scheduler-confirm" name="pt-scheduler-confirm" class="is-placeholder">
+          <select id="pt-logins-tested" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label for="pt-scheduler-notes">Scheduler specifics (rules/teams/loaders) captured</label>
-        <div class="row-actions">
-          <input id="pt-scheduler-notes" name="pt-scheduler-notes" type="text" placeholder="Short note" />
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
 
       <div class="checklist-row">
-        <label for="pt-mpi-ready">MPI forms reviewed / ready (required fields, left/right, tire depth/age, etc.)</label>
+        <label for="pt-mobile-ready">Mobile app readiness confirmed (logins + permissions)</label>
         <div class="row-actions">
-          <select id="pt-mpi-ready" name="pt-mpi-ready" class="is-placeholder">
+          <select id="pt-mobile-ready" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="pt-opcodes-reviewed">Opcodes / pricing mapping reviewed (parts pricing, price-six, etc.)</label>
-        <div class="row-actions">
-          <select id="pt-opcodes-reviewed" name="pt-opcodes-reviewed" class="is-placeholder">
-            <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
-          </select>
-
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-pre-training" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-setup" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: NOTES -->
-    <div class="section-block" id="notes-pre-training">
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-pre-training-setup">
       <h2>Notes</h2>
       <div class="mk-ta-wrap">
-        <textarea placeholder="Use the 🗨️ buttons to insert bullet headers..."></textarea>
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="cards-grid two-col">
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="pretraining-scheduler-card">
+      <h2>Pre-Training — Scheduler & Workflow</h2>
+
+      <div class="checklist-row">
+        <label for="pt-scheduler-confirmed">Scheduler approach confirmed (Advisor-based vs Tech-based)</label>
+        <div class="row-actions">
+          <select id="pt-scheduler-confirmed" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="pt-workflows-mapped">Workflows mapped (Main Shop vs Quick Lube)</label>
+        <div class="row-actions">
+          <select id="pt-workflows-mapped" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label for="pt-scheduler-specifics">Scheduler specifics captured (teams/rules/loaders)</label>
+        <div class="row-actions">
+          <input id="pt-scheduler-specifics" type="text" placeholder="Short detail" />
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-scheduler" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-pre-training-scheduler">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="cards-grid two-col">
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="pretraining-forms-card">
+      <h2>Pre-Training — MPI & Forms</h2>
+
+      <div class="checklist-row">
+        <label for="pt-mpi-fields-ready">MPI fields confirmed (tire depth/size/pressure/age, L/R items)</label>
+        <div class="row-actions">
+          <select id="pt-mpi-fields-ready" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-forms" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="pt-mpi-templates-approved">Inspection templates approved (shop + quick lube)</label>
+        <div class="row-actions">
+          <select id="pt-mpi-templates-approved" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-forms" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-pre-training-forms">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="cards-grid two-col">
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="pretraining-opcodes-card">
+      <h2>Pre-Training — Opcodes & Pricing</h2>
+
+      <div class="checklist-row">
+        <label for="pt-opcodes-reviewed">Opcodes reviewed (labor ops present + correct)</label>
+        <div class="row-actions">
+          <select id="pt-opcodes-reviewed" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-opcodes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="pt-pricing-mapped">Pricing mapped correctly (e.g., price-six, parts pricing not zero)</label>
+        <div class="row-actions">
+          <select id="pt-pricing-mapped" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-pre-training-opcodes" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-pre-training-opcodes">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
         <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
       </div>
     </div>
@@ -507,124 +683,259 @@
 
 
 <!-- =======================================================
-     PAGE 4 — MONDAY VISIT  (with correct notes buttons)
-     Drop this in place of your existing #monday-visit section
+     PAGE 4 — MONDAY VISIT (FULL SECTION HTML)
+     ✅ Includes EVERYTHING for this page section:
+     - Title + subtitle + Reset button
+     - 2x2 card rows (Question card + Notes card) like your last stable look
+     - Correct notes buttons + correct notes IDs
 ======================================================= -->
 <section id="monday-visit" class="page-section">
   <button type="button" class="clear-page-btn">Reset This Page</button>
 
   <h1>Monday Visit</h1>
-  <p class="page-subtitle">Day 1 onsite items. Use 🗨️ notes buttons to capture decisions, blockers, and action items.</p>
+  <p class="page-subtitle">Day 1 onsite items. Capture decisions, blockers, and action items with the notes bubble.</p>
 
+  <!-- ROW 1 -->
   <div class="cards-grid two-col">
-    <!-- LEFT: QUESTIONS -->
-    <div class="section-block orange-outline-card">
-      <h2>Onsite Kickoff</h2>
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="monday-kickoff-card">
+      <h2>Monday — Kickoff</h2>
 
       <div class="checklist-row">
         <label for="mv-kickoff-complete">Kickoff completed (expectations, timeline, success criteria)</label>
         <div class="row-actions">
-          <select id="mv-kickoff-complete" name="mv-kickoff-complete" class="is-placeholder">
+          <select id="mv-kickoff-complete" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
 
       <div class="checklist-row">
-        <label for="mv-logins-verified">Logins verified for all roles (advisors/techs/parts/managers)</label>
+        <label for="mv-stakeholders-present">Key stakeholders present (SM/PM/Dispatch/IT)</label>
         <div class="row-actions">
-          <select id="mv-logins-verified" name="mv-logins-verified" class="is-placeholder">
+          <select id="mv-stakeholders-present" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
 
       <div class="checklist-row">
-        <label for="mv-workflows-validated">Workflows validated in live environment (RO creation, MPI, media, approvals)</label>
+        <label for="mv-success-criteria">Success criteria agreed + documented</label>
         <div class="row-actions">
-          <select id="mv-workflows-validated" name="mv-workflows-validated" class="is-placeholder">
+          <select id="mv-success-criteria" class="is-placeholder">
             <option value="" data-ghost="true">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="In Progress">In Progress</option>
-            <option value="No">No</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
           </select>
 
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label for="mv-blockers">Any blockers identified (scheduler, DMS, pricing, forms)</label>
-        <div class="row-actions">
-          <input id="mv-blockers" name="mv-blockers" type="text" placeholder="Short note" />
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="checklist-row">
-        <label for="mv-next-steps">Next steps agreed (owners + dates)</label>
-        <div class="row-actions">
-          <input id="mv-next-steps" name="mv-next-steps" type="text" placeholder="Owner / date" />
-          <button type="button" class="notes-bubble-btn" data-notes-target="notes-monday-visit" aria-label="Add notes">
-            <svg class="notes-bubble-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-              <path d="M20 14.2c0 1.7-1.5 3.1-3.4 3.1H10l-3.7 2.1V17.3c-1.9 0-3.3-1.4-3.3-3.1V7.8C3 6.1 4.5 4.7 6.3 4.7h10.3c1.9 0 3.4 1.4 3.4 3.1v6.4Z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M9 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M12 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              <path d="M15 11.2h0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-kickoff" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: NOTES -->
-    <div class="section-block" id="notes-monday-visit">
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-monday-kickoff">
       <h2>Notes</h2>
       <div class="mk-ta-wrap">
-        <textarea placeholder="Use the 🗨️ buttons to insert bullet headers..."></textarea>
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="cards-grid two-col">
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="monday-access-card">
+      <h2>Monday — Access & Environment</h2>
+
+      <div class="checklist-row">
+        <label for="mv-logins-verified">All logins verified onsite (desktop + mobile)</label>
+        <div class="row-actions">
+          <select id="mv-logins-verified" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="mv-ro-flow">RO flow validated (create/assign/dispatch, statuses)</label>
+        <div class="row-actions">
+          <select id="mv-ro-flow" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="mv-mpi-flow">MPI flow validated (photos/video, customer view, approvals)</label>
+        <div class="row-actions">
+          <select id="mv-mpi-flow" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label for="mv-blockers">Blockers identified + owner assigned</label>
+        <div class="row-actions">
+          <input id="mv-blockers" type="text" placeholder="Owner / detail" />
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-access" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-monday-access">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
+        <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="cards-grid two-col">
+    <!-- QUESTIONS CARD -->
+    <div class="section-block orange-outline-card" id="monday-plan-card">
+      <h2>Monday — Plan & Next Steps</h2>
+
+      <div class="checklist-row">
+        <label for="mv-agenda-confirmed">Training agenda confirmed with managers</label>
+        <div class="row-actions">
+          <select id="mv-agenda-confirmed" class="is-placeholder">
+            <option value="" data-ghost="true">Select</option>
+            <option>Yes</option>
+            <option>In Progress</option>
+            <option>No</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-plan" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label for="mv-next-steps">Next steps agreed (owner + date)</label>
+        <div class="row-actions">
+          <input id="mv-next-steps" type="text" placeholder="Owner / date" />
+          <button type="button" class="notes-icon-btn" data-notes-target="notes-monday-plan" aria-label="Add/View Notes">
+            <svg class="notes-bubble" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5c0 1.2-.7 2.2-1.8 2.7-.3.1-.5.4-.5.7v2.1l-2.2-1.3c-.2-.1-.4-.1-.6 0-1 .4-2.1.6-3.3.6H8c-2.8 0-5-2.1-5-4.7V7.5C3 5 5.2 3 8 3h7c2.8 0 5 2.1 5 4.5v7z"/>
+              <g class="dots">
+                <path d="M9 11.2h0"/>
+                <path d="M12 11.2h0"/>
+                <path d="M15 11.2h0"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="section-block" id="notes-monday-plan">
+      <h2>Notes</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Use the notes bubbles to insert bullet headers..."></textarea>
         <button type="button" class="mk-ta-expand" title="Expand">⤢</button>
       </div>
     </div>
