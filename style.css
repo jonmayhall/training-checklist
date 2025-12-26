@@ -6,6 +6,7 @@
    ✅ Dealership Address textbox: ~1/3 shorter
    ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
    ✅ Training Date inputs match all other inputs
+   ✅ Notes button: ICON-ONLY, centered, clean (no square button)
    ======================================================= */
 
 /* =======================
@@ -30,8 +31,9 @@
   /* default (single-column pages) */
   --input-width:340px;
 
-  /* ✅ YOUR NOTES ICON (PNG) as a mask */
-  --notes-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAfAAAANsAAAABAAAAAQAAANsAAAABAAKgAgAEAAAAAQAAAgCgAwAEAAAAAQAAAgAAAAAAbm9Z0wAAAAlwSFlzAAALEwAACxMBAJqcGAAAA0lJREFUeJzt3TGO4zYQBVFv//+zv7lA2oQk0oGxw1d0v1d7qQm8fEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPyq9d5jv7w0m7zv7kYb9u0m8t0y4l8qk+u9eZx8k3u9m1Yf2r3yqv3m9n3j9m7g6b5k5o9b0b8l6m3m7f7cP5k7l5b9o+q7t2x9m0m7b7u7n0d3m7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m3u7m1n7m0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4H/8Bv2m1fQwQG1oAAAAASUVORK5CYII=");
+  /* Notes icon colors */
+  --notes-icon: #9aa0a6;
+  --notes-icon-hover: var(--orange);
 }
 
 /* =======================
@@ -428,121 +430,86 @@ main{
   background:#fff9f5;
 }
 
-/* =========================
-   NOTES ICON BUTTON (SMALL)
-   - Works even when button has no inner HTML
-   - Uses CSS mask icon if available
-   - Falls back to 📝 if not
-========================= */
-
-:root{
-  --notes-btn-size: 26px;        /* 👈 small */
-  --notes-icon-size: 16px;
-  --notes-btn-bg: #f4f4f4;
-  --notes-btn-border: #d6d6d6;
-  --notes-btn-hover-bg: #ececec;
-  --notes-btn-active-bg: #e2e2e2;
-
-  /* If you have your icon file, set this to your path: */
-  --notes-icon-url: url("notes-icon.svg"); /* 👈 change file name/path */
-}
-
-/* keeps select + notes button aligned nicely */
+/* =======================
+   Notes linking layout (row-actions)
+======================= */
 .row-actions{
   display:flex;
   align-items:center;
   gap:10px;
 }
 
-/* base button */
+/* =========================
+   ✅ NOTES ICON BUTTON (CLEAN ICON-ONLY)
+   - No square button
+   - SVG centered perfectly
+   - Matches your style
+========================= */
 .notes-icon-btn{
-  width: var(--notes-btn-size);
-  height: var(--notes-btn-size);
-  min-width: var(--notes-btn-size);
-  min-height: var(--notes-btn-size);
+  appearance:none;
+  border:0;
+  background:transparent;
+  padding:0;
+  margin:0;
+
+  width:20px;
+  height:20px;
+  min-width:20px;
+  min-height:20px;
+
   display:inline-flex;
   align-items:center;
   justify-content:center;
 
-  border: 1px solid var(--notes-btn-border);
-  background: var(--notes-btn-bg);
-  border-radius: 8px;
-  cursor: pointer;
-
-  padding:0;
-  line-height:1;
+  cursor:pointer;
   user-select:none;
-
-  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+  line-height:0;
+  color:var(--notes-icon);
+  transition:color .15s ease, transform .08s ease;
 }
 
 .notes-icon-btn:hover{
-  background: var(--notes-btn-hover-bg);
+  color:var(--notes-icon-hover);
 }
 
 .notes-icon-btn:active{
-  background: var(--notes-btn-active-bg);
-  transform: translateY(1px);
+  transform:translateY(1px);
 }
 
 .notes-icon-btn:focus-visible{
-  outline: 2px solid rgba(239,109,34,.55); /* your orange */
-  outline-offset: 2px;
+  outline:none;
 }
 
-/* If the button is empty, we draw the icon with ::before */
-.notes-icon-btn::before{
-  content:"";
-  width: var(--notes-icon-size);
-  height: var(--notes-icon-size);
+.notes-icon-btn:focus-visible{
+  box-shadow:0 0 0 3px rgba(239,109,34,0.28);
+  border-radius:8px;
+}
+
+/* Make your embedded SVG behave like an icon */
+.notes-icon-btn .notes-svg{
+  width:18px;
+  height:18px;
   display:block;
-
-  /* mask icon (best) */
-  -webkit-mask-image: var(--notes-icon-url);
-  mask-image: var(--notes-icon-url);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-
-  background: #666; /* icon color */
+  fill:currentColor;
 }
 
-/* Fallback: if you still use <span class="notes-icon">📝</span> in some places */
-.notes-icon-btn .notes-icon{
-  font-size: 16px;
-  line-height: 1;
-}
-
-/* If the icon file path isn't valid, the mask can appear blank.
-   This makes emoji fallback visible for EMPTY buttons by using text content instead. */
-.notes-icon-btn[data-emoji="true"]::before{
-  content:"📝";
-  background: none;
-  -webkit-mask-image: none;
-  mask-image: none;
-  width:auto;
-  height:auto;
-  font-size: 16px;
+/* Optional: if you toggle this in JS when notes exist */
+.notes-icon-btn.has-notes{
+  color:var(--orange);
 }
 
 /* Table notes column tighter */
 .notes-col-head,
 .notes-col-cell{
-  width: 54px;
+  width:54px;
   text-align:center;
   white-space:nowrap;
 }
-
 .notes-col-cell .notes-icon-btn{
-  margin: 0 auto;
+  margin:0 auto;
 }
 
-/* =======================
-   Notes linking layout (row-actions)
-======================= */
+/* keeps select + notes button aligned nicely (extra safety) */
 .checklist-row .row-actions{
   display:inline-flex !important;
   align-items:center !important;
