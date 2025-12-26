@@ -526,6 +526,80 @@ main{
   margin-left:8px !important;
 }
 
+/* ================================
+   NOTES COLUMN (Tables) — P3/P4 Match
+================================ */
+
+/* Header + cell sizing */
+.training-table .notes-col-head,
+.training-table .notes-col-cell{
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px 6px;
+}
+
+/* Notes icon button (icon-only) */
+.notes-btn{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* if you use subtle elevation on P3/P4 */
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+
+/* Hover/active */
+.notes-btn:hover{
+  border-color: rgba(239,109,34,.45);
+  background: rgba(239,109,34,.06);
+}
+
+.notes-btn:active{
+  transform: translateY(1px);
+}
+
+/* Accessible focus */
+.notes-btn:focus-visible{
+  outline: 2px solid rgba(239,109,34,.55);
+  outline-offset: 2px;
+}
+
+/* The actual icon — uses mask so it can change color */
+.notes-btn{
+  --notes-icon-color: var(--orange);
+  -webkit-mask: var(--notes-icon) center / 18px 18px no-repeat;
+  mask: var(--notes-icon) center / 18px 18px no-repeat;
+  background-color: var(--notes-icon-color);
+}
+
+/* When we mask, the "background" becomes the icon,
+   so we need a wrapper background behind it */
+.notes-btn{
+  position: relative;
+}
+.notes-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: 10px;
+  background:#fff;
+  z-index:-1;
+}
+
+/* Optional: slightly dim icon when empty/unused (if you want)
+.notes-btn.is-empty{ --notes-icon-color: #9aa3af; }
+*/
+
 /* =======================================================
    INDENTED Q&A ROWS — bring inputs in to match non-indented padding
 ======================================================= */
