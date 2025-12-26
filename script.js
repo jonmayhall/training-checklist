@@ -1,1241 +1,612 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL script.js
-   ✅ FIXED (Pages 5–6 tables + popup)
-   - Notes buttons in TABLES now use the SAME icon behavior as pages 3 & 4 (CSS mask)
-     -> JS strips any inline SVG/extra markup inside .notes-icon-btn
-   - Notes column no longer shows “random double buttons”
-     -> Hard de-dupe per row + force button into Notes cell only
-   - Popup Notes buttons now work
-     -> Modal notes clone ID no longer conflicts with real notes block
-     -> Notes buttons always target REAL notes block id
-   - Popup: inputs (Opcodes table) no longer overflow cells
+   myKaarma Interactive Training Checklist — FULL PROJECT JS
+   -------------------------------------------------------
+   ✅ Page nav (sidebar)
+   ✅ Autosave/Restore (supports dynamically added rows/cards)
+   ✅ Reset This Page buttons
+   ✅ Add Row (+) for all tables (keeps notes buttons working)
+   ✅ Notes buttons (Pages 3–6 consistent) -> scroll + focus notes textarea
+   ✅ Optional bullet insertion into notes (if you add data-insert-bullet)
+   ✅ Support Tickets: base locked to Open, clones enforced, move by status
+   ✅ Dealership Map update helper (if #dealershipMapFrame exists)
+   ✅ Defensive: won’t crash if some elements/sections don’t exist
 ======================================================= */
 
 (() => {
   "use strict";
 
-  /* -----------------------------
-     CONFIG / KEYS
-  ----------------------------- */
-  const LS_KEY = "mk_training_checklist_v2";
-  const NOTES_KEY = "mk_training_notes_v2";
+  /* =======================
+     CONFIG
+  ======================= */
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v3";
+  const AUTO_ID_ATTR = "data-mk-id";      // persistent identity marker
+  const AUTO_ROW_ATTR = "data-mk-row";    // stable row marker for cloned rows
+  const AUTO_CARD_ATTR = "data-mk-card";  // stable card marker for cloned cards
 
-  /* -----------------------------
-     DOM HELPERS
-  ----------------------------- */
+  /* =======================
+     HELPERS
+  ======================= */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const safeJSONParse = (str, fallback) => {
-    try { return JSON.parse(str); } catch { return fallback; }
-  };
+  const uid = (() => {
+    let n = 0;
+    return (prefix = "mk") => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
+  })();
 
-  const debounce = (fn, wait = 250) => {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-  };
+  const isEl = (x) => x && x.nodeType === 1;
+  const isCheckbox = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "checkbox";
+  const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
+  const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
 
-  const closestSectionId = (el) => el?.closest?.(".page-section")?.id || "unknown-section";
-
-  const bindOnce = (el, key) => {
-    if (!el) return false;
-    const k = `bound_${key}`;
-    if (el.dataset[k] === "true") return false;
-    el.dataset[k] = "true";
-    return true;
-  };
-
-  /* -----------------------------
-     NOTES BUTTON (MASK ICON)
-     - CSS provides icon via mask on .notes-icon-btn
-     - JS toggles .has-notes (orange)
-  ----------------------------- */
-  function makeNotesButton(targetId) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "notes-icon-btn mk-table-note-btn";
-    btn.dataset.notesTarget = targetId;
-    btn.setAttribute("aria-label", "Add notes");
-    btn.innerHTML = ""; // IMPORTANT: no SVG/img/text (mask icon only)
-    return btn;
+  function flash(el, cls = "mk-flash", ms = 800) {
+    if (!isEl(el)) return;
+    el.classList.add(cls);
+    window.setTimeout(() => el.classList.remove(cls), ms);
   }
 
-  // Force any existing notes buttons (from HTML) to behave like mask buttons
-  // (Prevents “wrong icon” / leftover SVG)
-  function forceMaskNotesButtons(root = document) {
-    $$(".notes-icon-btn", root).forEach((btn) => {
-      btn.classList.add("notes-icon-btn");
-      btn.innerHTML = ""; // strip SVG / duplicates / random markup
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add notes");
+  function scrollToEl(el, offset = -10) {
+    if (!isEl(el)) return;
+    const top = el.getBoundingClientRect().top + window.scrollY + offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+
+  function formatDateYYYYMMDD(d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function addDays(dateStr, days) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    return formatDateYYYYMMDD(d);
+  }
+
+  /* =======================
+     GHOST / PLACEHOLDER STYLING
+     - select empty => .is-placeholder
+     - date empty => .is-placeholder
+  ======================= */
+  function applyGhostStyling(root = document) {
+    $$("select", root).forEach(sel => {
+      const update = () => sel.classList.toggle("is-placeholder", !sel.value);
+      sel.addEventListener("change", update);
+      update();
+    });
+
+    $$("input[type='date']", root).forEach(inp => {
+      const update = () => inp.classList.toggle("is-placeholder", !inp.value);
+      inp.addEventListener("change", update);
+      update();
     });
   }
 
-   document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".notes-btn,[data-notes-target]");
-  if (!btn) return;
+  /* =======================
+     PERSISTENT ID SYSTEM
+     -------------------------------------------------------
+     Your project has tons of inputs without ids (tables esp.).
+     This system assigns a stable id to every field using:
+       - page id
+       - table index / row index
+       - cell element order
+     and stores it in data-mk-id.
+     That makes autosave/restore actually work across the whole app.
+  ======================= */
 
-  const targetId = btn.getAttribute("data-notes-target");
-  if (!targetId) return;
-
-  const el = document.getElementById(targetId);
-  if (!el) return;
-
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-  el.classList.add("flash-notes");
-  setTimeout(() => el.classList.remove("flash-notes"), 800);
-});
-
-  /* -----------------------------
-     PLACEHOLDER / GHOST CLASSING
-  ----------------------------- */
-  function applyPlaceholderClassToSelect(sel) {
-    const opt = sel.selectedOptions?.[0];
-    const isGhost = !!opt?.dataset?.ghost || sel.value === "" || opt?.value === "";
-    sel.classList.toggle("is-placeholder", isGhost);
-  }
-  function applyPlaceholderClassToInput(inp) {
-    if (inp.type === "date") {
-      inp.classList.toggle("is-placeholder", !inp.value);
-      return;
-    }
-    const hasPh = !!inp.getAttribute("placeholder");
-    if (hasPh) inp.classList.toggle("is-placeholder", !inp.value);
-  }
-  function applyPlaceholderClassToTextarea(ta) {
-    const hasPh = !!ta.getAttribute("placeholder");
-    if (hasPh) ta.classList.toggle("is-placeholder", !ta.value);
-  }
-
-  function initPlaceholderStyling(root = document) {
-    $$("select", root).forEach(applyPlaceholderClassToSelect);
-    $$("input", root).forEach(applyPlaceholderClassToInput);
-    $$("textarea", root).forEach(applyPlaceholderClassToTextarea);
-  }
-
-  /* -----------------------------
-     AUTOSAVE / RESTORE
-  ----------------------------- */
-  function loadState() {
-    return safeJSONParse(localStorage.getItem(LS_KEY), {}) || {};
-  }
-  function saveState(state) {
-    localStorage.setItem(LS_KEY, JSON.stringify(state));
-  }
-
-  function snapshotTables(state) {
-    state.__tables = state.__tables || {};
-    $$(".table-container").forEach((tc, idx) => {
-      const sectionId = closestSectionId(tc);
-      const table = $("table", tc);
-      if (!table) return;
-      const key = `${sectionId}::table::${idx}`;
-      const tbody = table.tBodies?.[0];
-      if (tbody) state.__tables[key] = tbody.innerHTML;
-    });
-  }
-
-  function restoreTables(state) {
-    const map = state.__tables || {};
-    $$(".table-container").forEach((tc, idx) => {
-      const sectionId = closestSectionId(tc);
-      const table = $("table", tc);
-      if (!table) return;
-      const key = `${sectionId}::table::${idx}`;
-      const tbody = table.tBodies?.[0];
-      if (tbody && map[key]) tbody.innerHTML = map[key];
-    });
-  }
-
-  function snapshotDynamicBlocks(state) {
-    state.__ticketsHTML = {
-      open: $("#openTicketsContainer")?.innerHTML || "",
-      tierTwo: $("#tierTwoTicketsContainer")?.innerHTML || "",
-      closedResolved: $("#closedResolvedTicketsContainer")?.innerHTML || "",
-      closedFeature: $("#closedFeatureTicketsContainer")?.innerHTML || ""
-    };
-  }
-
-  function restoreDynamicBlocks(state) {
-    const t = state.__ticketsHTML;
-    if (!t) return;
-    if ($("#openTicketsContainer") && t.open) $("#openTicketsContainer").innerHTML = t.open;
-    if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = t.tierTwo || "";
-    if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = t.closedResolved || "";
-    if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = t.closedFeature || "";
-  }
-
-  function snapshotFormControls(state) {
-    state.__controls = state.__controls || {};
-    $$(".page-section").forEach((sec) => {
-      const sectionId = sec.id;
-      const controls = $$("input, select, textarea", sec);
-
-      controls.forEach((el, i) => {
-        const inTable = !!el.closest("table");
-        const inTickets = !!el.closest("#support-tickets");
-        if (inTable || inTickets) return;
-
-        const key = `${sectionId}::ctrl::${i}`;
-        if (el.type === "checkbox") state.__controls[key] = !!el.checked;
-        else state.__controls[key] = el.value ?? "";
-      });
-    });
-  }
-
-  function restoreFormControls(state) {
-    const map = state.__controls || {};
-    $$(".page-section").forEach((sec) => {
-      const sectionId = sec.id;
-      const controls = $$("input, select, textarea", sec);
-
-      controls.forEach((el, i) => {
-        const inTable = !!el.closest("table");
-        const inTickets = !!el.closest("#support-tickets");
-        if (inTable || inTickets) return;
-
-        const key = `${sectionId}::ctrl::${i}`;
-        if (!(key in map)) return;
-
-        if (el.type === "checkbox") el.checked = !!map[key];
-        else el.value = map[key];
-      });
-    });
-  }
-
-  const persistAllDebounced = debounce(() => {
-    const state = loadState();
-    snapshotTables(state);
-    snapshotDynamicBlocks(state);
-    snapshotFormControls(state);
-    saveState(state);
-  }, 300);
-
-  function initAutosave() {
-    if (!bindOnce(document.body, "autosave")) return;
-
-    document.addEventListener("input", (e) => {
-      const t = e.target;
-      if (!t) return;
-      if (t.matches("input, textarea")) persistAllDebounced();
+  function ensureStableFieldIds(root = document) {
+    // Mark rows and cards so dynamic clones are stable
+    $$("tr", root).forEach(tr => {
+      if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
     });
 
-    document.addEventListener("change", (e) => {
-      const t = e.target;
-      if (!t) return;
-      if (t.matches("select, input[type='checkbox'], input[type='date']")) {
-        if (t.tagName === "SELECT") applyPlaceholderClassToSelect(t);
-        if (t.tagName === "INPUT") applyPlaceholderClassToInput(t);
-        persistAllDebounced();
+    $$(".ticket-group, .card, .section-block, .dms-card", root).forEach(card => {
+      // Only mark things that look like repeatables
+      if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
+    });
+
+    // Assign stable IDs for form controls if missing
+    $$("input, select, textarea", root).forEach(el => {
+      // Skip buttons and non-form inputs
+      if (el.tagName === "INPUT") {
+        const type = (el.type || "").toLowerCase();
+        if (["button", "submit", "reset", "file"].includes(type)) return;
       }
-    });
 
-    window.addEventListener("beforeunload", () => {
-      const state = loadState();
-      snapshotTables(state);
-      snapshotDynamicBlocks(state);
-      snapshotFormControls(state);
-      saveState(state);
+      // If element already has an explicit id, use it as the persistence key
+      if (el.id) {
+        if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
+        return;
+      }
+
+      // If already has a mk-id, keep it
+      if (el.getAttribute(AUTO_ID_ATTR)) return;
+
+      const page = el.closest(".page-section");
+      const pageId = page?.id || "no-page";
+
+      // Build a structured locator
+      const table = el.closest("table");
+      const tr = el.closest("tr");
+      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
+
+      // Column index (td) if any
+      let colIndex = "";
+      if (tr) {
+        const cell = el.closest("td,th");
+        if (cell) {
+          const cells = Array.from(tr.children);
+          colIndex = String(cells.indexOf(cell));
+        }
+      }
+
+      // Position among same-tag controls in the same cell (or row)
+      const scope = el.closest("td,th") || tr || el.parentElement || document.body;
+      const siblings = $$("input, select, textarea", scope);
+      const idx = siblings.indexOf(el);
+
+      const mkid = `${pageId}::${table ? "table" : "form"}::${rowKey}::c${colIndex}::i${idx}`;
+      el.setAttribute(AUTO_ID_ATTR, mkid);
     });
   }
 
-  function restoreAll() {
-    const state = loadState();
-    restoreTables(state);
-    restoreDynamicBlocks(state);
-    restoreFormControls(state);
+  /* =======================
+     AUTOSAVE / RESTORE
+     - uses data-mk-id as the key
+     - works for dynamically added rows/cards
+  ======================= */
+  function readState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) || {};
+    } catch {
+      return {};
+    }
   }
 
-  /* -----------------------------
-     NAV
-  ----------------------------- */
-  function initNav() {
-    const navButtons = $$("#sidebar-nav .nav-btn");
-    const sections = $$(".page-section");
+  function writeState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
 
-    const showSection = (id) => {
-      sections.forEach((s) => s.classList.toggle("active", s.id === id));
-      navButtons.forEach((b) => b.classList.toggle("active", b.dataset.target === id));
-      window.scrollTo({ top: 0, behavior: "auto" });
-    };
+  function getFieldKey(el) {
+    return el?.getAttribute?.(AUTO_ID_ATTR) || el?.id || "";
+  }
 
-    navButtons.forEach((btn) => {
-      if (!bindOnce(btn, "nav")) return;
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const target = btn.dataset.target;
-        if (!target) return;
-        showSection(target);
+  function captureState(root = document) {
+    ensureStableFieldIds(root);
 
-        const state = loadState();
-        state.__lastPage = target;
-        saveState(state);
+    const state = readState();
+
+    $$("input, select, textarea", root).forEach(el => {
+      const key = getFieldKey(el);
+      if (!key) return;
+
+      if (isCheckbox(el)) state[key] = !!el.checked;
+      else if (isRadio(el)) state[key] = el.checked ? el.value : (state[key] ?? "");
+      else state[key] = el.value ?? "";
+    });
+
+    writeState(state);
+  }
+
+  function restoreState(root = document) {
+    ensureStableFieldIds(root);
+
+    const state = readState();
+    if (!state || typeof state !== "object") return;
+
+    $$("input, select, textarea", root).forEach(el => {
+      const key = getFieldKey(el);
+      if (!key || !(key in state)) return;
+
+      if (isCheckbox(el)) el.checked = !!state[key];
+      else if (isRadio(el)) el.checked = (el.value === state[key]);
+      else el.value = state[key] ?? "";
+    });
+
+    applyGhostStyling(root);
+  }
+
+  // Save on changes
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (!t || !t.matches("input, select, textarea")) return;
+    captureState(document);
+  });
+
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!t || !t.matches("input, select, textarea")) return;
+    captureState(document);
+  });
+
+  /* =======================
+     PAGE NAVIGATION
+     - expects .nav-btn[data-target="sectionId"]
+     - expects .page-section
+  ======================= */
+  const pageSections = $$(".page-section");
+  const navButtons = $$(".nav-btn");
+
+  function activatePage(sectionId) {
+    if (!sectionId) return;
+
+    pageSections.forEach(sec => sec.classList.remove("active"));
+    navButtons.forEach(btn => btn.classList.remove("active"));
+
+    const sec = document.getElementById(sectionId);
+    if (sec) sec.classList.add("active");
+
+    const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
+    if (btn) btn.classList.add("active");
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => activatePage(btn.dataset.target));
+  });
+
+  /* =======================
+     RESET THIS PAGE BUTTONS
+     - .clear-page-btn inside .page-section
+  ======================= */
+  $$(".clear-page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.closest(".page-section");
+      if (!page) return;
+
+      $$("input, select, textarea", page).forEach(el => {
+        if (isCheckbox(el) || isRadio(el)) el.checked = false;
+        else el.value = "";
       });
-    });
 
-    const state = loadState();
-    if (state.__lastPage && $("#" + state.__lastPage)) showSection(state.__lastPage);
-    else if (navButtons[0]?.dataset?.target) showSection(navButtons[0].dataset.target);
-  }
+      applyGhostStyling(page);
 
-  /* -----------------------------
-     SANITIZE TABLE HEADERS
-  ----------------------------- */
-  function sanitizeTableHeaders(root = document) {
-    $$(".training-table", root).forEach((table) => {
-      const thead = table.tHead;
-      if (!thead) return;
-
-      $$("tr", thead).forEach((tr) => {
-        if (tr.querySelector("input, select, textarea, button")) tr.remove();
+      // Also clear state entries for keys that belong to this page
+      ensureStableFieldIds(page);
+      const state = readState();
+      $$("input, select, textarea", page).forEach(el => {
+        const k = getFieldKey(el);
+        if (k && k in state) delete state[k];
       });
-
-      $$("tr", thead).forEach((tr) => {
-        tr.querySelectorAll("td").forEach((td) => {
-          const th = document.createElement("th");
-          th.innerHTML = td.innerHTML;
-          td.replaceWith(th);
-        });
-      });
+      writeState(state);
     });
-  }
+  });
 
-  /* -----------------------------
-     NOTES STATE
-  ----------------------------- */
-  function loadNotesState() {
-    return safeJSONParse(localStorage.getItem(NOTES_KEY), {}) || {};
-  }
-  function saveNotesState(state) {
-    localStorage.setItem(NOTES_KEY, JSON.stringify(state));
-  }
+  /* =======================
+     GLOBAL CLEAR ALL (optional)
+     - supports any button with:
+         data-clear-all="true"
+  ======================= */
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-clear-all="true"]');
+    if (!btn) return;
+    if (!confirm("Clear ALL saved data for this checklist?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
 
-  function ensureNotesBlock(targetId) {
-    const s = loadNotesState();
-    s[targetId] = s[targetId] || { items: {} };
-    saveNotesState(s);
-    return s;
-  }
-
-  function ensureNotesItem(targetId, sigIndex, label) {
-    const s = ensureNotesBlock(targetId);
-    const itemId = String(sigIndex);
-    s[targetId].items[itemId] = s[targetId].items[itemId] || { label, text: "" };
-    s[targetId].items[itemId].label = label;
-    saveNotesState(s);
-  }
-
-  function buttonIsActive(targetId, sigIndex) {
-    const s = loadNotesState();
-    return !!s?.[targetId]?.items?.[String(sigIndex)];
-  }
-
-  function refreshAllNotesButtons(root = document) {
-    $$(".notes-icon-btn[data-notes-target]", root).forEach((btn) => {
-      const targetId = btn.dataset.notesTarget;
-      if (!targetId) return;
-      const sig = getRowSignature(btn);
-      btn.classList.toggle("has-notes", buttonIsActive(targetId, sig.index));
+  /* =======================
+     TABLE ADD ROW (+)
+     - button.add-row inside .table-footer
+     - clones FIRST tbody row as template
+     - clears controls
+     - preserves notes buttons and data-notes-target
+  ======================= */
+  function clearControls(root) {
+    $$("input, select, textarea", root).forEach(el => {
+      if (isCheckbox(el) || isRadio(el)) el.checked = false;
+      else el.value = "";
     });
+    applyGhostStyling(root);
   }
 
-  /* -----------------------------
-     NOTES TEXTAREA: insert bullet header
-  ----------------------------- */
-  function findNotesTextareaById(notesId) {
-    // IMPORTANT: real notes blocks keep their original id.
-    // Modal clone gets a different id (so this always finds the REAL textarea).
-    const block = document.getElementById(notesId);
-    return block ? $("textarea", block) : null;
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest(".table-footer .add-row");
+    if (!addBtn) return;
+
+    const tableContainer = addBtn.closest(".table-container");
+    const table = tableContainer ? $("table", tableContainer) : null;
+    const tbody = table ? $("tbody", table) : null;
+    const firstRow = tbody ? $("tr", tbody) : null;
+    if (!tbody || !firstRow) return;
+
+    const clone = firstRow.cloneNode(true);
+
+    // mark row id
+    clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
+
+    // Clear values
+    clearControls(clone);
+
+    // Remove any duplicate explicit ids inside cloned row (keep AUTO_ID_ATTR rebuilt)
+    $$("[id]", clone).forEach(el => (el.id = ""));
+    $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
+
+    tbody.appendChild(clone);
+
+    // Rebuild stable ids and autosave
+    ensureStableFieldIds(tbody);
+    captureState(document);
+  });
+
+  /* =======================
+     NOTES BUTTONS (Pages 3–6 consistent)
+     -------------------------------------------------------
+     Buttons:
+       <button class="notes-btn" data-notes-target="notes-techs"></button>
+     Targets:
+       <div id="notes-techs"><textarea></textarea></div>
+  ======================= */
+  // Make sure all notes buttons have aria-label
+  $$(".notes-btn").forEach(b => {
+    if (!b.getAttribute("aria-label")) b.setAttribute("aria-label", "Notes");
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".notes-btn,[data-notes-target]");
+    if (!btn) return;
+
+    const targetId = btn.getAttribute("data-notes-target");
+    if (!targetId) return;
+
+    const notesBlock = document.getElementById(targetId);
+    if (!notesBlock) return;
+
+    // Activate the page containing the notes block if it’s on a different page
+    const page = notesBlock.closest(".page-section");
+    if (page && !page.classList.contains("active")) activatePage(page.id);
+
+    scrollToEl(notesBlock, -12);
+    flash(notesBlock);
+
+    const ta = $("textarea", notesBlock);
+    if (ta) setTimeout(() => ta.focus({ preventScroll: true }), 250);
+  });
+
+  /* =======================
+     OPTIONAL: INSERT BULLET INTO NOTES
+     -------------------------------------------------------
+     If you add buttons like:
+       <button data-notes-target="notes-techs" data-insert-bullet="• John Doe:">Add</button>
+  ======================= */
+  function appendBullet(textarea, bulletLine) {
+    if (!textarea || !bulletLine) return;
+
+    const current = textarea.value || "";
+    const trimmed = current.replace(/\s+$/g, "");
+    const needsBlankLine = trimmed.length > 0 && !trimmed.endsWith("\n\n");
+
+    textarea.value =
+      trimmed +
+      (trimmed.length ? (needsBlankLine ? "\n\n" : "\n") : "") +
+      bulletLine +
+      "\n";
+
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function insertBulletHeaderIfMissing(notesId, label) {
-    const ta = findNotesTextareaById(notesId);
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-insert-bullet][data-notes-target]");
+    if (!btn) return;
+
+    const targetId = btn.getAttribute("data-notes-target");
+    const bullet = btn.getAttribute("data-insert-bullet");
+    if (!targetId || !bullet) return;
+
+    const block = document.getElementById(targetId);
+    const ta = block ? $("textarea", block) : null;
     if (!ta) return;
 
-    const header = `• ${label}:`;
-    const existing = ta.value || "";
-    if (existing.includes(header)) return;
+    appendBullet(ta, bullet);
+    flash(block);
+    ta.focus({ preventScroll: true });
+  });
 
-    const trimmed = existing.replace(/\s+$/, "");
-    const add = (trimmed.length ? `${trimmed}\n\n${header}\n` : `${header}\n`);
-    ta.value = add;
+  /* =======================
+     SUPPORT TICKETS (your structure)
+     -------------------------------------------------------
+     Containers expected by id:
+       #openTicketsContainer
+       #tierTwoTicketsContainer
+       #closedResolvedTicketsContainer
+       #closedFeatureTicketsContainer
+     Base card:
+       .ticket-group[data-base="true"] inside Open
+     Base rules:
+       - status locked to Open
+       - must fill ticket number, url, summary before adding new
+     Clones:
+       - can change status; moved automatically
+       - removable
+  ======================= */
+  const ticketContainers = {
+    Open: $("#openTicketsContainer"),
+    "Tier Two": $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
+  };
 
-    applyPlaceholderClassToTextarea(ta);
-    persistAllDebounced();
+  function ticketIsBase(groupEl) {
+    return groupEl?.getAttribute?.("data-base") === "true";
   }
 
-  /* -----------------------------
-     SIGNATURES + LABELS
-  ----------------------------- */
-  function getRowSignature(btn) {
-    const tr = btn.closest("tr");
-    if (tr) {
-      const tbody = tr.parentElement;
-      const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
-      const idx = rows.indexOf(tr);
-      return { kind: "table", index: idx >= 0 ? idx : 9999 };
-    }
-
-    const row = btn.closest(".checklist-row");
-    if (row) {
-      const sec = row.closest(".page-section") || document;
-      const all = $$(".notes-icon-btn", sec).filter((b) => !b.closest("table"));
-      const idx = all.indexOf(btn);
-      return { kind: "question", index: idx >= 0 ? idx : 9999 };
-    }
-
-    return { kind: "unknown", index: 9999 };
-  }
-
-  function getBulletLabel(btn) {
-    const tr = btn.closest("tr");
-    if (tr) {
-      const table = tr.closest("table");
-      const headers = table ? $$("thead th", table).map((th) => th.textContent.trim().toLowerCase()) : [];
-      const hasOpcodeHeader = headers.includes("opcode");
-
-      if (hasOpcodeHeader) {
-        const opcodeInput = tr.querySelector("td:nth-child(2) input[type='text']");
-        const opcode = opcodeInput?.value?.trim();
-        return opcode || "Opcode";
-      }
-
-      const nameInput = tr.querySelector("input[type='text']");
-      const name = nameInput?.value?.trim();
-      return name || "Name";
-    }
-
-    const row = btn.closest(".checklist-row");
-    const label = row?.querySelector("label")?.textContent?.trim();
-    return label ? label.replace(/\s+/g, " ") : "Note";
-  }
-
-  /* -----------------------------
-     NOTES BUTTON PLACEMENT (TABLES)
-  ----------------------------- */
-  function getNotesColumnIndex(table) {
-    const headCells = $$("thead th", table).map((th) => th.textContent.trim().toLowerCase());
-    return headCells.lastIndexOf("notes");
-  }
-
-  function rowHasControls(tr, notesIdx) {
-    const cloned = tr.cloneNode(true);
-    const clonedCells = Array.from(cloned.cells);
-    if (notesIdx >= 0 && clonedCells[notesIdx]) clonedCells[notesIdx].innerHTML = "";
-    return !!cloned.querySelector("input, select, textarea");
-  }
-
-  function normalizeNotesColumns(root = document) {
-    $$(".training-table", root).forEach((table) => {
-      const notesIdx = getNotesColumnIndex(table);
-      if (notesIdx < 0) return;
-
-      const tbody = table.tBodies?.[0];
-      if (!tbody) return;
-
-      Array.from(tbody.rows).forEach((tr) => {
-        while (tr.cells.length <= notesIdx) tr.insertCell(-1);
-
-        const notesCell = tr.cells[notesIdx];
-        notesCell.classList.add("notes-col", "notes-col-cell");
-
-        // HARD de-dupe: remove all notes buttons, then keep only the first in notes cell
-        const allBtns = $$(".notes-icon-btn", tr);
-        allBtns.forEach((b) => {
-          // if it lives outside the notes cell, remove it
-          if (b.closest("td") !== notesCell) b.remove();
-        });
-
-        const keep = $(".notes-icon-btn", notesCell);
-        $$(".notes-icon-btn", notesCell).forEach((b) => { if (b !== keep) b.remove(); });
-
-        if (keep) {
-          keep.innerHTML = ""; // enforce mask icon always
-          keep.classList.add("notes-icon-btn");
-        }
-      });
-    });
-
-    forceMaskNotesButtons(root);
-  }
-
-  function ensureElementId(el, prefix = "notes-card") {
-    if (el.id) return el.id;
-    el.id = `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now()}`;
-    return el.id;
-  }
-
-  // Returns the REAL notes block for this table (even when called from modal clone)
-  function findRelatedNotesBlock(tableContainer) {
-    // if this is a modal clone, redirect to the real table container first
-    if (tableContainer?.closest?.("#mkTableModal") && modalEl?.dataset?.activeTableKey) {
-      const realTc = realContainerFromKey(modalEl.dataset.activeTableKey);
-      if (realTc) return findRelatedNotesBlock(realTc);
-    }
-
-    // 1) If a notes button exists already, trust its target
-    const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
-    const id = btn?.dataset?.notesTarget;
-    if (id && document.getElementById(id)) return document.getElementById(id);
-
-    // 2) Fallback: first notes block in the same section
-    const section = tableContainer.closest(".page-section");
-    if (!section) return null;
-    const all = $$("[id^='notes-'].section-block, [id^='notes-card-'].section-block", section);
-    return all[0] || null;
-  }
-
-  function injectTableNotesButtons(root = document) {
-    $$(".training-table", root).forEach((table) => {
-      const notesIdx = getNotesColumnIndex(table);
-      if (notesIdx < 0) return;
-
-      const tc = table.closest(".table-container");
-      const realNotesBlock = tc ? findRelatedNotesBlock(tc) : null;
-      const realNotesId = realNotesBlock ? ensureElementId(realNotesBlock, "notes-card") : null;
-      if (!realNotesId) return;
-
-      const tbody = table.tBodies?.[0];
-      if (!tbody) return;
-
-      Array.from(tbody.rows).forEach((tr) => {
-        if (!rowHasControls(tr, notesIdx)) return;
-
-        while (tr.cells.length <= notesIdx) tr.insertCell(-1);
-        const cell = tr.cells[notesIdx];
-        cell.classList.add("notes-col", "notes-col-cell");
-
-        // Remove ANY notes buttons anywhere in the row (prevents doubles)
-        $$(".notes-icon-btn", tr).forEach((b) => b.remove());
-
-        // Add exactly one
-        const btn = makeNotesButton(realNotesId);
-        cell.appendChild(btn);
-      });
-    });
-
-    normalizeNotesColumns(root);
-  }
-
-  /* -----------------------------
-     NOTES BUTTON PLACEMENT (TWO-COL CARDS)
-  ----------------------------- */
-  function injectNotesButtonsIntoTwoColCards(root = document) {
-    $$(".cards-grid.two-col", root).forEach((grid) => {
-      const blocks = $$(".section-block", grid);
-      if (blocks.length < 2) return;
-
-      const notesBlock = blocks.find((b) => {
-        const h2 = b.querySelector("h2")?.textContent?.trim().toLowerCase() || "";
-        return h2.startsWith("notes");
-      });
-      if (!notesBlock) return;
-
-      const notesId = ensureElementId(notesBlock, "notes-card");
-      const notesTA = $("textarea", notesBlock);
-      if (!notesTA) return;
-
-      const questionBlock = blocks.find((b) => b !== notesBlock);
-      if (!questionBlock) return;
-
-      $$(".checklist-row", questionBlock).forEach((row) => {
-        const hasControl = row.querySelector("input, select, textarea");
-        if (!hasControl) return;
-
-        if (row.querySelector(".notes-icon-btn")) {
-          forceMaskNotesButtons(row);
-          return;
-        }
-
-        const btn = makeNotesButton(notesId);
-
-        let actions = row.querySelector(".row-actions");
-        if (!actions) {
-          actions = document.createElement("div");
-          actions.className = "row-actions";
-          row.appendChild(actions);
-        }
-        actions.appendChild(btn);
-      });
-    });
-
-    forceMaskNotesButtons(root);
-  }
-
-  /* -----------------------------
-     NOTES TEXTAREA PARSING
-  ----------------------------- */
-  function parseNotesTextareaToState(notesId, text) {
-    const s = ensureNotesBlock(notesId);
-
-    const lines = (text || "").split("\n");
-    let currentKey = null;
-    let currentLabel = null;
-    let buf = [];
-
-    const flush = () => {
-      if (currentKey == null) return;
-      s[notesId].items[String(currentKey)] = s[notesId].items[String(currentKey)] || { label: currentLabel || "Note", text: "" };
-      s[notesId].items[String(currentKey)].label = currentLabel || "Note";
-      s[notesId].items[String(currentKey)].text = buf.join("\n").trim();
-    };
-
-    const labelToKey = new Map();
-    Object.entries(s[notesId].items || {}).forEach(([k, v]) => {
-      if (v?.label) labelToKey.set(v.label, Number(k));
-    });
-
-    let nextKey = Math.max(-1, ...Object.keys(s[notesId].items || {}).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
-
-    for (const line of lines) {
-      const m = line.match(/^•\s(.+):\s*$/);
-      if (m) {
-        flush();
-        buf = [];
-        currentLabel = m[1];
-
-        const existingKey = labelToKey.get(currentLabel);
-        if (existingKey != null) currentKey = existingKey;
-        else { nextKey += 1; currentKey = nextKey; }
-      } else if (currentKey != null) {
-        buf.push(line);
-      }
-    }
-    flush();
-
-    saveNotesState(s);
-  }
-
-  function initNotesTextareaParsing(root = document) {
-    $$("textarea", root).forEach((ta) => {
-      const block = ta.closest(".section-block");
-      const id = block?.id;
-      if (!id) return;
-      if (!id.startsWith("notes-") && !id.startsWith("notes-card-")) return;
-
-      if (!bindOnce(ta, "notes_parse")) return;
-
-      const run = debounce(() => {
-        parseNotesTextareaToState(id, ta.value || "");
-        persistAllDebounced();
-        refreshAllNotesButtons();
-      }, 200);
-
-      ta.addEventListener("input", run);
-      ta.addEventListener("change", run);
-    });
-  }
-
-  /* -----------------------------
-     TABLE ADD ROW (+)
-  ----------------------------- */
-  function clearRowControls(row) {
-    $$("input, select, textarea", row).forEach((el) => {
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-
-      if (el.tagName === "SELECT") applyPlaceholderClassToSelect(el);
-      if (el.tagName === "INPUT") applyPlaceholderClassToInput(el);
-      if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
-    });
-  }
-
-  function cloneLastRow(table) {
-    const tbody = table.tBodies?.[0];
-    if (!tbody || !tbody.rows.length) return null;
-    const last = tbody.rows[tbody.rows.length - 1];
-    const clone = last.cloneNode(true);
-    clearRowControls(clone);
-    tbody.appendChild(clone);
-    return clone;
-  }
-
-  /* -----------------------------
-     TABLE POPUP MODAL
-  ----------------------------- */
-  let modalEl = null;
-
-  function ensureModal() {
-    if (modalEl) return modalEl;
-
-    modalEl = document.createElement("div");
-    modalEl.id = "mkTableModal";
-    modalEl.style.position = "fixed";
-    modalEl.style.inset = "0";
-    modalEl.style.zIndex = "99998";
-    modalEl.style.display = "none";
-    modalEl.style.background = "rgba(0,0,0,0.55)";
-    modalEl.style.padding = "18px";
-    modalEl.style.overflow = "hidden";
-
-    modalEl.innerHTML = `
-      <div id="mkTableModalShell" style="max-width:1400px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column;">
-        <div id="mkTableModalBar" style="
-          background:#fff;
-          border-radius:16px;
-          padding:14px 16px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          gap:12px;
-          margin-bottom:14px;
-          flex:0 0 auto;
-        ">
-          <div id="mkTableModalTitle" style="font-weight:800; font-size:22px;"></div>
-          <div style="display:flex; gap:10px;">
-            <button type="button" id="mkTableModalExpand" title="Expand" style="
-              width:40px;height:40px;border-radius:12px;
-              border:1px solid rgba(0,0,0,0.12);
-              background:#fff;cursor:pointer;
-              font-size:18px;
-            ">↗</button>
-            <button type="button" id="mkTableModalClose" title="Close" style="
-              width:40px;height:40px;border-radius:12px;
-              border:1px solid rgba(0,0,0,0.12);
-              background:#fff;cursor:pointer;
-              font-size:22px; line-height:1;
-            ">×</button>
-          </div>
-        </div>
-
-        <div id="mkTableModalCards" style="display:flex; flex-direction:column; gap:16px; width:100%; overflow:auto; padding-bottom:10px;"></div>
-      </div>
-    `;
-
-    document.body.appendChild(modalEl);
-
-    $("#mkTableModalClose", modalEl).addEventListener("click", closeModal);
-
-    $("#mkTableModalExpand", modalEl).addEventListener("click", () => {
-      const shell = $("#mkTableModalShell", modalEl);
-      if (!shell) return;
-      const full = shell.dataset.full === "true";
-      shell.dataset.full = (!full).toString();
-      shell.style.maxWidth = full ? "1400px" : "96vw";
-    });
-
-    modalEl.addEventListener("click", (e) => {
-      if (e.target === modalEl) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalEl?.style?.display === "block") closeModal();
-    });
-
-    return modalEl;
-  }
-
-  function closeModal() {
-    if (!modalEl) return;
-    modalEl.style.display = "none";
-    modalEl.dataset.activeTableKey = "";
-    const cards = $("#mkTableModalCards", modalEl);
-    if (cards) cards.innerHTML = "";
-  }
-
-  function tableKeyForContainer(tableContainer) {
-    const sectionId = closestSectionId(tableContainer);
-    const all = $$(".table-container");
-    const idx = all.indexOf(tableContainer);
-    return `${sectionId}::tc::${idx >= 0 ? idx : 0}`;
-  }
-
-  function realContainerFromKey(key) {
-    if (!key) return null;
-    const m = key.match(/::tc::(\d+)$/);
-    const idx = m ? Number(m[1]) : -1;
-    const all = $$(".table-container");
-    return idx >= 0 ? all[idx] : null;
-  }
-
-  function constrainInputsInTable(rootEl) {
-    $$("input, select, textarea", rootEl).forEach((el) => {
-      el.style.maxWidth = "100%";
-      el.style.boxSizing = "border-box";
-      if (el.tagName === "INPUT") el.style.width = "100%";
-    });
-  }
-
-  function openTablePopup(tableContainer) {
-    const modal = ensureModal();
-    const cards = $("#mkTableModalCards", modal);
-    const titleEl = $("#mkTableModalTitle", modal);
-    if (!cards || !titleEl) return;
-
-    const header =
-      tableContainer.closest(".section")?.querySelector(".section-header span")?.textContent?.trim() ||
-      tableContainer.closest(".section")?.querySelector(".section-header")?.textContent?.trim() ||
-      tableContainer.closest(".page-section")?.querySelector("h1")?.textContent?.trim() ||
-      "Table";
-
-    titleEl.textContent = header;
-
-    modal.dataset.activeTableKey = tableKeyForContainer(tableContainer);
-
-    const realNotesBlock = findRelatedNotesBlock(tableContainer);
-    const realNotesId = realNotesBlock?.id || null;
-
-    // TABLE CARD
-    const tableCard = document.createElement("div");
-    tableCard.className = "section-block";
-    tableCard.style.width = "100%";
-    tableCard.style.overflow = "hidden";
-    tableCard.innerHTML = `<h2>${header}</h2>`;
-
-    const tableCloneContainer = tableContainer.cloneNode(true);
-
-    // remove any nested expand buttons inside the popup clone footer
-    const footer = $(".table-footer", tableCloneContainer);
-    if (footer) $$(".mk-table-expand-btn, .expand-table-btn", footer).forEach((b) => b.remove());
-
-    const scrollWrap = $(".scroll-wrapper", tableCloneContainer);
-    if (scrollWrap) {
-      scrollWrap.style.maxHeight = "52vh";
-      scrollWrap.style.overflow = "auto";
-      scrollWrap.style.maxWidth = "100%";
-    }
-
-    constrainInputsInTable(tableCloneContainer);
-    tableCard.appendChild(tableCloneContainer);
-
-    // NOTES CARD (clone with NON-CONFLICTING id)
-    let notesCard = null;
-    if (realNotesBlock && realNotesId) {
-      notesCard = realNotesBlock.cloneNode(true);
-      notesCard.style.width = "100%";
-      notesCard.style.overflow = "hidden";
-
-      // prevent duplicate IDs breaking #id lookups (THIS was killing popup button behavior)
-      notesCard.id = `${realNotesId}__modal`;
-
-      const realTA = $("textarea", realNotesBlock);
-      const modalTA = $("textarea", notesCard);
-      if (realTA && modalTA) {
-        modalTA.value = realTA.value || "";
-        modalTA.style.width = "100%";
-        modalTA.style.maxWidth = "100%";
-        modalTA.style.overflowX = "hidden";
-        modalTA.style.minHeight = "240px";
-        modalTA.style.boxSizing = "border-box";
-
-        const syncToReal = () => {
-          realTA.value = modalTA.value;
-          applyPlaceholderClassToTextarea(realTA);
-          parseNotesTextareaToState(realNotesId, realTA.value);
-          persistAllDebounced();
-          refreshAllNotesButtons();
-        };
-        modalTA.addEventListener("input", syncToReal);
-        modalTA.addEventListener("change", syncToReal);
-
-        const syncToModal = () => {
-          if (modalTA.value !== realTA.value) modalTA.value = realTA.value;
-        };
-        realTA.addEventListener("input", syncToModal);
-        realTA.addEventListener("change", syncToModal);
-      }
-    }
-
-    cards.innerHTML = "";
-    cards.appendChild(tableCard);
-    if (notesCard) cards.appendChild(notesCard);
-
-    sanitizeTableHeaders(tableCard);
-
-    // Inject buttons into popup clone table that target the REAL notes block id
-    injectTableNotesButtons(tableCard);
-    if (realNotesId) {
-      $$(".notes-icon-btn[data-notes-target]", tableCard).forEach((b) => {
-        b.dataset.notesTarget = realNotesId; // always real
-        b.innerHTML = ""; // mask icon only
-      });
-    }
-    forceMaskNotesButtons(tableCard);
-
-    refreshAllNotesButtons(tableCard);
-
-    modal.style.display = "block";
-  }
-
-  function initTableExpandButtons() {
-    $$(".table-container").forEach((tc) => {
-      const footer = $(".table-footer", tc);
-      if (!footer) return;
-
-      let expandBtn = $(".mk-table-expand-btn", footer) || $(".expand-table-btn", footer);
-      if (!expandBtn) {
-        expandBtn = document.createElement("button");
-        expandBtn.type = "button";
-        expandBtn.className = "mk-table-expand-btn expand-table-btn";
-        expandBtn.title = "Expand table";
-        expandBtn.textContent = "⤢";
-        footer.appendChild(expandBtn);
-      } else {
-        expandBtn.classList.add("mk-table-expand-btn", "expand-table-btn");
-      }
-    });
-  }
-
-  /* -----------------------------
-     SUPPORT TICKETS
-  ----------------------------- */
-  function ticketIsComplete(groupEl) {
-    const num = $(".ticket-number-input", groupEl)?.value?.trim();
+  function requiredTicketFieldsFilled(groupEl) {
+    const ticketNum = $(".ticket-number-input", groupEl)?.value?.trim();
     const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
     const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
-    return !!num && (!!url || !!summary);
+    return !!(ticketNum && url && summary);
   }
 
-  function lockBaseOpenStatus(openBaseGroup) {
-    const status = $(".ticket-status-select", openBaseGroup);
-    if (status) {
-      status.value = "Open";
-      status.disabled = true;
-    }
+  function setTicketStatus(groupEl, status, lock = false) {
+    const sel = $(".ticket-status-select", groupEl);
+    if (!sel) return;
+    sel.value = status;
+    sel.disabled = !!lock;
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  function moveTicketGroup(groupEl, statusVal) {
-    const open = $("#openTicketsContainer");
-    const t2 = $("#tierTwoTicketsContainer");
-    const cr = $("#closedResolvedTicketsContainer");
-    const cf = $("#closedFeatureTicketsContainer");
-    if (!open || !t2 || !cr || !cf) return;
+  function moveTicketGroup(groupEl, status) {
+    const dest = ticketContainers[status] || ticketContainers.Open;
+    if (!dest) return;
 
-    if (statusVal === "Open") open.appendChild(groupEl);
-    else if (statusVal === "Tier Two") t2.appendChild(groupEl);
-    else if (statusVal === "Closed - Resolved") cr.appendChild(groupEl);
-    else if (statusVal === "Closed - Feature Not Supported") cf.appendChild(groupEl);
-
-    persistAllDebounced();
-  }
-
-  function initSupportTickets() {
-    const openContainer = $("#openTicketsContainer");
-    if (!openContainer) return;
-
-    const base = $(".ticket-group[data-base='true']", openContainer);
-    if (base) lockBaseOpenStatus(base);
-
-    [openContainer, $("#tierTwoTicketsContainer"), $("#closedResolvedTicketsContainer"), $("#closedFeatureTicketsContainer")]
-      .filter(Boolean)
-      .forEach((cont) => {
-        $$(".ticket-group", cont).forEach((g) => {
-          if (g.dataset.base === "true") lockBaseOpenStatus(g);
-          else {
-            const status = $(".ticket-status-select", g);
-            if (status) status.disabled = false;
-          }
-        });
-      });
-  }
-
-  /* -----------------------------
-     ADDITIONAL TRAINERS / ADDITIONAL POC (+)
-  ----------------------------- */
-  function cloneAndClear(el) {
-    const c = el.cloneNode(true);
-    $$("input, select, textarea", c).forEach((x) => {
-      if (x.type === "checkbox") x.checked = false;
-      else x.value = "";
-      if (x.tagName === "SELECT") applyPlaceholderClassToSelect(x);
-      if (x.tagName === "INPUT") applyPlaceholderClassToInput(x);
-      if (x.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(x);
-    });
-    return c;
-  }
-
-  function handleIntegratedPlusClick(plusBtn) {
-    const pocCardBase = plusBtn.closest(".additional-poc-card[data-base='true']");
-    if (pocCardBase) {
-      const clone = cloneAndClear(pocCardBase);
-      clone.dataset.base = "false";
-      clone.dataset.clone = "true";
-      $$(".add-row", clone).forEach((b) => b.remove());
-      pocCardBase.parentElement?.insertBefore(clone, pocCardBase.nextSibling);
-      initPlaceholderStyling(clone);
-      persistAllDebounced();
-      return true;
+    // Base must stay open
+    if (ticketIsBase(groupEl)) {
+      setTicketStatus(groupEl, "Open", true);
+      return;
     }
 
-    const trainersContainer = plusBtn.closest("#additionalTrainersContainer");
-    if (trainersContainer) {
-      const baseRow = plusBtn.closest(".checklist-row.integrated-plus");
-      if (!baseRow) return true;
+    // Enable select for non-base
+    const sel = $(".ticket-status-select", groupEl);
+    if (sel) sel.disabled = false;
 
-      const clone = cloneAndClear(baseRow);
-      clone.classList.add("trainer-clone");
-      clone.dataset.base = "false";
-      $$(".add-row", clone).forEach((b) => b.remove());
-      trainersContainer.appendChild(clone);
-      initPlaceholderStyling(clone);
-      persistAllDebounced();
-      return true;
+    // Remove disclaimer from clones if it exists
+    const disc = $(".ticket-disclaimer", groupEl);
+    if (disc) disc.remove();
+
+    dest.appendChild(groupEl);
+  }
+
+  // Initialize base lock
+  if (ticketContainers.Open) {
+    const base = $('.ticket-group[data-base="true"]', ticketContainers.Open);
+    if (base) setTicketStatus(base, "Open", true);
+  }
+
+  // Add ticket (+) from base
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest(".add-ticket-btn");
+    if (!addBtn) return;
+
+    const group = addBtn.closest(".ticket-group");
+    if (!group || !ticketIsBase(group)) return;
+
+    if (!requiredTicketFieldsFilled(group)) {
+      flash(group, "mk-flash", 700);
+      alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
+      return;
     }
 
-    return false;
-  }
+    const clone = group.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
-  /* -----------------------------
-     RESET PAGE / CLEAR ALL
-  ----------------------------- */
-  function clearNotesForSection(sectionEl) {
-    const notesIds = $$(".section-block[id^='notes-'], .section-block[id^='notes-card-']", sectionEl)
-      .map((b) => b.id)
-      .filter(Boolean);
+    // Clear ticket values
+    $$("input, textarea", clone).forEach(el => (el.value = ""));
+    // Unlock select on clone
+    setTicketStatus(clone, "Open", false);
 
-    if (!notesIds.length) return;
-
-    const notesState = loadNotesState();
-    notesIds.forEach((id) => { delete notesState[id]; });
-    saveNotesState(notesState);
-  }
-
-  function clearSection(sectionEl) {
-    if (!sectionEl) return;
-
-    $$("input, select, textarea", sectionEl).forEach((el) => {
-      const inTable = !!el.closest("table");
-      const inTickets = !!el.closest("#support-tickets");
-      if (inTable || inTickets) return;
-
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-      if (el.tagName === "SELECT") applyPlaceholderClassToSelect(el);
-      if (el.tagName === "INPUT") applyPlaceholderClassToInput(el);
-      if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
-    });
-
-    $$(".table-container", sectionEl).forEach((tc) => {
-      const table = $("table", tc);
-      const tbody = table?.tBodies?.[0];
-      if (!tbody) return;
-
-      const rows = Array.from(tbody.rows);
-      const keep = Math.max(1, Math.min(3, rows.length));
-      rows.forEach((r, idx) => {
-        if (idx >= keep) r.remove();
-        else clearRowControls(r);
-      });
-    });
-
-    if (sectionEl.id === "support-tickets") {
-      const open = $("#openTicketsContainer");
-      const base = $(".ticket-group[data-base='true']", open);
-      if (open && base) open.innerHTML = base.outerHTML;
-      if ($("#tierTwoTicketsContainer")) $("#tierTwoTicketsContainer").innerHTML = "";
-      if ($("#closedResolvedTicketsContainer")) $("#closedResolvedTicketsContainer").innerHTML = "";
-      if ($("#closedFeatureTicketsContainer")) $("#closedFeatureTicketsContainer").innerHTML = "";
+    // Add remove button if not present
+    if (!$(".remove-ticket-btn", clone)) {
+      const inner = $(".ticket-group-inner", clone) || clone;
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "remove-ticket-btn";
+      rm.textContent = "Remove";
+      rm.title = "Remove Ticket";
+      inner.prepend(rm);
     }
 
-    clearNotesForSection(sectionEl);
+    ticketContainers.Open.appendChild(clone);
 
-    initPlaceholderStyling(sectionEl);
-    persistAllDebounced();
+    // Rebuild IDs and persist
+    ensureStableFieldIds(clone);
+    captureState(document);
+  });
 
-    injectNotesButtonsIntoTwoColCards(sectionEl);
-    injectTableNotesButtons(sectionEl);
-    forceMaskNotesButtons(sectionEl);
-    refreshAllNotesButtons(sectionEl);
-  }
+  // Remove ticket (clones only)
+  document.addEventListener("click", (e) => {
+    const rm = e.target.closest(".remove-ticket-btn");
+    if (!rm) return;
 
-  function initResetButtons() {
-    $$(".clear-page-btn").forEach((btn) => {
-      if (!bindOnce(btn, "reset_page")) return;
-      btn.addEventListener("click", () => {
-        const sec = btn.closest(".page-section");
-        clearSection(sec);
-      });
+    const group = rm.closest(".ticket-group");
+    if (!group || ticketIsBase(group)) return;
+
+    // remove its persisted keys
+    ensureStableFieldIds(group);
+    const state = readState();
+    $$("input, select, textarea", group).forEach(el => {
+      const k = getFieldKey(el);
+      if (k && k in state) delete state[k];
     });
+    writeState(state);
 
-    const clearAllBtn = $("#clearAllBtn");
-    if (clearAllBtn && bindOnce(clearAllBtn, "clear_all")) {
-      clearAllBtn.addEventListener("click", () => {
-        localStorage.removeItem(LS_KEY);
-        localStorage.removeItem(NOTES_KEY);
-        closeModal();
-        $$(".page-section").forEach(clearSection);
-        saveState({});
-      });
+    group.remove();
+  });
+
+  // Status change moves tickets
+  document.addEventListener("change", (e) => {
+    const sel = e.target.closest(".ticket-status-select");
+    if (!sel) return;
+
+    const group = sel.closest(".ticket-group");
+    if (!group) return;
+
+    if (ticketIsBase(group)) {
+      sel.value = "Open";
+      sel.disabled = true;
+      return;
     }
-  }
 
-  /* -----------------------------
-     GLOBAL CLICK HANDLER
-  ----------------------------- */
-  function initGlobalClicks() {
-    if (!bindOnce(document.body, "global_clicks")) return;
+    moveTicketGroup(group, sel.value || "Open");
+    captureState(document);
+  });
 
-    document.addEventListener("click", (e) => {
-      const t = e.target;
+  /* =======================
+     DEALERSHIP MAP HELPER
+     -------------------------------------------------------
+     If you have:
+       <iframe id="dealershipMapFrame"></iframe>
+     then updateDealershipMap(address) will update it.
+  ======================= */
+  window.updateDealershipMap = function updateDealershipMap(address) {
+    const frame = $("#dealershipMapFrame");
+    if (!frame) return;
 
-      // Expand table
-      const expandBtn = t.closest?.(".expand-table-btn, .mk-table-expand-btn");
-      if (expandBtn) {
-        const tc = expandBtn.closest(".table-container");
-        if (tc) openTablePopup(tc);
-        return;
-      }
+    const q = encodeURIComponent(address || "");
+    // Embed search (no key required for basic embed)
+    frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+  };
 
-      // Add row (+) in table footer (page or popup)
-      const addRowBtn = t.closest?.(".table-footer .add-row");
-      if (addRowBtn) {
-        const inModal = !!addRowBtn.closest("#mkTableModal");
-
-        if (inModal && modalEl?.dataset?.activeTableKey) {
-          const realTc = realContainerFromKey(modalEl.dataset.activeTableKey);
-          const realTable = realTc ? $("table", realTc) : null;
-          if (realTable) {
-            const newRow = cloneLastRow(realTable);
-            if (newRow) {
-              persistAllDebounced();
-              injectTableNotesButtons();
-              forceMaskNotesButtons();
-              refreshAllNotesButtons();
-              openTablePopup(realTc);
-            }
-          }
-          return;
-        }
-
-        const tc = addRowBtn.closest(".table-container");
-        const table = tc ? $("table", tc) : null;
-        if (table) {
-          const newRow = cloneLastRow(table);
-          if (newRow) {
-            persistAllDebounced();
-            injectTableNotesButtons();
-            forceMaskNotesButtons();
-            refreshAllNotesButtons();
-          }
-        }
-        return;
-      }
-
-      // Integrated plus rows
-      const plusBtn = t.closest?.(".checklist-row.integrated-plus > .add-row");
-      if (plusBtn) {
-        if (handleIntegratedPlusClick(plusBtn)) return;
-      }
-
-      // Notes icon click (tables + cards + modal)
-      const notesBtn = t.closest?.(".notes-icon-btn");
-      if (notesBtn) {
-        const targetId = notesBtn.dataset.notesTarget;
-        if (!targetId) return;
-
-        const sig = getRowSignature(notesBtn);
-        const label = getBulletLabel(notesBtn);
-
-        ensureNotesItem(targetId, sig.index, label);
-        insertBulletHeaderIfMissing(targetId, label);
-
-        refreshAllNotesButtons();
-        return;
-      }
-
-      // Support tickets: add (+)
-      const addTicketBtn = t.closest?.(".add-ticket-btn");
-      if (addTicketBtn) {
-        const openContainer = $("#openTicketsContainer");
-        if (!openContainer) return;
-
-        const baseGroup = $(".ticket-group[data-base='true']", openContainer);
-        if (!baseGroup) return;
-
-        if (!ticketIsComplete(baseGroup)) {
-          $(".ticket-number-input", baseGroup)?.focus();
-          return;
-        }
-
-        const clone = baseGroup.cloneNode(true);
-        clone.dataset.base = "false";
-        $$(".ticket-disclaimer", clone).forEach((el) => el.remove());
-
-        const status = $(".ticket-status-select", clone);
-        if (status) {
-          status.disabled = false;
-          status.value = "Open";
-        }
-
-        if (!$(".remove-ticket-btn", clone)) {
-          const wrap = $(".ticket-number-wrap", clone);
-          if (wrap) {
-            const rm = document.createElement("button");
-            rm.type = "button";
-            rm.className = "remove-ticket-btn";
-            rm.textContent = "–";
-            wrap.appendChild(rm);
-          }
-        }
-
-        openContainer.appendChild(clone);
-
-        $$("input, textarea", baseGroup).forEach((el) => (el.value = ""));
-        persistAllDebounced();
-        return;
-      }
-
-      // Support tickets: remove (–)
-      const removeTicketBtn = t.closest?.(".remove-ticket-btn");
-      if (removeTicketBtn) {
-        const group = removeTicketBtn.closest(".ticket-group");
-        if (!group) return;
-        if (group.dataset.base === "true") return;
-        group.remove();
-        persistAllDebounced();
-        return;
+  /* =======================
+     OPTIONAL: ONSITE DATE DEFAULT
+     -------------------------------------------------------
+     If you have start/end ids, we’ll auto-set end = start + 2.
+  ======================= */
+  const onsiteStart = $("#onsiteStartDate");
+  const onsiteEnd = $("#onsiteEndDate");
+  if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
+    onsiteStart.addEventListener("change", () => {
+      if (!onsiteStart.value) return;
+      if (!onsiteEnd.value) {
+        onsiteEnd.value = addDays(onsiteStart.value, 2);
+        onsiteEnd.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
-
-    // ticket status mover (delegated)
-    document.addEventListener("change", (e) => {
-      const sel = e.target;
-      if (!sel) return;
-      if (!sel.classList?.contains("ticket-status-select")) return;
-
-      const group = sel.closest(".ticket-group");
-      if (!group) return;
-
-      if (group.dataset.base === "true") {
-        sel.value = "Open";
-        sel.disabled = true;
-        return;
-      }
-
-      moveTicketGroup(group, sel.value);
-    });
   }
 
-  /* -----------------------------
-     BOOT
-  ----------------------------- */
-  function boot() {
-    restoreAll();
+  /* =======================
+     INIT
+  ======================= */
+  function init() {
+    // Ensure IDs exist before restore
+    ensureStableFieldIds(document);
+    restoreState(document);
+    applyGhostStyling(document);
 
-    sanitizeTableHeaders();
-    initNav();
-    initAutosave();
-    initResetButtons();
-    initSupportTickets();
+    // Activate first page
+    const active = $(".page-section.active")?.id || $(".page-section")?.id;
+    if (active) activatePage(active);
 
-    initTableExpandButtons();
-
-    // Notes buttons everywhere
-    injectNotesButtonsIntoTwoColCards();
-    injectTableNotesButtons();
-    forceMaskNotesButtons();
-    normalizeNotesColumns();
-
-    initNotesTextareaParsing();
-
-    refreshAllNotesButtons();
-    initPlaceholderStyling();
-
-    initGlobalClicks();
+    // Save once after init to “lock in” ids
+    captureState(document);
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  init();
 
 })();
