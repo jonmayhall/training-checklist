@@ -406,7 +406,6 @@
   }
 
   function rowHasControls(tr, notesIdx) {
-    // ignore controls living in the notes column itself
     const cloned = tr.cloneNode(true);
     const clonedCells = Array.from(cloned.cells);
     if (notesIdx >= 0 && clonedCells[notesIdx]) clonedCells[notesIdx].innerHTML = "";
@@ -422,13 +421,11 @@
       if (!tbody) return;
 
       Array.from(tbody.rows).forEach((tr) => {
-        // pad if needed
         while (tr.cells.length <= notesIdx) tr.insertCell(-1);
 
         const notesCell = tr.cells[notesIdx];
         notesCell.classList.add("notes-col", "notes-col-cell");
 
-        // move any buttons into notes cell, remove duplicates
         const allBtns = $$(".notes-icon-btn", tr);
         if (allBtns.length) {
           allBtns.forEach((b) => {
@@ -449,12 +446,10 @@
   }
 
   function findRelatedNotesBlock(tableContainer) {
-    // if a notes button already exists, use its target
     const btn = $(".notes-icon-btn[data-notes-target]", tableContainer);
     const id = btn?.dataset?.notesTarget;
     if (id && $("#" + id)) return $("#" + id);
 
-    // fallback: first notes block in this section
     const section = tableContainer.closest(".page-section");
     if (!section) return null;
     const all = $$("[id^='notes-'].section-block, [id^='notes-card-'].section-block", section);
@@ -475,24 +470,19 @@
       if (!tbody) return;
 
       Array.from(tbody.rows).forEach((tr) => {
-        // only rows with real controls
         if (!rowHasControls(tr, notesIdx)) return;
 
         while (tr.cells.length <= notesIdx) tr.insertCell(-1);
         const cell = tr.cells[notesIdx];
         cell.classList.add("notes-col", "notes-col-cell");
 
-        // remove extras, ensure exactly one
         const existing = $(".notes-icon-btn", cell);
         if (existing) {
-          // remove any stray duplicates elsewhere in row
           $$(".notes-icon-btn", tr).forEach((b) => { if (!cell.contains(b)) b.remove(); });
           return;
         }
 
-        // remove any stray duplicates in row before adding
         $$(".notes-icon-btn", tr).forEach((b) => b.remove());
-
         const btn = makeNotesButton(notesId);
         cell.appendChild(btn);
       });
@@ -502,10 +492,7 @@
   }
 
   /* -----------------------------
-     NOTES BUTTON PLACEMENT (RIGHT-SIDE NOTES PAGES)
-     - two-col cards: one card is Notes, one is Questions
-     - only add button on rows with control
-     - place into .row-actions (create if missing)
+     NOTES BUTTON PLACEMENT (TWO-COL CARDS)
   ----------------------------- */
   function injectNotesButtonsIntoTwoColCards(root = document) {
     $$(".cards-grid.two-col", root).forEach((grid) => {
@@ -529,12 +516,10 @@
         const hasControl = row.querySelector("input, select, textarea");
         if (!hasControl) return;
 
-        // prevent duplicates
         if (row.querySelector(".notes-icon-btn")) return;
 
         const btn = makeNotesButton(notesId);
 
-        // Prefer a dedicated actions container (keeps layout stable)
         let actions = row.querySelector(".row-actions");
         if (!actions) {
           actions = document.createElement("div");
@@ -548,7 +533,6 @@
 
   /* -----------------------------
      NOTES TEXTAREA PARSING
-     - keeps state in sync (without rewriting textarea)
   ----------------------------- */
   function parseNotesTextareaToState(notesId, text) {
     const s = ensureNotesBlock(notesId);
@@ -560,18 +544,23 @@
 
     const flush = () => {
       if (currentKey == null) return;
-      s[notesId].items[String(currentKey)] = s[notesId].items[String(currentKey)] || { label: currentLabel || "Note", text: "" };
+      s[notesId].items[String(currentKey)] =
+        s[notesId].items[String(currentKey)] || { label: currentLabel || "Note", text: "" };
       s[notesId].items[String(currentKey)].label = currentLabel || "Note";
       s[notesId].items[String(currentKey)].text = buf.join("\n").trim();
     };
 
-    // map label -> key if it exists already
     const labelToKey = new Map();
     Object.entries(s[notesId].items || {}).forEach(([k, v]) => {
       if (v?.label) labelToKey.set(v.label, Number(k));
     });
 
-    let nextKey = Math.max(-1, ...Object.keys(s[notesId].items || {}).map((k) => Number(k)).filter((n) => !Number.isNaN(n)));
+    let nextKey = Math.max(
+      -1,
+      ...Object.keys(s[notesId].items || {})
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n))
+    );
 
     for (const line of lines) {
       const m = line.match(/^•\s(.+):\s*$/);
@@ -749,12 +738,10 @@
 
     titleEl.textContent = header;
 
-    // remember which REAL table is open
     modal.dataset.activeTableKey = tableKeyForContainer(tableContainer);
 
     const notesBlock = findRelatedNotesBlock(tableContainer);
 
-    // TABLE CARD (clone container so it looks identical)
     const tableCard = document.createElement("div");
     tableCard.className = "section-block";
     tableCard.style.width = "100%";
@@ -763,11 +750,9 @@
 
     const tableCloneContainer = tableContainer.cloneNode(true);
 
-    // remove any nested expand buttons inside the popup clone footer
     const footer = $(".table-footer", tableCloneContainer);
     if (footer) $$(".mk-table-expand-btn, .expand-table-btn", footer).forEach((b) => b.remove());
 
-    // force table to scroll like the originals
     const scrollWrap = $(".scroll-wrapper", tableCloneContainer);
     if (scrollWrap) {
       scrollWrap.style.maxHeight = "52vh";
@@ -777,7 +762,6 @@
 
     tableCard.appendChild(tableCloneContainer);
 
-    // NOTES CARD (clone, but keep synced to real)
     let notesCard = null;
     if (notesBlock) {
       notesCard = notesBlock.cloneNode(true);
@@ -817,7 +801,6 @@
 
     sanitizeTableHeaders(tableCard);
 
-    // inject notes buttons into popup clone table
     injectTableNotesButtons(tableCard);
     refreshAllNotesButtons(tableCard);
 
@@ -912,7 +895,6 @@
   }
 
   function handleIntegratedPlusClick(plusBtn) {
-    // Additional POC card cloning
     const pocCardBase = plusBtn.closest(".additional-poc-card[data-base='true']");
     if (pocCardBase) {
       const clone = cloneAndClear(pocCardBase);
@@ -925,7 +907,6 @@
       return true;
     }
 
-    // Additional Trainers row cloning
     const trainersContainer = plusBtn.closest("#additionalTrainersContainer");
     if (trainersContainer) {
       const baseRow = plusBtn.closest(".checklist-row.integrated-plus");
@@ -974,7 +955,6 @@
       if (el.tagName === "TEXTAREA") applyPlaceholderClassToTextarea(el);
     });
 
-    // clear tables (keep first 3 rows max)
     $$(".table-container", sectionEl).forEach((tc) => {
       const table = $("table", tc);
       const tbody = table?.tBodies?.[0];
@@ -988,7 +968,6 @@
       });
     });
 
-    // support tickets reset
     if (sectionEl.id === "support-tickets") {
       const open = $("#openTicketsContainer");
       const base = $(".ticket-group[data-base='true']", open);
@@ -1051,7 +1030,6 @@
       if (addRowBtn) {
         const inModal = !!addRowBtn.closest("#mkTableModal");
 
-        // in popup -> add to REAL table and refresh popup
         if (inModal && modalEl?.dataset?.activeTableKey) {
           const realTc = realContainerFromKey(modalEl.dataset.activeTableKey);
           const realTable = realTc ? $("table", realTc) : null;
@@ -1067,7 +1045,6 @@
           return;
         }
 
-        // normal page add row
         const tc = addRowBtn.closest(".table-container");
         const table = tc ? $("table", tc) : null;
         if (table) {
@@ -1190,7 +1167,6 @@
 
     initTableExpandButtons();
 
-    // inject/normalize notes buttons everywhere
     injectNotesButtonsIntoTwoColCards();
     injectTableNotesButtons();
     normalizeNotesColumns();
@@ -1205,5 +1181,4 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
-
 })();
