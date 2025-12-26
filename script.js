@@ -1,20 +1,10 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL script.js
-   ✅ FIXED / RESTORED (MASK ICON VERSION)
-   - Menu + buttons working again (event delegation; no dead bindings after restore)
-   - No double-add / no double-binding
-   - ✅ Notes icon-only button uses YOUR PNG mask via CSS (.notes-icon-btn)
-   - ✅ Turns orange when notes exist (.has-notes)
-   - Notes buttons ONLY added where there is an input/select/textarea (no blank label rows)
-   - Training tables bullet label = Name (first text input in row)
-   - Opcode tables bullet label = Opcode (2nd column text input)
-   - Notes buttons work in tables + popup tables
-   - Popup table is inside a real-looking card, never runs off right side
-   - Popup keeps Add Row (+) and it adds to the REAL table and refreshes popup
-   - Notes card never scrolls left/right (no horizontal)
-   - No page “jump” when clicking notes buttons
-   - Fix phantom white header row / textbox: sanitizeTableHeaders()
-   - Clearing page clears table + notes state for that page (prevents “old bullets” returning)
+   ✅ FIXED: Notes column showing “two random buttons”
+   - Notes column index now prefers: th.notes-col-head (your real Notes header)
+   - Notes cell hard-clean: only ONE .notes-icon-btn, remove stray SVG/inputs/buttons inside
+   - Keeps mask-icon behavior + .has-notes orange state
+   - Works on page tables + popup tables
 ======================================================= */
 
 (() => {
@@ -53,16 +43,21 @@
 
   /* -----------------------------
      NOTES BUTTON (ICON MASK)
-     - CSS provides icon via mask on .notes-icon-btn
-     - JS toggles .has-notes (orange)
   ----------------------------- */
+  function stripNotesButtonInternals(btn) {
+    if (!btn) return;
+    // If any legacy SVG/img exists inside, remove it (mask icon is handled by CSS)
+    $$("svg, img", btn).forEach((n) => n.remove());
+    btn.textContent = "";
+  }
+
   function makeNotesButton(targetId) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "notes-icon-btn mk-table-note-btn";
     btn.dataset.notesTarget = targetId;
     btn.setAttribute("aria-label", "Add notes");
-    // no inner SVG/img/text — CSS mask renders icon
+    stripNotesButtonInternals(btn);
     return btn;
   }
 
@@ -260,19 +255,16 @@
 
   /* -----------------------------
      SANITIZE TABLE HEADERS
-     - fixes phantom white row + textbox in headers
   ----------------------------- */
   function sanitizeTableHeaders(root = document) {
     $$(".training-table", root).forEach((table) => {
       const thead = table.tHead;
       if (!thead) return;
 
-      // remove any header rows polluted with inputs/buttons
       $$("tr", thead).forEach((tr) => {
         if (tr.querySelector("input, select, textarea, button")) tr.remove();
       });
 
-      // ensure header cells are TH (not TD)
       $$("tr", thead).forEach((tr) => {
         tr.querySelectorAll("td").forEach((td) => {
           const th = document.createElement("th");
@@ -315,6 +307,7 @@
 
   function refreshAllNotesButtons(root = document) {
     $$(".notes-icon-btn[data-notes-target]", root).forEach((btn) => {
+      stripNotesButtonInternals(btn);
       const targetId = btn.dataset.notesTarget;
       if (!targetId) return;
       const sig = getRowSignature(btn);
@@ -323,7 +316,7 @@
   }
 
   /* -----------------------------
-     NOTES TEXTAREA: insert bullet header (no reflow/jump)
+     NOTES TEXTAREA: insert bullet header
   ----------------------------- */
   function findNotesTextareaById(notesId) {
     const block = $("#" + notesId);
@@ -382,26 +375,27 @@
         return opcode || "Opcode";
       }
 
-      // training tables: first text input in the row = Name
       const nameInput = tr.querySelector("input[type='text']");
       const name = nameInput?.value?.trim();
       return name || "Name";
     }
 
-    // question rows: use label text
     const row = btn.closest(".checklist-row");
     const label = row?.querySelector("label")?.textContent?.trim();
     return label ? label.replace(/\s+/g, " ") : "Note";
   }
 
   /* -----------------------------
-     NOTES BUTTON PLACEMENT (TABLES)
-     - Only in Notes column
-     - Only on rows that have input/select/textarea (ignoring notes cell)
-     - Remove duplicates
+     NOTES COLUMN DETECTION (FIX)
+     ✅ Prefer the explicit header class: th.notes-col-head
+     This prevents “Notes” being mistaken for some other column.
   ----------------------------- */
   function getNotesColumnIndex(table) {
-    const headCells = $$("thead th", table).map((th) => th.textContent.trim().toLowerCase());
+    const ths = $$("thead th", table);
+    const byClass = ths.findIndex((th) => th.classList.contains("notes-col-head"));
+    if (byClass >= 0) return byClass;
+
+    const headCells = ths.map((th) => th.textContent.trim().toLowerCase());
     return headCells.lastIndexOf("notes");
   }
 
@@ -410,33 +404,6 @@
     const clonedCells = Array.from(cloned.cells);
     if (notesIdx >= 0 && clonedCells[notesIdx]) clonedCells[notesIdx].innerHTML = "";
     return !!cloned.querySelector("input, select, textarea");
-  }
-
-  function normalizeNotesColumns(root = document) {
-    $$(".training-table", root).forEach((table) => {
-      const notesIdx = getNotesColumnIndex(table);
-      if (notesIdx < 0) return;
-
-      const tbody = table.tBodies?.[0];
-      if (!tbody) return;
-
-      Array.from(tbody.rows).forEach((tr) => {
-        while (tr.cells.length <= notesIdx) tr.insertCell(-1);
-
-        const notesCell = tr.cells[notesIdx];
-        notesCell.classList.add("notes-col", "notes-col-cell");
-
-        const allBtns = $$(".notes-icon-btn", tr);
-        if (allBtns.length) {
-          allBtns.forEach((b) => {
-            if (b.closest("td") !== notesCell) notesCell.appendChild(b);
-          });
-
-          const keep = $(".notes-icon-btn", notesCell);
-          $$(".notes-icon-btn", notesCell).forEach((b) => { if (b !== keep) b.remove(); });
-        }
-      });
-    });
   }
 
   function ensureElementId(el, prefix = "notes-card") {
@@ -456,10 +423,56 @@
     return all[0] || null;
   }
 
+  /* -----------------------------
+     HARD CLEAN NOTES CELLS (FIX)
+     ✅ Make the Notes cell match Page 3/4:
+     - exactly ONE .notes-icon-btn
+     - remove any stray checkboxes/inputs/buttons/SVG inside the Notes cell
+  ----------------------------- */
+  function hardCleanNotesCells(root = document) {
+    $$(".training-table", root).forEach((table) => {
+      const notesIdx = getNotesColumnIndex(table);
+      if (notesIdx < 0) return;
+
+      // Only enforce “icon-only Notes” on tables that actually have the Notes header marker class
+      const hasNotesHeadClass = !!$("thead th.notes-col-head", table);
+      if (!hasNotesHeadClass) return;
+
+      const tbody = table.tBodies?.[0];
+      if (!tbody) return;
+
+      Array.from(tbody.rows).forEach((tr) => {
+        while (tr.cells.length <= notesIdx) tr.insertCell(-1);
+        const cell = tr.cells[notesIdx];
+        cell.classList.add("notes-col", "notes-col-cell");
+
+        // keep first notes button if any (from HTML or injected)
+        const keepBtn = $(".notes-icon-btn", cell) || $(".notes-icon-btn", tr);
+
+        // wipe the cell completely
+        cell.innerHTML = "";
+
+        if (keepBtn) {
+          keepBtn.dataset.notesTarget = keepBtn.dataset.notesTarget || "";
+          keepBtn.classList.add("notes-icon-btn");
+          stripNotesButtonInternals(keepBtn);
+          cell.appendChild(keepBtn);
+        }
+      });
+    });
+  }
+
+  /* -----------------------------
+     INJECT NOTES BUTTONS (TABLES)
+  ----------------------------- */
   function injectTableNotesButtons(root = document) {
     $$(".training-table", root).forEach((table) => {
       const notesIdx = getNotesColumnIndex(table);
       if (notesIdx < 0) return;
+
+      // Only inject icon-notes for tables that truly have the Notes icon header class
+      const hasNotesHeadClass = !!$("thead th.notes-col-head", table);
+      if (!hasNotesHeadClass) return;
 
       const tc = table.closest(".table-container");
       const notesBlock = tc ? findRelatedNotesBlock(tc) : null;
@@ -476,23 +489,17 @@
         const cell = tr.cells[notesIdx];
         cell.classList.add("notes-col", "notes-col-cell");
 
+        // ensure exactly one notes button
         const existing = $(".notes-icon-btn", cell);
-        if (existing) {
-          $$(".notes-icon-btn", tr).forEach((b) => { if (!cell.contains(b)) b.remove(); });
-          return;
-        }
-
-        $$(".notes-icon-btn", tr).forEach((b) => b.remove());
-        const btn = makeNotesButton(notesId);
-        cell.appendChild(btn);
+        if (!existing) cell.appendChild(makeNotesButton(notesId));
       });
     });
 
-    normalizeNotesColumns(root);
+    hardCleanNotesCells(root);
   }
 
   /* -----------------------------
-     NOTES BUTTON PLACEMENT (TWO-COL CARDS)
+     NOTES BUTTONS (TWO-COL CARDS)
   ----------------------------- */
   function injectNotesButtonsIntoTwoColCards(root = document) {
     $$(".cards-grid.two-col", root).forEach((grid) => {
@@ -737,7 +744,6 @@
       "Table";
 
     titleEl.textContent = header;
-
     modal.dataset.activeTableKey = tableKeyForContainer(tableContainer);
 
     const notesBlock = findRelatedNotesBlock(tableContainer);
@@ -802,6 +808,7 @@
     sanitizeTableHeaders(tableCard);
 
     injectTableNotesButtons(tableCard);
+    hardCleanNotesCells(tableCard);
     refreshAllNotesButtons(tableCard);
 
     modal.style.display = "block";
@@ -827,7 +834,7 @@
   }
 
   /* -----------------------------
-     SUPPORT TICKETS
+     SUPPORT TICKETS (unchanged)
   ----------------------------- */
   function ticketIsComplete(groupEl) {
     const num = $(".ticket-number-input", groupEl)?.value?.trim();
@@ -880,7 +887,7 @@
   }
 
   /* -----------------------------
-     ADDITIONAL TRAINERS / ADDITIONAL POC (+)
+     ADDITIONAL TRAINERS / POC (+) (unchanged)
   ----------------------------- */
   function cloneAndClear(el) {
     const c = el.cloneNode(true);
@@ -926,7 +933,7 @@
   }
 
   /* -----------------------------
-     RESET PAGE / CLEAR ALL
+     RESET PAGE / CLEAR ALL (unchanged)
   ----------------------------- */
   function clearNotesForSection(sectionEl) {
     const notesIds = $$(".section-block[id^='notes-'], .section-block[id^='notes-card-']", sectionEl)
@@ -984,6 +991,7 @@
 
     injectNotesButtonsIntoTwoColCards(sectionEl);
     injectTableNotesButtons(sectionEl);
+    hardCleanNotesCells(sectionEl);
     refreshAllNotesButtons(sectionEl);
   }
 
@@ -1025,7 +1033,7 @@
         return;
       }
 
-      // Add row (+) in table footer (page or popup)
+      // Add row (+)
       const addRowBtn = t.closest?.(".table-footer .add-row");
       if (addRowBtn) {
         const inModal = !!addRowBtn.closest("#mkTableModal");
@@ -1038,6 +1046,7 @@
             if (newRow) {
               persistAllDebounced();
               injectTableNotesButtons();
+              hardCleanNotesCells();
               refreshAllNotesButtons();
               openTablePopup(realTc);
             }
@@ -1052,6 +1061,7 @@
           if (newRow) {
             persistAllDebounced();
             injectTableNotesButtons();
+            hardCleanNotesCells();
             refreshAllNotesButtons();
           }
         }
@@ -1169,7 +1179,7 @@
 
     injectNotesButtonsIntoTwoColCards();
     injectTableNotesButtons();
-    normalizeNotesColumns();
+    hardCleanNotesCells();
 
     initNotesTextareaParsing();
 
