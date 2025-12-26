@@ -70,6 +70,21 @@
     });
   }
 
+   document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".notes-btn,[data-notes-target]");
+  if (!btn) return;
+
+  const targetId = btn.getAttribute("data-notes-target");
+  if (!targetId) return;
+
+  const el = document.getElementById(targetId);
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.add("flash-notes");
+  setTimeout(() => el.classList.remove("flash-notes"), 800);
+});
+
   /* -----------------------------
      PLACEHOLDER / GHOST CLASSING
   ----------------------------- */
