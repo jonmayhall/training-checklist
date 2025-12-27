@@ -1,13 +1,10 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN CSS
-   ✅ Single source of truth (no duplicate blocks)
-   ✅ Preserves: Support Tickets + DMS + Notes + Modals + Tables
-   ✅ Dealership Address: input + MAP button attached + map restored
-   ✅ Dealership Address textbox: ~1/3 shorter
-   ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
-   ✅ Training Date inputs match all other inputs
-   ✅ Notes button: ICON-ONLY, centered, clean (no square button)
-   ✅ TABLE Notes buttons (Pages 5 & 6): MATCH Pages 3 & 4 (white button + bubble icon)
+   myKaarma Interactive Training Checklist — FULL CSS (DROP-IN)
+   ✅ Restores ALL Notes buttons (Q&A rows + table Notes buttons)
+   ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
+   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (uses .mk-table-expand-btn)
+   ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
+   ✅ No duplicate/conflicting blocks
    ======================================================= */
 
 /* =======================
@@ -32,17 +29,12 @@
   /* default (single-column pages) */
   --input-width:340px;
 
-  /* Notes icon colors (used for non-table icon button + table hover color) */
-  --notes-icon: #9aa0a6;
-  --notes-icon-hover: var(--orange);
+  /* Notes icon colors */
+  --notes-icon:#9aa0a6;
+  --notes-icon-hover:var(--orange);
 
-  /* IMPORTANT:
-     Pages 3/4 table notes icon uses a mask.
-     Set this to your bubble icon mask value (same as pages 3/4).
-     Example (if you already use it elsewhere): 
-       --notes-icon-mask: url("data:image/svg+xml;utf8,<svg .../>");
-  */
-  --notes-icon-mask: var(--notes-icon-mask);
+  /* Bubble icon mask used by table Notes buttons (Pages 3/4 style) */
+  --notes-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3v3.5a.5.5 0 0 0 .85.35L11.7 19H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 14h-8.7l-2.3 2.3V17H4V5h16v12Z'/%3E%3C/svg%3E");
 }
 
 /* =======================
@@ -406,7 +398,7 @@ main{
   height:34px;
 }
 
-/* Make DATE inputs render like the others */
+/* Date inputs match */
 .section-block .checklist-row input[type="date"]{
   -webkit-appearance:none;
   appearance:none;
@@ -440,32 +432,33 @@ main{
 }
 
 /* =======================
-   Notes linking layout (row-actions)
+   NOTES BUTTONS (NON-TABLE / QUESTIONS)
+   - This restores icon-only notes buttons beside questions
 ======================= */
 .row-actions{
-  display:flex;
+  display:inline-flex;
   align-items:center;
   gap:10px;
+  margin-left:auto;
 }
 
-/* =========================
-   ✅ NOTES ICON BUTTON (CLEAN ICON-ONLY)
-========================= */
-.notes-icon-btn{
+/* Base icon-only button (for question rows) */
+.notes-icon-btn,
+.checklist-row .notes-btn{
   appearance:none;
   border:0;
-  background:transparent;
-  padding:0;
-  margin:0;
+  background:transparent !important;
+  padding:0 !important;
+  margin:0 !important;
 
   width:20px;
   height:20px;
   min-width:20px;
   min-height:20px;
 
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
 
   cursor:pointer;
   user-select:none;
@@ -473,49 +466,37 @@ main{
   color:var(--notes-icon);
   transition:color .15s ease, transform .08s ease;
 }
-
-.notes-icon-btn:hover{
+.notes-icon-btn:hover,
+.checklist-row .notes-btn:hover{
   color:var(--notes-icon-hover);
 }
-
-.notes-icon-btn:active{
+.notes-icon-btn:active,
+.checklist-row .notes-btn:active{
   transform:translateY(1px);
 }
-
-.notes-icon-btn:focus-visible{
+.notes-icon-btn:focus-visible,
+.checklist-row .notes-btn:focus-visible{
   outline:none;
-}
-
-.notes-icon-btn:focus-visible{
   box-shadow:0 0 0 3px rgba(239,109,34,0.28);
   border-radius:8px;
 }
 
-/* Make your embedded SVG behave like an icon */
-.notes-icon-btn .notes-svg{
+/* If your question-row notes uses inline SVG */
+.notes-icon-btn .notes-svg,
+.checklist-row .notes-btn .notes-svg{
   width:18px;
   height:18px;
   display:block;
   fill:currentColor;
 }
 
-/* Optional: if you toggle this in JS when notes exist */
-.notes-icon-btn.has-notes{
+/* In case JS toggles */
+.notes-icon-btn.has-notes,
+.checklist-row .notes-btn.has-notes{
   color:var(--orange);
 }
 
-/* Table notes column tighter */
-.notes-col-head,
-.notes-col-cell{
-  width:54px;
-  text-align:center;
-  white-space:nowrap;
-}
-.notes-col-cell .notes-icon-btn{
-  margin:0 auto;
-}
-
-/* keeps select + notes button aligned nicely (extra safety) */
+/* Keep select + notes button aligned */
 .checklist-row .row-actions{
   display:inline-flex !important;
   align-items:center !important;
@@ -533,38 +514,11 @@ main{
 }
 
 /* ================================
-   NOTES COLUMN (Tables) — P3/P4 Match (base sizing)
+   INDENTED Q&A ROWS
 ================================ */
-.training-table .notes-col-head,
-.training-table .notes-col-cell{
-  width: 56px;
-  min-width: 56px;
-  max-width: 56px;
-  text-align: center;
-  vertical-align: middle;
-  padding: 8px 6px;
-}
-
-/* =======================================================
-   INDENTED Q&A ROWS — bring inputs in to match non-indented padding
-======================================================= */
-.section-block .checklist-row{
-  padding-right:22px;
-}
-.section-block .checklist-row.indent-sub input[type="text"],
-.section-block .checklist-row.indent-sub input[type="number"],
-.section-block .checklist-row.indent-sub input[type="email"],
-.section-block .checklist-row.indent-sub input[type="tel"],
-.section-block .checklist-row.indent-sub input[type="date"],
-.section-block .checklist-row.indent-sub select{
-  margin-left:0 !important;
-}
-.section-block .checklist-row.indent-sub{
-  padding-right:22px !important;
-}
-.section-block .checklist-row.indent-sub label{
-  flex:1 1 auto !important;
-}
+.section-block .checklist-row{ padding-right:22px; }
+.section-block .checklist-row.indent-sub{ padding-right:22px !important; }
+.section-block .checklist-row.indent-sub label{ flex:1 1 auto !important; }
 .section-block .checklist-row.indent-sub input[type="text"],
 .section-block .checklist-row.indent-sub input[type="number"],
 .section-block .checklist-row.indent-sub input[type="email"],
@@ -573,11 +527,10 @@ main{
 .section-block .checklist-row.indent-sub select{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
+  margin-left:0 !important;
 }
 
-/* =======================================================
-   2x2 CARDS (two-col cards grid) — shift questions LEFT
-======================================================= */
+/* 2x2 cards: shift questions left */
 .page-section:not(#dealership-info):not(#dms-integration)
   .cards-grid.two-col > .section-block .checklist-row{
   padding-left:16px !important;
@@ -636,7 +589,7 @@ main{
 }
 
 /* =======================================================
-   DEALERSHIP INFO PAGE FIXES
+   DEALERSHIP INFO PAGE FIXES (dates)
 ======================================================= */
 .training-dates-row,
 .onsite-training-dates-row{
@@ -661,26 +614,24 @@ main{
 .onsite-training-dates-row .date-stack input[type="date"]{
   width:100% !important;
   height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
   background:#f7f7f7 !important;
   color:var(--ink) !important;
   font-size:13px !important;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif !important;
   -webkit-appearance:none !important;
   appearance:none !important;
   box-shadow:none !important;
 }
 
-/* =============== PRIMARY CONTACTS (uniform gap) =============== */
+/* =======================
+   PRIMARY CONTACTS (uniform gap)
+======================= */
 #dealership-info{
   --di-input-width:225px;
   --pc-gap:30px;
 }
-
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -689,7 +640,6 @@ main{
   margin-top:10px;
   align-items:start;
   justify-items:stretch;
-  box-sizing:border-box;
 }
 #dealership-info .primary-contacts-grid .mini-card{
   border:1px solid var(--border);
@@ -699,18 +649,11 @@ main{
   overflow:hidden;
   padding:14px 14px 6px;
   width:100%;
-  max-width:none;
-  justify-self:stretch;
   min-width:0;
 }
 #dealership-info .primary-contacts-grid .mini-card .checklist-row{
   padding-left:18px;
   padding-right:18px;
-}
-#dealership-info .primary-contacts-grid .contact-card,
-#dealership-info .primary-contacts-grid .additional-poc-card{
-  width:100%;
-  min-width:0;
 }
 #dealership-info .primary-contacts-grid .checklist-row{
   padding-left:16px !important;
@@ -731,33 +674,9 @@ main{
   max-width:var(--di-input-width) !important;
   height:34px !important;
 }
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--di-input-width) - 34px) !important;
-  width:calc(var(--di-input-width) - 34px) !important;
-  max-width:calc(var(--di-input-width) - 34px) !important;
-}
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus > .add-row{
-  flex:0 0 34px !important;
-  width:34px !important;
-  margin-left:-1px !important;
-}
-#dealership-info .primary-contacts-grid
-  .additional-poc-card[data-clone="true"] .checklist-row.integrated-plus input[type="text"],
-#dealership-info .primary-contacts-grid
-  .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"]{
-  border-radius:var(--radius-sm) !important;
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  height:34px !important;
-}
 
 /* =======================
-   Notes cards textarea fill (2-col layouts)
+   Notes cards textarea fill (2-col)
 ======================= */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
@@ -778,7 +697,7 @@ main{
 }
 
 /* =======================
-   TRAINERS PAGE
+   TRAINERS PAGE tweaks
 ======================= */
 #trainers-deployment .grid-2{ grid-template-columns:1fr !important; }
 #trainers-deployment .grid-2 > .section-block{
@@ -786,28 +705,7 @@ main{
   max-width:100%;
   min-width:0;
 }
-#trainers-deployment .checklist-row.integrated-plus[data-base="true"] input[type="text"]{
-  flex:0 0 calc(var(--input-width) - 34px) !important;
-  width:calc(var(--input-width) - 34px) !important;
-  margin-left:auto !important;
-}
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  padding-left:60px !important;
-}
 #trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
-#trainers-deployment .trainer-clone input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  border-radius:var(--radius-sm) !important;
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-}
 
 /* =======================
    TABLES
@@ -834,6 +732,7 @@ main{
   margin-bottom:32px;
   padding:0;
   max-width:100%;
+  position:relative; /* needed for bottom-right popup button */
 }
 .scroll-wrapper{
   display:block;
@@ -874,7 +773,7 @@ main{
   display:none !important;
 }
 
-/* Sticky first column (single source) */
+/* Sticky first column */
 .training-table th:first-child,
 .training-table td:first-child{
   position:sticky;
@@ -923,6 +822,7 @@ main{
   gap:10px;
   border-bottom-left-radius:var(--radius-lg);
   border-bottom-right-radius:var(--radius-lg);
+  position:relative;
 }
 .table-footer .add-row{
   background:var(--orange);
@@ -940,6 +840,42 @@ main{
 .table-footer .add-row:hover{
   background:#ff8b42;
   transform:translateY(-1px);
+}
+
+/* ===== Tiny TABLE POPUP button (bottom-right) =====
+   Put the button in your HTML inside .table-container OR .table-footer
+   class="mk-table-expand-btn"  (JS wires click)
+*/
+.mk-table-expand-btn{
+  width:16px;
+  height:16px;
+  padding:0;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  background:#ffffffee;
+  color:#111827;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  line-height:1;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  transition:border-color .12s, background .12s, transform .12s;
+}
+.mk-table-expand-btn:hover{
+  border-color:var(--orange);
+  background:#fff;
+  transform:translateY(-1px);
+}
+/* If it lives in the footer, push it right */
+.table-footer .mk-table-expand-btn{ margin-left:auto; }
+/* If you render it as a floating corner button inside table-container */
+.table-container > .mk-table-expand-btn{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  z-index:6;
 }
 
 /* acceptance helper colors */
@@ -994,54 +930,77 @@ main{
 }
 
 /* =======================
-   TABLE NOTES COLUMN (legacy selectors)
+   TABLE NOTES COLUMN (headers/cells)
 ======================= */
-.training-table th.notes-col,
-.training-table td.notes-col{
-  width:60px;
-  min-width:60px;
-  text-align:center !important;
-  vertical-align:middle;
+.notes-col-head,
+.notes-col-cell{
+  width:56px;
+  text-align:center;
+  white-space:nowrap;
 }
-.training-table td.notes-col{ padding:6px 6px; }
+.training-table .notes-col-head,
+.training-table .notes-col-cell{
+  width:56px !important;
+  min-width:56px !important;
+  max-width:56px !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+  padding:8px 6px !important;
+}
+
+/* =========================================================
+   ✅ TABLE NOTES BUTTON — P3/P4 Match (white button + bubble icon)
+   IMPORTANT: This only targets table notes buttons.
+========================================================= */
+.training-table .notes-btn{
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+  border:1px solid var(--border) !important;
+  background:#fff !important;
+  cursor:pointer !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
+  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
+
+  -webkit-mask:none !important;
+  mask:none !important;
+  background-color:#fff !important;
+}
+.training-table .notes-btn:hover{
+  border-color:rgba(239,109,34,.45) !important;
+  background:rgba(239,109,34,.06) !important;
+}
+.training-table .notes-btn:active{ transform:translateY(1px) !important; }
+.training-table .notes-btn:focus-visible{
+  outline:2px solid rgba(239,109,34,.55) !important;
+  outline-offset:2px !important;
+}
+.training-table .notes-btn::before{
+  content:"";
+  width:18px;
+  height:18px;
+  display:block;
+  background:var(--notes-icon);
+  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+}
+.training-table .notes-btn:hover::before{
+  background:var(--notes-icon-hover);
+}
 
 /* =======================
-   TABLE EXPAND (⤢)
+   SUPPORT TICKETS — FULL SECTION (2x2)
 ======================= */
-.mk-table-expand-btn{
-  width:16px;
-  height:16px;
-  padding:0;
-  border-radius:6px;
-  border:1px solid #d1d5db;
-  background:#ffffffee;
-  color:#111827;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-size:10px;
-  line-height:1;
-  box-shadow:0 1px 3px rgba(0,0,0,0.12);
-  transition:border-color .12s, background .12s, transform .12s;
-}
-.mk-table-expand-btn:hover{
-  border-color:var(--orange);
-  background:#fff;
-  transform:translateY(-1px);
-}
-
-/* =======================================================
-   SUPPORT TICKETS — FULL SECTION (RESTORED & CLEAN)
-======================================================= */
-
 #support-tickets .ticket-sections-stack{
   display:flex;
   flex-direction:column;
   gap:24px;
 }
-
-/* === 2x2 SIDE-BY-SIDE LAYOUT (ORIGINAL BEHAVIOR) === */
 #support-tickets #openTicketsContainer,
 #support-tickets #tierTwoTicketsContainer,
 #support-tickets #closedResolvedTicketsContainer,
@@ -1051,8 +1010,6 @@ main{
   gap:18px;
   align-items:start;
 }
-
-/* === TICKET CARD === */
 #support-tickets .ticket-group{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
@@ -1062,32 +1019,21 @@ main{
   width:100%;
   min-width:0;
 }
-
-/* inner padding */
 #support-tickets .ticket-group-inner{
   padding:16px 18px 16px;
   font-size:13px;
   line-height:1.4;
 }
-
-/* typography normalization */
 #support-tickets .ticket-group-inner,
-#support-tickets .ticket-group-inner *{
-  font-weight:400;
-}
-
+#support-tickets .ticket-group-inner *{ font-weight:400; }
 #support-tickets .ticket-row label{
   font-weight:500;
   font-size:13px;
   color:#222;
 }
-
-/* === FORM ELEMENTS === */
 #support-tickets input[type="text"],
 #support-tickets select,
-#support-tickets textarea{
-  font-size:13px;
-}
+#support-tickets textarea{ font-size:13px; }
 
 #support-tickets .ticket-row{
   display:grid;
@@ -1097,12 +1043,7 @@ main{
   padding:10px 0;
   border-bottom:1px solid #ececec;
 }
-
-#support-tickets .ticket-row:last-child{
-  border-bottom:none;
-}
-
-/* inputs */
+#support-tickets .ticket-row:last-child{ border-bottom:none; }
 #support-tickets .ticket-row > input[type="text"],
 #support-tickets .ticket-row > select{
   width:100%;
@@ -1112,14 +1053,11 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
 }
-
-/* === Ticket Number + Add Button === */
 #support-tickets .ticket-number-wrap{
   display:flex;
   align-items:stretch;
   width:100%;
 }
-
 #support-tickets .ticket-number-input{
   flex:1;
   height:34px;
@@ -1128,7 +1066,6 @@ main{
   background:#f7f7f7;
   border-radius:var(--radius-sm) 0 0 var(--radius-sm);
 }
-
 #support-tickets .add-ticket-btn{
   width:34px;
   height:34px;
@@ -1143,15 +1080,12 @@ main{
   align-items:center;
   justify-content:center;
 }
-
-/* === SUMMARY ROW === */
 #support-tickets .ticket-row.ticket-summary-row{
   grid-template-columns:1fr;
   align-items:start;
   border-bottom:none;
   padding:10px 0;
 }
-
 #support-tickets .ticket-row.ticket-summary-row textarea{
   width:100%;
   min-height:80px;
@@ -1160,10 +1094,8 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
   resize:vertical;
-  margin-bottom:6px; /* tightened */
+  margin-bottom:6px;
 }
-
-/* === DISCLAIMER (BASE CARD ONLY) === */
 #support-tickets .ticket-group[data-base="true"] .ticket-disclaimer{
   margin-top:6px;
   padding:6px 12px;
@@ -1171,18 +1103,9 @@ main{
   line-height:1.35;
   color:#6b7280;
 }
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{ display:none; }
+#support-tickets .ticket-group[data-base="true"] .ticket-group-inner{ padding-bottom:10px; }
 
-/* hide disclaimer on cloned tickets */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{
-  display:none;
-}
-
-/* tighten bottom of base card */
-#support-tickets .ticket-group[data-base="true"] .ticket-group-inner{
-  padding-bottom:10px;
-}
-
-/* === STATUS DROPDOWN (always black text) === */
 #support-tickets .ticket-status-select,
 #support-tickets .ticket-status-select:disabled{
   color:#111;
@@ -1190,8 +1113,6 @@ main{
   background:#f7f7f7;
   cursor:default;
 }
-
-/* === RESPONSIVE FALLBACK === */
 @media (max-width:980px){
   #support-tickets #openTicketsContainer,
   #support-tickets #tierTwoTicketsContainer,
@@ -1202,9 +1123,8 @@ main{
 }
 
 /* =======================
-   DMS INTEGRATION
+   DMS INTEGRATION (unchanged)
 ======================= */
-/* (unchanged from your file — kept as-is) */
 #dms-integration .dms-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -1258,7 +1178,6 @@ main{
   border-color:rgba(255,255,255,0.35) !important;
   color:#fff !important;
 }
-
 #dms-integration .dms-list{
   list-style:none;
   padding:10px 12px 14px;
@@ -1274,8 +1193,6 @@ main{
 #dms-integration .dms-row-top{ display:block; margin-bottom:4px; }
 #dms-integration .dms-field{ font-weight:800; color:#111827; font-size:13px; }
 #dms-integration .dms-list p{ margin:0; font-size:12px; color:#6b7280; }
-
-/* BODY BADGES */
 #dms-integration .dms-list .dms-tag{
   position:absolute;
   right:52px;
@@ -1323,7 +1240,7 @@ main{
 }
 
 /* =======================
-   EQUAL-HEIGHT 2-COL ROWS
+   EQUAL-HEIGHT 2-COL ROWS (Pre/Monday/Post)
 ======================= */
 #pre-training .cards-grid.two-col,
 #monday-visit .cards-grid.two-col,
@@ -1348,7 +1265,7 @@ main{
 }
 
 /* =======================
-   NOTES POP-OUT EXPANDER (⤢)
+   NOTES POP-OUT (textarea expander ⤢)
 ======================= */
 .mk-ta-wrap{
   position:relative;
@@ -1461,27 +1378,6 @@ main{
   resize:none;
 }
 
-/* =========================
-   Table Popup (Modal) — force clean card + no right overflow
-========================= */
-#mkTableModal{ overflow:hidden !important; }
-#mkTableModalShell{ width:100%; }
-#mkTableModalCards{ width:100%; }
-#mkTableModalCards .section-block{
-  width:100%;
-  overflow:hidden;
-}
-#mkTableModalCards .scroll-wrapper{
-  overflow:auto !important;
-  max-width:100% !important;
-}
-#mkTableModalCards .section-block textarea{
-  width:100% !important;
-  max-width:100% !important;
-  overflow-x:hidden !important;
-  resize:vertical;
-}
-
 /* =======================
    TABLE MODAL (mkTableModal)
 ======================= */
@@ -1573,8 +1469,29 @@ main{
   resize:vertical;
 }
 
+/* =========================
+   Table Popup (Modal) — ensure clean card + no overflow
+========================= */
+#mkTableModal{ overflow:hidden !important; }
+#mkTableModalShell{ width:100%; }
+#mkTableModalCards{ width:100%; }
+#mkTableModalCards .section-block{
+  width:100%;
+  overflow:hidden;
+}
+#mkTableModalCards .scroll-wrapper{
+  overflow:auto !important;
+  max-width:100% !important;
+}
+#mkTableModalCards .section-block textarea{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+  resize:vertical;
+}
+
 /* =======================================================
-   DEALERSHIP ADDRESS — single source of truth
+   DEALERSHIP ADDRESS — input + MAP button attached + map restored
 ======================================================= */
 #dealership-address-card .checklist-row{
   display:grid !important;
@@ -1647,72 +1564,6 @@ main{
   color:#555;
 }
 
-/* =========================================================
-   ✅ FINAL OVERRIDE: TABLE NOTES BUTTON (Pages 5 & 6 match 3 & 4)
-   White button + bubble icon (mask on ::before)
-========================================================= */
-.training-table .notes-col-head,
-.training-table .notes-col-cell{
-  width:56px !important;
-  min-width:56px !important;
-  max-width:56px !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-  padding:8px 6px !important;
-}
-
-.training-table .notes-col-cell{ white-space:nowrap; }
-
-.training-table .notes-btn{
-  width:34px !important;
-  height:34px !important;
-  border-radius:10px !important;
-  border:1px solid var(--border) !important;
-  background:#fff !important;
-  cursor:pointer !important;
-
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
-  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
-
-  /* make sure no earlier "mask-on-button" rules win */
-  -webkit-mask:none !important;
-  mask:none !important;
-  background-color:#fff !important;
-}
-
-.training-table .notes-btn:hover{
-  border-color:rgba(239,109,34,.45) !important;
-  background:rgba(239,109,34,.06) !important;
-}
-.training-table .notes-btn:active{ transform:translateY(1px) !important; }
-
-.training-table .notes-btn:focus-visible{
-  outline:2px solid rgba(239,109,34,.55) !important;
-  outline-offset:2px !important;
-}
-
-/* Bubble icon */
-.training-table .notes-btn::before{
-  content:"";
-  width:18px;
-  height:18px;
-  display:block;
-
-  /* default gray, hover orange */
-  background:var(--notes-icon);
-
-  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-}
-
-.training-table .notes-btn:hover::before{
-  background:var(--notes-icon-hover);
-}
-
 /* =======================
    RESPONSIVE
 ======================= */
@@ -1733,13 +1584,6 @@ main{
   }
   #dms-integration .dms-grid{ grid-template-columns:1fr; }
 
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
-  }
-
   #dealership-address-card .checklist-row{
     grid-template-columns:1fr !important;
     align-items:flex-start !important;
@@ -1750,7 +1594,6 @@ main{
     margin-left:0 !important;
   }
 }
-
 @media (max-width:600px){
   #sidebar{ display:none; }
   main{ margin-left:0; padding:16px; }
@@ -1789,13 +1632,11 @@ main{
   z-index:9999;
   display:block;
 }
-
 .mk-modal__backdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.45);
 }
-
 .mk-modal__panel{
   position:relative;
   width:min(1100px, calc(100% - 40px));
@@ -1804,7 +1645,6 @@ main{
   overflow:auto;
   border-radius:18px;
 }
-
 .mk-modal__close{
   position:sticky;
   top:10px;
@@ -1820,7 +1660,6 @@ main{
   cursor:pointer;
   z-index:2;
 }
-
 /* OUTER WHITE CARD that wraps the two cards */
 .mk-modal__outer-card{
   background:#fff;
@@ -1829,40 +1668,14 @@ main{
   padding:16px;
   margin-top:6px;
 }
-
-/* Inner card should match your normal cards */
-.mk-modal__inner-card{
-  margin:0;
-}
-
-/* Notes host spacing */
-.mk-modal__notes-host{
-  margin-top:14px;
-}
-
-/* Make the moved notes card look normal inside modal */
-.mk-modal__notes-host .section-block{
-  margin:0;
-}
-
-/* The modal table should look like the main tables */
-.mk-modal__panel .training-table{
-  width:100%;
-}
-
-/* Keep scroll wrapper feel inside modal */
+.mk-modal__inner-card{ margin:0; }
+.mk-modal__notes-host{ margin-top:14px; }
+.mk-modal__notes-host .section-block{ margin:0; }
+.mk-modal__panel .training-table{ width:100%; }
 .mk-modal__panel .mk-modal__table-scroll{
   overflow:auto;
   border-radius:14px;
 }
-
-/* Prevent any weird width squish */
 .mk-modal__panel .training-table th,
-.mk-modal__panel .training-table td{
-  white-space:nowrap;
-}
-
-/* Placeholder row (in original table while row is in popup) */
-.mk-row-placeholder{
-  display:none;
-}
+.mk-modal__panel .training-table td{ white-space:nowrap; }
+.mk-row-placeholder{ display:none; }
