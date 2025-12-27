@@ -1636,7 +1636,8 @@
 
 <!-- ========================================================= -->
 <!-- PAGE 5 : TRAINING CHECKLIST                               -->
-<!-- ✅ UPDATED: table Notes buttons now match pages 3 & 4      -->
+<!-- ✅ FIXED: Notifications + Filters + Notes are aligned       -->
+<!-- ✅ Notes buttons use SAME markup as Pages 3 & 4 (SVG icon)  -->
 <!-- ========================================================= -->
 <section id="training-checklist" class="page-section">
   <h1>Training Checklist</h1>
@@ -1720,7 +1721,7 @@
           </thead>
 
           <tbody>
-            <!-- Row 1 -->
+            <!-- TEMPLATE ROW (Row 1) -->
             <tr>
               <td>
                 <input type="checkbox">
@@ -1760,13 +1761,29 @@
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notifications -->
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
 
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notes (same button markup as pages 3/4) -->
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-techs" aria-label="Notes"></button>
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-techs"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
 
@@ -1790,10 +1807,17 @@
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-techs" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-techs" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
 
@@ -1817,10 +1841,277 @@
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-techs" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-techs" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notes-techs" class="section-block">
+    <h2>Notes — Technicians</h2>
+    <textarea></textarea>
+  </div>
+
+  <!-- Service Advisors – Checklist -->
+  <div class="section">
+    <div class="section-header">
+      <span>Service Advisors – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>MCI</th>
+              <th>Prev. Declines</th>
+              <th>Workflow Order</th>
+              <th>Status Change</th>
+              <th>OCR</th>
+              <th>Custom Recs</th>
+              <th>ShopChat</th>
+              <th>Left MPI Panel</th>
+              <th>Sending MPI</th>
+              <t
+<!-- ========================================================= -->
+<!-- PAGE 5 : TRAINING CHECKLIST                               -->
+<!-- ✅ FIXED: Notifications + Filters + Notes are aligned       -->
+<!-- ✅ Notes buttons use SAME markup as Pages 3 & 4 (SVG icon)  -->
+<!-- ========================================================= -->
+<section id="training-checklist" class="page-section">
+  <h1>Training Checklist</h1>
+  <p class="page-subtitle">
+    Track adoption by role and ensure every user can work confidently in myKaarma.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <!-- Techs & Advisors Morning Meetings -->
+  <div class="section-block">
+    <h2>Techs &amp; Advisors Morning Meetings</h2>
+
+    <div class="checklist-row">
+      <label>Tuesday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers, Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Wednesday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers</option>
+        <option>Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Thursday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers</option>
+        <option>Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Technicians – Checklist -->
+  <div class="section">
+    <div class="section-header">
+      <span>Technicians – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>Workflow Order</th>
+              <th>OCR</th>
+              <th>MPI</th>
+              <th>Self Assign/Take</th>
+              <th>Dispatch</th>
+              <th>Left MPI Panel</th>
+              <th>Prev. Declines</th>
+              <th>ShopChat</th>
+              <th>Media</th>
+              <th>Status Change</th>
+              <th>Notifications</th>
+              <th>RO History</th>
+              <th>Inspection History</th>
+              <th>MPI History</th>
+              <th>Filters</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW (Row 1) -->
+            <tr>
+              <td>
+                <input type="checkbox">
+                <input type="text">
+              </td>
+
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+
+              <td>
+                <select>
+                  <option></option><option>Yes</option><option>No</option><option>N/A</option>
+                </select>
+              </td>
+
+              <td>
+                <select>
+                  <option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option>
+                </select>
+              </td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notifications -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notes (same button markup as pages 3/4) -->
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-techs"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr>
+              <td><input type="checkbox"><input type="text"></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-techs" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr>
+              <td><input type="checkbox"><input type="text"></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-techs" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -1873,6 +2164,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -1888,13 +2180,24 @@
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notifications -->
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
 
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-advisors" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-advisors" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -1944,6 +2247,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -1959,10 +2263,20 @@
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notifications -->
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Filters -->
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-parts" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-parts" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -2015,6 +2329,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -2030,13 +2345,24 @@
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- ✅ Notifications -->
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
               <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
 
+              <!-- ✅ Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-foreman" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-foreman" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -2078,6 +2404,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -2089,7 +2416,12 @@
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-bdc" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-bdc" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -2127,11 +2459,11 @@
               <th>Notes</th>
               <th>Communication</th>
               <th>Notifications</th>
-              <!-- Leave as-is (already has Notes training column) -->
             </tr>
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -2183,6 +2515,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW -->
             <tr>
               <td><input type="checkbox"><input type="text"></td>
               <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
@@ -2195,7 +2528,12 @@
               <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-pud-dispatch" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-pud-dispatch" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -2216,7 +2554,7 @@
 
 <!-- ========================================================= -->
 <!-- PAGE 6: OPCODES & PRICING                                 -->
-<!-- ✅ UPDATED: table Notes buttons now match pages 3 & 4      -->
+<!-- ✅ Notes buttons use SAME markup as Pages 3 & 4 (SVG icon)  -->
 <!-- ========================================================= -->
 <section id="opcodes-pricing" class="page-section">
   <h1>Opcodes &amp; Pricing</h1>
@@ -2250,6 +2588,7 @@
           </thead>
 
           <tbody>
+            <!-- TEMPLATE ROW (Row 1) -->
             <tr>
               <td><input type="checkbox"></td>
               <td><input type="text"></td>
@@ -2265,10 +2604,16 @@
               <td><input type="checkbox"></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-opcodes" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-opcodes-pricing" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
 
+            <!-- Row 2 -->
             <tr>
               <td><input type="checkbox"></td>
               <td><input type="text"></td>
@@ -2284,7 +2629,12 @@
               <td><input type="checkbox"></td>
 
               <td class="notes-col-cell">
-                <button type="button" class="notes-btn" data-notes-target="notes-opcodes" aria-label="Notes"></button>
+                <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-opcodes-pricing" aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -2297,7 +2647,7 @@
     </div>
   </div>
 
-  <div id="notes-opcodes" class="section-block">
+  <div id="notes-opcodes-pricing" class="section-block">
     <h2>Notes — Opcodes &amp; Pricing</h2>
     <textarea placeholder="Notes about opcode setup, pricing, and any discrepancies"></textarea>
   </div>
