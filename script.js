@@ -1,18 +1,11 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Page nav (sidebar)
-   ✅ Autosave/Restore (supports dynamically added rows/cards)
-   ✅ Reset This Page buttons
-   ✅ Add Row (+) for all tables (keeps dropdowns/notes working)
-   ✅ Notes buttons (ALL pages + tables):
-      - Click inserts/maintains a BULLET LIST inside the target NOTES TEXTAREA
-      - Bullets stay in the correct on-page order (even if clicked out of order)
-      - Table bullets include Name + Opcode (when those columns exist)
-      - Scrolls to notes section + focuses textarea
-   ✅ Support Tickets: base locked to Open, clones enforced, move by status
-   ✅ Dealership Map update helper (if #dealershipMapFrame exists)
-   ✅ Defensive: won’t crash if some elements/sections don’t exist
+   ✅ Notes buttons now insert ONLY what you asked for:
+      • Name + Opcode + Question
+   ✅ Bullets stay in the correct order (even if clicked out of order)
+   ✅ Table bullets pull Name + Opcode from that row + Question from the column header
+   ✅ Scrolls to the notes textarea + focuses it
 ======================================================= */
 
 (() => {
@@ -21,14 +14,10 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v5";
-  const AUTO_ID_ATTR = "data-mk-id";      // persistent identity marker
-  const AUTO_ROW_ATTR = "data-mk-row";    // stable row marker for cloned rows
-  const AUTO_CARD_ATTR = "data-mk-card";  // stable card marker for cloned cards
-
-  // Notes textarea formatting (visible, but keeps things organized)
-  const BULLETS_HEADER = "=== Bullet Points ===";
-  const NOTES_HEADER = "=== Notes ===";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const AUTO_ID_ATTR = "data-mk-id";
+  const AUTO_ROW_ATTR = "data-mk-row";
+  const AUTO_CARD_ATTR = "data-mk-card";
 
   /* =======================
      HELPERS
@@ -47,23 +36,13 @@
   const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
   const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
 
-  function safeText(str) {
-    return (str || "").toString().replace(/\s+/g, " ").trim();
-  }
-  function normalizeKey(str) {
-    return safeText(str).toLowerCase();
-  }
+  const safeText = (str) => (str || "").toString().replace(/\s+/g, " ").trim();
+  const normalizeKey = (str) => safeText(str).toLowerCase();
 
   function flash(el, cls = "mk-flash", ms = 800) {
     if (!isEl(el)) return;
     el.classList.add(cls);
     window.setTimeout(() => el.classList.remove(cls), ms);
-  }
-
-  function scrollToEl(el, offset = -10) {
-    if (!isEl(el)) return;
-    const top = el.getBoundingClientRect().top + window.scrollY + offset;
-    window.scrollTo({ top, behavior: "smooth" });
   }
 
   function formatDateYYYYMMDD(d) {
@@ -72,7 +51,6 @@
     const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
-
   function addDays(dateStr, days) {
     if (!dateStr) return "";
     const d = new Date(dateStr + "T00:00:00");
@@ -100,9 +78,6 @@
 
   /* =======================
      NOTES BUTTON NORMALIZATION
-     - Make sure every notes button is:
-       [data-notes-btn][data-notes-target]
-     - We do NOT inject SVG; your HTML/CSS controls the look.
   ======================= */
   function normalizeNotesButtons(root = document) {
     $$("button[data-notes-target]", root).forEach((btn) => {
@@ -174,11 +149,9 @@
       return {};
     }
   }
-
   function writeState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
-
   function getFieldKey(el) {
     return el?.getAttribute?.(AUTO_ID_ATTR) || el?.id || "";
   }
@@ -201,7 +174,6 @@
 
   function restoreState(root = document) {
     ensureStableFieldIds(root);
-
     const state = readState();
     if (!state || typeof state !== "object") return;
 
@@ -316,28 +288,20 @@
   });
 
   /* =======================
-     NOTES BULLETS -> INTO TEXTAREA
-     Requirements you listed:
-     - notes button pulls the bullet into the notes TEXTBOX
-     - bullets kept in correct order even if clicked out of order
-     - table bullets include Name + Opcode (when present)
-     - scroll screen down when clicking notes buttons
+     NOTES (ONLY: Name + Opcode + Question)
+     - Maintains order based on the button’s on-page position
   ======================= */
-
   function getNotesBlock(targetId) {
     if (!targetId) return null;
     return document.getElementById(targetId) || $(`#${CSS.escape(targetId)}`);
   }
-
   function getTextarea(notesBlock) {
     return notesBlock ? $("textarea", notesBlock) : null;
   }
-
   function getAllNotesButtonsForTarget(targetId) {
     if (!targetId) return [];
     return $$(`[data-notes-btn][data-notes-target="${CSS.escape(targetId)}"]`);
   }
-
   function getOrderIndex(clickedBtn, targetId) {
     const all = getAllNotesButtonsForTarget(targetId);
     const idx = all.indexOf(clickedBtn);
@@ -350,80 +314,31 @@
       const lbl = $("label", row);
       if (lbl) return safeText(lbl.textContent);
     }
-    return "Notes item";
+    return "Question";
   }
 
-  function getTableContext(btn) {
-    const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    if (!tr || !table) return null;
+  function parseTextarea(taVal) {
+    const lines = (taVal || "").split("\n");
+    const bulletLines = [];
+    let i = 0;
 
-    // ensure row has stable marker (for uniqueness + reorder stability)
-    if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
-    const rowId = tr.getAttribute(AUTO_ROW_ATTR);
-
-    const ths = $$("thead th", table).map((th) => safeText(th.textContent));
-    const tds = $$("td", tr);
-
-    function findColIndex(headerName) {
-      const hn = normalizeKey(headerName);
-      return ths.findIndex((t) => normalizeKey(t) === hn);
+    // bullets only from the top
+    while (i < lines.length) {
+      const ln = lines[i];
+      if (ln.trim().startsWith("•")) bulletLines.push(ln);
+      else break;
+      i++;
     }
 
-    function getCellTextAt(idx) {
-      if (idx < 0 || idx >= tds.length) return "";
-      const cell = tds[idx];
-
-      const sel = cell.querySelector("select");
-      if (sel) {
-        return safeText(sel.options[sel.selectedIndex]?.textContent || sel.value);
-      }
-      const inp = cell.querySelector("input[type='text'], input:not([type])");
-      if (inp) return safeText(inp.value);
-
-      return safeText(cell.textContent);
-    }
-
-    // Name (often checkbox + text input)
-    let name = "";
-    const nameIdx = findColIndex("Name");
-    if (nameIdx >= 0) {
-      const cell = tds[nameIdx];
-      const nameInput = cell ? cell.querySelector("input[type='text'], input:not([type])") : null;
-      name = safeText(nameInput ? nameInput.value : getCellTextAt(nameIdx));
-    } else {
-      const anyText = tr.querySelector("input[type='text'], input:not([type])");
-      name = safeText(anyText ? anyText.value : "");
-    }
-
-    // Opcode (page 6 table)
-    let opcode = "";
-    const opcodeIdx = findColIndex("Opcode");
-    if (opcodeIdx >= 0) opcode = getCellTextAt(opcodeIdx);
-
-    const tableId = table.id ? `table:${table.id}` : "table";
-    return { tableId, rowId, name, opcode };
+    // remainder is user notes (kept untouched)
+    const rest = lines.slice(i).join("\n").replace(/^\n+/, "");
+    return { bulletLines, rest };
   }
 
-  function buildBulletText(btn) {
-    const ctx = getTableContext(btn);
-    if (ctx) {
-      const parts = [];
-      if (ctx.name) parts.push(`Name: ${ctx.name}`);
-      if (ctx.opcode) parts.push(`Opcode: ${ctx.opcode}`);
-      return parts.length ? parts.join(" — ") : "Table row notes";
-    }
-    return getClosestLabelText(btn);
-  }
-
-  // Unique identity for the bullet (prevents duplicates)
-  function buildBulletKey(btn, targetId) {
-    const ctx = getTableContext(btn);
-    if (ctx) {
-      return `target:${targetId}|${ctx.tableId}|row:${ctx.rowId}`;
-    }
-    // Non-table: key by target + label text
-    return `target:${targetId}|label:${normalizeKey(getClosestLabelText(btn))}`;
+  function writeTextarea(ta, bulletsOrdered, restNotes) {
+    const bulletLines = bulletsOrdered.map((b) => `• ${b.text}`);
+    ta.value = bulletLines.join("\n") + (restNotes ? `\n\n${restNotes}` : "");
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   function ensureNotesMeta(state) {
@@ -433,63 +348,79 @@
     return state.__notesBullets;
   }
 
-  function readTextareaSections(textareaValue) {
-    const v = textareaValue || "";
-    const bIdx = v.indexOf(BULLETS_HEADER);
-    const nIdx = v.indexOf(NOTES_HEADER);
+  // TABLE CONTEXT: Name + Opcode + Question
+  function getTableContext(btn) {
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    if (!tr || !table) return null;
 
-    // If user hasn't used our structure yet, treat everything as "notes"
-    if (bIdx === -1 || nIdx === -1 || nIdx < bIdx) {
-      return { bulletsLines: [], notesText: v.trim() };
+    if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
+    const rowId = tr.getAttribute(AUTO_ROW_ATTR);
+
+    const ths = $$("thead th", table).map((th) => safeText(th.textContent));
+    const tds = $$("td", tr);
+
+    const notesCell = btn.closest("td");
+    const notesColIndex = notesCell ? tds.indexOf(notesCell) : -1;
+
+    function getCellTextAt(idx) {
+      if (idx < 0 || idx >= tds.length) return "";
+      const cell = tds[idx];
+
+      const sel = cell.querySelector("select");
+      if (sel) return safeText(sel.options[sel.selectedIndex]?.textContent || sel.value);
+
+      const inp = cell.querySelector("input[type='text'], input:not([type])");
+      if (inp) return safeText(inp.value);
+
+      return safeText(cell.textContent);
     }
 
-    const bulletsPart = v.slice(bIdx + BULLETS_HEADER.length, nIdx).trim();
-    const notesPart = v.slice(nIdx + NOTES_HEADER.length).trim();
+    // Name column
+    let name = "";
+    const nameIdx = ths.findIndex((t) => normalizeKey(t) === "name");
+    if (nameIdx >= 0) {
+      const cell = tds[nameIdx];
+      const nameInput = cell ? cell.querySelector("input[type='text'], input:not([type])") : null;
+      name = safeText(nameInput ? nameInput.value : getCellTextAt(nameIdx));
+    } else {
+      const anyText = tr.querySelector("input[type='text'], input:not([type])");
+      name = safeText(anyText ? anyText.value : "");
+    }
 
-    const bulletsLines = bulletsPart
-      .split("\n")
-      .map((x) => x.trim())
-      .filter(Boolean);
+    // Opcode column (page 6)
+    let opcode = "";
+    const opcodeIdx = ths.findIndex((t) => normalizeKey(t) === "opcode");
+    if (opcodeIdx >= 0) opcode = getCellTextAt(opcodeIdx);
 
-    return { bulletsLines, notesText: notesPart };
+    // "Question" = the column header immediately LEFT of the Notes column
+    let question = "Question";
+    if (notesColIndex > 0 && ths[notesColIndex - 1]) {
+      question = ths[notesColIndex - 1];
+    }
+
+    const tableId = table.id ? `table:${table.id}` : "table";
+    return { tableId, rowId, name, opcode, question };
   }
 
-  function writeTextareaWithBullets(textarea, bulletsOrdered, existingNotesText) {
-    const bulletLines = bulletsOrdered.map((b) => `• ${b.text}`);
+  function buildBulletText(btn) {
+    const ctx = getTableContext(btn);
+    if (ctx) {
+      const n = ctx.name ? `Name: ${ctx.name}` : "Name:";
+      const o = ctx.opcode ? `Opcode: ${ctx.opcode}` : "Opcode:";
+      const q = ctx.question ? `Question: ${ctx.question}` : "Question:";
+      return `${n} | ${o} | ${q}`;
+    }
 
-    const out =
-      `${BULLETS_HEADER}\n` +
-      (bulletLines.length ? bulletLines.join("\n") : "• \n").trimEnd() +
-      `\n\n${NOTES_HEADER}\n` +
-      (existingNotesText ? existingNotesText : "");
-
-    textarea.value = out;
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    // non-table notes: just "Question: <label>"
+    const q = getClosestLabelText(btn);
+    return `Question: ${q}`;
   }
 
-  function rebuildNotesTextareaForTarget(targetId) {
-    const notesBlock = getNotesBlock(targetId);
-    const ta = notesBlock ? getTextarea(notesBlock) : null;
-    if (!ta) return;
-
-    const state = readState();
-    const meta = ensureNotesMeta(state);
-    const list = Array.isArray(meta[targetId]) ? meta[targetId] : [];
-
-    // sort by orderIndex then createdAt
-    list.sort((a, b) => {
-      const oa = Number.isFinite(a.order) ? a.order : 999999;
-      const ob = Number.isFinite(b.order) ? b.order : 999999;
-      if (oa !== ob) return oa - ob;
-      return (a.createdAt || 0) - (b.createdAt || 0);
-    });
-
-    // keep user's notes section
-    const { notesText } = readTextareaSections(ta.value);
-
-    writeTextareaWithBullets(ta, list, notesText);
-
-    writeState(state);
+  function buildBulletKey(btn, targetId) {
+    const ctx = getTableContext(btn);
+    if (ctx) return `target:${targetId}|${ctx.tableId}|row:${ctx.rowId}|q:${normalizeKey(ctx.question)}`;
+    return `target:${targetId}|q:${normalizeKey(getClosestLabelText(btn))}`;
   }
 
   function upsertBullet(targetId, bulletKey, bulletText, orderIndex) {
@@ -501,20 +432,35 @@
 
     const existing = list.find((b) => b.key === bulletKey);
     if (existing) {
-      // update text if Name/Opcode changed, keep original order/createdAt
-      existing.text = bulletText;
-      if (Number.isFinite(orderIndex) && orderIndex < (existing.order ?? 999999)) {
-        // if we found a better (smaller) order, take it
-        existing.order = orderIndex;
-      }
+      existing.text = bulletText; // updates if Name/Opcode changed
+      existing.order = Number.isFinite(existing.order) ? existing.order : 999999;
+      if (Number.isFinite(orderIndex) && orderIndex < existing.order) existing.order = orderIndex;
     } else {
-      list.push({
-        key: bulletKey,
-        text: bulletText,
-        order: orderIndex,
-        createdAt: Date.now(),
-      });
+      list.push({ key: bulletKey, text: bulletText, order: orderIndex, createdAt: Date.now() });
     }
+
+    writeState(state);
+  }
+
+  function rebuildNotesTextareaForTarget(targetId) {
+    const notesBlock = getNotesBlock(targetId);
+    const ta = getTextarea(notesBlock);
+    if (!ta) return;
+
+    const state = readState();
+    const meta = ensureNotesMeta(state);
+    const list = Array.isArray(meta[targetId]) ? meta[targetId] : [];
+
+    // keep correct order no matter click order
+    list.sort((a, b) => {
+      const oa = Number.isFinite(a.order) ? a.order : 999999;
+      const ob = Number.isFinite(b.order) ? b.order : 999999;
+      if (oa !== ob) return oa - ob;
+      return (a.createdAt || 0) - (b.createdAt || 0);
+    });
+
+    const { rest } = parseTextarea(ta.value);
+    writeTextarea(ta, list, rest);
 
     writeState(state);
   }
@@ -522,14 +468,9 @@
   function scrollToNotesBlock(notesBlock) {
     if (!notesBlock) return;
     notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-    // nudge for sticky headers/top bars
-    setTimeout(() => {
-      const offset = 90;
-      window.scrollTo({ top: Math.max(0, window.scrollY - offset), behavior: "smooth" });
-    }, 250);
+    setTimeout(() => window.scrollTo({ top: Math.max(0, window.scrollY - 90), behavior: "smooth" }), 250);
   }
 
-  // Normalize notes buttons now (including tables)
   normalizeNotesButtons(document);
 
   document.addEventListener("click", (e) => {
@@ -547,33 +488,22 @@
     const bulletText = buildBulletText(btn);
     const bulletKey = buildBulletKey(btn, targetId);
 
-    // store + rebuild textarea bullets in correct order
     upsertBullet(targetId, bulletKey, bulletText, orderIndex);
 
-    // scroll + focus
     scrollToNotesBlock(notesBlock);
 
     setTimeout(() => {
       rebuildNotesTextareaForTarget(targetId);
-
       const ta = getTextarea(notesBlock);
       if (ta) {
         flash(notesBlock);
         ta.focus({ preventScroll: true });
-
-        // try to put cursor into Notes section (below NOTES_HEADER)
-        const v = ta.value || "";
-        const idx = v.indexOf(NOTES_HEADER);
-        if (idx !== -1) {
-          const pos = idx + NOTES_HEADER.length + 1;
-          ta.setSelectionRange(pos, pos);
-        }
       }
-    }, 350);
+    }, 250);
   });
 
   /* =======================
-     SUPPORT TICKETS
+     SUPPORT TICKETS (unchanged)
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -585,14 +515,12 @@
   function ticketIsBase(groupEl) {
     return groupEl?.getAttribute?.("data-base") === "true";
   }
-
   function requiredTicketFieldsFilled(groupEl) {
     const ticketNum = $(".ticket-number-input", groupEl)?.value?.trim();
     const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
     const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
     return !!(ticketNum && url && summary);
   }
-
   function setTicketStatus(groupEl, status, lock = false) {
     const sel = $(".ticket-status-select", groupEl);
     if (!sel) return;
@@ -600,7 +528,6 @@
     sel.disabled = !!lock;
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
-
   function moveTicketGroup(groupEl, status) {
     const dest = ticketContainers[status] || ticketContainers.Open;
     if (!dest) return;
@@ -729,7 +656,7 @@
     restoreState(document);
     applyGhostStyling(document);
 
-    // Rebuild bullets formatting for any notes blocks that already have stored bullets
+    // rebuild bullet lists for any targets already stored
     const state = readState();
     const meta = state.__notesBullets && typeof state.__notesBullets === "object" ? state.__notesBullets : {};
     Object.keys(meta).forEach((targetId) => rebuildNotesTextareaForTarget(targetId));
