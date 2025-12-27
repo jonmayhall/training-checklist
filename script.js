@@ -249,10 +249,13 @@
     const sec = document.getElementById(sectionId);
     if (sec) sec.classList.add("active");
 
-    const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
+    // CSS.escape is widely supported in modern browsers; fall back if needed
+    const safeId = (window.CSS && CSS.escape) ? CSS.escape(sectionId) : sectionId.replace(/"/g, '\\"');
+    const btn = $(`.nav-btn[data-target="${safeId}"]`);
     if (btn) btn.classList.add("active");
 
-    window.scrollTo({ top: 0, behavior: "instant" });
+    // "instant" isn't a valid behavior value; use "auto"
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   navButtons.forEach(btn => {
@@ -563,5 +566,4 @@
   }
 
   init();
-
 })();
