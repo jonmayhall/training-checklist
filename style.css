@@ -1679,3 +1679,151 @@ main{
 .mk-modal__panel .training-table th,
 .mk-modal__panel .training-table td{ white-space:nowrap; }
 .mk-row-placeholder{ display:none; }
+
+/* =========================================================
+   HOTFIX OVERRIDES — do not remove
+   Fixes:
+   ✅ Question notes buttons visible again
+   ✅ Tables use correct Notes button style (P3/P4)
+   ✅ Expand ⤢ button visible in table footer
+   ✅ Additional POC textbox same width as others
+========================================================= */
+
+/* ---------- 1) QUESTION NOTES BUTTONS (icon-only) ---------- */
+/* Never style question buttons as .notes-btn (that class is for TABLE notes) */
+.section-block .checklist-row .notes-btn{
+  /* if any question buttons accidentally still use .notes-btn, make them look like icon-only */
+  width:20px !important;
+  height:20px !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* Real question icon button */
+.notes-icon-btn{
+  appearance:none !important;
+  border:0 !important;
+  background:transparent !important;
+  padding:0 !important;
+  margin:0 !important;
+
+  width:20px !important;
+  height:20px !important;
+  min-width:20px !important;
+  min-height:20px !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  cursor:pointer !important;
+  line-height:0 !important;
+  color:var(--notes-icon) !important;
+  transition:color .15s ease, transform .08s ease !important;
+}
+.notes-icon-btn:hover{ color:var(--notes-icon-hover) !important; }
+.notes-icon-btn:active{ transform:translateY(1px) !important; }
+.notes-icon-btn:focus-visible{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(239,109,34,0.28) !important;
+  border-radius:8px !important;
+}
+.notes-icon-btn .notes-svg{
+  width:18px !important;
+  height:18px !important;
+  display:block !important;
+  fill:currentColor !important;
+}
+
+/* Ensure question-row action area doesn't collapse */
+.section-block .checklist-row .row-actions{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-left:auto !important;
+}
+
+/* ---------- 2) TABLE NOTES BUTTONS (P3/P4 correct) ---------- */
+/* This is the ONLY place .notes-btn should be styled like a white button */
+.training-table .notes-btn{
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+  border:1px solid var(--border) !important;
+  background:#fff !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  cursor:pointer !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
+  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
+}
+.training-table .notes-btn:hover{
+  border-color:rgba(239,109,34,.45) !important;
+  background:rgba(239,109,34,.06) !important;
+}
+.training-table .notes-btn:active{ transform:translateY(1px) !important; }
+.training-table .notes-btn::before{
+  content:"";
+  width:18px;
+  height:18px;
+  display:block;
+  background:var(--notes-icon);
+  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+}
+.training-table .notes-btn:hover::before{
+  background:var(--notes-icon-hover);
+}
+
+/* ---------- 3) TABLE EXPAND BUTTON (⤢) must show in footer ---------- */
+.table-footer .mk-table-expand-btn{
+  display:inline-flex !important;
+  margin-left:auto !important;
+  width:16px !important;
+  height:16px !important;
+  padding:0 !important;
+  border-radius:6px !important;
+  border:1px solid #d1d5db !important;
+  background:#ffffffee !important;
+  color:#111827 !important;
+  cursor:pointer !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12) !important;
+}
+.table-footer .mk-table-expand-btn:hover{
+  border-color:var(--orange) !important;
+  background:#fff !important;
+  transform:translateY(-1px) !important;
+}
+
+/* ---------- 4) Additional POC textbox width must match others ---------- */
+#dealership-info{
+  --di-input-width:225px; /* your standard for those cards */
+}
+
+/* Force ALL POC card inputs to same width */
+#dealership-info .primary-contacts-grid .additional-poc-card
+  .checklist-row input[type="text"]{
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+}
+
+/* Integrated-plus base row should be input width minus the button */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--di-input-width) - 34px) !important;
+  width:calc(var(--di-input-width) - 34px) !important;
+  max-width:calc(var(--di-input-width) - 34px) !important;
+}
