@@ -7,6 +7,7 @@
    ✅ Primary Contacts: uniform spacing (same gap all around + between cards)
    ✅ Training Date inputs match all other inputs
    ✅ Notes button: ICON-ONLY, centered, clean (no square button)
+   ✅ TABLE Notes buttons (Pages 5 & 6): MATCH Pages 3 & 4 (white button + bubble icon)
    ======================================================= */
 
 /* =======================
@@ -31,9 +32,17 @@
   /* default (single-column pages) */
   --input-width:340px;
 
-  /* Notes icon colors */
+  /* Notes icon colors (used for non-table icon button + table hover color) */
   --notes-icon: #9aa0a6;
   --notes-icon-hover: var(--orange);
+
+  /* IMPORTANT:
+     Pages 3/4 table notes icon uses a mask.
+     Set this to your bubble icon mask value (same as pages 3/4).
+     Example (if you already use it elsewhere): 
+       --notes-icon-mask: url("data:image/svg+xml;utf8,<svg .../>");
+  */
+  --notes-icon-mask: var(--notes-icon-mask);
 }
 
 /* =======================
@@ -441,9 +450,6 @@ main{
 
 /* =========================
    ✅ NOTES ICON BUTTON (CLEAN ICON-ONLY)
-   - No square button
-   - SVG centered perfectly
-   - Matches your style
 ========================= */
 .notes-icon-btn{
   appearance:none;
@@ -527,10 +533,8 @@ main{
 }
 
 /* ================================
-   NOTES COLUMN (Tables) — P3/P4 Match
+   NOTES COLUMN (Tables) — P3/P4 Match (base sizing)
 ================================ */
-
-/* Header + cell sizing */
 .training-table .notes-col-head,
 .training-table .notes-col-cell{
   width: 56px;
@@ -540,65 +544,6 @@ main{
   vertical-align: middle;
   padding: 8px 6px;
 }
-
-/* Notes icon button (icon-only) */
-.notes-btn{
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  /* if you use subtle elevation on P3/P4 */
-  box-shadow: 0 1px 2px rgba(0,0,0,.06);
-  transition: transform .08s ease, background .15s ease, border-color .15s ease;
-}
-
-/* Hover/active */
-.notes-btn:hover{
-  border-color: rgba(239,109,34,.45);
-  background: rgba(239,109,34,.06);
-}
-
-.notes-btn:active{
-  transform: translateY(1px);
-}
-
-/* Accessible focus */
-.notes-btn:focus-visible{
-  outline: 2px solid rgba(239,109,34,.55);
-  outline-offset: 2px;
-}
-
-/* The actual icon — uses mask so it can change color */
-.notes-btn{
-  --notes-icon-color: var(--orange);
-  -webkit-mask: var(--notes-icon) center / 18px 18px no-repeat;
-  mask: var(--notes-icon) center / 18px 18px no-repeat;
-  background-color: var(--notes-icon-color);
-}
-
-/* When we mask, the "background" becomes the icon,
-   so we need a wrapper background behind it */
-.notes-btn{
-  position: relative;
-}
-.notes-btn::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius: 10px;
-  background:#fff;
-  z-index:-1;
-}
-
-/* Optional: slightly dim icon when empty/unused (if you want)
-.notes-btn.is-empty{ --notes-icon-color: #9aa3af; }
-*/
 
 /* =======================================================
    INDENTED Q&A ROWS — bring inputs in to match non-indented padding
@@ -1049,7 +994,7 @@ main{
 }
 
 /* =======================
-   TABLE NOTES COLUMN
+   TABLE NOTES COLUMN (legacy selectors)
 ======================= */
 .training-table th.notes-col,
 .training-table td.notes-col{
@@ -1685,6 +1630,72 @@ main{
   margin:6px 10px 10px;
   font-size:12px;
   color:#555;
+}
+
+/* =========================================================
+   ✅ FINAL OVERRIDE: TABLE NOTES BUTTON (Pages 5 & 6 match 3 & 4)
+   White button + bubble icon (mask on ::before)
+========================================================= */
+.training-table .notes-col-head,
+.training-table .notes-col-cell{
+  width:56px !important;
+  min-width:56px !important;
+  max-width:56px !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+  padding:8px 6px !important;
+}
+
+.training-table .notes-col-cell{ white-space:nowrap; }
+
+.training-table .notes-btn{
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+  border:1px solid var(--border) !important;
+  background:#fff !important;
+  cursor:pointer !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
+  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
+
+  /* make sure no earlier "mask-on-button" rules win */
+  -webkit-mask:none !important;
+  mask:none !important;
+  background-color:#fff !important;
+}
+
+.training-table .notes-btn:hover{
+  border-color:rgba(239,109,34,.45) !important;
+  background:rgba(239,109,34,.06) !important;
+}
+.training-table .notes-btn:active{ transform:translateY(1px) !important; }
+
+.training-table .notes-btn:focus-visible{
+  outline:2px solid rgba(239,109,34,.55) !important;
+  outline-offset:2px !important;
+}
+
+/* Bubble icon */
+.training-table .notes-btn::before{
+  content:"";
+  width:18px;
+  height:18px;
+  display:block;
+
+  /* default gray, hover orange */
+  background:var(--notes-icon);
+
+  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
+}
+
+.training-table .notes-btn:hover::before{
+  background:var(--notes-icon-hover);
 }
 
 /* =======================
