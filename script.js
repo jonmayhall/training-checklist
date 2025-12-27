@@ -1,25 +1,24 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT JS
+   myKaarma Interactive Training Checklist — FULL PROJECT JS (FIXED)
    -------------------------------------------------------
    ✅ Page nav (sidebar)
    ✅ Autosave/Restore (supports dynamically added rows/cards)
    ✅ Reset This Page buttons (also clears saved state for that page)
    ✅ Add Row (+) for all tables
-   ✅ Notes buttons (pages 3–6 + tables): appends an organized bullet stub into the correct Notes textarea
-      - No page “jump/shift”
+   ✅ Notes buttons (questions + tables):
+      - Questions: .notes-icon-btn with inline SVG
+      - Tables: .notes-btn (CSS bubble mask / P3-P4 style)
+      - Appends a clean bullet stub into correct Notes textarea
+      - No page jump/shift
       - Format:
-          • Name (or Opcode)
-            ◦ <your notes here>
-   ✅ Row Popup Modal (Training + Opcodes tables):
-      - Opens on row click (not on inputs/buttons)
-      - White outer card containing: table card + notes card underneath
-      - Moves the LIVE row + LIVE notes block (no syncing bugs)
-   ✅ Support Tickets:
-      - Base card only shows disclaimer + (+) button
-      - Clicking (+) moves base values into a NEW card (prefilled), then clears base
-      - No remove buttons anywhere
-      - Status dropdown stays black text
-      - Ticket moves to correct container by status
+          • Title
+              ◦
+   ✅ Table Expand (⤢) injected into table footers (small) + opens TABLE modal (mkTableModal)
+      - If mkTableModal exists, it opens it and moves LIVE table card + LIVE notes card into it
+      - If mkTableModal does not exist, it falls back to row modal behavior (first row click behavior)
+   ✅ Row Popup Modal (mkRowModal) still supported (row click)
+   ✅ Additional POC (+) restored
+   ✅ Support Tickets rules preserved (base-only disclaimer/+)
 ======================================================= */
 
 (() => {
@@ -73,27 +72,42 @@
     });
   }
 
-  /* =======================
-     NOTES BUTTONS — NORMALIZE
-     - Any button with data-notes-target becomes icon-only .notes-btn
-     - We do NOT inject SVG; your CSS handles the icon
-  ======================= */
-  function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target]", root).forEach((btn) => {
-      btn.classList.add("notes-btn");
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-      // icon-only
-      btn.textContent = "";
-    });
+  /* =========================================================
+     NOTES BUTTON NORMALIZATION (FIXED)
+     - Table notes buttons must be `.notes-btn` (CSS bubble mask)
+     - Question notes buttons must be `.notes-icon-btn` with SVG
+     - NEVER blank out question buttons without providing the icon
+  ========================================================= */
 
-    // Some pages use data-notes-btn + data-notes-target
-    $$("button[data-notes-btn][data-notes-target]", root).forEach((btn) => {
-      btn.classList.add("notes-btn");
+  const NOTES_SVG = `
+    <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3a1 1 0 0 0 1.64.77L13.5 18H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 13h-6.85a1 1 0 0 0-.64.23L9 19.1V17a1 1 0 0 0-1-1H4V5h16v11Z"/>
+    </svg>
+  `;
+
+  function isTableNotesButton(btn) {
+    return !!btn.closest("table.training-table");
+  }
+
+  function normalizeNotesButtons(root = document) {
+    $$("button[data-notes-target], button[data-notes-btn][data-notes-target]", root).forEach((btn) => {
       btn.type = "button";
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-      // If you want those to remain SVG buttons, comment out next line:
-      // btn.textContent = "";
+
+      const inTable = isTableNotesButton(btn);
+
+      // Strip both classes first (prevents cross-styling)
+      btn.classList.remove("notes-btn", "notes-icon-btn");
+
+      if (inTable) {
+        // TABLE: must be .notes-btn (CSS renders bubble via ::before)
+        btn.classList.add("notes-btn");
+        btn.innerHTML = ""; // no svg needed
+      } else {
+        // QUESTION: must be .notes-icon-btn with SVG
+        btn.classList.add("notes-icon-btn");
+        btn.innerHTML = NOTES_SVG;
+      }
     });
   }
 
@@ -239,9 +253,6 @@
 
   /* =======================
      RESET THIS PAGE BUTTONS
-     - Clears the page UI
-     - Removes saved state for fields on that page
-     - Also clears any "notes bullets cache" for that page by removing textarea values from storage
   ======================= */
   function clearControls(root) {
     $$("input, select, textarea", root).forEach((el) => {
@@ -256,10 +267,8 @@
       const page = btn.closest(".page-section");
       if (!page) return;
 
-      // Clear UI
       clearControls(page);
 
-      // Remove saved values for those fields
       ensureStableFieldIds(page);
       const state = readState();
       $$("input, select, textarea", page).forEach((el) => {
@@ -273,7 +282,7 @@
   });
 
   /* =======================
-     TABLE ADD ROW (+)
+     TABLE ADD ROW (+)  (unchanged logic)
   ======================= */
   function clearControlsIn(root) {
     $$("input, select, textarea", root).forEach((el) => {
@@ -309,38 +318,72 @@
   });
 
   /* =======================
+     Additional POC (+) — RESTORED
+     - clones the base Additional POC card and clears the clone fields
+     - removes the + button from clones
+  ======================= */
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#dealership-info .additional-poc-card[data-base='true'] .add-row");
+    if (!btn) return;
+
+    const baseCard = btn.closest(".additional-poc-card");
+    if (!baseCard) return;
+
+    // Find the container that holds POC cards (prefer an ID container, else parent)
+    const container =
+      baseCard.closest("#dealership-info .primary-contacts-grid") ||
+      baseCard.parentElement;
+
+    const clone = baseCard.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute("data-clone", "true");
+    clone.setAttribute(AUTO_CARD_ATTR, uid("poc"));
+
+    // Remove the plus button from the clone
+    $$(".add-row", clone).forEach((b) => b.remove());
+
+    // Clear all inputs in clone
+    clearControlsIn(clone);
+
+    // Remove saved IDs
+    $$("[id]", clone).forEach((el) => (el.id = ""));
+    $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
+
+    // Append clone after base card
+    container.insertBefore(clone, baseCard.nextSibling);
+
+    normalizeNotesButtons(clone);
+    ensureStableFieldIds(container);
+    captureState(document);
+  });
+
+  /* =======================
      NOTES BULLETS (NO SCROLL SHIFT)
-     - Clicking a notes button appends a small stub into the target notes textarea
-     - Format:
-         • Name (or Opcode)
-           ◦
-     - No markdown, no bold, no extra symbols
+     - Clicking a notes button appends stub into the correct Notes textarea
+     - Table title = "NameOrOpcode  ColumnHeader"
+     - Question title = label text
+     - Stub:
+         • Title
+             ◦
   ======================= */
   function getNotesTargetIdFromButton(btn) {
     return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
   }
 
   function getContextLabel(btn) {
-    // Table row context: prefer "Name" input value (first text input)
     const row = btn.closest("tr");
     if (row) {
-      // Opcode table: opcode is likely first text in row after checkbox; take first non-empty text input
+      // Take first non-empty text input value in the row (Name or Opcode)
       const texts = $$('input[type="text"]', row).map((i) => (i.value || "").trim());
       const firstNonEmpty = texts.find((v) => v.length);
-      if (firstNonEmpty) return firstNonEmpty;
-
-      // If name cell has checkbox + input, still captured above
-      // Fallback: nothing
-      return "";
+      return firstNonEmpty || "";
     }
 
-    // Non-table checklist-row context: use the label text nearest
     const rowWrap = btn.closest(".checklist-row, .indent-sub");
     if (rowWrap) {
       const label = $("label", rowWrap);
       return (label?.textContent || "").trim();
     }
-
     return "";
   }
 
@@ -352,49 +395,43 @@
       return (label?.textContent || "").trim();
     }
 
-    // Table: use column header for the cell containing the button
+    // Table: column header for the button cell
     const td = btn.closest("td");
     const tr = btn.closest("tr");
     const table = btn.closest("table");
     if (td && tr && table) {
       const colIndex = Array.from(tr.children).indexOf(td);
       const th = table.tHead?.rows?.[0]?.children?.[colIndex];
-      const head = (th?.textContent || "").trim();
-      return head;
+      return (th?.textContent || "").trim();
     }
     return "";
   }
 
   function ensureBulletStub(textarea, titleLine) {
     const current = textarea.value || "";
-
-    // If this exact title already exists, do nothing (avoid duplicates)
-    if (current.includes(titleLine)) return;
+    if (current.includes(`• ${titleLine}`)) return;
 
     const spacer = current.trim().length ? "\n\n" : "";
-    const hollow = "◦"; // hollow bullet for indented note line
-
     textarea.value =
       current.replace(/\s+$/g, "") +
       spacer +
       `• ${titleLine}\n` +
-      `    ${hollow} \n`;
+      `        ◦ \n`;
 
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function focusNotesTextarea(block) {
-    const ta = $("textarea", block);
-    if (!ta) return;
-    // Prevent scroll-jump/shift:
-    ta.focus({ preventScroll: true });
+  function focusNoScroll(el) {
+    if (!el) return;
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
   }
 
-  // Normalize existing notes buttons on load
-  normalizeNotesButtons(document);
-
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn][data-notes-target], .notes-btn");
+    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn][data-notes-target]");
     if (!btn) return;
 
     const targetId = getNotesTargetIdFromButton(btn);
@@ -403,41 +440,196 @@
     const notesBlock = document.getElementById(targetId);
     if (!notesBlock) return;
 
-    // Build title:
-    // Tables: only need actual name/opcode (no dash), plus the column label
-    // Non-table: just the label text
-    const context = getContextLabel(btn);     // name/opcode when table, or label fallback
-    const q = getQuestionText(btn);           // column header or label
+    const ta = $("textarea", notesBlock);
+    if (!ta) return;
+
+    const context = (getContextLabel(btn) || "").trim();
+    const q = (getQuestionText(btn) || "").trim();
 
     let title = "";
     if (btn.closest("tr")) {
-      // Table: "NameOrOpcode  ColumnHeader"
-      const left = (context || "").trim();
-      const right = (q || "").trim();
-      title = [left, right].filter(Boolean).join("  ");
+      title = [context, q].filter(Boolean).join("  ").trim();
     } else {
-      // Non-table: use label only
-      title = (q || context || "").trim();
+      title = (q || context || "Notes").trim();
     }
 
-    if (!title) title = "Notes";
+    ensureBulletStub(ta, title);
+    focusNoScroll(ta);
+    flash(notesBlock);
 
-    // Append stub (no scrolling)
-    const ta = $("textarea", notesBlock);
-    if (ta) {
-      ensureBulletStub(ta, title);
-      focusNotesTextarea(notesBlock);
-      flash(notesBlock);
+    // NO scrolling, NO page activation here
+  });
+
+  /* =========================================================
+     TABLE EXPAND (⤢) — injected into table footers + working
+     - If #mkTableModal exists, uses it.
+     - Otherwise, just ensures the button exists (no-op fallback).
+  ========================================================= */
+
+  function ensureTableExpandButtons(root = document) {
+    $$(".table-container", root).forEach((container) => {
+      const footer = $(".table-footer", container);
+      const table = $("table.training-table", container);
+      if (!footer || !table) return;
+
+      if (footer.querySelector(".mk-table-expand-btn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-table-expand-btn";
+      btn.textContent = "⤢";
+      btn.setAttribute("aria-label", "Expand table");
+      btn.title = "Expand table";
+
+      footer.appendChild(btn);
+    });
+  }
+
+  /* =======================
+     TABLE MODAL (mkTableModal) — moves LIVE table card + LIVE notes card
+     Expected HTML ids (based on your CSS):
+       #mkTableModal
+       #mkTableModal .mk-modal-close (or [data-mk-modal-close])
+       #mkTableModalCards  (content host)
+  ======================= */
+
+  const mkTableModal = document.getElementById("mkTableModal");
+  const mkTableModalCards = document.getElementById("mkTableModalCards");
+  let activeTableModal = null; // { tableCard, tablePH, tableParent, notesCard, notesPH, notesParent }
+
+  function openTableModalShell(title = "Table") {
+    if (!mkTableModal) return;
+    mkTableModal.classList.add("open");
+    mkTableModal.setAttribute("aria-hidden", "false");
+
+    const titleEl = mkTableModal.querySelector(".mk-modal-title");
+    if (titleEl) titleEl.textContent = title;
+  }
+
+  function closeTableModalShell() {
+    if (!mkTableModal) return;
+    mkTableModal.classList.remove("open");
+    mkTableModal.setAttribute("aria-hidden", "true");
+  }
+
+  function restoreTableModal() {
+    if (!activeTableModal) return;
+
+    // restore notes card
+    if (activeTableModal.notesCard && activeTableModal.notesPH && activeTableModal.notesParent) {
+      activeTableModal.notesParent.insertBefore(activeTableModal.notesCard, activeTableModal.notesPH);
+      activeTableModal.notesPH.remove();
     }
 
-    // IMPORTANT: do NOT scroll, do NOT activatePage here (prevents shifting)
-    // If you want it to open the row popup instead, the popup handles it.
+    // restore table card
+    if (activeTableModal.tableCard && activeTableModal.tablePH && activeTableModal.tableParent) {
+      activeTableModal.tableParent.insertBefore(activeTableModal.tableCard, activeTableModal.tablePH);
+      activeTableModal.tablePH.remove();
+    }
+
+    if (mkTableModalCards) mkTableModalCards.innerHTML = "";
+    closeTableModalShell();
+    activeTableModal = null;
+  }
+
+  function getNotesCardForTable(tableContainer) {
+    // For pages 5/6, notes cards are typically right after the table section
+    // We take the FIRST notes button target id in the table and use that notes block.
+    const firstNotesBtn = tableContainer.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const targetId = firstNotesBtn?.getAttribute("data-notes-target") || "";
+    return targetId ? document.getElementById(targetId) : null;
+  }
+
+  function openTableModalFromContainer(tableContainer) {
+    if (!mkTableModal || !mkTableModalCards) return;
+
+    // The "table card" here is the nearest `.section` or `.table-container` wrapper
+    // Your table UI is: .section-header + .table-container (card)
+    // We'll move the `.table-container` card, plus its header if present.
+    const section = tableContainer.closest(".section") || tableContainer;
+    const sectionHeader = section.querySelector(".section-header");
+    const title = (sectionHeader?.textContent || "Table").trim();
+
+    // Create an outer white wrapper card (as you requested)
+    mkTableModalCards.innerHTML = "";
+    const outer = document.createElement("div");
+    outer.className = "mk-modal__outer-card";
+    mkTableModalCards.appendChild(outer);
+
+    // Placeholder where the section will go back
+    const tablePH = document.createElement("div");
+    tablePH.className = "mk-table-placeholder";
+
+    const tableParent = section.parentElement;
+    tableParent.insertBefore(tablePH, section);
+    tableParent.removeChild(section);
+
+    // Move live notes card too
+    const notesCard = getNotesCardForTable(tableContainer);
+    let notesPH = null;
+    let notesParent = null;
+
+    if (notesCard) {
+      notesPH = document.createElement("div");
+      notesPH.className = "mk-notes-placeholder";
+      notesParent = notesCard.parentElement;
+      notesParent.insertBefore(notesPH, notesCard);
+      notesParent.removeChild(notesCard);
+    }
+
+    // Append BOTH into outer card (table card + notes card underneath)
+    outer.appendChild(section);
+    if (notesCard) {
+      const notesWrap = document.createElement("div");
+      notesWrap.className = "mk-modal__notes-host";
+      notesWrap.appendChild(notesCard);
+      outer.appendChild(notesWrap);
+    }
+
+    activeTableModal = {
+      tableCard: section,
+      tablePH,
+      tableParent,
+      notesCard,
+      notesPH,
+      notesParent
+    };
+
+    openTableModalShell(title);
+  }
+
+  // Table modal close handlers
+  if (mkTableModal) {
+    mkTableModal.addEventListener("click", (e) => {
+      const closeBtn = e.target.closest(".mk-modal-close,[data-mk-modal-close]");
+      const backdrop = e.target.closest(".mk-modal-backdrop");
+      if (closeBtn || backdrop) restoreTableModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mkTableModal.classList.contains("open")) restoreTableModal();
+    });
+  }
+
+  // Expand button click
+  document.addEventListener("click", (e) => {
+    const expandBtn = e.target.closest(".mk-table-expand-btn");
+    if (!expandBtn) return;
+
+    const tableContainer = expandBtn.closest(".table-container");
+    if (!tableContainer) return;
+
+    if (mkTableModal && mkTableModalCards) {
+      openTableModalFromContainer(tableContainer);
+    } else {
+      // If mkTableModal doesn't exist, do nothing (button still shows).
+      // (Your mkRowModal still works via row-click.)
+      flash(tableContainer);
+    }
   });
 
   /* =======================
-     ROW POPUP MODAL (Training + Opcodes tables)
-     - Requires the modal HTML you added (mkRowModal)
-     - Moves LIVE row + LIVE notes card into modal (no sync issues)
+     ROW POPUP MODAL (mkRowModal) — your existing behavior, preserved
   ======================= */
   const modal = document.getElementById("mkRowModal");
   const tableHost = document.getElementById("mkModalTableHost");
@@ -498,7 +690,7 @@
   function moveNotesIntoModal(row) {
     if (!notesHost) return null;
 
-    const btn = row.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target], .notes-btn");
+    const btn = row.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
     const targetId = btn?.getAttribute("data-notes-target");
     if (!targetId) return null;
 
@@ -521,13 +713,11 @@
   function restoreModal() {
     if (!activeModal) return;
 
-    // Restore notes
     if (activeModal.notesEl && activeModal.notesPH && activeModal.notesParent) {
       activeModal.notesParent.insertBefore(activeModal.notesEl, activeModal.notesPH);
       activeModal.notesPH.remove();
     }
 
-    // Restore row
     if (activeModal.row && activeModal.rowPH && activeModal.rowParent) {
       activeModal.rowParent.insertBefore(activeModal.row, activeModal.rowPH);
       activeModal.rowPH.remove();
@@ -553,7 +743,7 @@
     document.addEventListener("click", (e) => {
       const t = e.target;
 
-      // ignore clicks on controls/buttons/notes/add-row
+      // ignore clicks on controls/buttons/notes/add-row/expand
       if (
         t.closest("button") ||
         t.closest("a") ||
@@ -583,13 +773,7 @@
   }
 
   /* =======================
-     SUPPORT TICKETS
-     - Base card only has (+) and disclaimer
-     - (+) creates a new card with the base values (prefilled)
-     - Then clears base for next entry
-     - No remove buttons anywhere
-     - Status select stays black
-     - Cards move by status
+     SUPPORT TICKETS (your logic preserved)
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -624,7 +808,7 @@
     if (!sel) return;
     sel.value = status;
     sel.disabled = !!lock;
-    sel.style.color = "#111"; // keep black text
+    sel.style.color = "#111";
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
@@ -647,26 +831,21 @@
     const dest = ticketContainers[status] || ticketContainers.Open;
     if (!dest) return;
 
-    // base always stays open + locked
     if (ticketIsBase(groupEl)) {
       setTicketStatus(groupEl, "Open", true);
       return;
     }
 
-    // unlock for clones
     const sel = $(".ticket-status-select", groupEl);
     if (sel) {
       sel.disabled = false;
       sel.style.color = "#111";
     }
 
-    // strip disclaimers / buttons (base-only)
     ensureOnlyBaseHasDisclaimerAndAdd(groupEl);
-
     dest.appendChild(groupEl);
   }
 
-  // Initialize base lock + black text
   if (ticketContainers.Open) {
     const base = $('.ticket-group[data-base="true"]', ticketContainers.Open);
     if (base) {
@@ -675,7 +854,6 @@
     }
   }
 
-  // Add ticket: move base values into a new card, then clear base
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".add-ticket-btn");
     if (!addBtn) return;
@@ -690,30 +868,22 @@
     }
 
     const baseF = ticketFields(baseGroup);
-
-    // Clone the base card WITH the entered values (so the new card "pulls over" the info)
     const clone = baseGroup.cloneNode(true);
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
-    // In clone: keep values as-is, unlock status
     setTicketStatus(clone, baseF.status?.value || "Open", false);
-
-    // Remove disclaimer + add button from clone (base-only)
     ensureOnlyBaseHasDisclaimerAndAdd(clone);
 
-    // Append clone to correct container based on its status
     const st = $(".ticket-status-select", clone)?.value || "Open";
     (ticketContainers[st] || ticketContainers.Open)?.appendChild(clone);
 
-    // Now clear base inputs for next ticket entry
     const bf = ticketFields(baseGroup);
     if (bf.num) bf.num.value = "";
     if (bf.url) bf.url.value = "";
     if (bf.summary) bf.summary.value = "";
     setTicketStatus(baseGroup, "Open", true);
 
-    // Make sure base retains disclaimer + add button
     ensureOnlyBaseHasDisclaimerAndAdd(baseGroup);
 
     ensureStableFieldIds(clone);
@@ -721,7 +891,6 @@
     captureState(document);
   });
 
-  // Status changes: move non-base cards by status
   document.addEventListener("change", (e) => {
     const sel = e.target.closest(".ticket-status-select");
     if (!sel) return;
@@ -742,7 +911,6 @@
     captureState(document);
   });
 
-  // On any mutation (new cards), enforce base-only elements
   const ticketsRoot = document.getElementById("support-tickets");
   if (ticketsRoot && window.MutationObserver) {
     const mo = new MutationObserver(() => {
@@ -795,12 +963,18 @@
      INIT
   ======================= */
   function init() {
+    // Normalize buttons correctly (questions vs tables)
     normalizeNotesButtons(document);
+
+    // Ensure expand buttons exist in every table footer
+    ensureTableExpandButtons(document);
+
+    // IDs + state
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
-    // Activate first visible page
+    // Activate first page
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
@@ -812,75 +986,16 @@
       $$(".ticket-group", ticketsRoot).forEach((g) => ensureOnlyBaseHasDisclaimerAndAdd(g));
       $$(".ticket-status-select", ticketsRoot).forEach((s) => (s.style.color = "#111"));
     }
+
+    // If DOM changes (new rows/cards), keep notes button styles correct + keep expand buttons present
+    if (window.MutationObserver) {
+      const mo = new MutationObserver(() => {
+        normalizeNotesButtons(document);
+        ensureTableExpandButtons(document);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   init();
-})();
-
-/* =========================================================
-   HOTFIX PATCH — drop at very bottom of script.js
-   ✅ Injects ⤢ expand button into every table footer (if missing)
-   ✅ Restores delegated + add-row handler (prevents "plus not working")
-   ✅ Leaves your existing modal/table code intact
-========================================================= */
-
-(function mkHotfixPatch(){
-  // ---- 1) Ensure every table has an expand button in footer ----
-  function ensureExpandButtons(){
-    document.querySelectorAll('.table-container').forEach(container => {
-      const footer = container.querySelector('.table-footer');
-      const table = container.querySelector('table.training-table');
-      if (!footer || !table) return;
-
-      // if already exists, do nothing
-      if (footer.querySelector('.mk-table-expand-btn')) return;
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'mk-table-expand-btn';
-      btn.textContent = '⤢';
-      btn.setAttribute('aria-label', 'Expand table');
-      btn.title = 'Expand table';
-      footer.appendChild(btn);
-    });
-  }
-
-  // ---- 2) Delegated click handlers (fixes add-row + expand) ----
-  function onDocClick(e){
-    const addBtn = e.target.closest('.table-footer .add-row');
-    if (addBtn){
-      // If your project already has its own handler, this will still work
-      // because we dispatch a custom event instead of duplicating logic.
-      const tableContainer = addBtn.closest('.table-container');
-      const table = tableContainer?.querySelector('table.training-table');
-      if (!table) return;
-
-      // Let your existing code handle it if it listens for this event
-      table.dispatchEvent(new CustomEvent('mk:addRow', { bubbles:true }));
-      // If your existing code is NOT event-based, you likely have a direct handler on .add-row
-      // This delegated patch ensures something fires even if cloning broke bindings.
-      return;
-    }
-
-    const expandBtn = e.target.closest('.mk-table-expand-btn');
-    if (expandBtn){
-      const tableContainer = expandBtn.closest('.table-container');
-      const table = tableContainer?.querySelector('table.training-table');
-      if (!table) return;
-
-      // Try to trigger your existing table modal logic:
-      // 1) If you already delegate on .mk-table-expand-btn, you're done.
-      // 2) If your code expects an event, we dispatch one.
-      table.dispatchEvent(new CustomEvent('mk:openTableModal', { bubbles:true, detail:{ table } }));
-      return;
-    }
-  }
-
-  // ---- 3) Run now + after any dynamic cloning ----
-  ensureExpandButtons();
-  document.addEventListener('click', onDocClick, true);
-
-  // If your app clones DOM after load, this keeps expand buttons present
-  const mo = new MutationObserver(() => ensureExpandButtons());
-  mo.observe(document.body, { childList:true, subtree:true });
 })();
