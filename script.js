@@ -1,28 +1,25 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Sidebar page nav
+   ✅ Page nav (sidebar)
    ✅ Autosave/Restore (supports dynamically added rows/cards)
-   ✅ Reset This Page (clears saved state for that page)
+   ✅ Reset This Page buttons (also clears saved state for that page)
    ✅ Add Row (+) for all tables
-   ✅ Notes buttons (Pages 3–6 + tables) -> INSERTS BULLET BLOCKS
-      - keeps bullets in DOM order even if clicked out of order
-      - NO page shifting / NO scrolling
-      - creates a spaced block:
-          • Title
-                ◦ 
-   ✅ Tables: bullet is ONLY the Name or Opcode value (no “Technicians – Checklist”, no hyphen)
+   ✅ Notes buttons (pages 3–6 + tables): appends an organized bullet stub into the correct Notes textarea
+      - No page “jump/shift”
+      - Format:
+          • Name (or Opcode)
+            ◦ <your notes here>
+   ✅ Row Popup Modal (Training + Opcodes tables):
+      - Opens on row click (not on inputs/buttons)
+      - White outer card containing: table card + notes card underneath
+      - Moves the LIVE row + LIVE notes block (no syncing bugs)
    ✅ Support Tickets:
-      - Only base card shows disclaimer
-      - + button only on base card
-      - NO remove button
-      - Adding a ticket COPIES base inputs into a new card, then clears base inputs
-      - Base ticket must be complete before adding another
-   ✅ Defensive: won’t crash if sections don’t exist
-
-   NOTES / BULLETS:
-   - Uses invisible order markers (no visible **, no visible extra text)
-   - Re-sorts bullet blocks in textarea by DOM order on each insert
+      - Base card only shows disclaimer + (+) button
+      - Clicking (+) moves base values into a NEW card (prefilled), then clears base
+      - No remove buttons anywhere
+      - Status dropdown stays black text
+      - Ticket moves to correct container by status
 ======================================================= */
 
 (() => {
@@ -31,15 +28,10 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v3";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v4";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
-
-  // Invisible marker to preserve DOM order in notes without showing extra text
-  const INV = "\u2063"; // invisible separator
-  const marker = (n) => `${INV}${n}${INV}`;
-  const markerRe = new RegExp(`${INV}(\\d+)${INV}$`);
 
   /* =======================
      HELPERS
@@ -49,28 +41,19 @@
 
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
+    return (prefix = "mk") =>
+      `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
-
   const isCheckbox = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "checkbox";
   const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
   const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
 
-  function formatDateYYYYMMDD(d) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  function addDays(dateStr, days) {
-    if (!dateStr) return "";
-    const d = new Date(dateStr + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    return formatDateYYYYMMDD(d);
+  function flash(el, cls = "mk-flash", ms = 650) {
+    if (!isEl(el)) return;
+    el.classList.add(cls);
+    window.setTimeout(() => el.classList.remove(cls), ms);
   }
 
   /* =======================
@@ -91,7 +74,31 @@
   }
 
   /* =======================
-     STABLE IDS (autosave-safe)
+     NOTES BUTTONS — NORMALIZE
+     - Any button with data-notes-target becomes icon-only .notes-btn
+     - We do NOT inject SVG; your CSS handles the icon
+  ======================= */
+  function normalizeNotesButtons(root = document) {
+    $$("button[data-notes-target]", root).forEach((btn) => {
+      btn.classList.add("notes-btn");
+      btn.type = "button";
+      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
+      // icon-only
+      btn.textContent = "";
+    });
+
+    // Some pages use data-notes-btn + data-notes-target
+    $$("button[data-notes-btn][data-notes-target]", root).forEach((btn) => {
+      btn.classList.add("notes-btn");
+      btn.type = "button";
+      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
+      // If you want those to remain SVG buttons, comment out next line:
+      // btn.textContent = "";
+    });
+  }
+
+  /* =======================
+     PERSISTENT ID SYSTEM
   ======================= */
   function ensureStableFieldIds(root = document) {
     $$("tr", root).forEach((tr) => {
@@ -179,6 +186,7 @@
 
   function restoreState(root = document) {
     ensureStableFieldIds(root);
+
     const state = readState();
     if (!state || typeof state !== "object") return;
 
@@ -187,7 +195,7 @@
       if (!key || !(key in state)) return;
 
       if (isCheckbox(el)) el.checked = !!state[key];
-      else if (isRadio(el)) el.checked = el.value === state[key];
+      else if (isRadio(el)) el.checked = (el.value === state[key]);
       else el.value = state[key] ?? "";
     });
 
@@ -207,7 +215,7 @@
   });
 
   /* =======================
-     PAGE NAVIGATION (no jump)
+     PAGE NAVIGATION
   ======================= */
   const pageSections = $$(".page-section");
   const navButtons = $$(".nav-btn");
@@ -223,7 +231,6 @@
 
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
-    // IMPORTANT: no scrollTo here (prevents shifting)
   }
 
   navButtons.forEach((btn) => {
@@ -231,9 +238,10 @@
   });
 
   /* =======================
-     RESET THIS PAGE
-     - Clears fields AND clears saved state keys for that page
-     - Prevents “old notes” reappearing later
+     RESET THIS PAGE BUTTONS
+     - Clears the page UI
+     - Removes saved state for fields on that page
+     - Also clears any "notes bullets cache" for that page by removing textarea values from storage
   ======================= */
   function clearControls(root) {
     $$("input, select, textarea", root).forEach((el) => {
@@ -243,42 +251,36 @@
     applyGhostStyling(root);
   }
 
-  function clearSavedStateForRoot(root) {
-    ensureStableFieldIds(root);
-    const state = readState();
-
-    $$("input, select, textarea", root).forEach((el) => {
-      const k = getFieldKey(el);
-      if (k && k in state) delete state[k];
-    });
-
-    writeState(state);
-  }
-
   $$(".clear-page-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const page = btn.closest(".page-section");
       if (!page) return;
 
+      // Clear UI
       clearControls(page);
-      clearSavedStateForRoot(page);
+
+      // Remove saved values for those fields
+      ensureStableFieldIds(page);
+      const state = readState();
+      $$("input, select, textarea", page).forEach((el) => {
+        const k = getFieldKey(el);
+        if (k && k in state) delete state[k];
+      });
+      writeState(state);
+
+      flash(page);
     });
   });
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest('[data-clear-all="true"]');
-    if (!btn) return;
-    if (!confirm("Clear ALL saved data for this checklist?")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  });
-
   /* =======================
-     ADD ROW (+) for tables
+     TABLE ADD ROW (+)
   ======================= */
-  function scrubCloneIds(node) {
-    $$("[id]", node).forEach((el) => (el.id = ""));
-    $$(`[${AUTO_ID_ATTR}]`, node).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
+  function clearControlsIn(root) {
+    $$("input, select, textarea", root).forEach((el) => {
+      if (isCheckbox(el) || isRadio(el)) el.checked = false;
+      else el.value = "";
+    });
+    applyGhostStyling(root);
   }
 
   document.addEventListener("click", (e) => {
@@ -292,278 +294,302 @@
     if (!tbody || !firstRow) return;
 
     const clone = firstRow.cloneNode(true);
+
     clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
+    clearControlsIn(clone);
 
-    clearControls(clone);
-    scrubCloneIds(clone);
-
-    // Ensure notes buttons exist + are normalized
-    normalizeNotesButtons(clone);
-    assignNotesOrder(document);
+    $$("[id]", clone).forEach((el) => (el.id = ""));
+    $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
 
     tbody.appendChild(clone);
 
+    normalizeNotesButtons(clone);
     ensureStableFieldIds(tbody);
     captureState(document);
   });
 
   /* =======================
-     NOTES BUTTONS — NORMALIZE
-     Supports:
-       - data-notes-target (tables + pages 3–6)
-       - data-notes-btn (pages 3–4)
+     NOTES BULLETS (NO SCROLL SHIFT)
+     - Clicking a notes button appends a small stub into the target notes textarea
+     - Format:
+         • Name (or Opcode)
+           ◦
+     - No markdown, no bold, no extra symbols
   ======================= */
-  function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target], button[data-notes-btn]", root).forEach((btn) => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-      // do NOT force innerHTML/text: pages 3/4 use SVG buttons.
-      // tables use icon via CSS; leaving content alone is safest.
-    });
+  function getNotesTargetIdFromButton(btn) {
+    return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
   }
 
-  /* =======================
-     NOTES ORDER (DOM order)
-  ======================= */
-  function assignNotesOrder(root = document) {
-    let i = 1;
-    $$("button[data-notes-target], button[data-notes-btn]", root).forEach((btn) => {
-      btn.dataset.mkOrder = String(i++);
-      // unify target attr
-      if (!btn.getAttribute("data-notes-target") && btn.getAttribute("data-notes-btn")) {
-        const t = btn.getAttribute("data-notes-target");
-        if (!t) {
-          // pages 3/4 already have data-notes-target in your HTML
-          // if any are missing, they won't work anyway
-        }
-      }
-    });
-  }
+  function getContextLabel(btn) {
+    // Table row context: prefer "Name" input value (first text input)
+    const row = btn.closest("tr");
+    if (row) {
+      // Opcode table: opcode is likely first text in row after checkbox; take first non-empty text input
+      const texts = $$('input[type="text"]', row).map((i) => (i.value || "").trim());
+      const firstNonEmpty = texts.find((v) => v.length);
+      if (firstNonEmpty) return firstNonEmpty;
 
-  /* =======================
-     NOTES: Build bullet text
-     Requirements:
-       - No markdown **, no “question” word
-       - Spaced blocks for readability
-       - Indented hollow bullet line beneath (more indent)
-       - Tables: ONLY actual Name or Opcode value (no section titles, no hyphens)
-  ======================= */
-  function getClosestLabelText(btn) {
-    // For pages 3/4: button is in .row-actions next to select/input and label is in same .checklist-row
-    const row = btn.closest(".checklist-row");
-    if (!row) return "";
-    const label = $("label", row);
-    return (label?.textContent || "").trim();
-  }
-
-  function getTablePrimaryValue(btn) {
-    const tr = btn.closest("tr");
-    if (!tr) return "";
-
-    const table = btn.closest("table");
-    if (!table) return "";
-
-    // Find the column index for Notes
-    const ths = $$("thead th", table);
-    const notesIdx = ths.findIndex((th) => (th.textContent || "").trim().toLowerCase() === "notes");
-    if (notesIdx < 0) return "";
-
-    // Prefer “Opcode” column (page 6) if present, else “Name” (page 5)
-    const opcodeIdx = ths.findIndex((th) => (th.textContent || "").trim().toLowerCase() === "opcode");
-    const nameIdx = ths.findIndex((th) => (th.textContent || "").trim().toLowerCase() === "name");
-
-    const getCellValue = (idx) => {
-      if (idx < 0) return "";
-      const td = tr.children[idx];
-      if (!td) return "";
-      const inp = $("input[type='text']", td);
-      const sel = $("select", td);
-      const val =
-        (inp && (inp.value || "").trim()) ||
-        (sel && (sel.value || "").trim()) ||
-        (td.textContent || "").trim();
-      return val;
-    };
-
-    // If opcode exists on the table, use opcode value (only)
-    if (opcodeIdx >= 0) {
-      return getCellValue(opcodeIdx);
+      // If name cell has checkbox + input, still captured above
+      // Fallback: nothing
+      return "";
     }
 
-    // Otherwise, use name column value (only).
-    // Name cell often contains a checkbox + text input; grab the text input.
-    if (nameIdx >= 0) {
-      const td = tr.children[nameIdx];
-      if (!td) return "";
-      const nameInput = $$("input[type='text']", td)[0];
-      return (nameInput?.value || "").trim();
+    // Non-table checklist-row context: use the label text nearest
+    const rowWrap = btn.closest(".checklist-row, .indent-sub");
+    if (rowWrap) {
+      const label = $("label", rowWrap);
+      return (label?.textContent || "").trim();
     }
 
     return "";
   }
 
-  function buildBulletHeader(btn) {
-    const inTable = !!btn.closest("table");
-
-    if (inTable) {
-      const primary = getTablePrimaryValue(btn);
-      return primary ? `• ${primary}` : `•`; // keep minimal
+  function getQuestionText(btn) {
+    // Non-table: label in same row
+    const rowWrap = btn.closest(".checklist-row, .indent-sub");
+    if (rowWrap) {
+      const label = $("label", rowWrap);
+      return (label?.textContent || "").trim();
     }
 
-    // Non-table: use the label text only
-    const label = getClosestLabelText(btn);
-    return label ? `• ${label}` : `•`;
-  }
-
-  function buildIndentedLine() {
-    // more indent + hollow bullet
-    return `        ◦ `;
-  }
-
-  function parseBlocks(text) {
-    const lines = (text || "").split("\n");
-    const blocks = [];
-    let current = null;
-
-    const startRe = /^•\s?.*$/;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-
-      if (startRe.test(line)) {
-        if (current) blocks.push(current);
-        current = { lines: [line] };
-      } else {
-        if (!current) {
-          // preamble lines (rare) -> keep as a block with order 0
-          current = { lines: [line], preamble: true };
-        } else {
-          current.lines.push(line);
-        }
-      }
+    // Table: use column header for the cell containing the button
+    const td = btn.closest("td");
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    if (td && tr && table) {
+      const colIndex = Array.from(tr.children).indexOf(td);
+      const th = table.tHead?.rows?.[0]?.children?.[colIndex];
+      const head = (th?.textContent || "").trim();
+      return head;
     }
-    if (current) blocks.push(current);
-
-    return blocks;
+    return "";
   }
 
-  function extractOrderFromHeaderLine(line) {
-    const m = line.match(markerRe);
-    if (!m) return null;
-    return Number(m[1]);
+  function ensureBulletStub(textarea, titleLine) {
+    const current = textarea.value || "";
+
+    // If this exact title already exists, do nothing (avoid duplicates)
+    if (current.includes(titleLine)) return;
+
+    const spacer = current.trim().length ? "\n\n" : "";
+    const hollow = "◦"; // hollow bullet for indented note line
+
+    textarea.value =
+      current.replace(/\s+$/g, "") +
+      spacer +
+      `• ${titleLine}\n` +
+      `    ${hollow} \n`;
+
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function stripMarkerFromLine(line) {
-    return line.replace(markerRe, "");
+  function focusNotesTextarea(block) {
+    const ta = $("textarea", block);
+    if (!ta) return;
+    // Prevent scroll-jump/shift:
+    ta.focus({ preventScroll: true });
   }
 
-  function ensureBlockHasIndent(block) {
-    // If the block doesn't already have an indented hollow line, add it.
-    const hasIndented = block.lines.some((l) => l.trimStart().startsWith("◦") || l.includes("◦"));
-    if (!hasIndented) {
-      block.lines.push(buildIndentedLine());
-    }
-    return block;
-  }
-
-  function sortAndRebuildTextarea(ta) {
-    const blocks = parseBlocks(ta.value);
-
-    // Separate preamble (non-bullet) block(s)
-    const pre = blocks.filter((b) => b.preamble);
-    const bullets = blocks.filter((b) => !b.preamble);
-
-    // Sort bullet blocks by embedded order marker if present
-    bullets.sort((a, b) => {
-      const oa = extractOrderFromHeaderLine(a.lines[0]) ?? 999999;
-      const ob = extractOrderFromHeaderLine(b.lines[0]) ?? 999999;
-      return oa - ob;
-    });
-
-    // Make sure all bullet blocks have spaced separation and indent line
-    const normalized = bullets.map((b) => {
-      b.lines[0] = stripMarkerFromLine(b.lines[0]); // marker is invisible anyway; stripping is safe
-      // re-add invisible marker at end if it was there (keeps sorting stable)
-      // (we preserve by reading it before stripping)
-      return b;
-    });
-
-    // rebuild: preamble first, then blocks separated by blank line
-    const out = [];
-    pre.forEach((b) => out.push(...b.lines));
-
-    normalized.forEach((b, idx) => {
-      ensureBlockHasIndent(b);
-      if (out.length && out[out.length - 1].trim() !== "") out.push("");
-      out.push(...b.lines);
-      // extra blank line between entries for readability
-      if (idx !== normalized.length - 1) out.push("");
-    });
-
-    ta.value = out.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-  }
-
-  function insertBulletBlock(ta, header, orderNum) {
-    const headerWithOrder = `${header}${marker(orderNum)}`; // invisible marker
-
-    const current = ta.value || "";
-    // If an exact header already exists (ignoring marker), do nothing
-    const exists = current.split("\n").some((l) => stripMarkerFromLine(l).trim() === header.trim());
-    if (exists) return;
-
-    const block = [headerWithOrder, buildIndentedLine(), ""].join("\n");
-    ta.value = (current.trimEnd() ? current.trimEnd() + "\n\n" : "") + block;
-
-    // reorder to DOM order
-    sortAndRebuildTextarea(ta);
-
-    // trigger autosave
-    ta.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  /* =======================
-     NOTES CLICK HANDLER
-     - NO scroll
-     - NO activatePage (no shift)
-     - Inserts bullet blocks into target textarea
-  ======================= */
+  // Normalize existing notes buttons on load
   normalizeNotesButtons(document);
-  assignNotesOrder(document);
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn]");
+    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn][data-notes-target], .notes-btn");
     if (!btn) return;
 
-    // Must have a target
-    const targetId = btn.getAttribute("data-notes-target");
+    const targetId = getNotesTargetIdFromButton(btn);
     if (!targetId) return;
 
     const notesBlock = document.getElementById(targetId);
     if (!notesBlock) return;
 
-    const ta = $("textarea", notesBlock);
-    if (!ta) return;
+    // Build title:
+    // Tables: only need actual name/opcode (no dash), plus the column label
+    // Non-table: just the label text
+    const context = getContextLabel(btn);     // name/opcode when table, or label fallback
+    const q = getQuestionText(btn);           // column header or label
 
-    // Build header + insert (no bold, no “question” word, no hyphen)
-    const header = buildBulletHeader(btn);
-    const orderNum = Number(btn.dataset.mkOrder || 999999);
-
-    insertBulletBlock(ta, header, orderNum);
-
-    // focus without scrolling (prevents page shifting)
-    try {
-      ta.focus({ preventScroll: true });
-    } catch {
-      ta.focus();
+    let title = "";
+    if (btn.closest("tr")) {
+      // Table: "NameOrOpcode  ColumnHeader"
+      const left = (context || "").trim();
+      const right = (q || "").trim();
+      title = [left, right].filter(Boolean).join("  ");
+    } else {
+      // Non-table: use label only
+      title = (q || context || "").trim();
     }
+
+    if (!title) title = "Notes";
+
+    // Append stub (no scrolling)
+    const ta = $("textarea", notesBlock);
+    if (ta) {
+      ensureBulletStub(ta, title);
+      focusNotesTextarea(notesBlock);
+      flash(notesBlock);
+    }
+
+    // IMPORTANT: do NOT scroll, do NOT activatePage here (prevents shifting)
+    // If you want it to open the row popup instead, the popup handles it.
   });
 
   /* =======================
+     ROW POPUP MODAL (Training + Opcodes tables)
+     - Requires the modal HTML you added (mkRowModal)
+     - Moves LIVE row + LIVE notes card into modal (no sync issues)
+  ======================= */
+  const modal = document.getElementById("mkRowModal");
+  const tableHost = document.getElementById("mkModalTableHost");
+  const notesHost = document.getElementById("mkModalNotesHost");
+
+  let activeModal = null; // { row, rowPH, rowParent, notesEl, notesPH, notesParent }
+
+  function openModal() {
+    if (!modal) return;
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function buildModalTableShell(fromTable, row) {
+    tableHost.innerHTML = "";
+
+    const h2 = document.createElement("h2");
+    h2.textContent = "Row Details";
+    tableHost.appendChild(h2);
+
+    const scroll = document.createElement("div");
+    scroll.className = "mk-modal__table-scroll";
+    tableHost.appendChild(scroll);
+
+    const t = document.createElement("table");
+    t.className = fromTable.className || "training-table";
+    scroll.appendChild(t);
+
+    const thead = fromTable.tHead ? fromTable.tHead.cloneNode(true) : null;
+    if (thead) t.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    t.appendChild(tbody);
+
+    tbody.appendChild(row); // LIVE row
+  }
+
+  function moveRowIntoModal(row) {
+    const table = row.closest("table");
+    if (!table || !tableHost) return null;
+
+    const ph = document.createElement("tr");
+    ph.className = "mk-row-placeholder";
+
+    const parent = row.parentElement;
+    parent.insertBefore(ph, row);
+    parent.removeChild(row);
+
+    buildModalTableShell(table, row);
+
+    return { parent, ph, table };
+  }
+
+  function moveNotesIntoModal(row) {
+    if (!notesHost) return null;
+
+    const btn = row.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target], .notes-btn");
+    const targetId = btn?.getAttribute("data-notes-target");
+    if (!targetId) return null;
+
+    const notesEl = document.getElementById(targetId);
+    if (!notesEl) return null;
+
+    const notesPH = document.createElement("div");
+    notesPH.className = "mk-notes-placeholder";
+
+    const notesParent = notesEl.parentElement;
+    notesParent.insertBefore(notesPH, notesEl);
+    notesParent.removeChild(notesEl);
+
+    notesHost.innerHTML = "";
+    notesHost.appendChild(notesEl);
+
+    return { notesEl, notesPH, notesParent };
+  }
+
+  function restoreModal() {
+    if (!activeModal) return;
+
+    // Restore notes
+    if (activeModal.notesEl && activeModal.notesPH && activeModal.notesParent) {
+      activeModal.notesParent.insertBefore(activeModal.notesEl, activeModal.notesPH);
+      activeModal.notesPH.remove();
+    }
+
+    // Restore row
+    if (activeModal.row && activeModal.rowPH && activeModal.rowParent) {
+      activeModal.rowParent.insertBefore(activeModal.row, activeModal.rowPH);
+      activeModal.rowPH.remove();
+    }
+
+    if (tableHost) tableHost.innerHTML = "";
+    if (notesHost) notesHost.innerHTML = "";
+
+    closeModal();
+    activeModal = null;
+  }
+
+  if (modal && tableHost && notesHost) {
+    modal.addEventListener("click", (e) => {
+      if (e.target && e.target.hasAttribute("data-mk-modal-close")) restoreModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") restoreModal();
+    });
+
+    // Open on row click (avoid controls)
+    document.addEventListener("click", (e) => {
+      const t = e.target;
+
+      // ignore clicks on controls/buttons/notes/add-row
+      if (
+        t.closest("button") ||
+        t.closest("a") ||
+        t.matches("input, select, textarea, option") ||
+        t.closest(".table-footer")
+      ) return;
+
+      const row = t.closest("table.training-table tbody tr");
+      if (!row) return;
+
+      const movedRow = moveRowIntoModal(row);
+      if (!movedRow) return;
+
+      const movedNotes = moveNotesIntoModal(row);
+
+      activeModal = {
+        row,
+        rowPH: movedRow.ph,
+        rowParent: movedRow.parent,
+        notesEl: movedNotes?.notesEl || null,
+        notesPH: movedNotes?.notesPH || null,
+        notesParent: movedNotes?.notesParent || null,
+      };
+
+      openModal();
+    });
+  }
+
+  /* =======================
      SUPPORT TICKETS
-     - Only base shows disclaimer
-     - + only on base
-     - no remove button (no creation + no handler)
-     - Add copies base values into new ticket, then clears base
+     - Base card only has (+) and disclaimer
+     - (+) creates a new card with the base values (prefilled)
+     - Then clears base for next entry
+     - No remove buttons anywhere
+     - Status select stays black
+     - Cards move by status
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -576,10 +602,20 @@
     return groupEl?.getAttribute?.("data-base") === "true";
   }
 
+  function ticketFields(groupEl) {
+    return {
+      num: $(".ticket-number-input", groupEl),
+      status: $(".ticket-status-select", groupEl),
+      url: $(".ticket-zendesk-input", groupEl),
+      summary: $(".ticket-summary-input", groupEl),
+    };
+  }
+
   function requiredTicketFieldsFilled(groupEl) {
-    const ticketNum = $(".ticket-number-input", groupEl)?.value?.trim();
-    const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
-    const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
+    const f = ticketFields(groupEl);
+    const ticketNum = f.num?.value?.trim();
+    const url = f.url?.value?.trim();
+    const summary = f.summary?.value?.trim();
     return !!(ticketNum && url && summary);
   }
 
@@ -588,111 +624,109 @@
     if (!sel) return;
     sel.value = status;
     sel.disabled = !!lock;
+    sel.style.color = "#111"; // keep black text
     sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function ensureOnlyBaseHasDisclaimerAndAdd(groupEl) {
+    const isBase = ticketIsBase(groupEl);
+
+    // Remove any remove buttons (everywhere)
+    $$(".remove-ticket-btn", groupEl).forEach((b) => b.remove());
+
+    // Add button: only base keeps it
+    const add = $(".add-ticket-btn", groupEl);
+    if (add && !isBase) add.remove();
+
+    // Disclaimer: only base keeps it
+    const disc = $(".ticket-disclaimer", groupEl);
+    if (disc && !isBase) disc.remove();
   }
 
   function moveTicketGroup(groupEl, status) {
     const dest = ticketContainers[status] || ticketContainers.Open;
     if (!dest) return;
 
-    // base is locked to Open
+    // base always stays open + locked
     if (ticketIsBase(groupEl)) {
       setTicketStatus(groupEl, "Open", true);
       return;
     }
 
+    // unlock for clones
     const sel = $(".ticket-status-select", groupEl);
-    if (sel) sel.disabled = false;
+    if (sel) {
+      sel.disabled = false;
+      sel.style.color = "#111";
+    }
 
-    // ensure disclaimer is removed from non-base
-    const disc = $(".ticket-disclaimer", groupEl);
-    if (disc) disc.remove();
-
-    // ensure any add button is removed from non-base
-    const addBtn = $(".add-ticket-btn", groupEl);
-    if (addBtn) addBtn.remove();
-
-    // ensure any remove button is removed (no remove tickets)
-    const rmBtn = $(".remove-ticket-btn", groupEl);
-    if (rmBtn) rmBtn.remove();
+    // strip disclaimers / buttons (base-only)
+    ensureOnlyBaseHasDisclaimerAndAdd(groupEl);
 
     dest.appendChild(groupEl);
   }
 
-  // lock base status to Open on load
+  // Initialize base lock + black text
   if (ticketContainers.Open) {
     const base = $('.ticket-group[data-base="true"]', ticketContainers.Open);
-    if (base) setTicketStatus(base, "Open", true);
+    if (base) {
+      setTicketStatus(base, "Open", true);
+      ensureOnlyBaseHasDisclaimerAndAdd(base);
+    }
   }
 
-  // Add ticket: copy base into new card, then clear base
+  // Add ticket: move base values into a new card, then clear base
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".add-ticket-btn");
     if (!addBtn) return;
 
-    const group = addBtn.closest(".ticket-group");
-    if (!group || !ticketIsBase(group)) return;
+    const baseGroup = addBtn.closest(".ticket-group");
+    if (!baseGroup || !ticketIsBase(baseGroup)) return;
 
-    if (!requiredTicketFieldsFilled(group)) {
-      alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
+    if (!requiredTicketFieldsFilled(baseGroup)) {
+      flash(baseGroup, "mk-flash", 700);
+      alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another card.");
       return;
     }
 
-    // Collect base values
-    const baseTicketNum = $(".ticket-number-input", group)?.value ?? "";
-    const baseUrl = $(".ticket-zendesk-input", group)?.value ?? "";
-    const baseSummary = $(".ticket-summary-input", group)?.value ?? "";
+    const baseF = ticketFields(baseGroup);
 
-    // Clone base structure
-    const clone = group.cloneNode(true);
+    // Clone the base card WITH the entered values (so the new card "pulls over" the info)
+    const clone = baseGroup.cloneNode(true);
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
-    // Remove disclaimer from clone
-    const disc = $(".ticket-disclaimer", clone);
-    if (disc) disc.remove();
+    // In clone: keep values as-is, unlock status
+    setTicketStatus(clone, baseF.status?.value || "Open", false);
 
-    // Remove add button from clone
-    const add = $(".add-ticket-btn", clone);
-    if (add) add.remove();
+    // Remove disclaimer + add button from clone (base-only)
+    ensureOnlyBaseHasDisclaimerAndAdd(clone);
 
-    // Remove remove button if any exists
-    const rm = $(".remove-ticket-btn", clone);
-    if (rm) rm.remove();
+    // Append clone to correct container based on its status
+    const st = $(".ticket-status-select", clone)?.value || "Open";
+    (ticketContainers[st] || ticketContainers.Open)?.appendChild(clone);
 
-    // Unlock status dropdown for clone and keep black text via CSS
-    setTicketStatus(clone, "Open", false);
+    // Now clear base inputs for next ticket entry
+    const bf = ticketFields(baseGroup);
+    if (bf.num) bf.num.value = "";
+    if (bf.url) bf.url.value = "";
+    if (bf.summary) bf.summary.value = "";
+    setTicketStatus(baseGroup, "Open", true);
 
-    // Put copied values into clone
-    const cNum = $(".ticket-number-input", clone);
-    const cUrl = $(".ticket-zendesk-input", clone);
-    const cSum = $(".ticket-summary-input", clone);
-    if (cNum) cNum.value = baseTicketNum;
-    if (cUrl) cUrl.value = baseUrl;
-    if (cSum) cSum.value = baseSummary;
+    // Make sure base retains disclaimer + add button
+    ensureOnlyBaseHasDisclaimerAndAdd(baseGroup);
 
-    // Clear base fields for the next entry
-    const bNum = $(".ticket-number-input", group);
-    const bUrl = $(".ticket-zendesk-input", group);
-    const bSum = $(".ticket-summary-input", group);
-    if (bNum) bNum.value = "";
-    if (bUrl) bUrl.value = "";
-    if (bSum) bSum.value = "";
-
-    // Ensure Open container exists and append there
-    (ticketContainers.Open || group.parentElement || document.body).appendChild(clone);
-
-    // Ensure stable IDs + save
-    scrubCloneIds(clone);
     ensureStableFieldIds(clone);
-    ensureStableFieldIds(group);
+    ensureStableFieldIds(baseGroup);
     captureState(document);
   });
 
-  // Status changes move ticket cards (base stays Open locked)
+  // Status changes: move non-base cards by status
   document.addEventListener("change", (e) => {
     const sel = e.target.closest(".ticket-status-select");
     if (!sel) return;
+
+    sel.style.color = "#111";
 
     const group = sel.closest(".ticket-group");
     if (!group) return;
@@ -700,6 +734,7 @@
     if (ticketIsBase(group)) {
       sel.value = "Open";
       sel.disabled = true;
+      sel.style.color = "#111";
       return;
     }
 
@@ -707,8 +742,18 @@
     captureState(document);
   });
 
+  // On any mutation (new cards), enforce base-only elements
+  const ticketsRoot = document.getElementById("support-tickets");
+  if (ticketsRoot && window.MutationObserver) {
+    const mo = new MutationObserver(() => {
+      $$(".ticket-group", ticketsRoot).forEach((g) => ensureOnlyBaseHasDisclaimerAndAdd(g));
+      $$(".ticket-status-select", ticketsRoot).forEach((s) => (s.style.color = "#111"));
+    });
+    mo.observe(ticketsRoot, { childList: true, subtree: true });
+  }
+
   /* =======================
-     DEALERSHIP MAP HELPER (safe)
+     DEALERSHIP MAP HELPER
   ======================= */
   window.updateDealershipMap = function updateDealershipMap(address) {
     const frame = $("#dealershipMapFrame");
@@ -718,8 +763,22 @@
   };
 
   /* =======================
-     OPTIONAL: onsite date default
+     OPTIONAL: ONSITE DATE DEFAULT
   ======================= */
+  function formatDateYYYYMMDD(d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  function addDays(dateStr, days) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    return formatDateYYYYMMDD(d);
+  }
+
   const onsiteStart = $("#onsiteStartDate");
   const onsiteEnd = $("#onsiteEndDate");
   if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
@@ -737,17 +796,22 @@
   ======================= */
   function init() {
     normalizeNotesButtons(document);
-    assignNotesOrder(document);
-
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
+    // Activate first visible page
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
-    // Save once after init to lock IDs
+    // Save once to lock IDs
     captureState(document);
+
+    // Ensure ticket UI rules on load
+    if (ticketsRoot) {
+      $$(".ticket-group", ticketsRoot).forEach((g) => ensureOnlyBaseHasDisclaimerAndAdd(g));
+      $$(".ticket-status-select", ticketsRoot).forEach((s) => (s.style.color = "#111"));
+    }
   }
 
   init();
