@@ -1,48 +1,45 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Sidebar page navigation
-   ✅ Autosave/Restore (supports dynamic rows)
-   ✅ Reset This Page (clears fields + notes storage for that page)
-   ✅ Add Row (+) for all tables
-   ✅ Notes buttons (pages 3–6 + tables)
-   ✅ Notes bullets:
-       • Title
-             ◦
-     (plain text; no bold; hollow sub-bullet; extra indent)
-   ✅ Stable ordering (DOM order) even if clicked out of order
-   ✅ NO screen shifting (no scroll, no jump)
+   ✅ Page nav (sidebar)
+   ✅ Autosave/Restore (supports dynamically added rows/cards)
+   ✅ Reset This Page buttons (also clears notes-order memory for that page)
+   ✅ Add Row (+) for all tables (keeps notes buttons working)
+   ✅ Notes buttons:
+        - Cards (Pages 3–4) + Tables (Pages 5–6)
+        - Clicking a notes button inserts a structured bullet into the target textarea
+        - Bullets stay in DOM order even if clicked out-of-order
+        - NO screen “shift down then up” when clicking notes buttons
    ✅ Support Tickets:
-       - Base locked to Open
-       - Add clones that KEEP base data
-       - Base clears after add
-       - Status dropdown font black
-       - Remove button removed / never injected
-       - Add button removed from clones
-   ✅ Dealership map helper
-   ✅ Ghost styling for selects/dates
+        - Base ticket locked to Open
+        - Adding a ticket TRANSFERS base values into the new ticket (clone)
+        - Base is cleared for the next entry
+        - NO injected Remove buttons
+        - NO injected Add buttons
+        - Only BASE shows disclaimer (tight spacing) and card shrinks to fit
+        - Status dropdown font set to black
+
+   Defensive: won’t crash if some elements/sections don’t exist
 ======================================================= */
 
 (() => {
   "use strict";
 
   /* =======================
-     CONFIG / STORAGE
+     CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v10";
-  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v10";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v4";
+  const AUTO_ID_ATTR = "data-mk-id";      // persistent identity marker
+  const AUTO_ROW_ATTR = "data-mk-row";    // stable row marker for cloned rows
+  const AUTO_CARD_ATTR = "data-mk-card";  // stable card marker for cloned cards
 
-  const AUTO_ID_ATTR  = "data-mk-id";
-  const AUTO_ROW_ATTR = "data-mk-row";
-
-  const SUB_INDENT = "              ";
-  const BULLET_MAIN = "• ";
-  const BULLET_SUB  = "◦ ";
+  // Notes ordering memory (stored inside STORAGE_KEY payload)
+  const NOTES_ORDER_KEY = "__mk_notes_order_v1";
 
   /* =======================
      HELPERS
   ======================= */
-  const $  = (sel, root = document) => root.querySelector(sel);
+  const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const uid = (() => {
@@ -52,32 +49,60 @@
 
   const isEl = (x) => x && x.nodeType === 1;
   const isCheckbox = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "checkbox";
-  const isRadio    = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
-  const isDate     = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
+  const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
+  const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
 
-  function safeJSONParse(raw, fallback) {
-    try { return JSON.parse(raw) ?? fallback; } catch { return fallback; }
+  function flash(el, cls = "mk-flash", ms = 800) {
+    if (!isEl(el)) return;
+    el.classList.add(cls);
+    window.setTimeout(() => el.classList.remove(cls), ms);
   }
-  function readState() {
-    return safeJSONParse(localStorage.getItem(STORAGE_KEY), {});
+
+  function formatDateYYYYMMDD(d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
   }
-  function writeState(obj) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj || {}));
+
+  function addDays(dateStr, days) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    return formatDateYYYYMMDD(d);
   }
-  function readNotes() {
-    return safeJSONParse(localStorage.getItem(NOTES_KEY), {});
+
+  function getPageIdForEl(el) {
+    return el?.closest?.(".page-section")?.id || "";
   }
-  function writeNotes(obj) {
-    localStorage.setItem(NOTES_KEY, JSON.stringify(obj || {}));
+
+  function safeText(s) {
+    return String(s ?? "").replace(/\s+/g, " ").trim();
   }
 
   /* =======================
-     SELECT COLOR HELPERS
+     STORAGE
   ======================= */
-  function forceSelectBlack(sel) {
-    if (!sel) return;
-    // Always black font per request
-    sel.style.color = "#000";
+  function readState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function getNotesOrderState(state) {
+    if (!state[NOTES_ORDER_KEY] || typeof state[NOTES_ORDER_KEY] !== "object") {
+      state[NOTES_ORDER_KEY] = {};
+    }
+    return state[NOTES_ORDER_KEY];
   }
 
   /* =======================
@@ -98,32 +123,39 @@
   }
 
   /* =======================
-     STABLE IDs (for autosave + dynamic rows)
+     PERSISTENT ID SYSTEM
   ======================= */
-  function ensureStableRowIds(root = document) {
-    $$("tbody tr", root).forEach(tr => {
+  function ensureStableFieldIds(root = document) {
+    // rows
+    $$("tr", root).forEach(tr => {
       if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
     });
-  }
 
-  function ensureStableFieldIds(root = document) {
-    ensureStableRowIds(root);
+    // cards
+    $$(".ticket-group, .card, .section-block, .dms-card", root).forEach(card => {
+      if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
+    });
 
+    // form controls
     $$("input, select, textarea", root).forEach(el => {
       if (el.tagName === "INPUT") {
         const type = (el.type || "").toLowerCase();
         if (["button", "submit", "reset", "file"].includes(type)) return;
       }
 
-      if (el.id && !el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
+      if (el.id) {
+        if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
+        return;
+      }
+
       if (el.getAttribute(AUTO_ID_ATTR)) return;
 
-      const page = el.closest(".page-section");
-      const pageId = page?.id || "no-page";
+      const pageId = getPageIdForEl(el) || "no-page";
+      const table = el.closest("table");
       const tr = el.closest("tr");
-      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "no-row";
+      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
 
-      let colIndex = "x";
+      let colIndex = "";
       if (tr) {
         const cell = el.closest("td,th");
         if (cell) colIndex = String(Array.from(tr.children).indexOf(cell));
@@ -131,19 +163,20 @@
 
       const scope = el.closest("td,th") || tr || el.parentElement || document.body;
       const siblings = $$("input, select, textarea", scope);
-      const idx = Math.max(0, siblings.indexOf(el));
+      const idx = siblings.indexOf(el);
 
-      el.setAttribute(AUTO_ID_ATTR, `${pageId}::${rowKey}::c${colIndex}::i${idx}`);
+      const mkid = `${pageId}::${table ? "table" : "form"}::${rowKey}::c${colIndex}::i${idx}`;
+      el.setAttribute(AUTO_ID_ATTR, mkid);
     });
-  }
-
-  function getFieldKey(el) {
-    return el?.getAttribute?.(AUTO_ID_ATTR) || el?.id || "";
   }
 
   /* =======================
      AUTOSAVE / RESTORE
   ======================= */
+  function getFieldKey(el) {
+    return el?.getAttribute?.(AUTO_ID_ATTR) || el?.id || "";
+  }
+
   function captureState(root = document) {
     ensureStableFieldIds(root);
     const state = readState();
@@ -162,7 +195,6 @@
 
   function restoreState(root = document) {
     ensureStableFieldIds(root);
-
     const state = readState();
     if (!state || typeof state !== "object") return;
 
@@ -191,12 +223,12 @@
   });
 
   /* =======================
-     PAGE NAVIGATION
+     PAGE NAVIGATION (NO SHIFT ON NOTES)
   ======================= */
   const pageSections = $$(".page-section");
-  const navButtons   = $$(".nav-btn");
+  const navButtons = $$(".nav-btn");
 
-  function activatePage(sectionId, { dontScroll = false } = {}) {
+  function activatePage(sectionId, opts = { scrollTop: true }) {
     if (!sectionId) return;
 
     pageSections.forEach(sec => sec.classList.remove("active"));
@@ -208,15 +240,69 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    if (!dontScroll) window.scrollTo({ top: 0, behavior: "instant" });
+    // ✅ Only nav clicks should scroll to top. Notes clicks must NOT.
+    if (opts.scrollTop) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
   }
 
   navButtons.forEach(btn => {
-    btn.addEventListener("click", () => activatePage(btn.dataset.target));
+    btn.addEventListener("click", () => activatePage(btn.dataset.target, { scrollTop: true }));
   });
 
   /* =======================
-     RESET THIS PAGE
+     RESET THIS PAGE BUTTONS
+     - clears inputs/selects/textareas in that page
+     - removes saved fields for that page
+     - clears notes-order memory for that page’s notes targets
+  ======================= */
+  function clearPageNotesOrder(pageEl) {
+    const state = readState();
+    const notesOrder = getNotesOrderState(state);
+
+    const targets = new Set(
+      $$("[data-notes-target]", pageEl)
+        .map(b => b.getAttribute("data-notes-target"))
+        .filter(Boolean)
+    );
+
+    Object.keys(notesOrder).forEach(targetId => {
+      if (targets.has(targetId)) delete notesOrder[targetId];
+    });
+
+    writeState(state);
+  }
+
+  $$(".clear-page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.closest(".page-section");
+      if (!page) return;
+
+      // Clear UI
+      $$("input, select, textarea", page).forEach(el => {
+        if (isCheckbox(el) || isRadio(el)) el.checked = false;
+        else el.value = "";
+      });
+
+      applyGhostStyling(page);
+
+      // Remove saved field values for this page
+      ensureStableFieldIds(page);
+      const state = readState();
+      $$("input, select, textarea", page).forEach(el => {
+        const k = getFieldKey(el);
+        if (k && k in state) delete state[k];
+      });
+
+      // Also clear ordering memory for notes targets on that page
+      clearPageNotesOrder(page);
+
+      writeState(state);
+    });
+  });
+
+  /* =======================
+     TABLE ADD ROW (+)
   ======================= */
   function clearControls(root) {
     $$("input, select, textarea", root).forEach(el => {
@@ -226,39 +312,17 @@
     applyGhostStyling(root);
   }
 
-  $$(".clear-page-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const page = btn.closest(".page-section");
-      if (!page) return;
-
-      clearControls(page);
-
-      ensureStableFieldIds(page);
-      const state = readState();
-      $$("input, select, textarea", page).forEach(el => {
-        const k = getFieldKey(el);
-        if (k && k in state) delete state[k];
-      });
-      writeState(state);
-
-      const notes = readNotes();
-      const noteBlocks = $$("[id^='notes-']", page)
-        .map(b => b.id)
-        .filter(Boolean);
-
-      noteBlocks.forEach(id => {
-        delete notes[id];
-        const ta = $(`#${CSS.escape(id)} textarea`);
-        if (ta) ta.value = "";
-      });
-
-      writeNotes(notes);
+  // Normalize table notes buttons to match the rest: class "notes-btn", icon-only
+  function normalizeTableNotesButtons(root = document) {
+    // Accept either already .notes-btn or anything using data-notes-target
+    $$("button[data-notes-target]", root).forEach(btn => {
+      btn.type = "button";
+      btn.classList.add("notes-btn");
+      btn.textContent = ""; // icon-only (CSS handles icon)
+      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
     });
-  });
+  }
 
-  /* =======================
-     TABLE ADD ROW (+)
-  ======================= */
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".table-footer .add-row");
     if (!addBtn) return;
@@ -272,125 +336,228 @@
     const clone = firstRow.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
 
-    $$("input, select, textarea", clone).forEach(el => {
-      if (isCheckbox(el) || isRadio(el)) el.checked = false;
-      else el.value = "";
-    });
+    clearControls(clone);
 
+    // Remove IDs inside clone (avoid dup IDs)
     $$("[id]", clone).forEach(el => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
 
     tbody.appendChild(clone);
 
+    normalizeTableNotesButtons(clone);
     ensureStableFieldIds(tbody);
-    applyGhostStyling(clone);
     captureState(document);
   });
 
   /* =======================
-     NOTES — BULLET SYSTEM (NO SCROLL / NO SHIFT)
+     NOTES SYSTEM
+     -------------------------------------------------------
+     GOALS:
+       - Clicking notes button inserts bullet + hollow sub-bullet
+       - Bullets stay in DOM order even if clicked out-of-order
+       - Tables: bullet should be "• Name" OR "• Opcode" only (no dash)
+       - No bold formatting added (no **)
+       - No screen “shift down then up” on click
   ======================= */
-  function getNotesTextarea(targetId) {
+
+  const BULLET_MAIN = "• ";
+  const BULLET_SUB  = "    ◦ "; // more indent + hollow bullet
+
+  function getNotesTextareaByTargetId(targetId) {
     const block = document.getElementById(targetId);
     if (!block) return null;
-    return $("textarea", block);
+    return block.querySelector("textarea");
   }
 
-  function getChecklistRowIndex(btn) {
-    const page = btn.closest(".page-section");
-    if (!page) return 999999;
-    const row = btn.closest(".checklist-row");
-    if (!row) return 999999;
-    const all = $$(".checklist-row", page);
-    return all.indexOf(row);
-  }
+  function parseNotesSections(text) {
+    // Sections start with "• "
+    const lines = String(text || "").split("\n");
+    const sections = [];
+    let current = null;
 
-  function getTableRowIndex(btn) {
-    const tr = btn.closest("tr");
-    const tbody = tr?.parentElement;
-    if (!tr || !tbody) return 999999;
-    return Array.from(tbody.children).indexOf(tr);
-  }
-
-  function getNonTableTitle(btn) {
-    const row = btn.closest(".checklist-row");
-    const label = row ? $("label", row) : null;
-    return (label?.textContent || "").trim() || "—";
-  }
-
-  function getTableTitle(btn) {
-    const tr = btn.closest("tr");
-    const pageId = btn.closest(".page-section")?.id || "";
-
-    if (pageId === "opcodes-pricing") {
-      const opcode = tr?.querySelector("td:nth-child(2) input[type='text']")?.value?.trim();
-      return opcode || "—";
+    function pushCurrent() {
+      if (current) sections.push(current);
+      current = null;
     }
 
-    const name = tr?.querySelector("td:first-child input[type='text']")?.value?.trim();
-    return name || "—";
+    for (const line of lines) {
+      if (line.startsWith(BULLET_MAIN)) {
+        pushCurrent();
+        current = { heading: line.trimEnd(), body: [] };
+      } else {
+        if (!current) {
+          // keep leading stray text as a pseudo-section
+          current = { heading: "", body: [] };
+        }
+        current.body.push(line);
+      }
+    }
+    pushCurrent();
+    return sections;
   }
 
-  function buildBulletBlock(title) {
-    return `${BULLET_MAIN}${title}\n${SUB_INDENT}${BULLET_SUB}`;
+  function buildNotesTextFromSections(sections) {
+    const out = [];
+    sections.forEach((sec, idx) => {
+      if (sec.heading) out.push(sec.heading);
+      // Keep body exactly
+      if (sec.body && sec.body.length) out.push(...sec.body);
+      if (idx !== sections.length - 1) out.push(""); // blank line between sections
+    });
+    return out.join("\n").replace(/\n{3,}/g, "\n\n");
   }
 
-  function rebuildNotes(targetId) {
-    const ta = getNotesTextarea(targetId);
+  function ensureSectionBodyHasSubBullet(section) {
+    const body = section.body || [];
+    const hasSub = body.some(l => l.trimStart().startsWith("◦") || l.startsWith(BULLET_SUB));
+    if (!hasSub) {
+      // Put one empty sub-bullet line directly under heading
+      section.body = [BULLET_SUB, ...body.filter((_, i) => i !== 0)];
+    }
+  }
+
+  function getNotesTargetOrder(targetId) {
+    // DOM order index list: all buttons pointing to this target
+    // Each button yields an entry string (used as heading)
+    const btns = $$(`[data-notes-target="${CSS.escape(targetId)}"]`);
+    return btns.map(btn => makeEntryHeading(btn)).filter(Boolean);
+  }
+
+  function makeEntryHeading(btn) {
+    // Determine if table row note or card/row question note
+
+    // TABLE ROW: use first text input in the row (Name) OR opcode cell for opcode tables
+    const tr = btn.closest("tr");
+    if (tr) {
+      // opcode table: likely has inputs; choose 2nd cell input as opcode if present and looks like opcode column
+      // Prefer: if row has many inputs and an input[type="text"] in early columns, choose the first non-empty in first 3 cells
+      const cells = Array.from(tr.children);
+      const earlyInputs = [];
+      for (let i = 0; i < Math.min(cells.length, 4); i++) {
+        earlyInputs.push(...Array.from(cells[i].querySelectorAll('input[type="text"]')));
+      }
+      const val = safeText(earlyInputs.find(i => safeText(i.value))?.value || earlyInputs[0]?.value || "");
+
+      // Also try: name field might be in first cell (checkbox + text)
+      if (val) return `${BULLET_MAIN}${val}`;
+
+      // fallback: any text input anywhere in row
+      const anyText = tr.querySelector('input[type="text"]');
+      const anyVal = safeText(anyText?.value || "");
+      if (anyVal) return `${BULLET_MAIN}${anyVal}`;
+
+      return `${BULLET_MAIN}Row`;
+    }
+
+    // CARD/ROW QUESTION: use the label text for that checklist-row
+    const row = btn.closest(".checklist-row");
+    if (row) {
+      const label = row.querySelector("label");
+      const labelText = safeText(label?.innerText || "");
+      if (labelText) return `${BULLET_MAIN}${labelText}`;
+    }
+
+    // Generic fallback
+    return `${BULLET_MAIN}Notes`;
+  }
+
+  function reorderAndInsertNotes(targetId, headingToEnsure) {
+    const ta = getNotesTextareaByTargetId(targetId);
     if (!ta) return;
 
-    const notesStore = readNotes();
-    const arr = Array.isArray(notesStore[targetId]) ? notesStore[targetId] : [];
-    arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const currentText = ta.value || "";
+    const sections = parseNotesSections(currentText);
 
-    ta.value = arr.map(x => x.text).join("\n\n");
-  }
+    // map existing by heading
+    const map = new Map();
+    sections.forEach(sec => {
+      if (sec.heading) map.set(sec.heading, sec);
+    });
 
-  function ensureNoteEntry(targetId, entryKey, order, text) {
-    const notesStore = readNotes();
-    if (!Array.isArray(notesStore[targetId])) notesStore[targetId] = [];
+    // desired order based on DOM order
+    const desired = getNotesTargetOrder(targetId);
 
-    const exists = notesStore[targetId].some(n => n.key === entryKey);
-    if (!exists) {
-      notesStore[targetId].push({ key: entryKey, order, text });
-      writeNotes(notesStore);
+    // if we have an ensured heading not present in DOM order (rare), append it
+    if (headingToEnsure && !desired.includes(headingToEnsure)) desired.push(headingToEnsure);
+
+    // build ordered sections
+    const ordered = [];
+    desired.forEach(h => {
+      let sec = map.get(h);
+      if (!sec) {
+        sec = { heading: h, body: [BULLET_SUB] };
+      } else {
+        ensureSectionBodyHasSubBullet(sec);
+      }
+      ordered.push(sec);
+      map.delete(h);
+    });
+
+    // Append any leftover sections (user custom headings) at the end, preserving them
+    for (const sec of map.values()) {
+      if (sec.heading) ordered.push(sec);
     }
+
+    ta.value = buildNotesTextFromSections(ordered);
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-notes-target]");
-    if (!btn) return;
+  function rememberNotesOrder(targetId) {
+    const state = readState();
+    const notesOrder = getNotesOrderState(state);
+    notesOrder[targetId] = getNotesTargetOrder(targetId);
+    writeState(state);
+  }
 
-    e.preventDefault();
-    e.stopPropagation();
+  // Initial normalization for table notes buttons
+  normalizeTableNotesButtons(document);
+
+  // Notes click handler: NO scroll, NO jump. Just activate page without scroll.
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-notes-target]");
+    if (!btn) return;
 
     const targetId = btn.getAttribute("data-notes-target");
     if (!targetId) return;
 
-    const inTable = !!btn.closest("table");
-    const title = inTable ? getTableTitle(btn) : getNonTableTitle(btn);
+    const notesBlock = document.getElementById(targetId);
+    if (!notesBlock) return;
 
-    let key = `${targetId}::${title}`;
-    let order = 999999;
-
-    if (inTable) {
-      const tr = btn.closest("tr");
-      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
-      key = `${targetId}::row::${rowKey || title}`;
-      order = getTableRowIndex(btn);
-    } else {
-      order = getChecklistRowIndex(btn);
+    // If notes block is on a different page, activate that page but DO NOT scroll to top
+    const page = notesBlock.closest(".page-section");
+    if (page && !page.classList.contains("active")) {
+      activatePage(page.id, { scrollTop: false });
     }
 
-    ensureNoteEntry(targetId, key, order, buildBulletBlock(title));
-    rebuildNotes(targetId);
+    // Build heading for this button
+    const heading = makeEntryHeading(btn);
 
-    const ta = getNotesTextarea(targetId);
-    if (ta) ta.focus({ preventScroll: true });
+    // Persist desired order (based on DOM)
+    rememberNotesOrder(targetId);
+
+    // Ensure heading exists and text is ordered
+    reorderAndInsertNotes(targetId, heading);
+
+    // Focus textarea without scrolling
+    const ta = notesBlock.querySelector("textarea");
+    if (ta) {
+      // no scroll shifting
+      setTimeout(() => ta.focus({ preventScroll: true }), 0);
+    }
+
+    flash(notesBlock);
   });
 
   /* =======================
-     SUPPORT TICKETS (UPDATED)
+     SUPPORT TICKETS
+     -------------------------------------------------------
+     - Base ticket locked to Open
+     - "Add ticket" transfers entered values into new ticket
+     - Base clears for next ticket
+     - NO remove button injection
+     - Strip Add button from clones
+     - Only base shows disclaimer (tight) and card shrinks
+     - Status select font black
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -403,34 +570,83 @@
     return groupEl?.getAttribute?.("data-base") === "true";
   }
 
+  function setSelectBlack(sel) {
+    if (!sel) return;
+    sel.style.color = "#000";
+  }
+
   function requiredTicketFieldsFilled(groupEl) {
-    const ticketNum = $(".ticket-number-input", groupEl)?.value?.trim();
-    const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
-    const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
+    const ticketNum = groupEl.querySelector(".ticket-number-input")?.value?.trim();
+    const url = groupEl.querySelector(".ticket-zendesk-input")?.value?.trim();
+    const summary = groupEl.querySelector(".ticket-summary-input")?.value?.trim();
     return !!(ticketNum && url && summary);
   }
 
   function setTicketStatus(groupEl, status, lock = false) {
-    const sel = $(".ticket-status-select", groupEl);
+    const sel = groupEl.querySelector(".ticket-status-select");
     if (!sel) return;
     sel.value = status;
     sel.disabled = !!lock;
-    forceSelectBlack(sel);
+    setSelectBlack(sel);
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  function stripTicketButtons(groupEl, { keepAddOnBase = true } = {}) {
-    // remove any remove buttons (existing in HTML or previously inserted)
-    $$(".remove-ticket-btn", groupEl).forEach(b => b.remove());
+  function stripTicketButtons(groupEl, opts = { keepAddOnBase: true }) {
+    if (!groupEl) return;
 
-    // remove add button from clones
-    if (!ticketIsBase(groupEl) || !keepAddOnBase) {
-      $$(".add-ticket-btn", groupEl).forEach(b => b.remove());
+    // Remove any injected remove buttons (or any remove buttons)
+    groupEl.querySelectorAll(".remove-ticket-btn, [data-ticket-remove], .ticket-remove").forEach(b => b.remove());
+
+    // Remove Add button from clones
+    if (!ticketIsBase(groupEl) || !opts.keepAddOnBase) {
+      groupEl.querySelectorAll(".add-ticket-btn, [data-ticket-add], .ticket-add").forEach(b => b.remove());
+    }
+  }
+
+  function normalizeTicketDisclaimer(groupEl) {
+    if (!groupEl) return;
+
+    const isBase = ticketIsBase(groupEl);
+    const disc = groupEl.querySelector(".ticket-disclaimer");
+
+    if (!isBase) {
+      if (disc) disc.remove();
+      // shrink clones too
+      groupEl.style.height = "auto";
+      groupEl.style.minHeight = "unset";
+      groupEl.style.paddingBottom = "10px";
+      return;
     }
 
-    // status select always black
-    const sel = $(".ticket-status-select", groupEl);
-    if (sel) forceSelectBlack(sel);
+    // Base must have disclaimer
+    let d = disc;
+    if (!d) {
+      d = document.createElement("div");
+      d.className = "ticket-disclaimer";
+      d.textContent = "Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.";
+      groupEl.appendChild(d);
+    }
+
+    // Place disclaimer directly under short summary
+    const summary = groupEl.querySelector(".ticket-summary-input");
+    if (summary) {
+      const wrap =
+        summary.closest(".checklist-row") ||
+        summary.closest(".field") ||
+        summary.parentElement;
+
+      if (wrap && wrap.parentElement) {
+        wrap.insertAdjacentElement("afterend", d);
+      }
+    }
+
+    // Tight spacing + shrink
+    d.style.marginTop = "6px";
+    d.style.paddingTop = "0px";
+    d.style.paddingBottom = "0px";
+    groupEl.style.height = "auto";
+    groupEl.style.minHeight = "unset";
+    groupEl.style.paddingBottom = "10px";
   }
 
   function moveTicketGroup(groupEl, status) {
@@ -442,34 +658,80 @@
       return;
     }
 
-    const sel = $(".ticket-status-select", groupEl);
-    if (sel) sel.disabled = false;
+    const sel = groupEl.querySelector(".ticket-status-select");
+    if (sel) {
+      sel.disabled = false;
+      setSelectBlack(sel);
+    }
 
-    // remove disclaimers if any
-    const disc = $(".ticket-disclaimer", groupEl);
-    if (disc) disc.remove();
-
+    stripTicketButtons(groupEl, { keepAddOnBase: false });
     dest.appendChild(groupEl);
+
+    normalizeTicketDisclaimer(groupEl);
   }
 
-  // initialize base lock + black font
-  if (ticketContainers.Open) {
-    const base = $('.ticket-group[data-base="true"]', ticketContainers.Open);
-    if (base) {
-      setTicketStatus(base, "Open", true);
-      stripTicketButtons(base, { keepAddOnBase: true });
+  function copyTicketFields(fromEl, toEl) {
+    if (!fromEl || !toEl) return;
+
+    const fields = [
+      [".ticket-number-input", "value"],
+      [".ticket-zendesk-input", "value"],
+      [".ticket-summary-input", "value"],
+    ];
+
+    fields.forEach(([sel, prop]) => {
+      const a = fromEl.querySelector(sel);
+      const b = toEl.querySelector(sel);
+      if (a && b) b[prop] = a[prop] || "";
+    });
+
+    // Copy status selection value too (but clones remain editable)
+    const aStatus = fromEl.querySelector(".ticket-status-select");
+    const bStatus = toEl.querySelector(".ticket-status-select");
+    if (aStatus && bStatus) {
+      bStatus.value = aStatus.value || "Open";
+      bStatus.disabled = false;
+      setSelectBlack(bStatus);
     }
   }
 
-  // ensure all current ticket groups have correct button rules + black font
-  $$(".ticket-group").forEach(g => stripTicketButtons(g, { keepAddOnBase: true }));
-  $$(".ticket-status-select").forEach(sel => forceSelectBlack(sel));
+  function clearTicketFields(groupEl) {
+    if (!groupEl) return;
+    groupEl.querySelectorAll("input, textarea").forEach(el => (el.value = ""));
+    const sel = groupEl.querySelector(".ticket-status-select");
+    if (sel) {
+      sel.value = "Open";
+      setSelectBlack(sel);
+    }
+    groupEl.querySelectorAll("input, textarea, select").forEach(el => {
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  }
 
-  // ADD ticket:
-  // - clone base
-  // - clone KEEPS the typed values
-  // - clone is not base, no add button, no remove button
-  // - base is cleared after add
+  // Init: lock base ticket
+  if (ticketContainers.Open) {
+    const base = ticketContainers.Open.querySelector('.ticket-group[data-base="true"]');
+    if (base) {
+      setTicketStatus(base, "Open", true);
+      stripTicketButtons(base, { keepAddOnBase: true });
+      normalizeTicketDisclaimer(base);
+
+      // Ensure select font black even when disabled
+      const sel = base.querySelector(".ticket-status-select");
+      if (sel) setSelectBlack(sel);
+    }
+
+    // Normalize any existing clones (remove disclaimer/buttons)
+    $$(".ticket-group", ticketContainers.Open).forEach(g => {
+      stripTicketButtons(g, { keepAddOnBase: true });
+      normalizeTicketDisclaimer(g);
+      const sel = g.querySelector(".ticket-status-select");
+      if (sel) setSelectBlack(sel);
+    });
+  }
+
+  // Add ticket: transfers base info into a new clone, then clears base
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".add-ticket-btn");
     if (!addBtn) return;
@@ -478,49 +740,48 @@
     if (!baseGroup || !ticketIsBase(baseGroup)) return;
 
     if (!requiredTicketFieldsFilled(baseGroup)) {
+      flash(baseGroup, "mk-flash", 700);
       alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
       return;
     }
 
     const clone = baseGroup.cloneNode(true);
     clone.setAttribute("data-base", "false");
-    clone.setAttribute("data-mk-ticket", uid("ticket"));
+    clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
-    // IMPORTANT: clone keeps entered values.
-    // But we must unlock status select on clone.
-    setTicketStatus(clone, "Open", false);
+    // Transfer values from base into clone, then clear base
+    copyTicketFields(baseGroup, clone);
 
-    // Remove buttons from clone (no remove, no add)
+    // Clones must not have add/remove and must not have disclaimer
     stripTicketButtons(clone, { keepAddOnBase: false });
+    normalizeTicketDisclaimer(clone);
 
-    // Append clone to Open container
-    ticketContainers.Open?.appendChild(clone);
-
-    // Clear base inputs after adding (so you can enter next ticket)
-    $$("input, textarea", baseGroup).forEach(el => (el.value = ""));
-    // keep base status locked to Open
+    // Base stays locked Open and keeps disclaimer, then clear inputs for next entry
+    clearTicketFields(baseGroup);
     setTicketStatus(baseGroup, "Open", true);
     stripTicketButtons(baseGroup, { keepAddOnBase: true });
+    normalizeTicketDisclaimer(baseGroup);
+
+    ticketContainers.Open?.appendChild(clone);
 
     ensureStableFieldIds(clone);
-    ensureStableFieldIds(baseGroup);
     captureState(document);
   });
 
-  // status change move
+  // Status changes move clones only
   document.addEventListener("change", (e) => {
     const sel = e.target.closest(".ticket-status-select");
     if (!sel) return;
 
-    forceSelectBlack(sel);
-
     const group = sel.closest(".ticket-group");
     if (!group) return;
+
+    setSelectBlack(sel);
 
     if (ticketIsBase(group)) {
       sel.value = "Open";
       sel.disabled = true;
-      forceSelectBlack(sel);
+      setSelectBlack(sel);
       return;
     }
 
@@ -541,20 +802,6 @@
   /* =======================
      OPTIONAL: ONSITE DATE DEFAULT
   ======================= */
-  function formatDateYYYYMMDD(d) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
-  function addDays(dateStr, days) {
-    if (!dateStr) return "";
-    const d = new Date(dateStr + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    return formatDateYYYYMMDD(d);
-  }
-
   const onsiteStart = $("#onsiteStartDate");
   const onsiteEnd = $("#onsiteEndDate");
   if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
@@ -571,20 +818,16 @@
      INIT
   ======================= */
   function init() {
+    normalizeTableNotesButtons(document);
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
+    // Activate initial page (do not force scroll that causes “shift”)
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
-    if (active) activatePage(active);
+    if (active) activatePage(active, { scrollTop: false });
 
-    // rebuild notes textareas from store
-    const notesStore = readNotes();
-    Object.keys(notesStore).forEach(targetId => rebuildNotes(targetId));
-
-    // make ticket status selects black on init
-    $$(".ticket-status-select").forEach(sel => forceSelectBlack(sel));
-
+    // Save once after init to lock IDs
     captureState(document);
   }
 
