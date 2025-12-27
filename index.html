@@ -13,6 +13,27 @@
 
 </head>
 
+  <!-- ========================================================= -->
+<!-- ROW POPUP MODAL (Training Tables + Opcodes)               -->
+<!-- Drop this once, near the end of your HTML, before </body> -->
+<!-- ========================================================= -->
+<div id="mkRowModal" class="mk-modal" aria-hidden="true">
+  <div class="mk-modal__backdrop" data-mk-modal-close></div>
+
+  <div class="mk-modal__panel" role="dialog" aria-modal="true" aria-label="Row Details">
+    <button type="button" class="mk-modal__close" data-mk-modal-close aria-label="Close">×</button>
+
+    <!-- Outer white card that contains BOTH cards -->
+    <div class="mk-modal__outer-card">
+      <!-- Table card goes here -->
+      <div id="mkModalTableHost" class="section-block mk-modal__inner-card"></div>
+
+      <!-- Notes card goes here (the actual notes block gets moved here) -->
+      <div id="mkModalNotesHost" class="mk-modal__notes-host"></div>
+    </div>
+  </div>
+</div>
+
 <body class="stacked-compact">
 
 <!-- =========================
