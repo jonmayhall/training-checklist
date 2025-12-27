@@ -455,50 +455,58 @@
     writeState(state);
   }
 
-  // ✅ one scroll only, after layout has settled, to prevent “shift”
-  function scrollToNotesBlockStable(notesBlock) {
-    if (!notesBlock) return;
+ // ✅ Replace your current scrollToNotesBlockStable + notes click handler with this:
+
+function scrollToNotesOnce(notesBlock) {
+  if (!notesBlock) return;
+  // one single scroll, after layout is stable
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-notes-btn][data-notes-target]");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const targetId = btn.getAttribute("data-notes-target");
+  const notesBlock = getNotesBlock(targetId);
+  if (!notesBlock) return;
+
+  // If the notes block is on another page, activate it WITHOUT forcing scroll changes
+  const page = notesBlock.closest(".page-section");
+  if (page && !page.classList.contains("active")) {
+    activatePage(page.id, { preserveScroll: true });
   }
 
-  normalizeNotesButtons(document);
+  // Build bullet info
+  const orderIndex = getOrderIndex(btn, targetId);
+  const bulletText = buildBulletText(btn);
+  const bulletKey = buildBulletKey(btn, targetId);
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-notes-btn][data-notes-target]");
-    if (!btn) return;
+  upsertBullet(targetId, bulletKey, bulletText, orderIndex);
 
-    const targetId = btn.getAttribute("data-notes-target");
-    const notesBlock = getNotesBlock(targetId);
-    if (!notesBlock) return;
+  // ✅ KEY CHANGE:
+  // 1) rebuild textarea FIRST (this is what can change layout/height)
+  // 2) THEN scroll exactly once
+  requestAnimationFrame(() => {
+    rebuildNotesTextareaForTarget(targetId);
 
-    // ✅ If we need to activate another page, do NOT force scroll-to-top
-    const page = notesBlock.closest(".page-section");
-    if (page && !page.classList.contains("active")) {
-      activatePage(page.id, { preserveScroll: true });
-    }
+    // After bullets are in, do the single scroll
+    scrollToNotesOnce(notesBlock);
 
-    const orderIndex = getOrderIndex(btn, targetId);
-    const bulletText = buildBulletText(btn);
-    const bulletKey = buildBulletKey(btn, targetId);
-
-    upsertBullet(targetId, bulletKey, bulletText, orderIndex);
-
-    scrollToNotesBlockStable(notesBlock);
-
-    // ✅ Update textarea AFTER scroll kicks off; no second scroll or offset
+    // Focus without causing scroll
     setTimeout(() => {
-      rebuildNotesTextareaForTarget(targetId);
       const ta = getTextarea(notesBlock);
-      if (ta) {
-        flash(notesBlock);
-        ta.focus({ preventScroll: true });
-      }
-    }, 250);
+      if (ta) ta.focus({ preventScroll: true });
+      flash(notesBlock);
+    }, 200);
   });
+});
 
   /* =======================
      SUPPORT TICKETS (unchanged)
