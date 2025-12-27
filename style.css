@@ -1778,3 +1778,91 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
+/* =========================================================
+   ROW POPUP MODAL — Training Tables + Opcodes
+========================================================= */
+.mk-modal[aria-hidden="true"] { display:none; }
+.mk-modal[aria-hidden="false"]{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:block;
+}
+
+.mk-modal__backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+}
+
+.mk-modal__panel{
+  position:relative;
+  width:min(1100px, calc(100% - 40px));
+  max-height:calc(100% - 40px);
+  margin:20px auto;
+  overflow:auto;
+  border-radius:18px;
+}
+
+.mk-modal__close{
+  position:sticky;
+  top:10px;
+  float:right;
+  margin:10px 10px 0 0;
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,0.12);
+  background:#fff;
+  font-size:26px;
+  line-height:1;
+  cursor:pointer;
+  z-index:2;
+}
+
+/* OUTER WHITE CARD that wraps the two cards */
+.mk-modal__outer-card{
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,0.22);
+  padding:16px;
+  margin-top:6px;
+}
+
+/* Inner card should match your normal cards */
+.mk-modal__inner-card{
+  margin:0;
+}
+
+/* Notes host spacing */
+.mk-modal__notes-host{
+  margin-top:14px;
+}
+
+/* Make the moved notes card look normal inside modal */
+.mk-modal__notes-host .section-block{
+  margin:0;
+}
+
+/* The modal table should look like the main tables */
+.mk-modal__panel .training-table{
+  width:100%;
+}
+
+/* Keep scroll wrapper feel inside modal */
+.mk-modal__panel .mk-modal__table-scroll{
+  overflow:auto;
+  border-radius:14px;
+}
+
+/* Prevent any weird width squish */
+.mk-modal__panel .training-table th,
+.mk-modal__panel .training-table td{
+  white-space:nowrap;
+}
+
+/* Placeholder row (in original table while row is in popup) */
+.mk-row-placeholder{
+  display:none;
+}
