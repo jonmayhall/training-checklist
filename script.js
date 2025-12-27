@@ -1,5 +1,5 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT JS (FIXED)
+   myKaarma Interactive Training Checklist — FULL PROJECT JS (CLEAN + WORKING)
    -------------------------------------------------------
    ✅ Page nav (sidebar)
    ✅ Autosave/Restore (supports dynamically added rows/cards)
@@ -13,10 +13,8 @@
       - Format:
           • Title
               ◦
-   ✅ Table Expand (⤢) injected into table footers (small) + opens TABLE modal (mkTableModal)
-      - If mkTableModal exists, it opens it and moves LIVE table card + LIVE notes card into it
-      - If mkTableModal does not exist, it falls back to row modal behavior (first row click behavior)
-   ✅ Row Popup Modal (mkRowModal) still supported (row click)
+   ✅ Table Expand (⤢) injected into table footers + opens TABLE modal (mkTableModal) if present
+   ✅ Row Popup Modal (mkRowModal) supported (row click)
    ✅ Additional POC (+) restored
    ✅ Support Tickets rules preserved (base-only disclaimer/+)
 ======================================================= */
@@ -73,10 +71,9 @@
   }
 
   /* =========================================================
-     NOTES BUTTON NORMALIZATION (FIXED)
+     NOTES BUTTON NORMALIZATION (CORRECT)
      - Table notes buttons must be `.notes-btn` (CSS bubble mask)
      - Question notes buttons must be `.notes-icon-btn` with SVG
-     - NEVER blank out question buttons without providing the icon
   ========================================================= */
 
   const NOTES_SVG = `
@@ -90,21 +87,22 @@
   }
 
   function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target], button[data-notes-btn][data-notes-target]", root).forEach((btn) => {
+    $$(
+      "button[data-notes-target], button[data-notes-btn][data-notes-target]",
+      root
+    ).forEach((btn) => {
       btn.type = "button";
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
 
       const inTable = isTableNotesButton(btn);
 
-      // Strip both classes first (prevents cross-styling)
+      // Strip both classes first
       btn.classList.remove("notes-btn", "notes-icon-btn");
 
       if (inTable) {
-        // TABLE: must be .notes-btn (CSS renders bubble via ::before)
         btn.classList.add("notes-btn");
-        btn.innerHTML = ""; // no svg needed
+        btn.innerHTML = ""; // table buttons rely on CSS ::before
       } else {
-        // QUESTION: must be .notes-icon-btn with SVG
         btn.classList.add("notes-icon-btn");
         btn.innerHTML = NOTES_SVG;
       }
@@ -209,7 +207,7 @@
       if (!key || !(key in state)) return;
 
       if (isCheckbox(el)) el.checked = !!state[key];
-      else if (isRadio(el)) el.checked = (el.value === state[key]);
+      else if (isRadio(el)) el.checked = el.value === state[key];
       else el.value = state[key] ?? "";
     });
 
@@ -282,7 +280,7 @@
   });
 
   /* =======================
-     TABLE ADD ROW (+)  (unchanged logic)
+     TABLE ADD ROW (+)
   ======================= */
   function clearControlsIn(root) {
     $$("input, select, textarea", root).forEach((el) => {
@@ -318,38 +316,31 @@
   });
 
   /* =======================
-     Additional POC (+) — RESTORED
-     - clones the base Additional POC card and clears the clone fields
-     - removes the + button from clones
+     Additional POC (+)
   ======================= */
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("#dealership-info .additional-poc-card[data-base='true'] .add-row");
+    const btn = e.target.closest(
+      "#dealership-info .additional-poc-card[data-base='true'] .add-row"
+    );
     if (!btn) return;
 
     const baseCard = btn.closest(".additional-poc-card");
     if (!baseCard) return;
 
-    // Find the container that holds POC cards (prefer an ID container, else parent)
     const container =
-      baseCard.closest("#dealership-info .primary-contacts-grid") ||
-      baseCard.parentElement;
+      baseCard.closest("#dealership-info .primary-contacts-grid") || baseCard.parentElement;
 
     const clone = baseCard.cloneNode(true);
     clone.setAttribute("data-base", "false");
     clone.setAttribute("data-clone", "true");
     clone.setAttribute(AUTO_CARD_ATTR, uid("poc"));
 
-    // Remove the plus button from the clone
     $$(".add-row", clone).forEach((b) => b.remove());
-
-    // Clear all inputs in clone
     clearControlsIn(clone);
 
-    // Remove saved IDs
     $$("[id]", clone).forEach((el) => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
 
-    // Append clone after base card
     container.insertBefore(clone, baseCard.nextSibling);
 
     normalizeNotesButtons(clone);
@@ -359,12 +350,6 @@
 
   /* =======================
      NOTES BULLETS (NO SCROLL SHIFT)
-     - Clicking a notes button appends stub into the correct Notes textarea
-     - Table title = "NameOrOpcode  ColumnHeader"
-     - Question title = label text
-     - Stub:
-         • Title
-             ◦
   ======================= */
   function getNotesTargetIdFromButton(btn) {
     return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
@@ -373,7 +358,6 @@
   function getContextLabel(btn) {
     const row = btn.closest("tr");
     if (row) {
-      // Take first non-empty text input value in the row (Name or Opcode)
       const texts = $$('input[type="text"]', row).map((i) => (i.value || "").trim());
       const firstNonEmpty = texts.find((v) => v.length);
       return firstNonEmpty || "";
@@ -388,14 +372,12 @@
   }
 
   function getQuestionText(btn) {
-    // Non-table: label in same row
     const rowWrap = btn.closest(".checklist-row, .indent-sub");
     if (rowWrap) {
       const label = $("label", rowWrap);
       return (label?.textContent || "").trim();
     }
 
-    // Table: column header for the button cell
     const td = btn.closest("td");
     const tr = btn.closest("tr");
     const table = btn.closest("table");
@@ -431,7 +413,9 @@
   }
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const btn = e.target.closest(
+      "button[data-notes-target], button[data-notes-btn][data-notes-target]"
+    );
     if (!btn) return;
 
     const targetId = getNotesTargetIdFromButton(btn);
@@ -447,23 +431,16 @@
     const q = (getQuestionText(btn) || "").trim();
 
     let title = "";
-    if (btn.closest("tr")) {
-      title = [context, q].filter(Boolean).join("  ").trim();
-    } else {
-      title = (q || context || "Notes").trim();
-    }
+    if (btn.closest("tr")) title = [context, q].filter(Boolean).join("  ").trim();
+    else title = (q || context || "Notes").trim();
 
     ensureBulletStub(ta, title);
     focusNoScroll(ta);
     flash(notesBlock);
-
-    // NO scrolling, NO page activation here
   });
 
   /* =========================================================
-     TABLE EXPAND (⤢) — injected into table footers + working
-     - If #mkTableModal exists, uses it.
-     - Otherwise, just ensures the button exists (no-op fallback).
+     TABLE EXPAND (⤢) — injected into table footers
   ========================================================= */
 
   function ensureTableExpandButtons(root = document) {
@@ -471,7 +448,6 @@
       const footer = $(".table-footer", container);
       const table = $("table.training-table", container);
       if (!footer || !table) return;
-
       if (footer.querySelector(".mk-table-expand-btn")) return;
 
       const btn = document.createElement("button");
@@ -486,13 +462,8 @@
   }
 
   /* =======================
-     TABLE MODAL (mkTableModal) — moves LIVE table card + LIVE notes card
-     Expected HTML ids (based on your CSS):
-       #mkTableModal
-       #mkTableModal .mk-modal-close (or [data-mk-modal-close])
-       #mkTableModalCards  (content host)
+     TABLE MODAL (mkTableModal)
   ======================= */
-
   const mkTableModal = document.getElementById("mkTableModal");
   const mkTableModalCards = document.getElementById("mkTableModalCards");
   let activeTableModal = null; // { tableCard, tablePH, tableParent, notesCard, notesPH, notesParent }
@@ -515,13 +486,11 @@
   function restoreTableModal() {
     if (!activeTableModal) return;
 
-    // restore notes card
     if (activeTableModal.notesCard && activeTableModal.notesPH && activeTableModal.notesParent) {
       activeTableModal.notesParent.insertBefore(activeTableModal.notesCard, activeTableModal.notesPH);
       activeTableModal.notesPH.remove();
     }
 
-    // restore table card
     if (activeTableModal.tableCard && activeTableModal.tablePH && activeTableModal.tableParent) {
       activeTableModal.tableParent.insertBefore(activeTableModal.tableCard, activeTableModal.tablePH);
       activeTableModal.tablePH.remove();
@@ -533,9 +502,9 @@
   }
 
   function getNotesCardForTable(tableContainer) {
-    // For pages 5/6, notes cards are typically right after the table section
-    // We take the FIRST notes button target id in the table and use that notes block.
-    const firstNotesBtn = tableContainer.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const firstNotesBtn = tableContainer.querySelector(
+      "button[data-notes-target], button[data-notes-btn][data-notes-target]"
+    );
     const targetId = firstNotesBtn?.getAttribute("data-notes-target") || "";
     return targetId ? document.getElementById(targetId) : null;
   }
@@ -543,20 +512,15 @@
   function openTableModalFromContainer(tableContainer) {
     if (!mkTableModal || !mkTableModalCards) return;
 
-    // The "table card" here is the nearest `.section` or `.table-container` wrapper
-    // Your table UI is: .section-header + .table-container (card)
-    // We'll move the `.table-container` card, plus its header if present.
     const section = tableContainer.closest(".section") || tableContainer;
     const sectionHeader = section.querySelector(".section-header");
     const title = (sectionHeader?.textContent || "Table").trim();
 
-    // Create an outer white wrapper card (as you requested)
     mkTableModalCards.innerHTML = "";
     const outer = document.createElement("div");
     outer.className = "mk-modal__outer-card";
     mkTableModalCards.appendChild(outer);
 
-    // Placeholder where the section will go back
     const tablePH = document.createElement("div");
     tablePH.className = "mk-table-placeholder";
 
@@ -564,7 +528,6 @@
     tableParent.insertBefore(tablePH, section);
     tableParent.removeChild(section);
 
-    // Move live notes card too
     const notesCard = getNotesCardForTable(tableContainer);
     let notesPH = null;
     let notesParent = null;
@@ -577,8 +540,8 @@
       notesParent.removeChild(notesCard);
     }
 
-    // Append BOTH into outer card (table card + notes card underneath)
     outer.appendChild(section);
+
     if (notesCard) {
       const notesWrap = document.createElement("div");
       notesWrap.className = "mk-modal__notes-host";
@@ -592,13 +555,12 @@
       tableParent,
       notesCard,
       notesPH,
-      notesParent
+      notesParent,
     };
 
     openTableModalShell(title);
   }
 
-  // Table modal close handlers
   if (mkTableModal) {
     mkTableModal.addEventListener("click", (e) => {
       const closeBtn = e.target.closest(".mk-modal-close,[data-mk-modal-close]");
@@ -611,7 +573,6 @@
     });
   }
 
-  // Expand button click
   document.addEventListener("click", (e) => {
     const expandBtn = e.target.closest(".mk-table-expand-btn");
     if (!expandBtn) return;
@@ -619,17 +580,12 @@
     const tableContainer = expandBtn.closest(".table-container");
     if (!tableContainer) return;
 
-    if (mkTableModal && mkTableModalCards) {
-      openTableModalFromContainer(tableContainer);
-    } else {
-      // If mkTableModal doesn't exist, do nothing (button still shows).
-      // (Your mkRowModal still works via row-click.)
-      flash(tableContainer);
-    }
+    if (mkTableModal && mkTableModalCards) openTableModalFromContainer(tableContainer);
+    else flash(tableContainer);
   });
 
   /* =======================
-     ROW POPUP MODAL (mkRowModal) — your existing behavior, preserved
+     ROW POPUP MODAL (mkRowModal)
   ======================= */
   const modal = document.getElementById("mkRowModal");
   const tableHost = document.getElementById("mkModalTableHost");
@@ -690,7 +646,9 @@
   function moveNotesIntoModal(row) {
     if (!notesHost) return null;
 
-    const btn = row.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const btn = row.querySelector(
+      "button[data-notes-target], button[data-notes-btn][data-notes-target]"
+    );
     const targetId = btn?.getAttribute("data-notes-target");
     if (!targetId) return null;
 
@@ -739,17 +697,16 @@
       if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") restoreModal();
     });
 
-    // Open on row click (avoid controls)
     document.addEventListener("click", (e) => {
       const t = e.target;
 
-      // ignore clicks on controls/buttons/notes/add-row/expand
       if (
         t.closest("button") ||
         t.closest("a") ||
         t.matches("input, select, textarea, option") ||
         t.closest(".table-footer")
-      ) return;
+      )
+        return;
 
       const row = t.closest("table.training-table tbody tr");
       if (!row) return;
@@ -773,7 +730,7 @@
   }
 
   /* =======================
-     SUPPORT TICKETS (your logic preserved)
+     SUPPORT TICKETS
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -815,14 +772,11 @@
   function ensureOnlyBaseHasDisclaimerAndAdd(groupEl) {
     const isBase = ticketIsBase(groupEl);
 
-    // Remove any remove buttons (everywhere)
     $$(".remove-ticket-btn", groupEl).forEach((b) => b.remove());
 
-    // Add button: only base keeps it
     const add = $(".add-ticket-btn", groupEl);
     if (add && !isBase) add.remove();
 
-    // Disclaimer: only base keeps it
     const disc = $(".ticket-disclaimer", groupEl);
     if (disc && !isBase) disc.remove();
   }
@@ -939,6 +893,7 @@
     const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
+
   function addDays(dateStr, days) {
     if (!dateStr) return "";
     const d = new Date(dateStr + "T00:00:00");
@@ -947,440 +902,60 @@
     return formatDateYYYYMMDD(d);
   }
 
-  const onsiteStart = $("#onsiteStartDate");
-  const onsiteEnd = $("#onsiteEndDate");
-  if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
-    onsiteStart.addEventListener("change", () => {
-      if (!onsiteStart.value) return;
-      if (!onsiteEnd.value) {
-        onsiteEnd.value = addDays(onsiteStart.value, 2);
-        onsiteEnd.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-    });
-  }
-
   /* =======================
      INIT
   ======================= */
   function init() {
-    // Normalize buttons correctly (questions vs tables)
     normalizeNotesButtons(document);
-
-    // Ensure expand buttons exist in every table footer
     ensureTableExpandButtons(document);
 
-    // IDs + state
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
-    // Activate first page
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
     // Save once to lock IDs
     captureState(document);
 
-    // Ensure ticket UI rules on load
+    // Tickets UI rules on load
     if (ticketsRoot) {
       $$(".ticket-group", ticketsRoot).forEach((g) => ensureOnlyBaseHasDisclaimerAndAdd(g));
       $$(".ticket-status-select", ticketsRoot).forEach((s) => (s.style.color = "#111"));
     }
 
-/* =========================================================
-   HOTFIX: stop MutationObserver infinite loop / page hang
-   - Debounce re-normalization
-   - Do NOT rewrite notes buttons if already normalized
-========================================================= */
-(function mkObserverHotfix(){
-  // --- 1) Patch normalizeNotesButtons to be idempotent ---
-  // If your normalizeNotesButtons is not in global scope, this still works by re-normalizing safely below.
-  const NOTES_SVG_MARKER = 'class="notes-svg"';
-
-  function isTableNotesButton(btn){
-    return !!btn.closest("table.training-table");
-  }
-
-  function safeNormalize(root=document){
-    root.querySelectorAll("button[data-notes-target], button[data-notes-btn][data-notes-target]").forEach((btn) => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-
-      const inTable = isTableNotesButton(btn);
-
-      // If it's already correct, do nothing (prevents mutation churn)
-      if (inTable) {
-        if (btn.classList.contains("notes-btn") && !btn.classList.contains("notes-icon-btn") && btn.innerHTML === "") {
-          return;
+    // Onsite date auto-fill (if present)
+    const onsiteStart = $("#onsiteStartDate");
+    const onsiteEnd = $("#onsiteEndDate");
+    if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
+      onsiteStart.addEventListener("change", () => {
+        if (!onsiteStart.value) return;
+        if (!onsiteEnd.value) {
+          onsiteEnd.value = addDays(onsiteStart.value, 2);
+          onsiteEnd.dispatchEvent(new Event("input", { bubbles: true }));
         }
-        btn.classList.remove("notes-icon-btn");
-        btn.classList.add("notes-btn");
-        btn.innerHTML = ""; // table buttons rely on CSS ::before
-      } else {
-        // question buttons must have SVG
-        if (btn.classList.contains("notes-icon-btn") && btn.innerHTML.includes(NOTES_SVG_MARKER)) {
-          return;
-        }
-        btn.classList.remove("notes-btn");
-        btn.classList.add("notes-icon-btn");
-        btn.innerHTML = `
-          <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3a1 1 0 0 0 1.64.77L13.5 18H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 13h-6.85a1 1 0 0 0-.64.23L9 19.1V17a1 1 0 0 0-1-1H4V5h16v11Z"/>
-          </svg>
-        `;
-      }
-    });
-  }
-
-  function ensureExpandButtons(){
-    document.querySelectorAll(".table-container").forEach((container) => {
-      const footer = container.querySelector(".table-footer");
-      const table = container.querySelector("table.training-table");
-      if (!footer || !table) return;
-      if (footer.querySelector(".mk-table-expand-btn")) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-table-expand-btn";
-      btn.textContent = "⤢";
-      btn.setAttribute("aria-label", "Expand table");
-      btn.title = "Expand table";
-      footer.appendChild(btn);
-    });
-  }
-
-  // Run once immediately
-  safeNormalize(document);
-  ensureExpandButtons();
-
-  // --- 2) Replace the “always firing” observer with a debounced one ---
-  let rafPending = false;
-  const mo = new MutationObserver((mutations) => {
-    // Ignore mutations that are purely attribute changes from our own normalizing
-    // (we only observe childList anyway in the config below)
-    if (rafPending) return;
-    rafPending = true;
-    requestAnimationFrame(() => {
-      rafPending = false;
-      safeNormalize(document);
-      ensureExpandButtons();
-    });
-  });
-
-  // IMPORTANT: observe only childList to reduce churn
-  mo.observe(document.body, { childList: true, subtree: true });
-})();
-
-  init();
-})();
-
-/* =========================================================
-   PAGE HELPERS (Notes buttons, Add Row tables, Reset page)
-   + SUPPORT TICKETS (clone + status move)
-   ========================================================= */
-
-(function () {
-  // -------------------------------
-  // Utilities
-  // -------------------------------
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  function isEmpty(val) {
-    return val == null || String(val).trim() === "";
-  }
-
-  function scrollToEl(el) {
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function clearInputsIn(root) {
-    if (!root) return;
-
-    // text inputs, dates, textareas
-    $$("input[type='text'], input[type='date'], input:not([type]), textarea", root).forEach((el) => {
-      el.value = "";
-    });
-
-    // checkboxes
-    $$("input[type='checkbox']", root).forEach((el) => {
-      el.checked = false;
-    });
-
-    // selects -> reset to placeholder if exists
-    $$("select", root).forEach((sel) => {
-      const ghost = sel.querySelector("option[data-ghost='true']");
-      if (ghost) {
-        sel.value = ghost.value; // typically ""
-      } else {
-        sel.selectedIndex = 0;
-      }
-    });
-  }
-
-  // -------------------------------
-  // Notes Icon Buttons
-  // -------------------------------
-  function initNotesButtons() {
-    // Any button with [data-notes-btn] toggles visibility / focuses the target notes block.
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-notes-btn]");
-      if (!btn) return;
-
-      const targetId = btn.getAttribute("data-notes-target");
-      if (!targetId) return;
-
-      const target = document.getElementById(targetId);
-      if (!target) return;
-
-      // If you have a hidden/collapsed class, toggle it here.
-      // Otherwise, just scroll + focus the textarea.
-      scrollToEl(target);
-
-      const ta = $("textarea", target);
-      if (ta) ta.focus({ preventScroll: true });
-    });
-  }
-
-  // -------------------------------
-  // Add Row (+) for tables
-  // -------------------------------
-  function initAddRowButtons() {
-    // Works for any .table-container where a .add-row exists.
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest("button.add-row");
-      if (!addBtn) return;
-
-      const tableContainer = addBtn.closest(".table-container");
-      const table = $("table.training-table", tableContainer);
-      const tbody = $("tbody", table);
-      if (!tbody) return;
-
-      // Clone the FIRST row as the template.
-      const templateRow = $("tr", tbody);
-      if (!templateRow) return;
-
-      const newRow = templateRow.cloneNode(true);
-
-      // Clear inputs inside cloned row
-      clearInputsIn(newRow);
-
-      // If you ever add IDs inside rows, scrub them here to avoid duplicates:
-      $$("[id]", newRow).forEach((el) => el.removeAttribute("id"));
-
-      tbody.appendChild(newRow);
-    });
-  }
-
-  // -------------------------------
-  // Reset This Page button
-  // -------------------------------
-  function initPageResetButtons() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("button.clear-page-btn");
-      if (!btn) return;
-
-      const section = btn.closest("section.page-section");
-      if (!section) return;
-
-      // Clear normal inputs/selects in this section
-      clearInputsIn(section);
-
-      // Remove dynamically-added table rows (keep first 2 if you want; here we keep the first 2 for opcodes page)
-      // If you want “keep only template row”, change keepCount to 1.
-      $$("table.training-table tbody", section).forEach((tbody) => {
-        const rows = $$("tr", tbody);
-        const keepCount = Math.min(2, rows.length); // keeps 2 rows like your current markup
-        rows.slice(keepCount).forEach((r) => r.remove());
       });
-
-      // Reset Support Tickets to ONLY the base card in Open
-      if (section.id === "support-tickets") {
-        resetSupportTickets();
-      }
-    });
-  }
-
-  // -------------------------------
-  // Support Tickets
-  // -------------------------------
-  const ticketContainers = {
-    Open: () => $("#openTicketsContainer"),
-    "Tier Two": () => $("#tierTwoTicketsContainer"),
-    "Closed - Resolved": () => $("#closedResolvedTicketsContainer"),
-    "Closed - Feature Not Supported": () => $("#closedFeatureTicketsContainer"),
-  };
-
-  function getTicketStatus(groupEl) {
-    const sel = $(".ticket-status-select", groupEl);
-    return sel ? sel.value : "Open";
-  }
-
-  function setTicketStatus(groupEl, status, { lock = false } = {}) {
-    const sel = $(".ticket-status-select", groupEl);
-    if (!sel) return;
-
-    sel.value = status;
-
-    if (lock) {
-      sel.disabled = true;
-      sel.setAttribute("aria-disabled", "true");
-    } else {
-      sel.disabled = false;
-      sel.removeAttribute("aria-disabled");
-    }
-  }
-
-  function ticketIsComplete(groupEl) {
-    const num = $(".ticket-number-input", groupEl)?.value || "";
-    const url = $(".ticket-zendesk-input", groupEl)?.value || "";
-    const summary = $(".ticket-summary-input", groupEl)?.value || "";
-
-    // Minimal completion rule: Ticket # + Summary required.
-    // Adjust if you want URL required too.
-    return !isEmpty(num) && !isEmpty(summary);
-  }
-
-  function cloneTicketGroup(fromGroupEl) {
-    const clone = fromGroupEl.cloneNode(true);
-
-    // It's NOT the base card
-    clone.removeAttribute("data-base");
-
-    // Remove disclaimer from cloned card
-    const disclaimer = $(".ticket-disclaimer", clone);
-    if (disclaimer) disclaimer.remove();
-
-    // Clear fields in cloned card
-    clearInputsIn(clone);
-
-    // Add a remove button (optional but helpful)
-    const headerRow = $(".ticket-number-wrap", clone);
-    if (headerRow && !$(".remove-ticket-btn", headerRow)) {
-      const rm = document.createElement("button");
-      rm.type = "button";
-      rm.className = "remove-ticket-btn";
-      rm.title = "Remove Ticket";
-      rm.textContent = "–";
-      headerRow.appendChild(rm);
     }
 
-    // For cloned cards, allow status changes (not locked)
-    setTicketStatus(clone, "Open", { lock: false });
-
-    return clone;
-  }
-
-  function moveTicketGroupToStatusContainer(groupEl, status) {
-    const containerFn = ticketContainers[status];
-    const container = containerFn ? containerFn() : null;
-    if (!container) return;
-
-    container.appendChild(groupEl);
-  }
-
-  function resetSupportTickets() {
-    // Keep only base group in Open; clear others
-    const open = $("#openTicketsContainer");
-    if (!open) return;
-
-    // Find the base card
-    const base = $(".ticket-group[data-base='true']", open);
-    if (!base) return;
-
-    // Remove all other ticket-groups anywhere
-    Object.values(ticketContainers).forEach((fn) => {
-      const c = fn();
-      if (!c) return;
-      $$(".ticket-group", c).forEach((g) => {
-        if (g !== base) g.remove();
+    // Debounced observer: re-normalize ONLY when new nodes are added (prevents churn)
+    let rafPending = false;
+    const mo = new MutationObserver(() => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        normalizeNotesButtons(document);
+        ensureTableExpandButtons(document);
       });
     });
-
-    // Clear base fields + lock status to Open
-    clearInputsIn(base);
-    setTicketStatus(base, "Open", { lock: true });
-
-    // Ensure base contains the add button (your markup does)
+    mo.observe(document.body, { childList: true, subtree: true });
   }
 
-  function initSupportTickets() {
-    // Lock base card status to Open on load
-    const base = $("#openTicketsContainer .ticket-group[data-base='true']");
-    if (base) setTicketStatus(base, "Open", { lock: true });
-
-    // Add Ticket button: only on base card; enforce completion
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest(".add-ticket-btn");
-      if (!addBtn) return;
-
-      const group = addBtn.closest(".ticket-group");
-      if (!group) return;
-
-      // Only enforce rule on base card (you described that behavior)
-      const isBase = group.getAttribute("data-base") === "true";
-      if (isBase && !ticketIsComplete(group)) {
-        // Simple inline feedback (no modal)
-        group.classList.add("ticket-incomplete");
-        setTimeout(() => group.classList.remove("ticket-incomplete"), 900);
-        return;
-      }
-
-      const openContainer = $("#openTicketsContainer");
-      if (!openContainer) return;
-
-      // Clone from base card always (consistent structure)
-      const baseCard = $("#openTicketsContainer .ticket-group[data-base='true']");
-      if (!baseCard) return;
-
-      const clone = cloneTicketGroup(baseCard);
-      openContainer.appendChild(clone);
-
-      // Optionally scroll to new card
-      scrollToEl(clone);
-      $(".ticket-number-input", clone)?.focus({ preventScroll: true });
-    });
-
-    // Remove ticket card (for clones)
-    document.addEventListener("click", (e) => {
-      const rm = e.target.closest(".remove-ticket-btn");
-      if (!rm) return;
-      const group = rm.closest(".ticket-group");
-      if (!group) return;
-
-      // Don't allow removing base
-      if (group.getAttribute("data-base") === "true") return;
-
-      group.remove();
-    });
-
-    // Status change moves the card between containers
-    document.addEventListener("change", (e) => {
-      const sel = e.target.closest(".ticket-status-select");
-      if (!sel) return;
-
-      const group = sel.closest(".ticket-group");
-      if (!group) return;
-
-      // Base stays Open & locked
-      if (group.getAttribute("data-base") === "true") {
-        setTicketStatus(group, "Open", { lock: true });
-        return;
-      }
-
-      const status = sel.value || "Open";
-      moveTicketGroupToStatusContainer(group, status);
-    });
+  // Run at the right time
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
   }
-
-  // -------------------------------
-  // Init
-  // -------------------------------
-  document.addEventListener("DOMContentLoaded", () => {
-    initNotesButtons();
-    initAddRowButtons();
-    initPageResetButtons();
-    initSupportTickets();
-  });
 })();
