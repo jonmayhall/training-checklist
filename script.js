@@ -987,16 +987,6 @@
       $$(".ticket-status-select", ticketsRoot).forEach((s) => (s.style.color = "#111"));
     }
 
-    // If DOM changes (new rows/cards), keep notes button styles correct + keep expand buttons present
-    if (window.MutationObserver) {
-      const mo = new MutationObserver(() => {
-        normalizeNotesButtons(document);
-        ensureTableExpandButtons(document);
-      });
-      mo.observe(document.body, { childList: true, subtree: true });
-    }
-  }
-
 /* =========================================================
    HOTFIX: stop MutationObserver infinite loop / page hang
    - Debounce re-normalization
