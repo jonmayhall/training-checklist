@@ -5,9 +5,10 @@
    ✅ Autosave/Restore (supports dynamically added rows/cards)
    ✅ Reset This Page buttons
    ✅ Add Row (+) for all tables (keeps notes buttons working)
-   ✅ Notes buttons (supports BOTH styles):
-        - Pages 3/4: .notes-icon-btn with inline SVG (preserved)
-        - Tables: .notes-btn mask-icon style (kept empty)
+   ✅ Notes buttons — ONE consistent style everywhere:
+        - EXACTLY like Pages 3 & 4:
+          button.notes-icon-btn.notes-icon-btn--sm + inline SVG
+          data-notes-btn + data-notes-target
    ✅ Optional bullet insertion into notes (if you add data-insert-bullet)
    ✅ Support Tickets: base locked to Open, clones enforced, move by status
    ✅ Dealership Map update helper (if #dealershipMapFrame exists)
@@ -24,6 +25,14 @@
   const AUTO_ID_ATTR = "data-mk-id";      // persistent identity marker
   const AUTO_ROW_ATTR = "data-mk-row";    // stable row marker for cloned rows
   const AUTO_CARD_ATTR = "data-mk-card";  // stable card marker for cloned cards
+
+  // ✅ Exact SVG used on Pages 3/4
+  const NOTES_SVG = `
+    <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"></path>
+      <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"></path>
+    </svg>
+  `.trim();
 
   /* =======================
      HELPERS
@@ -70,8 +79,6 @@
 
   /* =======================
      GHOST / PLACEHOLDER STYLING
-     - select empty => .is-placeholder
-     - date empty => .is-placeholder
   ======================= */
   function applyGhostStyling(root = document) {
     $$("select", root).forEach(sel => {
@@ -88,36 +95,46 @@
   }
 
   /* =======================
-     NOTES BUTTONS — SUPPORT BOTH STYLES
+     NOTES BUTTONS — FORCE PAGES 3/4 STYLE EVERYWHERE
      -------------------------------------------------------
-     1) Pages 3/4: button.notes-icon-btn contains inline SVG -> PRESERVE SVG
-     2) Tables: button.notes-btn uses CSS mask icon -> KEEP EMPTY
-     Targets:
-       - button[data-notes-target]
-       - button[data-notes-btn] (optional marker)
+     Any button that targets notes MUST become:
+       <button type="button"
+               class="notes-icon-btn notes-icon-btn--sm"
+               data-notes-btn
+               data-notes-target="...">
+         [inline SVG]
+       </button>
   ======================= */
-  function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target], button[data-notes-btn]", root).forEach(btn => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add/View Notes");
+  function forceNotesBtnStyle(btn) {
+    if (!btn) return;
+    btn.type = "button";
+    btn.setAttribute("data-notes-btn", "");
 
-      // ✅ SVG style (Pages 3/4) — do NOT clear inner HTML
-      if (btn.classList.contains("notes-icon-btn")) return;
+    // Ensure classes match Pages 3/4
+    btn.classList.remove("notes-btn"); // in case old table-style existed
+    btn.classList.add("notes-icon-btn", "notes-icon-btn--sm");
 
-      // ✅ Table style — ensure .notes-btn and keep empty
-      btn.classList.add("notes-btn");
-      btn.innerHTML = "";
+    if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add/View Notes");
+
+    // Ensure EXACT SVG exists
+    const hasSvg = !!btn.querySelector("svg.notes-svg");
+    if (!hasSvg) btn.innerHTML = NOTES_SVG;
+  }
+
+  function normalizeAllNotesButtons(root = document) {
+    // Only normalize buttons that actually target notes
+    $$("button[data-notes-target]", root).forEach(forceNotesBtnStyle);
+
+    // Also catch any legacy markers
+    $$("button[data-notes-btn]:not([data-notes-target])", root).forEach(btn => {
+      // if it has data-notes-btn but no target, do nothing
     });
   }
 
   /* =======================
      PERSISTENT ID SYSTEM
-     -------------------------------------------------------
-     Assign stable ids using data-mk-id.
-     This makes autosave/restore work across the whole app.
   ======================= */
   function ensureStableFieldIds(root = document) {
-    // Mark rows and cards so dynamic clones are stable
     $$("tr", root).forEach(tr => {
       if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
     });
@@ -126,7 +143,6 @@
       if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
     });
 
-    // Assign stable IDs for form controls if missing
     $$("input, select, textarea", root).forEach(el => {
       if (el.tagName === "INPUT") {
         const type = (el.type || "").toLowerCase();
@@ -221,7 +237,6 @@
     applyGhostStyling(root);
   }
 
-  // Save on changes
   document.addEventListener("input", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -252,7 +267,6 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    // "instant" isn't a valid behavior; use "auto"
     window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -307,19 +321,6 @@
     applyGhostStyling(root);
   }
 
-  function enforceTableNotesButtonStyle(root) {
-    // In tables, we want the mask-icon notes button (.notes-btn) with empty contents.
-    $$("button[data-notes-target], button[data-notes-btn]", root).forEach(btn => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add/View Notes");
-
-      btn.classList.remove("notes-icon-btn", "notes-icon-btn--sm");
-      btn.classList.add("notes-btn");
-      btn.innerHTML = "";
-      btn.removeAttribute("data-notes-btn"); // optional cleanup
-    });
-  }
-
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".table-footer .add-row");
     if (!addBtn) return;
@@ -331,7 +332,6 @@
     if (!tbody || !firstRow) return;
 
     const clone = firstRow.cloneNode(true);
-
     clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
 
     clearControls(clone);
@@ -340,8 +340,8 @@
     $$("[id]", clone).forEach(el => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
 
-    // Ensure table notes buttons stay in the correct style
-    enforceTableNotesButtonStyle(clone);
+    // ✅ IMPORTANT: make sure cloned row notes buttons match Pages 3/4 exactly
+    normalizeAllNotesButtons(clone);
 
     tbody.appendChild(clone);
 
@@ -352,11 +352,11 @@
   /* =======================
      NOTES BUTTONS (click -> scroll/focus)
   ======================= */
-  // Normalize current DOM buttons safely (does NOT delete SVG buttons anymore)
-  normalizeNotesButtons(document);
+  // ✅ Force all existing notes buttons to Pages 3/4 style (including tables)
+  normalizeAllNotesButtons(document);
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-notes-target], button[data-notes-btn]");
+    const btn = e.target.closest("button[data-notes-target]");
     if (!btn) return;
 
     const targetId = btn.getAttribute("data-notes-target");
@@ -563,8 +563,8 @@
      INIT
   ======================= */
   function init() {
-    // Normalize notes buttons safely (will not delete SVGs)
-    normalizeNotesButtons(document);
+    // ✅ Make notes buttons consistent everywhere (including tables)
+    normalizeAllNotesButtons(document);
 
     ensureStableFieldIds(document);
     restoreState(document);
@@ -573,10 +573,8 @@
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
-    // Save once after init to “lock in” ids
     captureState(document);
   }
 
   init();
-
 })();
