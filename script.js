@@ -1,11 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Notes buttons now insert ONLY what you asked for:
-      • Name + Opcode + Question
-   ✅ Bullets stay in the correct order (even if clicked out of order)
-   ✅ Table bullets pull Name + Opcode from that row + Question from the column header
-   ✅ Scrolls to the notes textarea + focuses it
+   ✅ Notes buttons insert ONLY:
+      • Name | Opcode | <Column Header>
+      (No "Question:" label)
+   ✅ Bullets stay in correct order even if clicked out of order
+   ✅ Table bullets pull Name + Opcode from that row + Column Header
+   ✅ Scrolls once to notes (no “down then back up” shift)
 ======================================================= */
 
 (() => {
@@ -14,7 +15,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v7";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -288,8 +289,7 @@
   });
 
   /* =======================
-     NOTES (ONLY: Name + Opcode + Question)
-     - Maintains order based on the button’s on-page position
+     NOTES BULLETS (ORDERED)
   ======================= */
   function getNotesBlock(targetId) {
     if (!targetId) return null;
@@ -308,37 +308,12 @@
     return idx >= 0 ? idx : 999999;
   }
 
-  function getClosestLabelText(btn) {
-    const row = btn.closest(".checklist-row");
-    if (row) {
-      const lbl = $("label", row);
-      if (lbl) return safeText(lbl.textContent);
-    }
-    return "Question";
-  }
-
   function parseTextarea(taVal) {
     const lines = (taVal || "").split("\n");
-    const bulletLines = [];
     let i = 0;
-
-    // bullets only from the top
-    while (i < lines.length) {
-      const ln = lines[i];
-      if (ln.trim().startsWith("•")) bulletLines.push(ln);
-      else break;
-      i++;
-    }
-
-    // remainder is user notes (kept untouched)
+    while (i < lines.length && lines[i].trim().startsWith("•")) i++;
     const rest = lines.slice(i).join("\n").replace(/^\n+/, "");
-    return { bulletLines, rest };
-  }
-
-  function writeTextarea(ta, bulletsOrdered, restNotes) {
-    const bulletLines = bulletsOrdered.map((b) => `• ${b.text}`);
-    ta.value = bulletLines.join("\n") + (restNotes ? `\n\n${restNotes}` : "");
-    ta.dispatchEvent(new Event("input", { bubbles: true }));
+    return { rest };
   }
 
   function ensureNotesMeta(state) {
@@ -348,7 +323,6 @@
     return state.__notesBullets;
   }
 
-  // TABLE CONTEXT: Name + Opcode + Question
   function getTableContext(btn) {
     const tr = btn.closest("tr");
     const table = btn.closest("table");
@@ -376,7 +350,7 @@
       return safeText(cell.textContent);
     }
 
-    // Name column
+    // Name
     let name = "";
     const nameIdx = ths.findIndex((t) => normalizeKey(t) === "name");
     if (nameIdx >= 0) {
@@ -388,19 +362,17 @@
       name = safeText(anyText ? anyText.value : "");
     }
 
-    // Opcode column (page 6)
+    // Opcode (page 6)
     let opcode = "";
     const opcodeIdx = ths.findIndex((t) => normalizeKey(t) === "opcode");
     if (opcodeIdx >= 0) opcode = getCellTextAt(opcodeIdx);
 
-    // "Question" = the column header immediately LEFT of the Notes column
-    let question = "Question";
-    if (notesColIndex > 0 && ths[notesColIndex - 1]) {
-      question = ths[notesColIndex - 1];
-    }
+    // Column header immediately LEFT of Notes column
+    let colHeader = "Note";
+    if (notesColIndex > 0 && ths[notesColIndex - 1]) colHeader = ths[notesColIndex - 1];
 
     const tableId = table.id ? `table:${table.id}` : "table";
-    return { tableId, rowId, name, opcode, question };
+    return { tableId, rowId, name, opcode, colHeader };
   }
 
   function buildBulletText(btn) {
@@ -408,19 +380,20 @@
     if (ctx) {
       const n = ctx.name ? `Name: ${ctx.name}` : "Name:";
       const o = ctx.opcode ? `Opcode: ${ctx.opcode}` : "Opcode:";
-      const q = ctx.question ? `Question: ${ctx.question}` : "Question:";
-      return `${n} | ${o} | ${q}`;
+      return `${n} | ${o} | ${ctx.colHeader}`;
     }
-
-    // non-table notes: just "Question: <label>"
-    const q = getClosestLabelText(btn);
-    return `Question: ${q}`;
+    // Non-table: just the label text
+    const row = btn.closest(".checklist-row");
+    const lbl = row ? $("label", row) : null;
+    return safeText(lbl ? lbl.textContent : "Note");
   }
 
   function buildBulletKey(btn, targetId) {
     const ctx = getTableContext(btn);
-    if (ctx) return `target:${targetId}|${ctx.tableId}|row:${ctx.rowId}|q:${normalizeKey(ctx.question)}`;
-    return `target:${targetId}|q:${normalizeKey(getClosestLabelText(btn))}`;
+    if (ctx) return `target:${targetId}|${ctx.tableId}|row:${ctx.rowId}|h:${normalizeKey(ctx.colHeader)}`;
+    const row = btn.closest(".checklist-row");
+    const lbl = row ? $("label", row) : null;
+    return `target:${targetId}|h:${normalizeKey(lbl ? lbl.textContent : "note")}`;
   }
 
   function upsertBullet(targetId, bulletKey, bulletText, orderIndex) {
@@ -432,8 +405,8 @@
 
     const existing = list.find((b) => b.key === bulletKey);
     if (existing) {
-      existing.text = bulletText; // updates if Name/Opcode changed
-      existing.order = Number.isFinite(existing.order) ? existing.order : 999999;
+      existing.text = bulletText;
+      if (!Number.isFinite(existing.order)) existing.order = 999999;
       if (Number.isFinite(orderIndex) && orderIndex < existing.order) existing.order = orderIndex;
     } else {
       list.push({ key: bulletKey, text: bulletText, order: orderIndex, createdAt: Date.now() });
@@ -451,7 +424,6 @@
     const meta = ensureNotesMeta(state);
     const list = Array.isArray(meta[targetId]) ? meta[targetId] : [];
 
-    // keep correct order no matter click order
     list.sort((a, b) => {
       const oa = Number.isFinite(a.order) ? a.order : 999999;
       const ob = Number.isFinite(b.order) ? b.order : 999999;
@@ -460,15 +432,18 @@
     });
 
     const { rest } = parseTextarea(ta.value);
-    writeTextarea(ta, list, rest);
+
+    const bulletLines = list.map((b) => `• ${b.text}`);
+    ta.value = bulletLines.join("\n") + (rest ? `\n\n${rest}` : "");
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
 
     writeState(state);
   }
 
   function scrollToNotesBlock(notesBlock) {
     if (!notesBlock) return;
+    // One smooth scroll only — no follow-up offset that causes the “down then up” feel.
     notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-    setTimeout(() => window.scrollTo({ top: Math.max(0, window.scrollY - 90), behavior: "smooth" }), 250);
   }
 
   normalizeNotesButtons(document);
@@ -492,6 +467,7 @@
 
     scrollToNotesBlock(notesBlock);
 
+    // Rebuild after scroll settles (prevents extra jump)
     setTimeout(() => {
       rebuildNotesTextareaForTarget(targetId);
       const ta = getTextarea(notesBlock);
@@ -499,7 +475,7 @@
         flash(notesBlock);
         ta.focus({ preventScroll: true });
       }
-    }, 250);
+    }, 200);
   });
 
   /* =======================
