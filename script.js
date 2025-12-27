@@ -1,12 +1,10 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Notes buttons insert ONLY:
-      • Name | Opcode | <Column Header>
-      (No "Question:" label)
-   ✅ Bullets stay in correct order even if clicked out of order
-   ✅ Table bullets pull Name + Opcode from that row + Column Header
-   ✅ Scrolls once to notes (no “down then back up” shift)
+   ✅ Fix: NO screen “shift down then back up” on Notes clicks
+      - activatePage() no longer forces scroll-to-top when opened from Notes
+      - scroll happens once (after layout), then we update textarea
+   ✅ Bullets are spaced out (blank line between bullets)
 ======================================================= */
 
 (() => {
@@ -15,7 +13,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v7";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -207,7 +205,8 @@
   const pageSections = $$(".page-section");
   const navButtons = $$(".nav-btn");
 
-  function activatePage(sectionId) {
+  // ✅ change: allow preserving scroll when opening page from Notes click
+  function activatePage(sectionId, opts = {}) {
     if (!sectionId) return;
 
     pageSections.forEach((sec) => sec.classList.remove("active"));
@@ -219,11 +218,13 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    window.scrollTo({ top: 0, behavior: "instant" });
+    if (!opts.preserveScroll) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
   }
 
   navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => activatePage(btn.dataset.target));
+    btn.addEventListener("click", () => activatePage(btn.dataset.target, { preserveScroll: false }));
   });
 
   /* =======================
@@ -289,7 +290,7 @@
   });
 
   /* =======================
-     NOTES BULLETS (ORDERED)
+     NOTES BULLETS (ORDERED + SPACED)
   ======================= */
   function getNotesBlock(targetId) {
     if (!targetId) return null;
@@ -308,12 +309,25 @@
     return idx >= 0 ? idx : 999999;
   }
 
-  function parseTextarea(taVal) {
-    const lines = (taVal || "").split("\n");
+  // remove existing bullet header section (• lines + blank lines right after)
+  function stripLeadingBullets(text) {
+    const lines = (text || "").split("\n");
     let i = 0;
-    while (i < lines.length && lines[i].trim().startsWith("•")) i++;
+
+    // consume bullets and any blank lines between bullets
+    while (i < lines.length) {
+      const t = lines[i].trim();
+      if (t.startsWith("•") || t === "") {
+        // keep consuming until we hit first non-bullet non-empty after we've started
+        i++;
+        continue;
+      }
+      break;
+    }
+
+    // remove extra blank lines at the very top of the remaining content
     const rest = lines.slice(i).join("\n").replace(/^\n+/, "");
-    return { rest };
+    return rest;
   }
 
   function ensureNotesMeta(state) {
@@ -380,9 +394,8 @@
     if (ctx) {
       const n = ctx.name ? `Name: ${ctx.name}` : "Name:";
       const o = ctx.opcode ? `Opcode: ${ctx.opcode}` : "Opcode:";
-      return `${n} | ${o} | ${ctx.colHeader}`;
+      return `${n} | ${o} | ${ctx.colHeader}`; // ✅ no "Question:"
     }
-    // Non-table: just the label text
     const row = btn.closest(".checklist-row");
     const lbl = row ? $("label", row) : null;
     return safeText(lbl ? lbl.textContent : "Note");
@@ -431,19 +444,25 @@
       return (a.createdAt || 0) - (b.createdAt || 0);
     });
 
-    const { rest } = parseTextarea(ta.value);
+    const rest = stripLeadingBullets(ta.value);
 
-    const bulletLines = list.map((b) => `• ${b.text}`);
-    ta.value = bulletLines.join("\n") + (rest ? `\n\n${rest}` : "");
+    // ✅ spaced bullets: blank line between each bullet
+    const bulletLines = list.map((b) => `• ${b.text}`).join("\n\n");
+
+    ta.value = bulletLines + (rest ? `\n\n${rest}` : "");
     ta.dispatchEvent(new Event("input", { bubbles: true }));
 
     writeState(state);
   }
 
-  function scrollToNotesBlock(notesBlock) {
+  // ✅ one scroll only, after layout has settled, to prevent “shift”
+  function scrollToNotesBlockStable(notesBlock) {
     if (!notesBlock) return;
-    // One smooth scroll only — no follow-up offset that causes the “down then up” feel.
-    notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
   }
 
   normalizeNotesButtons(document);
@@ -456,8 +475,11 @@
     const notesBlock = getNotesBlock(targetId);
     if (!notesBlock) return;
 
+    // ✅ If we need to activate another page, do NOT force scroll-to-top
     const page = notesBlock.closest(".page-section");
-    if (page && !page.classList.contains("active")) activatePage(page.id);
+    if (page && !page.classList.contains("active")) {
+      activatePage(page.id, { preserveScroll: true });
+    }
 
     const orderIndex = getOrderIndex(btn, targetId);
     const bulletText = buildBulletText(btn);
@@ -465,9 +487,9 @@
 
     upsertBullet(targetId, bulletKey, bulletText, orderIndex);
 
-    scrollToNotesBlock(notesBlock);
+    scrollToNotesBlockStable(notesBlock);
 
-    // Rebuild after scroll settles (prevents extra jump)
+    // ✅ Update textarea AFTER scroll kicks off; no second scroll or offset
     setTimeout(() => {
       rebuildNotesTextareaForTarget(targetId);
       const ta = getTextarea(notesBlock);
@@ -475,7 +497,7 @@
         flash(notesBlock);
         ta.focus({ preventScroll: true });
       }
-    }, 200);
+    }, 250);
   });
 
   /* =======================
@@ -632,13 +654,14 @@
     restoreState(document);
     applyGhostStyling(document);
 
-    // rebuild bullet lists for any targets already stored
+    // Rebuild bullet lists for any targets already stored
     const state = readState();
-    const meta = state.__notesBullets && typeof state.__notesBullets === "object" ? state.__notesBullets : {};
+    const meta =
+      state.__notesBullets && typeof state.__notesBullets === "object" ? state.__notesBullets : {};
     Object.keys(meta).forEach((targetId) => rebuildNotesTextareaForTarget(targetId));
 
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
-    if (active) activatePage(active);
+    if (active) activatePage(active, { preserveScroll: false });
 
     captureState(document);
   }
