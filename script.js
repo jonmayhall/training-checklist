@@ -559,6 +559,63 @@
     });
   }
 
+   function repairTableRowColumns(root = document) {
+  $$("table", root).forEach(table => {
+    const ths = $$("thead th", table);
+    if (!ths.length) return;
+
+    const idxByHeader = (regex) =>
+      ths.findIndex(th => regex.test((th.textContent || "").trim().toLowerCase()));
+
+    const notesIdx = idxByHeader(/\bnotes?\b/);
+    const notifIdx = idxByHeader(/\bnotification(s)?\b/);
+
+    const tbody = $("tbody", table);
+    if (!tbody) return;
+
+    $$("tr", tbody).forEach(tr => {
+      const tds = $$("td", tr);
+
+      // If row is short, pad it so indices exist
+      while (tds.length < ths.length) {
+        tr.appendChild(document.createElement("td"));
+        tds.push(tr.lastElementChild);
+      }
+
+      // --- Move notes button into the Notes column
+      if (notesIdx >= 0) {
+        const btn = tr.querySelector("button[data-notes-target]");
+        if (btn) {
+          const currentCell = btn.closest("td");
+          const targetCell = tds[notesIdx];
+          if (currentCell && targetCell && currentCell !== targetCell) {
+            targetCell.appendChild(btn);
+          }
+        }
+      }
+
+      // --- Ensure Notifications dropdown exists in Notifications column
+      if (notifIdx >= 0) {
+        const notifCell = tds[notifIdx];
+        if (notifCell) {
+          const hasSelect = !!notifCell.querySelector("select");
+          if (!hasSelect) {
+            const sel = document.createElement("select");
+            sel.className = "notification-select";
+            sel.innerHTML = `
+              <option value="" data-ghost="true">Notification</option>
+              <option>Yes</option>
+              <option>No</option>
+              <option>N/A</option>
+            `;
+            notifCell.appendChild(sel);
+          }
+        }
+      }
+    });
+  });
+}
+
   /* =======================
      INIT
   ======================= */
