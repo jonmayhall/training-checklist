@@ -1031,75 +1031,39 @@ main{
   transform:translateY(-1px);
 }
 
-/* =======================================================
-   SUPPORT TICKETS — FINAL SPACING + BASE CARD FIX
-   Drop-in overrides for your existing CSS
-======================================================= */
+/* =========================================================
+   SUPPORT TICKETS — FORCE 2-COLUMN GRID (FIX SIDE-BY-SIDE)
+   Put this BELOW your existing Support Tickets CSS
+========================================================= */
 
-/* ---------- Base ticket card should shrink to content ---------- */
-#support-tickets .ticket-group[data-base="true"]{
-  min-height: unset !important;
+#openTicketsContainer,
+#tierTwoTicketsContainer,
+#closedResolvedTicketsContainer,
+#closedFeatureTicketsContainer{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  align-items: start !important;
 }
 
-/* Pull the base card bottom up */
-#support-tickets .ticket-group[data-base="true"] .ticket-group-inner{
-  padding-bottom: 12px !important;
+/* Make sure each ticket card stays inside one grid column */
+#openTicketsContainer .ticket-group,
+#tierTwoTicketsContainer .ticket-group,
+#closedResolvedTicketsContainer .ticket-group,
+#closedFeatureTicketsContainer .ticket-group{
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-column: auto !important;   /* prevents spanning full width */
 }
 
-/* ---------- Summary row tightening (THIS was the main gap) ---------- */
-#support-tickets
-.ticket-group[data-base="true"]
-.ticket-row.ticket-summary-row textarea{
-  margin-bottom: 8px !important;
-}
-
-/* ---------- Disclaimer positioning & padding ---------- */
-#support-tickets
-.ticket-group[data-base="true"]
-.ticket-disclaimer{
-  margin-top: 6px !important;
-  padding: 8px 12px !important;
-  font-size: 12px;
-  line-height: 1.35;
-  color: #6b7280;
-}
-
-/* ---------- Remove disclaimer from ALL non-base tickets ---------- */
-#support-tickets
-.ticket-group:not([data-base="true"])
-.ticket-disclaimer{
-  display: none !important;
-}
-
-/* ---------- Status dropdown should always be black text ---------- */
-#support-tickets select.ticket-status-select,
-#support-tickets select.ticket-status-select:disabled{
-  color: #111 !important;
-  opacity: 1 !important;
-  background: #f7f7f7;
-  cursor: default;
-}
-
-/* ---------- Remove Add / Remove buttons from non-base tickets ---------- */
-#support-tickets
-.ticket-group:not([data-base="true"])
-.add-ticket-btn,
-#support-tickets
-.ticket-group:not([data-base="true"])
-.remove-ticket-btn{
-  display: none !important;
-}
-
-/* ---------- Ensure base Add button still aligns cleanly ---------- */
-#support-tickets
-.ticket-group[data-base="true"]
-.add-ticket-btn{
-  box-shadow: 0 1px 4px rgba(239,109,34,0.25);
-}
-
-/* ---------- Defensive: prevent hidden height from grid ---------- */
-#support-tickets .ticket-group{
-  align-self: flex-start;
+/* Optional: on smaller screens collapse to 1 column */
+@media (max-width: 980px){
+  #openTicketsContainer,
+  #tierTwoTicketsContainer,
+  #closedResolvedTicketsContainer,
+  #closedFeatureTicketsContainer{
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* =======================
