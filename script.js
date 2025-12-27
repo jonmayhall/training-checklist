@@ -997,5 +997,89 @@
     }
   }
 
+/* =========================================================
+   HOTFIX: stop MutationObserver infinite loop / page hang
+   - Debounce re-normalization
+   - Do NOT rewrite notes buttons if already normalized
+========================================================= */
+(function mkObserverHotfix(){
+  // --- 1) Patch normalizeNotesButtons to be idempotent ---
+  // If your normalizeNotesButtons is not in global scope, this still works by re-normalizing safely below.
+  const NOTES_SVG_MARKER = 'class="notes-svg"';
+
+  function isTableNotesButton(btn){
+    return !!btn.closest("table.training-table");
+  }
+
+  function safeNormalize(root=document){
+    root.querySelectorAll("button[data-notes-target], button[data-notes-btn][data-notes-target]").forEach((btn) => {
+      btn.type = "button";
+      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
+
+      const inTable = isTableNotesButton(btn);
+
+      // If it's already correct, do nothing (prevents mutation churn)
+      if (inTable) {
+        if (btn.classList.contains("notes-btn") && !btn.classList.contains("notes-icon-btn") && btn.innerHTML === "") {
+          return;
+        }
+        btn.classList.remove("notes-icon-btn");
+        btn.classList.add("notes-btn");
+        btn.innerHTML = ""; // table buttons rely on CSS ::before
+      } else {
+        // question buttons must have SVG
+        if (btn.classList.contains("notes-icon-btn") && btn.innerHTML.includes(NOTES_SVG_MARKER)) {
+          return;
+        }
+        btn.classList.remove("notes-btn");
+        btn.classList.add("notes-icon-btn");
+        btn.innerHTML = `
+          <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3a1 1 0 0 0 1.64.77L13.5 18H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 13h-6.85a1 1 0 0 0-.64.23L9 19.1V17a1 1 0 0 0-1-1H4V5h16v11Z"/>
+          </svg>
+        `;
+      }
+    });
+  }
+
+  function ensureExpandButtons(){
+    document.querySelectorAll(".table-container").forEach((container) => {
+      const footer = container.querySelector(".table-footer");
+      const table = container.querySelector("table.training-table");
+      if (!footer || !table) return;
+      if (footer.querySelector(".mk-table-expand-btn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-table-expand-btn";
+      btn.textContent = "⤢";
+      btn.setAttribute("aria-label", "Expand table");
+      btn.title = "Expand table";
+      footer.appendChild(btn);
+    });
+  }
+
+  // Run once immediately
+  safeNormalize(document);
+  ensureExpandButtons();
+
+  // --- 2) Replace the “always firing” observer with a debounced one ---
+  let rafPending = false;
+  const mo = new MutationObserver((mutations) => {
+    // Ignore mutations that are purely attribute changes from our own normalizing
+    // (we only observe childList anyway in the config below)
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      safeNormalize(document);
+      ensureExpandButtons();
+    });
+  });
+
+  // IMPORTANT: observe only childList to reduce churn
+  mo.observe(document.body, { childList: true, subtree: true });
+})();
+
   init();
 })();
