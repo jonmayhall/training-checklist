@@ -1073,3 +1073,314 @@
 
   init();
 })();
+
+/* =========================================================
+   PAGE HELPERS (Notes buttons, Add Row tables, Reset page)
+   + SUPPORT TICKETS (clone + status move)
+   ========================================================= */
+
+(function () {
+  // -------------------------------
+  // Utilities
+  // -------------------------------
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  function isEmpty(val) {
+    return val == null || String(val).trim() === "";
+  }
+
+  function scrollToEl(el) {
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function clearInputsIn(root) {
+    if (!root) return;
+
+    // text inputs, dates, textareas
+    $$("input[type='text'], input[type='date'], input:not([type]), textarea", root).forEach((el) => {
+      el.value = "";
+    });
+
+    // checkboxes
+    $$("input[type='checkbox']", root).forEach((el) => {
+      el.checked = false;
+    });
+
+    // selects -> reset to placeholder if exists
+    $$("select", root).forEach((sel) => {
+      const ghost = sel.querySelector("option[data-ghost='true']");
+      if (ghost) {
+        sel.value = ghost.value; // typically ""
+      } else {
+        sel.selectedIndex = 0;
+      }
+    });
+  }
+
+  // -------------------------------
+  // Notes Icon Buttons
+  // -------------------------------
+  function initNotesButtons() {
+    // Any button with [data-notes-btn] toggles visibility / focuses the target notes block.
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-notes-btn]");
+      if (!btn) return;
+
+      const targetId = btn.getAttribute("data-notes-target");
+      if (!targetId) return;
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      // If you have a hidden/collapsed class, toggle it here.
+      // Otherwise, just scroll + focus the textarea.
+      scrollToEl(target);
+
+      const ta = $("textarea", target);
+      if (ta) ta.focus({ preventScroll: true });
+    });
+  }
+
+  // -------------------------------
+  // Add Row (+) for tables
+  // -------------------------------
+  function initAddRowButtons() {
+    // Works for any .table-container where a .add-row exists.
+    document.addEventListener("click", (e) => {
+      const addBtn = e.target.closest("button.add-row");
+      if (!addBtn) return;
+
+      const tableContainer = addBtn.closest(".table-container");
+      const table = $("table.training-table", tableContainer);
+      const tbody = $("tbody", table);
+      if (!tbody) return;
+
+      // Clone the FIRST row as the template.
+      const templateRow = $("tr", tbody);
+      if (!templateRow) return;
+
+      const newRow = templateRow.cloneNode(true);
+
+      // Clear inputs inside cloned row
+      clearInputsIn(newRow);
+
+      // If you ever add IDs inside rows, scrub them here to avoid duplicates:
+      $$("[id]", newRow).forEach((el) => el.removeAttribute("id"));
+
+      tbody.appendChild(newRow);
+    });
+  }
+
+  // -------------------------------
+  // Reset This Page button
+  // -------------------------------
+  function initPageResetButtons() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button.clear-page-btn");
+      if (!btn) return;
+
+      const section = btn.closest("section.page-section");
+      if (!section) return;
+
+      // Clear normal inputs/selects in this section
+      clearInputsIn(section);
+
+      // Remove dynamically-added table rows (keep first 2 if you want; here we keep the first 2 for opcodes page)
+      // If you want “keep only template row”, change keepCount to 1.
+      $$("table.training-table tbody", section).forEach((tbody) => {
+        const rows = $$("tr", tbody);
+        const keepCount = Math.min(2, rows.length); // keeps 2 rows like your current markup
+        rows.slice(keepCount).forEach((r) => r.remove());
+      });
+
+      // Reset Support Tickets to ONLY the base card in Open
+      if (section.id === "support-tickets") {
+        resetSupportTickets();
+      }
+    });
+  }
+
+  // -------------------------------
+  // Support Tickets
+  // -------------------------------
+  const ticketContainers = {
+    Open: () => $("#openTicketsContainer"),
+    "Tier Two": () => $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": () => $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": () => $("#closedFeatureTicketsContainer"),
+  };
+
+  function getTicketStatus(groupEl) {
+    const sel = $(".ticket-status-select", groupEl);
+    return sel ? sel.value : "Open";
+  }
+
+  function setTicketStatus(groupEl, status, { lock = false } = {}) {
+    const sel = $(".ticket-status-select", groupEl);
+    if (!sel) return;
+
+    sel.value = status;
+
+    if (lock) {
+      sel.disabled = true;
+      sel.setAttribute("aria-disabled", "true");
+    } else {
+      sel.disabled = false;
+      sel.removeAttribute("aria-disabled");
+    }
+  }
+
+  function ticketIsComplete(groupEl) {
+    const num = $(".ticket-number-input", groupEl)?.value || "";
+    const url = $(".ticket-zendesk-input", groupEl)?.value || "";
+    const summary = $(".ticket-summary-input", groupEl)?.value || "";
+
+    // Minimal completion rule: Ticket # + Summary required.
+    // Adjust if you want URL required too.
+    return !isEmpty(num) && !isEmpty(summary);
+  }
+
+  function cloneTicketGroup(fromGroupEl) {
+    const clone = fromGroupEl.cloneNode(true);
+
+    // It's NOT the base card
+    clone.removeAttribute("data-base");
+
+    // Remove disclaimer from cloned card
+    const disclaimer = $(".ticket-disclaimer", clone);
+    if (disclaimer) disclaimer.remove();
+
+    // Clear fields in cloned card
+    clearInputsIn(clone);
+
+    // Add a remove button (optional but helpful)
+    const headerRow = $(".ticket-number-wrap", clone);
+    if (headerRow && !$(".remove-ticket-btn", headerRow)) {
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "remove-ticket-btn";
+      rm.title = "Remove Ticket";
+      rm.textContent = "–";
+      headerRow.appendChild(rm);
+    }
+
+    // For cloned cards, allow status changes (not locked)
+    setTicketStatus(clone, "Open", { lock: false });
+
+    return clone;
+  }
+
+  function moveTicketGroupToStatusContainer(groupEl, status) {
+    const containerFn = ticketContainers[status];
+    const container = containerFn ? containerFn() : null;
+    if (!container) return;
+
+    container.appendChild(groupEl);
+  }
+
+  function resetSupportTickets() {
+    // Keep only base group in Open; clear others
+    const open = $("#openTicketsContainer");
+    if (!open) return;
+
+    // Find the base card
+    const base = $(".ticket-group[data-base='true']", open);
+    if (!base) return;
+
+    // Remove all other ticket-groups anywhere
+    Object.values(ticketContainers).forEach((fn) => {
+      const c = fn();
+      if (!c) return;
+      $$(".ticket-group", c).forEach((g) => {
+        if (g !== base) g.remove();
+      });
+    });
+
+    // Clear base fields + lock status to Open
+    clearInputsIn(base);
+    setTicketStatus(base, "Open", { lock: true });
+
+    // Ensure base contains the add button (your markup does)
+  }
+
+  function initSupportTickets() {
+    // Lock base card status to Open on load
+    const base = $("#openTicketsContainer .ticket-group[data-base='true']");
+    if (base) setTicketStatus(base, "Open", { lock: true });
+
+    // Add Ticket button: only on base card; enforce completion
+    document.addEventListener("click", (e) => {
+      const addBtn = e.target.closest(".add-ticket-btn");
+      if (!addBtn) return;
+
+      const group = addBtn.closest(".ticket-group");
+      if (!group) return;
+
+      // Only enforce rule on base card (you described that behavior)
+      const isBase = group.getAttribute("data-base") === "true";
+      if (isBase && !ticketIsComplete(group)) {
+        // Simple inline feedback (no modal)
+        group.classList.add("ticket-incomplete");
+        setTimeout(() => group.classList.remove("ticket-incomplete"), 900);
+        return;
+      }
+
+      const openContainer = $("#openTicketsContainer");
+      if (!openContainer) return;
+
+      // Clone from base card always (consistent structure)
+      const baseCard = $("#openTicketsContainer .ticket-group[data-base='true']");
+      if (!baseCard) return;
+
+      const clone = cloneTicketGroup(baseCard);
+      openContainer.appendChild(clone);
+
+      // Optionally scroll to new card
+      scrollToEl(clone);
+      $(".ticket-number-input", clone)?.focus({ preventScroll: true });
+    });
+
+    // Remove ticket card (for clones)
+    document.addEventListener("click", (e) => {
+      const rm = e.target.closest(".remove-ticket-btn");
+      if (!rm) return;
+      const group = rm.closest(".ticket-group");
+      if (!group) return;
+
+      // Don't allow removing base
+      if (group.getAttribute("data-base") === "true") return;
+
+      group.remove();
+    });
+
+    // Status change moves the card between containers
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest(".ticket-status-select");
+      if (!sel) return;
+
+      const group = sel.closest(".ticket-group");
+      if (!group) return;
+
+      // Base stays Open & locked
+      if (group.getAttribute("data-base") === "true") {
+        setTicketStatus(group, "Open", { lock: true });
+        return;
+      }
+
+      const status = sel.value || "Open";
+      moveTicketGroupToStatusContainer(group, status);
+    });
+  }
+
+  // -------------------------------
+  // Init
+  // -------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    initNotesButtons();
+    initAddRowButtons();
+    initPageResetButtons();
+    initSupportTickets();
+  });
+})();
