@@ -10,11 +10,11 @@
         - Tables use your .notes-btn icon-only button styling
         - Clicking notes inserts a bullet into the target notes textarea
         - Bullets stay in the correct on-page order even if clicked out of order
-        - Table bullets include Name + Opcode (when available) + prompt
-        - NO "question" word in bullets
-        - Adds spacing between bullets for readability
+        - TABLE bullets: ONLY actual Name or Opcode -> "• **Name** -"  (no “Technicians – Checklist”, etc.)
+        - NON-TABLE bullets: "• **Prompt**" + indented bullet below for your notes
+        - Spacing between entries for readability
    ✅ NO SCROLL SHIFT on notes clicks (locks scroll position)
-   ✅ Support Tickets logic (as before)
+   ✅ Support Tickets logic
    ✅ Dealership Map helper
 ======================================================= */
 
@@ -27,9 +27,9 @@
   const STORAGE_KEY = "mykaarma_interactive_checklist__state_v3";
   const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v3";
 
-  const AUTO_ID_ATTR   = "data-mk-id";      // persistent identity marker
-  const AUTO_ROW_ATTR  = "data-mk-row";     // stable row marker for cloned rows
-  const AUTO_CARD_ATTR = "data-mk-card";    // stable card marker for cloned cards
+  const AUTO_ID_ATTR   = "data-mk-id";
+  const AUTO_ROW_ATTR  = "data-mk-row";
+  const AUTO_CARD_ATTR = "data-mk-card";
 
   /* =======================
      HELPERS
@@ -65,6 +65,7 @@
     return String(s || "").replace(/\s+/g, " ").trim();
   }
 
+  // Prevent scroll jumps caused by focus/layout updates
   function lockScrollWhile(fn) {
     const x = window.scrollX;
     const y = window.scrollY;
@@ -75,7 +76,6 @@
 
     fn();
 
-    // restore exact scroll position after layout settles
     requestAnimationFrame(() => {
       window.scrollTo(x, y);
       requestAnimationFrame(() => {
@@ -115,10 +115,8 @@
 
   function getNotesItems(targetId) {
     const ns = readNotesState();
-    const arr = Array.isArray(ns[targetId]) ? ns[targetId] : [];
-    return arr;
+    return Array.isArray(ns[targetId]) ? ns[targetId] : [];
   }
-
   function setNotesItems(targetId, items) {
     const ns = readNotesState();
     ns[targetId] = Array.isArray(items) ? items : [];
@@ -127,7 +125,6 @@
 
   function upsertBullet(targetId, bulletKey, bulletText, orderIndex) {
     const items = getNotesItems(targetId);
-
     const now = Date.now();
     const existing = items.find(it => it.key === bulletKey);
 
@@ -144,7 +141,6 @@
       });
     }
 
-    // sort by DOM order first, then stable by time
     items.sort((a, b) => {
       const ai = Number.isFinite(a.index) ? a.index : 999999;
       const bi = Number.isFinite(b.index) ? b.index : 999999;
@@ -163,36 +159,28 @@
     if (!ta) return;
 
     const items = getNotesItems(targetId);
+    // spaced entries (blank line between each)
+    ta.value = items.map(it => it.text).join("\n\n");
 
-    // spaced bullets: blank line between bullets
-    const text = items.map(it => it.text).join("\n\n");
-    ta.value = text;
-
-    // trigger autosave for textarea value (if your other autosave is watching)
     ta.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   /* =======================
      NOTES BUTTON NORMALIZATION
-     - DO NOT wipe SVG buttons on pages 3/4
-     - Ensure table notes buttons have .notes-btn and no inner text
+     - DO NOT wipe SVG buttons on pages 3/4 (.notes-icon-btn)
+     - Ensure table notes buttons are icon-only .notes-btn
   ======================= */
   function normalizeNotesButtons(root = document) {
     $$("button[data-notes-target], button[data-notes-btn][data-notes-target]", root).forEach(btn => {
       btn.type = "button";
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
 
-      // If it is the SVG style used on pages 3/4, keep it untouched
+      // Keep pages 3/4 SVG buttons intact
       if (btn.classList.contains("notes-icon-btn")) return;
 
-      // Otherwise treat it as the table icon button
+      // Table-style icon button
       btn.classList.add("notes-btn");
-
-      // Make sure it's icon-only (tables)
-      // (but do NOT wipe children if it already contains svg intentionally)
-      if (!btn.querySelector("svg")) {
-        btn.textContent = "";
-      }
+      if (!btn.querySelector("svg")) btn.textContent = "";
     });
   }
 
@@ -295,7 +283,6 @@
     applyGhostStyling(root);
   }
 
-  // Save on changes
   document.addEventListener("input", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -308,7 +295,7 @@
   });
 
   /* =======================
-     PAGE NAVIGATION (NO SHIFT option)
+     PAGE NAVIGATION
   ======================= */
   const pageSections = $$(".page-section");
   const navButtons = $$(".nav-btn");
@@ -329,12 +316,8 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    // Only scroll to top for normal nav usage
-    if (!preserveScroll) {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    } else {
-      window.scrollTo(x, y);
-    }
+    if (!preserveScroll) window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    else window.scrollTo(x, y);
   }
 
   navButtons.forEach(btn => {
@@ -352,7 +335,6 @@
       const page = btn.closest(".page-section");
       if (!page) return;
 
-      // clear visible fields on this page
       $$("input, select, textarea", page).forEach(el => {
         if (isCheckbox(el) || isRadio(el)) el.checked = false;
         else el.value = "";
@@ -360,7 +342,6 @@
 
       applyGhostStyling(page);
 
-      // clear saved field-state for this page
       ensureStableFieldIds(page);
       const state = readState();
       $$("input, select, textarea", page).forEach(el => {
@@ -369,7 +350,6 @@
       });
       writeState(state);
 
-      // ✅ clear saved notes bullets for notes blocks ON THIS PAGE
       const ns = readNotesState();
       $$(".section-block[id]", page).forEach(block => {
         const id = block.id || "";
@@ -377,7 +357,6 @@
       });
       writeNotesState(ns);
 
-      // also clear textarea contents of notes blocks (immediate visual)
       $$(".section-block[id^='notes-'] textarea", page).forEach(ta => {
         ta.value = "";
         ta.dispatchEvent(new Event("input", { bubbles: true }));
@@ -423,13 +402,10 @@
 
     clearControls(clone);
 
-    // remove duplicated ids/auto ids
     $$("[id]", clone).forEach(el => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
 
     tbody.appendChild(clone);
-
-    // keep notes buttons correct
     normalizeNotesButtons(clone);
 
     ensureStableFieldIds(tbody);
@@ -437,9 +413,18 @@
   });
 
   /* =======================
-     NOTES BULLET BUILDERS
-     - Bullets contain ONLY: name + opcode + prompt (no "question" word)
-     - Add spacing between bullets
+     BULLET BUILDERS
+     REQUIRED FORMAT:
+       NON-TABLE:
+         • **Prompt**
+           •
+       TABLE:
+         • **Name** -
+           •
+         OR
+         • **Opcode** -
+           •
+     (NO “Technicians – Checklist”, etc.)
   ======================= */
 
   function getOrderIndex(btn, targetId) {
@@ -447,103 +432,63 @@
     return all.indexOf(btn);
   }
 
-  function getNearestPromptText(btn) {
-    // For checklist rows (pages 3/4 etc.)
+  function getPromptFromLabel(btn) {
     const row = btn.closest(".checklist-row");
-    if (row) {
-      const lab = $("label", row);
-      if (lab) return safeText(lab.textContent);
-    }
-
-    // For tables: use nearest section header or h2
-    const section = btn.closest(".section") || btn.closest(".section-block") || btn.closest(".page-section");
-    const header = section ? ($(".section-header", section) || $("h2", section) || $("h1", section)) : null;
-    if (header) return safeText(header.textContent);
-
-    return "";
+    if (!row) return "";
+    const lab = $("label", row);
+    return lab ? safeText(lab.textContent) : "";
   }
 
-  function getTableNameValue(btn) {
-    // First cell usually contains checkbox + name input
+  function getTableName(btn) {
     const tr = btn.closest("tr");
     if (!tr) return "";
     const firstTd = tr.querySelector("td");
     if (!firstTd) return "";
-
-    // prefer the text input in first td
     const nameInput = firstTd.querySelector('input[type="text"]');
-    if (nameInput) return safeText(nameInput.value);
-
-    // fallback: any text input in row
-    const anyText = tr.querySelector('input[type="text"]');
-    return anyText ? safeText(anyText.value) : "";
+    return nameInput ? safeText(nameInput.value) : "";
   }
 
-  function getTableOpcodeValue(btn) {
-    // opcode tables: opcode usually in 2nd column text input
+  function getTableOpcode(btn) {
     const tr = btn.closest("tr");
     if (!tr) return "";
-
     const tds = Array.from(tr.querySelectorAll("td"));
     if (tds.length >= 2) {
       const opcodeInput = tds[1].querySelector('input[type="text"]');
       if (opcodeInput) return safeText(opcodeInput.value);
     }
-
-    // fallback: if any input marked data-opcode
-    const tagged = tr.querySelector('[data-opcode], input[name*="opcode" i]');
-    if (tagged && tagged.value != null) return safeText(tagged.value);
-
     return "";
   }
 
   function buildBulletText(btn) {
-    const targetId = btn.getAttribute("data-notes-target") || "";
     const inTable = !!btn.closest("table");
 
-    const prompt = getNearestPromptText(btn);
-
-    let name = "";
-    let opcode = "";
-
     if (inTable) {
-      name = getTableNameValue(btn);
-      opcode = getTableOpcodeValue(btn);
-    } else {
-      // Non-table: if a name field exists nearby (optional), keep it minimal
-      name = "";
-      opcode = "";
+      const name = getTableName(btn);
+      const opcode = getTableOpcode(btn);
+      const primary = name || opcode || "—";
+      // table bullet: ONLY name OR opcode
+      return `• **${primary}** -\n  •`;
     }
 
-    const parts = [];
-    if (name) parts.push(name);
-    if (opcode) parts.push(opcode);
-    if (prompt) parts.push(prompt);
-
-    // bullet with clean spacing and no "question" word
-    const line = `• ${parts.join(" — ")}`.trim();
-    return line;
+    // non-table bullet uses ONLY label prompt (no section headers)
+    const prompt = getPromptFromLabel(btn) || "—";
+    return `• **${prompt}**\n  •`;
   }
 
   function buildBulletKey(btn, targetId) {
-    // stable key for that specific button location
     const inTable = !!btn.closest("table");
     if (inTable) {
       const tr = btn.closest("tr");
       const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || uid("rowkey");
       return `${targetId}::table::${rowKey}`;
     }
-    // non-table: use target + prompt text + dom index
     const idx = getOrderIndex(btn, targetId);
-    const prompt = getNearestPromptText(btn);
+    const prompt = getPromptFromLabel(btn);
     return `${targetId}::row::${idx}::${prompt.slice(0, 40)}`;
   }
 
   /* =======================
      NOTES CLICK HANDLER (NO SHIFT)
-     - inserts bullet into notes textarea in DOM order
-     - rebuilds textarea from stored bullets
-     - focuses textarea without scroll
   ======================= */
   normalizeNotesButtons(document);
 
@@ -561,11 +506,9 @@
 
     const page = notesBlock.closest(".page-section");
     if (page && !page.classList.contains("active")) {
-      // page swap WITHOUT scrolling
       activatePage(page.id, { preserveScroll: true });
     }
 
-    // prevent any scroll shift while updating
     lockScrollWhile(() => {
       ensureStableFieldIds(document);
 
@@ -576,11 +519,9 @@
       upsertBullet(targetId, bulletKey, bulletText, orderIndex);
       rebuildNotesTextareaForTarget(targetId);
 
-      // keep state synced
       captureState(document);
     });
 
-    // focus notes textarea without scroll
     setTimeout(() => {
       const ta = notesBlock.querySelector("textarea");
       if (ta) ta.focus({ preventScroll: true });
@@ -744,18 +685,15 @@
     restoreState(document);
     applyGhostStyling(document);
 
-    // rebuild notes textareas from saved bullets (no scrolling)
+    // rebuild notes textareas from saved bullets
     const notesState = readNotesState();
     Object.keys(notesState || {}).forEach(targetId => {
-      if (document.getElementById(targetId)) {
-        rebuildNotesTextareaForTarget(targetId);
-      }
+      if (document.getElementById(targetId)) rebuildNotesTextareaForTarget(targetId);
     });
 
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active, { preserveScroll: true });
 
-    // Save once after init to “lock in” ids
     captureState(document);
   }
 
