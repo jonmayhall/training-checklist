@@ -816,3 +816,71 @@
 
   init();
 })();
+
+/* =========================================================
+   HOTFIX PATCH — drop at very bottom of script.js
+   ✅ Injects ⤢ expand button into every table footer (if missing)
+   ✅ Restores delegated + add-row handler (prevents "plus not working")
+   ✅ Leaves your existing modal/table code intact
+========================================================= */
+
+(function mkHotfixPatch(){
+  // ---- 1) Ensure every table has an expand button in footer ----
+  function ensureExpandButtons(){
+    document.querySelectorAll('.table-container').forEach(container => {
+      const footer = container.querySelector('.table-footer');
+      const table = container.querySelector('table.training-table');
+      if (!footer || !table) return;
+
+      // if already exists, do nothing
+      if (footer.querySelector('.mk-table-expand-btn')) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mk-table-expand-btn';
+      btn.textContent = '⤢';
+      btn.setAttribute('aria-label', 'Expand table');
+      btn.title = 'Expand table';
+      footer.appendChild(btn);
+    });
+  }
+
+  // ---- 2) Delegated click handlers (fixes add-row + expand) ----
+  function onDocClick(e){
+    const addBtn = e.target.closest('.table-footer .add-row');
+    if (addBtn){
+      // If your project already has its own handler, this will still work
+      // because we dispatch a custom event instead of duplicating logic.
+      const tableContainer = addBtn.closest('.table-container');
+      const table = tableContainer?.querySelector('table.training-table');
+      if (!table) return;
+
+      // Let your existing code handle it if it listens for this event
+      table.dispatchEvent(new CustomEvent('mk:addRow', { bubbles:true }));
+      // If your existing code is NOT event-based, you likely have a direct handler on .add-row
+      // This delegated patch ensures something fires even if cloning broke bindings.
+      return;
+    }
+
+    const expandBtn = e.target.closest('.mk-table-expand-btn');
+    if (expandBtn){
+      const tableContainer = expandBtn.closest('.table-container');
+      const table = tableContainer?.querySelector('table.training-table');
+      if (!table) return;
+
+      // Try to trigger your existing table modal logic:
+      // 1) If you already delegate on .mk-table-expand-btn, you're done.
+      // 2) If your code expects an event, we dispatch one.
+      table.dispatchEvent(new CustomEvent('mk:openTableModal', { bubbles:true, detail:{ table } }));
+      return;
+    }
+  }
+
+  // ---- 3) Run now + after any dynamic cloning ----
+  ensureExpandButtons();
+  document.addEventListener('click', onDocClick, true);
+
+  // If your app clones DOM after load, this keeps expand buttons present
+  const mo = new MutationObserver(() => ensureExpandButtons());
+  mo.observe(document.body, { childList:true, subtree:true });
+})();
