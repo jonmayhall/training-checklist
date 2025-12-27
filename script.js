@@ -1,46 +1,48 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Page nav (sidebar)
-   ✅ Autosave/Restore (supports dynamically added rows/cards)
-   ✅ Reset This Page buttons (NO resurrected notes)
+   ✅ Sidebar page navigation
+   ✅ Autosave/Restore (supports dynamic rows)
+   ✅ Reset This Page (clears fields + notes storage for that page)
    ✅ Add Row (+) for all tables
-   ✅ Notes buttons:
-       - Non-table: • **Title** + indented hollow bullet ◦
-       - Tables: • Name OR • Opcode only + indented hollow bullet ◦
-       - Ordered by DOM position (stable even if clicked out-of-order)
-       - NO screen shifting (no scroll / no focus / no activation jump)
-   ✅ Support Tickets: base locked to Open, clones enforced, move by status
-   ✅ Dealership Map helper (if #dealershipMapFrame exists)
-   ✅ Optional onsite date default
-   ✅ Defensive: won’t crash if sections don’t exist
+   ✅ Notes buttons (pages 3–6 + tables)
+   ✅ Notes bullets:
+       • Title
+             ◦
+     (plain text; no bold; hollow sub-bullet; extra indent)
+   ✅ Stable ordering (DOM order) even if clicked out of order
+   ✅ NO screen shifting (no scroll, no jump)
+   ✅ Support Tickets logic (base locked to Open; clones movable)
+   ✅ Dealership map helper
+   ✅ Ghost styling for selects/dates
 ======================================================= */
 
 (() => {
   "use strict";
 
   /* =======================
-     CONFIG
+     CONFIG / STORAGE
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
-  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v6";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v9";
+  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v9";
 
-  const AUTO_ID_ATTR   = "data-mk-id";
-  const AUTO_ROW_ATTR  = "data-mk-row";
-  const AUTO_CARD_ATTR = "data-mk-card";
+  const AUTO_ID_ATTR  = "data-mk-id";
+  const AUTO_ROW_ATTR = "data-mk-row";
 
-  const INDENT = "            "; // extra indent for hollow bullet line
+  // Notes formatting (plain text)
+  const SUB_INDENT = "              "; // more indent (per request)
+  const BULLET_MAIN = "• ";
+  const BULLET_SUB  = "◦ ";
 
   /* =======================
      HELPERS
   ======================= */
-  const $ = (sel, root = document) => root.querySelector(sel);
+  const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
+    return (prefix = "mk") => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
@@ -48,43 +50,20 @@
   const isRadio    = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
   const isDate     = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
 
-  function formatDateYYYYMMDD(d) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+  function safeJSONParse(raw, fallback) {
+    try { return JSON.parse(raw) ?? fallback; } catch { return fallback; }
   }
-
-  function addDays(dateStr, days) {
-    if (!dateStr) return "";
-    const d = new Date(dateStr + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    return formatDateYYYYMMDD(d);
-  }
-
-  /* =======================
-     STORAGE (STATE)
-  ======================= */
   function readState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    try { return JSON.parse(raw) || {}; } catch { return {}; }
+    return safeJSONParse(localStorage.getItem(STORAGE_KEY), {});
   }
-  function writeState(state) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function writeState(obj) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj || {}));
   }
-
-  /* =======================
-     STORAGE (NOTES)
-  ======================= */
   function readNotes() {
-    const raw = localStorage.getItem(NOTES_KEY);
-    if (!raw) return {};
-    try { return JSON.parse(raw) || {}; } catch { return {}; }
+    return safeJSONParse(localStorage.getItem(NOTES_KEY), {});
   }
-  function writeNotes(notesObj) {
-    localStorage.setItem(NOTES_KEY, JSON.stringify(notesObj));
+  function writeNotes(obj) {
+    localStorage.setItem(NOTES_KEY, JSON.stringify(obj || {}));
   }
 
   /* =======================
@@ -105,56 +84,46 @@
   }
 
   /* =======================
-     PERSISTENT ID SYSTEM
-     - stable ids for autosave
+     STABLE IDs (for autosave + dynamic rows)
   ======================= */
-  function ensureStableFieldIds(root = document) {
-    // stable row ids for all table rows
+  function ensureStableRowIds(root = document) {
     $$("tbody tr", root).forEach(tr => {
       if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
     });
+  }
 
-    // stable ids for cards/groups
-    $$(".ticket-group, .card, .section-block, .dms-card", root).forEach(card => {
-      if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
-    });
+  function ensureStableFieldIds(root = document) {
+    ensureStableRowIds(root);
 
-    // stable ids for inputs/selects/textarea
     $$("input, select, textarea", root).forEach(el => {
+      // ignore buttons
       if (el.tagName === "INPUT") {
         const type = (el.type || "").toLowerCase();
-        if (["button","submit","reset","file"].includes(type)) return;
+        if (["button", "submit", "reset", "file"].includes(type)) return;
       }
 
-      if (el.id) {
-        if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
-        return;
-      }
-
+      // keep existing ids stable
+      if (el.id && !el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
       if (el.getAttribute(AUTO_ID_ATTR)) return;
 
+      // deterministic-ish based on page + row + cell index
       const page = el.closest(".page-section");
       const pageId = page?.id || "no-page";
-
-      const table = el.closest("table");
       const tr = el.closest("tr");
-      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
+      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "no-row";
 
-      let colIndex = "";
+      let colIndex = "x";
       if (tr) {
         const cell = el.closest("td,th");
-        if (cell) {
-          const cells = Array.from(tr.children);
-          colIndex = String(cells.indexOf(cell));
-        }
+        if (cell) colIndex = String(Array.from(tr.children).indexOf(cell));
       }
 
+      // index within the cell (or row)
       const scope = el.closest("td,th") || tr || el.parentElement || document.body;
       const siblings = $$("input, select, textarea", scope);
-      const idx = siblings.indexOf(el);
+      const idx = Math.max(0, siblings.indexOf(el));
 
-      const mkid = `${pageId}::${table ? "table" : "form"}::${rowKey}::c${colIndex}::i${idx}`;
-      el.setAttribute(AUTO_ID_ATTR, mkid);
+      el.setAttribute(AUTO_ID_ATTR, `${pageId}::${rowKey}::c${colIndex}::i${idx}`);
     });
   }
 
@@ -183,6 +152,7 @@
 
   function restoreState(root = document) {
     ensureStableFieldIds(root);
+
     const state = readState();
     if (!state || typeof state !== "object") return;
 
@@ -203,7 +173,6 @@
     if (!t || !t.matches("input, select, textarea")) return;
     captureState(document);
   });
-
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -214,9 +183,9 @@
      PAGE NAVIGATION
   ======================= */
   const pageSections = $$(".page-section");
-  const navButtons = $$(".nav-btn");
+  const navButtons   = $$(".nav-btn");
 
-  function activatePage(sectionId) {
+  function activatePage(sectionId, { dontScroll = false } = {}) {
     if (!sectionId) return;
 
     pageSections.forEach(sec => sec.classList.remove("active"));
@@ -228,7 +197,8 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    window.scrollTo({ top: 0, behavior: "instant" });
+    // normal nav: go to top; but notes clicks will NOT call this at all
+    if (!dontScroll) window.scrollTo({ top: 0, behavior: "instant" });
   }
 
   navButtons.forEach(btn => {
@@ -236,64 +206,11 @@
   });
 
   /* =======================
-     RESET THIS PAGE BUTTONS
-     - clears inputs
-     - clears saved state keys on that page
-     - clears notes storage for notes blocks on that page
-     - NO resurrecting old notes
-  ======================= */
-  function clearNotesForPage(pageEl) {
-    const notes = readNotes();
-    $$("[id^='notes-']", pageEl).forEach(block => {
-      const id = block.id;
-      delete notes[id];
-      const ta = $("textarea", block);
-      if (ta) ta.value = "";
-    });
-    writeNotes(notes);
-  }
-
-  $$(".clear-page-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const page = btn.closest(".page-section");
-      if (!page) return;
-
-      // clear controls in DOM
-      $$("input, select, textarea", page).forEach(el => {
-        if (isCheckbox(el) || isRadio(el)) el.checked = false;
-        else el.value = "";
-      });
-
-      applyGhostStyling(page);
-
-      // remove saved state keys for this page
-      ensureStableFieldIds(page);
-      const state = readState();
-      $$("input, select, textarea", page).forEach(el => {
-        const k = getFieldKey(el);
-        if (k && k in state) delete state[k];
-      });
-      writeState(state);
-
-      // clear notes for this page (prevents reappearing)
-      clearNotesForPage(page);
-    });
-  });
-
-  /* =======================
-     GLOBAL CLEAR ALL (optional)
-  ======================= */
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest('[data-clear-all="true"]');
-    if (!btn) return;
-    if (!confirm("Clear ALL saved data for this checklist?")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(NOTES_KEY);
-    location.reload();
-  });
-
-  /* =======================
-     TABLE ADD ROW (+)
+     RESET THIS PAGE
+     - clears input/select/textarea values in that page
+     - removes those keys from STORAGE_KEY
+     - clears notes store entries for notes blocks inside that page
+     - clears notes textarea content immediately
   ======================= */
   function clearControls(root) {
     $$("input, select, textarea", root).forEach(el => {
@@ -303,6 +220,43 @@
     applyGhostStyling(root);
   }
 
+  $$(".clear-page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.closest(".page-section");
+      if (!page) return;
+
+      // 1) clear UI values
+      clearControls(page);
+
+      // 2) remove state keys for this page
+      ensureStableFieldIds(page);
+      const state = readState();
+      $$("input, select, textarea", page).forEach(el => {
+        const k = getFieldKey(el);
+        if (k && k in state) delete state[k];
+      });
+      writeState(state);
+
+      // 3) remove notes store entries for notes blocks in this page
+      const notes = readNotes();
+      const noteBlocks = $$("[id^='notes-']", page)
+        .map(b => b.id)
+        .filter(Boolean);
+
+      noteBlocks.forEach(id => {
+        delete notes[id];
+        // clear textarea immediately
+        const ta = $(`#${CSS.escape(id)} textarea`);
+        if (ta) ta.value = "";
+      });
+
+      writeNotes(notes);
+    });
+  });
+
+  /* =======================
+     TABLE ADD ROW (+)
+  ======================= */
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".table-footer .add-row");
     if (!addBtn) return;
@@ -316,65 +270,52 @@
     const clone = firstRow.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
 
-    clearControls(clone);
+    // clear values
+    $$("input, select, textarea", clone).forEach(el => {
+      if (isCheckbox(el) || isRadio(el)) el.checked = false;
+      else el.value = "";
+    });
 
+    // remove ids so ensureStableFieldIds can re-key
     $$("[id]", clone).forEach(el => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
-
-    // normalize notes buttons inside cloned row (if any)
-    normalizeNotesButtons(clone);
 
     tbody.appendChild(clone);
 
     ensureStableFieldIds(tbody);
+    applyGhostStyling(clone);
     captureState(document);
   });
 
   /* =======================
-     NOTES BUTTONS — NORMALIZE
-     Supports:
-       - .notes-btn (tables)
-       - [data-notes-btn] (pages 3/4 style)
-     Ensures:
-       - has data-notes-target
-       - type=button
+     NOTES — BULLET SYSTEM (NO SCROLL / NO SHIFT)
+     RULES:
+       - Plain text
+       - Main bullet: "• Title"
+       - Next line: "              ◦ "
+       - Titles:
+           * tables: ONLY Name (page 5) OR Opcode (page 6)
+           * non-tables: label text of the row (not bold)
+       - Stable ordering: DOM index of row (or checklist-row)
+       - Reset clears notes storage, so bullets won't resurrect
   ======================= */
-  function normalizeNotesButtons(root = document) {
-    // tables: .notes-btn
-    $$(".notes-btn", root).forEach(btn => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-    });
 
-    // pages 3/4: [data-notes-btn]
-    $$("button[data-notes-btn]", root).forEach(btn => {
-      btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add/View Notes");
-    });
+  function getNotesTextarea(targetId) {
+    const block = document.getElementById(targetId);
+    if (!block) return null;
+    return $("textarea", block);
   }
 
-  /* =======================
-     NOTES: ORDER + BULLET INSERTION
-     - NO scroll/focus/activation = NO screen shift
-     - stable order by DOM position
-  ======================= */
-
-  function getDomOrderKeyForNonTable(btn) {
-    // order within the page: checklist-row index, then button index
-    const page = btn.closest(".page-section") || document.body;
-    const rows = $$(".checklist-row", page);
+  function getChecklistRowIndex(btn) {
+    const page = btn.closest(".page-section");
+    if (!page) return 999999;
     const row = btn.closest(".checklist-row");
-    const rowIdx = row ? rows.indexOf(row) : 9999;
-
-    // within row-actions, sometimes multiple buttons exist
-    const group = row || page;
-    const btns = $$("button[data-notes-btn], .notes-btn[data-notes-target]", group);
-    const btnIdx = btns.indexOf(btn);
-
-    return rowIdx * 100 + Math.max(btnIdx, 0);
+    if (!row) return 999999;
+    const all = $$(".checklist-row", page);
+    return all.indexOf(row);
   }
 
-  function getDomOrderKeyForTable(btn) {
+  function getTableRowIndex(btn) {
     const tr = btn.closest("tr");
     const tbody = tr?.parentElement;
     if (!tr || !tbody) return 999999;
@@ -382,112 +323,91 @@
   }
 
   function getNonTableTitle(btn) {
-    const label = btn.closest(".checklist-row")?.querySelector("label");
+    const row = btn.closest(".checklist-row");
+    const label = row ? $("label", row) : null;
     return (label?.textContent || "").trim() || "—";
   }
 
-  function getTableIdentity(btn) {
-    // ONLY: Name or Opcode
+  function getTableTitle(btn) {
     const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    if (!tr || !table) return "—";
+    const pageId = btn.closest(".page-section")?.id || "";
 
-    const tablePage = btn.closest(".page-section")?.id || "";
-    const isOpcodeTable = tablePage === "opcodes-pricing" || table.id === "opcodesTable";
-
-    if (isOpcodeTable) {
-      // Opcode column = 2nd column input (your page 6 table)
-      const opcode = tr.querySelector("td:nth-child(2) input")?.value?.trim() || "";
+    // Page 6 opcodes-pricing: Opcode column is 2nd column input text
+    if (pageId === "opcodes-pricing") {
+      const opcode = tr?.querySelector("td:nth-child(2) input[type='text']")?.value?.trim();
       return opcode || "—";
     }
 
-    // Name = first td text input (your page 5 tables)
-    const name = tr.querySelector("td:nth-child(1) input[type='text']")?.value?.trim() || "";
+    // Page 5 tables (training-checklist): Name text in first cell
+    const name = tr?.querySelector("td:first-child input[type='text']")?.value?.trim();
     return name || "—";
   }
 
-  function buildBullet({ isTable, title }) {
-    if (isTable) {
-      // tables: no bold, no dash, no filler
-      return `• ${title}\n${INDENT}◦ `;
-    }
-    // non-table: bold TITLE only
-    return `• **${title}**\n${INDENT}◦ `;
+  function buildBulletBlock(title) {
+    // no bold, no extra symbols
+    return `${BULLET_MAIN}${title}\n${SUB_INDENT}${BULLET_SUB}`;
   }
 
-  function ensureNotesBucket(notesObj, targetId) {
-    if (!notesObj[targetId]) notesObj[targetId] = [];
-  }
-
-  function rebuildNotesTextarea(targetId) {
-    const block = document.getElementById(targetId);
-    const ta = block ? $("textarea", block) : null;
+  function rebuildNotes(targetId) {
+    const ta = getNotesTextarea(targetId);
     if (!ta) return;
 
-    const notesObj = readNotes();
-    const items = notesObj[targetId] || [];
+    const notesStore = readNotes();
+    const arr = Array.isArray(notesStore[targetId]) ? notesStore[targetId] : [];
 
-    // sort by stored orderKey (DOM order)
-    items.sort((a, b) => (a.orderKey ?? 0) - (b.orderKey ?? 0));
+    arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-    // add blank line spacing between bullets
-    ta.value = items.map(i => i.text).join("\n\n");
+    // spacing between blocks for readability
+    ta.value = arr.map(x => x.text).join("\n\n");
   }
 
-  // IMPORTANT: This handler never scrolls or focuses (prevents screen shift)
-  document.addEventListener("click", (e) => {
-    const btn =
-      e.target.closest(".notes-btn[data-notes-target]") ||
-      e.target.closest("button[data-notes-btn][data-notes-target]");
+  function ensureNoteEntry(targetId, entryKey, order, text) {
+    const notesStore = readNotes();
+    if (!Array.isArray(notesStore[targetId])) notesStore[targetId] = [];
 
+    const exists = notesStore[targetId].some(n => n.key === entryKey);
+    if (!exists) {
+      notesStore[targetId].push({ key: entryKey, order, text });
+      writeNotes(notesStore);
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    // Accept BOTH styles:
+    // - tables: <button class="notes-btn" data-notes-target="...">
+    // - pages 3/4: <button data-notes-btn data-notes-target="...">
+    const btn = e.target.closest("button[data-notes-target]");
     if (!btn) return;
 
-    // prevent any default + avoid bubbling to nav/page handlers
+    // absolutely prevent any default behavior that could move the page
     e.preventDefault();
     e.stopPropagation();
 
     const targetId = btn.getAttribute("data-notes-target");
     if (!targetId) return;
 
-    ensureStableFieldIds(document);
-    normalizeNotesButtons(document);
+    const inTable = !!btn.closest("table");
+    const title = inTable ? getTableTitle(btn) : getNonTableTitle(btn);
 
-    const isTable = !!btn.closest("table");
-    const orderKey = isTable ? getDomOrderKeyForTable(btn) : getDomOrderKeyForNonTable(btn);
+    // key should be stable per row
+    let key = `${targetId}::${title}`;
+    let order = 999999;
 
-    const title = isTable ? getTableIdentity(btn) : getNonTableTitle(btn);
-
-    const text = buildBullet({ isTable, title });
-
-    // unique key: target + row id (tables) OR target + label text (non-table)
-    let uniq = "";
-    if (isTable) {
+    if (inTable) {
       const tr = btn.closest("tr");
-      const rowId = tr?.getAttribute(AUTO_ROW_ATTR) || "";
-      uniq = `${targetId}::${rowId}`;
+      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
+      key = `${targetId}::row::${rowKey || title}`;
+      order = getTableRowIndex(btn);
     } else {
-      uniq = `${targetId}::${title}`;
+      order = getChecklistRowIndex(btn);
     }
 
-    const notesObj = readNotes();
-    ensureNotesBucket(notesObj, targetId);
+    ensureNoteEntry(targetId, key, order, buildBulletBlock(title));
+    rebuildNotes(targetId);
 
-    const existingIdx = notesObj[targetId].findIndex(x => x.key === uniq);
-    if (existingIdx === -1) {
-      notesObj[targetId].push({ key: uniq, orderKey, text });
-    } else {
-      // keep the earliest DOM order if something changes
-      notesObj[targetId][existingIdx].orderKey = Math.min(
-        notesObj[targetId][existingIdx].orderKey ?? orderKey,
-        orderKey
-      );
-      // keep original text (don’t overwrite user edits in textarea)
-    }
-
-    writeNotes(notesObj);
-    rebuildNotesTextarea(targetId);
-
-    // DO NOT focus/scroll/activate page → prevents the “shift down then up”
+    // Focus notes textarea WITHOUT scrolling
+    const ta = getNotesTextarea(targetId);
+    if (ta) ta.focus({ preventScroll: true });
   });
 
   /* =======================
@@ -556,7 +476,6 @@
 
     const clone = group.cloneNode(true);
     clone.setAttribute("data-base", "false");
-    clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
     $$("input, textarea", clone).forEach(el => (el.value = ""));
     setTicketStatus(clone, "Open", false);
@@ -571,7 +490,7 @@
       inner.prepend(rm);
     }
 
-    ticketContainers.Open.appendChild(clone);
+    ticketContainers.Open?.appendChild(clone);
 
     ensureStableFieldIds(clone);
     captureState(document);
@@ -625,6 +544,20 @@
   /* =======================
      OPTIONAL: ONSITE DATE DEFAULT
   ======================= */
+  function formatDateYYYYMMDD(d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  function addDays(dateStr, days) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    return formatDateYYYYMMDD(d);
+  }
+
   const onsiteStart = $("#onsiteStartDate");
   const onsiteEnd = $("#onsiteEndDate");
   if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
@@ -641,21 +574,22 @@
      INIT
   ======================= */
   function init() {
-    normalizeNotesButtons(document);
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
-    // rebuild all notes textareas from storage on load
-    const notesObj = readNotes();
-    Object.keys(notesObj).forEach(rebuildNotesTextarea);
-
+    // activate first visible page on load
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
+
+    // rebuild notes textareas from store (no scrolling)
+    const notesStore = readNotes();
+    Object.keys(notesStore).forEach(targetId => rebuildNotes(targetId));
 
     // save once to lock ids
     captureState(document);
   }
 
   init();
+
 })();
