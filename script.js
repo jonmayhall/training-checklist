@@ -1,10 +1,21 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    -------------------------------------------------------
-   ✅ Fix: NO screen “shift down then back up” on Notes clicks
-      - activatePage() no longer forces scroll-to-top when opened from Notes
-      - scroll happens once (after layout), then we update textarea
-   ✅ Bullets are spaced out (blank line between bullets)
+   ✅ Page nav (sidebar)
+   ✅ Autosave/Restore (supports dynamically added rows/cards)
+   ✅ Reset This Page buttons (also clears NOTES bullets for that page)
+   ✅ Add Row (+) for all tables (keeps notes buttons working)
+   ✅ Notes buttons:
+        - Pages 3/4 keep their SVG icon buttons as-is
+        - Tables use your .notes-btn icon-only button styling
+        - Clicking notes inserts a bullet into the target notes textarea
+        - Bullets stay in the correct on-page order even if clicked out of order
+        - Table bullets include Name + Opcode (when available) + prompt
+        - NO "question" word in bullets
+        - Adds spacing between bullets for readability
+   ✅ NO SCROLL SHIFT on notes clicks (locks scroll position)
+   ✅ Support Tickets logic (as before)
+   ✅ Dealership Map helper
 ======================================================= */
 
 (() => {
@@ -13,36 +24,28 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8";
-  const AUTO_ID_ATTR = "data-mk-id";
-  const AUTO_ROW_ATTR = "data-mk-row";
-  const AUTO_CARD_ATTR = "data-mk-card";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v3";
+  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v3";
+
+  const AUTO_ID_ATTR   = "data-mk-id";      // persistent identity marker
+  const AUTO_ROW_ATTR  = "data-mk-row";     // stable row marker for cloned rows
+  const AUTO_CARD_ATTR = "data-mk-card";    // stable card marker for cloned cards
 
   /* =======================
      HELPERS
   ======================= */
-  const $ = (sel, root = document) => root.querySelector(sel);
+  const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
+    return (prefix = "mk") => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
   const isCheckbox = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "checkbox";
   const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
   const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
-
-  const safeText = (str) => (str || "").toString().replace(/\s+/g, " ").trim();
-  const normalizeKey = (str) => safeText(str).toLowerCase();
-
-  function flash(el, cls = "mk-flash", ms = 800) {
-    if (!isEl(el)) return;
-    el.classList.add(cls);
-    window.setTimeout(() => el.classList.remove(cls), ms);
-  }
 
   function formatDateYYYYMMDD(d) {
     const yyyy = d.getFullYear();
@@ -58,17 +61,41 @@
     return formatDateYYYYMMDD(d);
   }
 
+  function safeText(s) {
+    return String(s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function lockScrollWhile(fn) {
+    const x = window.scrollX;
+    const y = window.scrollY;
+
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+
+    fn();
+
+    // restore exact scroll position after layout settles
+    requestAnimationFrame(() => {
+      window.scrollTo(x, y);
+      requestAnimationFrame(() => {
+        window.scrollTo(x, y);
+        html.style.scrollBehavior = prevBehavior || "";
+      });
+    });
+  }
+
   /* =======================
      GHOST / PLACEHOLDER STYLING
   ======================= */
   function applyGhostStyling(root = document) {
-    $$("select", root).forEach((sel) => {
+    $$("select", root).forEach(sel => {
       const update = () => sel.classList.toggle("is-placeholder", !sel.value);
       sel.addEventListener("change", update);
       update();
     });
 
-    $$("input[type='date']", root).forEach((inp) => {
+    $$("input[type='date']", root).forEach(inp => {
       const update = () => inp.classList.toggle("is-placeholder", !inp.value);
       inp.addEventListener("change", update);
       update();
@@ -76,29 +103,112 @@
   }
 
   /* =======================
+     NOTES STORAGE (bullets)
+  ======================= */
+  function readNotesState() {
+    try { return JSON.parse(localStorage.getItem(NOTES_KEY) || "{}"); }
+    catch { return {}; }
+  }
+  function writeNotesState(obj) {
+    localStorage.setItem(NOTES_KEY, JSON.stringify(obj || {}));
+  }
+
+  function getNotesItems(targetId) {
+    const ns = readNotesState();
+    const arr = Array.isArray(ns[targetId]) ? ns[targetId] : [];
+    return arr;
+  }
+
+  function setNotesItems(targetId, items) {
+    const ns = readNotesState();
+    ns[targetId] = Array.isArray(items) ? items : [];
+    writeNotesState(ns);
+  }
+
+  function upsertBullet(targetId, bulletKey, bulletText, orderIndex) {
+    const items = getNotesItems(targetId);
+
+    const now = Date.now();
+    const existing = items.find(it => it.key === bulletKey);
+
+    if (existing) {
+      existing.text  = bulletText;
+      existing.index = Number.isFinite(orderIndex) ? orderIndex : existing.index;
+      existing.ts    = now;
+    } else {
+      items.push({
+        key: bulletKey,
+        text: bulletText,
+        index: Number.isFinite(orderIndex) ? orderIndex : 999999,
+        ts: now
+      });
+    }
+
+    // sort by DOM order first, then stable by time
+    items.sort((a, b) => {
+      const ai = Number.isFinite(a.index) ? a.index : 999999;
+      const bi = Number.isFinite(b.index) ? b.index : 999999;
+      if (ai !== bi) return ai - bi;
+      return (a.ts || 0) - (b.ts || 0);
+    });
+
+    setNotesItems(targetId, items);
+  }
+
+  function rebuildNotesTextareaForTarget(targetId) {
+    const block = document.getElementById(targetId);
+    if (!block) return;
+
+    const ta = $("textarea", block);
+    if (!ta) return;
+
+    const items = getNotesItems(targetId);
+
+    // spaced bullets: blank line between bullets
+    const text = items.map(it => it.text).join("\n\n");
+    ta.value = text;
+
+    // trigger autosave for textarea value (if your other autosave is watching)
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  /* =======================
      NOTES BUTTON NORMALIZATION
+     - DO NOT wipe SVG buttons on pages 3/4
+     - Ensure table notes buttons have .notes-btn and no inner text
   ======================= */
   function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target]", root).forEach((btn) => {
-      if (!btn.hasAttribute("data-notes-btn")) btn.setAttribute("data-notes-btn", "");
+    $$("button[data-notes-target], button[data-notes-btn][data-notes-target]", root).forEach(btn => {
       btn.type = "button";
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Add/View Notes");
+      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
+
+      // If it is the SVG style used on pages 3/4, keep it untouched
+      if (btn.classList.contains("notes-icon-btn")) return;
+
+      // Otherwise treat it as the table icon button
+      btn.classList.add("notes-btn");
+
+      // Make sure it's icon-only (tables)
+      // (but do NOT wipe children if it already contains svg intentionally)
+      if (!btn.querySelector("svg")) {
+        btn.textContent = "";
+      }
     });
   }
 
   /* =======================
-     PERSISTENT ID SYSTEM
+     PERSISTENT ID SYSTEM (autosave)
   ======================= */
   function ensureStableFieldIds(root = document) {
-    $$("tr", root).forEach((tr) => {
+    $$("tr", root).forEach(tr => {
       if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
     });
 
-    $$(".ticket-group, .card, .section-block, .dms-card", root).forEach((card) => {
+    $$(".ticket-group, .card, .section-block, .dms-card", root).forEach(card => {
       if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
     });
 
-    $$("input, select, textarea", root).forEach((el) => {
+    $$("input, select, textarea", root).forEach(el => {
       if (el.tagName === "INPUT") {
         const type = (el.type || "").toLowerCase();
         if (["button", "submit", "reset", "file"].includes(type)) return;
@@ -137,16 +247,13 @@
   }
 
   /* =======================
-     AUTOSAVE / RESTORE
+     AUTOSAVE / RESTORE (fields)
   ======================= */
   function readState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
-    try {
-      return JSON.parse(raw) || {};
-    } catch {
-      return {};
-    }
+    try { return JSON.parse(raw) || {}; }
+    catch { return {}; }
   }
   function writeState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -159,7 +266,7 @@
     ensureStableFieldIds(root);
     const state = readState();
 
-    $$("input, select, textarea", root).forEach((el) => {
+    $$("input, select, textarea", root).forEach(el => {
       const key = getFieldKey(el);
       if (!key) return;
 
@@ -176,18 +283,19 @@
     const state = readState();
     if (!state || typeof state !== "object") return;
 
-    $$("input, select, textarea", root).forEach((el) => {
+    $$("input, select, textarea", root).forEach(el => {
       const key = getFieldKey(el);
       if (!key || !(key in state)) return;
 
       if (isCheckbox(el)) el.checked = !!state[key];
-      else if (isRadio(el)) el.checked = el.value === state[key];
+      else if (isRadio(el)) el.checked = (el.value === state[key]);
       else el.value = state[key] ?? "";
     });
 
     applyGhostStyling(root);
   }
 
+  // Save on changes
   document.addEventListener("input", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -200,17 +308,20 @@
   });
 
   /* =======================
-     PAGE NAVIGATION
+     PAGE NAVIGATION (NO SHIFT option)
   ======================= */
   const pageSections = $$(".page-section");
   const navButtons = $$(".nav-btn");
 
-  // ✅ change: allow preserving scroll when opening page from Notes click
   function activatePage(sectionId, opts = {}) {
     if (!sectionId) return;
 
-    pageSections.forEach((sec) => sec.classList.remove("active"));
-    navButtons.forEach((btn) => btn.classList.remove("active"));
+    const preserveScroll = !!opts.preserveScroll;
+    const x = window.scrollX;
+    const y = window.scrollY;
+
+    pageSections.forEach(sec => sec.classList.remove("active"));
+    navButtons.forEach(btn => btn.classList.remove("active"));
 
     const sec = document.getElementById(sectionId);
     if (sec) sec.classList.add("active");
@@ -218,45 +329,79 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    if (!opts.preserveScroll) {
-      window.scrollTo({ top: 0, behavior: "instant" });
+    // Only scroll to top for normal nav usage
+    if (!preserveScroll) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } else {
+      window.scrollTo(x, y);
     }
   }
 
-  navButtons.forEach((btn) => {
+  navButtons.forEach(btn => {
     btn.addEventListener("click", () => activatePage(btn.dataset.target, { preserveScroll: false }));
   });
 
   /* =======================
      RESET THIS PAGE BUTTONS
+     - clears fields on that page
+     - clears saved field state for that page
+     - clears saved NOTES bullets for notes blocks on that page
   ======================= */
-  $$(".clear-page-btn").forEach((btn) => {
+  $$(".clear-page-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const page = btn.closest(".page-section");
       if (!page) return;
 
-      $$("input, select, textarea", page).forEach((el) => {
+      // clear visible fields on this page
+      $$("input, select, textarea", page).forEach(el => {
         if (isCheckbox(el) || isRadio(el)) el.checked = false;
         else el.value = "";
       });
 
       applyGhostStyling(page);
 
+      // clear saved field-state for this page
       ensureStableFieldIds(page);
       const state = readState();
-      $$("input, select, textarea", page).forEach((el) => {
+      $$("input, select, textarea", page).forEach(el => {
         const k = getFieldKey(el);
         if (k && k in state) delete state[k];
       });
       writeState(state);
+
+      // ✅ clear saved notes bullets for notes blocks ON THIS PAGE
+      const ns = readNotesState();
+      $$(".section-block[id]", page).forEach(block => {
+        const id = block.id || "";
+        if (id.startsWith("notes-")) delete ns[id];
+      });
+      writeNotesState(ns);
+
+      // also clear textarea contents of notes blocks (immediate visual)
+      $$(".section-block[id^='notes-'] textarea", page).forEach(ta => {
+        ta.value = "";
+        ta.dispatchEvent(new Event("input", { bubbles: true }));
+      });
     });
+  });
+
+  /* =======================
+     GLOBAL CLEAR ALL (optional)
+  ======================= */
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-clear-all="true"]');
+    if (!btn) return;
+    if (!confirm("Clear ALL saved data for this checklist?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(NOTES_KEY);
+    location.reload();
   });
 
   /* =======================
      TABLE ADD ROW (+)
   ======================= */
   function clearControls(root) {
-    $$("input, select, textarea", root).forEach((el) => {
+    $$("input, select, textarea", root).forEach(el => {
       if (isCheckbox(el) || isRadio(el)) el.checked = false;
       else el.value = "";
     });
@@ -278,235 +423,169 @@
 
     clearControls(clone);
 
-    $$("[id]", clone).forEach((el) => (el.id = ""));
-    $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
-
-    normalizeNotesButtons(clone);
+    // remove duplicated ids/auto ids
+    $$("[id]", clone).forEach(el => (el.id = ""));
+    $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
 
     tbody.appendChild(clone);
+
+    // keep notes buttons correct
+    normalizeNotesButtons(clone);
 
     ensureStableFieldIds(tbody);
     captureState(document);
   });
 
   /* =======================
-     NOTES BULLETS (ORDERED + SPACED)
+     NOTES BULLET BUILDERS
+     - Bullets contain ONLY: name + opcode + prompt (no "question" word)
+     - Add spacing between bullets
   ======================= */
-  function getNotesBlock(targetId) {
-    if (!targetId) return null;
-    return document.getElementById(targetId) || $(`#${CSS.escape(targetId)}`);
-  }
-  function getTextarea(notesBlock) {
-    return notesBlock ? $("textarea", notesBlock) : null;
-  }
-  function getAllNotesButtonsForTarget(targetId) {
-    if (!targetId) return [];
-    return $$(`[data-notes-btn][data-notes-target="${CSS.escape(targetId)}"]`);
-  }
-  function getOrderIndex(clickedBtn, targetId) {
-    const all = getAllNotesButtonsForTarget(targetId);
-    const idx = all.indexOf(clickedBtn);
-    return idx >= 0 ? idx : 999999;
+
+  function getOrderIndex(btn, targetId) {
+    const all = $$(`[data-notes-target="${CSS.escape(targetId)}"]`);
+    return all.indexOf(btn);
   }
 
-  // remove existing bullet header section (• lines + blank lines right after)
-  function stripLeadingBullets(text) {
-    const lines = (text || "").split("\n");
-    let i = 0;
-
-    // consume bullets and any blank lines between bullets
-    while (i < lines.length) {
-      const t = lines[i].trim();
-      if (t.startsWith("•") || t === "") {
-        // keep consuming until we hit first non-bullet non-empty after we've started
-        i++;
-        continue;
-      }
-      break;
+  function getNearestPromptText(btn) {
+    // For checklist rows (pages 3/4 etc.)
+    const row = btn.closest(".checklist-row");
+    if (row) {
+      const lab = $("label", row);
+      if (lab) return safeText(lab.textContent);
     }
 
-    // remove extra blank lines at the very top of the remaining content
-    const rest = lines.slice(i).join("\n").replace(/^\n+/, "");
-    return rest;
+    // For tables: use nearest section header or h2
+    const section = btn.closest(".section") || btn.closest(".section-block") || btn.closest(".page-section");
+    const header = section ? ($(".section-header", section) || $("h2", section) || $("h1", section)) : null;
+    if (header) return safeText(header.textContent);
+
+    return "";
   }
 
-  function ensureNotesMeta(state) {
-    if (!state.__notesBullets || typeof state.__notesBullets !== "object") {
-      state.__notesBullets = {};
-    }
-    return state.__notesBullets;
-  }
-
-  function getTableContext(btn) {
+  function getTableNameValue(btn) {
+    // First cell usually contains checkbox + name input
     const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    if (!tr || !table) return null;
+    if (!tr) return "";
+    const firstTd = tr.querySelector("td");
+    if (!firstTd) return "";
 
-    if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
-    const rowId = tr.getAttribute(AUTO_ROW_ATTR);
+    // prefer the text input in first td
+    const nameInput = firstTd.querySelector('input[type="text"]');
+    if (nameInput) return safeText(nameInput.value);
 
-    const ths = $$("thead th", table).map((th) => safeText(th.textContent));
-    const tds = $$("td", tr);
+    // fallback: any text input in row
+    const anyText = tr.querySelector('input[type="text"]');
+    return anyText ? safeText(anyText.value) : "";
+  }
 
-    const notesCell = btn.closest("td");
-    const notesColIndex = notesCell ? tds.indexOf(notesCell) : -1;
+  function getTableOpcodeValue(btn) {
+    // opcode tables: opcode usually in 2nd column text input
+    const tr = btn.closest("tr");
+    if (!tr) return "";
 
-    function getCellTextAt(idx) {
-      if (idx < 0 || idx >= tds.length) return "";
-      const cell = tds[idx];
-
-      const sel = cell.querySelector("select");
-      if (sel) return safeText(sel.options[sel.selectedIndex]?.textContent || sel.value);
-
-      const inp = cell.querySelector("input[type='text'], input:not([type])");
-      if (inp) return safeText(inp.value);
-
-      return safeText(cell.textContent);
+    const tds = Array.from(tr.querySelectorAll("td"));
+    if (tds.length >= 2) {
+      const opcodeInput = tds[1].querySelector('input[type="text"]');
+      if (opcodeInput) return safeText(opcodeInput.value);
     }
 
-    // Name
-    let name = "";
-    const nameIdx = ths.findIndex((t) => normalizeKey(t) === "name");
-    if (nameIdx >= 0) {
-      const cell = tds[nameIdx];
-      const nameInput = cell ? cell.querySelector("input[type='text'], input:not([type])") : null;
-      name = safeText(nameInput ? nameInput.value : getCellTextAt(nameIdx));
-    } else {
-      const anyText = tr.querySelector("input[type='text'], input:not([type])");
-      name = safeText(anyText ? anyText.value : "");
-    }
+    // fallback: if any input marked data-opcode
+    const tagged = tr.querySelector('[data-opcode], input[name*="opcode" i]');
+    if (tagged && tagged.value != null) return safeText(tagged.value);
 
-    // Opcode (page 6)
-    let opcode = "";
-    const opcodeIdx = ths.findIndex((t) => normalizeKey(t) === "opcode");
-    if (opcodeIdx >= 0) opcode = getCellTextAt(opcodeIdx);
-
-    // Column header immediately LEFT of Notes column
-    let colHeader = "Note";
-    if (notesColIndex > 0 && ths[notesColIndex - 1]) colHeader = ths[notesColIndex - 1];
-
-    const tableId = table.id ? `table:${table.id}` : "table";
-    return { tableId, rowId, name, opcode, colHeader };
+    return "";
   }
 
   function buildBulletText(btn) {
-    const ctx = getTableContext(btn);
-    if (ctx) {
-      const n = ctx.name ? `Name: ${ctx.name}` : "Name:";
-      const o = ctx.opcode ? `Opcode: ${ctx.opcode}` : "Opcode:";
-      return `${n} | ${o} | ${ctx.colHeader}`; // ✅ no "Question:"
+    const targetId = btn.getAttribute("data-notes-target") || "";
+    const inTable = !!btn.closest("table");
+
+    const prompt = getNearestPromptText(btn);
+
+    let name = "";
+    let opcode = "";
+
+    if (inTable) {
+      name = getTableNameValue(btn);
+      opcode = getTableOpcodeValue(btn);
+    } else {
+      // Non-table: if a name field exists nearby (optional), keep it minimal
+      name = "";
+      opcode = "";
     }
-    const row = btn.closest(".checklist-row");
-    const lbl = row ? $("label", row) : null;
-    return safeText(lbl ? lbl.textContent : "Note");
+
+    const parts = [];
+    if (name) parts.push(name);
+    if (opcode) parts.push(opcode);
+    if (prompt) parts.push(prompt);
+
+    // bullet with clean spacing and no "question" word
+    const line = `• ${parts.join(" — ")}`.trim();
+    return line;
   }
 
   function buildBulletKey(btn, targetId) {
-    const ctx = getTableContext(btn);
-    if (ctx) return `target:${targetId}|${ctx.tableId}|row:${ctx.rowId}|h:${normalizeKey(ctx.colHeader)}`;
-    const row = btn.closest(".checklist-row");
-    const lbl = row ? $("label", row) : null;
-    return `target:${targetId}|h:${normalizeKey(lbl ? lbl.textContent : "note")}`;
+    // stable key for that specific button location
+    const inTable = !!btn.closest("table");
+    if (inTable) {
+      const tr = btn.closest("tr");
+      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || uid("rowkey");
+      return `${targetId}::table::${rowKey}`;
+    }
+    // non-table: use target + prompt text + dom index
+    const idx = getOrderIndex(btn, targetId);
+    const prompt = getNearestPromptText(btn);
+    return `${targetId}::row::${idx}::${prompt.slice(0, 40)}`;
   }
 
-  function upsertBullet(targetId, bulletKey, bulletText, orderIndex) {
-    const state = readState();
-    const meta = ensureNotesMeta(state);
+  /* =======================
+     NOTES CLICK HANDLER (NO SHIFT)
+     - inserts bullet into notes textarea in DOM order
+     - rebuilds textarea from stored bullets
+     - focuses textarea without scroll
+  ======================= */
+  normalizeNotesButtons(document);
 
-    if (!Array.isArray(meta[targetId])) meta[targetId] = [];
-    const list = meta[targetId];
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-notes-btn][data-notes-target], .notes-btn[data-notes-target]");
+    if (!btn) return;
 
-    const existing = list.find((b) => b.key === bulletKey);
-    if (existing) {
-      existing.text = bulletText;
-      if (!Number.isFinite(existing.order)) existing.order = 999999;
-      if (Number.isFinite(orderIndex) && orderIndex < existing.order) existing.order = orderIndex;
-    } else {
-      list.push({ key: bulletKey, text: bulletText, order: orderIndex, createdAt: Date.now() });
+    e.preventDefault();
+
+    const targetId = btn.getAttribute("data-notes-target");
+    if (!targetId) return;
+
+    const notesBlock = document.getElementById(targetId);
+    if (!notesBlock) return;
+
+    const page = notesBlock.closest(".page-section");
+    if (page && !page.classList.contains("active")) {
+      // page swap WITHOUT scrolling
+      activatePage(page.id, { preserveScroll: true });
     }
 
-    writeState(state);
-  }
+    // prevent any scroll shift while updating
+    lockScrollWhile(() => {
+      ensureStableFieldIds(document);
 
-  function rebuildNotesTextareaForTarget(targetId) {
-    const notesBlock = getNotesBlock(targetId);
-    const ta = getTextarea(notesBlock);
-    if (!ta) return;
+      const orderIndex = getOrderIndex(btn, targetId);
+      const bulletText = buildBulletText(btn);
+      const bulletKey  = buildBulletKey(btn, targetId);
 
-    const state = readState();
-    const meta = ensureNotesMeta(state);
-    const list = Array.isArray(meta[targetId]) ? meta[targetId] : [];
+      upsertBullet(targetId, bulletKey, bulletText, orderIndex);
+      rebuildNotesTextareaForTarget(targetId);
 
-    list.sort((a, b) => {
-      const oa = Number.isFinite(a.order) ? a.order : 999999;
-      const ob = Number.isFinite(b.order) ? b.order : 999999;
-      if (oa !== ob) return oa - ob;
-      return (a.createdAt || 0) - (b.createdAt || 0);
+      // keep state synced
+      captureState(document);
     });
 
-    const rest = stripLeadingBullets(ta.value);
-
-    // ✅ spaced bullets: blank line between each bullet
-    const bulletLines = list.map((b) => `• ${b.text}`).join("\n\n");
-
-    ta.value = bulletLines + (rest ? `\n\n${rest}` : "");
-    ta.dispatchEvent(new Event("input", { bubbles: true }));
-
-    writeState(state);
-  }
-
- // ✅ Replace your current scrollToNotesBlockStable + notes click handler with this:
-
-function scrollToNotesOnce(notesBlock) {
-  if (!notesBlock) return;
-  // one single scroll, after layout is stable
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      notesBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  });
-}
-
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-notes-btn][data-notes-target]");
-  if (!btn) return;
-
-  e.preventDefault();
-
-  const targetId = btn.getAttribute("data-notes-target");
-  const notesBlock = getNotesBlock(targetId);
-  if (!notesBlock) return;
-
-  // If the notes block is on another page, activate it WITHOUT forcing scroll changes
-  const page = notesBlock.closest(".page-section");
-  if (page && !page.classList.contains("active")) {
-    activatePage(page.id, { preserveScroll: true });
-  }
-
-  // Build bullet info
-  const orderIndex = getOrderIndex(btn, targetId);
-  const bulletText = buildBulletText(btn);
-  const bulletKey = buildBulletKey(btn, targetId);
-
-  upsertBullet(targetId, bulletKey, bulletText, orderIndex);
-
-  // ✅ KEY CHANGE:
-  // 1) rebuild textarea FIRST (this is what can change layout/height)
-  // 2) THEN scroll exactly once
-  requestAnimationFrame(() => {
-    rebuildNotesTextareaForTarget(targetId);
-
-    // After bullets are in, do the single scroll
-    scrollToNotesOnce(notesBlock);
-
-    // Focus without causing scroll
+    // focus notes textarea without scroll
     setTimeout(() => {
-      const ta = getTextarea(notesBlock);
+      const ta = notesBlock.querySelector("textarea");
       if (ta) ta.focus({ preventScroll: true });
-      flash(notesBlock);
-    }, 200);
+    }, 30);
   });
-});
 
   /* =======================
      SUPPORT TICKETS (unchanged)
@@ -521,12 +600,14 @@ document.addEventListener("click", (e) => {
   function ticketIsBase(groupEl) {
     return groupEl?.getAttribute?.("data-base") === "true";
   }
+
   function requiredTicketFieldsFilled(groupEl) {
     const ticketNum = $(".ticket-number-input", groupEl)?.value?.trim();
     const url = $(".ticket-zendesk-input", groupEl)?.value?.trim();
     const summary = $(".ticket-summary-input", groupEl)?.value?.trim();
     return !!(ticketNum && url && summary);
   }
+
   function setTicketStatus(groupEl, status, lock = false) {
     const sel = $(".ticket-status-select", groupEl);
     if (!sel) return;
@@ -534,6 +615,7 @@ document.addEventListener("click", (e) => {
     sel.disabled = !!lock;
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
+
   function moveTicketGroup(groupEl, status) {
     const dest = ticketContainers[status] || ticketContainers.Open;
     if (!dest) return;
@@ -565,7 +647,6 @@ document.addEventListener("click", (e) => {
     if (!group || !ticketIsBase(group)) return;
 
     if (!requiredTicketFieldsFilled(group)) {
-      flash(group, "mk-flash", 700);
       alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
       return;
     }
@@ -574,7 +655,7 @@ document.addEventListener("click", (e) => {
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, uid("ticket"));
 
-    $$("input, textarea", clone).forEach((el) => (el.value = ""));
+    $$("input, textarea", clone).forEach(el => (el.value = ""));
     setTicketStatus(clone, "Open", false);
 
     if (!$(".remove-ticket-btn", clone)) {
@@ -587,7 +668,7 @@ document.addEventListener("click", (e) => {
       inner.prepend(rm);
     }
 
-    ticketContainers.Open?.appendChild(clone);
+    ticketContainers.Open.appendChild(clone);
 
     ensureStableFieldIds(clone);
     captureState(document);
@@ -602,7 +683,7 @@ document.addEventListener("click", (e) => {
 
     ensureStableFieldIds(group);
     const state = readState();
-    $$("input, select, textarea", group).forEach((el) => {
+    $$("input, select, textarea", group).forEach(el => {
       const k = getFieldKey(el);
       if (k && k in state) delete state[k];
     });
@@ -658,21 +739,26 @@ document.addEventListener("click", (e) => {
   ======================= */
   function init() {
     normalizeNotesButtons(document);
+
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
-    // Rebuild bullet lists for any targets already stored
-    const state = readState();
-    const meta =
-      state.__notesBullets && typeof state.__notesBullets === "object" ? state.__notesBullets : {};
-    Object.keys(meta).forEach((targetId) => rebuildNotesTextareaForTarget(targetId));
+    // rebuild notes textareas from saved bullets (no scrolling)
+    const notesState = readNotesState();
+    Object.keys(notesState || {}).forEach(targetId => {
+      if (document.getElementById(targetId)) {
+        rebuildNotesTextareaForTarget(targetId);
+      }
+    });
 
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
-    if (active) activatePage(active, { preserveScroll: false });
+    if (active) activatePage(active, { preserveScroll: true });
 
+    // Save once after init to “lock in” ids
     captureState(document);
   }
 
   init();
+
 })();
