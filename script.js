@@ -12,7 +12,13 @@
      (plain text; no bold; hollow sub-bullet; extra indent)
    ✅ Stable ordering (DOM order) even if clicked out of order
    ✅ NO screen shifting (no scroll, no jump)
-   ✅ Support Tickets logic (base locked to Open; clones movable)
+   ✅ Support Tickets:
+       - Base locked to Open
+       - Add clones that KEEP base data
+       - Base clears after add
+       - Status dropdown font black
+       - Remove button removed / never injected
+       - Add button removed from clones
    ✅ Dealership map helper
    ✅ Ghost styling for selects/dates
 ======================================================= */
@@ -23,14 +29,13 @@
   /* =======================
      CONFIG / STORAGE
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v9";
-  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v9";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v10";
+  const NOTES_KEY   = "mykaarma_interactive_checklist__notes_v10";
 
   const AUTO_ID_ATTR  = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
 
-  // Notes formatting (plain text)
-  const SUB_INDENT = "              "; // more indent (per request)
+  const SUB_INDENT = "              ";
   const BULLET_MAIN = "• ";
   const BULLET_SUB  = "◦ ";
 
@@ -67,6 +72,15 @@
   }
 
   /* =======================
+     SELECT COLOR HELPERS
+  ======================= */
+  function forceSelectBlack(sel) {
+    if (!sel) return;
+    // Always black font per request
+    sel.style.color = "#000";
+  }
+
+  /* =======================
      GHOST / PLACEHOLDER STYLING
   ======================= */
   function applyGhostStyling(root = document) {
@@ -96,17 +110,14 @@
     ensureStableRowIds(root);
 
     $$("input, select, textarea", root).forEach(el => {
-      // ignore buttons
       if (el.tagName === "INPUT") {
         const type = (el.type || "").toLowerCase();
         if (["button", "submit", "reset", "file"].includes(type)) return;
       }
 
-      // keep existing ids stable
       if (el.id && !el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
       if (el.getAttribute(AUTO_ID_ATTR)) return;
 
-      // deterministic-ish based on page + row + cell index
       const page = el.closest(".page-section");
       const pageId = page?.id || "no-page";
       const tr = el.closest("tr");
@@ -118,7 +129,6 @@
         if (cell) colIndex = String(Array.from(tr.children).indexOf(cell));
       }
 
-      // index within the cell (or row)
       const scope = el.closest("td,th") || tr || el.parentElement || document.body;
       const siblings = $$("input, select, textarea", scope);
       const idx = Math.max(0, siblings.indexOf(el));
@@ -173,6 +183,7 @@
     if (!t || !t.matches("input, select, textarea")) return;
     captureState(document);
   });
+
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -197,7 +208,6 @@
     const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
     if (btn) btn.classList.add("active");
 
-    // normal nav: go to top; but notes clicks will NOT call this at all
     if (!dontScroll) window.scrollTo({ top: 0, behavior: "instant" });
   }
 
@@ -207,10 +217,6 @@
 
   /* =======================
      RESET THIS PAGE
-     - clears input/select/textarea values in that page
-     - removes those keys from STORAGE_KEY
-     - clears notes store entries for notes blocks inside that page
-     - clears notes textarea content immediately
   ======================= */
   function clearControls(root) {
     $$("input, select, textarea", root).forEach(el => {
@@ -225,10 +231,8 @@
       const page = btn.closest(".page-section");
       if (!page) return;
 
-      // 1) clear UI values
       clearControls(page);
 
-      // 2) remove state keys for this page
       ensureStableFieldIds(page);
       const state = readState();
       $$("input, select, textarea", page).forEach(el => {
@@ -237,7 +241,6 @@
       });
       writeState(state);
 
-      // 3) remove notes store entries for notes blocks in this page
       const notes = readNotes();
       const noteBlocks = $$("[id^='notes-']", page)
         .map(b => b.id)
@@ -245,7 +248,6 @@
 
       noteBlocks.forEach(id => {
         delete notes[id];
-        // clear textarea immediately
         const ta = $(`#${CSS.escape(id)} textarea`);
         if (ta) ta.value = "";
       });
@@ -270,13 +272,11 @@
     const clone = firstRow.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
 
-    // clear values
     $$("input, select, textarea", clone).forEach(el => {
       if (isCheckbox(el) || isRadio(el)) el.checked = false;
       else el.value = "";
     });
 
-    // remove ids so ensureStableFieldIds can re-key
     $$("[id]", clone).forEach(el => (el.id = ""));
     $$(`[${AUTO_ID_ATTR}]`, clone).forEach(el => el.removeAttribute(AUTO_ID_ATTR));
 
@@ -289,17 +289,7 @@
 
   /* =======================
      NOTES — BULLET SYSTEM (NO SCROLL / NO SHIFT)
-     RULES:
-       - Plain text
-       - Main bullet: "• Title"
-       - Next line: "              ◦ "
-       - Titles:
-           * tables: ONLY Name (page 5) OR Opcode (page 6)
-           * non-tables: label text of the row (not bold)
-       - Stable ordering: DOM index of row (or checklist-row)
-       - Reset clears notes storage, so bullets won't resurrect
   ======================= */
-
   function getNotesTextarea(targetId) {
     const block = document.getElementById(targetId);
     if (!block) return null;
@@ -332,19 +322,16 @@
     const tr = btn.closest("tr");
     const pageId = btn.closest(".page-section")?.id || "";
 
-    // Page 6 opcodes-pricing: Opcode column is 2nd column input text
     if (pageId === "opcodes-pricing") {
       const opcode = tr?.querySelector("td:nth-child(2) input[type='text']")?.value?.trim();
       return opcode || "—";
     }
 
-    // Page 5 tables (training-checklist): Name text in first cell
     const name = tr?.querySelector("td:first-child input[type='text']")?.value?.trim();
     return name || "—";
   }
 
   function buildBulletBlock(title) {
-    // no bold, no extra symbols
     return `${BULLET_MAIN}${title}\n${SUB_INDENT}${BULLET_SUB}`;
   }
 
@@ -354,10 +341,8 @@
 
     const notesStore = readNotes();
     const arr = Array.isArray(notesStore[targetId]) ? notesStore[targetId] : [];
-
     arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-    // spacing between blocks for readability
     ta.value = arr.map(x => x.text).join("\n\n");
   }
 
@@ -373,13 +358,9 @@
   }
 
   document.addEventListener("click", (e) => {
-    // Accept BOTH styles:
-    // - tables: <button class="notes-btn" data-notes-target="...">
-    // - pages 3/4: <button data-notes-btn data-notes-target="...">
     const btn = e.target.closest("button[data-notes-target]");
     if (!btn) return;
 
-    // absolutely prevent any default behavior that could move the page
     e.preventDefault();
     e.stopPropagation();
 
@@ -389,7 +370,6 @@
     const inTable = !!btn.closest("table");
     const title = inTable ? getTableTitle(btn) : getNonTableTitle(btn);
 
-    // key should be stable per row
     let key = `${targetId}::${title}`;
     let order = 999999;
 
@@ -405,13 +385,12 @@
     ensureNoteEntry(targetId, key, order, buildBulletBlock(title));
     rebuildNotes(targetId);
 
-    // Focus notes textarea WITHOUT scrolling
     const ta = getNotesTextarea(targetId);
     if (ta) ta.focus({ preventScroll: true });
   });
 
   /* =======================
-     SUPPORT TICKETS
+     SUPPORT TICKETS (UPDATED)
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -436,7 +415,22 @@
     if (!sel) return;
     sel.value = status;
     sel.disabled = !!lock;
+    forceSelectBlack(sel);
     sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function stripTicketButtons(groupEl, { keepAddOnBase = true } = {}) {
+    // remove any remove buttons (existing in HTML or previously inserted)
+    $$(".remove-ticket-btn", groupEl).forEach(b => b.remove());
+
+    // remove add button from clones
+    if (!ticketIsBase(groupEl) || !keepAddOnBase) {
+      $$(".add-ticket-btn", groupEl).forEach(b => b.remove());
+    }
+
+    // status select always black
+    const sel = $(".ticket-status-select", groupEl);
+    if (sel) forceSelectBlack(sel);
   }
 
   function moveTicketGroup(groupEl, status) {
@@ -451,72 +445,74 @@
     const sel = $(".ticket-status-select", groupEl);
     if (sel) sel.disabled = false;
 
+    // remove disclaimers if any
     const disc = $(".ticket-disclaimer", groupEl);
     if (disc) disc.remove();
 
     dest.appendChild(groupEl);
   }
 
+  // initialize base lock + black font
   if (ticketContainers.Open) {
     const base = $('.ticket-group[data-base="true"]', ticketContainers.Open);
-    if (base) setTicketStatus(base, "Open", true);
+    if (base) {
+      setTicketStatus(base, "Open", true);
+      stripTicketButtons(base, { keepAddOnBase: true });
+    }
   }
 
+  // ensure all current ticket groups have correct button rules + black font
+  $$(".ticket-group").forEach(g => stripTicketButtons(g, { keepAddOnBase: true }));
+  $$(".ticket-status-select").forEach(sel => forceSelectBlack(sel));
+
+  // ADD ticket:
+  // - clone base
+  // - clone KEEPS the typed values
+  // - clone is not base, no add button, no remove button
+  // - base is cleared after add
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".add-ticket-btn");
     if (!addBtn) return;
 
-    const group = addBtn.closest(".ticket-group");
-    if (!group || !ticketIsBase(group)) return;
+    const baseGroup = addBtn.closest(".ticket-group");
+    if (!baseGroup || !ticketIsBase(baseGroup)) return;
 
-    if (!requiredTicketFieldsFilled(group)) {
+    if (!requiredTicketFieldsFilled(baseGroup)) {
       alert("Complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
       return;
     }
 
-    const clone = group.cloneNode(true);
+    const clone = baseGroup.cloneNode(true);
     clone.setAttribute("data-base", "false");
+    clone.setAttribute("data-mk-ticket", uid("ticket"));
 
-    $$("input, textarea", clone).forEach(el => (el.value = ""));
+    // IMPORTANT: clone keeps entered values.
+    // But we must unlock status select on clone.
     setTicketStatus(clone, "Open", false);
 
-    if (!$(".remove-ticket-btn", clone)) {
-      const inner = $(".ticket-group-inner", clone) || clone;
-      const rm = document.createElement("button");
-      rm.type = "button";
-      rm.className = "remove-ticket-btn";
-      rm.textContent = "Remove";
-      rm.title = "Remove Ticket";
-      inner.prepend(rm);
-    }
+    // Remove buttons from clone (no remove, no add)
+    stripTicketButtons(clone, { keepAddOnBase: false });
 
+    // Append clone to Open container
     ticketContainers.Open?.appendChild(clone);
 
+    // Clear base inputs after adding (so you can enter next ticket)
+    $$("input, textarea", baseGroup).forEach(el => (el.value = ""));
+    // keep base status locked to Open
+    setTicketStatus(baseGroup, "Open", true);
+    stripTicketButtons(baseGroup, { keepAddOnBase: true });
+
     ensureStableFieldIds(clone);
+    ensureStableFieldIds(baseGroup);
     captureState(document);
   });
 
-  document.addEventListener("click", (e) => {
-    const rm = e.target.closest(".remove-ticket-btn");
-    if (!rm) return;
-
-    const group = rm.closest(".ticket-group");
-    if (!group || ticketIsBase(group)) return;
-
-    ensureStableFieldIds(group);
-    const state = readState();
-    $$("input, select, textarea", group).forEach(el => {
-      const k = getFieldKey(el);
-      if (k && k in state) delete state[k];
-    });
-    writeState(state);
-
-    group.remove();
-  });
-
+  // status change move
   document.addEventListener("change", (e) => {
     const sel = e.target.closest(".ticket-status-select");
     if (!sel) return;
+
+    forceSelectBlack(sel);
 
     const group = sel.closest(".ticket-group");
     if (!group) return;
@@ -524,6 +520,7 @@
     if (ticketIsBase(group)) {
       sel.value = "Open";
       sel.disabled = true;
+      forceSelectBlack(sel);
       return;
     }
 
@@ -578,15 +575,16 @@
     restoreState(document);
     applyGhostStyling(document);
 
-    // activate first visible page on load
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
-    // rebuild notes textareas from store (no scrolling)
+    // rebuild notes textareas from store
     const notesStore = readNotes();
     Object.keys(notesStore).forEach(targetId => rebuildNotes(targetId));
 
-    // save once to lock ids
+    // make ticket status selects black on init
+    $$(".ticket-status-select").forEach(sel => forceSelectBlack(sel));
+
     captureState(document);
   }
 
