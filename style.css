@@ -1031,159 +1031,75 @@ main{
   transform:translateY(-1px);
 }
 
-/* =======================
-   SUPPORT TICKETS
-======================= */
-/* (unchanged from your file — kept as-is) */
-#support-tickets .ticket-sections-stack{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
-#support-tickets #openTicketsContainer,
-#support-tickets #tierTwoTicketsContainer,
-#support-tickets #closedResolvedTicketsContainer,
-#support-tickets #closedFeatureTicketsContainer{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
-  align-items:start;
+/* =======================================================
+   SUPPORT TICKETS — FINAL SPACING + BASE CARD FIX
+   Drop-in overrides for your existing CSS
+======================================================= */
+
+/* ---------- Base ticket card should shrink to content ---------- */
+#support-tickets .ticket-group[data-base="true"]{
+  min-height: unset !important;
 }
 
+/* Pull the base card bottom up */
+#support-tickets .ticket-group[data-base="true"] .ticket-group-inner{
+  padding-bottom: 12px !important;
+}
+
+/* ---------- Summary row tightening (THIS was the main gap) ---------- */
+#support-tickets
+.ticket-group[data-base="true"]
+.ticket-row.ticket-summary-row textarea{
+  margin-bottom: 8px !important;
+}
+
+/* ---------- Disclaimer positioning & padding ---------- */
+#support-tickets
+.ticket-group[data-base="true"]
+.ticket-disclaimer{
+  margin-top: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #6b7280;
+}
+
+/* ---------- Remove disclaimer from ALL non-base tickets ---------- */
+#support-tickets
+.ticket-group:not([data-base="true"])
+.ticket-disclaimer{
+  display: none !important;
+}
+
+/* ---------- Status dropdown should always be black text ---------- */
+#support-tickets select.ticket-status-select,
+#support-tickets select.ticket-status-select:disabled{
+  color: #111 !important;
+  opacity: 1 !important;
+  background: #f7f7f7;
+  cursor: default;
+}
+
+/* ---------- Remove Add / Remove buttons from non-base tickets ---------- */
+#support-tickets
+.ticket-group:not([data-base="true"])
+.add-ticket-btn,
+#support-tickets
+.ticket-group:not([data-base="true"])
+.remove-ticket-btn{
+  display: none !important;
+}
+
+/* ---------- Ensure base Add button still aligns cleanly ---------- */
+#support-tickets
+.ticket-group[data-base="true"]
+.add-ticket-btn{
+  box-shadow: 0 1px 4px rgba(239,109,34,0.25);
+}
+
+/* ---------- Defensive: prevent hidden height from grid ---------- */
 #support-tickets .ticket-group{
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  background:#fff;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  width:100%;
-  min-width:0;
-}
-#support-tickets .ticket-group-inner{ padding:16px 18px 14px; }
-
-#support-tickets .ticket-group-inner,
-#support-tickets .ticket-group-inner *{ font-weight:400; }
-#support-tickets .ticket-row label{ font-weight:500 !important; }
-
-#support-tickets .ticket-group-inner{
-  font-size:13px;
-  line-height:1.4;
-}
-#support-tickets .ticket-row label{
-  font-size:13px !important;
-  font-weight:500 !important;
-  color:#222;
-}
-#support-tickets input[type="text"],
-#support-tickets select,
-#support-tickets textarea{
-  font-size:13px !important;
-}
-
-#support-tickets .ticket-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  column-gap:18px;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid #ececec;
-}
-#support-tickets .ticket-row:last-child{ border-bottom:none; }
-
-#support-tickets .ticket-row > input[type="text"],
-#support-tickets .ticket-row > select{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  margin:0;
-  height:34px;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-}
-
-#support-tickets .ticket-number-wrap{
-  width:100%;
-  display:flex;
-  align-items:stretch;
-  gap:0;
-  min-width:0;
-}
-#support-tickets .ticket-number-input{
-  flex:1 1 auto;
-  width:0;
-  min-width:0;
-  height:34px;
-  padding:7px 10px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-}
-#support-tickets .add-ticket-btn,
-#support-tickets .remove-ticket-btn{
-  flex:0 0 34px;
-  width:34px;
-  min-width:34px;
-  height:34px;
-  margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25);
-}
-#support-tickets .add-ticket-btn:hover,
-#support-tickets .remove-ticket-btn:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-}
-
-/* Summary row */
-#support-tickets .ticket-row.ticket-summary-row{
-  grid-template-columns:1fr;
-  align-items:start;
-  border-bottom:none;
-  padding:10px 0 18px;
-  margin-top:10px;
-}
-#support-tickets .ticket-row.ticket-summary-row label{
-  display:block;
-  margin:0 0 6px 0;
-}
-#support-tickets .ticket-row.ticket-summary-row textarea{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  min-height:80px;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  resize:vertical;
-  margin:0 0 18px 0 !important;
-  margin-top:0 !important;
-}
-
-#support-tickets .ticket-disclaimer{
-  margin:18px 0 0 !important;
-  font-size:12px;
-  color:#6b7280;
-}
-#support-tickets .ticket-status-select[disabled]{
-  opacity:0.9;
-  background:#f3f4f6;
-  cursor:not-allowed;
+  align-self: flex-start;
 }
 
 /* =======================
