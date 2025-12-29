@@ -1,8 +1,15 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (HARDENED: works even if controls are DIV/SPAN/A, not <button>)
-   - Single script (no duplicate IIFEs)
-   - All handlers use event delegation (works for cloned rows/cards)
+   (DROP-IN FULL SCRIPT — includes Additional Trainer row +)
+   ✅ Notes buttons (table + question)
+   ✅ Table add-row (+) for tbody rows
+   ✅ Table expand ⤢ (mkTableModal if present; fallback to row modal)
+   ✅ Row popup modal (mkRowModal)
+   ✅ Support tickets add/move/reset
+   ✅ Reset This Page (clears dynamic rows + tickets)
+   ✅ Autosave/restore (localStorage)
+   ✅ Additional Trainer row (+) injects into #additionalTrainersContainer
+   ✅ Hardened: works even if controls are DIV/SPAN/A (not <button>)
 ======================================================= */
 
 (() => {
@@ -58,11 +65,19 @@
       el.type = el.getAttribute("type") || "button";
       return;
     }
-    // Avoid doing this on inputs/selects/etc
     if (["A", "DIV", "SPAN"].includes(el.tagName)) {
       if (!el.hasAttribute("role")) el.setAttribute("role", "button");
       if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
     }
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   /* =======================
@@ -99,7 +114,6 @@
   }
 
   function normalizeNotesButtons(root = document) {
-    // IMPORTANT: do not require <button>; match any element with data-notes-target
     $$("[data-notes-target], [data-notes-btn][data-notes-target]", root).forEach((btn) => {
       asButton(btn);
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
@@ -284,6 +298,12 @@
           rows.slice(keep).forEach((r) => r.remove());
         });
 
+        // Remove dynamic additional-trainer rows
+        if (page.id === "trainers-deployment") {
+          const c = $("#additionalTrainersContainer");
+          if (c) c.innerHTML = "";
+        }
+
         if (page.id === "support-tickets") resetSupportTickets();
 
         ensureStableFieldIds(page);
@@ -307,7 +327,6 @@
       const addBtn = e.target.closest(".table-footer .add-row");
       if (!addBtn) return;
 
-      // prevent anchors from navigating
       if (addBtn.tagName === "A") e.preventDefault();
 
       const tableContainer = addBtn.closest(".table-container");
@@ -723,6 +742,73 @@
   }
 
   /* =======================
+     ADDITIONAL TRAINER ROW (+)
+     - matches your exact HTML:
+       #trainers-deployment .checklist-row.integrated-plus[data-base="true"]
+       inject into #additionalTrainersContainer
+  ======================= */
+  function initAdditionalTrainerRowAdder() {
+    document.addEventListener("click", (e) => {
+      const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+      if (!addBtn) return;
+
+      if (addBtn.tagName === "A") e.preventDefault();
+
+      const baseRow = addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']");
+      if (!baseRow) return;
+
+      const container = $("#additionalTrainersContainer");
+      if (!container) return;
+
+      const baseInput = $("input[type='text']", baseRow);
+      if (!baseInput) return;
+
+      const name = (baseInput.value || "").trim();
+      if (!name) {
+        flash(baseRow);
+        focusNoScroll(baseInput);
+        return;
+      }
+
+      const row = document.createElement("div");
+      row.className = "checklist-row indent-sub added-trainer-row";
+      row.innerHTML = `
+        <label class="sr-label">Additional Trainer</label>
+        <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}">
+        <button type="button" class="remove-row" title="Remove">–</button>
+      `;
+
+      container.appendChild(row);
+
+      baseInput.value = "";
+      baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+      normalizeNotesButtons(row);
+      ensureStableFieldIds(container);
+      captureState(document);
+      flash(row);
+    });
+
+    document.addEventListener("click", (e) => {
+      const rm = e.target.closest("#trainers-deployment #additionalTrainersContainer .remove-row");
+      if (!rm) return;
+      const row = rm.closest(".added-trainer-row");
+      if (!row) return;
+      row.remove();
+      captureState(document);
+    });
+
+    // keyboard support for non-button add controls (if you ever change markup)
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+      if (!addBtn) return;
+      e.preventDefault();
+      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+  }
+
+  /* =======================
      CARD CLONER (+) for Additional POC / Trainers / Trainer cards
      - Base card must have data-base="true"
      - Clones remove the + button
@@ -735,6 +821,9 @@
 
       // Skip table add-row (handled elsewhere)
       if (addBtn.closest(".table-footer")) return;
+
+      // Skip the Additional Trainer base-row add (handled by initAdditionalTrainerRowAdder)
+      if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
 
       if (addBtn.tagName === "A") e.preventDefault();
 
@@ -775,6 +864,7 @@
       const addBtn = e.target.closest(".add-row");
       if (!addBtn) return;
       if (addBtn.closest(".table-footer")) return;
+      if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
       e.preventDefault();
       addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -996,7 +1086,13 @@
     initResetButtons();
     initAddRowTables();
     initNotesButtons();
+
+    // NEW: trainers page "Additional Trainer" row adder
+    initAdditionalTrainerRowAdder();
+
+    // Existing card cloner (POC cards etc)
     initCloneAddButtons();
+
     initSupportTickets();
     initOnsiteDateHelper();
 
