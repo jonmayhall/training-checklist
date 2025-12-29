@@ -1,5 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
+   (HARDENED: works even if controls are DIV/SPAN/A, not <button>)
    - Single script (no duplicate IIFEs)
    - All handlers use event delegation (works for cloned rows/cards)
 ======================================================= */
@@ -14,6 +15,9 @@
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
+
+  // Toggle to true if you want a console line proving the script ran.
+  const DEBUG = false;
 
   /* =======================
      HELPERS
@@ -47,6 +51,20 @@
     }
   }
 
+  function asButton(el) {
+    // Makes non-button elements keyboard/click friendly.
+    if (!isEl(el)) return;
+    if (el.tagName === "BUTTON") {
+      el.type = el.getAttribute("type") || "button";
+      return;
+    }
+    // Avoid doing this on inputs/selects/etc
+    if (["A", "DIV", "SPAN"].includes(el.tagName)) {
+      if (!el.hasAttribute("role")) el.setAttribute("role", "button");
+      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    }
+  }
+
   /* =======================
      GHOST / PLACEHOLDER STYLING
   ======================= */
@@ -65,7 +83,7 @@
   }
 
   /* =========================================================
-     NOTES BUTTON NORMALIZATION
+     NOTES BUTTON NORMALIZATION (supports any tag)
      - Table notes buttons: .notes-btn (CSS pseudo bubble)
      - Question notes buttons: .notes-icon-btn with inline SVG
   ========================================================= */
@@ -81,8 +99,9 @@
   }
 
   function normalizeNotesButtons(root = document) {
-    $$("button[data-notes-target], button[data-notes-btn][data-notes-target]", root).forEach((btn) => {
-      btn.type = "button";
+    // IMPORTANT: do not require <button>; match any element with data-notes-target
+    $$("[data-notes-target], [data-notes-btn][data-notes-target]", root).forEach((btn) => {
+      asButton(btn);
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
 
       const inTable = isTableNotesButton(btn);
@@ -256,7 +275,6 @@
         const page = btn.closest(".page-section");
         if (!page) return;
 
-        // Clear form controls
         clearControlsIn(page);
 
         // Remove dynamically added table rows (keep first 2 like your template)
@@ -266,10 +284,8 @@
           rows.slice(keep).forEach((r) => r.remove());
         });
 
-        // Support tickets reset
         if (page.id === "support-tickets") resetSupportTickets();
 
-        // Remove saved state for fields on this page
         ensureStableFieldIds(page);
         const state = readState();
         $$("input, select, textarea", page).forEach((el) => {
@@ -284,12 +300,15 @@
   }
 
   /* =======================
-     TABLE ADD ROW (+)
+     TABLE ADD ROW (+)  (supports any tag for the +)
   ======================= */
   function initAddRowTables() {
     document.addEventListener("click", (e) => {
       const addBtn = e.target.closest(".table-footer .add-row");
       if (!addBtn) return;
+
+      // prevent anchors from navigating
+      if (addBtn.tagName === "A") e.preventDefault();
 
       const tableContainer = addBtn.closest(".table-container");
       const table = tableContainer ? $("table.training-table", tableContainer) : null;
@@ -302,7 +321,6 @@
       clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
       clearControlsIn(clone);
 
-      // scrub ids + saved ids
       $$("[id]", clone).forEach((el) => (el.id = ""));
       $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
 
@@ -314,10 +332,19 @@
 
       flash(clone);
     });
+
+    // keyboard support if add-row is not a button
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const addBtn = e.target.closest(".table-footer .add-row");
+      if (!addBtn) return;
+      e.preventDefault();
+      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
   }
 
   /* =======================
-     NOTES BULLETS (no scroll shift)
+     NOTES BULLETS (no scroll shift) (supports any tag)
   ======================= */
   function getNotesTargetIdFromButton(btn) {
     return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
@@ -373,8 +400,10 @@
 
   function initNotesButtons() {
     document.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+      const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
       if (!btn) return;
+
+      if (btn.tagName === "A") e.preventDefault();
 
       const targetId = getNotesTargetIdFromButton(btn);
       if (!targetId) return;
@@ -396,12 +425,19 @@
       focusNoScroll(ta);
       flash(notesBlock);
     });
+
+    // keyboard support for non-button notes controls
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
+      if (!btn) return;
+      e.preventDefault();
+      btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
   }
 
   /* =======================
      TABLE EXPAND (⤢) injected + working
-     - Uses mkTableModal if present
-     - Otherwise falls back to row modal by opening first row
   ======================= */
   function ensureTableExpandButtons(root = document) {
     $$(".table-container", root).forEach((container) => {
@@ -421,7 +457,6 @@
     });
   }
 
-  // TABLE MODAL elements (optional)
   const mkTableModal = document.getElementById("mkTableModal");
   const mkTableModalCards = document.getElementById("mkTableModalCards");
   let activeTableModal = null;
@@ -459,7 +494,7 @@
   }
 
   function getNotesCardForTable(tableContainer) {
-    const firstNotesBtn = tableContainer.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const firstNotesBtn = tableContainer.querySelector("[data-notes-target], [data-notes-btn][data-notes-target]");
     const targetId = firstNotesBtn?.getAttribute("data-notes-target") || "";
     return targetId ? document.getElementById(targetId) : null;
   }
@@ -529,16 +564,13 @@
       const tableContainer = expandBtn.closest(".table-container");
       if (!tableContainer) return;
 
-      // If table modal exists, use it
       if (mkTableModal && mkTableModalCards) {
         openTableModalFromContainer(tableContainer);
         return;
       }
 
-      // Fallback: open first row in row modal (if exists)
       const firstRow = tableContainer.querySelector("table.training-table tbody tr");
       if (firstRow) {
-        // simulate a click on the row (our row-modal listener will handle it)
         firstRow.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       } else {
         flash(tableContainer);
@@ -585,7 +617,7 @@
     const tbody = document.createElement("tbody");
     t.appendChild(tbody);
 
-    tbody.appendChild(row); // LIVE row
+    tbody.appendChild(row);
   }
 
   function moveRowIntoModal(row) {
@@ -607,7 +639,7 @@
   function moveNotesIntoModal(row) {
     if (!notesHost) return null;
 
-    const btn = row.querySelector("button[data-notes-target], button[data-notes-btn][data-notes-target]");
+    const btn = row.querySelector("[data-notes-target], [data-notes-btn][data-notes-target]");
     const targetId = btn?.getAttribute("data-notes-target");
     if (!targetId) return null;
 
@@ -658,7 +690,6 @@
       if (e.key === "Escape" && rowModal.getAttribute("aria-hidden") === "false") restoreRowModal();
     });
 
-    // open on row click (ignore controls)
     document.addEventListener("click", (e) => {
       const t = e.target;
 
@@ -666,7 +697,8 @@
         t.closest("button") ||
         t.closest("a") ||
         t.matches("input, select, textarea, option") ||
-        t.closest(".table-footer")
+        t.closest(".table-footer") ||
+        t.closest(".mk-table-expand-btn")
       ) return;
 
       const row = t.closest("table.training-table tbody tr");
@@ -691,27 +723,25 @@
   }
 
   /* =======================
-     ADDITIONAL POC + TRAINERS (+) CLONER
+     CARD CLONER (+) for Additional POC / Trainers / Trainer cards
      - Base card must have data-base="true"
      - Clones remove the + button
+     - IMPORTANT: This is NOT the table add-row
   ======================= */
   function initCloneAddButtons() {
     document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest("button.add-row");
+      const addBtn = e.target.closest(".add-row");
       if (!addBtn) return;
 
-      // Only clone cards (NOT table + buttons; those are handled above)
+      // Skip table add-row (handled elsewhere)
       if (addBtn.closest(".table-footer")) return;
 
-      const baseCard = addBtn.closest("[data-base='true']");
+      if (addBtn.tagName === "A") e.preventDefault();
+
+      const baseCard = addBtn.closest(
+        ".additional-poc-card[data-base='true'], .additional-trainer-card[data-base='true'], .trainer-card[data-base='true'], [data-base='true'].additional-poc-card, [data-base='true'].additional-trainer-card, [data-base='true'].trainer-card"
+      );
       if (!baseCard) return;
-
-      const isCloneable =
-        baseCard.classList.contains("additional-poc-card") ||
-        baseCard.classList.contains("additional-trainer-card") ||
-        baseCard.classList.contains("trainer-card");
-
-      if (!isCloneable) return;
 
       const container = baseCard.parentElement;
       if (!container) return;
@@ -721,8 +751,8 @@
       clone.setAttribute("data-clone", "true");
       clone.setAttribute(AUTO_CARD_ATTR, uid("clone"));
 
-      // remove + button(s) from the clone
-      clone.querySelectorAll("button.add-row").forEach((b) => b.remove());
+      // remove + buttons from clone
+      clone.querySelectorAll(".add-row").forEach((b) => b.remove());
 
       // clear fields
       clearControlsIn(clone);
@@ -737,6 +767,16 @@
       ensureStableFieldIds(container);
       captureState(document);
       flash(clone);
+    });
+
+    // keyboard support
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const addBtn = e.target.closest(".add-row");
+      if (!addBtn) return;
+      if (addBtn.closest(".table-footer")) return;
+      e.preventDefault();
+      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
   }
 
@@ -942,19 +982,17 @@
      INIT
   ======================= */
   function init() {
-    // nav
+    if (DEBUG) console.log("[myKaarma] script.js init OK");
+
     initNav();
 
-    // normalize notes & inject expand buttons
     normalizeNotesButtons(document);
     ensureTableExpandButtons(document);
 
-    // modals
     initRowModal();
     initTableModalClose();
     initExpandButtons();
 
-    // features
     initResetButtons();
     initAddRowTables();
     initNotesButtons();
@@ -962,20 +1000,16 @@
     initSupportTickets();
     initOnsiteDateHelper();
 
-    // IDs + restore
     ensureStableFieldIds(document);
     restoreState(document);
     applyGhostStyling(document);
 
-    // activate first page
     const active = $(".page-section.active")?.id || $(".page-section")?.id;
     if (active) activatePage(active);
 
-    // save once to lock IDs
     captureState(document);
   }
 
-  // Run after DOM is ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
