@@ -10,6 +10,7 @@
    ✅ Reset This Page
    ✅ Autosave/restore (localStorage)
    ✅ Hardened: works if controls are DIV/SPAN/A
+   🔧 FIXED: clone handler now HARD-STOPS on data-add-trainer
 ======================================================= */
 
 (() => {
@@ -77,10 +78,6 @@
       if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
     }
   }
-
-   document.addEventListener("click", e => {
-  if (e.target.closest(".add-row")) { ... }
-});
 
   /* =======================
      GHOST / PLACEHOLDER STYLING
@@ -232,6 +229,18 @@
 
     applyGhostStyling(root);
   }
+
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (!t || !t.matches("input, select, textarea")) return;
+    captureState(document);
+  });
+
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!t || !t.matches("input, select, textarea")) return;
+    captureState(document);
+  });
 
   /* =======================
      PAGE NAVIGATION
@@ -432,105 +441,73 @@
        div#additionalTrainersContainer
      - NO remove buttons
   ======================= */
-function initAdditionalTrainerAdd() {
-  function debug(msg, obj) {
-    // flip to true if you want console logs
-    const ON = true;
-    if (ON) console.log("[TRAINER+]", msg, obj || "");
-  }
+  function initAdditionalTrainerAdd() {
+    document.addEventListener("click", (e) => {
+      const addBtn = e.target.closest("[data-add-trainer]");
+      if (!addBtn) return;
 
-  function handleAdd() {
-    const container = document.getElementById("additionalTrainersContainer");
-    const baseInput = document.getElementById("additionalTrainerInput");
+      if (addBtn.tagName === "A") e.preventDefault();
 
-    if (!container || !baseInput) {
-      debug("Missing container/input", { container, baseInput });
-      return;
-    }
+      const container = $("#additionalTrainersContainer");
+      const baseInput = $("#additionalTrainerInput");
+      if (!container || !baseInput) return;
 
-    const name = (baseInput.value || "").trim();
-    if (!name) {
-      debug("No name entered");
-      try { baseInput.focus({ preventScroll: true }); } catch { baseInput.focus(); }
-      return;
-    }
+      const name = (baseInput.value || "").trim();
+      if (!name) {
+        flash(baseInput.closest(".checklist-row") || baseInput);
+        focusNoScroll(baseInput);
+        return;
+      }
 
-    const row = document.createElement("div");
-    row.className = "checklist-row indent-sub added-trainer-row";
-    row.innerHTML = `
-      <label></label>
-      <input type="text" value="${String(name).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}"
-             placeholder="Enter additional trainer name">
-    `;
-    container.appendChild(row);
+      // injected row (standalone input so right side is rounded in CSS)
+      const row = document.createElement("div");
+      row.className = "checklist-row indent-sub added-trainer-row";
 
-    baseInput.value = "";
-    baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      row.innerHTML = `
+        <label></label>
+        <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name" autocomplete="off">
+      `;
 
-    // If your helpers exist, keep them; if not, this won't crash
-    try { ensureStableFieldIds(row); } catch {}
-    try { captureState(document); } catch {}
+      container.appendChild(row);
 
-    debug("Added trainer row", name);
-  }
+      // clear base
+      baseInput.value = "";
+      baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      focusNoScroll(baseInput);
 
-  // CAPTURE PHASE = true (beats stopPropagation elsewhere)
-  document.addEventListener(
-    "click",
-    (e) => {
-      const btn =
-        e.target.closest("[data-add-trainer]") ||
-        e.target.closest("#trainers-deployment .input-plus .add-row");
+      // ids + save
+      ensureStableFieldIds(row);
+      captureState(document);
+      flash(row);
+    });
 
-      if (!btn) return;
-
-      // prevent submit / navigation
-      e.preventDefault();
-
-      // IMPORTANT: stop other add-row systems from running
-      e.stopPropagation();
-
-      handleAdd();
-    },
-    true
-  );
-
-  document.addEventListener(
-    "keydown",
-    (e) => {
+    // keyboard support if something non-button triggers
+    document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
-
-      const btn =
-        e.target.closest("[data-add-trainer]") ||
-        e.target.closest("#trainers-deployment .input-plus .add-row");
-
-      if (!btn) return;
-
+      const addBtn = e.target.closest("[data-add-trainer]");
+      if (!addBtn) return;
       e.preventDefault();
-      e.stopPropagation();
-
-      handleAdd();
-    },
-    true
-  );
-}
+      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+  }
 
   /* =======================
      CARD CLONER (+) — Additional POC cards
      - Only triggers when the button is inside a base card
      - Does NOT touch trainers add button (because that uses data-add-trainer)
      - Does NOT touch table add button (because that is inside .table-footer)
+     🔧 FIX: hard stop when addBtn has data-add-trainer
   ======================= */
   function initCloneAddButtons() {
     document.addEventListener("click", (e) => {
       const addBtn = e.target.closest(".add-row");
       if (!addBtn) return;
 
+      // 🔧 HARD STOP: never touch Trainer +
+      if (addBtn.hasAttribute("data-add-trainer")) return;
+
       // table add-row handled elsewhere
       if (addBtn.closest(".table-footer")) return;
-
-      // additional trainer handled elsewhere
-      if (addBtn.hasAttribute("data-add-trainer") || addBtn.closest("[data-add-trainer]")) return;
 
       const baseCard = addBtn.closest(".additional-poc-card[data-base='true'], .trainer-card[data-base='true']");
       if (!baseCard) return;
@@ -567,8 +544,11 @@ function initAdditionalTrainerAdd() {
       if (e.key !== "Enter" && e.key !== " ") return;
       const addBtn = e.target.closest(".add-row");
       if (!addBtn) return;
+
+      // 🔧 HARD STOP: never touch Trainer +
+      if (addBtn.hasAttribute("data-add-trainer")) return;
+
       if (addBtn.closest(".table-footer")) return;
-      if (addBtn.hasAttribute("data-add-trainer") || addBtn.closest("[data-add-trainer]")) return;
 
       const baseCard = addBtn.closest(".additional-poc-card[data-base='true'], .trainer-card[data-base='true']");
       if (!baseCard) return;
