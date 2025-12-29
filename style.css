@@ -1,11 +1,11 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL CSS (DROP-IN)
+   myKaarma Interactive Training Checklist — CLEANED FULL CSS (DROP-IN)
    ✅ Restores ALL Notes buttons (Q&A rows + table Notes buttons)
    ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
-   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (uses .mk-table-expand-btn)
+   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (.mk-table-expand-btn)
    ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
-   ✅ No duplicate/conflicting blocks
-   ======================================================= */
+   ✅ Deduped “hotfix packs” + removed conflicting overrides
+======================================================= */
 
 /* =======================
    CSS VARIABLES
@@ -432,8 +432,7 @@ main{
 }
 
 /* =======================
-   NOTES BUTTONS (NON-TABLE / QUESTIONS)
-   - This restores icon-only notes buttons beside questions
+   NOTES BUTTONS — QUESTIONS (icon-only)
 ======================= */
 .row-actions{
   display:inline-flex;
@@ -442,9 +441,9 @@ main{
   margin-left:auto;
 }
 
-/* Base icon-only button (for question rows) */
+/* icon-only notes for question rows */
 .notes-icon-btn,
-.checklist-row .notes-btn{
+.section-block .checklist-row .notes-btn{
   appearance:none;
   border:0;
   background:transparent !important;
@@ -467,36 +466,30 @@ main{
   transition:color .15s ease, transform .08s ease;
 }
 .notes-icon-btn:hover,
-.checklist-row .notes-btn:hover{
-  color:var(--notes-icon-hover);
-}
+.section-block .checklist-row .notes-btn:hover{ color:var(--notes-icon-hover); }
 .notes-icon-btn:active,
-.checklist-row .notes-btn:active{
-  transform:translateY(1px);
-}
+.section-block .checklist-row .notes-btn:active{ transform:translateY(1px); }
 .notes-icon-btn:focus-visible,
-.checklist-row .notes-btn:focus-visible{
+.section-block .checklist-row .notes-btn:focus-visible{
   outline:none;
   box-shadow:0 0 0 3px rgba(239,109,34,0.28);
   border-radius:8px;
 }
 
-/* If your question-row notes uses inline SVG */
+/* inline SVG support */
 .notes-icon-btn .notes-svg,
-.checklist-row .notes-btn .notes-svg{
+.section-block .checklist-row .notes-btn .notes-svg{
   width:18px;
   height:18px;
   display:block;
   fill:currentColor;
 }
 
-/* In case JS toggles */
+/* JS toggles */
 .notes-icon-btn.has-notes,
-.checklist-row .notes-btn.has-notes{
-  color:var(--orange);
-}
+.section-block .checklist-row .notes-btn.has-notes{ color:var(--orange); }
 
-/* Keep select + notes button aligned */
+/* Keep select + notes area aligned */
 .checklist-row .row-actions{
   display:inline-flex !important;
   align-items:center !important;
@@ -589,7 +582,7 @@ main{
 }
 
 /* =======================================================
-   DEALERSHIP INFO PAGE FIXES (dates)
+   DEALERSHIP INFO PAGE FIXES (dates + POC widths)
 ======================================================= */
 .training-dates-row,
 .onsite-training-dates-row{
@@ -625,9 +618,7 @@ main{
   box-shadow:none !important;
 }
 
-/* =======================
-   PRIMARY CONTACTS (uniform gap)
-======================= */
+/* Primary contacts */
 #dealership-info{
   --di-input-width:225px;
   --pc-gap:30px;
@@ -661,18 +652,27 @@ main{
 #dealership-info .primary-contacts-grid .checklist-row.indent-sub{
   padding-left:30px !important;
 }
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="text"],
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="email"],
-#dealership-info .primary-contacts-grid
-  .checklist-row input[type="tel"],
-#dealership-info .primary-contacts-grid
-  .checklist-row select{
+#dealership-info .primary-contacts-grid .checklist-row input[type="text"],
+#dealership-info .primary-contacts-grid .checklist-row input[type="email"],
+#dealership-info .primary-contacts-grid .checklist-row input[type="tel"],
+#dealership-info .primary-contacts-grid .checklist-row select{
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
   height:34px !important;
+}
+
+/* Additional POC textbox width must match others */
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row input[type="text"]{
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+}
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus input[type="text"]{
+  flex:0 0 calc(var(--di-input-width) - 34px) !important;
+  width:calc(var(--di-input-width) - 34px) !important;
+  max-width:calc(var(--di-input-width) - 34px) !important;
 }
 
 /* =======================
@@ -710,6 +710,48 @@ main{
 #trainers-deployment #additionalTrainersContainer [data-clone="true"] .add-row{
   display:none !important;
 }
+/* Re-enable + inside the container (base row) */
+#trainers-deployment #additionalTrainersContainer .add-row{
+  display:flex !important;
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  padding:0 !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* Additional Trainer injected rows look like normal inputs + keep right rounding */
+#trainers-deployment #additionalTrainersContainer .checklist-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+#trainers-deployment #additionalTrainersContainer input[type="text"]{
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+  height:34px;
+  padding:7px 10px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  border-radius:var(--radius-sm) !important;
+}
+#trainers-deployment #additionalTrainersContainer .remove-row{
+  width:34px;
+  height:34px;
+  border:1px solid #d1d5db;
+  background:#fff;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+}
+#trainers-deployment #additionalTrainersContainer .remove-row:hover{
+  border-color:var(--orange);
+}
 
 /* =======================
    TABLES
@@ -736,7 +778,7 @@ main{
   margin-bottom:32px;
   padding:0;
   max-width:100%;
-  position:relative; /* needed for bottom-right popup button */
+  position:relative; /* needed for floating corner expand button */
 }
 .scroll-wrapper{
   display:block;
@@ -760,6 +802,7 @@ main{
   border-right:1px solid var(--border);
   border-bottom:1px solid var(--border);
   padding:6px 6px;
+  vertical-align:middle;
 }
 .training-table thead th{
   background:var(--light-orange);
@@ -798,6 +841,7 @@ main{
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){ width:210px; min-width:210px; }
 
+/* table inputs */
 .training-table input[type="text"],
 .training-table select{
   width:100%;
@@ -846,10 +890,7 @@ main{
   transform:translateY(-1px);
 }
 
-/* ===== Tiny TABLE POPUP button (bottom-right) =====
-   Put the button in your HTML inside .table-container OR .table-footer
-   class="mk-table-expand-btn"  (JS wires click)
-*/
+/* ===== Tiny TABLE POPUP button (bottom-right) ===== */
 .mk-table-expand-btn{
   width:16px;
   height:16px;
@@ -872,9 +913,7 @@ main{
   background:#fff;
   transform:translateY(-1px);
 }
-/* If it lives in the footer, push it right */
-.table-footer .mk-table-expand-btn{ margin-left:auto; }
-/* If you render it as a floating corner button inside table-container */
+.table-footer .mk-table-expand-btn{ margin-left:auto; display:inline-flex !important; }
 .table-container > .mk-table-expand-btn{
   position:absolute;
   right:10px;
@@ -954,7 +993,7 @@ main{
 
 /* =========================================================
    ✅ TABLE NOTES BUTTON — P3/P4 Match (white button + bubble icon)
-   IMPORTANT: This only targets table notes buttons.
+   (Only targets table notes)
 ========================================================= */
 .training-table .notes-btn{
   width:34px !important;
@@ -970,10 +1009,6 @@ main{
 
   box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
   transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
-
-  -webkit-mask:none !important;
-  mask:none !important;
-  background-color:#fff !important;
 }
 .training-table .notes-btn:hover{
   border-color:rgba(239,109,34,.45) !important;
@@ -1368,9 +1403,7 @@ main{
   font-size:18px;
   line-height:1;
 }
-#mkNotesModal .mk-modal-close:hover{
-  background:rgba(255,255,255,0.25);
-}
+#mkNotesModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
 #mkNotesModal .mk-modal-textarea{
   flex:1 1 auto;
   width:100%;
@@ -1390,6 +1423,7 @@ main{
   inset:0;
   display:none;
   z-index:99998;
+  overflow:hidden !important;
 }
 #mkTableModal.open{ display:block; }
 #mkTableModal .mk-modal-backdrop{
@@ -1473,10 +1507,7 @@ main{
   resize:vertical;
 }
 
-/* =========================
-   Table Popup (Modal) — ensure clean card + no overflow
-========================= */
-#mkTableModal{ overflow:hidden !important; }
+/* Table Popup (Modal) — ensure clean card + no overflow */
 #mkTableModalShell{ width:100%; }
 #mkTableModalCards{ width:100%; }
 #mkTableModalCards .section-block{
@@ -1629,7 +1660,7 @@ main{
 /* =========================================================
    ROW POPUP MODAL — Training Tables + Opcodes
 ========================================================= */
-.mk-modal[aria-hidden="true"] { display:none; }
+.mk-modal[aria-hidden="true"]{ display:none; }
 .mk-modal[aria-hidden="false"]{
   position:fixed;
   inset:0;
@@ -1664,7 +1695,6 @@ main{
   cursor:pointer;
   z-index:2;
 }
-/* OUTER WHITE CARD that wraps the two cards */
 .mk-modal__outer-card{
   background:#fff;
   border-radius:18px;
@@ -1683,475 +1713,3 @@ main{
 .mk-modal__panel .training-table th,
 .mk-modal__panel .training-table td{ white-space:nowrap; }
 .mk-row-placeholder{ display:none; }
-
-/* =========================================================
-   HOTFIX OVERRIDES — do not remove
-   Fixes:
-   ✅ Question notes buttons visible again
-   ✅ Tables use correct Notes button style (P3/P4)
-   ✅ Expand ⤢ button visible in table footer
-   ✅ Additional POC textbox same width as others
-========================================================= */
-
-/* ---------- 1) QUESTION NOTES BUTTONS (icon-only) ---------- */
-/* Never style question buttons as .notes-btn (that class is for TABLE notes) */
-.section-block .checklist-row .notes-btn{
-  /* if any question buttons accidentally still use .notes-btn, make them look like icon-only */
-  width:20px !important;
-  height:20px !important;
-  border:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  padding:0 !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* Real question icon button */
-.notes-icon-btn{
-  appearance:none !important;
-  border:0 !important;
-  background:transparent !important;
-  padding:0 !important;
-  margin:0 !important;
-
-  width:20px !important;
-  height:20px !important;
-  min-width:20px !important;
-  min-height:20px !important;
-
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  cursor:pointer !important;
-  line-height:0 !important;
-  color:var(--notes-icon) !important;
-  transition:color .15s ease, transform .08s ease !important;
-}
-.notes-icon-btn:hover{ color:var(--notes-icon-hover) !important; }
-.notes-icon-btn:active{ transform:translateY(1px) !important; }
-.notes-icon-btn:focus-visible{
-  outline:none !important;
-  box-shadow:0 0 0 3px rgba(239,109,34,0.28) !important;
-  border-radius:8px !important;
-}
-.notes-icon-btn .notes-svg{
-  width:18px !important;
-  height:18px !important;
-  display:block !important;
-  fill:currentColor !important;
-}
-
-/* Ensure question-row action area doesn't collapse */
-.section-block .checklist-row .row-actions{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:6px !important;
-  margin-left:auto !important;
-}
-
-/* ---------- 2) TABLE NOTES BUTTONS (P3/P4 correct) ---------- */
-/* This is the ONLY place .notes-btn should be styled like a white button */
-.training-table .notes-btn{
-  width:34px !important;
-  height:34px !important;
-  border-radius:10px !important;
-  border:1px solid var(--border) !important;
-  background:#fff !important;
-
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  cursor:pointer !important;
-  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
-  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
-}
-.training-table .notes-btn:hover{
-  border-color:rgba(239,109,34,.45) !important;
-  background:rgba(239,109,34,.06) !important;
-}
-.training-table .notes-btn:active{ transform:translateY(1px) !important; }
-.training-table .notes-btn::before{
-  content:"";
-  width:18px;
-  height:18px;
-  display:block;
-  background:var(--notes-icon);
-  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-}
-.training-table .notes-btn:hover::before{
-  background:var(--notes-icon-hover);
-}
-
-/* ---------- 3) TABLE EXPAND BUTTON (⤢) must show in footer ---------- */
-.table-footer .mk-table-expand-btn{
-  display:inline-flex !important;
-  margin-left:auto !important;
-  width:16px !important;
-  height:16px !important;
-  padding:0 !important;
-  border-radius:6px !important;
-  border:1px solid #d1d5db !important;
-  background:#ffffffee !important;
-  color:#111827 !important;
-  cursor:pointer !important;
-  align-items:center !important;
-  justify-content:center !important;
-  font-size:10px !important;
-  line-height:1 !important;
-  box-shadow:0 1px 3px rgba(0,0,0,0.12) !important;
-}
-.table-footer .mk-table-expand-btn:hover{
-  border-color:var(--orange) !important;
-  background:#fff !important;
-  transform:translateY(-1px) !important;
-}
-
-/* ---------- 4) Additional POC textbox width must match others ---------- */
-#dealership-info{
-  --di-input-width:225px; /* your standard for those cards */
-}
-
-/* Force ALL POC card inputs to same width */
-#dealership-info .primary-contacts-grid .additional-poc-card
-  .checklist-row input[type="text"]{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-}
-
-/* Integrated-plus base row should be input width minus the button */
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--di-input-width) - 34px) !important;
-  width:calc(var(--di-input-width) - 34px) !important;
-  max-width:calc(var(--di-input-width) - 34px) !important;
-}
-
-/* =========================================================
-   FIX: "Additional Trainer" input + button sizing
-   - keeps the + button same size as other + buttons
-========================================================= */
-
-/* Use whatever wrapper you have around the input + button.
-   These are safe/general and won't break other pages. */
-.ticket-number-wrap,
-.add-input-wrap,
-.input-plus-wrap,
-.trainer-number-wrap,
-.trainer-name-wrap,
-.additional-trainer-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ticket-number-wrap input,
-.add-input-wrap input,
-.input-plus-wrap input,
-.trainer-number-wrap input,
-.trainer-name-wrap input,
-.additional-trainer-wrap input {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* Force ALL plus buttons to a fixed square (prevents "wide +" buttons) */
-.add-row,
-.add-ticket-btn,
-.add-trainer-btn,
-button.add-row,
-button.add-ticket-btn,
-button.add-trainer-btn {
-  flex: 0 0 34px;     /* <- size */
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  max-width: 34px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-/* =========================================================
-   HOTFIX PACK — rounded corners, input sizing, expand button
-   Paste at the BOTTOM of style.css
-========================================================= */
-
-/* -----------------------------
-   1) Universal input sizing (prevents "massive" date boxes)
--------------------------------- */
-.page-section input[type="text"],
-.page-section input[type="date"],
-.page-section select,
-.page-section textarea {
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.page-section input[type="text"],
-.page-section input[type="date"],
-.page-section select {
-  height: 40px;              /* match your normal input height */
-  padding: 10px 12px;
-  line-height: 1.2;
-  border-radius: 10px;       /* your standard rounded look */
-}
-
-/* Make date inputs behave like text inputs (some browsers are weird) */
-.page-section input[type="date"] {
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-/* -----------------------------
-   2) FIX: Right rounded corners missing on ADDED/CLONED lines
-   - Applies to table cells + cloned cards + any flex input rows
--------------------------------- */
-
-/* Ensure inputs have BOTH right corners by default */
-.page-section input[type="text"],
-.page-section input[type="date"] {
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* If a container is clipping the input, don't clip the corners */
-.page-section .checklist-row,
-.page-section .ticket-number-wrap,
-.page-section .input-wrap,
-.page-section .input-plus-wrap,
-.page-section .row-actions,
-.page-section .field-row {
-  overflow: visible !important;
-}
-
-/* -----------------------------
-   3) When an input sits NEXT TO a "+" button (grouped layout)
-   - Input should keep left corners
-   - Input should NOT have right corners (button owns the far-right radius)
-   - Button should have full right rounding
-   This prevents "square seam" + fixes missing corners on clones
--------------------------------- */
-
-/* Common patterns: input+button inside a flex wrapper */
-.ticket-number-wrap,
-.input-plus-wrap,
-.checklist-row.has-plus,
-.field-row.has-plus {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* If the + button is physically attached (no gap), use this attached style */
-.ticket-number-wrap.attached,
-.input-plus-wrap.attached {
-  gap: 0;
-}
-
-/* ATTACHED mode: input + button look like one control */
-.ticket-number-wrap.attached input[type="text"],
-.ticket-number-wrap.attached input[type="date"],
-.input-plus-wrap.attached input[type="text"],
-.input-plus-wrap.attached input[type="date"] {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
-/* The + button becomes the right side of the pill */
-.ticket-number-wrap.attached .add-ticket-btn,
-.input-plus-wrap.attached .add-row,
-.input-plus-wrap.attached button.add-row {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* NON-attached mode (gap exists): input keeps its own rounding */
-.ticket-number-wrap:not(.attached) input[type="text"],
-.input-plus-wrap:not(.attached) input[type="text"],
-.ticket-number-wrap:not(.attached) input[type="date"],
-.input-plus-wrap:not(.attached) input[type="date"] {
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* -----------------------------
-   4) Tables: ensure text inputs in cloned rows keep rounding
--------------------------------- */
-table.training-table input[type="text"],
-table.training-table input[type="date"],
-table.training-table select {
-  height: 36px;
-  padding: 8px 10px;
-  border-radius: 10px !important;
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* Notes icon buttons inside tables can shrink things if line-height is off */
-table.training-table td {
-  vertical-align: middle;
-}
-
-/* -----------------------------
-   5) "Additional Trainer" / cloned cards:
-   force consistent input rounding + prevent wrapper clipping
--------------------------------- */
-.additional-trainer-card,
-.additional-poc-card,
-.trainer-card {
-  overflow: visible !important;
-}
-
-.additional-trainer-card input[type="text"],
-.additional-poc-card input[type="text"],
-.trainer-card input[type="text"] {
-  border-radius: 10px !important;
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* If your "added trainer line" uses a grid/flex with columns, stop squaring */
-.additional-trainer-card .checklist-row,
-.additional-poc-card .checklist-row,
-.trainer-card .checklist-row {
-  overflow: visible !important;
-}
-
-/* -----------------------------
-   6) Expand button styling + clickability
--------------------------------- */
-.mk-table-expand-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,.15);
-  background: rgba(255,255,255,.9);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-}
-
-.mk-table-expand-btn:active {
-  transform: translateY(1px);
-}
-
-/* Put expand button next to the + button nicely */
-.table-footer {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* -----------------------------
-   7) Add-row button sizing (keeps it from being too wide)
--------------------------------- */
-button.add-row,
-.add-ticket-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-/* If any "+" button is stretching full width somewhere, stop it */
-button.add-row {
-  flex: 0 0 auto !important;
-  min-width: 34px !important;
-  max-width: 34px !important;
-}
-
-/* -----------------------------
-   8) Notes buttons sizing consistency
--------------------------------- */
-.notes-icon-btn,
-.notes-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.notes-icon-btn .notes-svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* =========================================================
-   FIX PACK (TARGETED) — trainers + dates + cloned rounding
-   Paste at VERY BOTTOM of style.css
-========================================================= */
-
-/* 1) Re-enable Additional Trainer + button (your CSS hides it) */
-#trainers-deployment #additionalTrainersContainer .add-row{
-  display:flex !important;
-}
-
-/* Keep the + button same size as other add buttons */
-#trainers-deployment #additionalTrainersContainer .add-row{
-  width:34px !important;
-  height:34px !important;
-  min-width:34px !important;
-  max-width:34px !important;
-  padding:0 !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* 2) Fix onsite/training date boxes to match other textboxes */
-.training-dates-row .date-stack input[type="date"],
-.onsite-training-dates-row .date-stack input[type="date"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  width:100% !important;
-  max-width:100% !important;
-}
-
-/* Also keep all date inputs in checklist rows consistent */
-.section-block .checklist-row input[type="date"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-/* 3) Fix: cloned/added textboxes missing RIGHT rounded edge
-   (only for rows that are NOT "integrated-plus") */
-.section-block .checklist-row:not(.integrated-plus) input[type="text"],
-.section-block .checklist-row:not(.integrated-plus) input[type="date"],
-.training-table input[type="text"],
-.training-table select{
-  border-top-right-radius:var(--radius-sm) !important;
-  border-bottom-right-radius:var(--radius-sm) !important;
-}
-
-/* Integrated-plus rows: input should be square on the right, button owns the rounding */
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"],
-.section-block .checklist-row.integrated-plus input[type="date"]{
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-}
-.section-block .checklist-row.integrated-plus > .add-row{
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-}
