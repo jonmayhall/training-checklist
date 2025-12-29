@@ -1,13 +1,12 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEAN FULL CSS (DROP-IN)
-   Fixes:
-   ✅ Dates no longer huge squares (kills global 42px overrides)
-   ✅ Trainers “Additional Trainer” + button matches all other + buttons
-   ✅ Added trainer rows appear BELOW and have fully-rounded inputs
-   ✅ NO remove button styling (since you don’t want remove buttons)
-   ✅ Notes buttons (Q&A + table) preserved
-   ✅ Table popup button preserved
-   ✅ Support tickets / DMS / modals preserved
+   myKaarma Interactive Training Checklist — CLEANED FULL CSS (DROP-IN)
+   ✅ Restores ALL Notes buttons (Q&A rows + table Notes buttons)
+   ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
+   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (.mk-table-expand-btn)
+   ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
+   ✅ Removes the global 42px override that caused giant date inputs
+   ✅ Fixes Trainers "+": orange, 34px, not wide, and added rows rounded
+   ✅ No remove buttons (hidden)
 ======================================================= */
 
 /* =======================
@@ -383,7 +382,7 @@ main{
   white-space:normal;
 }
 
-/* Default right-side inputs (AUTHORITATIVE: kills any global 42px overrides) */
+/* Default right-side inputs */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -398,16 +397,16 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  height:34px !important;
+  height:34px;
 }
 
-/* Date inputs match (no squares) */
+/* Date inputs match + prevent giant squares */
 .section-block .checklist-row input[type="date"]{
-  -webkit-appearance:none !important;
-  appearance:none !important;
-  box-shadow:none !important;
-  border-radius:var(--radius-sm) !important;
+  -webkit-appearance:none;
+  appearance:none;
+  box-shadow:none;
   height:34px !important;
+  border-radius:var(--radius-sm) !important;
   padding:7px 10px !important;
 }
 
@@ -540,7 +539,7 @@ main{
 }
 
 /* =======================
-   Integrated “+” rows (base row only)
+   Integrated “+” rows (base input + plus)
 ======================= */
 .section-block .checklist-row.integrated-plus{
   display:flex;
@@ -553,31 +552,28 @@ main{
   display:flex;
   align-items:center;
 }
-
-/* IMPORTANT: base integrated input must be LEFT rounded only */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 calc(var(--input-width) - 34px);
-  width:calc(var(--input-width) - 34px);
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
   margin-left:auto;
-  height:34px !important;
-  border-top-right-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-  border-top-left-radius:var(--radius-sm) !important;
-  border-bottom-left-radius:var(--radius-sm) !important;
+  height:34px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+  border-top-left-radius:var(--radius-sm);
+  border-bottom-left-radius:var(--radius-sm);
 }
 
-/* + button attached, orange, correct size */
+/* Base + button (default) */
 .section-block .checklist-row.integrated-plus > .add-row{
   flex:0 0 34px;
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
+  width:34px;
+  height:34px;
   margin-left:-1px;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border:1px solid var(--orange) !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  background:var(--orange);
+  color:#fff;
+  border:1px solid var(--orange);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
   font-size:18px;
   font-weight:900;
   cursor:pointer;
@@ -586,15 +582,16 @@ main{
   justify-content:center;
   box-shadow:0 1px 4px rgba(239,109,34,0.25);
   padding:0;
+  line-height:1;
 }
 .section-block .checklist-row.integrated-plus > .add-row:hover{
-  background:#ff8b42 !important;
+  background:#ff8b42;
   transform:translateY(-1px);
 }
 
-/* =======================
+/* =======================================================
    DEALERSHIP INFO PAGE FIXES (dates + POC widths)
-======================= */
+======================================================= */
 .training-dates-row,
 .onsite-training-dates-row{
   align-items:flex-start !important;
@@ -679,8 +676,6 @@ main{
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
 }
-
-/* base + row inside additional POC card */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus input[type="text"]{
   flex:0 0 calc(var(--di-input-width) - 34px) !important;
@@ -710,7 +705,7 @@ main{
 }
 
 /* =======================
-   TRAINERS PAGE — FIXED
+   TRAINERS PAGE tweaks
 ======================= */
 #trainers-deployment .grid-2{ grid-template-columns:1fr !important; }
 #trainers-deployment .grid-2 > .section-block{
@@ -719,15 +714,60 @@ main{
   min-width:0;
 }
 
-/* Container rows: keep same divider line behavior */
-#trainers-deployment #additionalTrainersContainer .checklist-row{
-  border-bottom:1px solid #e0e0e0;
-  padding-bottom:10px;
-  margin-bottom:14px;
+/* Divider line under base + added rows (force) */
+#trainers-deployment .section-block .checklist-row{
+  border-bottom:1px solid #e0e0e0 !important;
+  padding-bottom:10px !important;
+  margin-bottom:14px !important;
 }
 
-/* Added trainer rows are simple standalone inputs with BOTH corners rounded */
-#trainers-deployment #additionalTrainersContainer .added-trainer-row input[type="text"]{
+/* =========================
+   TRAINERS: INPUT + PLUS (CORRECT)
+   - This fixes your screenshot:
+     input gets left rounding only,
+     + is orange, 34px, attached
+========================= */
+#trainers-deployment .input-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  min-width:0 !important;
+}
+#trainers-deployment .input-plus input{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  height:34px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+#trainers-deployment .input-plus .add-row{
+  width:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:1 !important;
+}
+#trainers-deployment .input-plus .add-row:hover{
+  background:#ff8b42 !important;
+}
+
+/* Added trainer rows MUST be standalone input with full rounding */
+#trainers-deployment #additionalTrainersContainer .added-trainer-row input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row.added-trainer-row input[type="text"]{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   margin-left:auto !important;
@@ -735,7 +775,7 @@ main{
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important;
+  border-radius:var(--radius-sm) !important; /* RIGHT side rounded */
 }
 
 /* =======================
@@ -1697,3 +1737,14 @@ main{
 .mk-modal__panel .training-table th,
 .mk-modal__panel .training-table td{ white-space:nowrap; }
 .mk-row-placeholder{ display:none; }
+
+/* =========================================================
+   HARD RULE: no remove buttons anywhere
+========================================================= */
+.remove-btn,
+.remove-row,
+[data-remove-trainer],
+button.remove-btn,
+button.remove-row{
+  display:none !important;
+}
