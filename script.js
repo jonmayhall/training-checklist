@@ -448,7 +448,7 @@
 ======================= */
 function initAdditionalTrainerAdd() {
   const handler = (e) => {
-    const addBtn = e.target.closest("[data-add-trainer]");
+   const addBtn = e.target.closest("[data-add-trainer]");
     if (!addBtn) return;
 
     // Stop other handlers from eating this click
