@@ -1837,3 +1837,47 @@ select.is-placeholder{ color:#9ca3af !important; }
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
   border-radius:var(--radius-sm) !important; /* BOTH sides rounded */
 }
+
+/* =======================================================
+   LAYOUT BREATHING ROOM (paste at VERY bottom)
+   - More grey background around pages
+   - Narrower main page cards + inner cards
+   - Do NOT change individual POC mini-cards
+======================================================= */
+
+/* More grey border around the whole app */
+main{
+  padding-left:44px !important;
+  padding-right:44px !important;
+}
+
+/* Main white “page” card: slightly narrower + a touch more outer margin */
+.page-section{
+  max-width:1240px !important;      /* was 1320 */
+  padding-left:26px !important;      /* slightly tighter inside */
+  padding-right:26px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* Inner cards inside page: slightly narrower feel */
+.section-block{
+  padding-left:18px !important;      /* was 22 */
+  padding-right:18px !important;
+}
+
+/* Keep the orange header spanning edge-to-edge of the inner card */
+.section-block h2{
+  margin-left:-18px !important;
+  margin-right:-18px !important;
+}
+
+/* ✅ EXCEPTION: leave the individual POC mini-cards alone */
+#dealership-info .primary-contacts-grid .mini-card{
+  padding:14px 14px 6px !important;  /* keep your current */
+}
+#dealership-info .primary-contacts-grid .mini-card h2{
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+
