@@ -1827,3 +1827,50 @@ main{
   width:calc(var(--di-input-width) - 34px) !important;
   max-width:calc(var(--di-input-width) - 34px) !important;
 }
+
+/* =========================================================
+   FIX: "Additional Trainer" input + button sizing
+   - keeps the + button same size as other + buttons
+========================================================= */
+
+/* Use whatever wrapper you have around the input + button.
+   These are safe/general and won't break other pages. */
+.ticket-number-wrap,
+.add-input-wrap,
+.input-plus-wrap,
+.trainer-number-wrap,
+.trainer-name-wrap,
+.additional-trainer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-number-wrap input,
+.add-input-wrap input,
+.input-plus-wrap input,
+.trainer-number-wrap input,
+.trainer-name-wrap input,
+.additional-trainer-wrap input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Force ALL plus buttons to a fixed square (prevents "wide +" buttons) */
+.add-row,
+.add-ticket-btn,
+.add-trainer-btn,
+button.add-row,
+button.add-ticket-btn,
+button.add-trainer-btn {
+  flex: 0 0 34px;     /* <- size */
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
