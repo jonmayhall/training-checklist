@@ -1851,3 +1851,32 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:var(--placeholde
 #dms-integration select.is-placeholder{
   color:var(--placeholder-grey) !important;
 }
+
+/* =========================================================
+   HARD FIX — TRAINING DATE INPUTS
+   Force SAME size as all other right-side inputs
+========================================================= */
+
+/* Lock the date-stack to the same width used everywhere else */
+.training-dates-row .date-stack,
+.onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+}
+
+/* Lock the actual date inputs */
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+  border-radius:var(--radius-sm) !important;
+  box-sizing:border-box !important;
+
+  /* kill browser native sizing */
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
