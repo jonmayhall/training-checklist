@@ -108,53 +108,88 @@
               </select>
             </div>
 
-          <!-- Additional Trainer (input + + button) -->
-<div class="checklist-row integrated-plus indent-sub" data-base="true">
-  <label>Additional Trainer</label>
+  <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
+    <div class="section-block">
+      <h2>Lead &amp; Additional Trainers</h2>
 
-  <div class="input-plus">
-    <input
-      id="additionalTrainerInput"
-      type="text"
-      placeholder="Enter additional trainer name"
-    />
-    <button
-      type="button"
-      class="add-row"
-      data-add-trainer
-      aria-label="Add additional trainer"
-      title="Add another trainer"
-    >+</button>
-  </div>
-</div>
+      <!-- Lead Trainer -->
+      <div class="checklist-row">
+        <label class="sr-label">Lead Trainer</label>
+        <select>
+          <option value="" data-ghost="true">Select lead trainer</option>
 
-<!-- Added trainers inject here -->
-<div id="additionalTrainersContainer"></div>
+          <option disabled>──────────</option>
+          <option>Christopher Eskew</option>
+          <option>Brian Button</option>
+          <option>Dana Barry</option>
 
-          <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
-          <div class="section-block">
-            <h2>Deployment &amp; Customer Engagement Manager</h2>
+          <option disabled>──────────</option>
+          <option>Adam Jeffords</option>
+          <option>Alec Parker</option>
+          <option>Eliud Garcia</option>
+          <option>Joel Zavaleta</option>
+          <option>Kyle Leavitt</option>
+          <option>Lauren Ramos</option>
+          <option>Miles Krasic</option>
 
-            <div class="checklist-row">
-              <label>Deployment Manager</label>
-              <input id="deploymentManagerInput" type="text" placeholder="Enter Deployment Manager assigned" />
-            </div>
+          <option disabled>──────────</option>
+          <option>Anthony Carbone</option>
+          <option>Clyde Chapman</option>
+          <option>Dennitza Fernandez</option>
+          <option>Jackson Geraghty</option>
+          <option>Kevin Mullinax</option>
+          <option>Sharon Rusta</option>
+          <option>Terry Hart</option>
+        </select>
+      </div>
 
-            <div class="checklist-row">
-              <label>ServiceCart ASC</label>
-              <input id="serviceCartAscInput" type="text" placeholder="Enter ASC assigned" />
-            </div>
+      <!-- Additional Trainer (+) -->
+      <div class="checklist-row integrated-plus indent-sub" data-base="true">
+        <label>Additional Trainer</label>
 
-            <div class="checklist-row">
-              <label>Scheduler ASC</label>
-              <input id="schedulerAscInput" type="text" placeholder="Enter ASC assigned" />
-            </div>
+        <div class="input-plus">
+          <input
+            id="additionalTrainerInput"
+            type="text"
+            placeholder="Enter additional trainer name"
+          />
+          <button
+            type="button"
+            class="add-row"
+            data-add-trainer
+            title="Add another trainer"
+          >+</button>
+        </div>
+      </div>
 
-            <div class="checklist-row">
-              <label>CEM</label>
-              <input id="cemInput" type="text" placeholder="Enter CEM assigned" />
-            </div>
-          </div>
+      <div id="additionalTrainersContainer"></div>
+    </div>
+    <!-- ✅ END Lead & Additional Trainers card -->
+
+    <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
+    <div class="section-block">
+      <h2>Deployment &amp; Customer Engagement Manager</h2>
+
+      <div class="checklist-row">
+        <label>Deployment Manager</label>
+        <input type="text" placeholder="Enter Deployment Manager assigned">
+      </div>
+
+      <div class="checklist-row">
+        <label>ServiceCart ASC</label>
+        <input type="text" placeholder="Enter ASC assigned">
+      </div>
+
+      <div class="checklist-row">
+        <label>Scheduler ASC</label>
+        <input type="text" placeholder="Enter ASC assigned">
+      </div>
+
+      <div class="checklist-row">
+        <label>CEM</label>
+        <input type="text" placeholder="Enter CEM assigned">
+      </div>
+    </div>
 
         </div>
       </section>
