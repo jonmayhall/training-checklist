@@ -58,18 +58,16 @@
     ========================= -->
     <main>
 
-      <!-- =========================================================
-           PAGE 1: TRAINERS & MK TEAM
-      ========================================================== -->
+<!-- =========================================================
+           PAGE 1 — TRAINERS & mK TEAM
+      ========================================================= -->
       <section id="trainers-deployment" class="page-section active">
         <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">Reset This Page</button>
 
         <h1>Trainers &amp; mK Team</h1>
-        <p class="page-subtitle">Select the assigned lead trainer, add additional trainers, and capture the deployment/CEM assignments.</p>
-
-        <!-- NOTE:
-             Cards are STACKED (1 column) by design.
-             This also matches your request: Deployment & CEM card is BELOW Lead/Additional Trainers (not inside it). -->
+        <p class="page-subtitle">
+          Select the assigned lead trainer, add additional trainers, and capture the deployment/CEM assignments.
+        </p>
 
         <div class="grid-2">
 
@@ -108,92 +106,59 @@
               </select>
             </div>
 
-  <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
-    <div class="section-block">
-      <h2>Lead &amp; Additional Trainers</h2>
+            <!-- Additional Trainer (+) -->
+            <div class="checklist-row integrated-plus indent-sub" data-base="true">
+              <label>Additional Trainer</label>
 
-      <!-- Lead Trainer -->
-      <div class="checklist-row">
-        <label class="sr-label">Lead Trainer</label>
-        <select>
-          <option value="" data-ghost="true">Select lead trainer</option>
+              <div class="input-plus">
+                <input
+                  id="additionalTrainerInput"
+                  type="text"
+                  placeholder="Enter additional trainer name"
+                  autocomplete="off"
+                />
+                <!-- IMPORTANT: class MUST be add-row for your CSS -->
+                <button
+                  type="button"
+                  class="add-row"
+                  data-add-trainer
+                  title="Add another trainer"
+                >+</button>
+              </div>
+            </div>
 
-          <option disabled>──────────</option>
-          <option>Christopher Eskew</option>
-          <option>Brian Button</option>
-          <option>Dana Barry</option>
+            <!-- Added trainers render here (one input per row) -->
+            <div id="additionalTrainersContainer"></div>
+          </div>
 
-          <option disabled>──────────</option>
-          <option>Adam Jeffords</option>
-          <option>Alec Parker</option>
-          <option>Eliud Garcia</option>
-          <option>Joel Zavaleta</option>
-          <option>Kyle Leavitt</option>
-          <option>Lauren Ramos</option>
-          <option>Miles Krasic</option>
+          <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
+          <div class="section-block">
+            <h2>Deployment &amp; Customer Engagement Manager</h2>
 
-          <option disabled>──────────</option>
-          <option>Anthony Carbone</option>
-          <option>Clyde Chapman</option>
-          <option>Dennitza Fernandez</option>
-          <option>Jackson Geraghty</option>
-          <option>Kevin Mullinax</option>
-          <option>Sharon Rusta</option>
-          <option>Terry Hart</option>
-        </select>
-      </div>
+            <div class="checklist-row">
+              <label>Deployment Manager</label>
+              <input id="deploymentManager" type="text" placeholder="Enter Deployment Manager assigned" autocomplete="off" />
+            </div>
 
-      <!-- Additional Trainer (+) -->
-      <div class="checklist-row integrated-plus indent-sub" data-base="true">
-        <label>Additional Trainer</label>
+            <div class="checklist-row">
+              <label>ServiceCart ASC</label>
+              <input id="serviceCartASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
+            </div>
 
-        <div class="input-plus">
-          <input
-            id="additionalTrainerInput"
-            type="text"
-            placeholder="Enter additional trainer name"
-          />
-          <button
-            type="button"
-            class="add-row"
-            data-add-trainer
-            title="Add another trainer"
-          >+</button>
-        </div>
-      </div>
+            <div class="checklist-row">
+              <label>Scheduler ASC</label>
+              <input id="schedulerASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
+            </div>
 
-      <div id="additionalTrainersContainer"></div>
-    </div>
-    <!-- ✅ END Lead & Additional Trainers card -->
-
-    <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
-    <div class="section-block">
-      <h2>Deployment &amp; Customer Engagement Manager</h2>
-
-      <div class="checklist-row">
-        <label>Deployment Manager</label>
-        <input type="text" placeholder="Enter Deployment Manager assigned">
-      </div>
-
-      <div class="checklist-row">
-        <label>ServiceCart ASC</label>
-        <input type="text" placeholder="Enter ASC assigned">
-      </div>
-
-      <div class="checklist-row">
-        <label>Scheduler ASC</label>
-        <input type="text" placeholder="Enter ASC assigned">
-      </div>
-
-      <div class="checklist-row">
-        <label>CEM</label>
-        <input type="text" placeholder="Enter CEM assigned">
-      </div>
-    </div>
+            <div class="checklist-row">
+              <label>CEM</label>
+              <input id="cemAssigned" type="text" placeholder="Enter CEM assigned" autocomplete="off" />
+            </div>
+          </div>
 
         </div>
       </section>
-
+      
 <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
