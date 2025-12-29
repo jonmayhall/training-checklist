@@ -754,18 +754,6 @@ main{
 }
 
 /* =========================================
-   FORM CONTROLS (existing)
-========================================= */
-
-.checklist-row input,
-.checklist-row select,
-textarea {
-  height: 42px;
-  border-radius: 12px;
-  /* whatever you already have */
-}
-
-/* =========================================
    INPUT + PLUS BUTTON (ADD TRAINER FIX)
    ⬇⬇⬇ PASTE BELOW THIS LINE ⬇⬇⬇
 ========================================= */
@@ -1757,3 +1745,51 @@ textarea {
 .mk-modal__panel .training-table th,
 .mk-modal__panel .training-table td{ white-space:nowrap; }
 .mk-row-placeholder{ display:none; }
+
+/* ===== FIX: stop global height/radius overriding row inputs ===== */
+/* (Recommended) Remove your global 42px block entirely.
+   If you can't, at least neutralize it for checklist rows: */
+.section-block .checklist-row input,
+.section-block .checklist-row select,
+.section-block textarea{
+  height:34px;                 /* matches your existing system */
+  border-radius:var(--radius-sm);
+}
+
+/* ===== FIX: Input + button pairing (base row + injected rows) ===== */
+.input-plus{
+  display:flex;
+  align-items:stretch;
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  margin-left:auto;
+  min-width:0;
+}
+
+.input-plus input{
+  flex:1 1 auto;
+  min-width:0;
+  height:34px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.input-plus .add-row,
+.input-plus .remove-btn,
+.input-plus .remove-row{
+  width:34px;
+  min-width:34px;
+  height:34px;
+  margin-left:-1px;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+
+/* ensure injected trainer rows don't get fully-rounded input */
+#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
