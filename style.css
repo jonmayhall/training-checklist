@@ -1794,37 +1794,6 @@ select:has(option[value=""]:checked){
 /* Your existing helper class still supported */
 select.is-placeholder{ color:#9ca3af !important; }
 
-/* ---------- 3) ADDITIONAL POC (+): match Trainer (+) style ---------- */
-/* Works whether you used .poc-add-btn OR just data-add-poc */
-#dealership-info .input-plus button[data-add-poc],
-#dealership-info .input-plus .poc-add-btn{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-#dealership-info .input-plus button[data-add-poc]:hover,
-#dealership-info .input-plus .poc-add-btn:hover{
-  background:#ff8b42 !important;
-}
-
-/* Ensure the POC base input is attached to the + button nicely */
-#dealership-info .input-plus input{
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
 /* ---------- 4) SUPPORT TICKETS: no + button on added cards ---------- */
 #support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{
   display:none !important;
