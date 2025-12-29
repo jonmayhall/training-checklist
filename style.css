@@ -1,10 +1,13 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEANED FULL CSS (DROP-IN)
-   ✅ Restores ALL Notes buttons (Q&A rows + table Notes buttons)
-   ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
-   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (.mk-table-expand-btn)
-   ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
-   ✅ Deduped “hotfix packs” + removed conflicting overrides
+   myKaarma Interactive Training Checklist — CLEAN FULL CSS (DROP-IN)
+   Fixes:
+   ✅ Dates no longer huge squares (kills global 42px overrides)
+   ✅ Trainers “Additional Trainer” + button matches all other + buttons
+   ✅ Added trainer rows appear BELOW and have fully-rounded inputs
+   ✅ NO remove button styling (since you don’t want remove buttons)
+   ✅ Notes buttons (Q&A + table) preserved
+   ✅ Table popup button preserved
+   ✅ Support tickets / DMS / modals preserved
 ======================================================= */
 
 /* =======================
@@ -380,7 +383,7 @@ main{
   white-space:normal;
 }
 
-/* Default right-side inputs */
+/* Default right-side inputs (AUTHORITATIVE: kills any global 42px overrides) */
 .section-block .checklist-row input[type="text"],
 .section-block .checklist-row input[type="number"],
 .section-block .checklist-row input[type="email"],
@@ -395,14 +398,17 @@ main{
   border:1px solid var(--border);
   background:#f7f7f7;
   font-size:13px;
-  height:34px;
+  height:34px !important;
 }
 
-/* Date inputs match */
+/* Date inputs match (no squares) */
 .section-block .checklist-row input[type="date"]{
-  -webkit-appearance:none;
-  appearance:none;
-  box-shadow:none;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  box-shadow:none !important;
+  border-radius:var(--radius-sm) !important;
+  height:34px !important;
+  padding:7px 10px !important;
 }
 
 /* Textareas */
@@ -534,7 +540,7 @@ main{
 }
 
 /* =======================
-   Integrated “+” rows
+   Integrated “+” rows (base row only)
 ======================= */
 .section-block .checklist-row.integrated-plus{
   display:flex;
@@ -547,26 +553,31 @@ main{
   display:flex;
   align-items:center;
 }
+
+/* IMPORTANT: base integrated input must be LEFT rounded only */
 .section-block .checklist-row.integrated-plus input[type="text"],
 .section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
+  flex:0 0 calc(var(--input-width) - 34px);
+  width:calc(var(--input-width) - 34px);
   margin-left:auto;
-  height:34px;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
+  height:34px !important;
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+  border-top-left-radius:var(--radius-sm) !important;
+  border-bottom-left-radius:var(--radius-sm) !important;
 }
+
+/* + button attached, orange, correct size */
 .section-block .checklist-row.integrated-plus > .add-row{
   flex:0 0 34px;
-  width:34px;
-  height:34px;
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
   margin-left:-1px;
-  background:var(--orange);
-  color:#fff;
-  border:1px solid var(--orange);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid var(--orange) !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
   font-size:18px;
   font-weight:900;
   cursor:pointer;
@@ -577,13 +588,13 @@ main{
   padding:0;
 }
 .section-block .checklist-row.integrated-plus > .add-row:hover{
-  background:#ff8b42;
+  background:#ff8b42 !important;
   transform:translateY(-1px);
 }
 
-/* =======================================================
+/* =======================
    DEALERSHIP INFO PAGE FIXES (dates + POC widths)
-======================================================= */
+======================= */
 .training-dates-row,
 .onsite-training-dates-row{
   align-items:flex-start !important;
@@ -668,6 +679,8 @@ main{
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
 }
+
+/* base + row inside additional POC card */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
   .checklist-row.integrated-plus input[type="text"]{
   flex:0 0 calc(var(--di-input-width) - 34px) !important;
@@ -697,7 +710,7 @@ main{
 }
 
 /* =======================
-   TRAINERS PAGE tweaks
+   TRAINERS PAGE — FIXED
 ======================= */
 #trainers-deployment .grid-2{ grid-template-columns:1fr !important; }
 #trainers-deployment .grid-2 > .section-block{
@@ -705,83 +718,24 @@ main{
   max-width:100%;
   min-width:0;
 }
-/* Hide + only on cloned trainer cards, keep it on the base card */
-#trainers-deployment #additionalTrainersContainer [data-base="false"] .add-row,
-#trainers-deployment #additionalTrainersContainer [data-clone="true"] .add-row{
-  display:none !important;
-}
-/* Re-enable + inside the container (base row) */
-#trainers-deployment #additionalTrainersContainer .add-row{
-  display:flex !important;
-  width:34px !important;
-  height:34px !important;
-  min-width:34px !important;
-  max-width:34px !important;
-  padding:0 !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
 
-/* Additional Trainer injected rows look like normal inputs + keep right rounding */
+/* Container rows: keep same divider line behavior */
 #trainers-deployment #additionalTrainersContainer .checklist-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  border-bottom:1px solid #e0e0e0;
+  padding-bottom:10px;
+  margin-bottom:14px;
 }
-#trainers-deployment #additionalTrainersContainer input[type="text"]{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  height:34px;
-  padding:7px 10px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
+
+/* Added trainer rows are simple standalone inputs with BOTH corners rounded */
+#trainers-deployment #additionalTrainersContainer .added-trainer-row input[type="text"]{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  margin-left:auto !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
   border-radius:var(--radius-sm) !important;
-}
-#trainers-deployment #additionalTrainersContainer .remove-row{
-  width:34px;
-  height:34px;
-  border:1px solid #d1d5db;
-  background:#fff;
-  border-radius:var(--radius-sm);
-  cursor:pointer;
-  font-size:18px;
-  line-height:1;
-}
-#trainers-deployment #additionalTrainersContainer .remove-row:hover{
-  border-color:var(--orange);
-}
-
-/* =========================================
-   INPUT + PLUS BUTTON (ADD TRAINER FIX)
-   ⬇⬇⬇ PASTE BELOW THIS LINE ⬇⬇⬇
-========================================= */
-
-.input-plus{
-  display:flex;
-  align-items:stretch;
-  width:100%;
-  min-width:0;
-}
-
-.input-plus input{
-  flex:1;
-  min-width:0;
-  height:42px;              /* MUST match your normal inputs */
-  border-radius:12px 0 0 12px;
-}
-
-.input-plus .plus-btn{
-  width:44px;
-  height:42px;
-  border-radius:0 12px 12px 0;
-}
-
-.input-plus .remove-btn{
-  width:44px;
-  height:42px;
-  border-radius:0 12px 12px 0;
 }
 
 /* =======================
@@ -809,7 +763,7 @@ main{
   margin-bottom:32px;
   padding:0;
   max-width:100%;
-  position:relative; /* needed for floating corner expand button */
+  position:relative;
 }
 .scroll-wrapper{
   display:block;
@@ -1024,7 +978,6 @@ main{
 
 /* =========================================================
    ✅ TABLE NOTES BUTTON — P3/P4 Match (white button + bubble icon)
-   (Only targets table notes)
 ========================================================= */
 .training-table .notes-btn{
   width:34px !important;
@@ -1688,7 +1641,6 @@ main{
   .training-table{ min-width:760px; }
 }
 
-
 /* =========================================================
    ROW POPUP MODAL — Training Tables + Opcodes
 ========================================================= */
@@ -1745,51 +1697,3 @@ main{
 .mk-modal__panel .training-table th,
 .mk-modal__panel .training-table td{ white-space:nowrap; }
 .mk-row-placeholder{ display:none; }
-
-/* ===== FIX: stop global height/radius overriding row inputs ===== */
-/* (Recommended) Remove your global 42px block entirely.
-   If you can't, at least neutralize it for checklist rows: */
-.section-block .checklist-row input,
-.section-block .checklist-row select,
-.section-block textarea{
-  height:34px;                 /* matches your existing system */
-  border-radius:var(--radius-sm);
-}
-
-/* ===== FIX: Input + button pairing (base row + injected rows) ===== */
-.input-plus{
-  display:flex;
-  align-items:stretch;
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  min-width:0;
-}
-
-.input-plus input{
-  flex:1 1 auto;
-  min-width:0;
-  height:34px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
-}
-
-.input-plus .add-row,
-.input-plus .remove-btn,
-.input-plus .remove-row{
-  width:34px;
-  min-width:34px;
-  height:34px;
-  margin-left:-1px;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-}
-
-/* ensure injected trainer rows don't get fully-rounded input */
-#trainers-deployment #additionalTrainersContainer .checklist-row.integrated-plus input[type="text"]{
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
