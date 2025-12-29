@@ -1,16 +1,15 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (CLEAN + NON-COLLIDING ADD BUTTONS)
-   ✅ Table add-row (+) works
-   ✅ Additional Trainer (+) works (NO remove buttons)
-   ✅ Additional POC clone (+) works
-   ✅ Notes buttons (table + question)
-   ✅ Table expand ⤢ (mkTableModal if present)
-   ✅ Row popup modal (mkRowModal) — keeps ONLY last thead row
-   ✅ Reset This Page
-   ✅ Autosave/restore (localStorage)
-   ✅ Hardened: works if controls are DIV/SPAN/A
-   🔧 FIXED: clone handler now HARD-STOPS on data-add-trainer
+   (Single-file, hardened, event-delegated, stateful)
+   - Sidebar navigation (data-target)
+   - LocalStorage save/restore (inputs/selects/textareas + dynamic rows)
+   - “Reset This Page” buttons
+   - Add Row (+) for tables
+   - Notes icon buttons (scroll + flash)
+   - Support Tickets: add cards + move by status
+   - Additional Trainer (+) — FIXED + persisted
+   - Dealership name display
+   - PDF button (safe: only runs if libs exist)
 ======================================================= */
 
 (() => {
@@ -19,927 +18,782 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v5";
-  const AUTO_ID_ATTR = "data-mk-id";
-  const AUTO_ROW_ATTR = "data-mk-row";
-  const AUTO_CARD_ATTR = "data-mk-card";
-
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
   const DEBUG = false;
 
-  /* =======================
-     HELPERS
-  ======================= */
+  const log = (...a) => DEBUG && console.log("[mk]", ...a);
+
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  const debounce = (fn, wait = 250) => {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), wait);
+    };
+  };
+
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}-${++n}`;
+    return (prefix = "mk") => `${prefix}-${Date.now()}-${++n}`;
   })();
 
-  const isEl = (x) => x && x.nodeType === 1;
-  const isCheckbox = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "checkbox";
-  const isRadio = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "radio";
-  const isDate = (el) => isEl(el) && el.tagName === "INPUT" && el.type === "date";
+  const isTextLike = (el) =>
+    el &&
+    (el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.tagName === "SELECT");
 
-  function flash(el, cls = "mk-flash", ms = 650) {
-    if (!isEl(el)) return;
-    el.classList.add(cls);
-    window.setTimeout(() => el.classList.remove(cls), ms);
-  }
-
-  function focusNoScroll(el) {
-    if (!el) return;
-    try {
-      el.focus({ preventScroll: true });
-    } catch {
-      el.focus();
-    }
-  }
-
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function asButton(el) {
-    if (!isEl(el)) return;
-    if (el.tagName === "BUTTON") {
-      el.type = el.getAttribute("type") || "button";
-      return;
-    }
-    if (["A", "DIV", "SPAN"].includes(el.tagName)) {
-      if (!el.hasAttribute("role")) el.setAttribute("role", "button");
-      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
-    }
-  }
-
-  /* =======================
-     GHOST / PLACEHOLDER STYLING
-  ======================= */
-  function applyGhostStyling(root = document) {
-    $$("select", root).forEach((sel) => {
-      const update = () => sel.classList.toggle("is-placeholder", !sel.value);
-      sel.addEventListener("change", update);
-      update();
-    });
-
-    $$("input[type='date']", root).forEach((inp) => {
-      const update = () => inp.classList.toggle("is-placeholder", !inp.value);
-      inp.addEventListener("change", update);
-      update();
-    });
-  }
-
-  /* =========================================================
-     NOTES BUTTON NORMALIZATION
-  ========================================================= */
-  const NOTES_SVG = `
-    <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3a1 1 0 0 0 1.64.77L13.5 18H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 13h-6.85a1 1 0 0 0-.64.23L9 19.1V17a1 1 0 0 0-1-1H4V5h16v11Z"/>
-    </svg>
-  `;
-
-  function isTableNotesButton(btn) {
-    return !!btn.closest("table.training-table");
-  }
-
-  function normalizeNotesButtons(root = document) {
-    $$("[data-notes-target], [data-notes-btn][data-notes-target]", root).forEach((btn) => {
-      asButton(btn);
-      if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
-
-      const inTable = isTableNotesButton(btn);
-      btn.classList.remove("notes-btn", "notes-icon-btn");
-
-      if (inTable) {
-        btn.classList.add("notes-btn");
-        btn.innerHTML = "";
-      } else {
-        btn.classList.add("notes-icon-btn");
-        btn.innerHTML = NOTES_SVG;
-      }
-    });
-  }
-
-  /* =======================
-     PERSISTENT ID SYSTEM
-  ======================= */
-  function ensureStableFieldIds(root = document) {
-    $$("tr", root).forEach((tr) => {
-      if (!tr.getAttribute(AUTO_ROW_ATTR)) tr.setAttribute(AUTO_ROW_ATTR, uid("row"));
-    });
-
-    $$(".ticket-group, .card, .section-block, .dms-card, .additional-poc-card, .trainer-card", root).forEach(
-      (card) => {
-        if (!card.getAttribute(AUTO_CARD_ATTR)) card.setAttribute(AUTO_CARD_ATTR, uid("card"));
-      }
-    );
-
-    $$("input, select, textarea", root).forEach((el) => {
-      if (el.tagName === "INPUT") {
-        const type = (el.type || "").toLowerCase();
-        if (["button", "submit", "reset", "file"].includes(type)) return;
-      }
-
-      if (el.id) {
-        if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, el.id);
-        return;
-      }
-
-      if (el.getAttribute(AUTO_ID_ATTR)) return;
-
-      const page = el.closest(".page-section");
-      const pageId = page?.id || "no-page";
-
-      const table = el.closest("table");
-      const tr = el.closest("tr");
-      const rowKey = tr?.getAttribute(AUTO_ROW_ATTR) || "";
-
-      let colIndex = "";
-      if (tr) {
-        const cell = el.closest("td,th");
-        if (cell) colIndex = String(Array.from(tr.children).indexOf(cell));
-      }
-
-      const scope = el.closest("td,th") || tr || el.parentElement || document.body;
-      const siblings = $$("input, select, textarea", scope);
-      const idx = siblings.indexOf(el);
-
-      const mkid = `${pageId}::${table ? "table" : "form"}::${rowKey}::c${colIndex}::i${idx}`;
-      el.setAttribute(AUTO_ID_ATTR, mkid);
-    });
-  }
-
-  /* =======================
-     AUTOSAVE / RESTORE
-  ======================= */
-  function readState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    try {
-      return JSON.parse(raw) || {};
-    } catch {
-      return {};
-    }
-  }
-
-  function writeState(state) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-
-  function getFieldKey(el) {
-    return el?.getAttribute?.(AUTO_ID_ATTR) || el?.id || "";
-  }
-
-  function captureState(root = document) {
-    ensureStableFieldIds(root);
-    const state = readState();
-
-    $$("input, select, textarea", root).forEach((el) => {
-      const key = getFieldKey(el);
-      if (!key) return;
-
-      if (isCheckbox(el)) state[key] = !!el.checked;
-      else if (isRadio(el)) state[key] = el.checked ? el.value : state[key] ?? "";
-      else state[key] = el.value ?? "";
-    });
-
-    writeState(state);
-  }
-
-  function restoreState(root = document) {
-    ensureStableFieldIds(root);
-    const state = readState();
-    if (!state || typeof state !== "object") return;
-
-    $$("input, select, textarea", root).forEach((el) => {
-      const key = getFieldKey(el);
-      if (!key || !(key in state)) return;
-
-      if (isCheckbox(el)) el.checked = !!state[key];
-      else if (isRadio(el)) el.checked = el.value === state[key];
-      else el.value = state[key] ?? "";
-    });
-
-    applyGhostStyling(root);
-  }
-
-  document.addEventListener("input", (e) => {
-    const t = e.target;
-    if (!t || !t.matches("input, select, textarea")) return;
-    captureState(document);
-  });
-
-  document.addEventListener("change", (e) => {
-    const t = e.target;
-    if (!t || !t.matches("input, select, textarea")) return;
-    captureState(document);
-  });
+  const safeTrim = (v) => (typeof v === "string" ? v.trim() : "");
 
   /* =======================
      PAGE NAVIGATION
   ======================= */
-  function activatePage(sectionId) {
-    if (!sectionId) return;
+  function showSection(targetId) {
+    const sections = $$(".page-section");
+    const target = document.getElementById(targetId);
 
-    $$(".page-section").forEach((sec) => sec.classList.remove("active"));
-    $$(".nav-btn").forEach((btn) => btn.classList.remove("active"));
+    if (!target) return;
 
-    const sec = document.getElementById(sectionId);
-    if (sec) sec.classList.add("active");
+    sections.forEach((s) => s.classList.remove("active"));
+    target.classList.add("active");
 
-    const btn = $(`.nav-btn[data-target="${CSS.escape(sectionId)}"]`);
-    if (btn) btn.classList.add("active");
+    // Update nav active state
+    $$(".nav-btn").forEach((b) => {
+      const isActive = b.getAttribute("data-target") === targetId;
+      b.classList.toggle("active", isActive);
+    });
+
+    // Scroll to top of main content container (optional)
+    const main = $("#mainContent") || $("main");
+    if (main) main.scrollTop = 0;
   }
 
   function initNav() {
-    $$(".nav-btn").forEach((btn) => {
-      btn.addEventListener("click", () => activatePage(btn.dataset.target));
-    });
+    // If nothing is active, activate first section
+    const active = $(".page-section.active");
+    if (!active) {
+      const first = $(".page-section");
+      if (first?.id) first.classList.add("active");
+    }
+
+    // If a nav button is active, sync
+    const activeSection = $(".page-section.active");
+    if (activeSection?.id) {
+      $$(".nav-btn").forEach((b) => {
+        b.classList.toggle("active", b.getAttribute("data-target") === activeSection.id);
+      });
+    }
   }
 
   /* =======================
-     RESET THIS PAGE
+     DEALERSHIP NAME DISPLAY
   ======================= */
-  function clearControlsIn(root) {
-    $$("input, select, textarea", root).forEach((el) => {
-      if (isCheckbox(el) || isRadio(el)) el.checked = false;
-      else el.value = "";
-    });
-    applyGhostStyling(root);
+  function syncDealershipName() {
+    const input = $("#dealershipNameInput");
+    const display = $("#dealershipNameDisplay");
+    if (!input || !display) return;
+
+    const val = safeTrim(input.value);
+    display.textContent = val ? val : "";
   }
 
-  function initResetButtons() {
-    $$(".clear-page-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const page = btn.closest(".page-section");
-        if (!page) return;
+  /* =======================
+     “GHOST” PLACEHOLDER OPTIONS
+     (options like <option value="" data-ghost="true">Usage</option>)
+  ======================= */
+  function refreshGhostSelect(select) {
+    if (!select || select.tagName !== "SELECT") return;
+    const val = select.value;
+    const hasValue = safeTrim(val) !== "";
+    select.classList.toggle("has-value", hasValue);
+  }
 
-        clearControlsIn(page);
+  function initGhostSelects() {
+    $$("select").forEach(refreshGhostSelect);
+  }
 
-        // Remove dynamically added table rows (keep first 2 by default)
-        $$("table.training-table tbody", page).forEach((tbody) => {
-          const rows = $$("tr", tbody);
-          const keep = Math.min(2, rows.length);
-          rows.slice(keep).forEach((r) => r.remove());
-        });
-
-        // Trainers: remove injected additional trainers only (not the base row)
-        if (page.id === "trainers-deployment") {
-          const c = $("#additionalTrainersContainer");
-          if (c) c.innerHTML = "";
-        }
-
-        ensureStableFieldIds(page);
-        const state = readState();
-        $$("input, select, textarea", page).forEach((el) => {
-          const k = getFieldKey(el);
-          if (k && k in state) delete state[k];
-        });
-        writeState(state);
-
-        captureState(document);
-        flash(page);
-      });
+  /* =======================
+     STATE SAVE/RESTORE
+  ======================= */
+  function getAllFields(root = document) {
+    return $$("input, select, textarea", root).filter((el) => {
+      // ignore buttons etc
+      if (el.tagName === "INPUT") {
+        const type = (el.getAttribute("type") || "").toLowerCase();
+        // allowed: text, date, checkbox, number, etc.
+        return type !== "button" && type !== "submit" && type !== "reset";
+      }
+      return true;
     });
+  }
+
+  function buildState() {
+    // 1) basic fields (by stable selector)
+    const fields = getAllFields();
+    const fieldState = fields.map((el) => {
+      // Prefer ID; else generate a stable data-key once.
+      if (!el.dataset.mkKey) {
+        el.dataset.mkKey = el.id ? `id:${el.id}` : `key:${uid("fld")}`;
+      }
+
+      let value;
+      if (el.tagName === "INPUT") {
+        const type = (el.getAttribute("type") || "").toLowerCase();
+        if (type === "checkbox") value = el.checked;
+        else value = el.value;
+      } else {
+        value = el.value;
+      }
+
+      return { k: el.dataset.mkKey, v: value };
+    });
+
+    // 2) dynamic Additional Trainers
+    const trainers = $$("#additionalTrainersContainer .trainer-row input").map((i) => i.value);
+
+    // 3) dynamic tables (row counts only; values are already in fieldState)
+    const tableRowCounts = $$(".training-table tbody").map((tb, i) => ({
+      i,
+      rows: tb.querySelectorAll("tr").length,
+    }));
+
+    // 4) support tickets cards (count per column)
+    const tickets = {
+      open: $("#openTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
+      tierTwo: $("#tierTwoTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
+      closedResolved: $("#closedResolvedTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
+      closedFeature: $("#closedFeatureTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
+    };
+
+    return {
+      version: 6,
+      savedAt: new Date().toISOString(),
+      fieldState,
+      trainers,
+      tableRowCounts,
+      tickets,
+      activeSectionId: $(".page-section.active")?.id || "",
+    };
+  }
+
+  function applyState(state) {
+    if (!state || typeof state !== "object") return;
+
+    // 1) restore dynamic table rows by counts (then field values will apply)
+    if (Array.isArray(state.tableRowCounts)) {
+      const bodies = $$(".training-table tbody");
+      state.tableRowCounts.forEach((rc) => {
+        const tb = bodies[rc.i];
+        if (!tb) return;
+
+        const current = tb.querySelectorAll("tr").length;
+        const desired = Math.max(1, Number(rc.rows || 1)); // never 0
+        if (desired > current) {
+          // clone last row to reach desired
+          for (let n = current; n < desired; n++) {
+            const last = tb.querySelector("tr:last-child");
+            if (!last) break;
+            const clone = last.cloneNode(true);
+            clearRowInputs(clone);
+            tb.appendChild(clone);
+          }
+        } else if (desired < current) {
+          // remove from end, but keep at least 1
+          for (let n = current; n > desired; n--) {
+            const last = tb.querySelector("tr:last-child");
+            if (last && tb.querySelectorAll("tr").length > 1) last.remove();
+          }
+        }
+      });
+    }
+
+    // 2) restore additional trainers list
+    if (Array.isArray(state.trainers)) {
+      const container = $("#additionalTrainersContainer");
+      if (container) {
+        container.innerHTML = "";
+        state.trainers
+          .map((t) => safeTrim(t))
+          .filter(Boolean)
+          .forEach((name) => addTrainerRow(name));
+      }
+    }
+
+    // 3) restore ticket card counts (best-effort)
+    restoreTicketCounts(state.tickets);
+
+    // 4) restore field values
+    const map = new Map(Array.isArray(state.fieldState) ? state.fieldState.map((x) => [x.k, x.v]) : []);
+
+    const fields = getAllFields();
+    fields.forEach((el) => {
+      if (!el.dataset.mkKey) {
+        el.dataset.mkKey = el.id ? `id:${el.id}` : `key:${uid("fld")}`;
+      }
+      if (!map.has(el.dataset.mkKey)) return;
+
+      const v = map.get(el.dataset.mkKey);
+      if (el.tagName === "INPUT") {
+        const type = (el.getAttribute("type") || "").toLowerCase();
+        if (type === "checkbox") el.checked = !!v;
+        else el.value = v ?? "";
+      } else {
+        el.value = v ?? "";
+      }
+
+      if (el.tagName === "SELECT") refreshGhostSelect(el);
+    });
+
+    // 5) restore active section
+    if (state.activeSectionId && document.getElementById(state.activeSectionId)) {
+      showSection(state.activeSectionId);
+    }
+
+    // sync dealership display after restore
+    syncDealershipName();
+  }
+
+  const saveState = debounce(() => {
+    try {
+      const state = buildState();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      log("Saved", state);
+    } catch (e) {
+      console.warn("Could not save state:", e);
+    }
+  }, 250);
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn("Could not load state:", e);
+      return null;
+    }
   }
 
   /* =======================
      TABLE ADD ROW (+)
-     (ONLY table footer button)
   ======================= */
-  function initAddRowTables() {
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest(".table-footer .add-row");
-      if (!addBtn) return;
-      if (addBtn.tagName === "A") e.preventDefault();
-
-      const tableContainer = addBtn.closest(".table-container");
-      const table = tableContainer ? $("table.training-table", tableContainer) : null;
-      const tbody = table ? $("tbody", table) : null;
-      const firstRow = tbody ? $("tr", tbody) : null;
-      if (!tbody || !firstRow) return;
-
-      const clone = firstRow.cloneNode(true);
-      clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
-      clearControlsIn(clone);
-
-      $$("[id]", clone).forEach((el) => (el.id = ""));
-      $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
-
-      tbody.appendChild(clone);
-
-      normalizeNotesButtons(clone);
-      ensureStableFieldIds(tbody);
-      captureState(document);
-      flash(clone);
+  function clearRowInputs(rowEl) {
+    if (!rowEl) return;
+    const fields = getAllFields(rowEl);
+    fields.forEach((el) => {
+      if (el.tagName === "INPUT") {
+        const type = (el.getAttribute("type") || "").toLowerCase();
+        if (type === "checkbox") el.checked = false;
+        else el.value = "";
+      } else if (el.tagName === "TEXTAREA") {
+        el.value = "";
+      } else if (el.tagName === "SELECT") {
+        el.selectedIndex = 0;
+        refreshGhostSelect(el);
+      }
     });
+  }
 
-    // keyboard support for non-button
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      const addBtn = e.target.closest(".table-footer .add-row");
-      if (!addBtn) return;
-      e.preventDefault();
-      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+  function handleAddRow(btn) {
+    const tableContainer = btn.closest(".table-container");
+    if (!tableContainer) return;
+
+    const tbody = $("tbody", tableContainer);
+    if (!tbody) return;
+
+    const template = tbody.querySelector("tr:last-child") || tbody.querySelector("tr");
+    if (!template) return;
+
+    const clone = template.cloneNode(true);
+    clearRowInputs(clone);
+    tbody.appendChild(clone);
+
+    saveState();
   }
 
   /* =======================
-     NOTES "bullet stub"
+     NOTES BUTTONS (scroll to notes block)
   ======================= */
-  function getNotesTargetIdFromButton(btn) {
-    return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
+  function flash(el) {
+    if (!el) return;
+    el.classList.add("mk-flash");
+    setTimeout(() => el.classList.remove("mk-flash"), 900);
   }
 
-  function getContextLabel(btn) {
-    const row = btn.closest("tr");
-    if (row) {
-      const texts = $$('input[type="text"]', row).map((i) => (i.value || "").trim());
-      return texts.find((v) => v.length) || "";
-    }
-    const rowWrap = btn.closest(".checklist-row, .indent-sub");
-    if (rowWrap) return ($("label", rowWrap)?.textContent || "").trim();
-    return "";
-  }
+  function handleNotesButton(btn) {
+    const targetId = btn.getAttribute("data-notes-target");
+    if (!targetId) return;
 
-  function getQuestionText(btn) {
-    const rowWrap = btn.closest(".checklist-row, .indent-sub");
-    if (rowWrap) return ($("label", rowWrap)?.textContent || "").trim();
+    const target = document.getElementById(targetId);
+    if (!target) return;
 
-    const td = btn.closest("td");
-    const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    if (td && tr && table) {
-      const colIndex = Array.from(tr.children).indexOf(td);
-      const headerRows = table.tHead?.rows ? Array.from(table.tHead.rows) : [];
-      const lastHeaderRow = headerRows[headerRows.length - 1];
-      const th = lastHeaderRow?.children?.[colIndex];
-      return (th?.textContent || "").trim();
-    }
-    return "";
-  }
+    // ensure its page section is active (if notes block is on same page it will be visible)
+    const section = btn.closest(".page-section");
+    if (section?.id) showSection(section.id);
 
-  function ensureBulletStub(textarea, titleLine) {
-    const current = textarea.value || "";
-    if (current.includes(`• ${titleLine}`)) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    flash(target);
 
-    const spacer = current.trim().length ? "\n\n" : "";
-    textarea.value =
-      current.replace(/\s+$/g, "") +
-      spacer +
-      `• ${titleLine}\n` +
-      `        ◦ \n`;
-
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  function initNotesButtons() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
-      if (!btn) return;
-      if (btn.tagName === "A") e.preventDefault();
-
-      const targetId = getNotesTargetIdFromButton(btn);
-      if (!targetId) return;
-
-      const notesBlock = document.getElementById(targetId);
-      if (!notesBlock) return;
-
-      const ta = $("textarea", notesBlock);
-      if (!ta) return;
-
-      const context = (getContextLabel(btn) || "").trim();
-      const q = (getQuestionText(btn) || "").trim();
-      const title = btn.closest("tr") ? [context, q].filter(Boolean).join("  ").trim() : (q || context || "Notes");
-
-      ensureBulletStub(ta, title);
-      focusNoScroll(ta);
-      flash(notesBlock);
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
-      if (!btn) return;
-      e.preventDefault();
-      btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    // focus textarea if present
+    const ta = $("textarea", target);
+    if (ta) setTimeout(() => ta.focus(), 350);
   }
 
   /* =======================
-     ADDITIONAL TRAINER (+)
-     - uses your markup:
-       button[data-add-trainer]
-       input#additionalTrainerInput
-       div#additionalTrainersContainer
-     - NO remove buttons
+     RESET PAGE
   ======================= */
- /* =======================
-   ADDITIONAL TRAINER (+)
-   - CAPTURE PHASE so nothing can swallow the click
-   - stops propagation so other ".add-row" systems can’t interfere
-======================= */
-function initAdditionalTrainerAdd() {
-  const handler = (e) => {
-   const addBtn = e.target.closest("[data-add-trainer]");
-    if (!addBtn) return;
+  function resetPage(sectionEl) {
+    if (!sectionEl) return;
 
-    // Stop other handlers from eating this click
-    e.preventDefault();
-    e.stopPropagation();
+    // Clear all fields in section
+    getAllFields(sectionEl).forEach((el) => {
+      if (el.tagName === "INPUT") {
+        const type = (el.getAttribute("type") || "").toLowerCase();
+        if (type === "checkbox") el.checked = false;
+        else el.value = "";
+      } else if (el.tagName === "TEXTAREA") {
+        el.value = "";
+      } else if (el.tagName === "SELECT") {
+        el.selectedIndex = 0;
+        refreshGhostSelect(el);
+      }
+    });
 
-    const container = document.getElementById("additionalTrainersContainer");
-    const baseInput = document.getElementById("additionalTrainerInput");
-    if (!container || !baseInput) return;
+    // Reset dynamic tables to 1 row each (within this section only)
+    $$(".training-table tbody", sectionEl).forEach((tb) => {
+      const rows = tb.querySelectorAll("tr");
+      rows.forEach((r, idx) => {
+        if (idx === 0) clearRowInputs(r);
+        else r.remove();
+      });
+    });
 
-    const name = (baseInput.value || "").trim();
-    if (!name) {
-      flash(baseInput.closest(".checklist-row") || baseInput);
-      focusNoScroll(baseInput);
+    // Reset support tickets within page
+    if (sectionEl.id === "support-tickets") {
+      resetTickets();
+    }
+
+    // Reset additional trainers within page (wherever that block lives)
+    const trainersContainer = $("#additionalTrainersContainer", sectionEl) || $("#additionalTrainersContainer");
+    if (trainersContainer) trainersContainer.innerHTML = "";
+    const trainerInput = $("#additionalTrainerInput", sectionEl) || $("#additionalTrainerInput");
+    if (trainerInput) trainerInput.value = "";
+
+    // Re-sync dealership display if we cleared it
+    syncDealershipName();
+
+    saveState();
+  }
+
+  /* =======================
+     SUPPORT TICKETS
+  ======================= */
+  function ticketTargetsByStatus(status) {
+    switch (status) {
+      case "Open":
+        return $("#openTicketsContainer");
+      case "Tier Two":
+        return $("#tierTwoTicketsContainer");
+      case "Closed - Resolved":
+        return $("#closedResolvedTicketsContainer");
+      case "Closed - Feature Not Supported":
+        return $("#closedFeatureTicketsContainer");
+      default:
+        return $("#openTicketsContainer");
+    }
+  }
+
+  function getTicketCardEls(card) {
+    return {
+      number: $(".ticket-number-input", card),
+      status: $(".ticket-status-select", card),
+      url: $(".ticket-zendesk-input", card),
+      summary: $(".ticket-summary-input", card),
+    };
+  }
+
+  function isTicketCardComplete(card) {
+    const els = getTicketCardEls(card);
+    const numOk = !!safeTrim(els.number?.value);
+    const urlOk = !!safeTrim(els.url?.value);
+    const sumOk = !!safeTrim(els.summary?.value);
+    return numOk && urlOk && sumOk;
+  }
+
+  function cloneTicketCard(card) {
+    const clone = card.cloneNode(true);
+
+    // remove base flag
+    clone.removeAttribute("data-base");
+
+    // clear inputs
+    const { number, status, url, summary } = getTicketCardEls(clone);
+    if (number) number.value = "";
+    if (url) url.value = "";
+    if (summary) summary.value = "";
+    if (status) {
+      status.value = "Open";
+      status.disabled = true; // stays disabled until number typed
+    }
+
+    // ensure plus button exists on the active card only (we keep it on clones too; harmless)
+    return clone;
+  }
+
+  function handleAddTicket(btn) {
+    const card = btn.closest(".ticket-group");
+    if (!card) return;
+
+    if (!isTicketCardComplete(card)) {
+      alert("Please complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
       return;
     }
 
-    const row = document.createElement("div");
-    row.className = "checklist-row indent-sub added-trainer-row";
-    row.innerHTML = `
-      <label></label>
-      <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name" autocomplete="off">
-    `;
-    container.appendChild(row);
+    const container = card.parentElement;
+    if (!container) return;
 
-    baseInput.value = "";
-    baseInput.dispatchEvent(new Event("input", { bubbles: true }));
-    focusNoScroll(baseInput);
+    const newCard = cloneTicketCard(card);
+    container.appendChild(newCard);
 
-    ensureStableFieldIds(row);
-    captureState(document);
-    flash(row);
-  };
-
-  // ✅ CAPTURE PHASE (true) so other listeners can’t block us
-  document.addEventListener("click", handler, true);
-
-  // keyboard support (also capture)
-  document.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      const addBtn = e.target.closest("[data-add-trainer]");
-      if (!addBtn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    },
-    true
-  );
-}
-
-  /* =======================
-     CARD CLONER (+) — Additional POC cards
-     - Only triggers when the button is inside a base card
-     - Does NOT touch trainers add button (because that uses data-add-trainer)
-     - Does NOT touch table add button (because that is inside .table-footer)
-     🔧 FIX: hard stop when addBtn has data-add-trainer
-  ======================= */
-  function initCloneAddButtons() {
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest(".add-row");
-      if (!addBtn) return;
-
-      // 🔧 HARD STOP: never touch Trainer +
-      if (addBtn.hasAttribute("data-add-trainer")) return;
-
-      // table add-row handled elsewhere
-      if (addBtn.closest(".table-footer")) return;
-
-      const baseCard = addBtn.closest(".additional-poc-card[data-base='true'], .trainer-card[data-base='true']");
-      if (!baseCard) return;
-
-      if (addBtn.tagName === "A") e.preventDefault();
-
-      const container = baseCard.parentElement;
-      if (!container) return;
-
-      const clone = baseCard.cloneNode(true);
-      clone.setAttribute("data-base", "false");
-      clone.setAttribute("data-clone", "true");
-      clone.setAttribute(AUTO_CARD_ATTR, uid("clone"));
-
-      // remove + buttons from clone
-      clone.querySelectorAll(".add-row").forEach((b) => b.remove());
-
-      // clear fields
-      clearControlsIn(clone);
-
-      // scrub ids
-      clone.querySelectorAll("[id]").forEach((el) => (el.id = ""));
-      clone.querySelectorAll(`[${AUTO_ID_ATTR}]`).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
-
-      container.insertBefore(clone, baseCard.nextSibling);
-
-      normalizeNotesButtons(clone);
-      ensureStableFieldIds(container);
-      captureState(document);
-      flash(clone);
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      const addBtn = e.target.closest(".add-row");
-      if (!addBtn) return;
-
-      // 🔧 HARD STOP: never touch Trainer +
-      if (addBtn.hasAttribute("data-add-trainer")) return;
-
-      if (addBtn.closest(".table-footer")) return;
-
-      const baseCard = addBtn.closest(".additional-poc-card[data-base='true'], .trainer-card[data-base='true']");
-      if (!baseCard) return;
-
-      e.preventDefault();
-      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    saveState();
   }
 
-  /* =======================
-     TABLE EXPAND (⤢) injected
-  ======================= */
-  function ensureTableExpandButtons(root = document) {
-    $$(".table-container", root).forEach((container) => {
-      const footer = $(".table-footer", container);
-      const table = $("table.training-table", container);
-      if (!footer || !table) return;
-      if (footer.querySelector(".mk-table-expand-btn")) return;
+  function handleTicketNumberInput(inputEl) {
+    const card = inputEl.closest(".ticket-group");
+    if (!card) return;
+    const status = $(".ticket-status-select", card);
+    if (!status) return;
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-table-expand-btn";
-      btn.textContent = "⤢";
-      btn.setAttribute("aria-label", "Expand table");
-      btn.title = "Expand table";
-      footer.appendChild(btn);
-    });
+    const hasNum = !!safeTrim(inputEl.value);
+    status.disabled = !hasNum;
+
+    saveState();
   }
 
-  const mkTableModal = document.getElementById("mkTableModal");
-  const mkTableModalCards = document.getElementById("mkTableModalCards");
-  let activeTableModal = null;
+  function moveTicketCardByStatus(card, statusValue) {
+    const target = ticketTargetsByStatus(statusValue);
+    if (!target) return;
 
-  function openTableModalShell(title = "Table") {
-    if (!mkTableModal) return;
-    mkTableModal.classList.add("open");
-    mkTableModal.setAttribute("aria-hidden", "false");
-    const titleEl = mkTableModal.querySelector(".mk-modal-title");
-    if (titleEl) titleEl.textContent = title;
+    target.appendChild(card);
   }
 
-  function closeTableModalShell() {
-    if (!mkTableModal) return;
-    mkTableModal.classList.remove("open");
-    mkTableModal.setAttribute("aria-hidden", "true");
-  }
+  function resetTickets() {
+    const open = $("#openTicketsContainer");
+    if (!open) return;
 
-  function restoreTableModal() {
-    if (!activeTableModal) return;
+    // find base card
+    const base = open.querySelector(".ticket-group[data-base='true']") || open.querySelector(".ticket-group");
+    open.innerHTML = "";
+    if (base) {
+      const cleanBase = base.cloneNode(true);
+      // ensure base flag exists
+      cleanBase.setAttribute("data-base", "true");
 
-    if (activeTableModal.section && activeTableModal.ph && activeTableModal.parent) {
-      activeTableModal.parent.insertBefore(activeTableModal.section, activeTableModal.ph);
-      activeTableModal.ph.remove();
-    }
-
-    if (activeTableModal.notesEl && activeTableModal.notesPH && activeTableModal.notesParent) {
-      activeTableModal.notesParent.insertBefore(activeTableModal.notesEl, activeTableModal.notesPH);
-      activeTableModal.notesPH.remove();
-    }
-
-    if (mkTableModalCards) mkTableModalCards.innerHTML = "";
-    closeTableModalShell();
-    activeTableModal = null;
-  }
-
-  function getNotesCardForTable(tableContainer) {
-    const firstNotesBtn = tableContainer.querySelector("[data-notes-target], [data-notes-btn][data-notes-target]");
-    const targetId = firstNotesBtn?.getAttribute("data-notes-target") || "";
-    return targetId ? document.getElementById(targetId) : null;
-  }
-
-  function openTableModalFromContainer(tableContainer) {
-    if (!mkTableModal || !mkTableModalCards) return;
-
-    const section = tableContainer.closest(".section") || tableContainer;
-    const sectionHeader = section.querySelector(".section-header");
-    const title = (sectionHeader?.textContent || "Table").trim();
-
-    mkTableModalCards.innerHTML = "";
-    const outer = document.createElement("div");
-    outer.className = "mk-modal__outer-card";
-    mkTableModalCards.appendChild(outer);
-
-    // move section into modal
-    const ph = document.createElement("div");
-    ph.className = "mk-table-placeholder";
-    const parent = section.parentElement;
-    parent.insertBefore(ph, section);
-    parent.removeChild(section);
-
-    // move notes card if present
-    const notesEl = getNotesCardForTable(tableContainer);
-    let notesPH = null;
-    let notesParent = null;
-    if (notesEl) {
-      notesPH = document.createElement("div");
-      notesPH.className = "mk-notes-placeholder";
-      notesParent = notesEl.parentElement;
-      notesParent.insertBefore(notesPH, notesEl);
-      notesParent.removeChild(notesEl);
-    }
-
-    outer.appendChild(section);
-    if (notesEl) {
-      const notesWrap = document.createElement("div");
-      notesWrap.className = "mk-modal__notes-host";
-      notesWrap.appendChild(notesEl);
-      outer.appendChild(notesWrap);
-    }
-
-    activeTableModal = { section, ph, parent, notesEl, notesPH, notesParent };
-    openTableModalShell(title);
-  }
-
-  function initTableModalClose() {
-    if (!mkTableModal) return;
-
-    mkTableModal.addEventListener("click", (e) => {
-      const closeBtn = e.target.closest(".mk-modal-close,[data-mk-modal-close]");
-      const backdrop = e.target.closest(".mk-modal-backdrop");
-      if (closeBtn || backdrop) restoreTableModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && mkTableModal.classList.contains("open")) restoreTableModal();
-    });
-  }
-
-  function initExpandButtons() {
-    document.addEventListener("click", (e) => {
-      const expandBtn = e.target.closest(".mk-table-expand-btn");
-      if (!expandBtn) return;
-
-      const tableContainer = expandBtn.closest(".table-container");
-      if (!tableContainer) return;
-
-      if (mkTableModal && mkTableModalCards) {
-        openTableModalFromContainer(tableContainer);
-        return;
+      // clear base
+      const { number, status, url, summary } = getTicketCardEls(cleanBase);
+      if (number) number.value = "";
+      if (url) url.value = "";
+      if (summary) summary.value = "";
+      if (status) {
+        status.value = "Open";
+        status.disabled = true;
       }
 
-      const firstRow = tableContainer.querySelector("table.training-table tbody tr");
-      if (firstRow) firstRow.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      else flash(tableContainer);
-    });
-  }
-
-  /* =======================
-     ROW POPUP MODAL (mkRowModal)
-     - keeps ONLY the LAST header row (fixes duplicate headers)
-  ======================= */
-  const rowModal = document.getElementById("mkRowModal");
-  const tableHost = document.getElementById("mkModalTableHost");
-  const notesHost = document.getElementById("mkModalNotesHost");
-  let activeModal = null;
-
-  function openRowModal() {
-    if (!rowModal) return;
-    rowModal.setAttribute("aria-hidden", "false");
-  }
-  function closeRowModal() {
-    if (!rowModal) return;
-    rowModal.setAttribute("aria-hidden", "true");
-  }
-
-  function cloneLastHeaderRowOnly(fromTable) {
-    if (!fromTable?.tHead) return null;
-    const rows = Array.from(fromTable.tHead.rows || []);
-    if (!rows.length) return null;
-
-    const lastRow = rows[rows.length - 1].cloneNode(true);
-
-    // strip any controls that might exist in headers
-    lastRow.querySelectorAll("input, select, textarea, button").forEach((el) => el.remove());
-
-    const thead = document.createElement("thead");
-    thead.appendChild(lastRow);
-    return thead;
-  }
-
-  function buildModalTableShell(fromTable, row) {
-    tableHost.innerHTML = "";
-
-    const h2 = document.createElement("h2");
-    h2.textContent = "Row Details";
-    tableHost.appendChild(h2);
-
-    const scroll = document.createElement("div");
-    scroll.className = "mk-modal__table-scroll";
-    tableHost.appendChild(scroll);
-
-    const t = document.createElement("table");
-    t.className = fromTable.className || "training-table";
-    scroll.appendChild(t);
-
-    const thead = cloneLastHeaderRowOnly(fromTable);
-    if (thead) t.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-    t.appendChild(tbody);
-    tbody.appendChild(row);
-  }
-
-  function moveRowIntoModal(row) {
-    const table = row.closest("table");
-    if (!table || !tableHost) return null;
-
-    const ph = document.createElement("tr");
-    ph.className = "mk-row-placeholder";
-
-    const parent = row.parentElement;
-    parent.insertBefore(ph, row);
-    parent.removeChild(row);
-
-    buildModalTableShell(table, row);
-    return { parent, ph, table };
-  }
-
-  function moveNotesIntoModal(row) {
-    if (!notesHost) return null;
-
-    const btn = row.querySelector("[data-notes-target], [data-notes-btn][data-notes-target]");
-    const targetId = btn?.getAttribute("data-notes-target");
-    if (!targetId) return null;
-
-    const notesEl = document.getElementById(targetId);
-    if (!notesEl) return null;
-
-    const notesPH = document.createElement("div");
-    notesPH.className = "mk-notes-placeholder";
-
-    const notesParent = notesEl.parentElement;
-    notesParent.insertBefore(notesPH, notesEl);
-    notesParent.removeChild(notesEl);
-
-    notesHost.innerHTML = "";
-    notesHost.appendChild(notesEl);
-
-    return { notesEl, notesPH, notesParent };
-  }
-
-  function restoreRowModal() {
-    if (!activeModal) return;
-
-    if (activeModal.notesEl && activeModal.notesPH && activeModal.notesParent) {
-      activeModal.notesParent.insertBefore(activeModal.notesEl, activeModal.notesPH);
-      activeModal.notesPH.remove();
+      open.appendChild(cleanBase);
     }
 
-    if (activeModal.row && activeModal.rowPH && activeModal.rowParent) {
-      activeModal.rowParent.insertBefore(activeModal.row, activeModal.rowPH);
-      activeModal.rowPH.remove();
-    }
-
-    if (tableHost) tableHost.innerHTML = "";
-    if (notesHost) notesHost.innerHTML = "";
-
-    closeRowModal();
-    activeModal = null;
-  }
-
-  function initRowModal() {
-    if (!(rowModal && tableHost && notesHost)) return;
-
-    rowModal.addEventListener("click", (e) => {
-      if (e.target && e.target.hasAttribute("data-mk-modal-close")) restoreRowModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && rowModal.getAttribute("aria-hidden") === "false") restoreRowModal();
-    });
-
-    document.addEventListener("click", (e) => {
-      const t = e.target;
-
-      // don't open modal when interacting with controls
-      if (
-        t.closest("button") ||
-        t.closest("a") ||
-        t.matches("input, select, textarea, option") ||
-        t.closest(".table-footer") ||
-        t.closest(".mk-table-expand-btn")
-      ) return;
-
-      const row = t.closest("table.training-table tbody tr");
-      if (!row) return;
-
-      const movedRow = moveRowIntoModal(row);
-      if (!movedRow) return;
-
-      const movedNotes = moveNotesIntoModal(row);
-
-      activeModal = {
-        row,
-        rowPH: movedRow.ph,
-        rowParent: movedRow.parent,
-        notesEl: movedNotes?.notesEl || null,
-        notesPH: movedNotes?.notesPH || null,
-        notesParent: movedNotes?.notesParent || null,
-      };
-
-      openRowModal();
+    // clear other columns
+    ["#tierTwoTicketsContainer", "#closedResolvedTicketsContainer", "#closedFeatureTicketsContainer"].forEach((sel) => {
+      const c = $(sel);
+      if (c) c.innerHTML = "";
     });
   }
 
-  /* =======================
-     MAP HELPER
-  ======================= */
-  window.updateDealershipMap = function updateDealershipMap(address) {
-    const frame = $("#dealershipMapFrame");
-    if (!frame) return;
-    const q = encodeURIComponent(address || "");
-    frame.src = `https://www.google.com/maps?q=${q}&output=embed`;
-  };
+  function restoreTicketCounts(tickets) {
+    if (!tickets || typeof tickets !== "object") return;
 
-  /* =======================
-     ONSITE DATE DEFAULT (end = start + 2 days if empty)
-  ======================= */
-  function formatDateYYYYMMDD(d) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
-  function addDays(dateStr, days) {
-    if (!dateStr) return "";
-    const d = new Date(dateStr + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    return formatDateYYYYMMDD(d);
-  }
+    // We can only reliably restore by cloning the base card for OPEN.
+    // The actual field values are restored by fieldState, once cards exist.
+    // So: make sure each container has the right number of .ticket-group nodes.
+    const open = $("#openTicketsContainer");
+    const base = open?.querySelector(".ticket-group[data-base='true']") || open?.querySelector(".ticket-group");
+    if (!open || !base) return;
 
-  function initOnsiteDateHelper() {
-    const onsiteStart = $("#onsiteStartDate");
-    const onsiteEnd = $("#onsiteEndDate");
-    if (onsiteStart && onsiteEnd && isDate(onsiteStart) && isDate(onsiteEnd)) {
-      onsiteStart.addEventListener("change", () => {
-        if (!onsiteStart.value) return;
-        if (!onsiteEnd.value) {
-          onsiteEnd.value = addDays(onsiteStart.value, 2);
-          onsiteEnd.dispatchEvent(new Event("input", { bubbles: true }));
+    const ensureCount = (container, desired, fromCard) => {
+      desired = Math.max(0, Number(desired || 0));
+      const current = container.querySelectorAll(".ticket-group").length;
+
+      if (desired > current) {
+        for (let i = current; i < desired; i++) container.appendChild(cloneTicketCard(fromCard));
+      } else if (desired < current) {
+        // keep base in open, otherwise remove from end
+        for (let i = current; i > desired; i--) {
+          const last = container.querySelector(".ticket-group:last-child");
+          if (!last) break;
+          // don't remove base if in open
+          if (container === open && last.getAttribute("data-base") === "true") break;
+          last.remove();
         }
-      });
+      }
+    };
+
+    ensureCount(open, tickets.open ?? 1, base);
+
+    const tierTwo = $("#tierTwoTicketsContainer");
+    const closedResolved = $("#closedResolvedTicketsContainer");
+    const closedFeature = $("#closedFeatureTicketsContainer");
+
+    if (tierTwo) ensureCount(tierTwo, tickets.tierTwo ?? 0, base);
+    if (closedResolved) ensureCount(closedResolved, tickets.closedResolved ?? 0, base);
+    if (closedFeature) ensureCount(closedFeature, tickets.closedFeature ?? 0, base);
+  }
+
+  /* =======================
+     ADDITIONAL TRAINERS (FIXED)
+  ======================= */
+  function addTrainerRow(name = "") {
+    const container = $("#additionalTrainersContainer");
+    if (!container) return;
+
+    const row = document.createElement("div");
+    row.className = "checklist-row integrated-plus indent-sub trainer-row";
+
+    // keep consistent UI: input + remove button
+    row.innerHTML = `
+      <label>Trainer</label>
+      <div class="input-plus">
+        <input type="text" class="additional-trainer-input" placeholder="Trainer name" autocomplete="off" />
+        <button type="button" class="trainer-remove-btn" data-remove-trainer aria-label="Remove trainer" title="Remove">×</button>
+      </div>
+    `;
+
+    const input = $("input", row);
+    if (input) input.value = name;
+
+    container.appendChild(row);
+  }
+
+  function handleAddTrainer(btn) {
+    const input = $("#additionalTrainerInput");
+    if (!input) return;
+
+    const name = safeTrim(input.value);
+    if (!name) return;
+
+    addTrainerRow(name);
+    input.value = "";
+    input.focus();
+
+    saveState();
+  }
+
+  function handleRemoveTrainer(btn) {
+    const row = btn.closest(".trainer-row");
+    if (row) row.remove();
+    saveState();
+  }
+
+  /* =======================
+     PDF (safe)
+  ======================= */
+  async function saveAllPagesAsPDF() {
+    // Only run if libraries exist (you likely already have this wired elsewhere)
+    if (!window.html2canvas || !window.jspdf?.jsPDF) {
+      alert("PDF export libraries not found (html2canvas / jsPDF). If you want, I can wire them cleanly.");
+      return;
     }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "pt", "letter");
+
+    const sections = $$(".page-section");
+    for (let i = 0; i < sections.length; i++) {
+      const sec = sections[i];
+
+      // temporarily show each section for capture
+      const prevActive = sec.classList.contains("active");
+      $$(".page-section").forEach((s) => s.classList.remove("active"));
+      sec.classList.add("active");
+
+      // capture
+      // eslint-disable-next-line no-await-in-loop
+      const canvas = await window.html2canvas(sec, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      if (i > 0) doc.addPage();
+      doc.addImage(imgData, "PNG", 0, 0, imgW, Math.min(imgH, pageH));
+
+      // restore active if needed
+      sec.classList.toggle("active", prevActive);
+    }
+
+    // restore first active section if none
+    const active = $(".page-section.active");
+    if (!active) {
+      const first = $(".page-section");
+      if (first) first.classList.add("active");
+    }
+
+    doc.save("myKaarma-Training-Checklist.pdf");
+  }
+
+  /* =======================
+     EVENT DELEGATION
+  ======================= */
+  function onClick(e) {
+    const t = e.target;
+
+    // nav
+    const navBtn = t.closest(".nav-btn");
+    if (navBtn) {
+      const id = navBtn.getAttribute("data-target");
+      if (id) showSection(id);
+      saveState();
+      return;
+    }
+
+    // add-row (+)
+    const addRowBtn = t.closest(".add-row");
+    if (addRowBtn) {
+      handleAddRow(addRowBtn);
+      return;
+    }
+
+    // notes buttons
+    const notesBtn = t.closest("[data-notes-btn]");
+    if (notesBtn) {
+      handleNotesButton(notesBtn);
+      return;
+    }
+
+    // reset page
+    const resetBtn = t.closest(".clear-page-btn");
+    if (resetBtn) {
+      const section = resetBtn.closest(".page-section");
+      resetPage(section);
+      return;
+    }
+
+    // support tickets add card
+    const addTicket = t.closest(".add-ticket-btn");
+    if (addTicket) {
+      handleAddTicket(addTicket);
+      return;
+    }
+
+    // add trainer (FIXED)
+    const addTrainer = t.closest("[data-add-trainer]");
+    if (addTrainer) {
+      handleAddTrainer(addTrainer);
+      return;
+    }
+
+    // remove trainer
+    const removeTrainer = t.closest("[data-remove-trainer]");
+    if (removeTrainer) {
+      handleRemoveTrainer(removeTrainer);
+      return;
+    }
+
+    // PDF button
+    if (t && t.id === "savePDF") {
+      saveAllPagesAsPDF();
+      return;
+    }
+  }
+
+  function onInput(e) {
+    const el = e.target;
+
+    // ticket number enables status
+    if (el.classList.contains("ticket-number-input")) {
+      handleTicketNumberInput(el);
+      return;
+    }
+
+    // dealership name display
+    if (el.id === "dealershipNameInput") {
+      syncDealershipName();
+      saveState();
+      return;
+    }
+
+    // any other field -> save
+    if (isTextLike(el)) saveState();
+  }
+
+  function onChange(e) {
+    const el = e.target;
+
+    // ghost selects
+    if (el && el.tagName === "SELECT") refreshGhostSelect(el);
+
+    // ticket status moves card
+    if (el.classList.contains("ticket-status-select")) {
+      const card = el.closest(".ticket-group");
+      if (card) {
+        moveTicketCardByStatus(card, el.value);
+        saveState();
+      }
+      return;
+    }
+
+    if (isTextLike(el) || el?.tagName === "INPUT") saveState();
   }
 
   /* =======================
      INIT
   ======================= */
-  function init() {
-    if (DEBUG) console.log("[myKaarma] script.js init OK");
-
-    initNav();
-
-    normalizeNotesButtons(document);
-    ensureTableExpandButtons(document);
-
-    initRowModal();
-    initTableModalClose();
-    initExpandButtons();
-
-    initResetButtons();
-    initAddRowTables();
-    initNotesButtons();
-
-    // ✅ Clean, non-colliding add systems
-    initAdditionalTrainerAdd();
-    initCloneAddButtons();
-
-    initOnsiteDateHelper();
-
-    ensureStableFieldIds(document);
-    restoreState(document);
-    applyGhostStyling(document);
-
-    const active = $(".page-section.active")?.id || $(".page-section")?.id;
-    if (active) activatePage(active);
-
-    captureState(document);
+  function ensureFlashCSS() {
+    // Adds a tiny CSS helper if you didn’t already define it.
+    if ($("#mkFlashStyle")) return;
+    const style = document.createElement("style");
+    style.id = "mkFlashStyle";
+    style.textContent = `
+      .mk-flash {
+        outline: 2px solid rgba(255, 165, 0, .9);
+        outline-offset: 3px;
+        border-radius: 10px;
+        transition: outline-color .25s ease;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
+  function init() {
+    ensureFlashCSS();
+    initNav();
+    initGhostSelects();
+
+    // load state AFTER basic DOM is ready
+    const state = loadState();
+    if (state) applyState(state);
+
+    // if still no active section, show first
+    if (!$(".page-section.active")) {
+      const first = $(".page-section");
+      if (first?.id) showSection(first.id);
+    }
+
+    // sync dealership name display
+    syncDealershipName();
+
+    document.addEventListener("click", onClick, true);
+    document.addEventListener("input", onInput, true);
+    document.addEventListener("change", onChange, true);
+
+    log("init done");
+  }
+
+  // DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
