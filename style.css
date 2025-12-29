@@ -1747,59 +1747,57 @@ button.remove-row{
   display:none !important;
 }
 
-/* =========================================================
-   1) DATES: make date inputs match the SAME width as other inputs
-   (use the same right-side width variable)
-========================================================= */
-#dealership-info{
-  /* make Dealership Info match the global right-side width */
-  --di-input-width: var(--input-width);
-}
+/* =======================================================
+   HOTFIX OVERRIDES (paste at VERY bottom of style.css)
+   - Fix giant date inputs
+   - Fix select ghost/placeholder color (incl. DMS)
+   - Fix Additional POC + button color/shape
+   - Hide + on cloned support tickets + round right side
+======================================================= */
 
-#dealership-info .training-dates-row .date-stack,
-#dealership-info .onsite-training-dates-row .date-stack{
+/* ---------- 1) DATE INPUTS: never stretch / never grow ---------- */
+.section-block .checklist-row input[type="date"],
+.section-block input[type="date"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  line-height:34px !important;
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-#dealership-info .training-dates-row .date-stack input[type="date"],
-#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  font-size:13px !important;
-  border-radius:var(--radius-sm) !important;
-  box-sizing:border-box !important;
+  align-self:center !important;
   -webkit-appearance:none !important;
   appearance:none !important;
+  box-shadow:none !important;
+  border-radius:var(--radius-sm) !important;
+  padding:7px 10px !important;
 }
 
-/* =========================================================
-   2) ADDITIONAL POC (+): force correct orange + shape
-   (targets any add button inside the Additional POC card)
-========================================================= */
-#dealership-info .additional-poc-card .input-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  margin-left:auto !important;
-}
-
-#dealership-info .additional-poc-card .input-plus input[type="text"]{
-  flex:1 1 auto !important;
-  min-width:0 !important;
+/* If you have stacked date rows (date-stack), keep them tight */
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  flex:0 0 auto !important;
+  width:100% !important;
   height:34px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+  min-height:34px !important;
+  max-height:34px !important;
 }
 
-#dealership-info .additional-poc-card .input-plus button,
-#dealership-info .additional-poc-card .input-plus button[data-add-poc],
-#dealership-info .additional-poc-card .input-plus .poc-add-btn{
+/* ---------- 2) GHOST SELECT TEXT: same grey everywhere ---------- */
+/* Works in modern Chrome/Safari (your environment) */
+select:has(option[data-ghost="true"]:checked){
+  color:#9ca3af !important;
+}
+select:has(option[value=""]:checked){
+  color:#9ca3af !important;
+}
+
+/* Your existing helper class still supported */
+select.is-placeholder{ color:#9ca3af !important; }
+
+/* ---------- 3) ADDITIONAL POC (+): match Trainer (+) style ---------- */
+/* Works whether you used .poc-add-btn OR just data-add-poc */
+#dealership-info .input-plus button[data-add-poc],
+#dealership-info .input-plus .poc-add-btn{
   width:34px !important;
   min-width:34px !important;
   height:34px !important;
@@ -1817,66 +1815,25 @@ button.remove-row{
   line-height:1 !important;
   cursor:pointer !important;
 }
-#dealership-info .additional-poc-card .input-plus button:hover{
+#dealership-info .input-plus button[data-add-poc]:hover,
+#dealership-info .input-plus .poc-add-btn:hover{
   background:#ff8b42 !important;
 }
 
-/* Added POC rows (the ones created after +): full rounded right side too */
-#dealership-info #additionalPocsContainer input[type="text"]{
-  border-radius:var(--radius-sm) !important;
+/* Ensure the POC base input is attached to the + button nicely */
+#dealership-info .input-plus input{
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
 
-/* =========================================================
-   3) ALL placeholders/ghost text = same grey everywhere
-========================================================= */
-:root{ --placeholder-grey:#9ca3af; }
-
-/* inputs + textareas */
-input::placeholder,
-textarea::placeholder{
-  color:var(--placeholder-grey) !important;
-  opacity:1 !important;
+/* ---------- 4) SUPPORT TICKETS: no + button on added cards ---------- */
+#support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{
+  display:none !important;
 }
 
-/* selects: when ghost/placeholder option is active (your JS toggles .is-placeholder) */
-select.is-placeholder{
-  color:var(--placeholder-grey) !important;
+/* When + is hidden, the ticket number input must have rounded right side */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{
+  display:block !important;
 }
-
-/* date "ghost" style (your JS uses .is-placeholder on date inputs too) */
-input[type="date"].is-placeholder{ color:var(--placeholder-grey) !important; }
-input[type="date"].is-placeholder::-webkit-datetime-edit{ color:var(--placeholder-grey) !important; }
-
-/* DMS specifically (in case another rule overrides it) */
-#dms-integration select.is-placeholder{
-  color:var(--placeholder-grey) !important;
-}
-
-/* =========================================================
-   HARD FIX — TRAINING DATE INPUTS
-   Force SAME size as all other right-side inputs
-========================================================= */
-
-/* Lock the date-stack to the same width used everywhere else */
-.training-dates-row .date-stack,
-.onsite-training-dates-row .date-stack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-}
-
-/* Lock the actual date inputs */
-.training-dates-row .date-stack input[type="date"],
-.onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  font-size:13px !important;
-  line-height:1.2 !important;
-  border-radius:var(--radius-sm) !important;
-  box-sizing:border-box !important;
-
-  /* kill browser native sizing */
-  -webkit-appearance:none !important;
-  appearance:none !important;
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
+  border-radius:var(--radius-sm) !important; /* BOTH sides rounded */
 }
