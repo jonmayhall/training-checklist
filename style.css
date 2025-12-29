@@ -1677,60 +1677,91 @@ button.remove-row{
 }
 
 /* =======================================================
-   FIX: Additional POC (+) should match Additional Trainer (+)
-   - Same orange, same size (34px), same rounded right edge
-   - Same attached “input + button” look
-   - Forces the POC plus to use the SAME styling as .trainer-add-btn
+   FIX: Additional POC (+) — MATCH Trainer (+) EXACTLY
+   - Orange attached 34px button
+   - Pill input (left-rounded only)
+   - Correct width inside the POC mini-card
+   - Added POC rows (after +) fully rounded on right
    Paste at VERY BOTTOM of style.css
 ======================================================= */
 
-/* Make the Additional POC input+button wrapper behave like Trainers */
-#dealership-info .additional-poc-card .input-plus{
+/* Base "Additional POC" integrated row container */
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
   display:flex !important;
   align-items:stretch !important;
+  gap:0 !important;
+
+  /* match the other fields width in this mini-card */
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
+
   margin-left:auto !important;
-  gap:0 !important;
+  min-width:0 !important;
 }
 
-/* Input: attached left, flat right edge (so button can attach) */
-#dealership-info .additional-poc-card .input-plus input[type="text"]{
+/* Base "Additional POC" name input (pill, left rounded only) */
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus input[type="text"]{
   flex:1 1 auto !important;
   width:auto !important;
   min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+/* Force the + button to be the SAME as Trainer (+) */
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc],
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus .poc-add-btn{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+
+  margin-left:-1px !important;
+
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  padding:0 !important;
+  cursor:pointer !important;
+  box-shadow:none !important;
+}
+
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]:hover,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus .poc-add-btn:hover{
+  background:#ff8b42 !important;
+}
+
+/* IMPORTANT: make sure the base input isn't being shortened incorrectly */
+#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
+  .checklist-row.integrated-plus .input-plus{
+  width:var(--di-input-width) !important;
+}
+
+/* Added POC rows (the ones created after pressing +): full rounded BOTH sides */
+#dealership-info #additionalPocsContainer input[type="text"],
+#dealership-info #additionalPocsContainer .checklist-row input[type="text"]{
   height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-/* Button: force SAME look as trainer-add-btn */
-#dealership-info .additional-poc-card .input-plus button,
-#dealership-info .additional-poc-card .input-plus .trainer-add-btn,
-#dealership-info .additional-poc-card .input-plus [data-add-poc]{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-
-/* Hover: same as trainer */
-#dealership-info .additional-poc-card .input-plus button:hover,
-#dealership-info .additional-poc-card .input-plus [data-add-poc]:hover{
-  background:#ff8b42 !important;
+  border-radius:var(--radius-sm) !important; /* fully rounded right edge */
 }
