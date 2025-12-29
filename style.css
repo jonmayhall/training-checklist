@@ -753,6 +753,49 @@ main{
   border-color:var(--orange);
 }
 
+/* =========================================
+   FORM CONTROLS (existing)
+========================================= */
+
+.checklist-row input,
+.checklist-row select,
+textarea {
+  height: 42px;
+  border-radius: 12px;
+  /* whatever you already have */
+}
+
+/* =========================================
+   INPUT + PLUS BUTTON (ADD TRAINER FIX)
+   ⬇⬇⬇ PASTE BELOW THIS LINE ⬇⬇⬇
+========================================= */
+
+.input-plus{
+  display:flex;
+  align-items:stretch;
+  width:100%;
+  min-width:0;
+}
+
+.input-plus input{
+  flex:1;
+  min-width:0;
+  height:42px;              /* MUST match your normal inputs */
+  border-radius:12px 0 0 12px;
+}
+
+.input-plus .plus-btn{
+  width:44px;
+  height:42px;
+  border-radius:0 12px 12px 0;
+}
+
+.input-plus .remove-btn{
+  width:44px;
+  height:42px;
+  border-radius:0 12px 12px 0;
+}
+
 /* =======================
    TABLES
 ======================= */
@@ -1656,6 +1699,7 @@ main{
 
   .training-table{ min-width:760px; }
 }
+
 
 /* =========================================================
    ROW POPUP MODAL — Training Tables + Opcodes
