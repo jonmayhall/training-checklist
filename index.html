@@ -300,38 +300,49 @@
                 </div>
               </div>
 
-              <!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
-              <div class="mini-card additional-poc-card" data-base="true">
-                <div class="checklist-row integrated-plus">
-                  <label>Additional POC</label>
-                  <input type="text" placeholder="Enter name" />
-                  <button
-                    type="button"
-                    class="add-row additional-poc-add"
-                    title="Add another contact"
-                    aria-label="Add another contact"
-                  >
-                    +
-                  </button>
-                </div>
+            <!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
+<div class="mini-card additional-poc-card" data-base="true">
+  <div class="checklist-row integrated-plus indent-sub" data-base="true">
+    <label>Additional POC</label>
 
-                <div class="checklist-row indent-sub">
-                  <label>Role</label>
-                  <input type="text" placeholder="Enter role" />
-                </div>
+    <div class="input-plus">
+      <input
+        id="additionalPocInput"
+        type="text"
+        placeholder="Enter name"
+        autocomplete="off"
+      />
 
-                <div class="checklist-row indent-sub">
-                  <label>Cell</label>
-                  <input type="text" placeholder="Enter cell" />
-                </div>
+      <button
+        type="button"
+        class="poc-add-btn"
+        data-add-poc
+        title="Add another contact"
+        aria-label="Add another contact"
+      >
+        +
+      </button>
+    </div>
+  </div>
 
-                <div class="checklist-row indent-sub">
-                  <label>Email</label>
-                  <input type="email" placeholder="Enter company email" />
-                </div>
-              </div>
-            </div>
-          </div>
+  <!-- Added POCs render here -->
+  <div id="additionalPocsContainer" class="integrated-plus-container"></div>
+
+  <div class="checklist-row indent-sub">
+    <label>Role</label>
+    <input type="text" placeholder="Enter role" />
+  </div>
+
+  <div class="checklist-row indent-sub">
+    <label>Cell</label>
+    <input type="text" placeholder="Enter cell" />
+  </div>
+
+  <div class="checklist-row indent-sub">
+    <label>Email</label>
+    <input type="email" placeholder="Enter company email" />
+  </div>
+</div>
 
           <!-- ================= DEALERSHIP ADDRESS ================= -->
           <div class="section-block" id="dealership-address-card">
