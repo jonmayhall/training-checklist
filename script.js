@@ -441,55 +441,65 @@
        div#additionalTrainersContainer
      - NO remove buttons
   ======================= */
-  function initAdditionalTrainerAdd() {
-    document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest("[data-add-trainer]");
-      if (!addBtn) return;
+ /* =======================
+   ADDITIONAL TRAINER (+)
+   - CAPTURE PHASE so nothing can swallow the click
+   - stops propagation so other ".add-row" systems can’t interfere
+======================= */
+function initAdditionalTrainerAdd() {
+  const handler = (e) => {
+    const addBtn = e.target.closest("[data-add-trainer]");
+    if (!addBtn) return;
 
-      if (addBtn.tagName === "A") e.preventDefault();
+    // Stop other handlers from eating this click
+    e.preventDefault();
+    e.stopPropagation();
 
-      const container = $("#additionalTrainersContainer");
-      const baseInput = $("#additionalTrainerInput");
-      if (!container || !baseInput) return;
+    const container = document.getElementById("additionalTrainersContainer");
+    const baseInput = document.getElementById("additionalTrainerInput");
+    if (!container || !baseInput) return;
 
-      const name = (baseInput.value || "").trim();
-      if (!name) {
-        flash(baseInput.closest(".checklist-row") || baseInput);
-        focusNoScroll(baseInput);
-        return;
-      }
-
-      // injected row (standalone input so right side is rounded in CSS)
-      const row = document.createElement("div");
-      row.className = "checklist-row indent-sub added-trainer-row";
-
-      row.innerHTML = `
-        <label></label>
-        <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name" autocomplete="off">
-      `;
-
-      container.appendChild(row);
-
-      // clear base
-      baseInput.value = "";
-      baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+    const name = (baseInput.value || "").trim();
+    if (!name) {
+      flash(baseInput.closest(".checklist-row") || baseInput);
       focusNoScroll(baseInput);
+      return;
+    }
 
-      // ids + save
-      ensureStableFieldIds(row);
-      captureState(document);
-      flash(row);
-    });
+    const row = document.createElement("div");
+    row.className = "checklist-row indent-sub added-trainer-row";
+    row.innerHTML = `
+      <label></label>
+      <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name" autocomplete="off">
+    `;
+    container.appendChild(row);
 
-    // keyboard support if something non-button triggers
-    document.addEventListener("keydown", (e) => {
+    baseInput.value = "";
+    baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+    focusNoScroll(baseInput);
+
+    ensureStableFieldIds(row);
+    captureState(document);
+    flash(row);
+  };
+
+  // ✅ CAPTURE PHASE (true) so other listeners can’t block us
+  document.addEventListener("click", handler, true);
+
+  // keyboard support (also capture)
+  document.addEventListener(
+    "keydown",
+    (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
       const addBtn = e.target.closest("[data-add-trainer]");
       if (!addBtn) return;
       e.preventDefault();
+      e.stopPropagation();
       addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-  }
+    },
+    true
+  );
+}
 
   /* =======================
      CARD CLONER (+) — Additional POC cards
