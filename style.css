@@ -1874,3 +1874,220 @@ button.add-trainer-btn {
   justify-content: center;
   line-height: 1;
 }
+
+/* =========================================================
+   HOTFIX PACK — rounded corners, input sizing, expand button
+   Paste at the BOTTOM of style.css
+========================================================= */
+
+/* -----------------------------
+   1) Universal input sizing (prevents "massive" date boxes)
+-------------------------------- */
+.page-section input[type="text"],
+.page-section input[type="date"],
+.page-section select,
+.page-section textarea {
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.page-section input[type="text"],
+.page-section input[type="date"],
+.page-section select {
+  height: 40px;              /* match your normal input height */
+  padding: 10px 12px;
+  line-height: 1.2;
+  border-radius: 10px;       /* your standard rounded look */
+}
+
+/* Make date inputs behave like text inputs (some browsers are weird) */
+.page-section input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* -----------------------------
+   2) FIX: Right rounded corners missing on ADDED/CLONED lines
+   - Applies to table cells + cloned cards + any flex input rows
+-------------------------------- */
+
+/* Ensure inputs have BOTH right corners by default */
+.page-section input[type="text"],
+.page-section input[type="date"] {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* If a container is clipping the input, don't clip the corners */
+.page-section .checklist-row,
+.page-section .ticket-number-wrap,
+.page-section .input-wrap,
+.page-section .input-plus-wrap,
+.page-section .row-actions,
+.page-section .field-row {
+  overflow: visible !important;
+}
+
+/* -----------------------------
+   3) When an input sits NEXT TO a "+" button (grouped layout)
+   - Input should keep left corners
+   - Input should NOT have right corners (button owns the far-right radius)
+   - Button should have full right rounding
+   This prevents "square seam" + fixes missing corners on clones
+-------------------------------- */
+
+/* Common patterns: input+button inside a flex wrapper */
+.ticket-number-wrap,
+.input-plus-wrap,
+.checklist-row.has-plus,
+.field-row.has-plus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* If the + button is physically attached (no gap), use this attached style */
+.ticket-number-wrap.attached,
+.input-plus-wrap.attached {
+  gap: 0;
+}
+
+/* ATTACHED mode: input + button look like one control */
+.ticket-number-wrap.attached input[type="text"],
+.ticket-number-wrap.attached input[type="date"],
+.input-plus-wrap.attached input[type="text"],
+.input-plus-wrap.attached input[type="date"] {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* The + button becomes the right side of the pill */
+.ticket-number-wrap.attached .add-ticket-btn,
+.input-plus-wrap.attached .add-row,
+.input-plus-wrap.attached button.add-row {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* NON-attached mode (gap exists): input keeps its own rounding */
+.ticket-number-wrap:not(.attached) input[type="text"],
+.input-plus-wrap:not(.attached) input[type="text"],
+.ticket-number-wrap:not(.attached) input[type="date"],
+.input-plus-wrap:not(.attached) input[type="date"] {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* -----------------------------
+   4) Tables: ensure text inputs in cloned rows keep rounding
+-------------------------------- */
+table.training-table input[type="text"],
+table.training-table input[type="date"],
+table.training-table select {
+  height: 36px;
+  padding: 8px 10px;
+  border-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* Notes icon buttons inside tables can shrink things if line-height is off */
+table.training-table td {
+  vertical-align: middle;
+}
+
+/* -----------------------------
+   5) "Additional Trainer" / cloned cards:
+   force consistent input rounding + prevent wrapper clipping
+-------------------------------- */
+.additional-trainer-card,
+.additional-poc-card,
+.trainer-card {
+  overflow: visible !important;
+}
+
+.additional-trainer-card input[type="text"],
+.additional-poc-card input[type="text"],
+.trainer-card input[type="text"] {
+  border-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* If your "added trainer line" uses a grid/flex with columns, stop squaring */
+.additional-trainer-card .checklist-row,
+.additional-poc-card .checklist-row,
+.trainer-card .checklist-row {
+  overflow: visible !important;
+}
+
+/* -----------------------------
+   6) Expand button styling + clickability
+-------------------------------- */
+.mk-table-expand-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: rgba(255,255,255,.9);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.mk-table-expand-btn:active {
+  transform: translateY(1px);
+}
+
+/* Put expand button next to the + button nicely */
+.table-footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* -----------------------------
+   7) Add-row button sizing (keeps it from being too wide)
+-------------------------------- */
+button.add-row,
+.add-ticket-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* If any "+" button is stretching full width somewhere, stop it */
+button.add-row {
+  flex: 0 0 auto !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+}
+
+/* -----------------------------
+   8) Notes buttons sizing consistency
+-------------------------------- */
+.notes-icon-btn,
+.notes-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.notes-icon-btn .notes-svg {
+  width: 18px;
+  height: 18px;
+}
