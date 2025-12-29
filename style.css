@@ -6,7 +6,9 @@
    ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
    ✅ Removes the global 42px override that caused giant date inputs
    ✅ Fixes Trainers "+": orange, 34px, not wide, and added rows rounded
-   ✅ No remove buttons (hidden)
+   ✅ NO remove buttons anywhere
+   ✅ NEW: Added Trainers/POCs inputs have fully-rounded right sides
+   ✅ NEW: Added Support Tickets have NO plus button + ticket # input rounded on right
 ======================================================= */
 
 /* =======================
@@ -564,7 +566,6 @@ main{
   border-bottom-left-radius:var(--radius-sm);
 }
 
-
 /* =======================================================
    DEALERSHIP INFO PAGE FIXES (dates + POC widths)
 ======================================================= */
@@ -699,9 +700,6 @@ main{
 
 /* =========================
    TRAINERS: INPUT + PLUS (CORRECT)
-   - This fixes your screenshot:
-     input gets left rounding only,
-     + is orange, 34px, attached
 ========================= */
 #trainers-deployment .input-plus{
   display:flex !important;
@@ -719,20 +717,6 @@ main{
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
-
-/* Added trainer rows MUST be standalone input with full rounding */
-#trainers-deployment #additionalTrainersContainer .added-trainer-row input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row.added-trainer-row input[type="text"]{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important; /* RIGHT side rounded */
-}
-
 #trainers-deployment .input-plus .trainer-add-btn{
   width:34px !important;
   min-width:34px !important;
@@ -753,6 +737,26 @@ main{
 }
 #trainers-deployment .input-plus .trainer-add-btn:hover{
   background:#ff8b42 !important;
+}
+
+/* ✅ NEW: Added trainer rows MUST be standalone input with FULL rounding */
+#trainers-deployment #additionalTrainersContainer input[type="text"],
+#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) !important; /* RIGHT side rounded */
+}
+
+/* ✅ NEW: Added POCs container inputs should be fully rounded too */
+#dealership-info #additionalPocsContainer input[type="text"],
+#dealership-info #additionalPocsContainer .checklist-row input[type="text"]{
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) !important;
 }
 
 /* =======================
@@ -1120,6 +1124,23 @@ main{
   align-items:center;
   justify-content:center;
 }
+
+/* ✅ NEW: Added ticket cards should NOT have a plus button */
+#support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{
+  display:none !important;
+}
+
+/* ✅ NEW: Added ticket cards ticket-number input must have rounded RIGHT side */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
+  border-radius:var(--radius-sm) !important;
+  border-right:1px solid var(--border) !important;
+}
+
+/* When plus is hidden, ensure the input takes full width nicely */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{
+  gap:0 !important;
+}
+
 #support-tickets .ticket-row.ticket-summary-row{
   grid-template-columns:1fr;
   align-items:start;
