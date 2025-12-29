@@ -229,18 +229,6 @@
     applyGhostStyling(root);
   }
 
-  document.addEventListener("input", (e) => {
-    const t = e.target;
-    if (!t || !t.matches("input, select, textarea")) return;
-    captureState(document);
-  });
-
-  document.addEventListener("change", (e) => {
-    const t = e.target;
-    if (!t || !t.matches("input, select, textarea")) return;
-    captureState(document);
-  });
-
   /* =======================
      PAGE NAVIGATION
   ======================= */
