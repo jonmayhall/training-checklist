@@ -48,111 +48,128 @@
 
       <!-- ========================= MAIN CONTENT ========================= -->
       <main>
-        <!-- =========================================================
-             PAGE 1 — TRAINERS & mK TEAM
-        ========================================================= -->
-        <section id="trainers-deployment" class="page-section active">
-          <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
-            Reset This Page
+     <!-- =========================================================
+         PAGE 1 — TRAINERS & mK TEAM
+========================================================= -->
+<section id="trainers-deployment" class="page-section active">
+  <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
+    Reset This Page
+  </button>
+
+  <h1>Trainers &amp; mK Team</h1>
+  <p class="page-subtitle">
+    Select the assigned lead trainer, add additional trainers, and capture the
+    deployment/CEM assignments.
+  </p>
+
+  <div class="grid-2">
+    <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
+    <div class="section-block">
+      <h2>Lead &amp; Additional Trainers</h2>
+
+      <!-- Lead Trainer -->
+      <div class="checklist-row">
+        <label class="sr-label">Lead Trainer</label>
+        <select id="leadTrainerSelect">
+          <option value="" data-ghost="true">Select lead trainer</option>
+          <option disabled>──────────</option>
+          <option>Christopher Eskew</option>
+          <option>Brian Button</option>
+          <option>Dana Barry</option>
+          <option disabled>──────────</option>
+          <option>Adam Jeffords</option>
+          <option>Alec Parker</option>
+          <option>Eliud Garcia</option>
+          <option>Joel Zavaleta</option>
+          <option>Kyle Leavitt</option>
+          <option>Lauren Ramos</option>
+          <option>Miles Krasic</option>
+          <option disabled>──────────</option>
+          <option>Anthony Carbone</option>
+          <option>Clyde Chapman</option>
+          <option>Dennitza Fernandez</option>
+          <option>Jackson Geraghty</option>
+          <option>Kevin Mullinax</option>
+          <option>Sharon Rusta</option>
+          <option>Terry Hart</option>
+        </select>
+      </div>
+
+      <!-- Additional Trainer (+) -->
+      <div class="checklist-row integrated-plus indent-sub" data-base="true">
+        <label>Additional Trainer</label>
+
+        <div class="input-plus">
+          <input
+            id="additionalTrainerInput"
+            type="text"
+            placeholder="Enter additional trainer name"
+            autocomplete="off"
+          />
+
+          <button
+            type="button"
+            class="trainer-add-btn"
+            data-add-trainer
+            title="Add another trainer"
+            aria-label="Add another trainer"
+          >
+            +
           </button>
+        </div>
+      </div>
 
-          <h1>Trainers &amp; mK Team</h1>
-          <p class="page-subtitle">
-            Select the assigned lead trainer, add additional trainers, and capture the
-            deployment/CEM assignments.
-          </p>
+      <!-- Added trainers render here -->
+      <div id="additionalTrainersContainer" class="integrated-plus-container"></div>
+    </div>
+    <!-- ✅ END Lead & Additional Trainers card -->
 
-          <div class="grid-2">
-            <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
-            <div class="section-block">
-              <h2>Lead &amp; Additional Trainers</h2>
+    <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
+    <div class="section-block">
+      <h2>Deployment &amp; Customer Engagement Manager</h2>
 
-              <!-- Lead Trainer -->
-              <div class="checklist-row">
-                <label class="sr-label">Lead Trainer</label>
-                <select id="leadTrainerSelect">
-                  <option value="" data-ghost="true">Select lead trainer</option>
-                  <option disabled>──────────</option>
-                  <option>Christopher Eskew</option>
-                  <option>Brian Button</option>
-                  <option>Dana Barry</option>
-                  <option disabled>──────────</option>
-                  <option>Adam Jeffords</option>
-                  <option>Alec Parker</option>
-                  <option>Eliud Garcia</option>
-                  <option>Joel Zavaleta</option>
-                  <option>Kyle Leavitt</option>
-                  <option>Lauren Ramos</option>
-                  <option>Miles Krasic</option>
-                  <option disabled>──────────</option>
-                  <option>Anthony Carbone</option>
-                  <option>Clyde Chapman</option>
-                  <option>Dennitza Fernandez</option>
-                  <option>Jackson Geraghty</option>
-                  <option>Kevin Mullinax</option>
-                  <option>Sharon Rusta</option>
-                  <option>Terry Hart</option>
-                </select>
-              </div>
+      <div class="checklist-row">
+        <label>Deployment Manager</label>
+        <input
+          id="deploymentManager"
+          type="text"
+          placeholder="Enter Deployment Manager assigned"
+          autocomplete="off"
+        />
+      </div>
 
-             <!-- Additional Trainer (+) -->
-<div class="checklist-row integrated-plus indent-sub" data-base="true">
-  <label>Additional Trainer</label>
+      <div class="checklist-row">
+        <label>ServiceCart ASC</label>
+        <input
+          id="serviceCartASC"
+          type="text"
+          placeholder="Enter ASC assigned"
+          autocomplete="off"
+        />
+      </div>
 
-  <div class="input-plus">
-    <input
-      id="additionalTrainerInput"
-      type="text"
-      placeholder="Enter additional trainer name"
-      autocomplete="off"
-    />
+      <div class="checklist-row">
+        <label>Scheduler ASC</label>
+        <input
+          id="schedulerASC"
+          type="text"
+          placeholder="Enter ASC assigned"
+          autocomplete="off"
+        />
+      </div>
 
-    <button
-      type="button"
-      class="trainer-add-btn"
-      data-add-trainer
-      title="Add another trainer"
-      aria-label="Add another trainer"
-    >
-      +
-    </button>
+      <div class="checklist-row">
+        <label>CEM</label>
+        <input
+          id="cemAssigned"
+          type="text"
+          placeholder="Enter CEM assigned"
+          autocomplete="off"
+        />
+      </div>
+    </div>
   </div>
-</div>
-
-<!-- Added trainers render here -->
-<div id="additionalTrainersContainer" class="integrated-plus-container"></div>
-
-            <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
-            <div class="section-block">
-              <h2>Deployment &amp; Customer Engagement Manager</h2>
-
-              <div class="checklist-row">
-                <label>Deployment Manager</label>
-                <input
-                  id="deploymentManager"
-                  type="text"
-                  placeholder="Enter Deployment Manager assigned"
-                  autocomplete="off"
-                />
-              </div>
-
-              <div class="checklist-row">
-                <label>ServiceCart ASC</label>
-                <input id="serviceCartASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
-              </div>
-
-              <div class="checklist-row">
-                <label>Scheduler ASC</label>
-                <input id="schedulerASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
-              </div>
-
-              <div class="checklist-row">
-                <label>CEM</label>
-                <input id="cemAssigned" type="text" placeholder="Enter CEM assigned" autocomplete="off" />
-              </div>
-            </div>
-          </div>
-        </section>
+</section>
 
         <!-- ========================================================= -->
         <!-- PAGE 2: DEALERSHIP INFO -->
