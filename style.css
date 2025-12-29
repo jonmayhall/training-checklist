@@ -705,7 +705,11 @@ main{
   max-width:100%;
   min-width:0;
 }
-#trainers-deployment #additionalTrainersContainer .add-row{ display:none !important; }
+/* Hide + only on cloned trainer cards, keep it on the base card */
+#trainers-deployment #additionalTrainersContainer [data-base="false"] .add-row,
+#trainers-deployment #additionalTrainersContainer [data-clone="true"] .add-row{
+  display:none !important;
+}
 
 /* =======================
    TABLES
