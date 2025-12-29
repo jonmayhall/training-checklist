@@ -1748,19 +1748,47 @@ button.remove-row{
 }
 
 /* =========================================================
-   FIX 1) Additional POC (+) button — make it match Trainers (+)
-   (orange, 34x34, attached, rounded right)
+   1) DATES: make date inputs match the SAME width as other inputs
+   (use the same right-side width variable)
 ========================================================= */
-#dealership-info .checklist-row.integrated-plus .input-plus{
+#dealership-info{
+  /* make Dealership Info match the global right-side width */
+  --di-input-width: var(--input-width);
+}
+
+#dealership-info .training-dates-row .date-stack,
+#dealership-info .onsite-training-dates-row .date-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+}
+
+#dealership-info .training-dates-row .date-stack input[type="date"],
+#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  font-size:13px !important;
+  border-radius:var(--radius-sm) !important;
+  box-sizing:border-box !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
+
+/* =========================================================
+   2) ADDITIONAL POC (+): force correct orange + shape
+   (targets any add button inside the Additional POC card)
+========================================================= */
+#dealership-info .additional-poc-card .input-plus{
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
   margin-left:auto !important;
 }
 
-#dealership-info .checklist-row.integrated-plus .input-plus input[type="text"]{
+#dealership-info .additional-poc-card .input-plus input[type="text"]{
   flex:1 1 auto !important;
   min-width:0 !important;
   height:34px !important;
@@ -1769,9 +1797,9 @@ button.remove-row{
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
 
-/* catches your POC add button whether it's .poc-add-btn or just [data-add-poc] */
-#dealership-info .checklist-row.integrated-plus .input-plus button[data-add-poc],
-#dealership-info .checklist-row.integrated-plus .input-plus .poc-add-btn{
+#dealership-info .additional-poc-card .input-plus button,
+#dealership-info .additional-poc-card .input-plus button[data-add-poc],
+#dealership-info .additional-poc-card .input-plus .poc-add-btn{
   width:34px !important;
   min-width:34px !important;
   height:34px !important;
@@ -1789,48 +1817,37 @@ button.remove-row{
   line-height:1 !important;
   cursor:pointer !important;
 }
-
-#dealership-info .checklist-row.integrated-plus .input-plus button[data-add-poc]:hover,
-#dealership-info .checklist-row.integrated-plus .input-plus .poc-add-btn:hover{
+#dealership-info .additional-poc-card .input-plus button:hover{
   background:#ff8b42 !important;
 }
 
-/* Added POC rows: fully rounded (both sides) */
+/* Added POC rows (the ones created after +): full rounded right side too */
 #dealership-info #additionalPocsContainer input[type="text"]{
   border-radius:var(--radius-sm) !important;
 }
 
-
 /* =========================================================
-   FIX 2) Training date inputs still too big — force correct width + height
-   (these are the stacked date boxes on Dealership Info)
+   3) ALL placeholders/ghost text = same grey everywhere
 ========================================================= */
-#dealership-info .training-dates-row .date-stack,
-#dealership-info .onsite-training-dates-row .date-stack{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
+:root{ --placeholder-grey:#9ca3af; }
+
+/* inputs + textareas */
+input::placeholder,
+textarea::placeholder{
+  color:var(--placeholder-grey) !important;
+  opacity:1 !important;
 }
 
-#dealership-info .training-dates-row .date-stack input[type="date"],
-#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
-  height:34px !important;
-  max-height:34px !important;
-  padding:7px 10px !important;
-  font-size:13px !important;
-  line-height:1.2 !important;
-  border-radius:var(--radius-sm) !important;
-  box-sizing:border-box !important;
-  -webkit-appearance:none !important;
-  appearance:none !important;
+/* selects: when ghost/placeholder option is active (your JS toggles .is-placeholder) */
+select.is-placeholder{
+  color:var(--placeholder-grey) !important;
 }
 
+/* date "ghost" style (your JS uses .is-placeholder on date inputs too) */
+input[type="date"].is-placeholder{ color:var(--placeholder-grey) !important; }
+input[type="date"].is-placeholder::-webkit-datetime-edit{ color:var(--placeholder-grey) !important; }
 
-/* =========================================================
-   FIX 3) DMS dropdown ghost text — grey like other placeholders
-   (only when the select has class is-placeholder)
-========================================================= */
+/* DMS specifically (in case another rule overrides it) */
 #dms-integration select.is-placeholder{
-  color:#9ca3af !important;
+  color:var(--placeholder-grey) !important;
 }
