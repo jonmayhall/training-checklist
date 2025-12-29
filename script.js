@@ -1,13 +1,14 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    FIXES:
-   - Add Trainer (+) works (matches Support Ticket pattern)
-   - Add POC (+) works (same pattern)
+   - Sidebar/menu nav works (sections toggle .active)
+   - Add Trainer (+) works (no "required" input; no remove buttons)
+   - Add POC (+) works (clones base mini-card; no remove buttons)
    - Add Row buttons for tables
-   - Notes buttons (open/scroll)
-   - Support Tickets add card gating
+   - Notes buttons scroll to notes
+   - Support Tickets add card gating + status routing
    - Reset This Page buttons
-   - LocalStorage save/restore for everything
+   - LocalStorage save/restore for fields + dynamic clones
 ======================================================= */
 
 (() => {
@@ -32,12 +33,21 @@
 
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") => `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
+    return (prefix = "mk") =>
+      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random()
+        .toString(16)
+        .slice(2)}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
 
-  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
+  const getSection = (el) =>
+    el?.closest?.(".page-section") || el?.closest?.("section") || null;
+
+  const isFormField = (el) =>
+    isEl(el) &&
+    (el.matches("input, select, textarea") ||
+      el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -45,14 +55,8 @@
     return el.getAttribute(AUTO_ID_ATTR);
   };
 
-  const isFormField = (el) =>
-    isEl(el) &&
-    (el.matches("input, select, textarea") ||
-      el.matches("[contenteditable='true']"));
-
   const getFieldValue = (el) => {
     if (!isFormField(el)) return null;
-
     if (el.matches("input[type='checkbox']")) return !!el.checked;
     if (el.matches("input[type='radio']")) return el.checked ? el.value : null;
     if (el.matches("input, select, textarea")) return el.value;
@@ -99,7 +103,6 @@
 
   const saveField = (el) => {
     if (!isFormField(el)) return;
-
     ensureId(el);
     const id = el.getAttribute(AUTO_ID_ATTR);
     const state = readState();
@@ -117,61 +120,86 @@
     });
   };
 
-  const assignIdsToAllFields = () => {
-    // assign IDs to existing fields so we can persist them
-    const fields = $$("input, select, textarea, [contenteditable='true']");
+  const assignIdsToAllFields = (root = document) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", root);
     fields.forEach((el) => ensureId(el));
   };
 
-  const clearSectionState = (sectionEl) => {
-    if (!sectionEl) return;
-
-    const state = readState();
-
-    // clear values in DOM + remove keys from storage for fields in this section
-    const fields = $$(`[${AUTO_ID_ATTR}]`, sectionEl);
-    fields.forEach((el) => {
-      const id = el.getAttribute(AUTO_ID_ATTR);
-      delete state[id];
-
-      // clear DOM
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else if (el.matches("input[type='radio']")) el.checked = false;
-      else if (el.matches("input, select, textarea")) el.value = "";
-      else if (el.matches("[contenteditable='true']")) el.textContent = "";
-    });
-
-    writeState(state);
-
-    // If the section has dynamic containers (trainers/POCs/tickets/tables), optionally trim to base.
-    trimDynamicToBase(sectionEl);
+  const scrollIntoViewNice = (el) => {
+    try {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      el.scrollIntoView(true);
+    }
   };
 
+  /* =======================
+     NAV (MENU BUTTONS)
+     - your CSS shows only .page-section.active
+     - sidebar buttons are .nav-btn[data-target="section-id"]
+  ======================= */
+  const setActiveSection = (targetId) => {
+    if (!targetId) return;
+
+    const allSections = $$(".page-section");
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    allSections.forEach((s) => s.classList.remove("active"));
+    target.classList.add("active");
+
+    // update nav buttons
+    $$(".nav-btn").forEach((b) => b.classList.remove("active"));
+    const activeBtn = $(`.nav-btn[data-target="${CSS.escape(targetId)}"]`);
+    if (activeBtn) activeBtn.classList.add("active");
+
+    // remember last page
+    const state = readState();
+    state.__activeSection = targetId;
+    writeState(state);
+
+    scrollIntoViewNice(target);
+  };
+
+  const initNav = () => {
+    const state = readState();
+    const remembered = state.__activeSection;
+
+    // If something is already active in HTML, keep it; otherwise use remembered; otherwise first section.
+    const alreadyActive = $(".page-section.active")?.id;
+    const first = $$(".page-section")[0]?.id;
+
+    setActiveSection(alreadyActive || remembered || first);
+  };
+
+  /* =======================
+     RESET THIS PAGE BUTTONS
+  ======================= */
   const trimDynamicToBase = (sectionEl) => {
-    // 1) Additional Trainers container: remove added rows
+    // Trainers: remove added rows
     const trainerContainer = $("#additionalTrainersContainer", sectionEl);
     if (trainerContainer) trainerContainer.innerHTML = "";
 
-    // 2) Additional POCs container: remove added rows
-    const pocContainer = $("#additionalPocsContainer", sectionEl);
-    if (pocContainer) pocContainer.innerHTML = "";
+    // POCs: remove added mini-cards (keep base)
+    $$(".additional-poc-card", sectionEl).forEach((card) => {
+      if (card.getAttribute("data-base") === "true") return;
+      card.remove();
+    });
 
-    // 3) Tables: keep first 1–3 template rows? (we’ll keep whatever is already there in HTML and remove rows added by JS cloning)
+    // Tables: remove cloned rows
     $$("table.training-table tbody", sectionEl).forEach((tb) => {
-      const rows = $$("tr", tb);
-      rows.forEach((tr) => {
+      $$("tr", tb).forEach((tr) => {
         if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
       });
     });
 
-    // 4) Support tickets: keep only base card in Open container
+    // Tickets: keep only base in Open
     const open = $("#openTicketsContainer", sectionEl);
     if (open) {
-      const groups = $$(".ticket-group", open);
-      groups.forEach((g) => {
+      $$(".ticket-group", open).forEach((g) => {
         if (g.getAttribute("data-base") !== "true") g.remove();
       });
-      // Clear base fields
+
       const base = $(".ticket-group[data-base='true']", open);
       if (base) {
         $$("input, textarea", base).forEach((f) => {
@@ -187,56 +215,60 @@
         }
       }
     }
-
-    // Also clear saved keys for any removed nodes? (We cleared by section fields already.)
   };
 
-  const scrollIntoViewNice = (el) => {
-    try {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch {
-      el.scrollIntoView(true);
-    }
+  const clearSectionState = (sectionEl) => {
+    if (!sectionEl) return;
+    const state = readState();
+
+    // remove saved keys for fields inside section
+    const fields = $$(`[${AUTO_ID_ATTR}]`, sectionEl);
+    fields.forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      delete state[id];
+
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else if (el.matches("input[type='radio']")) el.checked = false;
+      else if (el.matches("input, select, textarea")) el.value = "";
+      else if (el.matches("[contenteditable='true']")) el.textContent = "";
+    });
+
+    writeState(state);
+    trimDynamicToBase(sectionEl);
+  };
+
+  const onResetPage = (btn) => {
+    const section = getSection(btn);
+    clearSectionState(section);
   };
 
   /* =======================
-     DYNAMIC: ADD TRAINER / ADD POC
-     (matches the Support Ticket approach: gated add, create row, append)
+     ADD TRAINER (+)
+     - NO required input
+     - NO remove button on added rows
   ======================= */
-
-  const buildIntegratedRow = ({ labelText, placeholder, inputIdPrefix }) => {
+  const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
     wrap.className = "checklist-row integrated-plus indent-sub";
     wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
 
     const label = document.createElement("label");
-    label.textContent = labelText;
+    label.textContent = "Additional Trainer";
 
     const inputPlus = document.createElement("div");
     inputPlus.className = "input-plus";
 
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = placeholder;
+    input.placeholder = "Enter additional trainer name";
     input.autocomplete = "off";
-    input.id = `${inputIdPrefix}-${uid("row")}`;
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "remove-inline-btn";
-    removeBtn.textContent = "–";
-    removeBtn.title = "Remove";
-    removeBtn.setAttribute("aria-label", "Remove");
+    input.value = value;
 
     inputPlus.appendChild(input);
-    inputPlus.appendChild(removeBtn);
-
     wrap.appendChild(label);
     wrap.appendChild(inputPlus);
 
-    // persist new input
     ensureId(input);
-
     return wrap;
   };
 
@@ -245,76 +277,61 @@
     const container = $("#additionalTrainersContainer");
     if (!input || !container) return;
 
-    const name = (input.value || "").trim();
-
-    // Gate: require something in the input before adding
-    if (!name) {
-      input.focus();
-      input.classList.add("mk-field-error");
-      setTimeout(() => input.classList.remove("mk-field-error"), 600);
-      return;
-    }
-
-    const row = buildIntegratedRow({
-      labelText: "Additional Trainer",
-      placeholder: "Enter additional trainer name",
-      inputIdPrefix: "additionalTrainer",
-    });
-
-    const rowInput = $("input", row);
-    rowInput.value = name;
+    const name = (input.value || "").trim(); // allowed to be blank if you want
+    const row = buildTrainerRow(name);
 
     container.appendChild(row);
 
     // clear base input
     input.value = "";
     saveField(input);
-    saveField(rowInput);
+
+    // save new field
+    const rowInput = $("input", row);
+    if (rowInput) saveField(rowInput);
   };
 
-  const addPocRow = () => {
-    // These IDs are expected for POC. If yours are different, tell me and I’ll change it.
-    const input = $("#additionalPocInput");
-    const container = $("#additionalPocsContainer");
-    if (!input || !container) return;
+  /* =======================
+     ADD POC (+)
+     - Your HTML uses:
+       .additional-poc-card[data-base="true"]
+       button.additional-poc-add
+     - We CLONE the base mini-card, clear fields, remove the + button on clones
+     - NO required input
+     - NO remove buttons
+  ======================= */
+  const addPocCard = (btn) => {
+    const baseCard =
+      btn?.closest?.(".additional-poc-card") ||
+      $(".additional-poc-card[data-base='true']");
+    if (!baseCard) return;
 
-    const name = (input.value || "").trim();
+    const parent = baseCard.parentElement; // the grid wrapper
+    if (!parent) return;
 
-    if (!name) {
-      input.focus();
-      input.classList.add("mk-field-error");
-      setTimeout(() => input.classList.remove("mk-field-error"), 600);
-      return;
-    }
+    const clone = baseCard.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    const row = buildIntegratedRow({
-      labelText: "Additional POC",
-      placeholder: "Enter additional POC name",
-      inputIdPrefix: "additionalPoc",
+    // remove the "+" button from clones
+    const plus = $(".additional-poc-add", clone);
+    if (plus) plus.remove();
+
+    // clear fields + new ids
+    $$("input, select, textarea", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
     });
 
-    const rowInput = $("input", row);
-    rowInput.value = name;
+    parent.appendChild(clone);
 
-    container.appendChild(row);
-
-    input.value = "";
-    saveField(input);
-    saveField(rowInput);
-  };
-
-  const removeIntegratedRow = (btn) => {
-    const row = btn.closest(".checklist-row");
-    if (!row) return;
-
-    // remove saved key for the input in this row
-    const input = $("input, textarea, select", row);
-    if (input?.getAttribute(AUTO_ID_ATTR)) {
-      const state = readState();
-      delete state[input.getAttribute(AUTO_ID_ATTR)];
-      writeState(state);
-    }
-    row.remove();
+    // focus first input if present
+    const firstInput = $("input, textarea", clone);
+    if (firstInput) firstInput.focus();
   };
 
   /* =======================
@@ -331,23 +348,18 @@
     const rows = $$("tr", tbody);
     if (!rows.length) return;
 
-    const template = rows[rows.length - 1]; // clone last visible row
+    const template = rows[rows.length - 1];
     const clone = template.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-    // clear inputs/selects/checkboxes in clone + assign new mk ids
     $$("input, select, textarea", clone).forEach((el) => {
-      // clear value
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
 
-      // new id for persistence
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       saveField(el);
     });
-
-    // Notes button target stays the same; OK.
 
     tbody.appendChild(clone);
   };
@@ -358,35 +370,20 @@
   const toggleNotes = (btn) => {
     const targetId = btn.getAttribute("data-notes-target");
     if (!targetId) return;
-
     const target = document.getElementById(targetId);
     if (!target) return;
 
-    // If your CSS uses hidden class, toggle it. Otherwise just scroll.
-    const isHidden =
-      target.classList.contains("is-hidden") ||
-      target.hasAttribute("hidden") ||
-      getComputedStyle(target).display === "none";
-
-    // Show if hidden
+    // If hidden by your CSS classes, unhide best-effort
     if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
     if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
-    // If display none by default and you use a class like .collapsed, try toggling
-    if (isHidden) target.classList.add("mk-notes-open");
-
     scrollIntoViewNice(target);
-
-    // focus textarea if present
     const ta = $("textarea", target);
     if (ta) ta.focus();
   };
 
   /* =======================
      SUPPORT TICKETS
-     - Add ticket card only if current card is complete
-     - Enable Status select once ticket number entered
-     - Move cards between containers based on status
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -399,8 +396,6 @@
     const num = $(".ticket-number-input", card)?.value?.trim() || "";
     const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
     const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
-
-    // Match your disclaimer intent: require these before adding a new card
     return !!(num && url && sum);
   };
 
@@ -426,19 +421,16 @@
     const currentCard = btn.closest(".ticket-group");
     if (!currentCard) return;
 
-    // Must be complete before adding another
     if (!isTicketCardComplete(currentCard)) {
       markTicketCardErrors(currentCard);
       return;
     }
 
-    // Clone BASE card if present, otherwise clone current
     const base = $(".ticket-group[data-base='true']", openContainer) || currentCard;
     const clone = base.cloneNode(true);
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "ticket");
 
-    // Clear fields
     $$("input, textarea", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -456,10 +448,7 @@
       saveField(status);
     }
 
-    // append into Open container
     openContainer.appendChild(clone);
-
-    // focus ticket number
     $(".ticket-number-input", clone)?.focus();
   };
 
@@ -486,53 +475,46 @@
     const dest = containers[statusVal] || containers.Open;
 
     if (dest) dest.appendChild(card);
-
     saveField(selectEl);
   };
 
   /* =======================
-     RESET THIS PAGE BUTTONS
-  ======================= */
-  const onResetPage = (btn) => {
-    const section = getSection(btn);
-    clearSectionState(section);
-  };
-
-  /* =======================
-     EVENT DELEGATION (ONE LISTENER)
+     EVENT DELEGATION
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // Add Trainer
+    // NAV menu buttons
+    const navBtn = t.closest(".nav-btn[data-target]");
+    if (navBtn) {
+      e.preventDefault();
+      setActiveSection(navBtn.getAttribute("data-target"));
+      return;
+    }
+
+    // Add Trainer (+)
     if (t.closest("[data-add-trainer]")) {
       e.preventDefault();
       addTrainerRow();
       return;
     }
 
-    // Add POC
-    if (t.closest("[data-add-poc]")) {
+    // Add POC (+) - your HTML uses .additional-poc-add
+    const pocAdd = t.closest(".additional-poc-add");
+    if (pocAdd) {
       e.preventDefault();
-      addPocRow();
+      addPocCard(pocAdd);
       return;
     }
 
-    // Remove integrated (trainer/poc) row (the "–" button we create)
-    if (t.closest(".remove-inline-btn")) {
-      e.preventDefault();
-      removeIntegratedRow(t.closest(".remove-inline-btn"));
-      return;
-    }
-
-    // Table add row
+    // Table add row (+)
     if (t.closest("button.add-row")) {
       e.preventDefault();
       cloneTableRow(t.closest("button.add-row"));
       return;
     }
 
-    // Notes
+    // Notes buttons
     if (t.closest("[data-notes-btn]")) {
       e.preventDefault();
       toggleNotes(t.closest("[data-notes-btn]"));
@@ -546,7 +528,7 @@
       return;
     }
 
-    // Support tickets add (+)
+    // Support ticket add (+)
     if (t.closest(".add-ticket-btn")) {
       e.preventDefault();
       addTicketCard(t.closest(".add-ticket-btn"));
@@ -557,13 +539,11 @@
   document.addEventListener("input", (e) => {
     const el = e.target;
 
-    // Save any normal field
     if (isFormField(el)) {
       ensureId(el);
       saveField(el);
     }
 
-    // Ticket number enables status
     if (el.matches(".ticket-number-input")) {
       onTicketNumberChange(el);
     }
@@ -577,16 +557,12 @@
       saveField(el);
     }
 
-    // Move ticket card on status change
     if (el.matches(".ticket-status-select")) {
       onTicketStatusChange(el);
     }
   });
 
-  /* =======================
-     ENTER KEY BEHAVIOR
-     - Press Enter in Additional Trainer / POC input triggers add
-  ======================= */
+  // Enter key adds Trainer row (no required input)
   document.addEventListener("keydown", (e) => {
     const el = e.target;
     if (!isEl(el)) return;
@@ -596,21 +572,16 @@
       addTrainerRow();
       return;
     }
-
-    if (el.id === "additionalPocInput" && e.key === "Enter") {
-      e.preventDefault();
-      addPocRow();
-      return;
-    }
   });
 
   /* =======================
      INIT
   ======================= */
   const init = () => {
+    // ensure IDs on all existing fields
     assignIdsToAllFields();
 
-    // Ensure the base support ticket status is disabled until ticket number entered
+    // support ticket status disabled until number entered
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
@@ -619,6 +590,10 @@
       if (status) ensureId(status);
     });
 
+    // NAV must run BEFORE restore so correct section is visible
+    initNav();
+
+    // restore saved values
     restoreAllFields();
 
     log("Initialized.");
