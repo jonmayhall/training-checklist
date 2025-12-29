@@ -1,15 +1,13 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (Single-file, hardened, event-delegated, stateful)
-   - Sidebar navigation (data-target)
-   - LocalStorage save/restore (inputs/selects/textareas + dynamic rows)
-   - “Reset This Page” buttons
-   - Add Row (+) for tables
-   - Notes icon buttons (scroll + flash)
-   - Support Tickets: add cards + move by status
-   - Additional Trainer (+) — FIXED + persisted
-   - Dealership name display
-   - PDF button (safe: only runs if libs exist)
+   FIXES:
+   - Add Trainer (+) works (matches Support Ticket pattern)
+   - Add POC (+) works (same pattern)
+   - Add Row buttons for tables
+   - Notes buttons (open/scroll)
+   - Support Tickets add card gating
+   - Reset This Page buttons
+   - LocalStorage save/restore for everything
 ======================================================= */
 
 (() => {
@@ -18,782 +16,614 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v5";
+  const AUTO_ID_ATTR = "data-mk-id";
+  const AUTO_ROW_ATTR = "data-mk-row";
+  const AUTO_CARD_ATTR = "data-mk-card";
+
   const DEBUG = false;
+  const log = (...args) => (DEBUG ? console.log("[mk]", ...args) : void 0);
 
-  const log = (...a) => DEBUG && console.log("[mk]", ...a);
-
+  /* =======================
+     HELPERS
+  ======================= */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const debounce = (fn, wait = 250) => {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), wait);
-    };
-  };
-
   const uid = (() => {
     let n = 0;
-    return (prefix = "mk") => `${prefix}-${Date.now()}-${++n}`;
+    return (prefix = "mk") => `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
   })();
 
-  const isTextLike = (el) =>
-    el &&
-    (el.tagName === "INPUT" ||
-      el.tagName === "TEXTAREA" ||
-      el.tagName === "SELECT");
+  const isEl = (x) => x && x.nodeType === 1;
 
-  const safeTrim = (v) => (typeof v === "string" ? v.trim() : "");
+  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
-  /* =======================
-     PAGE NAVIGATION
-  ======================= */
-  function showSection(targetId) {
-    const sections = $$(".page-section");
-    const target = document.getElementById(targetId);
+  const ensureId = (el) => {
+    if (!isEl(el)) return null;
+    if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, uid("fld"));
+    return el.getAttribute(AUTO_ID_ATTR);
+  };
 
-    if (!target) return;
+  const isFormField = (el) =>
+    isEl(el) &&
+    (el.matches("input, select, textarea") ||
+      el.matches("[contenteditable='true']"));
 
-    sections.forEach((s) => s.classList.remove("active"));
-    target.classList.add("active");
+  const getFieldValue = (el) => {
+    if (!isFormField(el)) return null;
 
-    // Update nav active state
-    $$(".nav-btn").forEach((b) => {
-      const isActive = b.getAttribute("data-target") === targetId;
-      b.classList.toggle("active", isActive);
-    });
+    if (el.matches("input[type='checkbox']")) return !!el.checked;
+    if (el.matches("input[type='radio']")) return el.checked ? el.value : null;
+    if (el.matches("input, select, textarea")) return el.value;
+    if (el.matches("[contenteditable='true']")) return el.textContent || "";
+    return null;
+  };
 
-    // Scroll to top of main content container (optional)
-    const main = $("#mainContent") || $("main");
-    if (main) main.scrollTop = 0;
-  }
+  const setFieldValue = (el, val) => {
+    if (!isFormField(el)) return;
 
-  function initNav() {
-    // If nothing is active, activate first section
-    const active = $(".page-section.active");
-    if (!active) {
-      const first = $(".page-section");
-      if (first?.id) first.classList.add("active");
+    if (el.matches("input[type='checkbox']")) {
+      el.checked = !!val;
+      return;
     }
-
-    // If a nav button is active, sync
-    const activeSection = $(".page-section.active");
-    if (activeSection?.id) {
-      $$(".nav-btn").forEach((b) => {
-        b.classList.toggle("active", b.getAttribute("data-target") === activeSection.id);
-      });
+    if (el.matches("input[type='radio']")) {
+      el.checked = el.value === val;
+      return;
     }
-  }
-
-  /* =======================
-     DEALERSHIP NAME DISPLAY
-  ======================= */
-  function syncDealershipName() {
-    const input = $("#dealershipNameInput");
-    const display = $("#dealershipNameDisplay");
-    if (!input || !display) return;
-
-    const val = safeTrim(input.value);
-    display.textContent = val ? val : "";
-  }
-
-  /* =======================
-     “GHOST” PLACEHOLDER OPTIONS
-     (options like <option value="" data-ghost="true">Usage</option>)
-  ======================= */
-  function refreshGhostSelect(select) {
-    if (!select || select.tagName !== "SELECT") return;
-    const val = select.value;
-    const hasValue = safeTrim(val) !== "";
-    select.classList.toggle("has-value", hasValue);
-  }
-
-  function initGhostSelects() {
-    $$("select").forEach(refreshGhostSelect);
-  }
-
-  /* =======================
-     STATE SAVE/RESTORE
-  ======================= */
-  function getAllFields(root = document) {
-    return $$("input, select, textarea", root).filter((el) => {
-      // ignore buttons etc
-      if (el.tagName === "INPUT") {
-        const type = (el.getAttribute("type") || "").toLowerCase();
-        // allowed: text, date, checkbox, number, etc.
-        return type !== "button" && type !== "submit" && type !== "reset";
-      }
-      return true;
-    });
-  }
-
-  function buildState() {
-    // 1) basic fields (by stable selector)
-    const fields = getAllFields();
-    const fieldState = fields.map((el) => {
-      // Prefer ID; else generate a stable data-key once.
-      if (!el.dataset.mkKey) {
-        el.dataset.mkKey = el.id ? `id:${el.id}` : `key:${uid("fld")}`;
-      }
-
-      let value;
-      if (el.tagName === "INPUT") {
-        const type = (el.getAttribute("type") || "").toLowerCase();
-        if (type === "checkbox") value = el.checked;
-        else value = el.value;
-      } else {
-        value = el.value;
-      }
-
-      return { k: el.dataset.mkKey, v: value };
-    });
-
-    // 2) dynamic Additional Trainers
-    const trainers = $$("#additionalTrainersContainer .trainer-row input").map((i) => i.value);
-
-    // 3) dynamic tables (row counts only; values are already in fieldState)
-    const tableRowCounts = $$(".training-table tbody").map((tb, i) => ({
-      i,
-      rows: tb.querySelectorAll("tr").length,
-    }));
-
-    // 4) support tickets cards (count per column)
-    const tickets = {
-      open: $("#openTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
-      tierTwo: $("#tierTwoTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
-      closedResolved: $("#closedResolvedTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
-      closedFeature: $("#closedFeatureTicketsContainer")?.querySelectorAll(".ticket-group").length || 0,
-    };
-
-    return {
-      version: 6,
-      savedAt: new Date().toISOString(),
-      fieldState,
-      trainers,
-      tableRowCounts,
-      tickets,
-      activeSectionId: $(".page-section.active")?.id || "",
-    };
-  }
-
-  function applyState(state) {
-    if (!state || typeof state !== "object") return;
-
-    // 1) restore dynamic table rows by counts (then field values will apply)
-    if (Array.isArray(state.tableRowCounts)) {
-      const bodies = $$(".training-table tbody");
-      state.tableRowCounts.forEach((rc) => {
-        const tb = bodies[rc.i];
-        if (!tb) return;
-
-        const current = tb.querySelectorAll("tr").length;
-        const desired = Math.max(1, Number(rc.rows || 1)); // never 0
-        if (desired > current) {
-          // clone last row to reach desired
-          for (let n = current; n < desired; n++) {
-            const last = tb.querySelector("tr:last-child");
-            if (!last) break;
-            const clone = last.cloneNode(true);
-            clearRowInputs(clone);
-            tb.appendChild(clone);
-          }
-        } else if (desired < current) {
-          // remove from end, but keep at least 1
-          for (let n = current; n > desired; n--) {
-            const last = tb.querySelector("tr:last-child");
-            if (last && tb.querySelectorAll("tr").length > 1) last.remove();
-          }
-        }
-      });
+    if (el.matches("input, select, textarea")) {
+      el.value = val ?? "";
+      return;
     }
-
-    // 2) restore additional trainers list
-    if (Array.isArray(state.trainers)) {
-      const container = $("#additionalTrainersContainer");
-      if (container) {
-        container.innerHTML = "";
-        state.trainers
-          .map((t) => safeTrim(t))
-          .filter(Boolean)
-          .forEach((name) => addTrainerRow(name));
-      }
+    if (el.matches("[contenteditable='true']")) {
+      el.textContent = val ?? "";
+      return;
     }
+  };
 
-    // 3) restore ticket card counts (best-effort)
-    restoreTicketCounts(state.tickets);
-
-    // 4) restore field values
-    const map = new Map(Array.isArray(state.fieldState) ? state.fieldState.map((x) => [x.k, x.v]) : []);
-
-    const fields = getAllFields();
-    fields.forEach((el) => {
-      if (!el.dataset.mkKey) {
-        el.dataset.mkKey = el.id ? `id:${el.id}` : `key:${uid("fld")}`;
-      }
-      if (!map.has(el.dataset.mkKey)) return;
-
-      const v = map.get(el.dataset.mkKey);
-      if (el.tagName === "INPUT") {
-        const type = (el.getAttribute("type") || "").toLowerCase();
-        if (type === "checkbox") el.checked = !!v;
-        else el.value = v ?? "";
-      } else {
-        el.value = v ?? "";
-      }
-
-      if (el.tagName === "SELECT") refreshGhostSelect(el);
-    });
-
-    // 5) restore active section
-    if (state.activeSectionId && document.getElementById(state.activeSectionId)) {
-      showSection(state.activeSectionId);
-    }
-
-    // sync dealership display after restore
-    syncDealershipName();
-  }
-
-  const saveState = debounce(() => {
+  const readState = () => {
     try {
-      const state = buildState();
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  };
+
+  const writeState = (state) => {
+    try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      log("Saved", state);
     } catch (e) {
       console.warn("Could not save state:", e);
     }
-  }, 250);
+  };
 
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) {
-      console.warn("Could not load state:", e);
-      return null;
+  const saveField = (el) => {
+    if (!isFormField(el)) return;
+
+    ensureId(el);
+    const id = el.getAttribute(AUTO_ID_ATTR);
+    const state = readState();
+    state[id] = getFieldValue(el);
+    writeState(state);
+  };
+
+  const restoreAllFields = () => {
+    const state = readState();
+    const fields = $$(`[${AUTO_ID_ATTR}]`);
+    fields.forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      if (!(id in state)) return;
+      setFieldValue(el, state[id]);
+    });
+  };
+
+  const assignIdsToAllFields = () => {
+    // assign IDs to existing fields so we can persist them
+    const fields = $$("input, select, textarea, [contenteditable='true']");
+    fields.forEach((el) => ensureId(el));
+  };
+
+  const clearSectionState = (sectionEl) => {
+    if (!sectionEl) return;
+
+    const state = readState();
+
+    // clear values in DOM + remove keys from storage for fields in this section
+    const fields = $$(`[${AUTO_ID_ATTR}]`, sectionEl);
+    fields.forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      delete state[id];
+
+      // clear DOM
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else if (el.matches("input[type='radio']")) el.checked = false;
+      else if (el.matches("input, select, textarea")) el.value = "";
+      else if (el.matches("[contenteditable='true']")) el.textContent = "";
+    });
+
+    writeState(state);
+
+    // If the section has dynamic containers (trainers/POCs/tickets/tables), optionally trim to base.
+    trimDynamicToBase(sectionEl);
+  };
+
+  const trimDynamicToBase = (sectionEl) => {
+    // 1) Additional Trainers container: remove added rows
+    const trainerContainer = $("#additionalTrainersContainer", sectionEl);
+    if (trainerContainer) trainerContainer.innerHTML = "";
+
+    // 2) Additional POCs container: remove added rows
+    const pocContainer = $("#additionalPocsContainer", sectionEl);
+    if (pocContainer) pocContainer.innerHTML = "";
+
+    // 3) Tables: keep first 1–3 template rows? (we’ll keep whatever is already there in HTML and remove rows added by JS cloning)
+    $$("table.training-table tbody", sectionEl).forEach((tb) => {
+      const rows = $$("tr", tb);
+      rows.forEach((tr) => {
+        if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
+      });
+    });
+
+    // 4) Support tickets: keep only base card in Open container
+    const open = $("#openTicketsContainer", sectionEl);
+    if (open) {
+      const groups = $$(".ticket-group", open);
+      groups.forEach((g) => {
+        if (g.getAttribute("data-base") !== "true") g.remove();
+      });
+      // Clear base fields
+      const base = $(".ticket-group[data-base='true']", open);
+      if (base) {
+        $$("input, textarea", base).forEach((f) => {
+          if (f.matches("input[type='checkbox']")) f.checked = false;
+          else f.value = "";
+          saveField(f);
+        });
+        const statusSel = $(".ticket-status-select", base);
+        if (statusSel) {
+          statusSel.value = "Open";
+          statusSel.disabled = true;
+          saveField(statusSel);
+        }
+      }
     }
-  }
+
+    // Also clear saved keys for any removed nodes? (We cleared by section fields already.)
+  };
+
+  const scrollIntoViewNice = (el) => {
+    try {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      el.scrollIntoView(true);
+    }
+  };
 
   /* =======================
-     TABLE ADD ROW (+)
+     DYNAMIC: ADD TRAINER / ADD POC
+     (matches the Support Ticket approach: gated add, create row, append)
   ======================= */
-  function clearRowInputs(rowEl) {
-    if (!rowEl) return;
-    const fields = getAllFields(rowEl);
-    fields.forEach((el) => {
-      if (el.tagName === "INPUT") {
-        const type = (el.getAttribute("type") || "").toLowerCase();
-        if (type === "checkbox") el.checked = false;
-        else el.value = "";
-      } else if (el.tagName === "TEXTAREA") {
-        el.value = "";
-      } else if (el.tagName === "SELECT") {
-        el.selectedIndex = 0;
-        refreshGhostSelect(el);
-      }
-    });
-  }
 
-  function handleAddRow(btn) {
+  const buildIntegratedRow = ({ labelText, placeholder, inputIdPrefix }) => {
+    const wrap = document.createElement("div");
+    wrap.className = "checklist-row integrated-plus indent-sub";
+    wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
+
+    const label = document.createElement("label");
+    label.textContent = labelText;
+
+    const inputPlus = document.createElement("div");
+    inputPlus.className = "input-plus";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = placeholder;
+    input.autocomplete = "off";
+    input.id = `${inputIdPrefix}-${uid("row")}`;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-inline-btn";
+    removeBtn.textContent = "–";
+    removeBtn.title = "Remove";
+    removeBtn.setAttribute("aria-label", "Remove");
+
+    inputPlus.appendChild(input);
+    inputPlus.appendChild(removeBtn);
+
+    wrap.appendChild(label);
+    wrap.appendChild(inputPlus);
+
+    // persist new input
+    ensureId(input);
+
+    return wrap;
+  };
+
+  const addTrainerRow = () => {
+    const input = $("#additionalTrainerInput");
+    const container = $("#additionalTrainersContainer");
+    if (!input || !container) return;
+
+    const name = (input.value || "").trim();
+
+    // Gate: require something in the input before adding
+    if (!name) {
+      input.focus();
+      input.classList.add("mk-field-error");
+      setTimeout(() => input.classList.remove("mk-field-error"), 600);
+      return;
+    }
+
+    const row = buildIntegratedRow({
+      labelText: "Additional Trainer",
+      placeholder: "Enter additional trainer name",
+      inputIdPrefix: "additionalTrainer",
+    });
+
+    const rowInput = $("input", row);
+    rowInput.value = name;
+
+    container.appendChild(row);
+
+    // clear base input
+    input.value = "";
+    saveField(input);
+    saveField(rowInput);
+  };
+
+  const addPocRow = () => {
+    // These IDs are expected for POC. If yours are different, tell me and I’ll change it.
+    const input = $("#additionalPocInput");
+    const container = $("#additionalPocsContainer");
+    if (!input || !container) return;
+
+    const name = (input.value || "").trim();
+
+    if (!name) {
+      input.focus();
+      input.classList.add("mk-field-error");
+      setTimeout(() => input.classList.remove("mk-field-error"), 600);
+      return;
+    }
+
+    const row = buildIntegratedRow({
+      labelText: "Additional POC",
+      placeholder: "Enter additional POC name",
+      inputIdPrefix: "additionalPoc",
+    });
+
+    const rowInput = $("input", row);
+    rowInput.value = name;
+
+    container.appendChild(row);
+
+    input.value = "";
+    saveField(input);
+    saveField(rowInput);
+  };
+
+  const removeIntegratedRow = (btn) => {
+    const row = btn.closest(".checklist-row");
+    if (!row) return;
+
+    // remove saved key for the input in this row
+    const input = $("input, textarea, select", row);
+    if (input?.getAttribute(AUTO_ID_ATTR)) {
+      const state = readState();
+      delete state[input.getAttribute(AUTO_ID_ATTR)];
+      writeState(state);
+    }
+    row.remove();
+  };
+
+  /* =======================
+     TABLE: ADD ROW (+)
+  ======================= */
+  const cloneTableRow = (btn) => {
     const tableContainer = btn.closest(".table-container");
     if (!tableContainer) return;
 
-    const tbody = $("tbody", tableContainer);
+    const table = $("table", tableContainer);
+    const tbody = $("tbody", table);
     if (!tbody) return;
 
-    const template = tbody.querySelector("tr:last-child") || tbody.querySelector("tr");
-    if (!template) return;
+    const rows = $$("tr", tbody);
+    if (!rows.length) return;
 
+    const template = rows[rows.length - 1]; // clone last visible row
     const clone = template.cloneNode(true);
-    clearRowInputs(clone);
-    tbody.appendChild(clone);
+    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-    saveState();
-  }
+    // clear inputs/selects/checkboxes in clone + assign new mk ids
+    $$("input, select, textarea", clone).forEach((el) => {
+      // clear value
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+
+      // new id for persistence
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
+
+    // Notes button target stays the same; OK.
+
+    tbody.appendChild(clone);
+  };
 
   /* =======================
-     NOTES BUTTONS (scroll to notes block)
+     NOTES ICON BUTTONS
   ======================= */
-  function flash(el) {
-    if (!el) return;
-    el.classList.add("mk-flash");
-    setTimeout(() => el.classList.remove("mk-flash"), 900);
-  }
-
-  function handleNotesButton(btn) {
+  const toggleNotes = (btn) => {
     const targetId = btn.getAttribute("data-notes-target");
     if (!targetId) return;
 
     const target = document.getElementById(targetId);
     if (!target) return;
 
-    // ensure its page section is active (if notes block is on same page it will be visible)
-    const section = btn.closest(".page-section");
-    if (section?.id) showSection(section.id);
+    // If your CSS uses hidden class, toggle it. Otherwise just scroll.
+    const isHidden =
+      target.classList.contains("is-hidden") ||
+      target.hasAttribute("hidden") ||
+      getComputedStyle(target).display === "none";
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-    flash(target);
+    // Show if hidden
+    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+    // If display none by default and you use a class like .collapsed, try toggling
+    if (isHidden) target.classList.add("mk-notes-open");
+
+    scrollIntoViewNice(target);
 
     // focus textarea if present
     const ta = $("textarea", target);
-    if (ta) setTimeout(() => ta.focus(), 350);
-  }
-
-  /* =======================
-     RESET PAGE
-  ======================= */
-  function resetPage(sectionEl) {
-    if (!sectionEl) return;
-
-    // Clear all fields in section
-    getAllFields(sectionEl).forEach((el) => {
-      if (el.tagName === "INPUT") {
-        const type = (el.getAttribute("type") || "").toLowerCase();
-        if (type === "checkbox") el.checked = false;
-        else el.value = "";
-      } else if (el.tagName === "TEXTAREA") {
-        el.value = "";
-      } else if (el.tagName === "SELECT") {
-        el.selectedIndex = 0;
-        refreshGhostSelect(el);
-      }
-    });
-
-    // Reset dynamic tables to 1 row each (within this section only)
-    $$(".training-table tbody", sectionEl).forEach((tb) => {
-      const rows = tb.querySelectorAll("tr");
-      rows.forEach((r, idx) => {
-        if (idx === 0) clearRowInputs(r);
-        else r.remove();
-      });
-    });
-
-    // Reset support tickets within page
-    if (sectionEl.id === "support-tickets") {
-      resetTickets();
-    }
-
-    // Reset additional trainers within page (wherever that block lives)
-    const trainersContainer = $("#additionalTrainersContainer", sectionEl) || $("#additionalTrainersContainer");
-    if (trainersContainer) trainersContainer.innerHTML = "";
-    const trainerInput = $("#additionalTrainerInput", sectionEl) || $("#additionalTrainerInput");
-    if (trainerInput) trainerInput.value = "";
-
-    // Re-sync dealership display if we cleared it
-    syncDealershipName();
-
-    saveState();
-  }
+    if (ta) ta.focus();
+  };
 
   /* =======================
      SUPPORT TICKETS
+     - Add ticket card only if current card is complete
+     - Enable Status select once ticket number entered
+     - Move cards between containers based on status
   ======================= */
-  function ticketTargetsByStatus(status) {
-    switch (status) {
-      case "Open":
-        return $("#openTicketsContainer");
-      case "Tier Two":
-        return $("#tierTwoTicketsContainer");
-      case "Closed - Resolved":
-        return $("#closedResolvedTicketsContainer");
-      case "Closed - Feature Not Supported":
-        return $("#closedFeatureTicketsContainer");
-      default:
-        return $("#openTicketsContainer");
-    }
-  }
+  const ticketContainersByStatus = () => ({
+    Open: $("#openTicketsContainer"),
+    "Tier Two": $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
+  });
 
-  function getTicketCardEls(card) {
-    return {
-      number: $(".ticket-number-input", card),
-      status: $(".ticket-status-select", card),
-      url: $(".ticket-zendesk-input", card),
-      summary: $(".ticket-summary-input", card),
-    };
-  }
+  const isTicketCardComplete = (card) => {
+    const num = $(".ticket-number-input", card)?.value?.trim() || "";
+    const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
+    const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
 
-  function isTicketCardComplete(card) {
-    const els = getTicketCardEls(card);
-    const numOk = !!safeTrim(els.number?.value);
-    const urlOk = !!safeTrim(els.url?.value);
-    const sumOk = !!safeTrim(els.summary?.value);
-    return numOk && urlOk && sumOk;
-  }
+    // Match your disclaimer intent: require these before adding a new card
+    return !!(num && url && sum);
+  };
 
-  function cloneTicketCard(card) {
-    const clone = card.cloneNode(true);
+  const markTicketCardErrors = (card) => {
+    const numEl = $(".ticket-number-input", card);
+    const urlEl = $(".ticket-zendesk-input", card);
+    const sumEl = $(".ticket-summary-input", card);
 
-    // remove base flag
-    clone.removeAttribute("data-base");
+    [numEl, urlEl, sumEl].forEach((el) => {
+      if (!el) return;
+      const v = (el.value || "").trim();
+      if (!v) {
+        el.classList.add("mk-field-error");
+        setTimeout(() => el.classList.remove("mk-field-error"), 700);
+      }
+    });
+  };
 
-    // clear inputs
-    const { number, status, url, summary } = getTicketCardEls(clone);
-    if (number) number.value = "";
-    if (url) url.value = "";
-    if (summary) summary.value = "";
-    if (status) {
-      status.value = "Open";
-      status.disabled = true; // stays disabled until number typed
-    }
+  const addTicketCard = (btn) => {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
 
-    // ensure plus button exists on the active card only (we keep it on clones too; harmless)
-    return clone;
-  }
+    const currentCard = btn.closest(".ticket-group");
+    if (!currentCard) return;
 
-  function handleAddTicket(btn) {
-    const card = btn.closest(".ticket-group");
-    if (!card) return;
-
-    if (!isTicketCardComplete(card)) {
-      alert("Please complete Ticket Number, Zendesk URL, and Short Summary before adding another ticket.");
+    // Must be complete before adding another
+    if (!isTicketCardComplete(currentCard)) {
+      markTicketCardErrors(currentCard);
       return;
     }
 
-    const container = card.parentElement;
-    if (!container) return;
+    // Clone BASE card if present, otherwise clone current
+    const base = $(".ticket-group[data-base='true']", openContainer) || currentCard;
+    const clone = base.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "ticket");
 
-    const newCard = cloneTicketCard(card);
-    container.appendChild(newCard);
+    // Clear fields
+    $$("input, textarea", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
 
-    saveState();
-  }
+    const status = $(".ticket-status-select", clone);
+    if (status) {
+      status.value = "Open";
+      status.disabled = true;
+      status.removeAttribute(AUTO_ID_ATTR);
+      ensureId(status);
+      saveField(status);
+    }
 
-  function handleTicketNumberInput(inputEl) {
+    // append into Open container
+    openContainer.appendChild(clone);
+
+    // focus ticket number
+    $(".ticket-number-input", clone)?.focus();
+  };
+
+  const onTicketNumberChange = (inputEl) => {
     const card = inputEl.closest(".ticket-group");
     if (!card) return;
+
     const status = $(".ticket-status-select", card);
     if (!status) return;
 
-    const hasNum = !!safeTrim(inputEl.value);
+    const hasNum = (inputEl.value || "").trim().length > 0;
     status.disabled = !hasNum;
 
-    saveState();
-  }
+    saveField(inputEl);
+    saveField(status);
+  };
 
-  function moveTicketCardByStatus(card, statusValue) {
-    const target = ticketTargetsByStatus(statusValue);
-    if (!target) return;
+  const onTicketStatusChange = (selectEl) => {
+    const card = selectEl.closest(".ticket-group");
+    if (!card) return;
 
-    target.appendChild(card);
-  }
+    const statusVal = selectEl.value;
+    const containers = ticketContainersByStatus();
+    const dest = containers[statusVal] || containers.Open;
 
-  function resetTickets() {
-    const open = $("#openTicketsContainer");
-    if (!open) return;
+    if (dest) dest.appendChild(card);
 
-    // find base card
-    const base = open.querySelector(".ticket-group[data-base='true']") || open.querySelector(".ticket-group");
-    open.innerHTML = "";
-    if (base) {
-      const cleanBase = base.cloneNode(true);
-      // ensure base flag exists
-      cleanBase.setAttribute("data-base", "true");
-
-      // clear base
-      const { number, status, url, summary } = getTicketCardEls(cleanBase);
-      if (number) number.value = "";
-      if (url) url.value = "";
-      if (summary) summary.value = "";
-      if (status) {
-        status.value = "Open";
-        status.disabled = true;
-      }
-
-      open.appendChild(cleanBase);
-    }
-
-    // clear other columns
-    ["#tierTwoTicketsContainer", "#closedResolvedTicketsContainer", "#closedFeatureTicketsContainer"].forEach((sel) => {
-      const c = $(sel);
-      if (c) c.innerHTML = "";
-    });
-  }
-
-  function restoreTicketCounts(tickets) {
-    if (!tickets || typeof tickets !== "object") return;
-
-    // We can only reliably restore by cloning the base card for OPEN.
-    // The actual field values are restored by fieldState, once cards exist.
-    // So: make sure each container has the right number of .ticket-group nodes.
-    const open = $("#openTicketsContainer");
-    const base = open?.querySelector(".ticket-group[data-base='true']") || open?.querySelector(".ticket-group");
-    if (!open || !base) return;
-
-    const ensureCount = (container, desired, fromCard) => {
-      desired = Math.max(0, Number(desired || 0));
-      const current = container.querySelectorAll(".ticket-group").length;
-
-      if (desired > current) {
-        for (let i = current; i < desired; i++) container.appendChild(cloneTicketCard(fromCard));
-      } else if (desired < current) {
-        // keep base in open, otherwise remove from end
-        for (let i = current; i > desired; i--) {
-          const last = container.querySelector(".ticket-group:last-child");
-          if (!last) break;
-          // don't remove base if in open
-          if (container === open && last.getAttribute("data-base") === "true") break;
-          last.remove();
-        }
-      }
-    };
-
-    ensureCount(open, tickets.open ?? 1, base);
-
-    const tierTwo = $("#tierTwoTicketsContainer");
-    const closedResolved = $("#closedResolvedTicketsContainer");
-    const closedFeature = $("#closedFeatureTicketsContainer");
-
-    if (tierTwo) ensureCount(tierTwo, tickets.tierTwo ?? 0, base);
-    if (closedResolved) ensureCount(closedResolved, tickets.closedResolved ?? 0, base);
-    if (closedFeature) ensureCount(closedFeature, tickets.closedFeature ?? 0, base);
-  }
+    saveField(selectEl);
+  };
 
   /* =======================
-     ADDITIONAL TRAINERS (FIXED)
+     RESET THIS PAGE BUTTONS
   ======================= */
-  function addTrainerRow(name = "") {
-    const container = $("#additionalTrainersContainer");
-    if (!container) return;
-
-    const row = document.createElement("div");
-    row.className = "checklist-row integrated-plus indent-sub trainer-row";
-
-    // keep consistent UI: input + remove button
-    row.innerHTML = `
-      <label>Trainer</label>
-      <div class="input-plus">
-        <input type="text" class="additional-trainer-input" placeholder="Trainer name" autocomplete="off" />
-        <button type="button" class="trainer-remove-btn" data-remove-trainer aria-label="Remove trainer" title="Remove">×</button>
-      </div>
-    `;
-
-    const input = $("input", row);
-    if (input) input.value = name;
-
-    container.appendChild(row);
-  }
-
-  function handleAddTrainer(btn) {
-    const input = $("#additionalTrainerInput");
-    if (!input) return;
-
-    const name = safeTrim(input.value);
-    if (!name) return;
-
-    addTrainerRow(name);
-    input.value = "";
-    input.focus();
-
-    saveState();
-  }
-
-  function handleRemoveTrainer(btn) {
-    const row = btn.closest(".trainer-row");
-    if (row) row.remove();
-    saveState();
-  }
+  const onResetPage = (btn) => {
+    const section = getSection(btn);
+    clearSectionState(section);
+  };
 
   /* =======================
-     PDF (safe)
+     EVENT DELEGATION (ONE LISTENER)
   ======================= */
-  async function saveAllPagesAsPDF() {
-    // Only run if libraries exist (you likely already have this wired elsewhere)
-    if (!window.html2canvas || !window.jspdf?.jsPDF) {
-      alert("PDF export libraries not found (html2canvas / jsPDF). If you want, I can wire them cleanly.");
-      return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF("p", "pt", "letter");
-
-    const sections = $$(".page-section");
-    for (let i = 0; i < sections.length; i++) {
-      const sec = sections[i];
-
-      // temporarily show each section for capture
-      const prevActive = sec.classList.contains("active");
-      $$(".page-section").forEach((s) => s.classList.remove("active"));
-      sec.classList.add("active");
-
-      // capture
-      // eslint-disable-next-line no-await-in-loop
-      const canvas = await window.html2canvas(sec, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
-
-      const pageW = doc.internal.pageSize.getWidth();
-      const pageH = doc.internal.pageSize.getHeight();
-
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-
-      if (i > 0) doc.addPage();
-      doc.addImage(imgData, "PNG", 0, 0, imgW, Math.min(imgH, pageH));
-
-      // restore active if needed
-      sec.classList.toggle("active", prevActive);
-    }
-
-    // restore first active section if none
-    const active = $(".page-section.active");
-    if (!active) {
-      const first = $(".page-section");
-      if (first) first.classList.add("active");
-    }
-
-    doc.save("myKaarma-Training-Checklist.pdf");
-  }
-
-  /* =======================
-     EVENT DELEGATION
-  ======================= */
-  function onClick(e) {
+  document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // nav
-    const navBtn = t.closest(".nav-btn");
-    if (navBtn) {
-      const id = navBtn.getAttribute("data-target");
-      if (id) showSection(id);
-      saveState();
+    // Add Trainer
+    if (t.closest("[data-add-trainer]")) {
+      e.preventDefault();
+      addTrainerRow();
       return;
     }
 
-    // add-row (+)
-    const addRowBtn = t.closest(".add-row");
-    if (addRowBtn) {
-      handleAddRow(addRowBtn);
+    // Add POC
+    if (t.closest("[data-add-poc]")) {
+      e.preventDefault();
+      addPocRow();
       return;
     }
 
-    // notes buttons
-    const notesBtn = t.closest("[data-notes-btn]");
-    if (notesBtn) {
-      handleNotesButton(notesBtn);
+    // Remove integrated (trainer/poc) row (the "–" button we create)
+    if (t.closest(".remove-inline-btn")) {
+      e.preventDefault();
+      removeIntegratedRow(t.closest(".remove-inline-btn"));
       return;
     }
 
-    // reset page
-    const resetBtn = t.closest(".clear-page-btn");
-    if (resetBtn) {
-      const section = resetBtn.closest(".page-section");
-      resetPage(section);
+    // Table add row
+    if (t.closest("button.add-row")) {
+      e.preventDefault();
+      cloneTableRow(t.closest("button.add-row"));
       return;
     }
 
-    // support tickets add card
-    const addTicket = t.closest(".add-ticket-btn");
-    if (addTicket) {
-      handleAddTicket(addTicket);
+    // Notes
+    if (t.closest("[data-notes-btn]")) {
+      e.preventDefault();
+      toggleNotes(t.closest("[data-notes-btn]"));
       return;
     }
 
-    // add trainer (FIXED)
-    const addTrainer = t.closest("[data-add-trainer]");
-    if (addTrainer) {
-      handleAddTrainer(addTrainer);
+    // Reset this page
+    if (t.closest(".clear-page-btn")) {
+      e.preventDefault();
+      onResetPage(t.closest(".clear-page-btn"));
       return;
     }
 
-    // remove trainer
-    const removeTrainer = t.closest("[data-remove-trainer]");
-    if (removeTrainer) {
-      handleRemoveTrainer(removeTrainer);
+    // Support tickets add (+)
+    if (t.closest(".add-ticket-btn")) {
+      e.preventDefault();
+      addTicketCard(t.closest(".add-ticket-btn"));
       return;
     }
+  });
 
-    // PDF button
-    if (t && t.id === "savePDF") {
-      saveAllPagesAsPDF();
-      return;
-    }
-  }
-
-  function onInput(e) {
+  document.addEventListener("input", (e) => {
     const el = e.target;
 
-    // ticket number enables status
-    if (el.classList.contains("ticket-number-input")) {
-      handleTicketNumberInput(el);
-      return;
+    // Save any normal field
+    if (isFormField(el)) {
+      ensureId(el);
+      saveField(el);
     }
 
-    // dealership name display
-    if (el.id === "dealershipNameInput") {
-      syncDealershipName();
-      saveState();
-      return;
+    // Ticket number enables status
+    if (el.matches(".ticket-number-input")) {
+      onTicketNumberChange(el);
     }
+  });
 
-    // any other field -> save
-    if (isTextLike(el)) saveState();
-  }
-
-  function onChange(e) {
+  document.addEventListener("change", (e) => {
     const el = e.target;
 
-    // ghost selects
-    if (el && el.tagName === "SELECT") refreshGhostSelect(el);
+    if (isFormField(el)) {
+      ensureId(el);
+      saveField(el);
+    }
 
-    // ticket status moves card
-    if (el.classList.contains("ticket-status-select")) {
-      const card = el.closest(".ticket-group");
-      if (card) {
-        moveTicketCardByStatus(card, el.value);
-        saveState();
-      }
+    // Move ticket card on status change
+    if (el.matches(".ticket-status-select")) {
+      onTicketStatusChange(el);
+    }
+  });
+
+  /* =======================
+     ENTER KEY BEHAVIOR
+     - Press Enter in Additional Trainer / POC input triggers add
+  ======================= */
+  document.addEventListener("keydown", (e) => {
+    const el = e.target;
+    if (!isEl(el)) return;
+
+    if (el.id === "additionalTrainerInput" && e.key === "Enter") {
+      e.preventDefault();
+      addTrainerRow();
       return;
     }
 
-    if (isTextLike(el) || el?.tagName === "INPUT") saveState();
-  }
+    if (el.id === "additionalPocInput" && e.key === "Enter") {
+      e.preventDefault();
+      addPocRow();
+      return;
+    }
+  });
 
   /* =======================
      INIT
   ======================= */
-  function ensureFlashCSS() {
-    // Adds a tiny CSS helper if you didn’t already define it.
-    if ($("#mkFlashStyle")) return;
-    const style = document.createElement("style");
-    style.id = "mkFlashStyle";
-    style.textContent = `
-      .mk-flash {
-        outline: 2px solid rgba(255, 165, 0, .9);
-        outline-offset: 3px;
-        border-radius: 10px;
-        transition: outline-color .25s ease;
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  const init = () => {
+    assignIdsToAllFields();
 
-  function init() {
-    ensureFlashCSS();
-    initNav();
-    initGhostSelects();
+    // Ensure the base support ticket status is disabled until ticket number entered
+    $$(".ticket-group").forEach((card) => {
+      const num = $(".ticket-number-input", card);
+      const status = $(".ticket-status-select", card);
+      if (num && status) status.disabled = !(num.value || "").trim();
+      if (num) ensureId(num);
+      if (status) ensureId(status);
+    });
 
-    // load state AFTER basic DOM is ready
-    const state = loadState();
-    if (state) applyState(state);
+    restoreAllFields();
 
-    // if still no active section, show first
-    if (!$(".page-section.active")) {
-      const first = $(".page-section");
-      if (first?.id) showSection(first.id);
-    }
+    log("Initialized.");
+  };
 
-    // sync dealership name display
-    syncDealershipName();
-
-    document.addEventListener("click", onClick, true);
-    document.addEventListener("input", onInput, true);
-    document.addEventListener("change", onChange, true);
-
-    log("init done");
-  }
-
-  // DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
