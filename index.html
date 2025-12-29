@@ -10,161 +10,154 @@
 
   <!-- JS -->
   <script defer src="script.js"></script>
-
 </head>
-
-  <!-- ========================================================= -->
-<!-- ROW POPUP MODAL (Training Tables + Opcodes)               -->
-<!-- Drop this once, near the end of your HTML, before </body> -->
-<!-- ========================================================= -->
-<div id="mkRowModal" class="mk-modal" aria-hidden="true">
-  <div class="mk-modal__backdrop" data-mk-modal-close></div>
-
-  <div class="mk-modal__panel" role="dialog" aria-modal="true" aria-label="Row Details">
-    <button type="button" class="mk-modal__close" data-mk-modal-close aria-label="Close">×</button>
-
-    <!-- Outer white card that contains BOTH cards -->
-    <div class="mk-modal__outer-card">
-      <!-- Table card goes here -->
-      <div id="mkModalTableHost" class="section-block mk-modal__inner-card"></div>
-
-      <!-- Notes card goes here (the actual notes block gets moved here) -->
-      <div id="mkModalNotesHost" class="mk-modal__notes-host"></div>
-    </div>
-  </div>
-</div>
 
 <body class="stacked-compact">
 
-<!-- =========================
-     TOP BAR
-========================= -->
-<header id="topbar">
-  <div class="topbar-content">
-    <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma" />
+  <!-- =========================
+       TOP BAR
+  ========================= -->
+  <header id="topbar">
+    <div class="topbar-content">
+      <img class="top-logo" src="mykaarma_logo.png" alt="myKaarma" />
 
-    <div class="topbar-right">
-      <div id="dealershipNameDisplay"></div>
+      <div class="topbar-right">
+        <div id="dealershipNameDisplay"></div>
+      </div>
     </div>
-  </div>
-</header>
-
-<!-- =========================
-     APP WRAPPER
-========================= -->
-<div id="app">
+  </header>
 
   <!-- =========================
-       SIDEBAR
+       APP WRAPPER
   ========================= -->
-  <aside id="sidebar">
-    <nav id="sidebar-nav">
-      <button type="button" class="nav-btn active" data-target="trainers-deployment">Trainers &amp; mK Team</button>
-      <button type="button" class="nav-btn" data-target="dealership-info">Dealership Info</button>
-      <button type="button" class="nav-btn" data-target="pre-training">Pre-Training</button>
-      <button type="button" class="nav-btn" data-target="monday-visit">Monday Visit</button>
-      <button type="button" class="nav-btn" data-target="training-checklist">Training Checklist</button>
-      <button type="button" class="nav-btn" data-target="opcodes-pricing">Opcodes &amp; Pricing</button>
-      <button type="button" class="nav-btn" data-target="support-tickets">Support Tickets</button>
-      <button type="button" class="nav-btn" data-target="dms-integration">DMS Integration</button>
-      <button type="button" class="nav-btn" data-target="post-training">Post-Training Verification</button>
-      <button type="button" class="nav-btn" data-target="resources">Resources</button>
-      <button type="button" class="nav-btn" data-target="training-summary">Training Summary</button>
-    </nav>
+  <div id="app">
 
-    <button id="clearAllBtn" type="button">Clear All</button>
-  </aside>
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+    <aside id="sidebar">
+      <nav id="sidebar-nav">
+        <button type="button" class="nav-btn active" data-target="trainers-deployment">Trainers &amp; mK Team</button>
+        <button type="button" class="nav-btn" data-target="dealership-info">Dealership Info</button>
+        <button type="button" class="nav-btn" data-target="pre-training">Pre-Training</button>
+        <button type="button" class="nav-btn" data-target="monday-visit">Monday Visit</button>
+        <button type="button" class="nav-btn" data-target="training-checklist">Training Checklist</button>
+        <button type="button" class="nav-btn" data-target="opcodes-pricing">Opcodes &amp; Pricing</button>
+        <button type="button" class="nav-btn" data-target="support-tickets">Support Tickets</button>
+        <button type="button" class="nav-btn" data-target="dms-integration">DMS Integration</button>
+        <button type="button" class="nav-btn" data-target="post-training">Post-Training Verification</button>
+        <button type="button" class="nav-btn" data-target="resources">Resources</button>
+        <button type="button" class="nav-btn" data-target="training-summary">Training Summary</button>
+      </nav>
 
-  <!-- =========================
-       MAIN CONTENT
-  ========================= -->
-  <main>
+      <button id="clearAllBtn" type="button">Clear All</button>
+    </aside>
 
-  <div class="grid-2">
+    <!-- =========================
+         MAIN CONTENT
+    ========================= -->
+    <main>
 
-  <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
-  <div class="section-block">
-    <h2>Lead &amp; Additional Trainers</h2>
+      <!-- =========================================================
+           PAGE 1: TRAINERS & MK TEAM
+      ========================================================== -->
+      <section id="trainers-deployment" class="page-section active">
+        <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">Reset This Page</button>
 
-    <!-- Lead Trainer -->
-    <div class="checklist-row">
-      <label class="sr-label">Lead Trainer</label>
-      <select>
-        <option value="" data-ghost="true">Select lead trainer</option>
+        <h1>Trainers &amp; mK Team</h1>
+        <p class="page-subtitle">Select the assigned lead trainer, add additional trainers, and capture the deployment/CEM assignments.</p>
 
-        <option disabled>──────────</option>
-        <option>Christopher Eskew</option>
-        <option>Brian Button</option>
-        <option>Dana Barry</option>
+        <!-- NOTE:
+             Cards are STACKED (1 column) by design.
+             This also matches your request: Deployment & CEM card is BELOW Lead/Additional Trainers (not inside it). -->
 
-        <option disabled>──────────</option>
-        <option>Adam Jeffords</option>
-        <option>Alec Parker</option>
-        <option>Eliud Garcia</option>
-        <option>Joel Zavaleta</option>
-        <option>Kyle Leavitt</option>
-        <option>Lauren Ramos</option>
-        <option>Miles Krasic</option>
+        <div class="grid-2">
 
-        <option disabled>──────────</option>
-        <option>Anthony Carbone</option>
-        <option>Clyde Chapman</option>
-        <option>Dennitza Fernandez</option>
-        <option>Jackson Geraghty</option>
-        <option>Kevin Mullinax</option>
-        <option>Sharon Rusta</option>
-        <option>Terry Hart</option>
-      </select>
-    </div>
+          <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
+          <div class="section-block">
+            <h2>Lead &amp; Additional Trainers</h2>
 
-  <div class="checklist-row integrated-plus indent-sub" data-base="true">
-  <label>Additional Trainer</label>
+            <!-- Lead Trainer -->
+            <div class="checklist-row">
+              <label class="sr-label">Lead Trainer</label>
+              <select id="leadTrainerSelect">
+                <option value="" data-ghost="true">Select lead trainer</option>
 
-  <div class="input-plus">
-    <input
-      id="additionalTrainerInput"
-      type="text"
-      placeholder="Enter additional trainer name"
-    />
-    <button
-      type="button"
-      class="add-trainer-btn"
-      data-add-trainer
-      title="Add another trainer"
-    >+</button>
-  </div>
-</div>
+                <option disabled>──────────</option>
+                <option>Christopher Eskew</option>
+                <option>Brian Button</option>
+                <option>Dana Barry</option>
 
-<div id="additionalTrainersContainer"></div>
+                <option disabled>──────────</option>
+                <option>Adam Jeffords</option>
+                <option>Alec Parker</option>
+                <option>Eliud Garcia</option>
+                <option>Joel Zavaleta</option>
+                <option>Kyle Leavitt</option>
+                <option>Lauren Ramos</option>
+                <option>Miles Krasic</option>
 
-  </div>
+                <option disabled>──────────</option>
+                <option>Anthony Carbone</option>
+                <option>Clyde Chapman</option>
+                <option>Dennitza Fernandez</option>
+                <option>Jackson Geraghty</option>
+                <option>Kevin Mullinax</option>
+                <option>Sharon Rusta</option>
+                <option>Terry Hart</option>
+              </select>
+            </div>
 
-  <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
-  <div class="section-block">
-    <h2>Deployment &amp; Customer Engagement Manager</h2>
+            <!-- Additional Trainer (input + + button) -->
+            <div class="checklist-row integrated-plus indent-sub" data-base="true">
+              <label>Additional Trainer</label>
 
-    <div class="checklist-row">
-      <label>Deployment Manager</label>
-      <input type="text" placeholder="Enter Deployment Manager assigned">
-    </div>
+              <div class="input-plus">
+                <input
+                  id="additionalTrainerInput"
+                  type="text"
+                  placeholder="Enter additional trainer name"
+                />
+                <button
+                  type="button"
+                  class="add-row add-trainer-btn"
+                  data-add-trainer
+                  title="Add another trainer"
+                >+</button>
+              </div>
+            </div>
 
-    <div class="checklist-row">
-      <label>ServiceCart ASC</label>
-      <input type="text" placeholder="Enter ASC assigned">
-    </div>
+            <!-- Added trainers will be injected here by JS -->
+            <div id="additionalTrainersContainer"></div>
+          </div>
 
-    <div class="checklist-row">
-      <label>Scheduler ASC</label>
-      <input type="text" placeholder="Enter ASC assigned">
-    </div>
+          <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
+          <div class="section-block">
+            <h2>Deployment &amp; Customer Engagement Manager</h2>
 
-    <div class="checklist-row">
-      <label>CEM</label>
-      <input type="text" placeholder="Enter CEM assigned">
-    </div>
-  </div>
+            <div class="checklist-row">
+              <label>Deployment Manager</label>
+              <input id="deploymentManagerInput" type="text" placeholder="Enter Deployment Manager assigned" />
+            </div>
 
-</div>
+            <div class="checklist-row">
+              <label>ServiceCart ASC</label>
+              <input id="serviceCartAscInput" type="text" placeholder="Enter ASC assigned" />
+            </div>
+
+            <div class="checklist-row">
+              <label>Scheduler ASC</label>
+              <input id="schedulerAscInput" type="text" placeholder="Enter ASC assigned" />
+            </div>
+
+            <div class="checklist-row">
+              <label>CEM</label>
+              <input id="cemInput" type="text" placeholder="Enter CEM assigned" />
+            </div>
+          </div>
+
+        </div>
+      </section>
 
 <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
