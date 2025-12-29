@@ -1881,3 +1881,42 @@ main{
   margin-right:0 !important;
 }
 
+/* =======================================================
+   INNER CARD TIGHTENING
+   - More space left/right inside main page card
+   - Inner cards slightly narrower
+   - Do NOT affect POC mini-cards
+======================================================= */
+
+/* Give the main page card a little inner gutter */
+.page-section{
+  padding-left:34px !important;
+  padding-right:34px !important;
+}
+
+/* Pull inner section cards inward */
+.page-section > .grid-2,
+.page-section > .cards-grid,
+.page-section > .two-col-grid{
+  padding-left:12px !important;
+  padding-right:12px !important;
+}
+
+/* Inner section cards tighter left/right */
+.page-section .section-block{
+  padding-left:16px !important;
+  padding-right:16px !important;
+}
+
+/* Keep orange headers flush to card edges */
+.page-section .section-block h2{
+  margin-left:-16px !important;
+  margin-right:-16px !important;
+}
+
+/* ✅ EXCLUDE dealership POC mini-cards completely */
+#dealership-info .primary-contacts-grid,
+#dealership-info .primary-contacts-grid .mini-card{
+  padding-left:initial !important;
+  padding-right:initial !important;
+}
