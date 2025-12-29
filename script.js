@@ -441,15 +441,25 @@
      - NO remove buttons
   ======================= */
 function initAdditionalTrainerAdd() {
-  function handle(addBtn) {
-    const container = $("#additionalTrainersContainer");
-    const baseInput = $("#additionalTrainerInput");
-    if (!container || !baseInput) return;
+  function debug(msg, obj) {
+    // flip to true if you want console logs
+    const ON = true;
+    if (ON) console.log("[TRAINER+]", msg, obj || "");
+  }
+
+  function handleAdd() {
+    const container = document.getElementById("additionalTrainersContainer");
+    const baseInput = document.getElementById("additionalTrainerInput");
+
+    if (!container || !baseInput) {
+      debug("Missing container/input", { container, baseInput });
+      return;
+    }
 
     const name = (baseInput.value || "").trim();
     if (!name) {
-      flash(baseInput.closest(".checklist-row") || baseInput);
-      focusNoScroll(baseInput);
+      debug("No name entered");
+      try { baseInput.focus({ preventScroll: true }); } catch { baseInput.focus(); }
       return;
     }
 
@@ -457,48 +467,60 @@ function initAdditionalTrainerAdd() {
     row.className = "checklist-row indent-sub added-trainer-row";
     row.innerHTML = `
       <label></label>
-      <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name">
+      <input type="text" value="${String(name).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}"
+             placeholder="Enter additional trainer name">
     `;
-
     container.appendChild(row);
 
     baseInput.value = "";
     baseInput.dispatchEvent(new Event("input", { bubbles: true }));
-    focusNoScroll(baseInput);
 
-    ensureStableFieldIds(row);
-    captureState(document);
-    flash(row);
+    // If your helpers exist, keep them; if not, this won't crash
+    try { ensureStableFieldIds(row); } catch {}
+    try { captureState(document); } catch {}
+
+    debug("Added trainer row", name);
   }
 
-  document.addEventListener("click", (e) => {
-    const addBtn =
-      e.target.closest("[data-add-trainer]") ||
-      e.target.closest("#trainers-deployment .input-plus .add-row");
+  // CAPTURE PHASE = true (beats stopPropagation elsewhere)
+  document.addEventListener(
+    "click",
+    (e) => {
+      const btn =
+        e.target.closest("[data-add-trainer]") ||
+        e.target.closest("#trainers-deployment .input-plus .add-row");
 
-    if (!addBtn) return;
+      if (!btn) return;
 
-    // prevent any other add-row systems from seeing this click
-    e.preventDefault();
-    e.stopPropagation();
+      // prevent submit / navigation
+      e.preventDefault();
 
-    handle(addBtn);
-  });
+      // IMPORTANT: stop other add-row systems from running
+      e.stopPropagation();
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
+      handleAdd();
+    },
+    true
+  );
 
-    const addBtn =
-      e.target.closest("[data-add-trainer]") ||
-      e.target.closest("#trainers-deployment .input-plus .add-row");
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
 
-    if (!addBtn) return;
+      const btn =
+        e.target.closest("[data-add-trainer]") ||
+        e.target.closest("#trainers-deployment .input-plus .add-row");
 
-    e.preventDefault();
-    e.stopPropagation();
+      if (!btn) return;
 
-    handle(addBtn);
-  });
+      e.preventDefault();
+      e.stopPropagation();
+
+      handleAdd();
+    },
+    true
+  );
 }
 
   /* =======================
