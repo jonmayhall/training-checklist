@@ -777,6 +777,10 @@ main{
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) !important; /* RIGHT side rounded */
 }
+#trainers-deployment .input-plus .add-row {
+  -webkit-appearance: none;
+  appearance: none;
+}
 
 /* =======================
    TABLES
