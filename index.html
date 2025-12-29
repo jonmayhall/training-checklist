@@ -4007,7 +4007,7 @@
 <script>
   function initAutocomplete() {
     const input = document.getElementById("dealershipAddressInput");
-    if (!input || !window.google?.maps?.places) return;
+    if (!input || !window.google?.maps?.places?.Autocomplete) return;
 
     const ac = new google.maps.places.Autocomplete(input, {
       fields: ["formatted_address", "geometry", "name"],
@@ -4018,6 +4018,9 @@
       const place = ac.getPlace();
       const addr = place?.formatted_address || input.value || "";
       if (addr) updateDealershipMap(addr);
+
+      // Optional: if you use geometry anywhere later
+      // if (!place?.geometry) console.warn("No geometry returned for place:", place);
     });
 
     input.addEventListener("keydown", (e) => {
