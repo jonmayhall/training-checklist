@@ -78,6 +78,10 @@
     }
   }
 
+   document.addEventListener("click", e => {
+  if (e.target.closest(".add-row")) { ... }
+});
+
   /* =======================
      GHOST / PLACEHOLDER STYLING
   ======================= */
