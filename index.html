@@ -128,16 +128,19 @@
         </select>
       </div>
 
-      <!-- Additional Trainer (base row) -->
-      <div class="checklist-row integrated-plus indent-sub" data-base="true">
-        <label>Additional Trainer</label>
-        <input type="text" placeholder="Enter additional trainer name">
-        <button type="button" class="add-row" title="Add another trainer">+</button>
-      </div>
+     <!-- Additional Trainer -->
+<div class="checklist-row indent-sub">
+  <label>Additional Trainer</label>
 
-      <!-- Additional trainers injected here -->
-      <div id="additionalTrainersContainer"></div>
-    </div>
+  <!-- ✅ unified "input + button" wrapper (controls rounded corners + sizing) -->
+  <div class="input-plus">
+    <input type="text" placeholder="Enter additional trainer name" id="additionalTrainerInput">
+    <button type="button" class="plus-btn" data-add-trainer title="Add another trainer">+</button>
+  </div>
+</div>
+
+<!-- Additional trainers injected here -->
+<div id="additionalTrainersContainer"></div>
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
