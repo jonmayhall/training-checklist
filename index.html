@@ -31,37 +31,18 @@
           <button type="button" class="nav-btn active" data-target="trainers-deployment">
             Trainers &amp; mK Team
           </button>
-          <button type="button" class="nav-btn" data-target="dealership-info">
-            Dealership Info
-          </button>
-          <button type="button" class="nav-btn" data-target="pre-training">
-            Pre-Training
-          </button>
-          <button type="button" class="nav-btn" data-target="monday-visit">
-            Monday Visit
-          </button>
-          <button type="button" class="nav-btn" data-target="training-checklist">
-            Training Checklist
-          </button>
-          <button type="button" class="nav-btn" data-target="opcodes-pricing">
-            Opcodes &amp; Pricing
-          </button>
-          <button type="button" class="nav-btn" data-target="support-tickets">
-            Support Tickets
-          </button>
-          <button type="button" class="nav-btn" data-target="dms-integration">
-            DMS Integration
-          </button>
-          <button type="button" class="nav-btn" data-target="post-training">
-            Post-Training Verification
-          </button>
-          <button type="button" class="nav-btn" data-target="resources">
-            Resources
-          </button>
-          <button type="button" class="nav-btn" data-target="training-summary">
-            Training Summary
-          </button>
+          <button type="button" class="nav-btn" data-target="dealership-info">Dealership Info</button>
+          <button type="button" class="nav-btn" data-target="pre-training">Pre-Training</button>
+          <button type="button" class="nav-btn" data-target="monday-visit">Monday Visit</button>
+          <button type="button" class="nav-btn" data-target="training-checklist">Training Checklist</button>
+          <button type="button" class="nav-btn" data-target="opcodes-pricing">Opcodes &amp; Pricing</button>
+          <button type="button" class="nav-btn" data-target="support-tickets">Support Tickets</button>
+          <button type="button" class="nav-btn" data-target="dms-integration">DMS Integration</button>
+          <button type="button" class="nav-btn" data-target="post-training">Post-Training Verification</button>
+          <button type="button" class="nav-btn" data-target="resources">Resources</button>
+          <button type="button" class="nav-btn" data-target="training-summary">Training Summary</button>
         </nav>
+
         <button id="clearAllBtn" type="button">Clear All</button>
       </aside>
 
@@ -117,6 +98,7 @@
               <!-- Additional Trainer (+) -->
               <div class="checklist-row integrated-plus indent-sub" data-base="true">
                 <label>Additional Trainer</label>
+
                 <div class="input-plus">
                   <input
                     id="additionalTrainerInput"
@@ -124,15 +106,15 @@
                     placeholder="Enter additional trainer name"
                     autocomplete="off"
                   />
-                <button
-  type="button"
-  class="trainer-add-btn"
-  data-add-trainer
-  title="Add another trainer"
->
-  +
-</button>
-
+                  <button
+                    type="button"
+                    class="trainer-add-btn"
+                    data-add-trainer
+                    title="Add another trainer"
+                    aria-label="Add another trainer"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
@@ -156,32 +138,17 @@
 
               <div class="checklist-row">
                 <label>ServiceCart ASC</label>
-                <input
-                  id="serviceCartASC"
-                  type="text"
-                  placeholder="Enter ASC assigned"
-                  autocomplete="off"
-                />
+                <input id="serviceCartASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
               </div>
 
               <div class="checklist-row">
                 <label>Scheduler ASC</label>
-                <input
-                  id="schedulerASC"
-                  type="text"
-                  placeholder="Enter ASC assigned"
-                  autocomplete="off"
-                />
+                <input id="schedulerASC" type="text" placeholder="Enter ASC assigned" autocomplete="off" />
               </div>
 
               <div class="checklist-row">
                 <label>CEM</label>
-                <input
-                  id="cemAssigned"
-                  type="text"
-                  placeholder="Enter CEM assigned"
-                  autocomplete="off"
-                />
+                <input id="cemAssigned" type="text" placeholder="Enter CEM assigned" autocomplete="off" />
               </div>
             </div>
           </div>
@@ -192,10 +159,10 @@
         <!-- ========================================================= -->
         <section id="dealership-info" class="page-section">
           <h1>Dealership Info</h1>
-          <p class="page-subtitle">
-            Core dealership details and key contacts your team will work with.
-          </p>
-          <button class="clear-page-btn" type="button">Reset This Page</button>
+          <p class="page-subtitle">Core dealership details and key contacts your team will work with.</p>
+          <button class="clear-page-btn" type="button" data-clear-page="dealership-info">
+            Reset This Page
+          </button>
 
           <!-- ================= DEALERSHIP DETAILS ================= -->
           <div class="section-block">
@@ -325,6 +292,7 @@
                     type="button"
                     class="add-row additional-poc-add"
                     title="Add another contact"
+                    aria-label="Add another contact"
                   >
                     +
                   </button>
@@ -362,9 +330,7 @@
                   placeholder="Enter dealership address"
                   autocomplete="off"
                 />
-                <button type="button" class="small-map-btn" id="openAddressInMapsBtn">
-                  Map
-                </button>
+                <button type="button" class="small-map-btn" id="openAddressInMapsBtn">Map</button>
               </div>
             </div>
 
