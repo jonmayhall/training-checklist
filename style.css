@@ -1746,3 +1746,91 @@ button.remove-btn,
 button.remove-row{
   display:none !important;
 }
+
+/* =========================================================
+   FIX 1) Additional POC (+) button — make it match Trainers (+)
+   (orange, 34x34, attached, rounded right)
+========================================================= */
+#dealership-info .checklist-row.integrated-plus .input-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  margin-left:auto !important;
+}
+
+#dealership-info .checklist-row.integrated-plus .input-plus input[type="text"]{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  height:34px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+/* catches your POC add button whether it's .poc-add-btn or just [data-add-poc] */
+#dealership-info .checklist-row.integrated-plus .input-plus button[data-add-poc],
+#dealership-info .checklist-row.integrated-plus .input-plus .poc-add-btn{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+}
+
+#dealership-info .checklist-row.integrated-plus .input-plus button[data-add-poc]:hover,
+#dealership-info .checklist-row.integrated-plus .input-plus .poc-add-btn:hover{
+  background:#ff8b42 !important;
+}
+
+/* Added POC rows: fully rounded (both sides) */
+#dealership-info #additionalPocsContainer input[type="text"]{
+  border-radius:var(--radius-sm) !important;
+}
+
+
+/* =========================================================
+   FIX 2) Training date inputs still too big — force correct width + height
+   (these are the stacked date boxes on Dealership Info)
+========================================================= */
+#dealership-info .training-dates-row .date-stack,
+#dealership-info .onsite-training-dates-row .date-stack{
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+}
+
+#dealership-info .training-dates-row .date-stack input[type="date"],
+#dealership-info .onsite-training-dates-row .date-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  max-height:34px !important;
+  padding:7px 10px !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+  border-radius:var(--radius-sm) !important;
+  box-sizing:border-box !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
+
+
+/* =========================================================
+   FIX 3) DMS dropdown ghost text — grey like other placeholders
+   (only when the select has class is-placeholder)
+========================================================= */
+#dms-integration select.is-placeholder{
+  color:#9ca3af !important;
+}
