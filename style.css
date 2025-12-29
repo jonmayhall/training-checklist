@@ -782,6 +782,28 @@ main{
   appearance: none;
 }
 
+#trainers-deployment .input-plus .trainer-add-btn{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+}
+#trainers-deployment .input-plus .trainer-add-btn:hover{
+  background:#ff8b42 !important;
+}
+
 /* =======================
    TABLES
 ======================= */
