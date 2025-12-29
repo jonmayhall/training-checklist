@@ -743,66 +743,88 @@
 
   /* =======================
      ADDITIONAL TRAINER ROW (+)
-     - matches your exact HTML:
-       #trainers-deployment .checklist-row.integrated-plus[data-base="true"]
-       inject into #additionalTrainersContainer
+     - This version supports BOTH patterns:
+       A) Your original markup with data-add-trainer + #additionalTrainerInput
+       B) Your trainers page base-row with .integrated-plus[data-base="true"] + .add-row
+     - Injects into #additionalTrainersContainer
   ======================= */
   function initAdditionalTrainerRowAdder() {
     document.addEventListener("click", (e) => {
-      const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+      // Pattern A: explicit data attribute
+      const addA = e.target.closest("[data-add-trainer]");
+
+      // Pattern B: your trainers page base row + button
+      const addB = e.target.closest(
+        "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+      );
+
+      const addBtn = addA || addB;
       if (!addBtn) return;
 
       if (addBtn.tagName === "A") e.preventDefault();
 
-      const baseRow = addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']");
-      if (!baseRow) return;
-
       const container = $("#additionalTrainersContainer");
       if (!container) return;
 
-      const baseInput = $("input[type='text']", baseRow);
+      // base input can be either:
+      // - id="additionalTrainerInput" (Pattern A)
+      // - the input inside the base row (Pattern B)
+      let baseInput = $("#additionalTrainerInput");
+      if (!baseInput) {
+        const baseRow = addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']");
+        baseInput = baseRow ? $("input[type='text']", baseRow) : null;
+      }
       if (!baseInput) return;
 
       const name = (baseInput.value || "").trim();
       if (!name) {
-        flash(baseRow);
+        flash(baseInput.closest(".checklist-row") || baseInput);
         focusNoScroll(baseInput);
         return;
       }
 
+      // Build row — keep your input/button pairing so CSS can round correctly
       const row = document.createElement("div");
-      row.className = "checklist-row indent-sub added-trainer-row";
+      row.className = "checklist-row integrated-plus indent-sub added-trainer-row";
+
       row.innerHTML = `
-        <label class="sr-label">Additional Trainer</label>
-        <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}">
-        <button type="button" class="remove-row" title="Remove">–</button>
+        <label></label>
+        <div class="input-plus">
+          <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}">
+          <button type="button" class="remove-btn" data-remove-trainer title="Remove">–</button>
+        </div>
       `;
 
       container.appendChild(row);
 
       baseInput.value = "";
       baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      focusNoScroll(baseInput);
 
-      normalizeNotesButtons(row);
-      ensureStableFieldIds(container);
+      ensureStableFieldIds(row);
       captureState(document);
       flash(row);
     });
 
     document.addEventListener("click", (e) => {
-      const rm = e.target.closest("#trainers-deployment #additionalTrainersContainer .remove-row");
-      if (!rm) return;
-      const row = rm.closest(".added-trainer-row");
-      if (!row) return;
-      row.remove();
+      const removeBtn = e.target.closest("[data-remove-trainer]");
+      if (!removeBtn) return;
+      const row = removeBtn.closest(".added-trainer-row") || removeBtn.closest(".checklist-row");
+      if (row) row.remove();
       captureState(document);
     });
 
-    // keyboard support for non-button add controls (if you ever change markup)
+    // keyboard support
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
-      const addBtn = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+
+      const addA = e.target.closest("[data-add-trainer]");
+      const addB = e.target.closest(
+        "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
+      );
+      const addBtn = addA || addB;
       if (!addBtn) return;
+
       e.preventDefault();
       addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -824,6 +846,7 @@
 
       // Skip the Additional Trainer base-row add (handled by initAdditionalTrainerRowAdder)
       if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
+      if (addBtn.closest("[data-add-trainer]")) return;
 
       if (addBtn.tagName === "A") e.preventDefault();
 
@@ -865,6 +888,7 @@
       if (!addBtn) return;
       if (addBtn.closest(".table-footer")) return;
       if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
+      if (addBtn.closest("[data-add-trainer]")) return;
       e.preventDefault();
       addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -1087,7 +1111,7 @@
     initAddRowTables();
     initNotesButtons();
 
-    // NEW: trainers page "Additional Trainer" row adder
+    // Trainers page Additional Trainer (+)
     initAdditionalTrainerRowAdder();
 
     // Existing card cloner (POC cards etc)
