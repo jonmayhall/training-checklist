@@ -514,6 +514,61 @@
       return;
     }
 
+     // =======================
+// ADDITIONAL POCs (PAGE 2)
+// =======================
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-add-poc]");
+  if (!btn) return;
+
+  const input = document.getElementById("additionalPocInput");
+  const container = document.getElementById("additionalPocsContainer");
+  if (!input || !container) return;
+
+  const name = (input.value || "").trim();
+  if (!name) {
+    input.focus();
+    return;
+  }
+
+  // Create a new POC mini-card (matches other contact cards)
+  const card = document.createElement("div");
+  card.className = "mini-card contact-card additional-poc-added";
+  card.setAttribute("data-mk-generated", "true");
+
+  card.innerHTML = `
+    <div class="checklist-row">
+      <label>Additional POC</label>
+      <input type="text" value="${escapeHtml(name)}" />
+    </div>
+    <div class="checklist-row indent-sub">
+      <label>Role</label>
+      <input type="text" placeholder="Enter role" />
+    </div>
+    <div class="checklist-row indent-sub">
+      <label>Cell</label>
+      <input type="text" placeholder="Enter cell" />
+    </div>
+    <div class="checklist-row indent-sub">
+      <label>Email</label>
+      <input type="email" placeholder="Enter company email" />
+    </div>
+  `;
+
+  container.appendChild(card);
+  input.value = "";
+});
+
+// basic escaping so a name like <Mike> doesn't break HTML
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
     // Notes buttons
     if (t.closest("[data-notes-btn]")) {
       e.preventDefault();
