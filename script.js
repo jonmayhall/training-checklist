@@ -1,14 +1,14 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (DROP-IN FULL SCRIPT — includes Additional Trainer row +)
-   ✅ Notes buttons (table + question)
-   ✅ Table add-row (+) for tbody rows
+   myKaarma Interactive Training Checklist — FULL PROJECT JS (CLEAN + CORRECT)
+   (DROP-IN FULL SCRIPT)
+   ✅ Notes buttons (table + question) normalized + bullet stub injected
+   ✅ Table add-row (+) clones FIRST tbody row safely
    ✅ Table expand ⤢ (mkTableModal if present; fallback to row modal)
-   ✅ Row popup modal (mkRowModal)
-   ✅ Support tickets add/move/reset
+   ✅ Row popup modal (mkRowModal) — fixes “extra/random header row” by keeping ONLY the 2nd header row when multiple exist
+   ✅ Support tickets add/move/reset (NO remove buttons)
    ✅ Reset This Page (clears dynamic rows + tickets)
    ✅ Autosave/restore (localStorage)
-   ✅ Additional Trainer row (+) injects into #additionalTrainersContainer
+   ✅ Additional Trainer (+) works (supports BOTH patterns) — NO remove button created
    ✅ Hardened: works even if controls are DIV/SPAN/A (not <button>)
 ======================================================= */
 
@@ -22,8 +22,6 @@
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
-
-  // Toggle to true if you want a console line proving the script ran.
   const DEBUG = false;
 
   /* =======================
@@ -59,7 +57,6 @@
   }
 
   function asButton(el) {
-    // Makes non-button elements keyboard/click friendly.
     if (!isEl(el)) return;
     if (el.tagName === "BUTTON") {
       el.type = el.getAttribute("type") || "button";
@@ -98,11 +95,10 @@
   }
 
   /* =========================================================
-     NOTES BUTTON NORMALIZATION (supports any tag)
-     - Table notes buttons: .notes-btn (CSS pseudo bubble)
-     - Question notes buttons: .notes-icon-btn with inline SVG
+     NOTES BUTTON NORMALIZATION
+     - Table: .notes-btn (CSS bubble pseudo)
+     - Question rows: .notes-icon-btn with inline svg
   ========================================================= */
-
   const NOTES_SVG = `
     <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3a1 1 0 0 0 1.64.77L13.5 18H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 13h-6.85a1 1 0 0 0-.64.23L9 19.1V17a1 1 0 0 0-1-1H4V5h16v11Z"/>
@@ -119,7 +115,6 @@
       if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "Notes");
 
       const inTable = isTableNotesButton(btn);
-
       btn.classList.remove("notes-btn", "notes-icon-btn");
 
       if (inTable) {
@@ -243,7 +238,6 @@
     if (!t || !t.matches("input, select, textarea")) return;
     captureState(document);
   });
-
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t || !t.matches("input, select, textarea")) return;
@@ -291,14 +285,14 @@
 
         clearControlsIn(page);
 
-        // Remove dynamically added table rows (keep first 2 like your template)
+        // Remove dynamically added table rows (keep first 2 like template)
         $$("table.training-table tbody", page).forEach((tbody) => {
           const rows = $$("tr", tbody);
           const keep = Math.min(2, rows.length);
           rows.slice(keep).forEach((r) => r.remove());
         });
 
-        // Remove dynamic additional-trainer rows
+        // Remove dynamic additional-trainer rows (but keep base input)
         if (page.id === "trainers-deployment") {
           const c = $("#additionalTrainersContainer");
           if (c) c.innerHTML = "";
@@ -320,7 +314,7 @@
   }
 
   /* =======================
-     TABLE ADD ROW (+)  (supports any tag for the +)
+     TABLE ADD ROW (+)
   ======================= */
   function initAddRowTables() {
     document.addEventListener("click", (e) => {
@@ -336,10 +330,11 @@
       if (!tbody || !firstRow) return;
 
       const clone = firstRow.cloneNode(true);
-
       clone.setAttribute(AUTO_ROW_ATTR, uid("row"));
+
       clearControlsIn(clone);
 
+      // scrub ids + auto ids
       $$("[id]", clone).forEach((el) => (el.id = ""));
       $$(`[${AUTO_ID_ATTR}]`, clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
 
@@ -348,11 +343,9 @@
       normalizeNotesButtons(clone);
       ensureStableFieldIds(tbody);
       captureState(document);
-
       flash(clone);
     });
 
-    // keyboard support if add-row is not a button
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
       const addBtn = e.target.closest(".table-footer .add-row");
@@ -363,7 +356,7 @@
   }
 
   /* =======================
-     NOTES BULLETS (no scroll shift) (supports any tag)
+     NOTES (inject bullets)
   ======================= */
   function getNotesTargetIdFromButton(btn) {
     return btn.getAttribute("data-notes-target") || btn.dataset.notesTarget || "";
@@ -376,7 +369,6 @@
       const firstNonEmpty = texts.find((v) => v.length);
       return firstNonEmpty || "";
     }
-
     const rowWrap = btn.closest(".checklist-row, .indent-sub");
     if (rowWrap) {
       const label = $("label", rowWrap);
@@ -397,7 +389,9 @@
     const table = btn.closest("table");
     if (td && tr && table) {
       const colIndex = Array.from(tr.children).indexOf(td);
-      const th = table.tHead?.rows?.[0]?.children?.[colIndex];
+      const headRows = table.tHead?.rows ? Array.from(table.tHead.rows) : [];
+      const useRow = headRows.length ? headRows[headRows.length - 1] : null; // last header row
+      const th = useRow?.children?.[colIndex];
       return (th?.textContent || "").trim();
     }
     return "";
@@ -421,7 +415,6 @@
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
       if (!btn) return;
-
       if (btn.tagName === "A") e.preventDefault();
 
       const targetId = getNotesTargetIdFromButton(btn);
@@ -436,16 +429,16 @@
       const context = (getContextLabel(btn) || "").trim();
       const q = (getQuestionText(btn) || "").trim();
 
-      let title = "";
-      if (btn.closest("tr")) title = [context, q].filter(Boolean).join("  ").trim();
-      else title = (q || context || "Notes").trim();
+      const title = btn.closest("tr")
+        ? [context, q].filter(Boolean).join("  ").trim()
+        : (q || context || "Notes").trim();
 
       ensureBulletStub(ta, title);
       focusNoScroll(ta);
       flash(notesBlock);
+      captureState(document);
     });
 
-    // keyboard support for non-button notes controls
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
       const btn = e.target.closest("[data-notes-target], [data-notes-btn][data-notes-target]");
@@ -456,7 +449,7 @@
   }
 
   /* =======================
-     TABLE EXPAND (⤢) injected + working
+     TABLE EXPAND (⤢)
   ======================= */
   function ensureTableExpandButtons(root = document) {
     $$(".table-container", root).forEach((container) => {
@@ -589,16 +582,14 @@
       }
 
       const firstRow = tableContainer.querySelector("table.training-table tbody tr");
-      if (firstRow) {
-        firstRow.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      } else {
-        flash(tableContainer);
-      }
+      if (firstRow) firstRow.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      else flash(tableContainer);
     });
   }
 
   /* =======================
      ROW POPUP MODAL (mkRowModal)
+     - FIX: if table has multiple header rows, keep ONLY the last (your “second”)
   ======================= */
   const rowModal = document.getElementById("mkRowModal");
   const tableHost = document.getElementById("mkModalTableHost");
@@ -613,6 +604,16 @@
   function closeRowModal() {
     if (!rowModal) return;
     rowModal.setAttribute("aria-hidden", "true");
+  }
+
+  function cloneOnlyLastHeaderRow(fromTable) {
+    if (!fromTable?.tHead) return null;
+    const head = document.createElement("thead");
+    const rows = Array.from(fromTable.tHead.rows || []);
+    if (!rows.length) return null;
+    const last = rows[rows.length - 1].cloneNode(true);
+    head.appendChild(last);
+    return head;
   }
 
   function buildModalTableShell(fromTable, row) {
@@ -630,12 +631,12 @@
     t.className = fromTable.className || "training-table";
     scroll.appendChild(t);
 
-    const thead = fromTable.tHead ? fromTable.tHead.cloneNode(true) : null;
-    if (thead) t.appendChild(thead);
+    // ✅ only the “second” header row (last row) to prevent the random extra header issue
+    const cleanHead = cloneOnlyLastHeaderRow(fromTable);
+    if (cleanHead) t.appendChild(cleanHead);
 
     const tbody = document.createElement("tbody");
     t.appendChild(tbody);
-
     tbody.appendChild(row);
   }
 
@@ -651,7 +652,6 @@
     parent.removeChild(row);
 
     buildModalTableShell(table, row);
-
     return { parent, ph, table };
   }
 
@@ -696,6 +696,8 @@
 
     closeRowModal();
     activeModal = null;
+
+    captureState(document);
   }
 
   function initRowModal() {
@@ -712,6 +714,7 @@
     document.addEventListener("click", (e) => {
       const t = e.target;
 
+      // don’t open modal from controls
       if (
         t.closest("button") ||
         t.closest("a") ||
@@ -741,51 +744,95 @@
     });
   }
 
-function initAdditionalTrainer() {
-  document.addEventListener("click", (e) => {
-    const addBtn = e.target.closest("[data-add-trainer]");
-    if (!addBtn) return;
+  /* =======================
+     ADDITIONAL TRAINER (+)
+     - supports BOTH patterns:
+       A) [data-add-trainer] + #additionalTrainerInput + #additionalTrainersContainer
+       B) #trainers-deployment .checklist-row.integrated-plus[data-base="true"] .add-row
+     - NO remove button created
+  ======================= */
+  function getTrainerBaseInput(addBtn) {
+    let baseInput = $("#additionalTrainerInput");
+    if (baseInput) return baseInput;
 
-    const container = document.getElementById("additionalTrainersContainer");
-    const baseInput = document.getElementById("additionalTrainerInput");
-    if (!container || !baseInput) return;
+    const baseRow = addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']");
+    return baseRow ? $("input[type='text']", baseRow) : null;
+  }
 
-    const name = (baseInput.value || "").trim();
-    if (!name) {
-      baseInput.focus();
-      return;
-    }
+  function initAdditionalTrainerRowAdder() {
+    const handler = (addBtn) => {
+      const container = $("#additionalTrainersContainer");
+      if (!container) return;
 
-    const row = document.createElement("div");
-    row.className = "checklist-row indent-sub added-trainer-row";
+      const baseInput = getTrainerBaseInput(addBtn);
+      if (!baseInput) return;
 
-    row.innerHTML = `
-      <label></label>
-      <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}" />
-    `;
+      const name = (baseInput.value || "").trim();
+      if (!name) {
+        flash(baseInput.closest(".checklist-row") || baseInput);
+        focusNoScroll(baseInput);
+        return;
+      }
 
-    container.appendChild(row);
+      // New row: just an input (NO button), so it can be fully rounded by CSS
+      const row = document.createElement("div");
+      row.className = "checklist-row indent-sub added-trainer-row";
 
-    baseInput.value = "";
-    baseInput.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-}
+      row.innerHTML = `
+        <label></label>
+        <input type="text" value="${escapeHtml(name)}" placeholder="Enter additional trainer name">
+      `;
+
+      container.appendChild(row);
+
+      baseInput.value = "";
+      baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+      focusNoScroll(baseInput);
+
+      ensureStableFieldIds(row);
+      applyGhostStyling(row);
+      captureState(document);
+      flash(row);
+    };
+
+    document.addEventListener("click", (e) => {
+      const addA = e.target.closest("[data-add-trainer]");
+      const addB = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+      const addBtn = addA || addB;
+      if (!addBtn) return;
+
+      if (addBtn.tagName === "A") e.preventDefault();
+      handler(addBtn);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+
+      const addA = e.target.closest("[data-add-trainer]");
+      const addB = e.target.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row");
+      const addBtn = addA || addB;
+      if (!addBtn) return;
+
+      e.preventDefault();
+      handler(addBtn);
+    });
+  }
 
   /* =======================
-     CARD CLONER (+) for Additional POC / Trainers / Trainer cards
+     CARD CLONER (+) (POC/Trainer Cards)
      - Base card must have data-base="true"
-     - Clones remove the + button
-     - IMPORTANT: This is NOT the table add-row
+     - Clones remove ALL + buttons
+     - NOTE: NOT the table add-row, NOT the additional-trainer base row
   ======================= */
   function initCloneAddButtons() {
     document.addEventListener("click", (e) => {
       const addBtn = e.target.closest(".add-row");
       if (!addBtn) return;
 
-      // Skip table add-row (handled elsewhere)
+      // Skip table add-row
       if (addBtn.closest(".table-footer")) return;
 
-      // Skip the Additional Trainer base-row add (handled by initAdditionalTrainerRowAdder)
+      // Skip Additional Trainer base-row add
       if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
       if (addBtn.closest("[data-add-trainer]")) return;
 
@@ -804,13 +851,11 @@ function initAdditionalTrainer() {
       clone.setAttribute("data-clone", "true");
       clone.setAttribute(AUTO_CARD_ATTR, uid("clone"));
 
-      // remove + buttons from clone
+      // remove ALL + buttons from clone
       clone.querySelectorAll(".add-row").forEach((b) => b.remove());
 
-      // clear fields
       clearControlsIn(clone);
 
-      // scrub ids + saved ids
       clone.querySelectorAll("[id]").forEach((el) => (el.id = ""));
       clone.querySelectorAll(`[${AUTO_ID_ATTR}]`).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
 
@@ -822,7 +867,6 @@ function initAdditionalTrainer() {
       flash(clone);
     });
 
-    // keyboard support
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
       const addBtn = e.target.closest(".add-row");
@@ -830,13 +874,14 @@ function initAdditionalTrainer() {
       if (addBtn.closest(".table-footer")) return;
       if (addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']")) return;
       if (addBtn.closest("[data-add-trainer]")) return;
+
       e.preventDefault();
       addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
   }
 
   /* =======================
-     SUPPORT TICKETS
+     SUPPORT TICKETS (NO REMOVE BUTTONS)
   ======================= */
   const ticketContainers = {
     Open: $("#openTicketsContainer"),
@@ -878,6 +923,7 @@ function initAdditionalTrainer() {
   function ensureOnlyBaseHasDisclaimerAndAdd(groupEl) {
     const isBase = ticketIsBase(groupEl);
 
+    // ✅ remove any remove buttons if they exist in HTML
     $$(".remove-ticket-btn", groupEl).forEach((b) => b.remove());
 
     const add = $(".add-ticket-btn", groupEl);
@@ -958,6 +1004,7 @@ function initAdditionalTrainer() {
       const st = $(".ticket-status-select", clone)?.value || "Open";
       (ticketContainers[st] || ticketContainers.Open)?.appendChild(clone);
 
+      // clear base fields for next entry
       const bf = ticketFields(baseGroup);
       if (bf.num) bf.num.value = "";
       if (bf.url) bf.url.value = "";
@@ -969,6 +1016,7 @@ function initAdditionalTrainer() {
       ensureStableFieldIds(clone);
       ensureStableFieldIds(baseGroup);
       captureState(document);
+      flash(clone);
     });
 
     document.addEventListener("change", (e) => {
@@ -976,7 +1024,6 @@ function initAdditionalTrainer() {
       if (!sel) return;
 
       sel.style.color = "#111";
-
       const group = sel.closest(".ticket-group");
       if (!group) return;
 
@@ -1055,7 +1102,7 @@ function initAdditionalTrainer() {
     // Trainers page Additional Trainer (+)
     initAdditionalTrainerRowAdder();
 
-    // Existing card cloner (POC cards etc)
+    // Card cloner (+) for base cards
     initCloneAddButtons();
 
     initSupportTickets();
