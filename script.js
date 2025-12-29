@@ -741,94 +741,35 @@
     });
   }
 
-  /* =======================
-     ADDITIONAL TRAINER ROW (+)
-     - This version supports BOTH patterns:
-       A) Your original markup with data-add-trainer + #additionalTrainerInput
-       B) Your trainers page base-row with .integrated-plus[data-base="true"] + .add-row
-     - Injects into #additionalTrainersContainer
-  ======================= */
-  function initAdditionalTrainerRowAdder() {
-    document.addEventListener("click", (e) => {
-      // Pattern A: explicit data attribute
-      const addA = e.target.closest("[data-add-trainer]");
+function initAdditionalTrainer() {
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest("[data-add-trainer]");
+    if (!addBtn) return;
 
-      // Pattern B: your trainers page base row + button
-      const addB = e.target.closest(
-        "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
-      );
+    const container = document.getElementById("additionalTrainersContainer");
+    const baseInput = document.getElementById("additionalTrainerInput");
+    if (!container || !baseInput) return;
 
-      const addBtn = addA || addB;
-      if (!addBtn) return;
+    const name = (baseInput.value || "").trim();
+    if (!name) {
+      baseInput.focus();
+      return;
+    }
 
-      if (addBtn.tagName === "A") e.preventDefault();
+    const row = document.createElement("div");
+    row.className = "checklist-row indent-sub added-trainer-row";
 
-      const container = $("#additionalTrainersContainer");
-      if (!container) return;
+    row.innerHTML = `
+      <label></label>
+      <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}" />
+    `;
 
-      // base input can be either:
-      // - id="additionalTrainerInput" (Pattern A)
-      // - the input inside the base row (Pattern B)
-      let baseInput = $("#additionalTrainerInput");
-      if (!baseInput) {
-        const baseRow = addBtn.closest("#trainers-deployment .checklist-row.integrated-plus[data-base='true']");
-        baseInput = baseRow ? $("input[type='text']", baseRow) : null;
-      }
-      if (!baseInput) return;
+    container.appendChild(row);
 
-      const name = (baseInput.value || "").trim();
-      if (!name) {
-        flash(baseInput.closest(".checklist-row") || baseInput);
-        focusNoScroll(baseInput);
-        return;
-      }
-
-      // Build row — keep your input/button pairing so CSS can round correctly
-      const row = document.createElement("div");
-      row.className = "checklist-row integrated-plus indent-sub added-trainer-row";
-
-      row.innerHTML = `
-        <label></label>
-        <div class="input-plus">
-          <input type="text" placeholder="Enter additional trainer name" value="${escapeHtml(name)}">
-          <button type="button" class="remove-btn" data-remove-trainer title="Remove">–</button>
-        </div>
-      `;
-
-      container.appendChild(row);
-
-      baseInput.value = "";
-      baseInput.dispatchEvent(new Event("input", { bubbles: true }));
-      focusNoScroll(baseInput);
-
-      ensureStableFieldIds(row);
-      captureState(document);
-      flash(row);
-    });
-
-    document.addEventListener("click", (e) => {
-      const removeBtn = e.target.closest("[data-remove-trainer]");
-      if (!removeBtn) return;
-      const row = removeBtn.closest(".added-trainer-row") || removeBtn.closest(".checklist-row");
-      if (row) row.remove();
-      captureState(document);
-    });
-
-    // keyboard support
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-
-      const addA = e.target.closest("[data-add-trainer]");
-      const addB = e.target.closest(
-        "#trainers-deployment .checklist-row.integrated-plus[data-base='true'] .add-row"
-      );
-      const addBtn = addA || addB;
-      if (!addBtn) return;
-
-      e.preventDefault();
-      addBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-  }
+    baseInput.value = "";
+    baseInput.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
 
   /* =======================
      CARD CLONER (+) for Additional POC / Trainers / Trainer cards
