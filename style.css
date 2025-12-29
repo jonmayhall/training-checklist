@@ -2091,3 +2091,63 @@ button.add-row {
   width: 18px;
   height: 18px;
 }
+
+/* =========================================================
+   FIX PACK (TARGETED) — trainers + dates + cloned rounding
+   Paste at VERY BOTTOM of style.css
+========================================================= */
+
+/* 1) Re-enable Additional Trainer + button (your CSS hides it) */
+#trainers-deployment #additionalTrainersContainer .add-row{
+  display:flex !important;
+}
+
+/* Keep the + button same size as other add buttons */
+#trainers-deployment #additionalTrainersContainer .add-row{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  padding:0 !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* 2) Fix onsite/training date boxes to match other textboxes */
+.training-dates-row .date-stack input[type="date"],
+.onsite-training-dates-row .date-stack input[type="date"]{
+  height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  width:100% !important;
+  max-width:100% !important;
+}
+
+/* Also keep all date inputs in checklist rows consistent */
+.section-block .checklist-row input[type="date"]{
+  height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+}
+
+/* 3) Fix: cloned/added textboxes missing RIGHT rounded edge
+   (only for rows that are NOT "integrated-plus") */
+.section-block .checklist-row:not(.integrated-plus) input[type="text"],
+.section-block .checklist-row:not(.integrated-plus) input[type="date"],
+.training-table input[type="text"],
+.training-table select{
+  border-top-right-radius:var(--radius-sm) !important;
+  border-bottom-right-radius:var(--radius-sm) !important;
+}
+
+/* Integrated-plus rows: input should be square on the right, button owns the rounding */
+.section-block .checklist-row.integrated-plus input[type="text"],
+.section-block .checklist-row.integrated-plus input[type="tel"],
+.section-block .checklist-row.integrated-plus input[type="date"]{
+  border-top-right-radius:0 !important;
+  border-bottom-right-radius:0 !important;
+}
+.section-block .checklist-row.integrated-plus > .add-row{
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
