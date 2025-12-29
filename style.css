@@ -9,6 +9,10 @@
    ✅ NO remove buttons anywhere
    ✅ NEW: Added Trainers/POCs inputs have fully-rounded right sides
    ✅ NEW: Added Support Tickets have NO plus button + ticket # input rounded on right
+   ✅ NEW: Additional POC (+) matches Trainer (+): orange attached button, correct sizing
+   ✅ NEW: Select ghost/placeholder text is consistently grey (incl. DMS)
+   ✅ NEW: Main page cards + inner cards slightly narrower to show more grey background
+   ✅ EXCEPTION: Individual POC mini-cards remain unchanged
 ======================================================= */
 
 /* =======================
@@ -74,6 +78,10 @@ textarea::placeholder{
 /* Ghost placeholders */
 select{ color:var(--ink); }
 select.is-placeholder{ color:#9ca3af; }
+
+/* modern Chrome/Safari placeholder for selects (incl DMS) */
+select:has(option[data-ghost="true"]:checked){ color:#9ca3af !important; }
+select:has(option[value=""]:checked){ color:#9ca3af !important; }
 
 input[type="date"]{ color:var(--ink); }
 input[type="date"].is-placeholder{ color:#9ca3af; }
@@ -217,17 +225,19 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
 /* =======================
    MAIN CONTENT
+   (slightly more gutter to show grey background)
 ======================= */
 main{
   flex:1;
   margin-left:230px;
-  padding:30px 32px;
+  padding:30px 44px; /* was 32px */
   background:var(--gray-bg);
   overflow-x:hidden;
 }
 
 /* =======================
    PAGE SECTIONS
+   (slightly narrower to show more grey)
 ======================= */
 .page-section{
   position:relative;
@@ -235,10 +245,10 @@ main{
   background:var(--card-bg);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
-  padding:22px 32px 28px;
+  padding:22px 34px 28px; /* slightly tighter inside */
   margin:0 auto 40px;
   width:100%;
-  max-width:1320px;
+  max-width:1240px; /* was 1320 */
 }
 .page-section.active{ display:block; }
 
@@ -295,13 +305,14 @@ main{
 
 /* =======================
    SECTION BLOCKS
+   (slightly tighter, but NOT dealership POC mini-cards)
 ======================= */
 .section-block{
   background:#fff;
   border-radius:var(--radius-lg);
   border:1px solid var(--border);
   box-shadow:var(--shadow);
-  padding:0 22px 14px;
+  padding:0 16px 14px; /* was 22 */
   margin-bottom:24px;
   position:relative;
 }
@@ -314,10 +325,19 @@ main{
   font-weight:800;
   border-bottom:1px solid var(--border);
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left:-22px;
-  margin-right:-22px;
+  margin-left:-16px;  /* was -22 */
+  margin-right:-16px; /* was -22 */
 }
 .orange-outline-card{ border:2px solid var(--orange); }
+
+/* ✅ EXCEPTION: keep POC mini-cards exactly as they are */
+#dealership-info .primary-contacts-grid .mini-card{
+  padding:14px 14px 6px !important;
+}
+#dealership-info .primary-contacts-grid .mini-card h2{
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
 
 /* =======================
    LAYOUT HELPERS
@@ -402,12 +422,16 @@ main{
   height:34px;
 }
 
-/* Date inputs match + prevent giant squares */
-.section-block .checklist-row input[type="date"]{
+/* Date inputs match + prevent giant squares (hard lock) */
+.section-block .checklist-row input[type="date"],
+.section-block input[type="date"]{
   -webkit-appearance:none;
   appearance:none;
   box-shadow:none;
   height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  line-height:34px !important;
   border-radius:var(--radius-sm) !important;
   padding:7px 10px !important;
 }
@@ -592,6 +616,8 @@ main{
 .onsite-training-dates-row .date-stack input[type="date"]{
   width:100% !important;
   height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
@@ -623,7 +649,6 @@ main{
   box-shadow:var(--shadow);
   background:#fff;
   overflow:hidden;
-  padding:14px 14px 6px;
   width:100%;
   min-width:0;
 }
@@ -652,12 +677,6 @@ main{
   flex:0 0 var(--di-input-width) !important;
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
-}
-#dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"]
-  .checklist-row.integrated-plus input[type="text"]{
-  flex:0 0 calc(var(--di-input-width) - 34px) !important;
-  width:calc(var(--di-input-width) - 34px) !important;
-  max-width:calc(var(--di-input-width) - 34px) !important;
 }
 
 /* =======================
@@ -739,17 +758,17 @@ main{
   background:#ff8b42 !important;
 }
 
-/* ✅ NEW: Added trainer rows MUST be standalone input with FULL rounding */
+/* ✅ Added trainer rows: standalone input fully rounded */
 #trainers-deployment #additionalTrainersContainer input[type="text"],
 #trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important; /* RIGHT side rounded */
+  border-radius:var(--radius-sm) !important;
 }
 
-/* ✅ NEW: Added POCs container inputs should be fully rounded too */
+/* ✅ Added POCs: standalone inputs fully rounded */
 #dealership-info #additionalPocsContainer input[type="text"],
 #dealership-info #additionalPocsContainer .checklist-row input[type="text"]{
   height:34px !important;
@@ -757,6 +776,50 @@ main{
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) !important;
+}
+
+/* ✅ Additional POC (+): match Trainer (+) exactly (button + sizing) */
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  flex:0 0 var(--di-input-width) !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  margin-left:auto !important;
+}
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus input[type="text"]{
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+}
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]:hover{
+  background:#ff8b42 !important;
 }
 
 /* =======================
@@ -1125,20 +1188,18 @@ main{
   justify-content:center;
 }
 
-/* ✅ NEW: Added ticket cards should NOT have a plus button */
+/* ✅ Added ticket cards: NO + button */
 #support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{
   display:none !important;
 }
 
-/* ✅ NEW: Added ticket cards ticket-number input must have rounded RIGHT side */
+/* ✅ Added ticket cards: ticket # input has rounded RIGHT side */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{
+  display:block !important;
+}
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
   border-radius:var(--radius-sm) !important;
   border-right:1px solid var(--border) !important;
-}
-
-/* When plus is hidden, ensure the input takes full width nicely */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{
-  gap:0 !important;
 }
 
 #support-tickets .ticket-row.ticket-summary-row{
@@ -1547,138 +1608,6 @@ main{
   resize:vertical;
 }
 
-/* =======================================================
-   DEALERSHIP ADDRESS — input + MAP button attached + map restored
-======================================================= */
-#dealership-address-card .checklist-row{
-  display:grid !important;
-  grid-template-columns:260px minmax(0,1fr) !important;
-  column-gap:18px !important;
-  align-items:center !important;
-}
-#dealership-address-card .address-input-wrap{
-  width:100% !important;
-  max-width:450px !important;
-  justify-self:end !important;
-  margin-left:auto !important;
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-}
-#dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto !important;
-  width:100% !important;
-  min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-#dealership-address-card .address-input-wrap .small-map-btn,
-#dealership-address-card .address-input-wrap button{
-  flex:0 0 44px !important;
-  width:44px !important;
-  min-width:44px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border:1px solid var(--orange) !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:11px !important;
-  font-weight:900 !important;
-  letter-spacing:0.08em !important;
-  text-transform:uppercase !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  cursor:pointer !important;
-  padding:0 !important;
-  box-shadow:0 1px 4px rgba(239,109,34,0.25) !important;
-}
-#dealership-address-card .address-input-wrap .small-map-btn:hover,
-#dealership-address-card .address-input-wrap button:hover{
-  background:#ff8b42 !important;
-}
-#dealership-address-card .map-wrapper{
-  margin:16px 0 8px !important;
-  border-radius:var(--radius-lg) !important;
-  overflow:hidden !important;
-  border:1px solid var(--border) !important;
-  background:#f8f8f8 !important;
-}
-#dealership-address-card .map-frame,
-#dealership-address-card .map-wrapper iframe{
-  width:100% !important;
-  height:440px !important;
-  border:0 !important;
-  display:block !important;
-}
-.map-helper-text{
-  margin:6px 10px 10px;
-  font-size:12px;
-  color:#555;
-}
-
-/* =======================
-   RESPONSIVE
-======================= */
-@media (max-width:900px){
-  #sidebar{ width:190px; }
-  main{ margin-left:190px; padding:20px; }
-  #clearAllBtn{ width:calc(190px - 48px); }
-
-  .cards-grid.two-col,
-  .cards-grid.three-col,
-  .two-col-grid,
-  .grid-2{
-    grid-template-columns:1fr;
-  }
-
-  #dealership-info .primary-contacts-grid{
-    grid-template-columns:1fr;
-  }
-  #dms-integration .dms-grid{ grid-template-columns:1fr; }
-
-  #dealership-address-card .checklist-row{
-    grid-template-columns:1fr !important;
-    align-items:flex-start !important;
-  }
-  #dealership-address-card .address-input-wrap{
-    max-width:100% !important;
-    justify-self:stretch !important;
-    margin-left:0 !important;
-  }
-}
-@media (max-width:600px){
-  #sidebar{ display:none; }
-  main{ margin-left:0; padding:16px; }
-
-  .checklist-row{
-    flex-direction:column;
-    align-items:flex-start;
-    padding-left:20px;
-  }
-  .checklist-row label{
-    padding-right:0;
-    margin-bottom:4px;
-  }
-
-  .section-block .checklist-row input[type="text"],
-  .section-block .checklist-row input[type="number"],
-  .section-block .checklist-row input[type="email"],
-  .section-block .checklist-row input[type="tel"],
-  .section-block .checklist-row input[type="date"],
-  .section-block .checklist-row select{
-    margin-left:0;
-    width:100%;
-    flex:0 0 auto;
-  }
-
-  .training-table{ min-width:760px; }
-}
-
 /* =========================================================
    ROW POPUP MODAL — Training Tables + Opcodes
 ========================================================= */
@@ -1745,202 +1674,4 @@ main{
 button.remove-btn,
 button.remove-row{
   display:none !important;
-}
-
-/* =======================================================
-   HOTFIX OVERRIDES (paste at VERY bottom of style.css)
-   - Fix giant date inputs
-   - Fix select ghost/placeholder color (incl. DMS)
-   - Fix Additional POC + button color/shape
-   - Hide + on cloned support tickets + round right side
-======================================================= */
-
-/* ---------- 1) DATE INPUTS: never stretch / never grow ---------- */
-.section-block .checklist-row input[type="date"],
-.section-block input[type="date"]{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  line-height:34px !important;
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  align-self:center !important;
-  -webkit-appearance:none !important;
-  appearance:none !important;
-  box-shadow:none !important;
-  border-radius:var(--radius-sm) !important;
-  padding:7px 10px !important;
-}
-
-/* If you have stacked date rows (date-stack), keep them tight */
-.training-dates-row .date-stack input[type="date"],
-.onsite-training-dates-row .date-stack input[type="date"]{
-  flex:0 0 auto !important;
-  width:100% !important;
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-}
-
-/* ---------- 2) GHOST SELECT TEXT: same grey everywhere ---------- */
-/* Works in modern Chrome/Safari (your environment) */
-select:has(option[data-ghost="true"]:checked){
-  color:#9ca3af !important;
-}
-select:has(option[value=""]:checked){
-  color:#9ca3af !important;
-}
-
-/* Your existing helper class still supported */
-select.is-placeholder{ color:#9ca3af !important; }
-
-/* ---------- 4) SUPPORT TICKETS: no + button on added cards ---------- */
-#support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{
-  display:none !important;
-}
-
-/* When + is hidden, the ticket number input must have rounded right side */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{
-  display:block !important;
-}
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  border-radius:var(--radius-sm) !important; /* BOTH sides rounded */
-}
-
-/* =======================================================
-   LAYOUT BREATHING ROOM (paste at VERY bottom)
-   - More grey background around pages
-   - Narrower main page cards + inner cards
-   - Do NOT change individual POC mini-cards
-======================================================= */
-
-/* More grey border around the whole app */
-main{
-  padding-left:44px !important;
-  padding-right:44px !important;
-}
-
-/* Main white “page” card: slightly narrower + a touch more outer margin */
-.page-section{
-  max-width:1240px !important;      /* was 1320 */
-  padding-left:26px !important;      /* slightly tighter inside */
-  padding-right:26px !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
-}
-
-/* Inner cards inside page: slightly narrower feel */
-.section-block{
-  padding-left:18px !important;      /* was 22 */
-  padding-right:18px !important;
-}
-
-/* Keep the orange header spanning edge-to-edge of the inner card */
-.section-block h2{
-  margin-left:-18px !important;
-  margin-right:-18px !important;
-}
-
-/* ✅ EXCEPTION: leave the individual POC mini-cards alone */
-#dealership-info .primary-contacts-grid .mini-card{
-  padding:14px 14px 6px !important;  /* keep your current */
-}
-#dealership-info .primary-contacts-grid .mini-card h2{
-  margin-left:0 !important;
-  margin-right:0 !important;
-}
-
-/* =======================================================
-   INNER CARD TIGHTENING
-   - More space left/right inside main page card
-   - Inner cards slightly narrower
-   - Do NOT affect POC mini-cards
-======================================================= */
-
-/* Give the main page card a little inner gutter */
-.page-section{
-  padding-left:34px !important;
-  padding-right:34px !important;
-}
-
-/* Pull inner section cards inward */
-.page-section > .grid-2,
-.page-section > .cards-grid,
-.page-section > .two-col-grid{
-  padding-left:12px !important;
-  padding-right:12px !important;
-}
-
-/* Inner section cards tighter left/right */
-.page-section .section-block{
-  padding-left:16px !important;
-  padding-right:16px !important;
-}
-
-/* Keep orange headers flush to card edges */
-.page-section .section-block h2{
-  margin-left:-16px !important;
-  margin-right:-16px !important;
-}
-
-/* ✅ EXCLUDE dealership POC mini-cards completely */
-#dealership-info .primary-contacts-grid,
-#dealership-info .primary-contacts-grid .mini-card{
-  padding-left:initial !important;
-  padding-right:initial !important;
-}
-
-/* =======================================================
-   FIX: Additional POC (+) button + input sizing
-   - Make it match Trainer (+): orange attached button
-   - Prevent the name input from shrinking
-======================================================= */
-
-/* Target the Additional POC mini-card integrated (+) row */
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  margin-left:auto !important;
-}
-
-/* Make the name input fill the space and keep left rounding */
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;
-  min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-/* Force the + button to be the same as Trainer (+) */
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]:hover{
-  background:#ff8b42 !important;
 }
