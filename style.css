@@ -1795,3 +1795,27 @@ button.remove-row{
   margin:8px 10px 0 !important;
   padding:0 2px !important;
 }
+
+/* =========================================================
+   ✅ FINAL OVERRIDE — CLONED POC rows (no + button)
+   Forces FULL rounding on the input even if row is still .integrated-plus
+========================================================= */
+#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="text"],
+#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="email"],
+#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="tel"]{
+  border-radius: var(--radius-sm) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+/* Hide the + button on cloned cards (just in case it still exists in the HTML) */
+#dealership-info .additional-poc-card[data-base="false"] .poc-add-btn,
+#dealership-info .additional-poc-card[data-base="false"] [data-add-poc]{
+  display:none !important;
+}
+
+/* Card right-side rounding (ensure it visually shows) */
+#dealership-info .additional-poc-card[data-base="false"]{
+  border-top-right-radius: 18px !important;
+  border-bottom-right-radius: 18px !important;
+  overflow:hidden !important;
+}
