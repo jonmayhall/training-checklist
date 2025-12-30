@@ -514,32 +514,45 @@
       return;
     }
 
- // ===============================
-// Additional POC: Add card handler
-// (matches the "Additional Trainer" pattern: input + button -> adds a new mini-card)
-// ===============================
+// =======================================
+// Additional POC (+): add new card
+// - Adds even if name is blank
+// - Moves name/role/cell/email into new card
+// - Resets the base card fields
+// =======================================
 document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-add-poc], .poc-add-btn");
+  const btn = e.target.closest("[data-add-poc]");
   if (!btn) return;
 
   const page = document.querySelector("#dealership-info");
   if (!page) return;
 
-  const nameInput = page.querySelector("#additionalPocInput");
-  const anchor = page.querySelector("#additionalPocsContainer"); // used as an insertion anchor
+  // Base POC card (the one with the + button)
+  const baseCard = btn.closest(".additional-poc-card[data-base='true']");
+  if (!baseCard) return;
 
-  if (!nameInput || !anchor) return;
+  // Grab ALL fields from the base card
+  const nameEl =
+    baseCard.querySelector("#additionalPocInput") ||
+    baseCard.querySelector(".input-plus input[type='text']") ||
+    baseCard.querySelector("input[type='text']");
 
-  const name = (nameInput.value || "").trim();
-  if (!name) {
-    nameInput.focus();
-    return;
-  }
+  // These three are the rows under it inside the same base card
+  const roleEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(2) input");
+  const cellEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(3) input");
+  const emailEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(4) input");
 
-  // Build the new POC mini-card (NO + button on added cards)
-  const card = document.createElement("div");
-  card.className = "mini-card additional-poc-card";
-  card.innerHTML = `
+  const values = {
+    name: (nameEl?.value ?? "").trim(),
+    role: (roleEl?.value ?? "").trim(),
+    cell: (cellEl?.value ?? "").trim(),
+    email: (emailEl?.value ?? "").trim(),
+  };
+
+  // Build the new card (NO plus button)
+  const newCard = document.createElement("div");
+  newCard.className = "mini-card additional-poc-card";
+  newCard.innerHTML = `
     <div class="checklist-row">
       <label>Additional POC</label>
       <input type="text" placeholder="Enter name" />
@@ -561,18 +574,32 @@ document.addEventListener("click", (e) => {
     </div>
   `;
 
-  // Set the name safely
-  card.querySelector('input[type="text"]').value = name;
+  // Fill the new card with base card values
+  const inputs = newCard.querySelectorAll("input");
+  // order: name, role, cell, email
+  if (inputs[0]) inputs[0].value = values.name;
+  if (inputs[1]) inputs[1].value = values.role;
+  if (inputs[2]) inputs[2].value = values.cell;
+  if (inputs[3]) inputs[3].value = values.email;
 
-  // IMPORTANT: insert as a GRID ITEM (sibling), not inside the container
-  anchor.before(card);
+  // Insert new card into the SAME GRID, right after the base card
+  baseCard.insertAdjacentElement("afterend", newCard);
 
-  // Clear input
-  nameInput.value = "";
-  nameInput.focus();
+  // Reset base card fields
+  if (nameEl) nameEl.value = "";
+  if (roleEl) roleEl.value = "";
+  if (cellEl) cellEl.value = "";
+  if (emailEl) emailEl.value = "";
 
-  // If your app auto-saves on input/change, poke it
-  nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+  // Nudge any auto-save logic listening for input
+  [nameEl, roleEl, cellEl, emailEl].forEach((el) => {
+    if (!el) return;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  // Put cursor back in name field
+  if (nameEl) nameEl.focus();
 });
 
 // basic escaping so a name like <Mike> doesn't break HTML
