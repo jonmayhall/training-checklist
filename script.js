@@ -853,32 +853,73 @@
     });
   };
 
-  const handleNotesClick = (btn) => {
-    const targetId =
-      btn.getAttribute("data-notes-target") ||
-      btn.getAttribute("data-target") ||
-      btn.getAttribute("href")?.replace("#", "");
-    if (!targetId) return;
+ const handleNotesClick = (btn) => {
+  // 1) Resolve the notes target (same as you already do)
+  const targetId =
+    btn.getAttribute("data-notes-target") ||
+    btn.getAttribute("data-target") ||
+    btn.getAttribute("href")?.replace("#", "");
+  if (!targetId) return;
 
-    const key = getNotesKey(btn, targetId);
-    const promptText = getNotesPromptText(btn);
+  const target = document.getElementById(targetId);
+  if (!target) return;
 
-    const target = renderNotesTarget(targetId);
-    if (!target) return;
+  if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+  if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
-    // Ensure THIS item exists (even if user never clicked other lines)
-    const list = $(".mk-notes-list", target);
-    if (!list) return;
+  scrollIntoViewNice(target);
 
-    let item = $(`.mk-notes-item[data-note-key="${CSS.escape(key)}"]`, list);
-    if (!item) {
-      const built = buildNotesItem({ targetId, key, promptText });
-      list.appendChild(built.wrap);
-      item = built.wrap;
-    } else {
-      const q = $(".mk-note-question", item);
-      if (q) q.textContent = `• ${promptText}`;
+  const ta = $("textarea", target);
+  if (!ta) return;
+
+  // 2) Get the "question text" from the row that the notes button lives in
+  //    (works for your Q&A rows: .checklist-row label)
+  let questionText = "";
+  const row = btn.closest(".checklist-row");
+  if (row) {
+    const label = row.querySelector("label");
+    if (label) questionText = (label.textContent || "").trim();
+  }
+
+  // Fallback if we couldn't find a label
+  if (!questionText) questionText = "Notes";
+
+  // 3) Build bullet template:
+  //    • Question
+  //      ◦ <cursor here>
+  const mainBullet = `• ${questionText}`;
+  const subBullet = `  ◦ `;
+
+  // Ensure there is a blank line between main bullet entries
+  let v = ta.value || "";
+  const hasContent = v.trim().length > 0;
+
+  // Normalize end spacing: if there is existing content and it doesn't end with blank line, add it
+  if (hasContent) {
+    // trim only the RIGHT side newlines to decide how many we need
+    const rightTrimmed = v.replace(/\s+$/, "");
+    const endsWithBlankLine = /\n\s*\n$/.test(v);
+    if (!endsWithBlankLine) {
+      // if it ends with a single newline, add one more; otherwise add two
+      v = v.replace(/\s*$/, "");
+      v += "\n\n";
     }
+  } else {
+    v = "";
+  }
+
+  // Insert template at end of textarea (single large textbox behavior)
+  const insertText = `${mainBullet}\n${subBullet}`;
+  ta.value = v + insertText;
+
+  // 4) Put cursor right after the hollow bullet + space
+  const caretPos = ta.value.length;
+  ta.focus();
+  ta.setSelectionRange(caretPos, caretPos);
+
+  // Trigger save + any UI updates your app relies on
+  triggerInputChange(ta);
+};
 
     // Turn button orange immediately
     markNotesButtonsActive(targetId, key, true);
