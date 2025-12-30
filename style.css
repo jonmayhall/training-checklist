@@ -1,18 +1,13 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — CLEANED FULL CSS (DROP-IN)
-   ✅ Restores ALL Notes buttons (Q&A rows + table Notes buttons)
-   ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
-   ✅ Adds tiny TABLE POPUP button in bottom-right of each table (.mk-table-expand-btn)
-   ✅ Preserves: Support Tickets 2x2, DMS, Notes modals, Table modal, Row popup modal
-   ✅ Removes the global 42px override that caused giant date inputs
-   ✅ Fixes Trainers "+": orange, 34px, not wide, and added rows rounded
-   ✅ NO remove buttons anywhere
-   ✅ NEW: Added Trainers/POCs inputs have fully-rounded right sides
-   ✅ NEW: Added Support Tickets have NO plus button + ticket # input rounded on right
-   ✅ NEW: Additional POC (+) matches Trainer (+): orange attached button, correct sizing
-   ✅ NEW: Select ghost/placeholder text is consistently grey (incl. DMS)
-   ✅ NEW: Main page cards + inner cards slightly narrower to show more grey background
-   ✅ EXCEPTION: Individual POC mini-cards remain unchanged
+   myKaarma Interactive Training Checklist — FULL PROJECT CSS (CLEANED + CONSOLIDATED)
+   ✅ Keeps EVERYTHING working (layout + spacing + cards + tables + tickets + DMS + modals)
+   ✅ Preserves table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
+   ✅ Preserves Trainers / POCs + buttons (orange attached +, no remove buttons)
+   ✅ Preserves: Support Tickets 2x2 + routing behavior
+   ✅ Preserves: Notes modal, Table modal, Row popup modal, textarea expander
+   ✅ Removes duplicate blocks + merges repeated rules (no behavior change)
+   ✅ RECENT PATCH INCLUDED:
+      - JS now toggles .is-notes-active → CSS maps it to the same “orange active” behavior
 ======================================================= */
 
 /* =======================
@@ -225,19 +220,17 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 
 /* =======================
    MAIN CONTENT
-   (slightly more gutter to show grey background)
 ======================= */
 main{
   flex:1;
   margin-left:230px;
-  padding:30px 44px; /* was 32px */
+  padding:30px 44px;
   background:var(--gray-bg);
   overflow-x:hidden;
 }
 
 /* =======================
    PAGE SECTIONS
-   (slightly narrower to show more grey)
 ======================= */
 .page-section{
   position:relative;
@@ -245,10 +238,10 @@ main{
   background:var(--card-bg);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
-  padding:22px 34px 28px; /* slightly tighter inside */
+  padding:22px 34px 28px;
   margin:0 auto 40px;
   width:100%;
-  max-width:1240px; /* was 1320 */
+  max-width:1240px;
 }
 .page-section.active{ display:block; }
 
@@ -305,14 +298,13 @@ main{
 
 /* =======================
    SECTION BLOCKS
-   (slightly tighter, but NOT dealership POC mini-cards)
 ======================= */
 .section-block{
   background:#fff;
   border-radius:var(--radius-lg);
   border:1px solid var(--border);
   box-shadow:var(--shadow);
-  padding:0 16px 14px; /* was 22 */
+  padding:0 16px 14px;
   margin-bottom:24px;
   position:relative;
 }
@@ -325,8 +317,8 @@ main{
   font-weight:800;
   border-bottom:1px solid var(--border);
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left:-16px;  /* was -22 */
-  margin-right:-16px; /* was -22 */
+  margin-left:-16px;
+  margin-right:-16px;
 }
 .orange-outline-card{ border:2px solid var(--orange); }
 
@@ -516,9 +508,13 @@ main{
   fill:currentColor;
 }
 
-/* JS toggles */
+/* Legacy active class + NEW JS class (recent patch) */
 .notes-icon-btn.has-notes,
-.section-block .checklist-row .notes-btn.has-notes{ color:var(--orange); }
+.section-block .checklist-row .notes-btn.has-notes,
+.notes-icon-btn.is-notes-active,
+.section-block .checklist-row .notes-btn.is-notes-active{
+  color:var(--orange);
+}
 
 /* Keep select + notes area aligned */
 .checklist-row .row-actions{
@@ -754,9 +750,7 @@ main{
   line-height:1 !important;
   cursor:pointer !important;
 }
-#trainers-deployment .input-plus .trainer-add-btn:hover{
-  background:#ff8b42 !important;
-}
+#trainers-deployment .input-plus .trainer-add-btn:hover{ background:#ff8b42 !important; }
 
 /* ✅ Added trainer rows: standalone input fully rounded */
 #trainers-deployment #additionalTrainersContainer input[type="text"],
@@ -779,6 +773,7 @@ main{
 }
 
 /* ✅ Additional POC (+): match Trainer (+) exactly (button + sizing) */
+#dealership-info .additional-poc-card .input-plus,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
   display:flex !important;
   align-items:stretch !important;
@@ -787,7 +782,10 @@ main{
   width:var(--di-input-width) !important;
   max-width:var(--di-input-width) !important;
   margin-left:auto !important;
+  min-width:0 !important;
 }
+
+#dealership-info .additional-poc-card .input-plus input,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus input[type="text"]{
   flex:1 1 auto !important;
   width:auto !important;
@@ -798,6 +796,9 @@ main{
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
+
+#dealership-info .additional-poc-card .input-plus .poc-add-btn,
+#dealership-info .additional-poc-card .input-plus [data-add-poc],
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]{
   width:34px !important;
@@ -817,6 +818,8 @@ main{
   line-height:1 !important;
   cursor:pointer !important;
 }
+#dealership-info .additional-poc-card .input-plus .poc-add-btn:hover,
+#dealership-info .additional-poc-card .input-plus [data-add-poc]:hover,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]:hover{
   background:#ff8b42 !important;
@@ -1096,8 +1099,15 @@ main{
   -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
   mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
 }
-.training-table .notes-btn:hover::before{
-  background:var(--notes-icon-hover);
+.training-table .notes-btn:hover::before{ background:var(--notes-icon-hover); }
+
+/* NEW JS active class for table notes (keeps same look, just “active/orange”) */
+.training-table .notes-btn.is-notes-active{
+  border-color:rgba(239,109,34,.55) !important;
+  background:rgba(239,109,34,.06) !important;
+}
+.training-table .notes-btn.is-notes-active::before{
+  background:var(--notes-icon-hover) !important;
 }
 
 /* =======================
@@ -1676,148 +1686,14 @@ button.remove-row{
   display:none !important;
 }
 
-/* =======================================================
-   Additional POC (+) — MATCH Additional Trainer (+)
-======================================================= */
-
-/* Make the POC row use the same input+ button sizing as trainer */
-#dealership-info .additional-poc-card .input-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  margin-left:auto !important;
-  min-width:0 !important;
-}
-
-#dealership-info .additional-poc-card .input-plus input{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  height:34px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-/* Orange attached + button (same as trainer) */
-#dealership-info .additional-poc-card .input-plus .poc-add-btn,
-#dealership-info .additional-poc-card .input-plus [data-add-poc]{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-#dealership-info .additional-poc-card .input-plus .poc-add-btn:hover,
-#dealership-info .additional-poc-card .input-plus [data-add-poc]:hover{
-  background:#ff8b42 !important;
-}
-
-/* Added POC rows: standalone inputs should be fully rounded (right side too) */
-#dealership-info #additionalPocsContainer input[type="text"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important;
-}
-
 /* ===============================
-   Dealership Address: full-width map fill
+   Dealership Address: input + map (consolidated)
 =============================== */
 #dealership-address-card{
-  padding-bottom:0 !important; /* lets the map feel like it fills the card */
+  padding-bottom:0 !important;
 }
 
-/* remove the "boxed" look and let map stretch full width */
-#dealership-address-card .map-wrapper{
-  width:100% !important;
-  max-width:100% !important;
-  margin:14px 0 0 !important;
-  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
-  overflow:hidden !important;
-  border:1px solid var(--border) !important;
-}
-
-/* iframe must be block + full width */
-#dealership-address-card .map-wrapper iframe,
-#dealership-address-card .map-frame{
-  display:block !important;
-  width:100% !important;
-  height:520px !important;  /* adjust if you want taller/shorter */
-  border:0 !important;
-}
-
-/* optional: keep helper text aligned, not shrinking the map */
-#dealership-address-card .map-helper-text{
-  margin:10px 0 14px !important;
-  padding:0 2px !important;
-}
-
-/* =========================================
-   Dealership Address: wider input + Map btn matches "+" buttons
-========================================= */
-
-/* Make the right-side input area ~25% wider */
-#dealership-address-card .address-input-wrap{
-  max-width:560px !important; /* was ~450; ~25% wider */
-}
-
-/* Input stays attached to button */
-#dealership-address-card .address-input-wrap input[type="text"]{
-  height:34px !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-/* Map button styled EXACTLY like add buttons (orange, same size/shape) */
-#dealership-address-card .address-input-wrap .small-map-btn{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-
-  font-size:12px !important;
-  font-weight:900 !important;
-  letter-spacing:0.06em !important;
-  text-transform:uppercase !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-
-#dealership-address-card .address-input-wrap .small-map-btn:hover{
-  background:#ff8b42 !important;
-}
-
-/* =======================================================
-   PAGE 2 — DEALERSHIP ADDRESS FIX
-   - Keep input + Map button on the SAME line (no wrapping)
-   - Make address input ~25% wider
-   - Make Map button match the orange "+" add buttons
-======================================================= */
-
+/* Keep label + input/button on SAME line, no wrap */
 #dealership-address-card .checklist-row{
   display:grid !important;
   grid-template-columns:260px minmax(0,1fr) !important;
@@ -1825,17 +1701,17 @@ button.remove-row{
   align-items:center !important;
 }
 
+/* Input wrap wider (~25%+) and attached to button */
 #dealership-address-card .address-input-wrap{
   width:100% !important;
-  max-width:620px !important; /* ~25% wider than before */
+  max-width:620px !important;
   justify-self:end !important;
   margin-left:auto !important;
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
-  flex-wrap:nowrap !important; /* ✅ prevents Map dropping below */
+  flex-wrap:nowrap !important;
 }
-
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
   width:100% !important;
@@ -1847,7 +1723,7 @@ button.remove-row{
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
 
-/* Map button styled exactly like your "+" add buttons */
+/* Map button matches orange "+" buttons */
 #dealership-address-card .address-input-wrap .small-map-btn{
   width:34px !important;
   min-width:34px !important;
@@ -1857,40 +1733,40 @@ button.remove-row{
   background:var(--orange) !important;
   color:#fff !important;
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
   font-size:12px !important;
   font-weight:900 !important;
   letter-spacing:0.06em !important;
   text-transform:uppercase !important;
+
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
+
   padding:0 !important;
   line-height:1 !important;
   cursor:pointer !important;
 }
+#dealership-address-card .address-input-wrap .small-map-btn:hover{ background:#ff8b42 !important; }
 
-#dealership-address-card .address-input-wrap .small-map-btn:hover{
-  background:#ff8b42 !important;
-}
-
-/* Map fills the card width */
+/* Map fills card width */
 #dealership-address-card .map-wrapper{
+  width:100% !important;
+  max-width:100% !important;
   margin:14px 0 0 !important;
   border-radius:var(--radius-lg) !important;
   overflow:hidden !important;
   border:1px solid var(--border) !important;
   background:#f8f8f8 !important;
 }
-
 #dealership-address-card .map-frame,
 #dealership-address-card .map-wrapper iframe{
+  display:block !important;
   width:100% !important;
   height:440px !important;
   border:0 !important;
-  display:block !important;
 }
-
-/* Optional: remove helper text spacing if you want full map dominance */
 #dealership-address-card .map-helper-text{
   margin:8px 10px 0 !important;
+  padding:0 2px !important;
 }
