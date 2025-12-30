@@ -656,44 +656,55 @@
     };
 
     const findOrDerivePromptText = (btn) => {
-      const tr = btn.closest("tr");
-      const table = btn.closest("table");
-      const section = getSection(btn);
-      const secId = section?.id || "";
+  const tr = btn.closest("tr");
+  const table = btn.closest("table");
+  const section = getSection(btn);
+  const secId = section?.id || "";
 
-      if (tr && table) {
-        const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-        const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-        let idx = -1;
+  // ===== TABLE ROW NOTES =====
+  if (tr && table) {
+    const tds = Array.from(tr.querySelectorAll("td"));
+    if (!tds.length) return "Item";
 
-        if (secId === "training-checklist") idx = idxOf("name");
-        if (secId === "opcodes-pricing") idx = idxOf("opcode");
-        if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+    let cell = null;
 
-        const tds = $$("td", tr);
-        const cell = idx >= 0 ? tds[idx] : null;
-        let val = "";
+    // Training Checklist → Name column (2nd column)
+    if (secId === "training-checklist" && tds[1]) {
+      cell = tds[1];
+    }
 
-        if (cell) {
-          const field = $("input, textarea, select", cell);
-          if (field) val = (field.value || "").trim();
-          else val = (cell.textContent || "").trim();
-        }
+    // Opcodes & Pricing → Opcode column (2nd column)
+    if (secId === "opcodes-pricing" && tds[1]) {
+      cell = tds[1];
+    }
 
-        const label =
-          secId === "training-checklist"
-            ? "Name"
-            : secId === "opcodes-pricing"
-            ? "Opcode"
-            : "Item";
+    // Fallback: first non-checkbox cell
+    if (!cell) {
+      cell = tds.find(td => !td.querySelector('input[type="checkbox"]')) || tds[0];
+    }
 
-        return val ? `${label}: ${val}` : `${label}: (blank)`;
-      }
+    if (!cell) return "Item";
 
-      const row = btn.closest(".checklist-row");
-      const label = row ? row.querySelector("label") : null;
-      return (label?.textContent || "").trim() || "Notes";
-    };
+    const field = cell.querySelector("input, select, textarea");
+    const value = field ? (field.value || "").trim() : (cell.textContent || "").trim();
+
+    // ✅ RETURN JUST THE VALUE — NO PREFIX
+    if (secId === "training-checklist") {
+      return value || "(blank)";
+    }
+
+    if (secId === "opcodes-pricing") {
+      return value || "(blank)";
+    }
+
+    return value || "Item";
+  }
+
+  // ===== NON-TABLE QUESTIONS =====
+  const row = btn.closest(".checklist-row");
+  const label = row?.querySelector("label");
+  return (label?.textContent || "").trim() || "Notes";
+};
 
     const parseBlocks = (text) => {
       const lines = normalizeNL(text || "").split("\n");
