@@ -4,7 +4,7 @@
 
    ✅ Sidebar/menu nav works (sections toggle .active)
    ✅ Clear All works (#clearAllBtn)
-   ✅ Reset This Page works (.clear-page-btn[data-clear-page])
+   ✅ Reset This Page works (.clear-page-btn)  (supports with/without data-clear-page)
    ✅ Add Trainer (+) works (adds row even if blank; no remove buttons)
    ✅ Add POC (+) works (adds ONE card even if blank; moves ALL fields; resets base)
    ✅ Table Add Row (+) works (only when inside .table-footer)
@@ -18,10 +18,17 @@
      - Adds a blank line between entries
      - De-dupes: if that • line already exists, it jumps you to its ◦ line instead of adding again
      - Works for normal Q&A rows AND table notes buttons (derives Name/Opcode if possible)
+     - ENTER inside that notes textarea inserts a new hollow bullet: "\n  ◦ "
+
+   ✅ NO PAGE SHIFT on notes click:
+   - Does NOT scroll to target
+   - Preserves scroll position even if focus would normally jump
+
+   ✅ Notes buttons DO NOT stay orange after Reset/Clear:
+   - Clears .has-notes in clearSection() and clearAll()
 
    ✅ Optional: Table Expand button (.mk-table-expand-btn) opens #mkTableModal if it exists
-   ✅ Optional: Map button (.small-map-btn) updates iframe if present
-
+   ✅ Optional: Map button (.small-map-btn / [data-map-btn]) updates iframe if present
 ======================================================= */
 
 (() => {
@@ -47,7 +54,9 @@
   const uid = (() => {
     let n = 0;
     return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
+      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random()
+        .toString(16)
+        .slice(2)}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
@@ -137,14 +146,6 @@
     fields.forEach((el) => ensureId(el));
   };
 
-  const scrollIntoViewNice = (el) => {
-    try {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch {
-      el.scrollIntoView(true);
-    }
-  };
-
   const triggerInputChange = (el) => {
     if (!el) return;
     el.dispatchEvent(new Event("input", { bubbles: true }));
@@ -165,6 +166,14 @@
     root.querySelectorAll('input[type="date"]').forEach((d) => {
       d.classList.toggle("is-placeholder", !d.value);
     });
+  };
+
+  // Preserve scroll position (prevents “page shifting” when focusing/selection changes)
+  const preserveScroll = (fn) => {
+    const x = window.scrollX || 0;
+    const y = window.scrollY || 0;
+    fn();
+    requestAnimationFrame(() => window.scrollTo(x, y));
   };
 
   /* =======================
@@ -214,7 +223,13 @@
     state.__activeSection = targetId;
     writeState(state);
 
-    scrollIntoViewNice(target);
+    // Keep your existing behavior (smooth to section top).
+    // If you ever want NO scroll on nav, remove this block.
+    try {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      target.scrollIntoView(true);
+    }
   };
 
   const initNav = () => {
@@ -223,6 +238,15 @@
     const alreadyActive = $(".page-section.active")?.id;
     const first = $$(".page-section")[0]?.id;
     setActiveSection(alreadyActive || remembered || first);
+  };
+
+  /* =======================
+     NOTES BUTTON VISUAL RESET
+  ======================= */
+  const clearAllNotesButtonStates = (root = document) => {
+    root
+      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes")
+      .forEach((btn) => btn.classList.remove("has-notes"));
   };
 
   /* =======================
@@ -303,8 +327,10 @@
     const disp = $("#dealershipNameDisplay");
     if (disp) disp.textContent = "";
 
-    cloneState.clearAll();
+    // reset notes button orange state
+    clearAllNotesButtonStates(document);
 
+    cloneState.clearAll();
     log("Clear All complete");
   };
 
@@ -352,10 +378,8 @@
     removeDynamicClonesIn(sectionEl);
     clearFieldsIn(sectionEl);
 
-    // remove “has-notes” visual state for buttons inside this section (optional)
-    $$(".notes-btn.has-notes, .notes-icon-btn.has-notes", sectionEl).forEach((b) =>
-      b.classList.remove("has-notes")
-    );
+    // reset notes button orange state INSIDE this section
+    clearAllNotesButtonStates(sectionEl);
 
     log("Cleared section:", sectionEl.id);
   };
@@ -481,7 +505,6 @@
     if (cellNew) cellNew.value = cell;
     if (emailNew) emailNew.value = email;
 
-    // assign IDs + save
     $$("input, select, textarea", newCard).forEach((el) => {
       ensureId(el);
       saveField(el);
@@ -503,7 +526,6 @@
 
     const { els, values } = readPocBaseValues(baseCard);
 
-    // insert after base card within same grid
     const newCard = buildPocCard(values);
     baseCard.insertAdjacentElement("afterend", newCard);
 
@@ -520,7 +542,6 @@
 
     [els.nameEl, els.roleEl, els.cellEl, els.emailEl].forEach(triggerInputChange);
 
-    // focus base name again
     if (els.nameEl) els.nameEl.focus();
   };
 
@@ -528,7 +549,6 @@
      TABLE: ADD ROW (+) + RESTORE
   ======================= */
   const getTableKey = (table) => {
-    // Prefer data-table-key if you have it; fallback to id; else stable-ish key from header text.
     const k =
       table.getAttribute("data-table-key") ||
       table.id ||
@@ -563,7 +583,7 @@
 
   const cloneTableRow = (btn) => {
     const footer = btn.closest(".table-footer");
-    if (!footer) return; // critical: prevents random buttons from triggering
+    if (!footer) return;
 
     const tableContainer = btn.closest(".table-container");
     if (!tableContainer) return;
@@ -579,7 +599,6 @@
     const clone = template.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-    // clear values
     $$("input, select, textarea", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -590,7 +609,6 @@
 
     tbody.appendChild(clone);
 
-    // persist clone row structure
     const tableKey = getTableKey(table);
     const clones = cloneState.get();
     clones.tables[tableKey] = clones.tables[tableKey] || [];
@@ -610,7 +628,6 @@
       const tbody = $("tbody", table);
       if (!tbody) return;
 
-      // Use last existing row as template
       const existingRows = $$("tr", tbody);
       if (!existingRows.length) return;
       const template = existingRows[existingRows.length - 1];
@@ -627,10 +644,11 @@
 
   /* =======================
      NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-======================= */
+  ======================= */
+
+  // IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
   const getNotesTargetId = (btn) =>
     btn.getAttribute("data-notes-target") ||
-    btn.getAttribute("data-target") ||
     btn.getAttribute("href")?.replace("#", "") ||
     "";
 
@@ -639,22 +657,21 @@
   const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   const findOrDerivePromptText = (btn) => {
-    // If inside a table row, try to derive Name/Opcode/etc.
     const tr = btn.closest("tr");
     const table = btn.closest("table");
     const section = getSection(btn);
     const secId = section?.id || "";
 
+    // Table notes buttons
     if (tr && table) {
       const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-
       const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-      let idx = -1;
 
+      let idx = -1;
       if (secId === "training-checklist") idx = idxOf("name");
       if (secId === "opcodes-pricing") idx = idxOf("opcode");
 
-      // fallback: use second column if it exists
+      // fallback: use second column if present
       if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
 
       // fallback: first cell with a text-ish field
@@ -702,33 +719,35 @@
 
     let v = normalizeNL(ta.value || "");
 
-    // If main bullet already exists, jump to its ◦ line (or create it)
+    // If main bullet exists, jump to its ◦ line (or create it)
     const mainRe = new RegExp(`^${escapeRegex(mainLine)}\\s*$`, "m");
     const mainMatch = v.match(mainRe);
 
     if (mainMatch && typeof mainMatch.index === "number") {
-      // find where that line starts
-      const startIdx = mainMatch.index;
-      const afterMainIdx = startIdx + mainMatch[0].length;
+      const mainStart = mainMatch.index;
+      const mainEnd = mainStart + mainMatch[0].length;
 
-      // look for the next line after main
-      const tail = v.slice(afterMainIdx);
-      const nextLineMatch = tail.match(/^\n([^\n]*)/);
+      // Find the next line after the main bullet
+      const after = v.slice(mainEnd);
+      const nextLineMatch = after.match(/^\n([^\n]*)/);
       const nextLine = nextLineMatch ? nextLineMatch[1] : "";
 
-      // if next line already starts with "  ◦", place cursor after it
+      // If next line already has a hollow bullet, place caret after it
       if (nextLine.trim().startsWith("◦")) {
-        const pos = afterMainIdx + 1 + nextLine.length; // end of that line
-        return { value: v, caret: pos };
+        // caret right after "◦ " if present, otherwise at end of line
+        const within = nextLine.indexOf("◦");
+        const caretInLine = within >= 0 ? within + 2 : nextLine.length;
+        const caret = mainEnd + 1 + caretInLine;
+        return { value: v, caret };
       }
 
-      // otherwise, inject a sub bullet line right after main line
-      let insertAt = afterMainIdx;
-      // ensure exactly one newline after main line
+      // Otherwise inject a sub bullet line right after main line
+      let insertAt = mainEnd;
       if (!v.slice(insertAt).startsWith("\n")) {
         v = v.slice(0, insertAt) + "\n" + v.slice(insertAt);
         insertAt += 1;
       }
+      // insert: subLine + newline
       v = v.slice(0, insertAt + 1) + subLine + "\n" + v.slice(insertAt + 1);
       const caret = insertAt + 1 + subLine.length;
       return { value: v, caret };
@@ -757,109 +776,37 @@
     if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
     const ta = $("textarea", target);
-    if (!ta) {
-      scrollIntoViewNice(target);
-      return;
-    }
+    if (!ta) return;
 
     const promptText = findOrDerivePromptText(btn);
-    const res = insertNotesTemplate(ta, promptText);
 
-    ta.value = res.value;
+    preserveScroll(() => {
+      const res = insertNotesTemplate(ta, promptText);
+      ta.value = res.value;
 
-    // Focus + cursor
-    scrollIntoViewNice(target);
-    ta.focus();
-    ta.setSelectionRange(res.caret, res.caret);
+      // Cursor (NO scroll into view)
+      ta.focus({ preventScroll: true });
+      try {
+        ta.setSelectionRange(res.caret, res.caret);
+      } catch {}
 
-    // Persist
-    ensureId(ta);
-    saveField(ta);
-    setGhostStyles(document);
+      // Persist
+      ensureId(ta);
+      saveField(ta);
+      setGhostStyles(document);
 
-    // Visual state (optional)
-    btn.classList.add("has-notes");
+      // Visual state
+      btn.classList.add("has-notes");
+    });
   };
 
-   /* =======================
-   NOTES: Enter => auto hollow bullet
-   - When typing inside a notes textarea (the big textbox inside the notes target card),
-     pressing Enter inserts: "\n  ◦ " and places cursor after it.
-======================= */
-
-const isNotesTargetTextarea = (ta) => {
-  if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-
-  // Primary: your notes target cards are referenced by data-notes-target on the button
-  // This checks if the textarea is inside an element that is a notes target in your system.
-  const notesTargetHost = ta.closest("[id]");
-  if (!notesTargetHost) return false;
-
-  // If ANY notes button points to this host id, treat this textarea as a notes textarea
-  const hostId = notesTargetHost.id;
-  if (!hostId) return false;
-
-  return !!document.querySelector(`[data-notes-target="${CSS.escape(hostId)}"]`);
-};
-
-document.addEventListener("keydown", (e) => {
-  const ta = e.target;
-  if (!isNotesTargetTextarea(ta)) return;
-
-  if (e.key !== "Enter") return;
-  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return; // keep Shift+Enter etc normal
-
-  // Insert newline + hollow bullet at caret (not at end)
-  e.preventDefault();
-
-  const insert = "\n  ◦ ";
-  const start = ta.selectionStart ?? ta.value.length;
-  const end = ta.selectionEnd ?? ta.value.length;
-
-  const before = ta.value.slice(0, start);
-  const after = ta.value.slice(end);
-
-  ta.value = before + insert + after;
-
-  const caret = start + insert.length;
-  ta.setSelectionRange(caret, caret);
-
-  // Persist + trigger your existing save flows
-  ensureId(ta);
-  saveField(ta);
-  triggerInputChange(ta);
-});
-
-/* =======================
-   NOTES POPOVER HANDLING
-   (NO LAYOUT SHIFT)
-======================= */
-
-document.addEventListener("click", (e) => {
-  const notesBtn = e.target.closest("[data-notes-target]");
-  if (!notesBtn) return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  const targetId = notesBtn.dataset.notesTarget;
-  const panel = document.getElementById(targetId);
-  if (!panel) return;
-
-  // Close all other open notes panels
-  document.querySelectorAll(".notes-panel.open").forEach((p) => {
-    if (p !== panel) p.classList.remove("open");
-  });
-
-  panel.classList.toggle("open");
-});
-
-// Click anywhere else closes notes
-document.addEventListener("click", () => {
-  document
-    .querySelectorAll(".notes-panel.open")
-    .forEach((p) => p.classList.remove("open"));
-});
+  // Detect if a textarea is a “notes big textbox” target (only ones referenced by notes buttons)
+  const isNotesTargetTextarea = (ta) => {
+    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+    const host = ta.closest("[id]");
+    if (!host || !host.id) return false;
+    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+  };
 
   /* =======================
      SUPPORT TICKETS
@@ -939,7 +886,6 @@ document.addEventListener("click", () => {
     openContainer.appendChild(clone);
     $(".ticket-number-input", clone)?.focus();
 
-    // persist
     const clones = cloneState.get();
     clones.tickets.push({ status: "Open", num: "", url: "", sum: "" });
     cloneState.set(clones);
@@ -998,7 +944,6 @@ document.addEventListener("click", () => {
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (!base) return;
 
-    // clear existing non-base
     $$(".ticket-group", document).forEach((g) => {
       if (g.getAttribute("data-base") !== "true") g.remove();
     });
@@ -1006,7 +951,6 @@ document.addEventListener("click", () => {
     clones.tickets.forEach((t) => {
       const clone = buildTicketCloneFromBase(base);
 
-      // fill values
       $(".ticket-number-input", clone).value = t.num || "";
       $(".ticket-zendesk-input", clone).value = t.url || "";
       $(".ticket-summary-input", clone).value = t.sum || "";
@@ -1018,10 +962,8 @@ document.addEventListener("click", () => {
         saveField(statusSel);
       }
 
-      // save fields
       $$("input, textarea, select", clone).forEach((el) => saveField(el));
 
-      // route
       const containers = ticketContainersByStatus();
       const dest = containers[t.status] || containers.Open || openContainer;
       dest.appendChild(clone);
@@ -1035,7 +977,6 @@ document.addEventListener("click", () => {
     const clones = cloneState.get();
     if (!clones.pocs || !clones.pocs.length) return;
 
-    // remove existing non-base
     $$(".additional-poc-card").forEach((c) => {
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
@@ -1088,8 +1029,6 @@ document.addEventListener("click", () => {
 
   /* =======================
      TABLE EXPAND MODAL (optional)
-     - Moves the closest .section containing the table into #mkTableModal
-     - Restores it back on close (no clones, no state loss)
   ======================= */
   const tableModal = {
     modal: null,
@@ -1104,10 +1043,9 @@ document.addEventListener("click", () => {
 
   const ensureTableExpandButtons = () => {
     const modal = $("#mkTableModal");
-    if (!modal) return; // only inject if modal exists in HTML
+    if (!modal) return;
 
     $$("div.table-container").forEach((tc) => {
-      // prefer footer button
       const footer = tc.parentElement?.querySelector?.(".table-footer");
       const existing =
         $(".mk-table-expand-btn", tc) || (footer ? $(".mk-table-expand-btn", footer) : null);
@@ -1132,7 +1070,6 @@ document.addEventListener("click", () => {
     const panel = $(".mk-modal-panel", modal) || modal;
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
-    const closeBtn = $(".mk-modal-close", modal);
     const backdrop = $(".mk-modal-backdrop", modal);
 
     if (!content) return;
@@ -1141,30 +1078,25 @@ document.addEventListener("click", () => {
       anyInsideTableContainer?.closest?.(".table-container") || $(".table-container");
     if (!tableContainer) return;
 
-    // pick a stable “section” wrapper to move (keeps header + footer together if wrapped)
     const sectionWrap =
       tableContainer.closest(".section") ||
       tableContainer.closest(".section-block") ||
       tableContainer.parentElement ||
       tableContainer;
 
-    // Store refs for close
     tableModal.modal = modal;
     tableModal.content = content;
     tableModal.title = titleEl;
-    tableModal.closeBtn = closeBtn;
     tableModal.backdrop = backdrop;
 
-    // Set title from nearest header
     const header =
       sectionWrap.querySelector?.(".section-header") ||
-      sectionWrap.previousElementSibling?.classList?.contains("section-header")
+      (sectionWrap.previousElementSibling?.classList?.contains("section-header")
         ? sectionWrap.previousElementSibling
-        : null;
+        : null);
 
     if (titleEl) titleEl.textContent = (header?.textContent || "Table").trim();
 
-    // Make placeholder and move
     tableModal.placeholder = document.createComment("mk-table-modal-placeholder");
     sectionWrap.parentNode.insertBefore(tableModal.placeholder, sectionWrap);
     tableModal.movedNode = sectionWrap;
@@ -1172,13 +1104,11 @@ document.addEventListener("click", () => {
     content.innerHTML = "";
     content.appendChild(sectionWrap);
 
-    // open
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
 
-    // scroll panel top
     try {
       panel.scrollTop = 0;
     } catch {}
@@ -1188,23 +1118,19 @@ document.addEventListener("click", () => {
     const modal = tableModal.modal;
     if (!modal) return;
 
-    // move node back
     if (tableModal.movedNode && tableModal.placeholder && tableModal.placeholder.parentNode) {
       tableModal.placeholder.parentNode.insertBefore(tableModal.movedNode, tableModal.placeholder);
       tableModal.placeholder.parentNode.removeChild(tableModal.placeholder);
     }
 
-    // close
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
 
     document.body.style.overflow = tableModal.bodyOverflow || "";
 
-    // cleanup
     tableModal.modal = null;
     tableModal.content = null;
     tableModal.title = null;
-    tableModal.closeBtn = null;
     tableModal.backdrop = null;
     tableModal.placeholder = null;
     tableModal.movedNode = null;
@@ -1232,12 +1158,14 @@ document.addEventListener("click", () => {
       return;
     }
 
-    // RESET THIS PAGE
-    const resetBtn = t.closest(".clear-page-btn[data-clear-page]");
+    // RESET THIS PAGE (supports with/without data-clear-page)
+    const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
-      const id = resetBtn.getAttribute("data-clear-page");
-      if (id) clearSection(document.getElementById(id));
+      const section =
+        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
+        resetBtn.closest(".page-section");
+      clearSection(section);
       return;
     }
 
@@ -1269,15 +1197,12 @@ document.addEventListener("click", () => {
       return;
     }
 
-    // NOTES buttons (Q&A + table notes)
-    const notesBtn = t.closest("[data-notes-btn], [data-notes-target], .notes-btn, .notes-icon-btn");
-    if (notesBtn) {
-      const targetId = getNotesTargetId(notesBtn);
-      if (targetId) {
-        e.preventDefault();
-        handleNotesClick(notesBtn);
-        return;
-      }
+    // NOTES buttons (ONLY those with data-notes-target)
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+      e.preventDefault();
+      handleNotesClick(notesBtn);
+      return;
     }
 
     // SUPPORT TICKET ADD (+)
@@ -1313,7 +1238,10 @@ document.addEventListener("click", () => {
     // TABLE MODAL close (backdrop or close button)
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+      if (
+        t.closest("#mkTableModal .mk-modal-close") ||
+        t.closest("#mkTableModal .mk-modal-backdrop")
+      ) {
         e.preventDefault();
         closeTableModal();
         return;
@@ -1342,7 +1270,10 @@ document.addEventListener("click", () => {
     }
 
     // persist pocs on changes (non-base)
-    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
+    if (
+      el.closest(".additional-poc-card") &&
+      el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
+    ) {
       const clones = cloneState.get();
       clones.pocs = $$(".additional-poc-card")
         .filter((c) => c.getAttribute("data-base") !== "true")
@@ -1392,6 +1323,30 @@ document.addEventListener("click", () => {
     const el = e.target;
     if (!isEl(el)) return;
 
+    // ENTER in Notes textarea => auto hollow bullet
+    if (e.key === "Enter" && isNotesTargetTextarea(el) && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
+      e.preventDefault();
+      preserveScroll(() => {
+        const insert = "\n  ◦ ";
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        const before = el.value.slice(0, start);
+        const after = el.value.slice(end);
+        el.value = before + insert + after;
+
+        const caret = start + insert.length;
+        try {
+          el.focus({ preventScroll: true });
+          el.setSelectionRange(caret, caret);
+        } catch {}
+
+        ensureId(el);
+        saveField(el);
+        triggerInputChange(el);
+      });
+      return;
+    }
+
     // Enter adds Trainer row
     if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
@@ -1423,22 +1378,17 @@ document.addEventListener("click", () => {
      INIT / RESTORE
   ======================= */
   const init = () => {
-    // IDs for existing fields
     assignIdsToAllFields();
 
-    // NAV first
     initNav();
 
-    // rebuild dynamic clones
     rebuildTrainerClones();
     rebuildPocClones();
     rebuildTableClones();
     rebuildTicketClones();
 
-    // restore saved values (after clones)
     restoreAllFields();
 
-    // ticket status disabled until number entered (base + clones)
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
@@ -1447,13 +1397,8 @@ document.addEventListener("click", () => {
       if (status) ensureId(status);
     });
 
-    // ghost styles
     setGhostStyles(document);
-
-    // initial dealership name display
     syncDealershipName();
-
-    // inject table expand buttons if modal exists
     ensureTableExpandButtons();
 
     log("Initialized.");
