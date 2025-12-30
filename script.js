@@ -414,149 +414,273 @@
     input.focus();
   };
 
-  /* =======================
-     NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-     ✅ Single implementation (REMOVED all duplicates below)
-  ======================= */
-  const Notes = (() => {
-    const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+/* =======================
+   NOTES (FIXED)
+   - Never overwrites existing bullets
+   - Inserts in DOM order (question order)
+   - If you skip a question then click Notes, it inserts ABOVE later questions
+======================= */
+const Notes = (() => {
+  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
 
-    // IMPORTANT: DO NOT use data-target fallback (collides with sidebar nav)
-    const getNotesTargetId = (btn) =>
-      btn.getAttribute("data-notes-target") ||
-      btn.getAttribute("href")?.replace("#", "") ||
-      "";
+  const getNotesTargetId = (btn) =>
+    btn.getAttribute("data-notes-target") ||
+    btn.getAttribute("href")?.replace("#", "") ||
+    "";
 
-    // ---------- Invisible key marker (zero-width only) ----------
-    const ZW0 = "\u200B";      // 0
-    const ZW1 = "\u200C";      // 1
-    const WRAP = "\u2060";     // word-joiner wrapper (invisible)
+  // Invisible key marker (word-joiner wrapper + zero width encoding)
+  const ZW0 = "\u200B";
+  const ZW1 = "\u200C";
+  const WRAP = "\u2060";
 
-    const zwEncode = (plain) => {
-      const bytes = new TextEncoder().encode(String(plain));
-      let bits = "";
-      for (const b of bytes) bits += b.toString(2).padStart(8, "0");
-      return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+  const zwEncode = (plain) => {
+    const bytes = new TextEncoder().encode(String(plain));
+    let bits = "";
+    for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+    return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+  };
+
+  const zwDecode = (zw) => {
+    const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+    const bytes = [];
+    for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    try {
+      return new TextDecoder().decode(new Uint8Array(bytes));
+    } catch {
+      return "";
+    }
+  };
+
+  const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
+
+  const extractKeyFromLine = (line) => {
+    const s = String(line || "");
+    const a = s.indexOf(WRAP);
+    if (a < 0) return null;
+    const b = s.indexOf(WRAP, a + 1);
+    if (b < 0) return null;
+    const payload = s.slice(a + 1, b);
+    const decoded = zwDecode(payload);
+    return decoded || null;
+  };
+
+  // IMPORTANT: do NOT remove WRAP markers (that’s what was nuking earlier bullets)
+  // Only remove legacy visible mk tags.
+  const cleanupLegacyVisibleKeys = (text) => {
+    let v = normalizeNL(text || "");
+    v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
+    v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");
+    return v;
+  };
+
+  const getSlotKey = (btn) => {
+    const hostId = getNotesTargetId(btn) || "notes";
+
+    const tr = btn.closest("tr");
+    if (tr) {
+      const table = btn.closest("table") || tr.closest("table");
+      const tb = tr.parentElement;
+      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+      const idx = rows.indexOf(tr);
+      const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+      return `${hostId}::tbl::${tKey}::r${idx}`;
+    }
+
+    const all = Array.from(
+      document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+    );
+    const idx = all.indexOf(btn);
+
+    return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
+  };
+
+  const findOrDerivePromptText = (btn) => {
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    const section = getSection(btn);
+    const secId = section?.id || "";
+
+    if (tr && table) {
+      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+      let idx = -1;
+
+      if (secId === "training-checklist") idx = idxOf("name");
+      if (secId === "opcodes-pricing") idx = idxOf("opcode");
+      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+
+      const tds = $$("td", tr);
+      const cell = idx >= 0 ? tds[idx] : null;
+      let val = "";
+
+      if (cell) {
+        const field = $("input, textarea, select", cell);
+        if (field) val = (field.value || "").trim();
+        else val = (cell.textContent || "").trim();
+      }
+
+      const label =
+        secId === "training-checklist"
+          ? "Name"
+          : secId === "opcodes-pricing"
+          ? "Opcode"
+          : "Item";
+
+      return val ? `${label}: ${val}` : `${label}: (blank)`;
+    }
+
+    const row = btn.closest(".checklist-row");
+    const label = row ? row.querySelector("label") : null;
+    return (label?.textContent || "").trim() || "Notes";
+  };
+
+  // Parse blocks:
+  // - marker blocks become keyed blocks
+  // - unmarked content is preserved as "misc" and re-appended at the end (never lost)
+  const parseBlocks = (text) => {
+    const lines = normalizeNL(text || "").split("\n");
+    const blocks = [];
+    let cur = null;
+
+    const isMain = (line) => String(line || "").trim().startsWith("•");
+
+    const flush = () => {
+      if (cur) blocks.push(cur);
+      cur = null;
     };
 
-    const zwDecode = (zw) => {
-      const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
-      const bytes = [];
-      for (let i = 0; i + 7 < bits.length; i += 8)
-        bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    for (const line of lines) {
+      if (isMain(line)) {
+        flush();
+        const key = extractKeyFromLine(line); // may be null
+        cur = { key: key || "__misc__", lines: [line] };
+      } else {
+        if (!cur) cur = { key: "__misc__", lines: [] };
+        cur.lines.push(line);
+      }
+    }
+    flush();
+    return blocks;
+  };
+
+  const buildBlockLines = (promptText, key) => {
+    const main = `• ${promptText}${makeMarker(key)}`;
+    const sub = `  ◦ `;
+    return [main, sub];
+  };
+
+  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+    const btns = Array.from(
+      document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
+    );
+    const wanted = btns.map(getSlotKey);
+
+    const map = new Map();
+    const miscChunks = [];
+
+    blocks.forEach((b) => {
+      if (!b || !b.lines) return;
+      if (b.key && b.key !== "__misc__" && b.key !== "__misc__") map.set(b.key, b);
+      else miscChunks.push(b.lines.join("\n"));
+    });
+
+    // ensure any previously-marked blocks with null key are not dropped
+    // (they’ll be in miscChunks already)
+
+    const out = [];
+    for (const k of wanted) {
+      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
+    }
+
+    if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+      out.push(map.get(newlyAddedKey).lines.join("\n"));
+    }
+
+    // Preserve any unrecognized / legacy bullets at the end (never overwrite)
+    const miscText = miscChunks
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+
+    const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+    if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
+    if (rebuilt) return rebuilt.trimEnd();
+    return miscText.trimEnd();
+  };
+
+  const caretAtHollowForKey = (text, key) => {
+    const v = normalizeNL(text || "");
+    const marker = makeMarker(key);
+    const idx = v.indexOf(marker);
+    if (idx < 0) return v.length;
+
+    const lineEnd = v.indexOf("\n", idx);
+    const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
+
+    const after = v.slice(afterMain);
+    const rel = after.indexOf("◦");
+    if (rel < 0) return afterMain;
+    return afterMain + rel + 2;
+  };
+
+  const handleNotesClick = (btn) => {
+    const targetId = getNotesTargetId(btn);
+    if (!targetId) return;
+
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+    const ta = $("textarea", target);
+    if (!ta) return;
+
+    const promptText = findOrDerivePromptText(btn);
+    const slotKey = getSlotKey(btn);
+
+    preserveScroll(() => {
+      ta.value = cleanupLegacyVisibleKeys(ta.value);
+
+      let blocks = parseBlocks(ta.value);
+
+      // Only treat "exists" as true if we already have THIS slotKey in a marked main line
+      const exists = blocks.some((b) => b.key === slotKey);
+
+      if (!exists) {
+        blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+      }
+
+      // Rebuild in DOM order, then re-append misc legacy text
+      ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
+
+      const caret = caretAtHollowForKey(ta.value, slotKey);
       try {
-        return new TextDecoder().decode(new Uint8Array(bytes));
+        ta.focus({ preventScroll: true });
       } catch {
-        return "";
+        ta.focus();
       }
-    };
+      try {
+        ta.setSelectionRange(caret, caret);
+      } catch {}
 
-    const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
+      btn.classList.add("has-notes");
 
-    const extractKeyFromLine = (line) => {
-      const s = String(line || "");
-      const a = s.indexOf(WRAP);
-      if (a < 0) return null;
-      const b = s.indexOf(WRAP, a + 1);
-      if (b < 0) return null;
-      const payload = s.slice(a + 1, b);
-      const decoded = zwDecode(payload);
-      return decoded || null;
-    };
+      ensureId(ta);
+      saveField(ta);
+      triggerInputChange(ta);
+    });
+  };
 
-    // Remove OLD visible junk from earlier builds (mk:... and [mk:...])
-    const cleanupLegacyVisibleKeys = (text) => {
-      let v = normalizeNL(text || "");
-      v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");     // " [mk:...]" style
-      v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");    // "mk:notes-..." style
-      // remove any stray WRAP markers from earlier attempts
-      const re = new RegExp(`${WRAP}[\\s\\S]*?${WRAP}`, "g");
-      v = v.replace(re, "");
-      return v;
-    };
+  const isNotesTargetTextarea = (ta) => {
+    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+    const host = ta.closest("[id]");
+    if (!host || !host.id) return false;
+    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+  };
 
-    // ---------- Stable slot key (for ordering) ----------
-    const getSlotKey = (btn) => {
-      const hostId = getNotesTargetId(btn) || "notes";
-
-      const tr = btn.closest("tr");
-      if (tr) {
-        const table = btn.closest("table") || tr.closest("table");
-        const tb = tr.parentElement;
-        const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
-        const idx = rows.indexOf(tr);
-        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
-        return `${hostId}::tbl::${tKey}::r${idx}`;
-      }
-
-      const all = Array.from(
-        document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
-      );
-      const idx = all.indexOf(btn);
-
-      const row = btn.closest(".checklist-row") || btn;
-      const labelText =
-        (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
-
-      let h = 5381;
-      for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
-      const labelHash = (h >>> 0).toString(16);
-
-      return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
-    };
-
-    const findOrDerivePromptText = (btn) => {
-      const tr = btn.closest("tr");
-      const table = btn.closest("table");
-      const section = getSection(btn);
-      const secId = section?.id || "";
-
-      if (tr && table) {
-        const ths = $$("thead th", table).map((th) =>
-          (th.textContent || "").trim().toLowerCase()
-        );
-        const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-        let idx = -1;
-
-        if (secId === "training-checklist") idx = idxOf("name");
-        if (secId === "opcodes-pricing") idx = idxOf("opcode");
-        if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
-
-        if (idx < 0) {
-          const tds = $$("td", tr);
-          for (let i = 0; i < tds.length; i++) {
-            const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
-            if (field) {
-              idx = i;
-              break;
-            }
-          }
-        }
-
-        const tds = $$("td", tr);
-        const cell = idx >= 0 ? tds[idx] : null;
-        let val = "";
-
-        if (cell) {
-          const field = $("input, textarea, select", cell);
-          if (field) val = (field.value || "").trim();
-          else val = (cell.textContent || "").trim();
-        }
-
-        const label =
-          secId === "training-checklist"
-            ? "Name"
-            : secId === "opcodes-pricing"
-            ? "Opcode"
-            : "Item";
-
-        return val ? `${label}: ${val}` : `${label}: (blank)`;
-      }
-
-      const row = btn.closest(".checklist-row");
-      const label = row ? row.querySelector("label") : null;
-      return (label?.textContent || "").trim() || "Notes";
-    };
+  return { handleNotesClick, isNotesTargetTextarea };
+})();
 
     // ---------- Block parsing / rebuilding (uses invisible marker) ----------
     const isMainLine = (line) => {
@@ -1064,74 +1188,95 @@
       }
     }
 
-    // ADD POC (+)
-    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
-    if (pocBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      addPocCard(pocBtn);
-      return;
-    }
+   const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+  e.preventDefault();
+  Notes.handleNotesClick(notesBtn);
+  return;
+}
 
-    // TABLE ADD ROW: ONLY inside footer
-    const addRowBtn = t.closest("button.add-row");
-    if (addRowBtn && addRowBtn.closest(".table-footer")) {
-      e.preventDefault();
-      cloneTableRow(addRowBtn);
-      return;
-    }
+    //* =======================
+   ADD POC (+)
+======================= */
+const readPocCardValues = (card) => ({
+  name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
+  role: (card.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
+  cell: (card.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
+  email: (card.querySelector('input[type="email"]')?.value || "").trim(),
+});
 
-    // NOTES
-    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
-    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
-      e.preventDefault();
-      Notes.handleNotesClick(notesBtn);
-      return;
-    }
+const writePocCardValues = (card, p) => {
+  const name = card.querySelector('input[placeholder="Enter name"]');
+  const role = card.querySelector('input[placeholder="Enter role"]');
+  const cell = card.querySelector('input[placeholder="Enter cell"]');
+  const email = card.querySelector('input[type="email"]');
 
-    // SUPPORT TICKET ADD (+)
-    const ticketAddBtn = t.closest(".add-ticket-btn");
-    if (ticketAddBtn) {
-      e.preventDefault();
-      addTicketCard(ticketAddBtn);
-      return;
-    }
+  if (name) name.value = p?.name || "";
+  if (role) role.value = p?.role || "";
+  if (cell) cell.value = p?.cell || "";
+  if (email) email.value = p?.email || "";
 
-    // DEALERSHIP MAP BTN
-    const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
-    if (mapBtn) {
-      e.preventDefault();
-      const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp =
-        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
-      updateDealershipMap(inp ? inp.value : "");
-      return;
-    }
-
-    // TABLE EXPAND BTN
-    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
-    if (expandBtn) {
-      const modal = $("#mkTableModal");
-      if (modal) {
-        e.preventDefault();
-        openTableModalFor(expandBtn);
-        return;
-      }
-    }
-
-    // TABLE MODAL close (backdrop or close button)
-    const mkTableModal = $("#mkTableModal");
-    if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (
-        t.closest("#mkTableModal .mk-modal-close") ||
-        t.closest("#mkTableModal .mk-modal-backdrop")
-      ) {
-        e.preventDefault();
-        closeTableModal();
-        return;
-      }
-    }
+  [name, role, cell, email].forEach((el) => {
+    if (!el) return;
+    ensureId(el);
+    saveField(el);
+    triggerInputChange(el);
   });
+};
+
+const buildPocCard = (p = null) => {
+  const base = document.querySelector('.additional-poc-card[data-base="true"]');
+  if (!base) return null;
+
+  const clone = base.cloneNode(true);
+  clone.setAttribute("data-base", "false");
+  clone.classList.add("additional-poc-card");
+  clone.setAttribute(AUTO_CARD_ATTR, "poc");
+
+  // clear/reset inputs & ids on clone
+  $$("input, textarea, select", clone).forEach((el) => {
+    if (el.matches("input[type='checkbox']")) el.checked = false;
+    else el.value = "";
+    el.removeAttribute(AUTO_ID_ATTR);
+    ensureId(el);
+    saveField(el);
+  });
+
+  // (Optional) if your clone contains the "+" button, keep it
+  // No remove buttons by design.
+
+  if (p) writePocCardValues(clone, p);
+
+  return clone;
+};
+
+const persistAllPocs = () => {
+  const clones = cloneState.get();
+  clones.pocs = $$(".additional-poc-card")
+    .filter((c) => c.getAttribute("data-base") !== "true")
+    .map((c) => readPocCardValues(c));
+  cloneState.set(clones);
+};
+
+const addPocCard = (btn) => {
+  const base = document.querySelector('.additional-poc-card[data-base="true"]');
+  if (!base) return;
+
+  const newCard = buildPocCard(null);
+  if (!newCard) return;
+
+  // Insert after the last POC card (base + any existing clones)
+  const allCards = $$(".additional-poc-card");
+  const last = allCards[allCards.length - 1] || base;
+  last.insertAdjacentElement("afterend", newCard);
+
+  // Persist clones
+  persistAllPocs();
+
+  // Focus first field in new card
+  const first = newCard.querySelector('input[placeholder="Enter name"], input, textarea, select');
+  if (first) first.focus();
+};
 
   document.addEventListener("input", (e) => {
     const el = e.target;
