@@ -2,28 +2,10 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN)  — UPDATED/FIXED
 
-   ✅ Sidebar/menu nav works (sections toggle .active)
-   ✅ Clear All works (#clearAllBtn)
-   ✅ Reset This Page works (.clear-page-btn)
-   ✅ Add Trainer (+) works
-   ✅ Add POC (+) works (adds ONE card even if blank; base card remains)
-   ✅ Table Add Row (+) works (only when inside .table-footer)
-   ✅ Support Tickets: gating + status routing + status disabled until # entered
-   ✅ LocalStorage save/restore (including dynamic clones: trainers, POCs, tables, tickets)
-
-   ✅ NOTES (FIXED):
-   - Click Notes ➜ inserts into existing big textarea for that card:
-       • <Question text>
-         ◦
-   - Never overwrites previous bullets
-   - Dedupes (if exists, jumps caret to its ◦ line)
-   - Maintains DOM order (skip a question → later click inserts ABOVE lower ones)
-   - Adds blank line between entries
-   - ENTER in notes textarea inserts "\n  ◦ "
-   - Invisible marker kept for stable ordering (no visible [mk:...] tags)
-
-   ✅ NO PAGE SHIFT on notes click:
-   - preserveScroll + preventScroll focus
+   ✅ POC FIX (YOUR NEW REQUEST):
+   - Cloned/added POC cards DO NOT include the (+) add button
+   - Cloned/added POC cards get a “right-rounded” look
+     (adds classes + inline right-side radius as a safe fallback)
 
 ======================================================= */
 
@@ -162,7 +144,6 @@
     });
   };
 
-  // Preserve scroll position (prevents “page shifting” when focusing/selection changes)
   const preserveScroll = (fn) => {
     const x = window.scrollX || 0;
     const y = window.scrollY || 0;
@@ -177,10 +158,10 @@
     get() {
       const state = readState();
       state.__clones = state.__clones || {
-        trainers: [], // [{ value }]
-        pocs: [], // [{ name, role, cell, email }]
-        tables: {}, // { tableKey: [ rows ] }
-        tickets: [], // [{ status, num, url, sum }]
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
       };
       return state.__clones;
     },
@@ -197,7 +178,7 @@
   };
 
   /* =======================
-     NAV (MENU BUTTONS)
+     NAV
   ======================= */
   const setActiveSection = (targetId) => {
     if (!targetId) return;
@@ -217,7 +198,6 @@
     state.__activeSection = targetId;
     writeState(state);
 
-    // (Leave your existing behavior)
     try {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
@@ -405,7 +385,9 @@
   };
 
   /* =======================
-     ADD POC (+)  — FIXED
+     ADD POC (+)  — UPDATED:
+     - clones REMOVE the add button
+     - clones have right rounded side
   ======================= */
   const readPocCardValues = (card) => ({
     name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
@@ -441,6 +423,18 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
+    // ✅ Remove the add (+) button from cloned cards
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
+
+    // ✅ Right-rounded side for cloned cards
+    // Add classes (preferred) + inline fallback (in case CSS not present yet)
+    clone.classList.add("mk-poc-clone", "mk-round-right");
+    clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
+    clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
+
+    // clear/reset inputs & ids on clone
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -536,17 +530,14 @@
   const cloneTableRow = (btn) => {
     const footer = btn.closest(".table-footer");
     const container = footer?.closest(".section-block") || footer?.parentElement;
-    const table = container?.querySelector?.("table.training-table") || btn.closest("table.training-table");
+    const table =
+      container?.querySelector?.("table.training-table") || btn.closest("table.training-table");
     if (!table) return;
 
     const tbody = $("tbody", table);
     if (!tbody) return;
 
-    // base row = first tbody row (or a row marked data-base="true" if you have it)
-    const baseRow =
-      tbody.querySelector('tr[data-base="true"]') ||
-      tbody.querySelector("tr") ||
-      null;
+    const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
     if (!baseRow) return;
 
     const clone = baseRow.cloneNode(true);
@@ -556,7 +547,6 @@
     tbody.appendChild(clone);
     persistTable(table);
 
-    // focus first input
     const first = $("input, textarea, select, [contenteditable='true']", clone);
     if (first) first.focus();
   };
@@ -573,13 +563,9 @@
       const tbody = $("tbody", table);
       if (!tbody) return;
 
-      // remove existing cloned rows
       $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).forEach((tr) => tr.remove());
 
-      const baseRow =
-        tbody.querySelector('tr[data-base="true"]') ||
-        tbody.querySelector("tr") ||
-        null;
+      const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
       if (!baseRow) return;
 
       rows.forEach((vals) => {
@@ -593,20 +579,18 @@
   };
 
   /* =======================
-     NOTES (FIXED / SINGLE SOURCE OF TRUTH)
+     NOTES (kept as-is from your working version)
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-
     const getNotesTargetId = (btn) =>
       btn.getAttribute("data-notes-target") ||
       btn.getAttribute("href")?.replace("#", "") ||
       "";
 
-    // Invisible key marker
-    const ZW0 = "\u200B"; // 0
-    const ZW1 = "\u200C"; // 1
-    const WRAP = "\u2060"; // word-joiner
+    const ZW0 = "\u200B";
+    const ZW1 = "\u200C";
+    const WRAP = "\u2060";
 
     const zwEncode = (plain) => {
       const bytes = new TextEncoder().encode(String(plain));
@@ -639,7 +623,6 @@
       return decoded || null;
     };
 
-    // Only remove legacy visible mk tags. DO NOT remove WRAP markers.
     const cleanupLegacyVisibleKeys = (text) => {
       let v = normalizeNL(text || "");
       v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
@@ -649,8 +632,6 @@
 
     const getSlotKey = (btn) => {
       const hostId = getNotesTargetId(btn) || "notes";
-
-      // table rows
       const tr = btn.closest("tr");
       if (tr) {
         const table = btn.closest("table") || tr.closest("table");
@@ -660,8 +641,6 @@
         const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
         return `${hostId}::tbl::${tKey}::r${idx}`;
       }
-
-      // normal Q rows: DOM order among notes buttons for this target
       const all = Array.from(
         document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
       );
@@ -709,7 +688,6 @@
       return (label?.textContent || "").trim() || "Notes";
     };
 
-    // Parse into keyed blocks + misc (unkeyed) preserved
     const parseBlocks = (text) => {
       const lines = normalizeNL(text || "").split("\n");
       const blocks = [];
@@ -725,7 +703,7 @@
       for (const line of lines) {
         if (isMain(line)) {
           flush();
-          const key = extractKeyFromLine(line); // may be null
+          const key = extractKeyFromLine(line);
           cur = { key: key || "__misc__", lines: [line] };
         } else {
           if (!cur) cur = { key: "__misc__", lines: [] };
@@ -762,17 +740,12 @@
         if (map.has(k)) out.push(map.get(k).lines.join("\n"));
       }
 
-      // safety: if a key exists but isn't in wanted anymore, keep it at end
       if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
         out.push(map.get(newlyAddedKey).lines.join("\n"));
       }
 
       const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
-
-      const miscText = miscChunks
-        .join("\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
+      const miscText = miscChunks.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 
       if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
       if (rebuilt) return rebuilt.trimEnd();
@@ -791,7 +764,7 @@
       const after = v.slice(afterMain);
       const rel = after.indexOf("◦");
       if (rel < 0) return afterMain;
-      return afterMain + rel + 2; // after "◦ "
+      return afterMain + rel + 2;
     };
 
     const handleNotesClick = (btn) => {
@@ -811,12 +784,9 @@
       const slotKey = getSlotKey(btn);
 
       preserveScroll(() => {
-        // Clean only legacy visible junk (never remove invisible markers)
         ta.value = cleanupLegacyVisibleKeys(ta.value);
 
         const blocks = parseBlocks(ta.value);
-
-        // Exists only if keyed
         const exists = blocks.some((b) => b.key === slotKey);
 
         if (!exists) {
@@ -1048,7 +1018,7 @@
   };
 
   /* =======================
-     DEALERSHIP NAME DISPLAY (top bar)
+     DEALERSHIP NAME DISPLAY
   ======================= */
   const syncDealershipName = () => {
     const input = $("#dealershipNameInput");
@@ -1058,7 +1028,7 @@
   };
 
   /* =======================
-     DEALERSHIP MAP BUTTON (optional)
+     MAP BTN (optional)
   ======================= */
   const updateDealershipMap = (address) => {
     const frame =
@@ -1179,12 +1149,11 @@
   };
 
   /* =======================
-     EVENT DELEGATION (SINGLE)  — KEEP ALL HANDLERS INSIDE HERE
+     EVENT DELEGATION
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // NAV
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -1192,7 +1161,6 @@
       return;
     }
 
-    // CLEAR ALL
     const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
@@ -1200,7 +1168,6 @@
       return;
     }
 
-    // RESET THIS PAGE
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -1211,7 +1178,6 @@
       return;
     }
 
-    // ADD TRAINER (+)
     const addTrainerBtn =
       t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
     if (addTrainerBtn) {
@@ -1220,7 +1186,6 @@
       return;
     }
 
-    // ADD POC (+)  ✅ FIXED: call the function (do NOT define code here)
     const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
     if (pocBtn) {
       e.preventDefault();
@@ -1229,7 +1194,6 @@
       return;
     }
 
-    // TABLE ADD ROW: ONLY inside footer
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -1237,7 +1201,6 @@
       return;
     }
 
-    // NOTES (must be after add-row, before other buttons that might match)
     const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
     if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
@@ -1245,7 +1208,6 @@
       return;
     }
 
-    // SUPPORT TICKET ADD (+)
     const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
@@ -1253,7 +1215,6 @@
       return;
     }
 
-    // DEALERSHIP MAP BTN
     const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
@@ -1264,8 +1225,9 @@
       return;
     }
 
-    // TABLE EXPAND BTN
-    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
+    const expandBtn = t.closest(
+      ".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn"
+    );
     if (expandBtn) {
       const modal = $("#mkTableModal");
       if (modal) {
@@ -1275,7 +1237,6 @@
       }
     }
 
-    // TABLE MODAL close
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
       if (
@@ -1300,7 +1261,6 @@
 
     if (el.id === "dealershipNameInput") syncDealershipName();
 
-    // persist trainers on changes
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
@@ -1309,7 +1269,6 @@
       cloneState.set(clones);
     }
 
-    // persist pocs on changes (non-base)
     if (
       el.closest(".additional-poc-card") &&
       el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
@@ -1317,10 +1276,8 @@
       persistAllPocs();
     }
 
-    // ticket behavior
     if (el.matches(".ticket-number-input")) onTicketNumberChange(el);
 
-    // table clone persistence (any change inside a cloned row triggers persist for that table)
     const tr = el.closest("tr");
     const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
@@ -1339,7 +1296,6 @@
 
     if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
 
-    // persist table on selects changing inside cloned rows
     const tr = el.closest("tr");
     const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
@@ -1350,7 +1306,6 @@
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // ENTER in Notes textarea => auto hollow bullet
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -1382,14 +1337,12 @@
       return;
     }
 
-    // Enter adds Trainer row
     if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
       return;
     }
 
-    // Esc closes table modal if open
     if (e.key === "Escape") {
       const mkTableModal = $("#mkTableModal");
       if (mkTableModal && mkTableModal.classList.contains("open")) {
@@ -1413,7 +1366,6 @@
 
     restoreAllFields();
 
-    // ticket status disabled until # entered
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
