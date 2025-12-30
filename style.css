@@ -1770,3 +1770,42 @@ button.remove-row{
   margin:8px 10px 0 !important;
   padding:0 2px !important;
 }
+
+/* ================================
+   NOTES POPOVER (NO LAYOUT SHIFT)
+================================ */
+
+.notes-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+
+  width: 100%;
+  max-width: 480px;
+
+  background: #0b1220;
+  color: #fff;
+
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+
+  padding: 12px;
+  margin-top: 6px;
+
+  z-index: 1000;
+
+  /* KEY: prevent layout impact */
+  display: none;
+}
+
+.notes-panel.open {
+  display: block;
+}
+
+/* Parent must anchor the absolute positioning */
+.checklist-row,
+.row-actions,
+.notes-anchor {
+  position: relative;
+}
+
