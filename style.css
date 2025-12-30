@@ -1732,3 +1732,35 @@ button.remove-row{
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) !important;
 }
+
+/* ===============================
+   Dealership Address: full-width map fill
+=============================== */
+#dealership-address-card{
+  padding-bottom:0 !important; /* lets the map feel like it fills the card */
+}
+
+/* remove the "boxed" look and let map stretch full width */
+#dealership-address-card .map-wrapper{
+  width:100% !important;
+  max-width:100% !important;
+  margin:14px 0 0 !important;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
+  overflow:hidden !important;
+  border:1px solid var(--border) !important;
+}
+
+/* iframe must be block + full width */
+#dealership-address-card .map-wrapper iframe,
+#dealership-address-card .map-frame{
+  display:block !important;
+  width:100% !important;
+  height:520px !important;  /* adjust if you want taller/shorter */
+  border:0 !important;
+}
+
+/* optional: keep helper text aligned, not shrinking the map */
+#dealership-address-card .map-helper-text{
+  margin:10px 0 14px !important;
+  padding:0 2px !important;
+}
