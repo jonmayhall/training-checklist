@@ -1964,3 +1964,47 @@ table.training-table td .input-plus,
 table.training-table td .input-plus * {
   min-width: 0;
 }
+
+/* =========================================================
+   FIX: Restore table spacing (pages 5/6) + constrain Name/Opcode inputs
+   Put this BELOW the previous modal/table CSS.
+   ========================================================= */
+
+/* 1) RESTORE ORIGINAL TABLE BEHAVIOR (undo the global "fixed" + flex td changes) */
+table.training-table {
+  table-layout: auto !important;   /* <-- puts spacing back to normal */
+}
+
+table.training-table td:first-child {
+  display: table-cell !important;  /* <-- undo flex that broke widths */
+  vertical-align: middle;
+}
+
+/* 2) KEEP INPUTS FROM OVERFLOWING THEIR CELLS (safe, doesn’t change layout) */
+table.training-table td input,
+table.training-table td select,
+table.training-table td textarea {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 3) NAME CELL (checkbox + text input in same cell) — prevent textbox overflow */
+table.training-table td:first-child input[type="text"] {
+  width: calc(100% - 34px) !important; /* room for checkbox + gap */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+table.training-table td:first-child input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+/* 4) OPCODE CELL (usually checkbox in col 1, opcode text in col 2) — keep it contained */
+table.training-table td:nth-child(2) input[type="text"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
