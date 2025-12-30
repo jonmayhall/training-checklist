@@ -842,14 +842,15 @@
     return { handleNotesClick, isNotesTargetTextarea };
   })();
 
-  /* =======================
-   SUPPORT TICKETS (DROP-IN)
-   ✅ "+"" now carries typed values into the new card
-   ✅ Base/default card resets after adding
-   ✅ Status dropdown remains disabled until Ticket # is entered
-   ✅ Status routing still works (Open / Tier Two / Closed...)
-   ✅ Persist + restore works
+/* =======================
+   SUPPORT TICKETS — DROP-IN (FIXED ADD FLOW)
+   ✅ Right-most card is always the ONLY “default” card with +
+   ✅ Clicking + finalizes current default (keeps values),
+      then appends a NEW blank default card to the RIGHT
+   ✅ Status dropdown enabled when Ticket # present
+   ✅ Saved cards route to proper status containers
 ======================= */
+
 const ticketContainersByStatus = () => ({
   Open: $("#openTicketsContainer"),
   "Tier Two": $("#tierTwoTicketsContainer"),
@@ -865,6 +866,28 @@ const readTicketValues = (card) => {
   return { num, url, sum, status };
 };
 
+const writeTicketValues = (card, v) => {
+  const numEl = $(".ticket-number-input", card);
+  const urlEl = $(".ticket-zendesk-input", card);
+  const sumEl = $(".ticket-summary-input", card);
+  const statusEl = $(".ticket-status-select", card);
+
+  if (numEl) numEl.value = v.num || "";
+  if (urlEl) urlEl.value = v.url || "";
+  if (sumEl) sumEl.value = v.sum || "";
+  if (statusEl) statusEl.value = v.status || "Open";
+
+  [numEl, urlEl, sumEl, statusEl].forEach((el) => {
+    if (!el) return;
+    ensureId(el);
+    saveField(el);
+    triggerInputChange(el);
+  });
+
+  // enable/disable status based on ticket number
+  if (statusEl) statusEl.disabled = !(String(v.num || "").trim());
+};
+
 const isTicketCardComplete = (card) => {
   const v = readTicketValues(card);
   return !!(v.num && v.url && v.sum);
@@ -877,51 +900,121 @@ const markTicketCardErrors = (card) => {
 
   [numEl, urlEl, sumEl].forEach((el) => {
     if (!el) return;
-    const v = (el.value || "").trim();
-    if (!v) {
+    const ok = (el.value || "").trim();
+    if (!ok) {
       el.classList.add("mk-field-error");
       setTimeout(() => el.classList.remove("mk-field-error"), 700);
     }
   });
 };
 
-const buildTicketCloneFromBase = (baseCard) => {
-  const clone = baseCard.cloneNode(true);
-  clone.setAttribute("data-base", "false");
-  clone.setAttribute(AUTO_CARD_ATTR, "ticket");
-
-  // reset fields + IDs
-  $$("input, textarea, select", clone).forEach((el) => {
+const clearTicketCard = (card) => {
+  $$("input, textarea, select", card).forEach((el) => {
     if (el.matches("input[type='checkbox']")) el.checked = false;
     else el.value = "";
+
+    // re-id so base card stays unique in storage
     el.removeAttribute(AUTO_ID_ATTR);
     ensureId(el);
     saveField(el);
+    triggerInputChange(el);
   });
 
-  // default status rules
-  const status = $(".ticket-status-select", clone);
-  if (status) {
-    status.value = "Open";
-    status.disabled = true; // enabled once Ticket # exists
-    ensureId(status);
-    saveField(status);
+  // reset status
+  const statusEl = $(".ticket-status-select", card);
+  if (statusEl) {
+    statusEl.value = "Open";
+    statusEl.disabled = true;
+    ensureId(statusEl);
+    saveField(statusEl);
+  }
+};
+
+const finalizeTicketCard = (card) => {
+  // Once saved, it is NOT the default card anymore
+  card.setAttribute("data-base", "false");
+  card.setAttribute(AUTO_CARD_ATTR, "ticket");
+
+  // status enabled if ticket number exists
+  const v = readTicketValues(card);
+  const statusEl = $(".ticket-status-select", card);
+  if (statusEl) statusEl.disabled = !(v.num || "").trim();
+
+  // CSS will hide the + button on non-base cards automatically
+};
+
+const ensureSingleDefaultTicketCard = () => {
+  const openContainer = $("#openTicketsContainer");
+  if (!openContainer) return;
+
+  // If there are multiple base cards (bug), keep only the LAST one as base
+  const bases = $$(".ticket-group[data-base='true']", openContainer);
+  if (bases.length > 1) {
+    bases.slice(0, -1).forEach((b) => b.setAttribute("data-base", "false"));
   }
 
-  return clone;
+  // If none exists, create one from the first card we can find
+  if (!$(".ticket-group[data-base='true']", openContainer)) {
+    const anyCard = $(".ticket-group", openContainer) || $(".ticket-group", document);
+    if (!anyCard) return;
+
+    const base = anyCard.cloneNode(true);
+    base.setAttribute("data-base", "true");
+    clearTicketCard(base);
+    openContainer.appendChild(base);
+  }
+};
+
+const routeTicketCardToStatusColumn = (card) => {
+  const containers = ticketContainersByStatus();
+  const v = readTicketValues(card);
+  const dest = containers[v.status] || containers.Open;
+  if (dest) dest.appendChild(card);
 };
 
 const persistAllTickets = () => {
   const clones = cloneState.get();
   clones.tickets = [];
 
-  const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
-  all.forEach((card) => {
+  // store only SAVED cards (data-base != true), across all columns
+  const allSaved = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
+
+  allSaved.forEach((card) => {
     const v = readTicketValues(card);
-    clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
+    // store even if partially filled (optional), but typically it will be complete
+    clones.tickets.push({ status: v.status || "Open", num: v.num, url: v.url, sum: v.sum });
   });
 
   cloneState.set(clones);
+};
+
+const rebuildTicketClones = () => {
+  const clones = cloneState.get();
+  const openContainer = $("#openTicketsContainer");
+  if (!openContainer) return;
+
+  // remove all NON-base cards (we will rebuild them)
+  $$(".ticket-group", document).forEach((g) => {
+    if (g.getAttribute("data-base") !== "true") g.remove();
+  });
+
+  // Ensure one base exists
+  ensureSingleDefaultTicketCard();
+
+  // Use the existing base card as a template for rebuilding saved cards
+  const baseTemplate = $(".ticket-group[data-base='true']", openContainer);
+  if (!baseTemplate) return;
+
+  (clones.tickets || []).forEach((t) => {
+    const card = baseTemplate.cloneNode(true);
+    finalizeTicketCard(card);
+    writeTicketValues(card, t);
+    routeTicketCardToStatusColumn(card);
+  });
+
+  // keep the base card at the END of OPEN column
+  const base = $(".ticket-group[data-base='true']", openContainer);
+  if (base) openContainer.appendChild(base);
 };
 
 const onTicketNumberChange = (inputEl) => {
@@ -934,13 +1027,9 @@ const onTicketNumberChange = (inputEl) => {
   const hasNum = (inputEl.value || "").trim().length > 0;
   status.disabled = !hasNum;
 
-  ensureId(inputEl);
   saveField(inputEl);
-
-  ensureId(status);
   saveField(status);
 
-  // keep clone persistence updated
   if (card.getAttribute("data-base") !== "true") persistAllTickets();
 };
 
@@ -948,128 +1037,76 @@ const onTicketStatusChange = (selectEl) => {
   const card = selectEl.closest(".ticket-group");
   if (!card) return;
 
-  const statusVal = selectEl.value;
-  const containers = ticketContainersByStatus();
-  const dest = containers[statusVal] || containers.Open;
-  if (dest) dest.appendChild(card);
-
-  ensureId(selectEl);
   saveField(selectEl);
 
-  if (card.getAttribute("data-base") !== "true") persistAllTickets();
+  // Only route SAVED cards (not the active entry card)
+  if (card.getAttribute("data-base") !== "true") {
+    routeTicketCardToStatusColumn(card);
+    persistAllTickets();
+  }
 };
 
-/* ✅ FIXED ADD: copies values into the new card, then clears the base */
 const addTicketCard = (btn) => {
   const openContainer = $("#openTicketsContainer");
   if (!openContainer) return;
 
-  const currentCard = btn.closest(".ticket-group");
-  if (!currentCard) return;
+  const entryCard = btn.closest(".ticket-group");
+  if (!entryCard) return;
 
-  // require completion before adding
-  if (!isTicketCardComplete(currentCard)) {
-    markTicketCardErrors(currentCard);
+  // This must work even if a “wrong” card still has a + button:
+  // we treat the clicked card as the entry card, finalize it, then add a new base to the right.
+  if (!isTicketCardComplete(entryCard)) {
+    markTicketCardErrors(entryCard);
     return;
   }
 
-  // capture typed values from the current/base card
-  const v = readTicketValues(currentCard);
+  // Capture values BEFORE we finalize
+  const v = readTicketValues(entryCard);
 
-  // clone from the true base template (preferred)
-  const base = $(".ticket-group[data-base='true']", openContainer) || currentCard;
-  const clone = buildTicketCloneFromBase(base);
+  // Finalize this card (becomes saved)
+  finalizeTicketCard(entryCard);
 
-  // ✅ apply values to clone
-  $(".ticket-number-input", clone).value = v.num || "";
-  $(".ticket-zendesk-input", clone).value = v.url || "";
-  $(".ticket-summary-input", clone).value = v.sum || "";
+  // Route saved card to its column
+  routeTicketCardToStatusColumn(entryCard);
 
-  const statusSel = $(".ticket-status-select", clone);
-  if (statusSel) {
-    statusSel.value = v.status || "Open";
-    statusSel.disabled = !(v.num || "").trim(); // enabled once ticket # exists
-    ensureId(statusSel);
-    saveField(statusSel);
-  }
+  // Build a NEW blank default card and put it to the RIGHT (end of Open column)
+  const newBase = entryCard.cloneNode(true);
 
-  // save fields in clone
-  $$("input, textarea, select", clone).forEach((el) => {
-    ensureId(el);
-    saveField(el);
-    triggerInputChange(el);
+  // Make sure it is the ONLY base card
+  newBase.setAttribute("data-base", "true");
+  clearTicketCard(newBase);
+  openContainer.appendChild(newBase);
+
+  // IMPORTANT: ensure no other base cards exist besides this newest one
+  $$(".ticket-group[data-base='true']", openContainer).forEach((b) => {
+    if (b !== newBase) b.setAttribute("data-base", "false");
   });
 
-  // route clone to correct container
-  const containers = ticketContainersByStatus();
-  const dest = containers[v.status] || containers.Open || openContainer;
-  dest.appendChild(clone);
-
-  // ✅ clear current/base card for next entry
-  $(".ticket-number-input", currentCard).value = "";
-  $(".ticket-zendesk-input", currentCard).value = "";
-  $(".ticket-summary-input", currentCard).value = "";
-
-  const curStatus = $(".ticket-status-select", currentCard);
-  if (curStatus) {
-    curStatus.value = "Open";
-    curStatus.disabled = true;
-    ensureId(curStatus);
-    saveField(curStatus);
-    triggerInputChange(curStatus);
-  }
-
-  $$("input, textarea, select", currentCard).forEach((el) => {
-    ensureId(el);
-    saveField(el);
-    triggerInputChange(el);
-  });
-
+  // Persist all saved cards
   persistAllTickets();
 
-  // focus ticket # on the cleared base card
-  $(".ticket-number-input", currentCard)?.focus();
+  // Focus new entry
+  $(".ticket-number-input", newBase)?.focus();
 };
 
-const rebuildTicketClones = () => {
-  const clones = cloneState.get();
-  if (!clones.tickets || !clones.tickets.length) return;
+/* =======================
+   INIT HELPERS (call inside init())
+======================= */
+const initTickets = () => {
+  ensureSingleDefaultTicketCard();
 
+  // ensure base card sits at end of Open column
   const openContainer = $("#openTicketsContainer");
-  if (!openContainer) return;
+  const base = openContainer ? $(".ticket-group[data-base='true']", openContainer) : null;
+  if (openContainer && base) openContainer.appendChild(base);
 
-  const base = $(".ticket-group[data-base='true']", openContainer);
-  if (!base) return;
-
-  // remove old clones
-  $$(".ticket-group", document).forEach((g) => {
-    if (g.getAttribute("data-base") !== "true") g.remove();
-  });
-
-  // rebuild from saved list
-  clones.tickets.forEach((t) => {
-    const clone = buildTicketCloneFromBase(base);
-
-    $(".ticket-number-input", clone).value = t.num || "";
-    $(".ticket-zendesk-input", clone).value = t.url || "";
-    $(".ticket-summary-input", clone).value = t.sum || "";
-
-    const statusSel = $(".ticket-status-select", clone);
-    if (statusSel) {
-      statusSel.value = t.status || "Open";
-      statusSel.disabled = !(t.num || "").trim();
-      ensureId(statusSel);
-      saveField(statusSel);
-    }
-
-    $$("input, textarea, select", clone).forEach((el) => {
-      ensureId(el);
-      saveField(el);
-    });
-
-    const containers = ticketContainersByStatus();
-    const dest = containers[t.status] || containers.Open || openContainer;
-    dest.appendChild(clone);
+  // set initial enable/disable
+  $$(".ticket-group").forEach((card) => {
+    const num = $(".ticket-number-input", card);
+    const status = $(".ticket-status-select", card);
+    if (status) status.disabled = !((num?.value || "").trim());
+    if (num) ensureId(num);
+    if (status) ensureId(status);
   });
 };
 
