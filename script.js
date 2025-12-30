@@ -1,38 +1,30 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN)
+   (SINGLE SCRIPT / HARDENED / DROP-IN)  — UPDATED/FIXED
 
    ✅ Sidebar/menu nav works (sections toggle .active)
    ✅ Clear All works (#clearAllBtn)
-   ✅ Reset This Page works (.clear-page-btn)  (supports with/without data-clear-page)
-   ✅ Add Trainer (+) works (adds row even if blank; no remove buttons)
-   ✅ Add POC (+) works (adds ONE card even if blank; moves ALL fields; resets base)
+   ✅ Reset This Page works (.clear-page-btn)
+   ✅ Add Trainer (+) works
+   ✅ Add POC (+) works (adds ONE card even if blank; base card remains)
    ✅ Table Add Row (+) works (only when inside .table-footer)
-   ✅ Support Tickets: add gating + status routing + status disabled until # entered
+   ✅ Support Tickets: gating + status routing + status disabled until # entered
    ✅ LocalStorage save/restore (including dynamic clones: trainers, POCs, tables, tickets)
 
-   ✅ NOTES (YOUR REQUEST):
-   - Click a Notes button ➜ inserts into the EXISTING big textarea for that card:
+   ✅ NOTES (FIXED):
+   - Click Notes ➜ inserts into existing big textarea for that card:
        • <Question text>
-         ◦  (cursor starts here)
-     - Adds a blank line between entries
-     - De-dupes: if that • line already exists, it jumps you to its ◦ line instead of adding again
-     - Works for normal Q&A rows AND table notes buttons (derives Name/Opcode if possible)
-     - ENTER inside that notes textarea inserts a new hollow bullet: "\n  ◦ "
-     - Maintains QUESTION ORDER always (inserts into the correct slot by DOM order)
+         ◦
+   - Never overwrites previous bullets
+   - Dedupes (if exists, jumps caret to its ◦ line)
+   - Maintains DOM order (skip a question → later click inserts ABOVE lower ones)
+   - Adds blank line between entries
+   - ENTER in notes textarea inserts "\n  ◦ "
+   - Invisible marker kept for stable ordering (no visible [mk:...] tags)
 
    ✅ NO PAGE SHIFT on notes click:
-   - Does NOT scroll to target
-   - Preserves scroll position even if focus would normally jump
+   - preserveScroll + preventScroll focus
 
-   ✅ Notes buttons DO NOT stay orange after Reset/Clear:
-   - Clears .has-notes in clearSection() and clearAll()
-
-   ✅ Removes the visible internal IDs in notes (no more “[mk:…]”)
-   - Uses an INVISIBLE marker to keep stable ordering internally
-
-   ✅ Optional: Table Expand button (.mk-table-expand-btn) opens #mkTableModal if it exists
-   ✅ Optional: Map button (.small-map-btn / [data-map-btn]) updates iframe if present
 ======================================================= */
 
 (() => {
@@ -225,6 +217,7 @@
     state.__activeSection = targetId;
     writeState(state);
 
+    // (Leave your existing behavior)
     try {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
@@ -262,9 +255,7 @@
     });
 
     $$("table.training-table tbody", root).forEach((tb) => {
-      $$("tr", tb).forEach((tr) => {
-        if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
-      });
+      $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tb).forEach((tr) => tr.remove());
     });
 
     $$(".ticket-group", root).forEach((g) => {
@@ -361,7 +352,6 @@
 
     removeDynamicClonesIn(sectionEl);
     clearFieldsIn(sectionEl);
-
     clearAllNotesButtonStates(sectionEl);
 
     log("Cleared section:", sectionEl.id);
@@ -414,284 +404,318 @@
     input.focus();
   };
 
-/* =======================
-   NOTES (FIXED)
-   - Never overwrites existing bullets
-   - Inserts in DOM order (question order)
-   - If you skip a question then click Notes, it inserts ABOVE later questions
-======================= */
-const Notes = (() => {
-  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+  /* =======================
+     ADD POC (+)  — FIXED
+  ======================= */
+  const readPocCardValues = (card) => ({
+    name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
+    role: (card.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
+    cell: (card.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
+    email: (card.querySelector('input[type="email"]')?.value || "").trim(),
+  });
 
-  const getNotesTargetId = (btn) =>
-    btn.getAttribute("data-notes-target") ||
-    btn.getAttribute("href")?.replace("#", "") ||
-    "";
+  const writePocCardValues = (card, p) => {
+    const name = card.querySelector('input[placeholder="Enter name"]');
+    const role = card.querySelector('input[placeholder="Enter role"]');
+    const cell = card.querySelector('input[placeholder="Enter cell"]');
+    const email = card.querySelector('input[type="email"]');
 
-  // Invisible key marker (word-joiner wrapper + zero width encoding)
-  const ZW0 = "\u200B";
-  const ZW1 = "\u200C";
-  const WRAP = "\u2060";
+    if (name) name.value = p?.name || "";
+    if (role) role.value = p?.role || "";
+    if (cell) cell.value = p?.cell || "";
+    if (email) email.value = p?.email || "";
 
-  const zwEncode = (plain) => {
-    const bytes = new TextEncoder().encode(String(plain));
-    let bits = "";
-    for (const b of bytes) bits += b.toString(2).padStart(8, "0");
-    return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+    [name, role, cell, email].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
   };
 
-  const zwDecode = (zw) => {
-    const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
-    const bytes = [];
-    for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
-    try {
-      return new TextDecoder().decode(new Uint8Array(bytes));
-    } catch {
-      return "";
-    }
+  const buildPocCard = (p = null) => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return null;
+
+    const clone = base.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "poc");
+
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
+
+    if (p) writePocCardValues(clone, p);
+    return clone;
   };
 
-  const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
-
-  const extractKeyFromLine = (line) => {
-    const s = String(line || "");
-    const a = s.indexOf(WRAP);
-    if (a < 0) return null;
-    const b = s.indexOf(WRAP, a + 1);
-    if (b < 0) return null;
-    const payload = s.slice(a + 1, b);
-    const decoded = zwDecode(payload);
-    return decoded || null;
+  const persistAllPocs = () => {
+    const clones = cloneState.get();
+    clones.pocs = $$(".additional-poc-card")
+      .filter((c) => c.getAttribute("data-base") !== "true")
+      .map((c) => readPocCardValues(c));
+    cloneState.set(clones);
   };
 
-  // IMPORTANT: do NOT remove WRAP markers (that’s what was nuking earlier bullets)
-  // Only remove legacy visible mk tags.
-  const cleanupLegacyVisibleKeys = (text) => {
-    let v = normalizeNL(text || "");
-    v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
-    v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");
-    return v;
-  };
+  const addPocCard = () => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return;
 
-  const getSlotKey = (btn) => {
-    const hostId = getNotesTargetId(btn) || "notes";
+    const newCard = buildPocCard(null);
+    if (!newCard) return;
 
-    const tr = btn.closest("tr");
-    if (tr) {
-      const table = btn.closest("table") || tr.closest("table");
-      const tb = tr.parentElement;
-      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
-      const idx = rows.indexOf(tr);
-      const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
-      return `${hostId}::tbl::${tKey}::r${idx}`;
-    }
+    const allCards = $$(".additional-poc-card");
+    const last = allCards[allCards.length - 1] || base;
+    last.insertAdjacentElement("afterend", newCard);
 
-    const all = Array.from(
-      document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+    persistAllPocs();
+
+    const first = newCard.querySelector(
+      'input[placeholder="Enter name"], input, textarea, select'
     );
-    const idx = all.indexOf(btn);
-
-    return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
+    if (first) first.focus();
   };
 
-  const findOrDerivePromptText = (btn) => {
-    const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    const section = getSection(btn);
-    const secId = section?.id || "";
+  /* =======================
+     TABLES: ADD ROW + PERSIST/RESTORE
+  ======================= */
+  const getTableKey = (table) =>
+    table?.getAttribute("data-table-key") ||
+    table?.id ||
+    `table-${$$("table.training-table").indexOf(table)}`;
 
-    if (tr && table) {
-      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-      let idx = -1;
-
-      if (secId === "training-checklist") idx = idxOf("name");
-      if (secId === "opcodes-pricing") idx = idxOf("opcode");
-      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
-
-      const tds = $$("td", tr);
-      const cell = idx >= 0 ? tds[idx] : null;
-      let val = "";
-
-      if (cell) {
-        const field = $("input, textarea, select", cell);
-        if (field) val = (field.value || "").trim();
-        else val = (cell.textContent || "").trim();
-      }
-
-      const label =
-        secId === "training-checklist"
-          ? "Name"
-          : secId === "opcodes-pricing"
-          ? "Opcode"
-          : "Item";
-
-      return val ? `${label}: ${val}` : `${label}: (blank)`;
-    }
-
-    const row = btn.closest(".checklist-row");
-    const label = row ? row.querySelector("label") : null;
-    return (label?.textContent || "").trim() || "Notes";
-  };
-
-  // Parse blocks:
-  // - marker blocks become keyed blocks
-  // - unmarked content is preserved as "misc" and re-appended at the end (never lost)
-  const parseBlocks = (text) => {
-    const lines = normalizeNL(text || "").split("\n");
-    const blocks = [];
-    let cur = null;
-
-    const isMain = (line) => String(line || "").trim().startsWith("•");
-
-    const flush = () => {
-      if (cur) blocks.push(cur);
-      cur = null;
-    };
-
-    for (const line of lines) {
-      if (isMain(line)) {
-        flush();
-        const key = extractKeyFromLine(line); // may be null
-        cur = { key: key || "__misc__", lines: [line] };
+  const clearRowFields = (tr) => {
+    $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
+      if (el.matches("input[type='checkbox'], input[type='radio']")) {
+        el.checked = false;
+      } else if (el.matches("[contenteditable='true']")) {
+        el.textContent = "";
       } else {
-        if (!cur) cur = { key: "__misc__", lines: [] };
-        cur.lines.push(line);
+        el.value = "";
       }
-    }
-    flush();
-    return blocks;
-  };
-
-  const buildBlockLines = (promptText, key) => {
-    const main = `• ${promptText}${makeMarker(key)}`;
-    const sub = `  ◦ `;
-    return [main, sub];
-  };
-
-  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
-    const btns = Array.from(
-      document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
-    );
-    const wanted = btns.map(getSlotKey);
-
-    const map = new Map();
-    const miscChunks = [];
-
-    blocks.forEach((b) => {
-      if (!b || !b.lines) return;
-      if (b.key && b.key !== "__misc__" && b.key !== "__misc__") map.set(b.key, b);
-      else miscChunks.push(b.lines.join("\n"));
-    });
-
-    // ensure any previously-marked blocks with null key are not dropped
-    // (they’ll be in miscChunks already)
-
-    const out = [];
-    for (const k of wanted) {
-      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
-    }
-
-    if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
-      out.push(map.get(newlyAddedKey).lines.join("\n"));
-    }
-
-    // Preserve any unrecognized / legacy bullets at the end (never overwrite)
-    const miscText = miscChunks
-      .join("\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-
-    const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
-    if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
-    if (rebuilt) return rebuilt.trimEnd();
-    return miscText.trimEnd();
-  };
-
-  const caretAtHollowForKey = (text, key) => {
-    const v = normalizeNL(text || "");
-    const marker = makeMarker(key);
-    const idx = v.indexOf(marker);
-    if (idx < 0) return v.length;
-
-    const lineEnd = v.indexOf("\n", idx);
-    const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
-
-    const after = v.slice(afterMain);
-    const rel = after.indexOf("◦");
-    if (rel < 0) return afterMain;
-    return afterMain + rel + 2;
-  };
-
-  const handleNotesClick = (btn) => {
-    const targetId = getNotesTargetId(btn);
-    if (!targetId) return;
-
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
-
-    const ta = $("textarea", target);
-    if (!ta) return;
-
-    const promptText = findOrDerivePromptText(btn);
-    const slotKey = getSlotKey(btn);
-
-    preserveScroll(() => {
-      ta.value = cleanupLegacyVisibleKeys(ta.value);
-
-      let blocks = parseBlocks(ta.value);
-
-      // Only treat "exists" as true if we already have THIS slotKey in a marked main line
-      const exists = blocks.some((b) => b.key === slotKey);
-
-      if (!exists) {
-        blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
-      }
-
-      // Rebuild in DOM order, then re-append misc legacy text
-      ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
-
-      const caret = caretAtHollowForKey(ta.value, slotKey);
-      try {
-        ta.focus({ preventScroll: true });
-      } catch {
-        ta.focus();
-      }
-      try {
-        ta.setSelectionRange(caret, caret);
-      } catch {}
-
-      btn.classList.add("has-notes");
-
-      ensureId(ta);
-      saveField(ta);
-      triggerInputChange(ta);
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
     });
   };
 
-  const isNotesTargetTextarea = (ta) => {
-    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-    const host = ta.closest("[id]");
-    if (!host || !host.id) return false;
-    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+  const extractRowValues = (tr) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", tr);
+    if (!fields.length) {
+      return $$("td", tr).map((td) => (td.textContent || "").trim());
+    }
+    return fields.map((el) => getFieldValue(el));
   };
 
-  return { handleNotesClick, isNotesTargetTextarea };
-})();
+  const applyRowValues = (tr, values) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", tr);
+    if (!fields.length) return;
+    fields.forEach((el, i) => {
+      setFieldValue(el, Array.isArray(values) ? values[i] : "");
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+  };
 
-    // ---------- Block parsing / rebuilding (uses invisible marker) ----------
-    const isMainLine = (line) => {
-      const s = String(line || "").trim();
-      return s.startsWith("•") && s.includes(WRAP);
+  const persistTable = (table) => {
+    const key = getTableKey(table);
+    const clones = cloneState.get();
+    const tbody = $("tbody", table);
+    if (!tbody) return;
+    const clonedRows = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody);
+    clones.tables[key] = clonedRows.map((r) => extractRowValues(r));
+    cloneState.set(clones);
+  };
+
+  const cloneTableRow = (btn) => {
+    const footer = btn.closest(".table-footer");
+    const container = footer?.closest(".section-block") || footer?.parentElement;
+    const table = container?.querySelector?.("table.training-table") || btn.closest("table.training-table");
+    if (!table) return;
+
+    const tbody = $("tbody", table);
+    if (!tbody) return;
+
+    // base row = first tbody row (or a row marked data-base="true" if you have it)
+    const baseRow =
+      tbody.querySelector('tr[data-base="true"]') ||
+      tbody.querySelector("tr") ||
+      null;
+    if (!baseRow) return;
+
+    const clone = baseRow.cloneNode(true);
+    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
+    clearRowFields(clone);
+
+    tbody.appendChild(clone);
+    persistTable(table);
+
+    // focus first input
+    const first = $("input, textarea, select, [contenteditable='true']", clone);
+    if (first) first.focus();
+  };
+
+  const rebuildTableClones = () => {
+    const clones = cloneState.get();
+    const tables = $$("table.training-table");
+
+    tables.forEach((table) => {
+      const key = getTableKey(table);
+      const rows = clones.tables?.[key];
+      if (!rows || !rows.length) return;
+
+      const tbody = $("tbody", table);
+      if (!tbody) return;
+
+      // remove existing cloned rows
+      $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).forEach((tr) => tr.remove());
+
+      const baseRow =
+        tbody.querySelector('tr[data-base="true"]') ||
+        tbody.querySelector("tr") ||
+        null;
+      if (!baseRow) return;
+
+      rows.forEach((vals) => {
+        const tr = baseRow.cloneNode(true);
+        tr.setAttribute(AUTO_ROW_ATTR, "cloned");
+        clearRowFields(tr);
+        applyRowValues(tr, vals);
+        tbody.appendChild(tr);
+      });
+    });
+  };
+
+  /* =======================
+     NOTES (FIXED / SINGLE SOURCE OF TRUTH)
+  ======================= */
+  const Notes = (() => {
+    const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") ||
+      btn.getAttribute("href")?.replace("#", "") ||
+      "";
+
+    // Invisible key marker
+    const ZW0 = "\u200B"; // 0
+    const ZW1 = "\u200C"; // 1
+    const WRAP = "\u2060"; // word-joiner
+
+    const zwEncode = (plain) => {
+      const bytes = new TextEncoder().encode(String(plain));
+      let bits = "";
+      for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+      return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
     };
 
+    const zwDecode = (zw) => {
+      const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+      const bytes = [];
+      for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      try {
+        return new TextDecoder().decode(new Uint8Array(bytes));
+      } catch {
+        return "";
+      }
+    };
+
+    const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
+
+    const extractKeyFromLine = (line) => {
+      const s = String(line || "");
+      const a = s.indexOf(WRAP);
+      if (a < 0) return null;
+      const b = s.indexOf(WRAP, a + 1);
+      if (b < 0) return null;
+      const payload = s.slice(a + 1, b);
+      const decoded = zwDecode(payload);
+      return decoded || null;
+    };
+
+    // Only remove legacy visible mk tags. DO NOT remove WRAP markers.
+    const cleanupLegacyVisibleKeys = (text) => {
+      let v = normalizeNL(text || "");
+      v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
+      v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");
+      return v;
+    };
+
+    const getSlotKey = (btn) => {
+      const hostId = getNotesTargetId(btn) || "notes";
+
+      // table rows
+      const tr = btn.closest("tr");
+      if (tr) {
+        const table = btn.closest("table") || tr.closest("table");
+        const tb = tr.parentElement;
+        const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+        const idx = rows.indexOf(tr);
+        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+        return `${hostId}::tbl::${tKey}::r${idx}`;
+      }
+
+      // normal Q rows: DOM order among notes buttons for this target
+      const all = Array.from(
+        document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+      );
+      const idx = all.indexOf(btn);
+      return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
+    };
+
+    const findOrDerivePromptText = (btn) => {
+      const tr = btn.closest("tr");
+      const table = btn.closest("table");
+      const section = getSection(btn);
+      const secId = section?.id || "";
+
+      if (tr && table) {
+        const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+        const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+        let idx = -1;
+
+        if (secId === "training-checklist") idx = idxOf("name");
+        if (secId === "opcodes-pricing") idx = idxOf("opcode");
+        if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+
+        const tds = $$("td", tr);
+        const cell = idx >= 0 ? tds[idx] : null;
+        let val = "";
+
+        if (cell) {
+          const field = $("input, textarea, select", cell);
+          if (field) val = (field.value || "").trim();
+          else val = (cell.textContent || "").trim();
+        }
+
+        const label =
+          secId === "training-checklist"
+            ? "Name"
+            : secId === "opcodes-pricing"
+            ? "Opcode"
+            : "Item";
+
+        return val ? `${label}: ${val}` : `${label}: (blank)`;
+      }
+
+      const row = btn.closest(".checklist-row");
+      const label = row ? row.querySelector("label") : null;
+      return (label?.textContent || "").trim() || "Notes";
+    };
+
+    // Parse into keyed blocks + misc (unkeyed) preserved
     const parseBlocks = (text) => {
       const lines = normalizeNL(text || "").split("\n");
       const blocks = [];
       let cur = null;
+
+      const isMain = (line) => String(line || "").trim().startsWith("•");
 
       const flush = () => {
         if (cur) blocks.push(cur);
@@ -699,19 +723,17 @@ const Notes = (() => {
       };
 
       for (const line of lines) {
-        if (isMainLine(line)) {
+        if (isMain(line)) {
           flush();
-          cur = { key: extractKeyFromLine(line) || "__unknown__", lines: [line] };
+          const key = extractKeyFromLine(line); // may be null
+          cur = { key: key || "__misc__", lines: [line] };
         } else {
           if (!cur) cur = { key: "__misc__", lines: [] };
           cur.lines.push(line);
         }
       }
       flush();
-
-      return blocks.filter(
-        (b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === "")
-      );
+      return blocks;
     };
 
     const buildBlockLines = (promptText, key) => {
@@ -727,8 +749,12 @@ const Notes = (() => {
       const wanted = btns.map(getSlotKey);
 
       const map = new Map();
+      const miscChunks = [];
+
       blocks.forEach((b) => {
+        if (!b || !b.lines) return;
         if (b.key && b.key !== "__misc__") map.set(b.key, b);
+        else miscChunks.push(b.lines.join("\n"));
       });
 
       const out = [];
@@ -736,11 +762,21 @@ const Notes = (() => {
         if (map.has(k)) out.push(map.get(k).lines.join("\n"));
       }
 
+      // safety: if a key exists but isn't in wanted anymore, keep it at end
       if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
         out.push(map.get(newlyAddedKey).lines.join("\n"));
       }
 
-      return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+      const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+
+      const miscText = miscChunks
+        .join("\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+      if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
+      if (rebuilt) return rebuilt.trimEnd();
+      return miscText.trimEnd();
     };
 
     const caretAtHollowForKey = (text, key) => {
@@ -775,14 +811,19 @@ const Notes = (() => {
       const slotKey = getSlotKey(btn);
 
       preserveScroll(() => {
+        // Clean only legacy visible junk (never remove invisible markers)
         ta.value = cleanupLegacyVisibleKeys(ta.value);
 
-        let blocks = parseBlocks(ta.value);
+        const blocks = parseBlocks(ta.value);
 
+        // Exists only if keyed
         const exists = blocks.some((b) => b.key === slotKey);
-        if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
 
-        ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey) + "\n";
+        if (!exists) {
+          blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+        }
+
+        ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
         const caret = caretAtHollowForKey(ta.value, slotKey);
         try {
@@ -806,9 +847,7 @@ const Notes = (() => {
       if (!ta || !ta.matches || !ta.matches("textarea")) return false;
       const host = ta.closest("[id]");
       if (!host || !host.id) return false;
-      return !!document.querySelector(
-        `[data-notes-target="${CSS.escape(host.id)}"]`
-      );
+      return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
     };
 
     return { handleNotesClick, isNotesTargetTextarea };
@@ -874,6 +913,19 @@ const Notes = (() => {
     return clone;
   };
 
+  const persistAllTickets = () => {
+    const clones = cloneState.get();
+    clones.tickets = [];
+
+    const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
+    all.forEach((card) => {
+      const v = readTicketValues(card);
+      clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
+    });
+
+    cloneState.set(clones);
+  };
+
   const addTicketCard = (btn) => {
     const openContainer = $("#openTicketsContainer");
     if (!openContainer) return;
@@ -927,19 +979,6 @@ const Notes = (() => {
     if (card.getAttribute("data-base") !== "true") persistAllTickets();
   };
 
-  const persistAllTickets = () => {
-    const clones = cloneState.get();
-    clones.tickets = [];
-
-    const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
-    all.forEach((card) => {
-      const v = readTicketValues(card);
-      clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
-    });
-
-    cloneState.set(clones);
-  };
-
   const rebuildTicketClones = () => {
     const clones = cloneState.get();
     if (!clones.tickets || !clones.tickets.length) return;
@@ -977,7 +1016,7 @@ const Notes = (() => {
   };
 
   /* =======================
-     POC CLONE RESTORE
+     POC / TRAINER CLONE RESTORE
   ======================= */
   const rebuildPocClones = () => {
     const clones = cloneState.get();
@@ -992,13 +1031,10 @@ const Notes = (() => {
 
     clones.pocs.forEach((p) => {
       const card = buildPocCard(p);
-      base.insertAdjacentElement("afterend", card);
+      if (card) base.insertAdjacentElement("afterend", card);
     });
   };
 
-  /* =======================
-     TRAINER CLONE RESTORE
-  ======================= */
   const rebuildTrainerClones = () => {
     const clones = cloneState.get();
     const container = $("#additionalTrainersContainer");
@@ -1041,7 +1077,6 @@ const Notes = (() => {
     modal: null,
     content: null,
     title: null,
-    closeBtn: null,
     backdrop: null,
     placeholder: null,
     movedNode: null,
@@ -1078,7 +1113,6 @@ const Notes = (() => {
     const panel = $(".mk-modal-panel", modal) || modal;
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
-    const backdrop = $(".mk-modal-backdrop", modal);
 
     if (!content) return;
 
@@ -1095,7 +1129,7 @@ const Notes = (() => {
     tableModal.modal = modal;
     tableModal.content = content;
     tableModal.title = titleEl;
-    tableModal.backdrop = backdrop;
+    tableModal.backdrop = $(".mk-modal-backdrop", modal);
 
     const header =
       sectionWrap.querySelector?.(".section-header") ||
@@ -1145,7 +1179,7 @@ const Notes = (() => {
   };
 
   /* =======================
-     EVENT DELEGATION (SINGLE)
+     EVENT DELEGATION (SINGLE)  — KEEP ALL HANDLERS INSIDE HERE
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
@@ -1166,7 +1200,7 @@ const Notes = (() => {
       return;
     }
 
-    // RESET THIS PAGE (supports with/without data-clear-page)
+    // RESET THIS PAGE
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -1178,105 +1212,82 @@ const Notes = (() => {
     }
 
     // ADD TRAINER (+)
-    if (t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn")) {
-      const btn =
-        t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
-      if (btn) {
+    const addTrainerBtn =
+      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+    if (addTrainerBtn) {
+      e.preventDefault();
+      addTrainerRow();
+      return;
+    }
+
+    // ADD POC (+)  ✅ FIXED: call the function (do NOT define code here)
+    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
+    if (pocBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      addPocCard();
+      return;
+    }
+
+    // TABLE ADD ROW: ONLY inside footer
+    const addRowBtn = t.closest("button.add-row");
+    if (addRowBtn && addRowBtn.closest(".table-footer")) {
+      e.preventDefault();
+      cloneTableRow(addRowBtn);
+      return;
+    }
+
+    // NOTES (must be after add-row, before other buttons that might match)
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+      e.preventDefault();
+      Notes.handleNotesClick(notesBtn);
+      return;
+    }
+
+    // SUPPORT TICKET ADD (+)
+    const ticketAddBtn = t.closest(".add-ticket-btn");
+    if (ticketAddBtn) {
+      e.preventDefault();
+      addTicketCard(ticketAddBtn);
+      return;
+    }
+
+    // DEALERSHIP MAP BTN
+    const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
+    if (mapBtn) {
+      e.preventDefault();
+      const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
+      const inp =
+        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      updateDealershipMap(inp ? inp.value : "");
+      return;
+    }
+
+    // TABLE EXPAND BTN
+    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
+    if (expandBtn) {
+      const modal = $("#mkTableModal");
+      if (modal) {
         e.preventDefault();
-        addTrainerRow();
+        openTableModalFor(expandBtn);
         return;
       }
     }
 
-   const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
-if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
-  e.preventDefault();
-  Notes.handleNotesClick(notesBtn);
-  return;
-}
-
-    //* =======================
-   ADD POC (+)
-======================= */
-const readPocCardValues = (card) => ({
-  name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
-  role: (card.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
-  cell: (card.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
-  email: (card.querySelector('input[type="email"]')?.value || "").trim(),
-});
-
-const writePocCardValues = (card, p) => {
-  const name = card.querySelector('input[placeholder="Enter name"]');
-  const role = card.querySelector('input[placeholder="Enter role"]');
-  const cell = card.querySelector('input[placeholder="Enter cell"]');
-  const email = card.querySelector('input[type="email"]');
-
-  if (name) name.value = p?.name || "";
-  if (role) role.value = p?.role || "";
-  if (cell) cell.value = p?.cell || "";
-  if (email) email.value = p?.email || "";
-
-  [name, role, cell, email].forEach((el) => {
-    if (!el) return;
-    ensureId(el);
-    saveField(el);
-    triggerInputChange(el);
+    // TABLE MODAL close
+    const mkTableModal = $("#mkTableModal");
+    if (mkTableModal && mkTableModal.classList.contains("open")) {
+      if (
+        t.closest("#mkTableModal .mk-modal-close") ||
+        t.closest("#mkTableModal .mk-modal-backdrop")
+      ) {
+        e.preventDefault();
+        closeTableModal();
+        return;
+      }
+    }
   });
-};
-
-const buildPocCard = (p = null) => {
-  const base = document.querySelector('.additional-poc-card[data-base="true"]');
-  if (!base) return null;
-
-  const clone = base.cloneNode(true);
-  clone.setAttribute("data-base", "false");
-  clone.classList.add("additional-poc-card");
-  clone.setAttribute(AUTO_CARD_ATTR, "poc");
-
-  // clear/reset inputs & ids on clone
-  $$("input, textarea, select", clone).forEach((el) => {
-    if (el.matches("input[type='checkbox']")) el.checked = false;
-    else el.value = "";
-    el.removeAttribute(AUTO_ID_ATTR);
-    ensureId(el);
-    saveField(el);
-  });
-
-  // (Optional) if your clone contains the "+" button, keep it
-  // No remove buttons by design.
-
-  if (p) writePocCardValues(clone, p);
-
-  return clone;
-};
-
-const persistAllPocs = () => {
-  const clones = cloneState.get();
-  clones.pocs = $$(".additional-poc-card")
-    .filter((c) => c.getAttribute("data-base") !== "true")
-    .map((c) => readPocCardValues(c));
-  cloneState.set(clones);
-};
-
-const addPocCard = (btn) => {
-  const base = document.querySelector('.additional-poc-card[data-base="true"]');
-  if (!base) return;
-
-  const newCard = buildPocCard(null);
-  if (!newCard) return;
-
-  // Insert after the last POC card (base + any existing clones)
-  const allCards = $$(".additional-poc-card");
-  const last = allCards[allCards.length - 1] || base;
-  last.insertAdjacentElement("afterend", newCard);
-
-  // Persist clones
-  persistAllPocs();
-
-  // Focus first field in new card
-  const first = newCard.querySelector('input[placeholder="Enter name"], input, textarea, select');
-  if (first) first.focus();
-};
 
   document.addEventListener("input", (e) => {
     const el = e.target;
@@ -1303,32 +1314,17 @@ const addPocCard = (btn) => {
       el.closest(".additional-poc-card") &&
       el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
     ) {
-      const clones = cloneState.get();
-      clones.pocs = $$(".additional-poc-card")
-        .filter((c) => c.getAttribute("data-base") !== "true")
-        .map((c) => ({
-          name: (c.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
-          role: (c.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
-          cell: (c.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
-          email: (c.querySelector('input[type="email"]')?.value || "").trim(),
-        }));
-      cloneState.set(clones);
+      persistAllPocs();
     }
 
+    // ticket behavior
     if (el.matches(".ticket-number-input")) onTicketNumberChange(el);
 
-    // table clone persistence
+    // table clone persistence (any change inside a cloned row triggers persist for that table)
     const tr = el.closest("tr");
     const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
-      const key = getTableKey(table);
-      const clones = cloneState.get();
-      clones.tables[key] = clones.tables[key] || [];
-
-      const tbody = $("tbody", table);
-      const clonedRows = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody);
-      clones.tables[key] = clonedRows.map((r) => extractRowValues(r));
-      cloneState.set(clones);
+      persistTable(table);
     }
   });
 
@@ -1342,6 +1338,13 @@ const addPocCard = (btn) => {
     }
 
     if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
+
+    // persist table on selects changing inside cloned rows
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
+    if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
+      persistTable(table);
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -1386,16 +1389,6 @@ const addPocCard = (btn) => {
       return;
     }
 
-    // Enter on POC name adds POC card
-    if (el.id === "additionalPocInput" && e.key === "Enter") {
-      e.preventDefault();
-      const btn = el
-        .closest(".additional-poc-card")
-        ?.querySelector("[data-add-poc], .additional-poc-add, .poc-add-btn");
-      if (btn) addPocCard(btn);
-      return;
-    }
-
     // Esc closes table modal if open
     if (e.key === "Escape") {
       const mkTableModal = $("#mkTableModal");
@@ -1411,7 +1404,6 @@ const addPocCard = (btn) => {
   ======================= */
   const init = () => {
     assignIdsToAllFields();
-
     initNav();
 
     rebuildTrainerClones();
@@ -1421,6 +1413,7 @@ const addPocCard = (btn) => {
 
     restoreAllFields();
 
+    // ticket status disabled until # entered
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
