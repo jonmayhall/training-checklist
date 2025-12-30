@@ -830,6 +830,26 @@ main{
   border-bottom-right-radius: 18px;
 }
 
+/* ✅ CLONED POC cards (no + button): make inputs fully rounded */
+#dealership-info .additional-poc-card[data-base="false"] .input-plus input,
+#dealership-info .additional-poc-card.mk-poc-clone .input-plus input{
+  border-radius: var(--radius-sm) !important;   /* full round */
+}
+
+/* ✅ If the + button was removed, kill the "joined" look spacing */
+#dealership-info .additional-poc-card[data-base="false"] .input-plus,
+#dealership-info .additional-poc-card.mk-poc-clone .input-plus{
+  gap: 0 !important;
+}
+
+/* ✅ Round the RIGHT side of the cloned CARD itself */
+#dealership-info .additional-poc-card[data-base="false"],
+#dealership-info .additional-poc-card.mk-poc-clone{
+  border-top-right-radius: 18px !important;
+  border-bottom-right-radius: 18px !important;
+  overflow: hidden; /* ensures inner backgrounds don't square the corner */
+}
+
 /* =======================
    TABLES
 ======================= */
