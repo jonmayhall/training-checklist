@@ -825,6 +825,11 @@ main{
   background:#ff8b42 !important;
 }
 
+.mk-poc-clone.mk-round-right{
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
 /* =======================
    TABLES
 ======================= */
