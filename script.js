@@ -1,14 +1,15 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   FIXES:
+   FIXES (CONSOLIDATED / SINGLE SCRIPT):
    - Sidebar/menu nav works (sections toggle .active)
-   - Add Trainer (+) works (no "required" input; no remove buttons)
-   - Add POC (+) works (clones base mini-card; no remove buttons)
-   - Add Row buttons for tables
-   - Notes buttons scroll to notes
-   - Support Tickets add card gating + status routing
-   - Reset This Page buttons
-   - LocalStorage save/restore for fields + dynamic clones
+   - Clear All works (#clearAllBtn)
+   - Reset This Page works (.clear-page-btn[data-clear-page])
+   - Add Trainer (+) works (adds row even if blank; no remove buttons)
+   - Add POC (+) works (adds ONE card even if blank; moves ALL fields; resets base)
+   - Table Add Row (+) works (only when inside .table-footer)
+   - Notes buttons scroll to notes targets ([data-notes-target] / [data-notes-btn])
+   - Support Tickets: add card gating + status routing + status disabled until # entered
+   - LocalStorage save/restore (including dynamic clones: trainers, POCs, tables, tickets)
 ======================================================= */
 
 (() => {
@@ -41,13 +42,11 @@
 
   const isEl = (x) => x && x.nodeType === 1;
 
-  const getSection = (el) =>
-    el?.closest?.(".page-section") || el?.closest?.("section") || null;
+  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
     isEl(el) &&
-    (el.matches("input, select, textarea") ||
-      el.matches("[contenteditable='true']"));
+    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -66,7 +65,6 @@
 
   const setFieldValue = (el, val) => {
     if (!isFormField(el)) return;
-
     if (el.matches("input[type='checkbox']")) {
       el.checked = !!val;
       return;
@@ -106,17 +104,19 @@
     ensureId(el);
     const id = el.getAttribute(AUTO_ID_ATTR);
     const state = readState();
-    state[id] = getFieldValue(el);
+    state.__fields = state.__fields || {};
+    state.__fields[id] = getFieldValue(el);
     writeState(state);
   };
 
   const restoreAllFields = () => {
     const state = readState();
+    const fieldsState = state.__fields || {};
     const fields = $$(`[${AUTO_ID_ATTR}]`);
     fields.forEach((el) => {
       const id = el.getAttribute(AUTO_ID_ATTR);
-      if (!(id in state)) return;
-      setFieldValue(el, state[id]);
+      if (!(id in fieldsState)) return;
+      setFieldValue(el, fieldsState[id]);
     });
   };
 
@@ -133,10 +133,55 @@
     }
   };
 
+  const triggerInputChange = (el) => {
+    if (!el) return;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const setGhostStyles = (root = document) => {
+    // select ghost
+    root.querySelectorAll("select").forEach((sel) => {
+      const first = sel.options?.[0];
+      const isGhost =
+        !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
+      sel.classList.toggle("is-placeholder", !!isGhost);
+    });
+
+    // date ghost
+    root.querySelectorAll('input[type="date"]').forEach((d) => {
+      d.classList.toggle("is-placeholder", !d.value);
+    });
+  };
+
+  /* =======================
+     CLONE STATE (for restore)
+  ======================= */
+  const cloneState = {
+    get() {
+      const state = readState();
+      state.__clones = state.__clones || {
+        trainers: [], // [{ value }]
+        pocs: [], // [{ name, role, cell, email }]
+        tables: {}, // { tableKey: [ [cellVals...] rows ] }
+        tickets: [], // [{ status, num, url, summary, notes? }]
+      };
+      return state.__clones;
+    },
+    set(next) {
+      const state = readState();
+      state.__clones = next;
+      writeState(state);
+    },
+    clearAll() {
+      const state = readState();
+      state.__clones = { trainers: [], pocs: [], tables: {}, tickets: [] };
+      writeState(state);
+    },
+  };
+
   /* =======================
      NAV (MENU BUTTONS)
-     - your CSS shows only .page-section.active
-     - sidebar buttons are .nav-btn[data-target="section-id"]
   ======================= */
   const setActiveSection = (targetId) => {
     if (!targetId) return;
@@ -148,12 +193,10 @@
     allSections.forEach((s) => s.classList.remove("active"));
     target.classList.add("active");
 
-    // update nav buttons
     $$(".nav-btn").forEach((b) => b.classList.remove("active"));
     const activeBtn = $(`.nav-btn[data-target="${CSS.escape(targetId)}"]`);
     if (activeBtn) activeBtn.classList.add("active");
 
-    // remember last page
     const state = readState();
     state.__activeSection = targetId;
     writeState(state);
@@ -164,88 +207,146 @@
   const initNav = () => {
     const state = readState();
     const remembered = state.__activeSection;
-
-    // If something is already active in HTML, keep it; otherwise use remembered; otherwise first section.
     const alreadyActive = $(".page-section.active")?.id;
     const first = $$(".page-section")[0]?.id;
-
     setActiveSection(alreadyActive || remembered || first);
   };
 
   /* =======================
-     RESET THIS PAGE BUTTONS
+     CLEAR ALL + RESET PAGE
   ======================= */
-  const trimDynamicToBase = (sectionEl) => {
-    // Trainers: remove added rows
-    const trainerContainer = $("#additionalTrainersContainer", sectionEl);
+  const removeDynamicClonesIn = (root = document) => {
+    // Trainers added rows
+    const trainerContainer = $("#additionalTrainersContainer", root);
     if (trainerContainer) trainerContainer.innerHTML = "";
 
-    // POCs: remove added mini-cards (keep base)
-    $$(".additional-poc-card", sectionEl).forEach((card) => {
+    // POCs: remove non-base cards
+    $$(".additional-poc-card", root).forEach((card) => {
       if (card.getAttribute("data-base") === "true") return;
       card.remove();
     });
 
     // Tables: remove cloned rows
-    $$("table.training-table tbody", sectionEl).forEach((tb) => {
+    $$("table.training-table tbody", root).forEach((tb) => {
       $$("tr", tb).forEach((tr) => {
         if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
       });
     });
 
-    // Tickets: keep only base in Open
-    const open = $("#openTicketsContainer", sectionEl);
-    if (open) {
-      $$(".ticket-group", open).forEach((g) => {
-        if (g.getAttribute("data-base") !== "true") g.remove();
-      });
-
-      const base = $(".ticket-group[data-base='true']", open);
-      if (base) {
-        $$("input, textarea", base).forEach((f) => {
-          if (f.matches("input[type='checkbox']")) f.checked = false;
-          else f.value = "";
-          saveField(f);
-        });
-        const statusSel = $(".ticket-status-select", base);
-        if (statusSel) {
-          statusSel.value = "Open";
-          statusSel.disabled = true;
-          saveField(statusSel);
-        }
-      }
-    }
+    // Tickets: remove non-base
+    $$(".ticket-group", root).forEach((g) => {
+      if (g.getAttribute("data-base") === "true") return;
+      // keep base only
+      g.remove();
+    });
   };
 
-  const clearSectionState = (sectionEl) => {
-    if (!sectionEl) return;
-    const state = readState();
-
-    // remove saved keys for fields inside section
-    const fields = $$(`[${AUTO_ID_ATTR}]`, sectionEl);
-    fields.forEach((el) => {
-      const id = el.getAttribute(AUTO_ID_ATTR);
-      delete state[id];
-
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else if (el.matches("input[type='radio']")) el.checked = false;
-      else if (el.matches("input, select, textarea")) el.value = "";
-      else if (el.matches("[contenteditable='true']")) el.textContent = "";
+  const clearFieldsIn = (root = document) => {
+    // inputs
+    root.querySelectorAll("input").forEach((inp) => {
+      const type = (inp.type || "").toLowerCase();
+      if (["button", "submit", "reset", "hidden"].includes(type)) return;
+      if (type === "checkbox" || type === "radio") {
+        inp.checked = false;
+      } else {
+        inp.value = "";
+      }
+      triggerInputChange(inp);
     });
 
-    writeState(state);
-    trimDynamicToBase(sectionEl);
+    // textareas
+    root.querySelectorAll("textarea").forEach((ta) => {
+      ta.value = "";
+      triggerInputChange(ta);
+    });
+
+    // selects
+    root.querySelectorAll("select").forEach((sel) => {
+      sel.selectedIndex = 0;
+      triggerInputChange(sel);
+    });
+
+    // contenteditable
+    root.querySelectorAll("[contenteditable='true']").forEach((ce) => {
+      ce.textContent = "";
+      triggerInputChange(ce);
+    });
+
+    setGhostStyles(root);
   };
 
-  const onResetPage = (btn) => {
-    const section = getSection(btn);
-    clearSectionState(section);
+  const clearAll = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+    // wipe UI
+    removeDynamicClonesIn(document);
+    clearFieldsIn(document);
+
+    // reset map
+    const map = $("#dealershipMapFrame");
+    if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
+
+    // reset dealership name display
+    const disp = $("#dealershipNameDisplay");
+    if (disp) disp.textContent = "";
+
+    // reset clone state
+    cloneState.clearAll();
+
+    log("Clear All complete");
+  };
+
+  const clearSection = (sectionEl) => {
+    if (!sectionEl) return;
+
+    // remove saved field keys for this section only
+    const state = readState();
+    state.__fields = state.__fields || {};
+    $$(`[${AUTO_ID_ATTR}]`, sectionEl).forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      delete state.__fields[id];
+    });
+
+    // remove clone state related to section (simple approach: if section contains these, clear those lists)
+    // Trainers page
+    if (sectionEl.id === "trainers-deployment") {
+      const clones = cloneState.get();
+      clones.trainers = [];
+      cloneState.set(clones);
+    }
+    // Dealership info (POCs + address map etc.)
+    if (sectionEl.id === "dealership-info") {
+      const clones = cloneState.get();
+      clones.pocs = [];
+      cloneState.set(clones);
+
+      const map = $("#dealershipMapFrame", sectionEl);
+      if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
+    }
+    // Tables + tickets (safe: wipe table keys/tickets if section contains them)
+    if ($("table.training-table", sectionEl)) {
+      const clones = cloneState.get();
+      clones.tables = {};
+      cloneState.set(clones);
+    }
+    if ($(".ticket-group", sectionEl)) {
+      const clones = cloneState.get();
+      clones.tickets = [];
+      cloneState.set(clones);
+    }
+
+    writeState(state);
+
+    // wipe UI in section
+    removeDynamicClonesIn(sectionEl);
+    clearFieldsIn(sectionEl);
+
+    log("Cleared section:", sectionEl.id);
   };
 
   /* =======================
      ADD TRAINER (+)
-     - NO required input
-     - NO remove button on added rows
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -269,6 +370,7 @@
     wrap.appendChild(inputPlus);
 
     ensureId(input);
+    saveField(input);
     return wrap;
   };
 
@@ -277,73 +379,186 @@
     const container = $("#additionalTrainersContainer");
     if (!input || !container) return;
 
-    const name = (input.value || "").trim(); // allowed to be blank if you want
+    const name = (input.value || "").trim(); // allowed blank
     const row = buildTrainerRow(name);
-
     container.appendChild(row);
 
-    // clear base input
+    // persist clone
+    const clones = cloneState.get();
+    clones.trainers.push({ value: name });
+    cloneState.set(clones);
+
+    // reset base
     input.value = "";
     saveField(input);
-
-    // save new field
-    const rowInput = $("input", row);
-    if (rowInput) saveField(rowInput);
+    input.focus();
   };
 
   /* =======================
-     ADD POC (+)
-     - Your HTML uses:
-       .additional-poc-card[data-base="true"]
-       button.additional-poc-add
-     - We CLONE the base mini-card, clear fields, remove the + button on clones
-     - NO required input
-     - NO remove buttons
+     ADD POC (+) — SINGLE FIRE
+     - Adds ONE card even if blank
+     - Moves name/role/cell/email into new card
+     - Resets base fields
   ======================= */
-  const addPocCard = (btn) => {
-    const baseCard =
-      btn?.closest?.(".additional-poc-card") ||
-      $(".additional-poc-card[data-base='true']");
-    if (!baseCard) return;
+  const getBasePocCard = (btn) =>
+    btn?.closest?.(".additional-poc-card[data-base='true']") ||
+    $(".additional-poc-card[data-base='true']");
 
-    const parent = baseCard.parentElement; // the grid wrapper
-    if (!parent) return;
+  const readPocBaseValues = (baseCard) => {
+    const nameEl =
+      baseCard.querySelector("#additionalPocInput") ||
+      baseCard.querySelector(".input-plus input[type='text']") ||
+      baseCard.querySelector('input[placeholder="Enter name"]');
 
-    const clone = baseCard.cloneNode(true);
-    clone.setAttribute("data-base", "false");
-    clone.setAttribute(AUTO_CARD_ATTR, "poc");
+    const roleEl =
+      baseCard.querySelector('input[placeholder="Enter role"]') ||
+      baseCard.querySelector('input[type="text"][data-field="role"]');
 
-    // remove the "+" button from clones
-    const plus = $(".additional-poc-add", clone);
-    if (plus) plus.remove();
+    const cellEl =
+      baseCard.querySelector('input[placeholder="Enter cell"]') ||
+      baseCard.querySelector('input[type="text"][data-field="cell"]');
 
-    // clear fields + new ids
-    $$("input, select, textarea", clone).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else el.value = "";
+    const emailEl =
+      baseCard.querySelector('input[type="email"]') ||
+      baseCard.querySelector('input[placeholder="Enter company email"]');
 
-      el.removeAttribute(AUTO_ID_ATTR);
+    return {
+      els: { nameEl, roleEl, cellEl, emailEl },
+      values: {
+        name: (nameEl?.value ?? "").trim(),
+        role: (roleEl?.value ?? "").trim(),
+        cell: (cellEl?.value ?? "").trim(),
+        email: (emailEl?.value ?? "").trim(),
+      },
+    };
+  };
+
+  const buildPocCard = ({ name = "", role = "", cell = "", email = "" } = {}) => {
+    const newCard = document.createElement("div");
+    newCard.className = "mini-card additional-poc-card";
+    newCard.setAttribute(AUTO_CARD_ATTR, "poc");
+    newCard.innerHTML = `
+      <div class="checklist-row">
+        <label>Additional POC</label>
+        <input type="text" placeholder="Enter name" autocomplete="off" />
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Role</label>
+        <input type="text" placeholder="Enter role" autocomplete="off" />
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Cell</label>
+        <input type="text" placeholder="Enter cell" autocomplete="off" />
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Email</label>
+        <input type="email" placeholder="Enter company email" autocomplete="off" />
+      </div>
+    `;
+
+    const nameNew = newCard.querySelector('input[placeholder="Enter name"]');
+    const roleNew = newCard.querySelector('input[placeholder="Enter role"]');
+    const cellNew = newCard.querySelector('input[placeholder="Enter cell"]');
+    const emailNew = newCard.querySelector('input[type="email"]');
+
+    if (nameNew) nameNew.value = name;
+    if (roleNew) roleNew.value = role;
+    if (cellNew) cellNew.value = cell;
+    if (emailNew) emailNew.value = email;
+
+    // assign IDs + save
+    $$("input, select, textarea", newCard).forEach((el) => {
       ensureId(el);
       saveField(el);
     });
 
-    parent.appendChild(clone);
+    return newCard;
+  };
 
-    // focus first input if present
-    const firstInput = $("input, textarea", clone);
-    if (firstInput) firstInput.focus();
+  const addPocCard = (btn) => {
+    const baseCard = getBasePocCard(btn);
+    if (!baseCard) return;
+
+    // hard stop double-fire
+    if (btn && btn.dataset.mkBusy === "1") return;
+    if (btn) {
+      btn.dataset.mkBusy = "1";
+      setTimeout(() => (btn.dataset.mkBusy = "0"), 0);
+    }
+
+    const { els, values } = readPocBaseValues(baseCard);
+
+    // insert after base card within same grid
+    const newCard = buildPocCard(values);
+    baseCard.insertAdjacentElement("afterend", newCard);
+
+    // persist clone
+    const clones = cloneState.get();
+    clones.pocs.push(values);
+    cloneState.set(clones);
+
+    // reset base fields
+    if (els.nameEl) els.nameEl.value = "";
+    if (els.roleEl) els.roleEl.value = "";
+    if (els.cellEl) els.cellEl.value = "";
+    if (els.emailEl) els.emailEl.value = "";
+
+    [els.nameEl, els.roleEl, els.cellEl, els.emailEl].forEach(triggerInputChange);
+
+    // focus base name again
+    if (els.nameEl) els.nameEl.focus();
   };
 
   /* =======================
-     TABLE: ADD ROW (+)
+     TABLE: ADD ROW (+) + RESTORE
   ======================= */
+  const getTableKey = (table) => {
+    // Prefer data-table-key if you have it; fallback to id; else stable-ish key from header text.
+    const k =
+      table.getAttribute("data-table-key") ||
+      table.id ||
+      (() => {
+        const h = table.closest(".table-container")?.previousElementSibling;
+        const ht = h?.textContent?.trim();
+        return ht ? `tbl:${ht}` : `tbl:${uid("t")}`;
+      })();
+    return k;
+  };
+
+  const extractRowValues = (tr) => {
+    const cells = [];
+    $$("input, select, textarea", tr).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) cells.push({ t: "cb", v: !!el.checked });
+      else cells.push({ t: "v", v: el.value ?? "" });
+    });
+    return cells;
+  };
+
+  const applyRowValues = (tr, vals) => {
+    const fields = $$("input, select, textarea", tr);
+    fields.forEach((el, idx) => {
+      const item = vals?.[idx];
+      if (!item) return;
+      if (el.matches("input[type='checkbox']")) el.checked = !!item.v;
+      else el.value = item.v ?? "";
+      ensureId(el);
+      saveField(el);
+    });
+  };
+
   const cloneTableRow = (btn) => {
+    const footer = btn.closest(".table-footer");
+    if (!footer) return; // critical: prevents POC/other buttons from triggering table add
+
     const tableContainer = btn.closest(".table-container");
     if (!tableContainer) return;
 
-    const table = $("table", tableContainer);
+    const table = $("table.training-table", tableContainer);
     const tbody = $("tbody", table);
-    if (!tbody) return;
+    if (!table || !tbody) return;
 
     const rows = $$("tr", tbody);
     if (!rows.length) return;
@@ -352,28 +567,65 @@
     const clone = template.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, "cloned");
 
+    // clear values
     $$("input, select, textarea", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
-
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       saveField(el);
     });
 
     tbody.appendChild(clone);
+
+    // persist clone row structure as an empty row
+    const tableKey = getTableKey(table);
+    const clones = cloneState.get();
+    clones.tables[tableKey] = clones.tables[tableKey] || [];
+    clones.tables[tableKey].push(extractRowValues(clone));
+    cloneState.set(clones);
+  };
+
+  const rebuildTableClones = () => {
+    const clones = cloneState.get();
+    const tables = $$("table.training-table");
+
+    tables.forEach((table) => {
+      const key = getTableKey(table);
+      const rowsData = clones.tables[key];
+      if (!rowsData || !rowsData.length) return;
+
+      const tbody = $("tbody", table);
+      if (!tbody) return;
+
+      // Use last existing row as template
+      const existingRows = $$("tr", tbody);
+      if (!existingRows.length) return;
+      const template = existingRows[existingRows.length - 1];
+
+      rowsData.forEach((rowVals) => {
+        const clone = template.cloneNode(true);
+        clone.setAttribute(AUTO_ROW_ATTR, "cloned");
+        // clear IDs then apply
+        $$("input, select, textarea", clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
+        applyRowValues(clone, rowVals);
+        tbody.appendChild(clone);
+      });
+    });
   };
 
   /* =======================
-     NOTES ICON BUTTONS
+     NOTES BUTTONS
   ======================= */
-  const toggleNotes = (btn) => {
-    const targetId = btn.getAttribute("data-notes-target");
+  const handleNotesClick = (btn) => {
+    const targetId =
+      btn.getAttribute("data-notes-target") ||
+      btn.getAttribute("data-target") ||
+      btn.getAttribute("href")?.replace("#", "");
     if (!targetId) return;
     const target = document.getElementById(targetId);
     if (!target) return;
 
-    // If hidden by your CSS classes, unhide best-effort
     if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
     if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
@@ -392,18 +644,23 @@
     "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
   });
 
-  const isTicketCardComplete = (card) => {
+  const readTicketValues = (card) => {
     const num = $(".ticket-number-input", card)?.value?.trim() || "";
     const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
     const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
-    return !!(num && url && sum);
+    const status = $(".ticket-status-select", card)?.value || "Open";
+    return { num, url, sum, status };
+  };
+
+  const isTicketCardComplete = (card) => {
+    const v = readTicketValues(card);
+    return !!(v.num && v.url && v.sum);
   };
 
   const markTicketCardErrors = (card) => {
     const numEl = $(".ticket-number-input", card);
     const urlEl = $(".ticket-zendesk-input", card);
     const sumEl = $(".ticket-summary-input", card);
-
     [numEl, urlEl, sumEl].forEach((el) => {
       if (!el) return;
       const v = (el.value || "").trim();
@@ -412,6 +669,29 @@
         setTimeout(() => el.classList.remove("mk-field-error"), 700);
       }
     });
+  };
+
+  const buildTicketCloneFromBase = (baseCard) => {
+    const clone = baseCard.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "ticket");
+
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
+
+    const status = $(".ticket-status-select", clone);
+    if (status) {
+      status.value = "Open";
+      status.disabled = true;
+      ensureId(status);
+      saveField(status);
+    }
+    return clone;
   };
 
   const addTicketCard = (btn) => {
@@ -427,29 +707,15 @@
     }
 
     const base = $(".ticket-group[data-base='true']", openContainer) || currentCard;
-    const clone = base.cloneNode(true);
-    clone.setAttribute("data-base", "false");
-    clone.setAttribute(AUTO_CARD_ATTR, "ticket");
-
-    $$("input, textarea", clone).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else el.value = "";
-      el.removeAttribute(AUTO_ID_ATTR);
-      ensureId(el);
-      saveField(el);
-    });
-
-    const status = $(".ticket-status-select", clone);
-    if (status) {
-      status.value = "Open";
-      status.disabled = true;
-      status.removeAttribute(AUTO_ID_ATTR);
-      ensureId(status);
-      saveField(status);
-    }
+    const clone = buildTicketCloneFromBase(base);
 
     openContainer.appendChild(clone);
     $(".ticket-number-input", clone)?.focus();
+
+    // persist
+    const clones = cloneState.get();
+    clones.tickets.push({ status: "Open", num: "", url: "", sum: "" });
+    cloneState.set(clones);
   };
 
   const onTicketNumberChange = (inputEl) => {
@@ -464,6 +730,9 @@
 
     saveField(inputEl);
     saveField(status);
+
+    // persist ticket values if this is a cloned card
+    if (card.getAttribute("data-base") !== "true") persistAllTickets();
   };
 
   const onTicketStatusChange = (selectEl) => {
@@ -473,18 +742,120 @@
     const statusVal = selectEl.value;
     const containers = ticketContainersByStatus();
     const dest = containers[statusVal] || containers.Open;
-
     if (dest) dest.appendChild(card);
+
     saveField(selectEl);
+
+    if (card.getAttribute("data-base") !== "true") persistAllTickets();
+  };
+
+  const persistAllTickets = () => {
+    const clones = cloneState.get();
+    clones.tickets = [];
+
+    const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
+    all.forEach((card) => {
+      const v = readTicketValues(card);
+      clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
+    });
+
+    cloneState.set(clones);
+  };
+
+  const rebuildTicketClones = () => {
+    const clones = cloneState.get();
+    if (!clones.tickets || !clones.tickets.length) return;
+
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const base = $(".ticket-group[data-base='true']", openContainer);
+    if (!base) return;
+
+    // clear existing non-base (safety)
+    $$(".ticket-group", document).forEach((g) => {
+      if (g.getAttribute("data-base") !== "true") g.remove();
+    });
+
+    clones.tickets.forEach((t) => {
+      const clone = buildTicketCloneFromBase(base);
+
+      // fill values
+      $(".ticket-number-input", clone).value = t.num || "";
+      $(".ticket-zendesk-input", clone).value = t.url || "";
+      $(".ticket-summary-input", clone).value = t.sum || "";
+
+      const statusSel = $(".ticket-status-select", clone);
+      if (statusSel) {
+        statusSel.value = t.status || "Open";
+        statusSel.disabled = !(t.num || "").trim();
+        saveField(statusSel);
+      }
+
+      // save fields
+      $$("input, textarea, select", clone).forEach((el) => saveField(el));
+
+      // route to container
+      const containers = ticketContainersByStatus();
+      const dest = containers[t.status] || containers.Open || openContainer;
+      dest.appendChild(clone);
+    });
   };
 
   /* =======================
-     EVENT DELEGATION
+     POC CLONE RESTORE
+  ======================= */
+  const rebuildPocClones = () => {
+    const clones = cloneState.get();
+    if (!clones.pocs || !clones.pocs.length) return;
+
+    // remove existing non-base
+    $$(".additional-poc-card").forEach((c) => {
+      if (c.getAttribute("data-base") !== "true") c.remove();
+    });
+
+    const base = $(".additional-poc-card[data-base='true']");
+    if (!base) return;
+
+    clones.pocs.forEach((p) => {
+      const card = buildPocCard(p);
+      base.insertAdjacentElement("afterend", card);
+    });
+  };
+
+  /* =======================
+     TRAINER CLONE RESTORE
+  ======================= */
+  const rebuildTrainerClones = () => {
+    const clones = cloneState.get();
+    const container = $("#additionalTrainersContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+    (clones.trainers || []).forEach((t) => {
+      const row = buildTrainerRow(t.value || "");
+      container.appendChild(row);
+    });
+  };
+
+  /* =======================
+     DEALERSHIP NAME DISPLAY (top bar)
+     - keeps #dealershipNameDisplay synced with #dealershipNameInput
+  ======================= */
+  const syncDealershipName = () => {
+    const input = $("#dealershipNameInput");
+    const display = $("#dealershipNameDisplay");
+    if (!input || !display) return;
+    display.textContent = (input.value || "").trim();
+  };
+
+  /* =======================
+     EVENT DELEGATION (SINGLE)
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // NAV menu buttons
+    // NAV
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -492,147 +863,63 @@
       return;
     }
 
-    // Add Trainer (+)
-    if (t.closest("[data-add-trainer]")) {
+    // CLEAR ALL
+    const clearAllBtn = t.closest("#clearAllBtn");
+    if (clearAllBtn) {
       e.preventDefault();
-      addTrainerRow();
+      clearAll();
       return;
     }
 
-    // Add POC (+) - your HTML uses .additional-poc-add
-    const pocAdd = t.closest(".additional-poc-add");
-    if (pocAdd) {
+    // RESET THIS PAGE
+    const resetBtn = t.closest(".clear-page-btn[data-clear-page]");
+    if (resetBtn) {
       e.preventDefault();
-      addPocCard(pocAdd);
+      const id = resetBtn.getAttribute("data-clear-page");
+      if (id) clearSection(document.getElementById(id));
       return;
     }
 
-    // Table add row (+)
-    if (t.closest("button.add-row")) {
+    // ADD TRAINER (+) supports [data-add-trainer] OR button.trainer-add-btn inside trainers page
+    if (t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn")) {
+      const btn = t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+      if (btn) {
+        e.preventDefault();
+        addTrainerRow();
+        return;
+      }
+    }
+
+    // ADD POC (+): supports [data-add-poc] OR .additional-poc-add
+    const pocBtn = t.closest("[data-add-poc], .additional-poc-add");
+    if (pocBtn) {
       e.preventDefault();
-      cloneTableRow(t.closest("button.add-row"));
+      e.stopPropagation();
+      addPocCard(pocBtn);
       return;
     }
 
-// =======================================
-// Additional POC (+): add new card (SINGLE-FIRE, moves ALL fields)
-// - Adds even if name is blank
-// - Moves name/role/cell/email into new card
-// - Resets the base card fields
-// - Inserts new card right after base card (same grid)
-// =======================================
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-add-poc]");
-  if (!btn) return;
-
-  // Prevent double-fire (in case you have two handlers somewhere)
-  if (btn.dataset.mkBusy === "1") return;
-  btn.dataset.mkBusy = "1";
-  setTimeout(() => (btn.dataset.mkBusy = "0"), 0);
-
-  const baseCard = btn.closest(".additional-poc-card[data-base='true']");
-  if (!baseCard) return;
-
-  // Base inputs (reliable selectors, NOT nth-of-type)
-  const nameEl =
-    baseCard.querySelector("#additionalPocInput") ||
-    baseCard.querySelector(".input-plus input[type='text']");
-
-  const roleEl = baseCard.querySelector('input[placeholder="Enter role"]');
-  const cellEl = baseCard.querySelector('input[placeholder="Enter cell"]');
-  const emailEl = baseCard.querySelector('input[type="email"]');
-
-  const values = {
-    name: (nameEl?.value ?? "").trim(),
-    role: (roleEl?.value ?? "").trim(),
-    cell: (cellEl?.value ?? "").trim(),
-    email: (emailEl?.value ?? "").trim(),
-  };
-
-  // Build the new card (NO plus button)
-  const newCard = document.createElement("div");
-  newCard.className = "mini-card additional-poc-card";
-  newCard.innerHTML = `
-    <div class="checklist-row">
-      <label>Additional POC</label>
-      <input type="text" placeholder="Enter name" />
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Role</label>
-      <input type="text" placeholder="Enter role" />
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Cell</label>
-      <input type="text" placeholder="Enter cell" />
-    </div>
-
-    <div class="checklist-row indent-sub">
-      <label>Email</label>
-      <input type="email" placeholder="Enter company email" />
-    </div>
-  `;
-
-  // Fill new card values
-  const nameNew = newCard.querySelector('input[placeholder="Enter name"]');
-  const roleNew = newCard.querySelector('input[placeholder="Enter role"]');
-  const cellNew = newCard.querySelector('input[placeholder="Enter cell"]');
-  const emailNew = newCard.querySelector('input[type="email"]');
-
-  if (nameNew) nameNew.value = values.name;
-  if (roleNew) roleNew.value = values.role;
-  if (cellNew) cellNew.value = values.cell;
-  if (emailNew) emailNew.value = values.email;
-
-  // Insert right after base card (same grid)
-  baseCard.insertAdjacentElement("afterend", newCard);
-
-  // Reset base card fields
-  if (nameEl) nameEl.value = "";
-  if (roleEl) roleEl.value = "";
-  if (cellEl) cellEl.value = "";
-  if (emailEl) emailEl.value = "";
-
-  // Trigger autosave listeners
-  [nameEl, roleEl, cellEl, emailEl].forEach((el) => {
-    if (!el) return;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-
-  // Focus name
-  if (nameEl) nameEl.focus();
-});
-
-// basic escaping so a name like <Mike> doesn't break HTML
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-    // Notes buttons
-    if (t.closest("[data-notes-btn]")) {
+    // TABLE ADD ROW: ONLY if inside table footer
+    const addRowBtn = t.closest("button.add-row");
+    if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
-      toggleNotes(t.closest("[data-notes-btn]"));
+      cloneTableRow(addRowBtn);
       return;
     }
 
-    // Reset this page
-    if (t.closest(".clear-page-btn")) {
+    // NOTES buttons
+    const notesBtn = t.closest("[data-notes-btn], [data-notes-target]");
+    if (notesBtn) {
       e.preventDefault();
-      onResetPage(t.closest(".clear-page-btn"));
+      handleNotesClick(notesBtn);
       return;
     }
 
-    // Support ticket add (+)
-    if (t.closest(".add-ticket-btn")) {
+    // SUPPORT TICKET ADD (+)
+    const ticketAddBtn = t.closest(".add-ticket-btn");
+    if (ticketAddBtn) {
       e.preventDefault();
-      addTicketCard(t.closest(".add-ticket-btn"));
+      addTicketCard(ticketAddBtn);
       return;
     }
   });
@@ -643,10 +930,52 @@ function escapeHtml(str) {
     if (isFormField(el)) {
       ensureId(el);
       saveField(el);
+      setGhostStyles(document);
+    }
+
+    if (el.id === "dealershipNameInput") syncDealershipName();
+
+    // persist clones on changes
+    if (el.closest("#additionalTrainersContainer")) {
+      // rebuild trainer clone state from DOM
+      const clones = cloneState.get();
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
+        value: (i.value || "").trim(),
+      }));
+      cloneState.set(clones);
+    }
+
+    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
+      // update pocs from DOM (non-base)
+      const clones = cloneState.get();
+      clones.pocs = $$(".additional-poc-card")
+        .filter((c) => c.getAttribute("data-base") !== "true")
+        .map((c) => ({
+          name: (c.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
+          role: (c.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
+          cell: (c.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
+          email: (c.querySelector('input[type="email"]')?.value || "").trim(),
+        }));
+      cloneState.set(clones);
     }
 
     if (el.matches(".ticket-number-input")) {
       onTicketNumberChange(el);
+    }
+
+    // table clone persistence
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
+    if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
+      const key = getTableKey(table);
+      const clones = cloneState.get();
+      clones.tables[key] = clones.tables[key] || [];
+
+      // recompute from DOM (all cloned rows in that table)
+      const tbody = $("tbody", table);
+      const clonedRows = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody);
+      clones.tables[key] = clonedRows.map((r) => extractRowValues(r));
+      cloneState.set(clones);
     }
   });
 
@@ -656,6 +985,7 @@ function escapeHtml(str) {
     if (isFormField(el)) {
       ensureId(el);
       saveField(el);
+      setGhostStyles(document);
     }
 
     if (el.matches(".ticket-status-select")) {
@@ -663,26 +993,47 @@ function escapeHtml(str) {
     }
   });
 
-  // Enter key adds Trainer row (no required input)
   document.addEventListener("keydown", (e) => {
     const el = e.target;
     if (!isEl(el)) return;
 
+    // Enter adds Trainer row
     if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
       return;
     }
+
+    // Enter on POC name adds POC card (matches trainer behavior, even if blank)
+    if (el.id === "additionalPocInput" && e.key === "Enter") {
+      e.preventDefault();
+      const btn = el.closest(".additional-poc-card")?.querySelector("[data-add-poc], .additional-poc-add");
+      if (btn) addPocCard(btn);
+      return;
+    }
   });
 
   /* =======================
-     INIT
+     INIT / RESTORE
   ======================= */
   const init = () => {
-    // ensure IDs on all existing fields
+    // IDs for existing fields
     assignIdsToAllFields();
 
-    // support ticket status disabled until number entered
+    // NAV first
+    initNav();
+
+    // rebuild dynamic clones
+    rebuildTrainerClones();
+    rebuildPocClones();
+    rebuildTableClones();
+    rebuildTicketClones();
+
+    // restore saved values
+    // (IDs for newly created clones already assigned; restore will fill them)
+    restoreAllFields();
+
+    // ticket status disabled until number entered (base + clones)
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
@@ -691,11 +1042,11 @@ function escapeHtml(str) {
       if (status) ensureId(status);
     });
 
-    // NAV must run BEFORE restore so correct section is visible
-    initNav();
+    // ghost styles
+    setGhostStyles(document);
 
-    // restore saved values
-    restoreAllFields();
+    // initial dealership name display
+    syncDealershipName();
 
     log("Initialized.");
   };
