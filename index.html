@@ -342,26 +342,49 @@
   </div>
 </div>
 
-<!-- ✅ IMPORTANT: container must be a GRID SIBLING (not inside the mini-card) -->
+<!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
+<div class="mini-card additional-poc-card" data-base="true">
+  <div class="checklist-row integrated-plus indent-sub" data-base="true">
+    <label>Additional POC</label>
+
+    <div class="input-plus">
+      <input
+        id="additionalPocInput"
+        type="text"
+        placeholder="Enter name"
+        autocomplete="off"
+      />
+
+      <button
+        type="button"
+        class="trainer-add-btn poc-add-btn"
+        data-add-poc
+        title="Add another contact"
+        aria-label="Add another contact"
+      >
+        +
+      </button>
+    </div>
+  </div>
+
+  <div class="checklist-row indent-sub">
+    <label>Role</label>
+    <input type="text" placeholder="Enter role" />
+  </div>
+
+  <div class="checklist-row indent-sub">
+    <label>Cell</label>
+    <input type="text" placeholder="Enter cell" />
+  </div>
+
+  <div class="checklist-row indent-sub">
+    <label>Email</label>
+    <input type="email" placeholder="Enter company email" />
+  </div>
+</div>
+
+<!-- ✅ Added POC cards will be appended here (ONE time only) -->
 <div id="additionalPocsContainer" class="integrated-plus-container"></div>
-
-        <!-- Added POCs render here -->
-        <div id="additionalPocsContainer" class="integrated-plus-container"></div>
-
-        <div class="checklist-row indent-sub">
-          <label>Role</label>
-          <input type="text" placeholder="Enter role" />
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
-        </div>
-
-        <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
-        </div>
       </div>
     </div>
   </div>
