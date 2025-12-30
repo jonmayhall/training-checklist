@@ -1811,3 +1811,86 @@ button.remove-row{
   background:#ff8b42 !important;
 }
 
+/* =======================================================
+   PAGE 2 — DEALERSHIP ADDRESS FIX
+   - Keep input + Map button on the SAME line (no wrapping)
+   - Make address input ~25% wider
+   - Make Map button match the orange "+" add buttons
+======================================================= */
+
+#dealership-address-card .checklist-row{
+  display:grid !important;
+  grid-template-columns:260px minmax(0,1fr) !important;
+  column-gap:18px !important;
+  align-items:center !important;
+}
+
+#dealership-address-card .address-input-wrap{
+  width:100% !important;
+  max-width:620px !important; /* ~25% wider than before */
+  justify-self:end !important;
+  margin-left:auto !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  flex-wrap:nowrap !important; /* ✅ prevents Map dropping below */
+}
+
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+/* Map button styled exactly like your "+" add buttons */
+#dealership-address-card .address-input-wrap .small-map-btn{
+  width:34px !important;
+  min-width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:12px !important;
+  font-weight:900 !important;
+  letter-spacing:0.06em !important;
+  text-transform:uppercase !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+}
+
+#dealership-address-card .address-input-wrap .small-map-btn:hover{
+  background:#ff8b42 !important;
+}
+
+/* Map fills the card width */
+#dealership-address-card .map-wrapper{
+  margin:14px 0 0 !important;
+  border-radius:var(--radius-lg) !important;
+  overflow:hidden !important;
+  border:1px solid var(--border) !important;
+  background:#f8f8f8 !important;
+}
+
+#dealership-address-card .map-frame,
+#dealership-address-card .map-wrapper iframe{
+  width:100% !important;
+  height:440px !important;
+  border:0 !important;
+  display:block !important;
+}
+
+/* Optional: remove helper text spacing if you want full map dominance */
+#dealership-address-card .map-helper-text{
+  margin:8px 10px 0 !important;
+}
