@@ -1060,41 +1060,55 @@
   };
 
  /* =======================
-   TABLE + NOTES EXPAND MODAL (Pages 5 & 6 only)
-   - Moves the REAL table card + related notes blocks into a centered modal card
-   - Everything still works (notes buttons, add-row, inputs) because nodes are moved, not cloned
+   /* =======================
+   TABLE + NOTES EXPAND MODAL (ROBUST)
+   - Auto-creates #mkTableModal if missing
+   - Adds ⤢ button to any table-container that contains notes buttons
+   - Opens a centered modal and MOVES the real table card + related notes blocks
 ======================= */
+
+const ensureExpandModalExists = () => {
+  let modal = document.getElementById("mkTableModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "mkTableModal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="mk-modal-backdrop" aria-hidden="true"></div>
+    <div class="mk-modal-panel" role="dialog" aria-modal="true">
+      <div class="mk-modal-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 6px 12px;">
+        <div class="mk-modal-title" style="font-weight:700;">Expanded View</div>
+        <button type="button" class="mk-modal-close" aria-label="Close" style="border:0;background:transparent;font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div class="mk-modal-content"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+};
 
 const tableModal = {
   modal: null,
   panel: null,
   content: null,
   title: null,
-  backdrop: null,
+  moved: [], // [{ node, placeholder }]
   bodyOverflow: "",
-  moved: [],        // [{ node, placeholder }]
 };
 
-const EXPAND_SECTION_IDS = new Set([
-  "training-checklist", // page 5 (change if your actual id differs)
-  "opcodes-pricing",    // page 6 (change if your actual id differs)
-]);
-
-const getPageSectionIdFor = (el) => getSection(el)?.id || "";
-
 const ensureTableExpandButtons = () => {
-  const modal = $("#mkTableModal");
-  if (!modal) return;
+  ensureExpandModalExists();
 
   $$("div.table-container").forEach((tc) => {
-    const secId = getPageSectionIdFor(tc);
-    if (!EXPAND_SECTION_IDS.has(secId)) return;
+    // Only add expand where there are notes buttons inside this table area
+    const hasNotesBtns = !!tc.querySelector("[data-notes-target]");
+    if (!hasNotesBtns) return;
 
     const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
     if (!footer) return;
 
-    // avoid duplicates
-    if ($(".mk-table-expand-btn", footer)) return;
+    if ($(".mk-table-expand-btn", footer)) return; // no duplicates
 
     const btn = document.createElement("button");
     btn.type = "button";
@@ -1107,22 +1121,14 @@ const ensureTableExpandButtons = () => {
   });
 };
 
-// Given a clicked expand button (or any node inside the table card),
-// return the "bundle" nodes we want to move:
-// - The table "section card" (whatever wrapper contains the table + footer)
-// - PLUS all notes blocks referenced by notes buttons inside that card
 const getExpandBundleNodes = (anyInsideTableCard) => {
-  const tc = anyInsideTableCard?.closest?.(".table-container") || anyInsideTableCard;
+  const tc = anyInsideTableCard?.closest?.(".table-container");
   if (!tc) return [];
 
-  // This is the “table card” wrapper we move (keeps header + table + footer together)
-  const tableCard =
-    tc.closest(".section") ||
-    tc.closest(".section-block") ||
-    tc.parentElement ||
-    tc;
+  // Move the WHOLE .section that contains the table-container (keeps header + footer together)
+  const tableCard = tc.closest(".section") || tc.closest(".section-block") || tc.parentElement || tc;
 
-  // Collect all data-notes-target ids used inside this table card
+  // Find related notes blocks by reading all data-notes-targets inside this table card
   const targets = new Set();
   $$("[data-notes-target]", tableCard).forEach((btn) => {
     const id = btn.getAttribute("data-notes-target");
@@ -1135,19 +1141,18 @@ const getExpandBundleNodes = (anyInsideTableCard) => {
     if (block) notesBlocks.push(block);
   });
 
-  // keep table card first, then notes blocks in the same order they appear in DOM
-  const all = [tableCard, ...notesBlocks];
+  const all = [tableCard, ...notesBlocks].filter(Boolean);
 
-  // de-dupe + filter null
+  // De-dupe
   const uniq = [];
   const seen = new Set();
   all.forEach((n) => {
-    if (!n || seen.has(n)) return;
+    if (seen.has(n)) return;
     seen.add(n);
     uniq.push(n);
   });
 
-  // sort by document order (so it matches the page stacking)
+  // Keep original DOM order
   uniq.sort((a, b) => {
     if (a === b) return 0;
     const pos = a.compareDocumentPosition(b);
@@ -1158,45 +1163,32 @@ const getExpandBundleNodes = (anyInsideTableCard) => {
 };
 
 const openTableModalFor = (anyInsideTableCard) => {
-  const modal = $("#mkTableModal");
-  if (!modal) return;
-
-  const secId = getPageSectionIdFor(anyInsideTableCard);
-  if (!EXPAND_SECTION_IDS.has(secId)) return; // only pages 5 & 6
+  const modal = ensureExpandModalExists();
 
   const panel = $(".mk-modal-panel", modal) || modal;
   const content = $(".mk-modal-content", modal);
   const titleEl = $(".mk-modal-title", modal);
-  const backdrop = $(".mk-modal-backdrop", modal);
 
   if (!content) return;
 
   const bundle = getExpandBundleNodes(anyInsideTableCard);
   if (!bundle.length) return;
 
-  // Title: use nearest section header text
-  const header =
-    bundle[0].querySelector?.(".section-header") ||
-    bundle[0].previousElementSibling?.classList?.contains("section-header")
-      ? bundle[0].previousElementSibling
-      : null;
-
+  // Title from section header if present
+  const header = bundle[0].querySelector?.(".section-header");
   if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
 
   tableModal.modal = modal;
   tableModal.panel = panel;
   tableModal.content = content;
   tableModal.title = titleEl;
-  tableModal.backdrop = backdrop;
   tableModal.moved = [];
 
-  // clear content, then move nodes in
   content.innerHTML = "";
 
   bundle.forEach((node) => {
     const ph = document.createComment("mk-expand-placeholder");
     node.parentNode.insertBefore(ph, node);
-
     tableModal.moved.push({ node, placeholder: ph });
     content.appendChild(node);
   });
@@ -1214,7 +1206,6 @@ const closeTableModal = () => {
   const modal = tableModal.modal;
   if (!modal) return;
 
-  // restore moved nodes to their original locations
   (tableModal.moved || []).forEach(({ node, placeholder }) => {
     if (!node || !placeholder || !placeholder.parentNode) return;
     placeholder.parentNode.insertBefore(node, placeholder);
@@ -1230,7 +1221,6 @@ const closeTableModal = () => {
   tableModal.panel = null;
   tableModal.content = null;
   tableModal.title = null;
-  tableModal.backdrop = null;
   tableModal.bodyOverflow = "";
   tableModal.moved = [];
 };
