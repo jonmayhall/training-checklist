@@ -1395,7 +1395,7 @@
 
     setGhostStyles(document);
     syncDealershipName();
-       ensureTableExpandButtons();
+      ensureTableExpandButtons();
 
     /* =======================
        SERVICE ADVISORS TABLE — FORCE 3 TOTAL ROWS
