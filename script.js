@@ -1395,67 +1395,71 @@
 
     setGhostStyles(document);
     syncDealershipName();
-    ensureTableExpandButtons();
+       ensureTableExpandButtons();
 
-/* =======================
-   SERVICE ADVISORS TABLE — FORCE 3 TOTAL ROWS
-   (template row + clones) and prevent “4 row” issue
-======================= */
-(() => {
-  const section = document.getElementById("service-advisors");
-  if (!section) return;
+    /* =======================
+       SERVICE ADVISORS TABLE — FORCE 3 TOTAL ROWS
+       (template row + clones) and prevent “4 row” issue
+    ======================= */
+    (() => {
+      const section = document.getElementById("service-advisors");
+      if (!section) return;
 
-  const table = section.querySelector("table.training-table");
-  const tbody = table?.querySelector("tbody");
-  const addBtn = section.querySelector(".table-footer .add-row");
-  if (!table || !tbody || !addBtn) return;
+      const table = section.querySelector("table.training-table");
+      const tbody = table?.querySelector("tbody");
+      const addBtn = section.querySelector(".table-footer .add-row") || section.querySelector(".add-row");
+      if (!table || !tbody || !addBtn) return;
 
-  const DESIRED_TOTAL = 3;
+      const DESIRED_TOTAL = 3;
 
-  // If there are SAVED CLONES for this table (localStorage restore), do nothing.
-  const key = getTableKey(table);
-  const saved = cloneState.get()?.tables?.[key];
-  if (Array.isArray(saved) && saved.length) return;
+      // If there are SAVED CLONES for this table (localStorage restore), do nothing.
+      const key = getTableKey(table);
+      const saved = (cloneState.get().tables || {})[key];
+      if (Array.isArray(saved) && saved.length) return;
 
-  const rows = () => Array.from(tbody.querySelectorAll("tr"));
+      const rows = () => Array.from(tbody.querySelectorAll("tr"));
 
-  const rowIsEmpty = (tr) => {
-    const fields = Array.from(tr.querySelectorAll("input, select, textarea"));
-    if (!fields.length) return true;
+      const rowIsEmpty = (tr) => {
+        const fields = Array.from(tr.querySelectorAll("input, select, textarea"));
+        if (!fields.length) return true;
 
-    return fields.every((el) => {
-      if (el.type === "checkbox" || el.type === "radio") return !el.checked;
-      return !(String(el.value || "").trim());
-    });
+        return fields.every((el) => {
+          if (el.type === "checkbox" || el.type === "radio") return !el.checked;
+          return !(String(el.value || "").trim());
+        });
+      };
+
+      // If too many, remove ONLY empty extras from bottom (never remove the first row)
+      while (rows().length > DESIRED_TOTAL) {
+        const all = rows();
+        const last = all[all.length - 1];
+        if (!last) break;
+        if (last === all[0]) break;          // never remove template row
+        if (!rowIsEmpty(last)) break;        // don't remove real data rows
+        last.remove();
+      }
+
+      // If still too many, your HTML has extra rows that aren't empty — leave them alone.
+      if (rows().length > DESIRED_TOTAL) {
+        console.warn(
+          "[mk] Service Advisors table has extra non-empty rows in HTML. Remove extra template rows in tbody to get exactly 3 total."
+        );
+        return;
+      }
+
+      // If too few, add clones until total = 3
+      while (rows().length < DESIRED_TOTAL) {
+        addBtn.click();
+      }
+    })();
+
+    log("Initialized.");
   };
 
-  // 1) If there are too many rows, remove ONLY extra EMPTY rows from the bottom.
-  //    (Never remove the first row.)
-  while (rows().length > DESIRED_TOTAL) {
-    const all = rows();
-    const last = all[all.length - 1];
-    if (!last) break;
-
-    // Don't delete non-empty rows (avoid wiping real data)
-    if (!rowIsEmpty(last)) break;
-
-    // Don't delete the first/template row
-    if (last === all[0]) break;
-
-    last.remove();
-  }
-
-  // 2) If still too many (because extra rows are not empty), it means HTML has extra real rows.
-  //    We won't delete them automatically.
-  if (rows().length > DESIRED_TOTAL) {
-    console.warn(
-      "[mk] Service Advisors table has extra non-empty rows in HTML. Remove extra template rows in tbody to get exactly 3."
-    );
-    return;
-  }
-
-  // 3) If too few rows, add clones until we hit exactly 3 total.
-  while (rows().length < DESIRED_TOTAL) {
-    addBtn.click(); // uses the same table clone logic you already have
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
 })();
+
