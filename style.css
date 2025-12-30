@@ -1734,44 +1734,33 @@ button.remove-row{
 #mkTableModal .mk-modal-notes textarea{ min-height:190px !important; }
 
 /* =========================================================
-   PAGES 5/6 TABLES — tighten User Acceptance + DMS ID
-   (Overrides the global min-width:180px that prevents shrinking)
-========================================================= */
+   Tighten User Acceptance + DMS ID columns (SAFE override)
+   ========================================================= */
 
-/* Most of your checklist tables are:
-   1 = Name, 2 = User Acceptance, 3 = DMS ID  */
-#training-checklist .training-table th:nth-child(2),
-#training-checklist .training-table td:nth-child(2){
-  width: 170px !important;
-  min-width: 170px !important;
+/* User Acceptance = column 2 */
+.training-table th:nth-child(2),
+.training-table td:nth-child(2){
+  width: auto;
+  min-width: 0;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#training-checklist .training-table th:nth-child(3),
-#training-checklist .training-table td:nth-child(3){
-  width: 120px !important;
-  min-width: 120px !important;
+/* DMS ID = column 3 */
+.training-table th:nth-child(3),
+.training-table td:nth-child(3){
+  width: auto;
+  min-width: 0;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-/* CRITICAL: allow the selects/inputs in those columns to shrink */
-#training-checklist .training-table td:nth-child(2) select,
-#training-checklist .training-table td:nth-child(2) input,
-#training-checklist .training-table td:nth-child(3) select,
-#training-checklist .training-table td:nth-child(3) input{
-  min-width: 0 !important;     /* overrides your min-width:180px */
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* If your Service Advisors / other role tables are also on page 5,
-   this makes the same tweak there too (safe override) */
-#service-advisors .training-table td:nth-child(2) select,
-#service-advisors .training-table td:nth-child(2) input,
-#service-advisors .training-table td:nth-child(3) select,
-#service-advisors .training-table td:nth-child(3) input{
+/* Override the global 180px input minimum JUST for these columns */
+.training-table td:nth-child(2) select,
+.training-table td:nth-child(3) select,
+.training-table td:nth-child(2) input,
+.training-table td:nth-child(3) input{
   min-width: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  width: 100%;
+  max-width: 100%;
 }
-
-
