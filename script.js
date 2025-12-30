@@ -655,7 +655,7 @@
       return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
     };
 
-    const findOrDerivePromptText = (btn) => {
+  const findOrDerivePromptText = (btn) => {
   const tr = btn.closest("tr");
   const table = btn.closest("table");
   const section = getSection(btn);
@@ -663,40 +663,32 @@
 
   // ===== TABLE ROW NOTES =====
   if (tr && table) {
-    const tds = Array.from(tr.querySelectorAll("td"));
-    if (!tds.length) return "Item";
-
-    let cell = null;
-
-    // Training Checklist → Name column (2nd column)
-    if (secId === "training-checklist" && tds[1]) {
-      cell = tds[1];
-    }
-
-    // Opcodes & Pricing → Opcode column (2nd column)
-    if (secId === "opcodes-pricing" && tds[1]) {
-      cell = tds[1];
-    }
-
-    // Fallback: first non-checkbox cell
-    if (!cell) {
-      cell = tds.find(td => !td.querySelector('input[type="checkbox"]')) || tds[0];
-    }
-
-    if (!cell) return "Item";
-
-    const field = cell.querySelector("input, select, textarea");
-    const value = field ? (field.value || "").trim() : (cell.textContent || "").trim();
-
-    // ✅ RETURN JUST THE VALUE — NO PREFIX
+    // TRAINING CHECKLIST: Name is in the FIRST cell (same cell as checkbox)
     if (secId === "training-checklist") {
+      const nameInput =
+        tr.querySelector('td:first-child input[type="text"]') ||
+        tr.querySelector('td:nth-child(2) input[type="text"]'); // fallback if your layout changes
+
+      const value = (nameInput?.value || nameInput?.textContent || "").trim();
       return value || "(blank)";
     }
 
+    // OPCODES: opcode is typically in 2nd cell (after checkbox)
     if (secId === "opcodes-pricing") {
+      const opcodeInput =
+        tr.querySelector('td:nth-child(2) input[type="text"]') ||
+        tr.querySelector('td:nth-child(2) input, td:nth-child(2) select, td:nth-child(2) textarea');
+
+      const value = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
       return value || "(blank)";
     }
 
+    // Fallback: first non-checkbox field in the row
+    const field =
+      tr.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
+      null;
+
+    const value = (field?.value || field?.textContent || "").trim();
     return value || "Item";
   }
 
