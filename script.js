@@ -1402,7 +1402,7 @@
        (template row + clones) and prevent “4 row” issue
     ======================= */
     (() => {
-      const section = document.getElementById("service-advisors");
+const section = document.querySelector('[data-notes-target="notes-advisors"]')?.closest(".section");
       if (!section) return;
 
       const table = section.querySelector("table.training-table");
