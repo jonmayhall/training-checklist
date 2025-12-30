@@ -1764,3 +1764,52 @@ button.remove-row{
   width: 100%;
   max-width: 100%;
 }
+
+/* =========================================================
+   MK TABLE MODAL — FIX Name column overflow + improve title spacing
+   (MODAL ONLY / SAFE)
+   ========================================================= */
+
+/* 1) Give the popup title bar breathing room and shift title right */
+#mkTableModal .mk-modal-header{
+  padding: 10px 22px !important; /* a bit more left/right padding */
+}
+
+#mkTableModal .mk-modal-title{
+  margin: 0 !important;
+  padding-left: 6px !important;  /* subtle shift right */
+  font-size: 18px !important;    /* slightly skinnier look */
+  font-weight: 800 !important;
+}
+
+/* 2) FIX: Name column checkbox + text input overflow inside MODAL */
+#mkTableModal .training-table td:first-child{
+  /* Make the checkbox + input behave nicely inside the cell */
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow: hidden !important;   /* prevents spill outside the cell */
+  min-width: 0 !important;
+}
+
+#mkTableModal .training-table td:first-child input[type="checkbox"]{
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+#mkTableModal .training-table td:first-child input[type="text"]{
+  flex: 1 1 auto !important;
+  min-width: 0 !important;       /* KEY: allows shrinking */
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+/* 3) Override the global min-width on inputs/selects ONLY in the modal */
+#mkTableModal .training-table input[type="text"],
+#mkTableModal .training-table select,
+#mkTableModal .training-table textarea{
+  min-width: 0 !important;       /* this is what stops the overflow */
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
