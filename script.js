@@ -830,6 +830,37 @@ document.addEventListener("keydown", (e) => {
   triggerInputChange(ta);
 });
 
+/* =======================
+   NOTES POPOVER HANDLING
+   (NO LAYOUT SHIFT)
+======================= */
+
+document.addEventListener("click", (e) => {
+  const notesBtn = e.target.closest("[data-notes-target]");
+  if (!notesBtn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const targetId = notesBtn.dataset.notesTarget;
+  const panel = document.getElementById(targetId);
+  if (!panel) return;
+
+  // Close all other open notes panels
+  document.querySelectorAll(".notes-panel.open").forEach((p) => {
+    if (p !== panel) p.classList.remove("open");
+  });
+
+  panel.classList.toggle("open");
+});
+
+// Click anywhere else closes notes
+document.addEventListener("click", () => {
+  document
+    .querySelectorAll(".notes-panel.open")
+    .forEach((p) => p.classList.remove("open"));
+});
+
   /* =======================
      SUPPORT TICKETS
   ======================= */
