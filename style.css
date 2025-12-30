@@ -1827,3 +1827,41 @@ button.remove-row{
 .mk-ta-wrap > textarea{
   min-height: 160px !important;
 }
+
+/* ===== Expand Modal (Table + Notes bundle) ===== */
+#mkTableModal.open { display: block; }
+
+#mkTableModal .mk-modal-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 9998;
+}
+
+#mkTableModal .mk-modal-panel{
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  width: min(1200px, 92vw);
+  height: min(86vh, 900px);
+  z-index: 9999;
+  overflow: auto;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+#mkTableModal .mk-modal-content{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.table-footer{
+  position: relative;
+}
+
+/* expand button bottom-right of footer */
+.table-footer .mk-table-expand-btn{
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+}
