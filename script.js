@@ -534,6 +534,28 @@
     cloneState.set(clones);
   };
 
+   const addPresetRowsToTable = (table, count = 3) => {
+  if (!table) return;
+  const tbody = $("tbody", table);
+  if (!tbody) return;
+
+  const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
+  if (!baseRow) return;
+
+  // Only count rows that are actual starter rows (cloned ones)
+  const existingClones = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).length;
+  if (existingClones > 0) return;
+
+  for (let i = 0; i < count; i++) {
+    const clone = baseRow.cloneNode(true);
+    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
+    clearRowFields(clone);
+    tbody.appendChild(clone);
+  }
+
+  persistTable(table);
+};
+
   const cloneTableRow = (btn) => {
     const footer = btn.closest(".table-footer");
     const container = footer?.closest(".section-block") || footer?.parentElement;
