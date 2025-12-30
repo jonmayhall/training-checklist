@@ -781,6 +781,55 @@
     btn.classList.add("has-notes");
   };
 
+   /* =======================
+   NOTES: Enter => auto hollow bullet
+   - When typing inside a notes textarea (the big textbox inside the notes target card),
+     pressing Enter inserts: "\n  ◦ " and places cursor after it.
+======================= */
+
+const isNotesTargetTextarea = (ta) => {
+  if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+
+  // Primary: your notes target cards are referenced by data-notes-target on the button
+  // This checks if the textarea is inside an element that is a notes target in your system.
+  const notesTargetHost = ta.closest("[id]");
+  if (!notesTargetHost) return false;
+
+  // If ANY notes button points to this host id, treat this textarea as a notes textarea
+  const hostId = notesTargetHost.id;
+  if (!hostId) return false;
+
+  return !!document.querySelector(`[data-notes-target="${CSS.escape(hostId)}"]`);
+};
+
+document.addEventListener("keydown", (e) => {
+  const ta = e.target;
+  if (!isNotesTargetTextarea(ta)) return;
+
+  if (e.key !== "Enter") return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return; // keep Shift+Enter etc normal
+
+  // Insert newline + hollow bullet at caret (not at end)
+  e.preventDefault();
+
+  const insert = "\n  ◦ ";
+  const start = ta.selectionStart ?? ta.value.length;
+  const end = ta.selectionEnd ?? ta.value.length;
+
+  const before = ta.value.slice(0, start);
+  const after = ta.value.slice(end);
+
+  ta.value = before + insert + after;
+
+  const caret = start + insert.length;
+  ta.setSelectionRange(caret, caret);
+
+  // Persist + trigger your existing save flows
+  ensureId(ta);
+  saveField(ta);
+  triggerInputChange(ta);
+});
+
   /* =======================
      SUPPORT TICKETS
   ======================= */
