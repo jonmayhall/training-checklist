@@ -171,13 +171,20 @@
   </div>
 </section>
 
-       <!-- ========================================================= -->
+    <!-- ========================================================= -->
 <!-- PAGE 2: DEALERSHIP INFO                                   -->
 <!-- ========================================================= -->
 <section id="dealership-info" class="page-section">
   <h1>Dealership Info</h1>
-  <p class="page-subtitle">Core dealership details and key contacts your team will work with.</p>
-  <button class="clear-page-btn" type="button" data-clear-page="dealership-info">
+  <p class="page-subtitle">
+    Core dealership details and key contacts your team will work with.
+  </p>
+
+  <button
+    class="clear-page-btn"
+    type="button"
+    data-clear-page="dealership-info"
+  >
     Reset This Page
   </button>
 
@@ -187,22 +194,38 @@
 
     <div class="checklist-row">
       <label>Dealer Group</label>
-      <input type="text" id="dealerGroupInput" placeholder="Enter dealer group name" />
+      <input
+        type="text"
+        id="dealerGroupInput"
+        placeholder="Enter dealer group name"
+      />
     </div>
 
     <div class="checklist-row">
       <label>Dealership Name</label>
-      <input type="text" id="dealershipNameInput" placeholder="Enter dealership name" />
+      <input
+        type="text"
+        id="dealershipNameInput"
+        placeholder="Enter dealership name"
+      />
     </div>
 
     <div class="checklist-row">
       <label>DID</label>
-      <input type="text" id="dealershipDidInput" placeholder="Enter dealership DID" />
+      <input
+        type="text"
+        id="dealershipDidInput"
+        placeholder="Enter dealership DID"
+      />
     </div>
 
     <div class="checklist-row">
       <label>Salesforce Order</label>
-      <input type="text" id="SForderInput" placeholder="Enter SF order link" />
+      <input
+        type="text"
+        id="SForderInput"
+        placeholder="Enter SF order link"
+      />
     </div>
 
     <div class="checklist-row">
@@ -225,8 +248,8 @@
     <div class="checklist-row training-dates-row">
       <label>Onsite Training Dates</label>
       <div class="date-stack">
-        <input type="date" id="onsiteStartDate" class="date-input is-placeholder" />
-        <input type="date" id="onsiteEndDate" class="date-input is-placeholder" />
+        <input type="date" id="onsiteStartDate" class="is-placeholder" />
+        <input type="date" id="onsiteEndDate" class="is-placeholder" />
       </div>
     </div>
   </div>
@@ -236,6 +259,7 @@
     <h2>Primary Contacts</h2>
 
     <div class="primary-contacts-grid">
+
       <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
@@ -300,54 +324,57 @@
         </div>
       </div>
 
-<!-- ========== ADDITIONAL POINT OF CONTACT (BASE) ========== -->
-<div class="mini-card additional-poc-card" data-base="true">
-  <div class="checklist-row integrated-plus indent-sub" data-base="true">
-    <label>Additional POC</label>
+      <!-- ========== ADDITIONAL POC (BASE) ========== -->
+      <div class="mini-card additional-poc-card" data-base="true">
+        <div class="checklist-row integrated-plus indent-sub">
+          <label>Additional POC</label>
 
-    <div class="input-plus">
-      <input
-        id="additionalPocInput"
-        type="text"
-        placeholder="Enter name"
-        autocomplete="off"
-      />
+          <div class="input-plus">
+            <input
+              id="additionalPocInput"
+              type="text"
+              placeholder="Enter name"
+              autocomplete="off"
+            />
 
-      <button
-        type="button"
-        class="trainer-add-btn poc-add-btn"
-        data-add-poc
-        title="Add another contact"
-        aria-label="Add another contact"
-      >
-        +
-      </button>
-    </div>
-  </div>
+            <button
+              type="button"
+              class="trainer-add-btn poc-add-btn"
+              data-add-poc
+              title="Add another contact"
+              aria-label="Add another contact"
+            >
+              +
+            </button>
+          </div>
+        </div>
 
-  <div class="checklist-row indent-sub">
-    <label>Role</label>
-    <input type="text" placeholder="Enter role" />
-  </div>
+        <div class="checklist-row indent-sub">
+          <label>Role</label>
+          <input type="text" placeholder="Enter role" />
+        </div>
 
-  <div class="checklist-row indent-sub">
-    <label>Cell</label>
-    <input type="text" placeholder="Enter cell" />
-  </div>
+        <div class="checklist-row indent-sub">
+          <label>Cell</label>
+          <input type="text" placeholder="Enter cell" />
+        </div>
 
-  <div class="checklist-row indent-sub">
-    <label>Email</label>
-    <input type="email" placeholder="Enter company email" />
-  </div>
-</div>
-
-<!-- ✅ Added POC cards will be appended here (ONE time only) -->
-<div id="additionalPocsContainer" class="integrated-plus-container"></div>
+        <div class="checklist-row indent-sub">
+          <label>Email</label>
+          <input type="email" placeholder="Enter company email" />
+        </div>
       </div>
+
+      <!-- Added POCs render here -->
+      <div
+        id="additionalPocsContainer"
+        class="integrated-plus-container"
+      ></div>
+
     </div>
   </div>
 
-  <!-- ================= DEALERSHIP ADDRESS (MUST BE BELOW CONTACTS CARD) ================= -->
+  <!-- ================= DEALERSHIP ADDRESS ================= -->
   <div class="section-block" id="dealership-address-card">
     <h2>Dealership Address</h2>
 
@@ -362,7 +389,13 @@
           placeholder="Enter dealership address"
           autocomplete="off"
         />
-        <button type="button" class="small-map-btn" id="openAddressInMapsBtn">Map</button>
+        <button
+          type="button"
+          class="small-map-btn"
+          id="openAddressInMapsBtn"
+        >
+          Map
+        </button>
       </div>
     </div>
 
@@ -376,7 +409,9 @@
       ></iframe>
     </div>
 
-    <p class="map-helper-text">Select an address above to update this map.</p>
+    <p class="map-helper-text">
+      Select an address above to update this map.
+    </p>
   </div>
 </section>
 
