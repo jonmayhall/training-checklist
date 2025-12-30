@@ -414,597 +414,281 @@
     input.focus();
   };
 
- /* =======================
-   NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-   ✅ Keeps QUESTION ORDER always
-   ✅ NO visible mk: tags (keys are invisible, using zero-width chars)
-   ✅ De-dupes
-   ✅ NO page shift (uses preserveScroll + preventScroll focus)
-======================= */
+  /* =======================
+     NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
+     ✅ Single implementation (REMOVED all duplicates below)
+  ======================= */
+  const Notes = (() => {
+    const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
 
-const Notes = (() => {
-  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+    // IMPORTANT: DO NOT use data-target fallback (collides with sidebar nav)
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") ||
+      btn.getAttribute("href")?.replace("#", "") ||
+      "";
 
-  // IMPORTANT: DO NOT use data-target fallback (collides with sidebar nav)
-  const getNotesTargetId = (btn) =>
-    btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+    // ---------- Invisible key marker (zero-width only) ----------
+    const ZW0 = "\u200B";      // 0
+    const ZW1 = "\u200C";      // 1
+    const WRAP = "\u2060";     // word-joiner wrapper (invisible)
 
-  // ---------- Invisible key marker (zero-width only) ----------
-  const ZW0 = "\u200B";      // 0
-  const ZW1 = "\u200C";      // 1
-  const WRAP = "\u2060";     // word-joiner wrapper (invisible)
+    const zwEncode = (plain) => {
+      const bytes = new TextEncoder().encode(String(plain));
+      let bits = "";
+      for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+      return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+    };
 
-  const zwEncode = (plain) => {
-    const bytes = new TextEncoder().encode(String(plain));
-    let bits = "";
-    for (const b of bytes) bits += b.toString(2).padStart(8, "0");
-    return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
-  };
+    const zwDecode = (zw) => {
+      const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+      const bytes = [];
+      for (let i = 0; i + 7 < bits.length; i += 8)
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      try {
+        return new TextDecoder().decode(new Uint8Array(bytes));
+      } catch {
+        return "";
+      }
+    };
 
-  const zwDecode = (zw) => {
-    const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
-    const bytes = [];
-    for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
-    try {
-      return new TextDecoder().decode(new Uint8Array(bytes));
-    } catch {
-      return "";
-    }
-  };
+    const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
 
-  const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
+    const extractKeyFromLine = (line) => {
+      const s = String(line || "");
+      const a = s.indexOf(WRAP);
+      if (a < 0) return null;
+      const b = s.indexOf(WRAP, a + 1);
+      if (b < 0) return null;
+      const payload = s.slice(a + 1, b);
+      const decoded = zwDecode(payload);
+      return decoded || null;
+    };
 
-  const extractKeyFromLine = (line) => {
-    const s = String(line || "");
-    const a = s.indexOf(WRAP);
-    if (a < 0) return null;
-    const b = s.indexOf(WRAP, a + 1);
-    if (b < 0) return null;
-    const payload = s.slice(a + 1, b);
-    const decoded = zwDecode(payload);
-    return decoded || null;
-  };
+    // Remove OLD visible junk from earlier builds (mk:... and [mk:...])
+    const cleanupLegacyVisibleKeys = (text) => {
+      let v = normalizeNL(text || "");
+      v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");     // " [mk:...]" style
+      v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");    // "mk:notes-..." style
+      // remove any stray WRAP markers from earlier attempts
+      const re = new RegExp(`${WRAP}[\\s\\S]*?${WRAP}`, "g");
+      v = v.replace(re, "");
+      return v;
+    };
 
-  // Remove OLD visible junk from earlier builds (mk:... and [mk:...])
-  const cleanupLegacyVisibleKeys = (text) => {
-    let v = normalizeNL(text || "");
-    v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");          // " [mk:...]" style
-    v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");         // "mk:notes-..." style
-    // also remove any stray WRAP markers from earlier attempts
-    const re = new RegExp(`${WRAP}[\\s\\S]*?${WRAP}`, "g");
-    v = v.replace(re, "");
-    return v;
-  };
+    // ---------- Stable slot key (for ordering) ----------
+    const getSlotKey = (btn) => {
+      const hostId = getNotesTargetId(btn) || "notes";
 
-  // ---------- Stable slot key (for ordering) ----------
-  const getSlotKey = (btn) => {
-    const hostId = getNotesTargetId(btn) || "notes";
+      const tr = btn.closest("tr");
+      if (tr) {
+        const table = btn.closest("table") || tr.closest("table");
+        const tb = tr.parentElement;
+        const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+        const idx = rows.indexOf(tr);
+        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+        return `${hostId}::tbl::${tKey}::r${idx}`;
+      }
 
-    const tr = btn.closest("tr");
-    if (tr) {
-      const table = btn.closest("table") || tr.closest("table");
-      const tb = tr.parentElement;
-      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
-      const idx = rows.indexOf(tr);
-      const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
-      return `${hostId}::tbl::${tKey}::r${idx}`;
-    }
+      const all = Array.from(
+        document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+      );
+      const idx = all.indexOf(btn);
 
-    const all = Array.from(
-      document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
-    );
-    const idx = all.indexOf(btn);
+      const row = btn.closest(".checklist-row") || btn;
+      const labelText =
+        (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
 
-    // fallback hash (in case idx not found)
-    const row = btn.closest(".checklist-row") || btn;
-    const labelText =
-      (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
+      let h = 5381;
+      for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
+      const labelHash = (h >>> 0).toString(16);
 
-    let h = 5381;
-    for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
-    const labelHash = (h >>> 0).toString(16);
+      return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
+    };
 
-    return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
-  };
+    const findOrDerivePromptText = (btn) => {
+      const tr = btn.closest("tr");
+      const table = btn.closest("table");
+      const section = getSection(btn);
+      const secId = section?.id || "";
 
-  const findOrDerivePromptText = (btn) => {
-    const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    const section = getSection(btn);
-    const secId = section?.id || "";
+      if (tr && table) {
+        const ths = $$("thead th", table).map((th) =>
+          (th.textContent || "").trim().toLowerCase()
+        );
+        const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+        let idx = -1;
 
-    if (tr && table) {
-      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-      let idx = -1;
+        if (secId === "training-checklist") idx = idxOf("name");
+        if (secId === "opcodes-pricing") idx = idxOf("opcode");
+        if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
 
-      if (secId === "training-checklist") idx = idxOf("name");
-      if (secId === "opcodes-pricing") idx = idxOf("opcode");
-      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
-
-      if (idx < 0) {
-        const tds = $$("td", tr);
-        for (let i = 0; i < tds.length; i++) {
-          const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
-          if (field) {
-            idx = i;
-            break;
+        if (idx < 0) {
+          const tds = $$("td", tr);
+          for (let i = 0; i < tds.length; i++) {
+            const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
+            if (field) {
+              idx = i;
+              break;
+            }
           }
         }
+
+        const tds = $$("td", tr);
+        const cell = idx >= 0 ? tds[idx] : null;
+        let val = "";
+
+        if (cell) {
+          const field = $("input, textarea, select", cell);
+          if (field) val = (field.value || "").trim();
+          else val = (cell.textContent || "").trim();
+        }
+
+        const label =
+          secId === "training-checklist"
+            ? "Name"
+            : secId === "opcodes-pricing"
+            ? "Opcode"
+            : "Item";
+
+        return val ? `${label}: ${val}` : `${label}: (blank)`;
       }
 
-      const tds = $$("td", tr);
-      const cell = idx >= 0 ? tds[idx] : null;
-      let val = "";
-
-      if (cell) {
-        const field = $("input, textarea, select", cell);
-        if (field) val = (field.value || "").trim();
-        else val = (cell.textContent || "").trim();
-      }
-
-      const label =
-        secId === "training-checklist"
-          ? "Name"
-          : secId === "opcodes-pricing"
-          ? "Opcode"
-          : "Item";
-
-      return val ? `${label}: ${val}` : `${label}: (blank)`;
-    }
-
-    const row = btn.closest(".checklist-row");
-    const label = row ? row.querySelector("label") : null;
-    return (label?.textContent || "").trim() || "Notes";
-  };
-
-  // ---------- Block parsing / rebuilding (uses invisible marker) ----------
-  const isMainLine = (line) => {
-    const s = String(line || "").trim();
-    return s.startsWith("•") && s.includes(WRAP);
-  };
-
-  const parseBlocks = (text) => {
-    const lines = normalizeNL(text || "").split("\n");
-    const blocks = [];
-    let cur = null;
-
-    const flush = () => {
-      if (cur) blocks.push(cur);
-      cur = null;
+      const row = btn.closest(".checklist-row");
+      const label = row ? row.querySelector("label") : null;
+      return (label?.textContent || "").trim() || "Notes";
     };
 
-    for (const line of lines) {
-      if (isMainLine(line)) {
-        flush();
-        cur = { key: extractKeyFromLine(line) || "__unknown__", lines: [line] };
-      } else {
-        if (!cur) cur = { key: "__misc__", lines: [] };
-        cur.lines.push(line);
-      }
-    }
-    flush();
-
-    return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
-  };
-
-  const buildBlockLines = (promptText, key) => {
-    // Visible prompt only. Invisible marker at end.
-    const main = `• ${promptText}${makeMarker(key)}`;
-    const sub = `  ◦ `;
-    return [main, sub];
-  };
-
-  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
-    const btns = Array.from(
-      document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
-    );
-    const wanted = btns.map(getSlotKey);
-
-    const map = new Map();
-    blocks.forEach((b) => {
-      if (b.key && b.key !== "__misc__") map.set(b.key, b);
-    });
-
-    const out = [];
-    for (const k of wanted) {
-      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
-    }
-
-    if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
-      out.push(map.get(newlyAddedKey).lines.join("\n"));
-    }
-
-    return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-  };
-
-  const caretAtHollowForKey = (text, key) => {
-    const v = normalizeNL(text || "");
-    const marker = makeMarker(key);
-    const idx = v.indexOf(marker);
-    if (idx < 0) return v.length;
-
-    const lineEnd = v.indexOf("\n", idx);
-    const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
-
-    const after = v.slice(afterMain);
-    const rel = after.indexOf("◦");
-    if (rel < 0) return afterMain;
-    return afterMain + rel + 2; // after "◦ "
-  };
-
-  const handleNotesClick = (btn) => {
-    const targetId = getNotesTargetId(btn);
-    if (!targetId) return;
-
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
-
-    const ta = $("textarea", target);
-    if (!ta) return;
-
-    const promptText = findOrDerivePromptText(btn);
-    const slotKey = getSlotKey(btn);
-
-    preserveScroll(() => {
-      // Clean old visible mk garbage once, safely
-      ta.value = cleanupLegacyVisibleKeys(ta.value);
-
-      // Parse existing blocks (that already have invisible markers)
-      let blocks = parseBlocks(ta.value);
-
-      // If none exist yet, start from empty
-      const exists = blocks.some((b) => b.key === slotKey);
-      if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
-
-      // Rebuild in question order
-      ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey) + "\n";
-
-      // Focus caret without scrolling
-      const caret = caretAtHollowForKey(ta.value, slotKey);
-      try {
-        ta.focus({ preventScroll: true });
-      } catch {
-        ta.focus();
-      }
-      try {
-        ta.setSelectionRange(caret, caret);
-      } catch {}
-
-      btn.classList.add("has-notes");
-
-      ensureId(ta);
-      saveField(ta);
-      triggerInputChange(ta);
-    });
-  };
-
-  const isNotesTargetTextarea = (ta) => {
-    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-    const host = ta.closest("[id]");
-    if (!host || !host.id) return false;
-    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
-  };
-
-  return { handleNotesClick, isNotesTargetTextarea };
-})();
-
-// ---------------------------
-// Parse blocks (main line must contain our invisible marker)
-// ---------------------------
-const parseNotesBlocks = (value) => {
-  const v = normalizeNL(value || "");
-  const lines = v.split("\n");
-
-  const blocks = [];
-  let cur = null;
-
-  const isMain = (line) => {
-    const s = String(line || "");
-    return s.trim().startsWith("•") && s.includes(ZW_WRAP);
-  };
-
-  const flush = () => {
-    if (cur) {
-      blocks.push(cur);
-      cur = null;
-    }
-  };
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (isMain(line)) {
-      flush();
-      const key = extractKeyFromLine(line) || "__unknown__";
-      cur = { key, lines: [line] };
-      continue;
-    }
-
-    if (!cur) cur = { key: "__misc__", lines: [] };
-    cur.lines.push(line);
-  }
-  flush();
-
-  return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
-};
-
-const buildBlockLines = (promptText, key) => {
-  // Visible: • PromptText
-  // Invisible: key marker at end of line
-  const main = `• ${promptText}${makeKeyMarker(key)}`;
-  const sub = `  ◦ `;
-  return [main, sub];
-};
-
-const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
-  const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
-  const wantedKeys = btns.map((b) => getNotesSlotKey(b));
-
-  const map = new Map();
-  blocks.forEach((b) => {
-    if (b.key && b.key !== "__misc__") map.set(b.key, b);
-  });
-
-  const out = [];
-  for (const k of wantedKeys) {
-    if (map.has(k)) out.push(map.get(k).lines.join("\n"));
-  }
-
-  if (newlyAddedKey && !wantedKeys.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
-    out.push(map.get(newlyAddedKey).lines.join("\n"));
-  }
-
-  return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-};
-
-const findCaretForKey = (text, key) => {
-  const v = normalizeNL(text || "");
-  const marker = makeKeyMarker(key);
-
-  // Find the exact main line containing this invisible marker
-  const idx = v.indexOf(marker);
-  if (idx < 0) return v.length;
-
-  // Go back to start of the line
-  const lineStart = v.lastIndexOf("\n", idx) + 1;
-  const lineEnd = v.indexOf("\n", idx);
-  const afterMainLinePos = lineEnd >= 0 ? lineEnd + 1 : v.length;
-
-  // Now find the next "◦" after the main line
-  const after = v.slice(afterMainLinePos);
-  const rel = after.indexOf("◦");
-  if (rel < 0) return afterMainLinePos;
-  return afterMainLinePos + rel + 2; // after "◦ "
-};
-
-const handleNotesClick = (btn) => {
-  const targetId = getNotesTargetId(btn);
-  if (!targetId) return;
-
-  const target = document.getElementById(targetId);
-  if (!target) return;
-
-  if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-  if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
-
-  const ta = $("textarea", target);
-  if (!ta) return;
-
-  const promptText = findOrDerivePromptText(btn);
-  const slotKey = getNotesSlotKey(btn);
-
-  preserveScroll(() => {
-    // ONE-TIME CLEANUP of old visible mk junk + strip any old markers
-    ta.value = stripMarkersFromText(ta.value);
-
-    // Parse blocks from current content (after cleanup, none will match "isMain" yet)
-    // So we rebuild from scratch using storage-inside-text via invisible markers going forward.
-    let blocks = parseNotesBlocks(ta.value);
-
-    // If no blocks exist (likely right after cleanup), we treat ta as empty blocks:
-    // We only add blocks via notes clicks.
-    const exists = blocks.some((b) => b.key === slotKey);
-
-    if (!exists) {
-      const lines = buildBlockLines(promptText, slotKey);
-      blocks.push({ key: slotKey, lines });
-    }
-
-    // Rebuild in canonical order
-    const rebuilt = rebuildInCanonicalOrder(targetId, blocks, slotKey);
-    ta.value = rebuilt ? rebuilt + "\n" : "";
-
-    // Focus caret at this slot’s hollow bullet
-    const caret = findCaretForKey(ta.value, slotKey);
-    try {
-      ta.focus({ preventScroll: true });
-    } catch {
-      ta.focus();
-    }
-    try {
-      ta.setSelectionRange(caret, caret);
-    } catch {}
-
-    // Visual state
-    btn.classList.add("has-notes");
-
-    // Persist
-    ensureId(ta);
-    saveField(ta);
-    triggerInputChange(ta);
-  });
-};
-
-// Detect if a textarea is a “notes big textbox” target (only ones referenced by notes buttons)
-const isNotesTargetTextarea = (ta) => {
-  if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-  const host = ta.closest("[id]");
-  if (!host || !host.id) return false;
-  return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
-};
-
-  // Parse existing notes blocks into {key, lines[]}
-  // Supports BOTH:
-  //   old: "• Prompt [mk:key]"
-  //   new: "• Prompt<INVISIBLE mk:key>"
-  const parseNotesBlocks = (value) => {
-    const v = normalizeNL(value || "");
-    const lines = v.split("\n");
-
-    const blocks = [];
-    let cur = null;
-
-    const oldKeyRe = /^\s*•\s*(.*?)\s*\[mk:(.+?)\]\s*$/;
-    const newKeyRe = new RegExp(
-      `^\\s*•\\s*(.*?)\\s*${MK_MARK}mk:(.+?)${MK_MARK}\\s*$`
-    );
-
-    const isMain = (line) => oldKeyRe.test(line) || newKeyRe.test(line);
-
-    const extractKey = (line) => {
-      const m1 = line.match(oldKeyRe);
-      if (m1) return { prompt: m1[1], key: m1[2] };
-      const m2 = line.match(newKeyRe);
-      if (m2) return { prompt: m2[1], key: m2[2] };
-      return null;
+    // ---------- Block parsing / rebuilding (uses invisible marker) ----------
+    const isMainLine = (line) => {
+      const s = String(line || "").trim();
+      return s.startsWith("•") && s.includes(WRAP);
     };
 
-    const flush = () => {
-      if (cur) {
-        blocks.push(cur);
+    const parseBlocks = (text) => {
+      const lines = normalizeNL(text || "").split("\n");
+      const blocks = [];
+      let cur = null;
+
+      const flush = () => {
+        if (cur) blocks.push(cur);
         cur = null;
+      };
+
+      for (const line of lines) {
+        if (isMainLine(line)) {
+          flush();
+          cur = { key: extractKeyFromLine(line) || "__unknown__", lines: [line] };
+        } else {
+          if (!cur) cur = { key: "__misc__", lines: [] };
+          cur.lines.push(line);
+        }
       }
+      flush();
+
+      return blocks.filter(
+        (b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === "")
+      );
     };
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+    const buildBlockLines = (promptText, key) => {
+      const main = `• ${promptText}${makeMarker(key)}`;
+      const sub = `  ◦ `;
+      return [main, sub];
+    };
 
-      if (isMain(line)) {
-        flush();
-        const ex = extractKey(line);
-        cur = { key: ex ? ex.key : "__unknown__", lines: [line] };
-        continue;
+    const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+      const btns = Array.from(
+        document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
+      );
+      const wanted = btns.map(getSlotKey);
+
+      const map = new Map();
+      blocks.forEach((b) => {
+        if (b.key && b.key !== "__misc__") map.set(b.key, b);
+      });
+
+      const out = [];
+      for (const k of wanted) {
+        if (map.has(k)) out.push(map.get(k).lines.join("\n"));
       }
 
-      if (!cur) cur = { key: "__misc__", lines: [] };
-      cur.lines.push(line);
-    }
-    flush();
+      if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+        out.push(map.get(newlyAddedKey).lines.join("\n"));
+      }
 
-    return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
-  };
+      return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+    };
 
-  const buildBlock = (promptText, key) => {
-    // ✅ NO visible [mk:...] — marker is invisible but parseable
-    const main = `• ${stripKeyMarkers(promptText)}${makeKeyMarker(key)}`;
-    const sub = `  ◦ `;
-    return `${main}\n${sub}`;
-  };
+    const caretAtHollowForKey = (text, key) => {
+      const v = normalizeNL(text || "");
+      const marker = makeMarker(key);
+      const idx = v.indexOf(marker);
+      if (idx < 0) return v.length;
 
-  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
-    const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
-    const wantedKeys = btns.map((b) => getNotesSlotKey(b));
+      const lineEnd = v.indexOf("\n", idx);
+      const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
 
-    const map = new Map();
-    blocks.forEach((b) => {
-      if (b.key && b.key !== "__misc__") map.set(b.key, b);
-    });
+      const after = v.slice(afterMain);
+      const rel = after.indexOf("◦");
+      if (rel < 0) return afterMain;
+      return afterMain + rel + 2; // after "◦ "
+    };
 
-    const out = [];
-    for (const k of wantedKeys) {
-      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
-    }
+    const handleNotesClick = (btn) => {
+      const targetId = getNotesTargetId(btn);
+      if (!targetId) return;
 
-    if (newlyAddedKey && !wantedKeys.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
-      out.push(map.get(newlyAddedKey).lines.join("\n"));
-    }
+      const target = document.getElementById(targetId);
+      if (!target) return;
 
-    return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-  };
+      if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+      if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
-  const findCaretForKey = (text, key) => {
-    const v = normalizeNL(text || "");
+      const ta = $("textarea", target);
+      if (!ta) return;
 
-    // match either old bracket style OR new invisible marker style
-    const re = new RegExp(
-      `^\\s*•.*(?:\\[mk:${escapeRegex(key)}\\]|${MK_MARK}mk:${escapeRegex(key)}${MK_MARK})\\s*$`,
-      "m"
-    );
+      const promptText = findOrDerivePromptText(btn);
+      const slotKey = getSlotKey(btn);
 
-    const m = v.match(re);
-    if (!m || typeof m.index !== "number") return v.length;
+      preserveScroll(() => {
+        ta.value = cleanupLegacyVisibleKeys(ta.value);
 
-    const mainStart = m.index;
-    const mainEnd = mainStart + m[0].length;
+        let blocks = parseBlocks(ta.value);
 
-    // look for the next "◦" after the main line
-    const after = v.slice(mainEnd);
-    const nextNl = after.indexOf("\n");
-    if (nextNl < 0) return v.length;
+        const exists = blocks.some((b) => b.key === slotKey);
+        if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
 
-    const rest = after.slice(nextNl + 1);
-    const rel = rest.indexOf("◦");
-    if (rel < 0) return mainEnd + 1;
+        ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey) + "\n";
 
-    return mainEnd + 1 + nextNl + 1 + rel + 2; // after "◦ "
-  };
+        const caret = caretAtHollowForKey(ta.value, slotKey);
+        try {
+          ta.focus({ preventScroll: true });
+        } catch {
+          ta.focus();
+        }
+        try {
+          ta.setSelectionRange(caret, caret);
+        } catch {}
 
-  const handleNotesClick = (btn) => {
-    const targetId = getNotesTargetId(btn);
-    if (!targetId) return;
-
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
-
-    const ta = $("textarea", target);
-    if (!ta) return;
-
-    const promptText = findOrDerivePromptText(btn);
-    const slotKey = getNotesSlotKey(btn);
-
-    preserveScroll(() => {
-      const blocks = parseNotesBlocks(ta.value);
-      const exists = blocks.some((b) => b.key === slotKey);
-
-      if (!exists) {
-        blocks.push({ key: slotKey, lines: buildBlock(promptText, slotKey).split("\n") });
         btn.classList.add("has-notes");
-      }
 
-      const rebuilt = rebuildInCanonicalOrder(targetId, blocks, slotKey);
-      ta.value = rebuilt ? rebuilt + "\n" : "";
+        ensureId(ta);
+        saveField(ta);
+        triggerInputChange(ta);
+      });
+    };
 
-      const caret = findCaretForKey(ta.value, slotKey);
+    const isNotesTargetTextarea = (ta) => {
+      if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+      const host = ta.closest("[id]");
+      if (!host || !host.id) return false;
+      return !!document.querySelector(
+        `[data-notes-target="${CSS.escape(host.id)}"]`
+      );
+    };
 
-      try {
-        ta.focus({ preventScroll: true });
-      } catch {
-        ta.focus();
-      }
-      try {
-        ta.setSelectionRange(caret, caret);
-      } catch {}
-
-      ensureId(ta);
-      saveField(ta);
-      triggerInputChange(ta);
-    });
-  };
-
-  // Detect if a textarea is the “notes big textbox” target (ones referenced by notes buttons)
-  const isNotesTargetTextarea = (ta) => {
-    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-    const host = ta.closest("[id]");
-    if (!host || !host.id) return false;
-    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
-  };
+    return { handleNotesClick, isNotesTargetTextarea };
+  })();
 
   /* =======================
      SUPPORT TICKETS
@@ -1397,12 +1081,13 @@ const isNotesTargetTextarea = (ta) => {
       return;
     }
 
-   const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
-if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
-  e.preventDefault();
-  Notes.handleNotesClick(notesBtn);
-  return;
-}
+    // NOTES
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+      e.preventDefault();
+      Notes.handleNotesClick(notesBtn);
+      return;
+    }
 
     // SUPPORT TICKET ADD (+)
     const ticketAddBtn = t.closest(".add-ticket-btn");
@@ -1516,12 +1201,11 @@ if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
 
   document.addEventListener("keydown", (e) => {
     const el = e.target;
-   if (e.key === "Enter" && Notes.isNotesTargetTextarea(el) && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
 
     // ENTER in Notes textarea => auto hollow bullet
     if (
       e.key === "Enter" &&
-      isNotesTargetTextarea(el) &&
+      Notes.isNotesTargetTextarea(el) &&
       !e.shiftKey &&
       !e.metaKey &&
       !e.ctrlKey &&
