@@ -1802,28 +1802,28 @@ button.remove-row{
 }
 
 /* =========================================================
-   TABLE NOTES CARDS — REDUCED HEIGHT (−25%)
+   TABLE NOTES CARDS — REDUCED HEIGHT (−33%)
 ========================================================= */
 
 /* Main page notes under tables */
 .section-block textarea,
 .mk-modal__notes-host textarea{
-  min-height: 240px !important;   /* was 320px */
+  min-height: 160px !important;   /* was 240px */
 }
 
 /* Table-adjacent notes cards */
 .table-container + .section-block textarea,
 .table-notes-card textarea,
 .notes-card textarea{
-  min-height: 240px !important;
+  min-height: 160px !important;
 }
 
 /* Expanded table modal notes */
 #mkTableModal .mk-modal-notes textarea{
-  min-height: 285px !important;   /* was 380px */
+  min-height: 190px !important;   /* was 285px */
 }
 
 /* Textarea wrapper */
 .mk-ta-wrap > textarea{
-  min-height: 240px !important;
+  min-height: 160px !important;
 }
