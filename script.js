@@ -1388,6 +1388,28 @@
     syncDealershipName();
     ensureTableExpandButtons();
 
+       /* =======================
+     SERVICE ADVISOR TABLE — PRESET ROWS (3)
+  ======================= */
+  (() => {
+    const section = document.getElementById("service-advisors");
+    if (!section) return;
+
+    const table = section.querySelector("table.training-table");
+    const addBtn = section.querySelector(".add-row");
+    const tbody = table?.querySelector("tbody");
+
+    if (!table || !addBtn || !tbody) return;
+
+    // If rows already exist (saved state), DO NOTHING
+    if (tbody.querySelectorAll("tr").length > 0) return;
+
+    // Add 3 starter rows
+    for (let i = 0; i < 3; i++) {
+      addBtn.click();
+    }
+  })();
+
     log("Initialized.");
   };
 
