@@ -414,358 +414,283 @@
     input.focus();
   };
 
-  /* =======================
-     ADD POC (+) — SINGLE FIRE
-  ======================= */
-  const getBasePocCard = (btn) =>
-    btn?.closest?.(".additional-poc-card[data-base='true']") ||
-    $(".additional-poc-card[data-base='true']");
-
-  const readPocBaseValues = (baseCard) => {
-    const nameEl =
-      baseCard.querySelector("#additionalPocInput") ||
-      baseCard.querySelector(".input-plus input[type='text']") ||
-      baseCard.querySelector('input[placeholder="Enter name"]');
-
-    const roleEl =
-      baseCard.querySelector('input[placeholder="Enter role"]') ||
-      baseCard.querySelector('input[type="text"][data-field="role"]');
-
-    const cellEl =
-      baseCard.querySelector('input[placeholder="Enter cell"]') ||
-      baseCard.querySelector('input[type="text"][data-field="cell"]');
-
-    const emailEl =
-      baseCard.querySelector('input[type="email"]') ||
-      baseCard.querySelector('input[placeholder="Enter company email"]');
-
-    return {
-      els: { nameEl, roleEl, cellEl, emailEl },
-      values: {
-        name: (nameEl?.value ?? "").trim(),
-        role: (roleEl?.value ?? "").trim(),
-        cell: (cellEl?.value ?? "").trim(),
-        email: (emailEl?.value ?? "").trim(),
-      },
-    };
-  };
-
-  const buildPocCard = ({ name = "", role = "", cell = "", email = "" } = {}) => {
-    const newCard = document.createElement("div");
-    newCard.className = "mini-card additional-poc-card";
-    newCard.setAttribute(AUTO_CARD_ATTR, "poc");
-    newCard.innerHTML = `
-      <div class="checklist-row">
-        <label>Additional POC</label>
-        <input type="text" placeholder="Enter name" autocomplete="off" />
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Role</label>
-        <input type="text" placeholder="Enter role" autocomplete="off" />
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Cell</label>
-        <input type="text" placeholder="Enter cell" autocomplete="off" />
-      </div>
-
-      <div class="checklist-row indent-sub">
-        <label>Email</label>
-        <input type="email" placeholder="Enter company email" autocomplete="off" />
-      </div>
-    `;
-
-    const nameNew = newCard.querySelector('input[placeholder="Enter name"]');
-    const roleNew = newCard.querySelector('input[placeholder="Enter role"]');
-    const cellNew = newCard.querySelector('input[placeholder="Enter cell"]');
-    const emailNew = newCard.querySelector('input[type="email"]');
-
-    if (nameNew) nameNew.value = name;
-    if (roleNew) roleNew.value = role;
-    if (cellNew) cellNew.value = cell;
-    if (emailNew) emailNew.value = email;
-
-    $$("input, select, textarea", newCard).forEach((el) => {
-      ensureId(el);
-      saveField(el);
-    });
-
-    return newCard;
-  };
-
-  const addPocCard = (btn) => {
-    const baseCard = getBasePocCard(btn);
-    if (!baseCard) return;
-
-    if (btn && btn.dataset.mkBusy === "1") return;
-    if (btn) {
-      btn.dataset.mkBusy = "1";
-      setTimeout(() => (btn.dataset.mkBusy = "0"), 0);
-    }
-
-    const { els, values } = readPocBaseValues(baseCard);
-
-    const newCard = buildPocCard(values);
-    baseCard.insertAdjacentElement("afterend", newCard);
-
-    const clones = cloneState.get();
-    clones.pocs.push(values);
-    cloneState.set(clones);
-
-    if (els.nameEl) els.nameEl.value = "";
-    if (els.roleEl) els.roleEl.value = "";
-    if (els.cellEl) els.cellEl.value = "";
-    if (els.emailEl) els.emailEl.value = "";
-
-    [els.nameEl, els.roleEl, els.cellEl, els.emailEl].forEach(triggerInputChange);
-
-    if (els.nameEl) els.nameEl.focus();
-  };
-
-  /* =======================
-     TABLE: ADD ROW (+) + RESTORE
-  ======================= */
-  const getTableKey = (table) => {
-    const k =
-      table.getAttribute("data-table-key") ||
-      table.id ||
-      (() => {
-        const h = table.closest(".table-container")?.previousElementSibling;
-        const ht = h?.textContent?.trim();
-        return ht ? `tbl:${ht}` : `tbl:${uid("t")}`;
-      })();
-    return k;
-  };
-
-  const extractRowValues = (tr) => {
-    const cells = [];
-    $$("input, select, textarea", tr).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) cells.push({ t: "cb", v: !!el.checked });
-      else cells.push({ t: "v", v: el.value ?? "" });
-    });
-    return cells;
-  };
-
-  const applyRowValues = (tr, vals) => {
-    const fields = $$("input, select, textarea", tr);
-    fields.forEach((el, idx) => {
-      const item = vals?.[idx];
-      if (!item) return;
-      if (el.matches("input[type='checkbox']")) el.checked = !!item.v;
-      else el.value = item.v ?? "";
-      ensureId(el);
-      saveField(el);
-    });
-  };
-
-  const cloneTableRow = (btn) => {
-    const footer = btn.closest(".table-footer");
-    if (!footer) return;
-
-    const tableContainer = btn.closest(".table-container");
-    if (!tableContainer) return;
-
-    const table = $("table.training-table", tableContainer);
-    const tbody = $("tbody", table);
-    if (!table || !tbody) return;
-
-    const rows = $$("tr", tbody);
-    if (!rows.length) return;
-
-    const template = rows[rows.length - 1];
-    const clone = template.cloneNode(true);
-    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
-
-    $$("input, select, textarea", clone).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else el.value = "";
-      el.removeAttribute(AUTO_ID_ATTR);
-      ensureId(el);
-      saveField(el);
-    });
-
-    tbody.appendChild(clone);
-
-    const tableKey = getTableKey(table);
-    const clones = cloneState.get();
-    clones.tables[tableKey] = clones.tables[tableKey] || [];
-    clones.tables[tableKey].push(extractRowValues(clone));
-    cloneState.set(clones);
-  };
-
-  const rebuildTableClones = () => {
-    const clones = cloneState.get();
-    const tables = $$("table.training-table");
-
-    tables.forEach((table) => {
-      const key = getTableKey(table);
-      const rowsData = clones.tables[key];
-      if (!rowsData || !rowsData.length) return;
-
-      const tbody = $("tbody", table);
-      if (!tbody) return;
-
-      const existingRows = $$("tr", tbody);
-      if (!existingRows.length) return;
-      const template = existingRows[existingRows.length - 1];
-
-      rowsData.forEach((rowVals) => {
-        const clone = template.cloneNode(true);
-        clone.setAttribute(AUTO_ROW_ATTR, "cloned");
-        $$("input, select, textarea", clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
-        applyRowValues(clone, rowVals);
-        tbody.appendChild(clone);
-      });
-    });
-  };
-
  /* =======================
    NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-   ✅ Maintains QUESTION ORDER always
-   ✅ No visible keys (uses zero-width encoding only)
+   ✅ Keeps QUESTION ORDER always
+   ✅ NO visible mk: tags (keys are invisible, using zero-width chars)
+   ✅ De-dupes
+   ✅ NO page shift (uses preserveScroll + preventScroll focus)
 ======================= */
 
-// IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
-const getNotesTargetId = (btn) =>
-  btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+const Notes = (() => {
+  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
 
-const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+  // IMPORTANT: DO NOT use data-target fallback (collides with sidebar nav)
+  const getNotesTargetId = (btn) =>
+    btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
-// ---------------------------
-// ZERO-WIDTH KEY ENCODING
-// (marker contains ONLY invisible chars)
-// ---------------------------
-const ZW0 = "\u200B"; // zero width space
-const ZW1 = "\u200C"; // zero width non-joiner
-const ZW_WRAP = "\u2060"; // word joiner (also invisible)
+  // ---------- Invisible key marker (zero-width only) ----------
+  const ZW0 = "\u200B";      // 0
+  const ZW1 = "\u200C";      // 1
+  const WRAP = "\u2060";     // word-joiner wrapper (invisible)
 
-// Encode a plain string into only ZW0/ZW1
-const zwEncode = (plain) => {
-  const bytes = new TextEncoder().encode(String(plain));
-  let bits = "";
-  for (const b of bytes) bits += b.toString(2).padStart(8, "0");
-  return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
-};
+  const zwEncode = (plain) => {
+    const bytes = new TextEncoder().encode(String(plain));
+    let bits = "";
+    for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+    return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+  };
 
-const zwDecode = (zw) => {
-  const bits = zw.replace(new RegExp(ZW0, "g"), "0").replace(new RegExp(ZW1, "g"), "1");
-  const bytes = [];
-  for (let i = 0; i + 7 < bits.length; i += 8) {
-    bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  }
-  try {
-    return new TextDecoder().decode(new Uint8Array(bytes));
-  } catch {
-    return "";
-  }
-};
+  const zwDecode = (zw) => {
+    const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+    const bytes = [];
+    for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    try {
+      return new TextDecoder().decode(new Uint8Array(bytes));
+    } catch {
+      return "";
+    }
+  };
 
-const makeKeyMarker = (key) => `${ZW_WRAP}${zwEncode(key)}${ZW_WRAP}`;
+  const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
 
-const extractKeyFromLine = (line) => {
-  const s = String(line || "");
-  const start = s.indexOf(ZW_WRAP);
-  if (start < 0) return null;
-  const end = s.indexOf(ZW_WRAP, start + 1);
-  if (end < 0) return null;
-  const payload = s.slice(start + 1, end); // only zw chars
-  const decoded = zwDecode(payload);
-  return decoded || null;
-};
+  const extractKeyFromLine = (line) => {
+    const s = String(line || "");
+    const a = s.indexOf(WRAP);
+    if (a < 0) return null;
+    const b = s.indexOf(WRAP, a + 1);
+    if (b < 0) return null;
+    const payload = s.slice(a + 1, b);
+    const decoded = zwDecode(payload);
+    return decoded || null;
+  };
 
-const stripMarkersFromText = (text) => {
-  // 1) Remove any old visible mk tags from earlier builds
-  let v = normalizeNL(text || "");
-  v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");                  // " [mk:...]" style
-  v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");                 // "mk:notes-..." style
-  // 2) Remove our zero-width markers (keep prompt visible)
-  // Remove everything between WRAPs (inclusive)
-  const re = new RegExp(`${ZW_WRAP}[\\s\\S]*?${ZW_WRAP}`, "g");
-  v = v.replace(re, "");
-  // Clean any double spaces created
-  v = v.replace(/[ \t]+\n/g, "\n").replace(/[ \t]{2,}/g, " ");
-  return v;
-};
+  // Remove OLD visible junk from earlier builds (mk:... and [mk:...])
+  const cleanupLegacyVisibleKeys = (text) => {
+    let v = normalizeNL(text || "");
+    v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");          // " [mk:...]" style
+    v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");         // "mk:notes-..." style
+    // also remove any stray WRAP markers from earlier attempts
+    const re = new RegExp(`${WRAP}[\\s\\S]*?${WRAP}`, "g");
+    v = v.replace(re, "");
+    return v;
+  };
 
-// ---------------------------
-// Stable key for a question "slot"
-// ---------------------------
-const getNotesSlotKey = (btn) => {
-  const hostId = getNotesTargetId(btn) || "notes";
+  // ---------- Stable slot key (for ordering) ----------
+  const getSlotKey = (btn) => {
+    const hostId = getNotesTargetId(btn) || "notes";
 
-  const tr = btn.closest("tr");
-  if (tr) {
-    const table = btn.closest("table") || tr.closest("table");
-    const tb = tr.parentElement;
-    const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
-    const idx = rows.indexOf(tr);
-    const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
-    return `${hostId}::tbl::${tKey}::r${idx}`;
-  }
+    const tr = btn.closest("tr");
+    if (tr) {
+      const table = btn.closest("table") || tr.closest("table");
+      const tb = tr.parentElement;
+      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+      const idx = rows.indexOf(tr);
+      const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+      return `${hostId}::tbl::${tKey}::r${idx}`;
+    }
 
-  const row = btn.closest(".checklist-row") || btn.closest(".section-block") || btn;
-  const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
-  const idx = all.indexOf(btn);
+    const all = Array.from(
+      document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+    );
+    const idx = all.indexOf(btn);
 
-  const labelText =
-    (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
+    // fallback hash (in case idx not found)
+    const row = btn.closest(".checklist-row") || btn;
+    const labelText =
+      (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
 
-  let h = 5381;
-  for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
-  const labelHash = (h >>> 0).toString(16);
+    let h = 5381;
+    for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
+    const labelHash = (h >>> 0).toString(16);
 
-  return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
-};
+    return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
+  };
 
-const findOrDerivePromptText = (btn) => {
-  const tr = btn.closest("tr");
-  const table = btn.closest("table");
-  const section = getSection(btn);
-  const secId = section?.id || "";
+  const findOrDerivePromptText = (btn) => {
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    const section = getSection(btn);
+    const secId = section?.id || "";
 
-  if (tr && table) {
-    const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-    const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-    let idx = -1;
+    if (tr && table) {
+      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+      let idx = -1;
 
-    if (secId === "training-checklist") idx = idxOf("name");
-    if (secId === "opcodes-pricing") idx = idxOf("opcode");
+      if (secId === "training-checklist") idx = idxOf("name");
+      if (secId === "opcodes-pricing") idx = idxOf("opcode");
+      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
 
-    if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
-
-    if (idx < 0) {
-      const tds = $$("td", tr);
-      for (let i = 0; i < tds.length; i++) {
-        const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
-        if (field) {
-          idx = i;
-          break;
+      if (idx < 0) {
+        const tds = $$("td", tr);
+        for (let i = 0; i < tds.length; i++) {
+          const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
+          if (field) {
+            idx = i;
+            break;
+          }
         }
       }
+
+      const tds = $$("td", tr);
+      const cell = idx >= 0 ? tds[idx] : null;
+      let val = "";
+
+      if (cell) {
+        const field = $("input, textarea, select", cell);
+        if (field) val = (field.value || "").trim();
+        else val = (cell.textContent || "").trim();
+      }
+
+      const label =
+        secId === "training-checklist"
+          ? "Name"
+          : secId === "opcodes-pricing"
+          ? "Opcode"
+          : "Item";
+
+      return val ? `${label}: ${val}` : `${label}: (blank)`;
     }
 
-    const tds = $$("td", tr);
-    const cell = idx >= 0 ? tds[idx] : null;
-    let val = "";
+    const row = btn.closest(".checklist-row");
+    const label = row ? row.querySelector("label") : null;
+    return (label?.textContent || "").trim() || "Notes";
+  };
 
-    if (cell) {
-      const field = $("input, textarea, select", cell);
-      if (field) val = (field.value || "").trim();
-      else val = (cell.textContent || "").trim();
+  // ---------- Block parsing / rebuilding (uses invisible marker) ----------
+  const isMainLine = (line) => {
+    const s = String(line || "").trim();
+    return s.startsWith("•") && s.includes(WRAP);
+  };
+
+  const parseBlocks = (text) => {
+    const lines = normalizeNL(text || "").split("\n");
+    const blocks = [];
+    let cur = null;
+
+    const flush = () => {
+      if (cur) blocks.push(cur);
+      cur = null;
+    };
+
+    for (const line of lines) {
+      if (isMainLine(line)) {
+        flush();
+        cur = { key: extractKeyFromLine(line) || "__unknown__", lines: [line] };
+      } else {
+        if (!cur) cur = { key: "__misc__", lines: [] };
+        cur.lines.push(line);
+      }
+    }
+    flush();
+
+    return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
+  };
+
+  const buildBlockLines = (promptText, key) => {
+    // Visible prompt only. Invisible marker at end.
+    const main = `• ${promptText}${makeMarker(key)}`;
+    const sub = `  ◦ `;
+    return [main, sub];
+  };
+
+  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+    const btns = Array.from(
+      document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
+    );
+    const wanted = btns.map(getSlotKey);
+
+    const map = new Map();
+    blocks.forEach((b) => {
+      if (b.key && b.key !== "__misc__") map.set(b.key, b);
+    });
+
+    const out = [];
+    for (const k of wanted) {
+      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
     }
 
-    const label =
-      secId === "training-checklist" ? "Name" : secId === "opcodes-pricing" ? "Opcode" : "Item";
+    if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+      out.push(map.get(newlyAddedKey).lines.join("\n"));
+    }
 
-    return val ? `${label}: ${val}` : `${label}: (blank)`;
-  }
+    return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+  };
 
-  const row = btn.closest(".checklist-row");
-  const label = row ? row.querySelector("label") : null;
-  const labelText = (label?.textContent || "").trim();
-  return labelText || "Notes";
-};
+  const caretAtHollowForKey = (text, key) => {
+    const v = normalizeNL(text || "");
+    const marker = makeMarker(key);
+    const idx = v.indexOf(marker);
+    if (idx < 0) return v.length;
+
+    const lineEnd = v.indexOf("\n", idx);
+    const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
+
+    const after = v.slice(afterMain);
+    const rel = after.indexOf("◦");
+    if (rel < 0) return afterMain;
+    return afterMain + rel + 2; // after "◦ "
+  };
+
+  const handleNotesClick = (btn) => {
+    const targetId = getNotesTargetId(btn);
+    if (!targetId) return;
+
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+    const ta = $("textarea", target);
+    if (!ta) return;
+
+    const promptText = findOrDerivePromptText(btn);
+    const slotKey = getSlotKey(btn);
+
+    preserveScroll(() => {
+      // Clean old visible mk garbage once, safely
+      ta.value = cleanupLegacyVisibleKeys(ta.value);
+
+      // Parse existing blocks (that already have invisible markers)
+      let blocks = parseBlocks(ta.value);
+
+      // If none exist yet, start from empty
+      const exists = blocks.some((b) => b.key === slotKey);
+      if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+
+      // Rebuild in question order
+      ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey) + "\n";
+
+      // Focus caret without scrolling
+      const caret = caretAtHollowForKey(ta.value, slotKey);
+      try {
+        ta.focus({ preventScroll: true });
+      } catch {
+        ta.focus();
+      }
+      try {
+        ta.setSelectionRange(caret, caret);
+      } catch {}
+
+      btn.classList.add("has-notes");
+
+      ensureId(ta);
+      saveField(ta);
+      triggerInputChange(ta);
+    });
+  };
+
+  const isNotesTargetTextarea = (ta) => {
+    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+    const host = ta.closest("[id]");
+    if (!host || !host.id) return false;
+    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+  };
+
+  return { handleNotesClick, isNotesTargetTextarea };
+})();
 
 // ---------------------------
 // Parse blocks (main line must contain our invisible marker)
@@ -1472,13 +1397,12 @@ const isNotesTargetTextarea = (ta) => {
       return;
     }
 
-    // NOTES buttons (ONLY those with data-notes-target)
-    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
-    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
-      e.preventDefault();
-      handleNotesClick(notesBtn);
-      return;
-    }
+   const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+  e.preventDefault();
+  Notes.handleNotesClick(notesBtn);
+  return;
+}
 
     // SUPPORT TICKET ADD (+)
     const ticketAddBtn = t.closest(".add-ticket-btn");
@@ -1592,7 +1516,7 @@ const isNotesTargetTextarea = (ta) => {
 
   document.addEventListener("keydown", (e) => {
     const el = e.target;
-    if (!isEl(el)) return;
+   if (e.key === "Enter" && Notes.isNotesTargetTextarea(el) && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
 
     // ENTER in Notes textarea => auto hollow bullet
     if (
