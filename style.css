@@ -1732,3 +1732,23 @@ button.remove-row{
 .notes-card textarea{ min-height:160px !important; }
 
 #mkTableModal .mk-modal-notes textarea{ min-height:190px !important; }
+
+/* =========================================================
+   TABLE WIDTH TWEAK — User Acceptance column
+   Make it just wide enough for the header text
+========================================================= */
+
+/* Base tables: tighten "User Acceptance" (usually column 3) */
+#training-checklist .training-table th:nth-child(3),
+#training-checklist .training-table td:nth-child(3){
+  width: 190px !important;     /* adjust if needed */
+  min-width: 190px !important;
+}
+
+/* Make the dropdowns in that column match the new width */
+#training-checklist .training-table td:nth-child(3) select,
+#training-checklist .training-table td:nth-child(3) input{
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
