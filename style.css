@@ -825,31 +825,6 @@ main{
   background:#ff8b42 !important;
 }
 
-.mk-poc-clone.mk-round-right{
-  border-top-right-radius: 18px;
-  border-bottom-right-radius: 18px;
-}
-
-/* ✅ CLONED POC cards (no + button): make inputs fully rounded */
-#dealership-info .additional-poc-card[data-base="false"] .input-plus input,
-#dealership-info .additional-poc-card.mk-poc-clone .input-plus input{
-  border-radius: var(--radius-sm) !important;   /* full round */
-}
-
-/* ✅ If the + button was removed, kill the "joined" look spacing */
-#dealership-info .additional-poc-card[data-base="false"] .input-plus,
-#dealership-info .additional-poc-card.mk-poc-clone .input-plus{
-  gap: 0 !important;
-}
-
-/* ✅ Round the RIGHT side of the cloned CARD itself */
-#dealership-info .additional-poc-card[data-base="false"],
-#dealership-info .additional-poc-card.mk-poc-clone{
-  border-top-right-radius: 18px !important;
-  border-bottom-right-radius: 18px !important;
-  overflow: hidden; /* ensures inner backgrounds don't square the corner */
-}
-
 /* =======================
    TABLES
 ======================= */
@@ -1797,25 +1772,34 @@ button.remove-row{
 }
 
 /* =========================================================
-   ✅ FINAL OVERRIDE — CLONED POC rows (no + button)
-   Forces FULL rounding on the input even if row is still .integrated-plus
+   ✅ POC CLONES — FORCE RIGHT ROUNDING (card + inputs)
+   Targets ANY additional POC card that is NOT the base card.
+   Put at VERY BOTTOM of style.css
 ========================================================= */
-#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="text"],
-#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="email"],
-#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="tel"]{
-  border-radius: var(--radius-sm) !important;
-  border-right: 1px solid var(--border) !important;
+
+/* 1) Round the RIGHT side of the cloned card itself */
+#dealership-info .additional-poc-card:not([data-base="true"]) {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: var(--radius-lg) !important;
+  border-bottom-right-radius: var(--radius-lg) !important;
+  overflow: hidden !important; /* prevents inner rows from squaring corners */
 }
 
-/* Hide the + button on cloned cards (just in case it still exists in the HTML) */
-#dealership-info .additional-poc-card[data-base="false"] .poc-add-btn,
-#dealership-info .additional-poc-card[data-base="false"] [data-add-poc]{
+/* 2) Kill the + button on cloned cards (if it exists in the clone markup) */
+#dealership-info .additional-poc-card:not([data-base="true"]) .poc-add-btn,
+#dealership-info .additional-poc-card:not([data-base="true"]) [data-add-poc]{
   display:none !important;
 }
 
-/* Card right-side rounding (ensure it visually shows) */
-#dealership-info .additional-poc-card[data-base="false"]{
-  border-top-right-radius: 18px !important;
-  border-bottom-right-radius: 18px !important;
-  overflow:hidden !important;
+/* 3) IMPORTANT: override the global integrated-plus rule that zeros the RIGHT radius */
+#dealership-info .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="text"],
+#dealership-info .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="email"],
+#dealership-info .additional-poc-card:not([data-base="true"]) .checklist-row.integrated-plus input[type="tel"]{
+  border-top-right-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
+  border-top-left-radius: var(--radius-sm) !important;
+  border-bottom-left-radius: var(--radius-sm) !important;
+  border-right: 1px solid var(--border) !important;
 }
+
