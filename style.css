@@ -1797,3 +1797,17 @@ button.remove-row{
 #dealership-info .additional-poc-card:not([data-base="true"]) [data-add-poc]{
   display:none !important;
 }
+
+/* ✅ CLONED POC: when there's no + button, make the name input fully rounded */
+#dealership-info .additional-poc-card.mk-poc-clone .mk-solo-input{
+  display:block !important;
+  width: var(--di-input-width) !important;
+  max-width: var(--di-input-width) !important;
+  margin-left:auto !important;
+}
+
+#dealership-info .additional-poc-card.mk-poc-clone .mk-solo-input input{
+  width:100% !important;
+  border-radius: var(--radius-sm) !important;
+}
+
