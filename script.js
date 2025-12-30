@@ -1,15 +1,13 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   FIXES (CONSOLIDATED / SINGLE SCRIPT):
-   - Sidebar/menu nav works (sections toggle .active)
-   - Clear All works (#clearAllBtn)
-   - Reset This Page works (.clear-page-btn[data-clear-page])
-   - Add Trainer (+) works (adds row even if blank; no remove buttons)
-   - Add POC (+) works (adds ONE card even if blank; moves ALL fields; resets base)
-   - Table Add Row (+) works (only when inside .table-footer)
-   - Notes buttons scroll to notes targets ([data-notes-target] / [data-notes-btn])
-   - Support Tickets: add card gating + status routing + status disabled until # entered
-   - LocalStorage save/restore (including dynamic clones: trainers, POCs, tables, tickets)
+   NOTES UPGRADE (NEW):
+   - Notes buttons now CREATE structured notes items (bullet + hollow bullet)
+   - Each notes item is tied to a specific question/row (stable key)
+   - Order ALWAYS matches on-page question order
+   - Cursor focuses the hollow-bullet textarea
+   - Notes button turns myKaarma orange after adding
+   - Tables: pulls Name column (Training page) / Opcode column (Opcodes page)
+   - Works for regular rows AND popup/expanded tables (same logic)
 ======================================================= */
 
 (() => {
@@ -35,9 +33,7 @@
   const uid = (() => {
     let n = 0;
     return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random()
-        .toString(16)
-        .slice(2)}`;
+      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
@@ -45,8 +41,7 @@
   const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
-    isEl(el) &&
-    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
+    isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -161,10 +156,10 @@
     get() {
       const state = readState();
       state.__clones = state.__clones || {
-        trainers: [], // [{ value }]
-        pocs: [], // [{ name, role, cell, email }]
-        tables: {}, // { tableKey: [ [cellVals...] rows ] }
-        tickets: [], // [{ status, num, url, summary, notes? }]
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
       };
       return state.__clones;
     },
@@ -216,57 +211,48 @@
      CLEAR ALL + RESET PAGE
   ======================= */
   const removeDynamicClonesIn = (root = document) => {
-    // Trainers added rows
     const trainerContainer = $("#additionalTrainersContainer", root);
     if (trainerContainer) trainerContainer.innerHTML = "";
 
-    // POCs: remove non-base cards
     $$(".additional-poc-card", root).forEach((card) => {
       if (card.getAttribute("data-base") === "true") return;
       card.remove();
     });
 
-    // Tables: remove cloned rows
     $$("table.training-table tbody", root).forEach((tb) => {
       $$("tr", tb).forEach((tr) => {
         if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
       });
     });
 
-    // Tickets: remove non-base
     $$(".ticket-group", root).forEach((g) => {
       if (g.getAttribute("data-base") === "true") return;
-      // keep base only
       g.remove();
     });
+
+    // Notes lists inside notes targets
+    $$(".mk-notes-list", root).forEach((list) => list.remove());
   };
 
   const clearFieldsIn = (root = document) => {
-    // inputs
     root.querySelectorAll("input").forEach((inp) => {
       const type = (inp.type || "").toLowerCase();
       if (["button", "submit", "reset", "hidden"].includes(type)) return;
-      if (type === "checkbox" || type === "radio") {
-        inp.checked = false;
-      } else {
-        inp.value = "";
-      }
+      if (type === "checkbox" || type === "radio") inp.checked = false;
+      else inp.value = "";
       triggerInputChange(inp);
     });
 
-    // textareas
     root.querySelectorAll("textarea").forEach((ta) => {
       ta.value = "";
       triggerInputChange(ta);
     });
 
-    // selects
     root.querySelectorAll("select").forEach((sel) => {
       sel.selectedIndex = 0;
       triggerInputChange(sel);
     });
 
-    // contenteditable
     root.querySelectorAll("[contenteditable='true']").forEach((ce) => {
       ce.textContent = "";
       triggerInputChange(ce);
@@ -279,28 +265,23 @@
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
-    // wipe UI
+
     removeDynamicClonesIn(document);
     clearFieldsIn(document);
 
-    // reset map
     const map = $("#dealershipMapFrame");
     if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
 
-    // reset dealership name display
     const disp = $("#dealershipNameDisplay");
     if (disp) disp.textContent = "";
 
-    // reset clone state
     cloneState.clearAll();
-
     log("Clear All complete");
   };
 
   const clearSection = (sectionEl) => {
     if (!sectionEl) return;
 
-    // remove saved field keys for this section only
     const state = readState();
     state.__fields = state.__fields || {};
     $$(`[${AUTO_ID_ATTR}]`, sectionEl).forEach((el) => {
@@ -308,14 +289,12 @@
       delete state.__fields[id];
     });
 
-    // remove clone state related to section (simple approach: if section contains these, clear those lists)
-    // Trainers page
     if (sectionEl.id === "trainers-deployment") {
       const clones = cloneState.get();
       clones.trainers = [];
       cloneState.set(clones);
     }
-    // Dealership info (POCs + address map etc.)
+
     if (sectionEl.id === "dealership-info") {
       const clones = cloneState.get();
       clones.pocs = [];
@@ -324,12 +303,13 @@
       const map = $("#dealershipMapFrame", sectionEl);
       if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
     }
-    // Tables + tickets (safe: wipe table keys/tickets if section contains them)
+
     if ($("table.training-table", sectionEl)) {
       const clones = cloneState.get();
       clones.tables = {};
       cloneState.set(clones);
     }
+
     if ($(".ticket-group", sectionEl)) {
       const clones = cloneState.get();
       clones.tickets = [];
@@ -338,9 +318,11 @@
 
     writeState(state);
 
-    // wipe UI in section
     removeDynamicClonesIn(sectionEl);
     clearFieldsIn(sectionEl);
+
+    // remove orange state on notes buttons in that section
+    $$("[data-notes-btn].is-notes-active", sectionEl).forEach((b) => b.classList.remove("is-notes-active"));
 
     log("Cleared section:", sectionEl.id);
   };
@@ -379,16 +361,14 @@
     const container = $("#additionalTrainersContainer");
     if (!input || !container) return;
 
-    const name = (input.value || "").trim(); // allowed blank
+    const name = (input.value || "").trim();
     const row = buildTrainerRow(name);
     container.appendChild(row);
 
-    // persist clone
     const clones = cloneState.get();
     clones.trainers.push({ value: name });
     cloneState.set(clones);
 
-    // reset base
     input.value = "";
     saveField(input);
     input.focus();
@@ -396,9 +376,6 @@
 
   /* =======================
      ADD POC (+) — SINGLE FIRE
-     - Adds ONE card even if blank
-     - Moves name/role/cell/email into new card
-     - Resets base fields
   ======================= */
   const getBasePocCard = (btn) =>
     btn?.closest?.(".additional-poc-card[data-base='true']") ||
@@ -469,7 +446,6 @@
     if (cellNew) cellNew.value = cell;
     if (emailNew) emailNew.value = email;
 
-    // assign IDs + save
     $$("input, select, textarea", newCard).forEach((el) => {
       ensureId(el);
       saveField(el);
@@ -482,7 +458,7 @@
     const baseCard = getBasePocCard(btn);
     if (!baseCard) return;
 
-    // hard stop double-fire
+    // hard stop double-fire (click bubbling / double listeners)
     if (btn && btn.dataset.mkBusy === "1") return;
     if (btn) {
       btn.dataset.mkBusy = "1";
@@ -491,16 +467,13 @@
 
     const { els, values } = readPocBaseValues(baseCard);
 
-    // insert after base card within same grid
     const newCard = buildPocCard(values);
     baseCard.insertAdjacentElement("afterend", newCard);
 
-    // persist clone
     const clones = cloneState.get();
     clones.pocs.push(values);
     cloneState.set(clones);
 
-    // reset base fields
     if (els.nameEl) els.nameEl.value = "";
     if (els.roleEl) els.roleEl.value = "";
     if (els.cellEl) els.cellEl.value = "";
@@ -508,7 +481,6 @@
 
     [els.nameEl, els.roleEl, els.cellEl, els.emailEl].forEach(triggerInputChange);
 
-    // focus base name again
     if (els.nameEl) els.nameEl.focus();
   };
 
@@ -516,7 +488,6 @@
      TABLE: ADD ROW (+) + RESTORE
   ======================= */
   const getTableKey = (table) => {
-    // Prefer data-table-key if you have it; fallback to id; else stable-ish key from header text.
     const k =
       table.getAttribute("data-table-key") ||
       table.id ||
@@ -551,7 +522,7 @@
 
   const cloneTableRow = (btn) => {
     const footer = btn.closest(".table-footer");
-    if (!footer) return; // critical: prevents POC/other buttons from triggering table add
+    if (!footer) return;
 
     const tableContainer = btn.closest(".table-container");
     if (!tableContainer) return;
@@ -567,7 +538,6 @@
     const clone = template.cloneNode(true);
     clone.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-    // clear values
     $$("input, select, textarea", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -578,7 +548,6 @@
 
     tbody.appendChild(clone);
 
-    // persist clone row structure as an empty row
     const tableKey = getTableKey(table);
     const clones = cloneState.get();
     clones.tables[tableKey] = clones.tables[tableKey] || [];
@@ -598,7 +567,6 @@
       const tbody = $("tbody", table);
       if (!tbody) return;
 
-      // Use last existing row as template
       const existingRows = $$("tr", tbody);
       if (!existingRows.length) return;
       const template = existingRows[existingRows.length - 1];
@@ -606,7 +574,6 @@
       rowsData.forEach((rowVals) => {
         const clone = template.cloneNode(true);
         clone.setAttribute(AUTO_ROW_ATTR, "cloned");
-        // clear IDs then apply
         $$("input, select, textarea", clone).forEach((el) => el.removeAttribute(AUTO_ID_ATTR));
         applyRowValues(clone, rowVals);
         tbody.appendChild(clone);
@@ -615,23 +582,315 @@
   };
 
   /* =======================
-     NOTES BUTTONS
+     NOTES SYSTEM (NEW)
+     - Builds a list UI inside the notes target card:
+       • Question text
+         ◦ [textarea for notes]
+     - Keeps stable storage keys per question row
+     - Keeps order matching on-page question order
+     - Button turns orange when item exists
   ======================= */
+
+  // tiny stable hash for deterministic IDs (no random, survives rebuild)
+  const hashStr = (s) => {
+    const str = String(s ?? "");
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = (h * 33) ^ str.charCodeAt(i);
+    return (h >>> 0).toString(16);
+  };
+
+  const getOrCreateNotesList = (targetEl) => {
+    if (!targetEl) return null;
+
+    let list = $(".mk-notes-list", targetEl);
+    if (list) return list;
+
+    // If your HTML has a textarea, we keep it (for layout) but hide it
+    // and replace with structured list. (No breaking your card sizing.)
+    const existingTa = $("textarea", targetEl);
+    if (existingTa) {
+      existingTa.setAttribute("data-mk-notes-legacy", "true");
+      existingTa.style.display = "none";
+    }
+
+    list = document.createElement("div");
+    list.className = "mk-notes-list";
+    // basic spacing without needing CSS edits
+    list.style.display = "flex";
+    list.style.flexDirection = "column";
+    list.style.gap = "14px";
+    list.style.marginTop = "10px";
+
+    targetEl.appendChild(list);
+    return list;
+  };
+
+  const getNotesSourceEl = (btn) => {
+    // If button is in a table row (including popup tables)
+    const tr = btn.closest("tr");
+    if (tr) return tr;
+
+    // Otherwise, normal checklist row
+    const row = btn.closest(".checklist-row");
+    if (row) return row;
+
+    // Fallback: the closest section-block
+    return btn.closest(".section-block") || btn;
+  };
+
+  const getNotesPromptText = (btn) => {
+    const section = getSection(btn);
+    const sourceEl = getNotesSourceEl(btn);
+
+    // TABLE RULES
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    if (tr && table) {
+      // Determine which column to pull:
+      // - Training page: "Name"
+      // - Opcodes page: "Opcode"
+      const secId = section?.id || "";
+      const want =
+        secId === "training-checklist"
+          ? "name"
+          : secId === "opcodes-pricing"
+          ? "opcode"
+          : null;
+
+      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+      const findIdx = (needle) => ths.findIndex((t) => t.includes(needle));
+
+      let idx = -1;
+      if (want === "name") idx = findIdx("name");
+      if (want === "opcode") idx = findIdx("opcode");
+
+      // If we can’t find a header match, default to first column with a text input
+      if (idx < 0) {
+        const tds = $$("td", tr);
+        for (let i = 0; i < tds.length; i++) {
+          const inp = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
+          if (inp) {
+            idx = i;
+            break;
+          }
+        }
+      }
+
+      const cell = idx >= 0 ? $$("td", tr)[idx] : null;
+      if (cell) {
+        const field = $("input, textarea, select", cell);
+        const val = field ? (field.value || "").trim() : (cell.textContent || "").trim();
+        const label =
+          want === "name" ? "Name" : want === "opcode" ? "Opcode" : "Item";
+        return val ? `${label}: ${val}` : `${label}: (blank)`;
+      }
+
+      return "Table row note";
+    }
+
+    // NORMAL ROWS
+    const label = $("label", sourceEl);
+    const labelText = (label?.textContent || "").trim();
+    return labelText || "Note";
+  };
+
+  const getNotesKey = (btn, targetId) => {
+    const sourceEl = getNotesSourceEl(btn);
+    const sourceId = ensureId(sourceEl) || uid("src");
+    return `${targetId}::${sourceId}`;
+  };
+
+  const buildNotesItem = ({ targetId, key, promptText }) => {
+    const wrap = document.createElement("div");
+    wrap.className = "mk-notes-item";
+    wrap.setAttribute("data-note-key", key);
+
+    const q = document.createElement("div");
+    q.className = "mk-note-question";
+    q.textContent = `• ${promptText}`;
+    q.style.fontWeight = "600";
+    q.style.lineHeight = "1.25";
+
+    const a = document.createElement("div");
+    a.className = "mk-note-answer";
+    a.style.display = "flex";
+    a.style.gap = "10px";
+    a.style.alignItems = "flex-start";
+
+    const bullet = document.createElement("div");
+    bullet.textContent = "◦";
+    bullet.style.marginLeft = "18px";
+    bullet.style.lineHeight = "1.2";
+    bullet.style.paddingTop = "8px";
+
+    const ta = document.createElement("textarea");
+    ta.rows = 3;
+    ta.placeholder = "Add notes here…";
+    ta.style.width = "100%";
+    ta.style.resize = "vertical";
+
+    // deterministic id for this note textarea so it restores forever
+    const stableId = `note-${hashStr(key)}`;
+    ta.setAttribute(AUTO_ID_ATTR, stableId);
+
+    // restore saved value if it exists
+    const state = readState();
+    const fieldsState = state.__fields || {};
+    if (stableId in fieldsState) ta.value = fieldsState[stableId] ?? "";
+
+    // make sure it’s tracked
+    ensureId(ta);
+    saveField(ta);
+
+    // when typing notes, persist & keep button orange
+    ta.addEventListener("input", () => {
+      saveField(ta);
+      markNotesButtonsActive(targetId, key, true);
+    });
+
+    a.appendChild(bullet);
+    a.appendChild(ta);
+
+    wrap.appendChild(q);
+    wrap.appendChild(a);
+
+    return { wrap, textarea: ta };
+  };
+
+  const collectAllSourcesForTarget = (targetId) => {
+    // All notes buttons that point to this target, in DOM order
+    const btns = $$(`[data-notes-target="${CSS.escape(targetId)}"]`);
+    const items = btns.map((btn) => {
+      const key = getNotesKey(btn, targetId);
+      const text = getNotesPromptText(btn);
+      return { btn, key, text };
+    });
+
+    // De-dupe by key while preserving first occurrence order
+    const seen = new Set();
+    const out = [];
+    for (const it of items) {
+      if (seen.has(it.key)) continue;
+      seen.add(it.key);
+      out.push(it);
+    }
+    return out;
+  };
+
+  const renderNotesTarget = (targetId) => {
+    const target = document.getElementById(targetId);
+    if (!target) return null;
+
+    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+    const list = getOrCreateNotesList(target);
+    if (!list) return null;
+
+    const sources = collectAllSourcesForTarget(targetId);
+
+    // Keep existing note items, rebuild in correct order:
+    const existing = new Map();
+    $$(".mk-notes-item", list).forEach((el) => {
+      existing.set(el.getAttribute("data-note-key"), el);
+    });
+
+    // Clear and rebuild in correct order
+    list.innerHTML = "";
+
+    sources.forEach((s) => {
+      let el = existing.get(s.key);
+      let focusTa = null;
+
+      if (!el) {
+        const built = buildNotesItem({ targetId, key: s.key, promptText: s.text });
+        el = built.wrap;
+        focusTa = built.textarea;
+
+        // Mark button orange because an item exists
+        markNotesButtonsActive(targetId, s.key, true);
+      } else {
+        // If prompt text changed, update the display
+        const q = $(".mk-note-question", el);
+        if (q) q.textContent = `• ${s.text}`;
+      }
+
+      list.appendChild(el);
+
+      // Keep buttons orange if there is any saved text
+      const ta = $("textarea", el);
+      if (ta && (ta.value || "").trim()) {
+        markNotesButtonsActive(targetId, s.key, true);
+      }
+    });
+
+    return target;
+  };
+
+  const markNotesButtonsActive = (targetId, key, isActive) => {
+    // Add a marker on ALL buttons pointing to this target + key
+    const btns = $$(`[data-notes-target="${CSS.escape(targetId)}"]`);
+    btns.forEach((b) => {
+      const k = getNotesKey(b, targetId);
+      if (k !== key) return;
+      b.classList.toggle("is-notes-active", !!isActive);
+    });
+  };
+
+  const syncAllNotesButtonStates = () => {
+    // After restore, ensure any buttons with saved notes are orange
+    const targets = new Set($$("[data-notes-target]").map((b) => b.getAttribute("data-notes-target")));
+    targets.forEach((targetId) => {
+      if (!targetId) return;
+      const sources = collectAllSourcesForTarget(targetId);
+      sources.forEach((s) => {
+        const stableId = `note-${hashStr(s.key)}`;
+        const state = readState();
+        const fields = state.__fields || {};
+        const hasText = (fields[stableId] || "").trim().length > 0;
+        if (hasText) markNotesButtonsActive(targetId, s.key, true);
+      });
+    });
+  };
+
   const handleNotesClick = (btn) => {
     const targetId =
       btn.getAttribute("data-notes-target") ||
       btn.getAttribute("data-target") ||
       btn.getAttribute("href")?.replace("#", "");
     if (!targetId) return;
-    const target = document.getElementById(targetId);
+
+    const key = getNotesKey(btn, targetId);
+    const promptText = getNotesPromptText(btn);
+
+    const target = renderNotesTarget(targetId);
     if (!target) return;
 
-    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+    // Ensure THIS item exists (even if user never clicked other lines)
+    const list = $(".mk-notes-list", target);
+    if (!list) return;
 
-    scrollIntoViewNice(target);
-    const ta = $("textarea", target);
-    if (ta) ta.focus();
+    let item = $(`.mk-notes-item[data-note-key="${CSS.escape(key)}"]`, list);
+    if (!item) {
+      const built = buildNotesItem({ targetId, key, promptText });
+      list.appendChild(built.wrap);
+      item = built.wrap;
+    } else {
+      const q = $(".mk-note-question", item);
+      if (q) q.textContent = `• ${promptText}`;
+    }
+
+    // Turn button orange immediately
+    markNotesButtonsActive(targetId, key, true);
+
+    // Focus the hollow bullet textarea
+    const ta = $("textarea", item);
+    if (ta) {
+      scrollIntoViewNice(item);
+      ta.focus();
+    } else {
+      scrollIntoViewNice(target);
+    }
   };
 
   /* =======================
@@ -712,7 +971,6 @@
     openContainer.appendChild(clone);
     $(".ticket-number-input", clone)?.focus();
 
-    // persist
     const clones = cloneState.get();
     clones.tickets.push({ status: "Open", num: "", url: "", sum: "" });
     cloneState.set(clones);
@@ -731,7 +989,6 @@
     saveField(inputEl);
     saveField(status);
 
-    // persist ticket values if this is a cloned card
     if (card.getAttribute("data-base") !== "true") persistAllTickets();
   };
 
@@ -772,7 +1029,6 @@
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (!base) return;
 
-    // clear existing non-base (safety)
     $$(".ticket-group", document).forEach((g) => {
       if (g.getAttribute("data-base") !== "true") g.remove();
     });
@@ -780,7 +1036,6 @@
     clones.tickets.forEach((t) => {
       const clone = buildTicketCloneFromBase(base);
 
-      // fill values
       $(".ticket-number-input", clone).value = t.num || "";
       $(".ticket-zendesk-input", clone).value = t.url || "";
       $(".ticket-summary-input", clone).value = t.sum || "";
@@ -792,10 +1047,8 @@
         saveField(statusSel);
       }
 
-      // save fields
       $$("input, textarea, select", clone).forEach((el) => saveField(el));
 
-      // route to container
       const containers = ticketContainersByStatus();
       const dest = containers[t.status] || containers.Open || openContainer;
       dest.appendChild(clone);
@@ -809,7 +1062,6 @@
     const clones = cloneState.get();
     if (!clones.pocs || !clones.pocs.length) return;
 
-    // remove existing non-base
     $$(".additional-poc-card").forEach((c) => {
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
@@ -839,8 +1091,7 @@
   };
 
   /* =======================
-     DEALERSHIP NAME DISPLAY (top bar)
-     - keeps #dealershipNameDisplay synced with #dealershipNameInput
+     DEALERSHIP NAME DISPLAY
   ======================= */
   const syncDealershipName = () => {
     const input = $("#dealershipNameInput");
@@ -880,9 +1131,10 @@
       return;
     }
 
-    // ADD TRAINER (+) supports [data-add-trainer] OR button.trainer-add-btn inside trainers page
+    // ADD TRAINER (+)
     if (t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn")) {
-      const btn = t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+      const btn =
+        t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
       if (btn) {
         e.preventDefault();
         addTrainerRow();
@@ -890,7 +1142,7 @@
       }
     }
 
-    // ADD POC (+): supports [data-add-poc] OR .additional-poc-add
+    // ADD POC (+)
     const pocBtn = t.closest("[data-add-poc], .additional-poc-add");
     if (pocBtn) {
       e.preventDefault();
@@ -899,7 +1151,7 @@
       return;
     }
 
-    // TABLE ADD ROW: ONLY if inside table footer
+    // TABLE ADD ROW (only inside footer)
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -909,7 +1161,7 @@
 
     // NOTES buttons
     const notesBtn = t.closest("[data-notes-btn], [data-notes-target]");
-    if (notesBtn) {
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
       handleNotesClick(notesBtn);
       return;
@@ -935,9 +1187,8 @@
 
     if (el.id === "dealershipNameInput") syncDealershipName();
 
-    // persist clones on changes
+    // persist trainers
     if (el.closest("#additionalTrainersContainer")) {
-      // rebuild trainer clone state from DOM
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
         value: (i.value || "").trim(),
@@ -945,8 +1196,11 @@
       cloneState.set(clones);
     }
 
-    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
-      // update pocs from DOM (non-base)
+    // persist pocs (non-base)
+    if (
+      el.closest(".additional-poc-card") &&
+      el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
+    ) {
       const clones = cloneState.get();
       clones.pocs = $$(".additional-poc-card")
         .filter((c) => c.getAttribute("data-base") !== "true")
@@ -971,7 +1225,6 @@
       const clones = cloneState.get();
       clones.tables[key] = clones.tables[key] || [];
 
-      // recompute from DOM (all cloned rows in that table)
       const tbody = $("tbody", table);
       const clonedRows = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody);
       clones.tables[key] = clonedRows.map((r) => extractRowValues(r));
@@ -997,17 +1250,17 @@
     const el = e.target;
     if (!isEl(el)) return;
 
-    // Enter adds Trainer row
     if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
       return;
     }
 
-    // Enter on POC name adds POC card (matches trainer behavior, even if blank)
     if (el.id === "additionalPocInput" && e.key === "Enter") {
       e.preventDefault();
-      const btn = el.closest(".additional-poc-card")?.querySelector("[data-add-poc], .additional-poc-add");
+      const btn = el
+        .closest(".additional-poc-card")
+        ?.querySelector("[data-add-poc], .additional-poc-add");
       if (btn) addPocCard(btn);
       return;
     }
@@ -1017,23 +1270,18 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
-    // IDs for existing fields
     assignIdsToAllFields();
 
-    // NAV first
     initNav();
 
-    // rebuild dynamic clones
     rebuildTrainerClones();
     rebuildPocClones();
     rebuildTableClones();
     rebuildTicketClones();
 
-    // restore saved values
-    // (IDs for newly created clones already assigned; restore will fill them)
+    // IMPORTANT: restore AFTER clones rebuild
     restoreAllFields();
 
-    // ticket status disabled until number entered (base + clones)
     $$(".ticket-group").forEach((card) => {
       const num = $(".ticket-number-input", card);
       const status = $(".ticket-status-select", card);
@@ -1042,11 +1290,12 @@
       if (status) ensureId(status);
     });
 
-    // ghost styles
     setGhostStyles(document);
 
-    // initial dealership name display
     syncDealershipName();
+
+    // Notes: after restore, make buttons orange if notes exist
+    syncAllNotesButtonStates();
 
     log("Initialized.");
   };
