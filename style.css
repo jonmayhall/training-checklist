@@ -1865,3 +1865,102 @@ button.remove-row{
   right: 8px;
   bottom: 6px;
 }
+
+/* =========================================================
+   POPUP (MK TABLE MODAL) — polish + spacing + overflow fixes
+   ========================================================= */
+
+/* 1) Make modal header match your card headers (flush + skinnier) */
+#mkTableModal .mk-modal-panel {
+  /* keep your centered “card” look */
+  border-radius: 18px;
+  overflow: hidden; /* makes header flush/rounded */
+}
+
+#mkTableModal .mk-modal-header {
+  /* if you already have a header wrapper */
+  padding: 10px 16px;              /* skinnier */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0;
+}
+
+#mkTableModal .mk-modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* If your modal header is just a bar without the “card” look, this helps */
+#mkTableModal .mk-modal-header,
+#mkTableModal .mk-modal-titlebar {
+  border-radius: 0; /* flush to panel */
+}
+
+/* 2) WAY LESS gap between the table card and notes cards inside the modal */
+#mkTableModal .mk-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;          /* <-- reduces the big gap */
+  padding: 14px;      /* tighter padding */
+}
+
+/* kill any large top/bottom margins that sections/cards have on the page */
+#mkTableModal .mk-modal-content > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* optional: if your page cards use .section and notes use .section-block */
+#mkTableModal .mk-modal-content .section,
+#mkTableModal .mk-modal-content .section-block {
+  margin: 0 !important;
+}
+
+/* 3) Fix overflowing Name / Opcode text inputs in table cells */
+table.training-table {
+  table-layout: fixed; /* IMPORTANT: forces columns to respect widths */
+  width: 100%;
+}
+
+table.training-table th,
+table.training-table td {
+  overflow: hidden;   /* prevents spill outside the cell */
+}
+
+table.training-table td input,
+table.training-table td select,
+table.training-table td textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;       /* key for flex/table overflow cases */
+  box-sizing: border-box;
+}
+
+/* Your “Name” style cells often have checkbox + text input together */
+table.training-table td:first-child {
+  overflow: hidden;
+}
+
+table.training-table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+table.training-table td:first-child input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+
+table.training-table td:first-child input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* If you use .input-plus wrappers inside tds, make sure they can shrink */
+table.training-table td .input-plus,
+table.training-table td .input-plus * {
+  min-width: 0;
+}
