@@ -642,171 +642,238 @@
     });
   };
 
-  /* =======================
-     NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-  ======================= */
+/* =======================
+   NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
+   ✅ Maintains QUESTION ORDER always
+   - Each notes button builds a stable "slot key" based on question order in the DOM
+   - When you add a note later (even for an earlier question), it is inserted into the correct slot
+   - De-dupes by slot key (won’t add twice)
+======================= */
 
-  // IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
-  const getNotesTargetId = (btn) =>
-    btn.getAttribute("data-notes-target") ||
-    btn.getAttribute("href")?.replace("#", "") ||
-    "";
+// IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
+const getNotesTargetId = (btn) =>
+  btn.getAttribute("data-notes-target") ||
+  btn.getAttribute("href")?.replace("#", "") ||
+  "";
 
-  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Stable key for a question "slot"
+const getNotesSlotKey = (btn) => {
+  const hostId = getNotesTargetId(btn) || "notes";
+  const tr = btn.closest("tr");
+  if (tr) {
+    // stable-enough: table + row index within tbody
+    const table = btn.closest("table") || tr.closest("table");
+    const tb = tr.parentElement;
+    const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+    const idx = rows.indexOf(tr);
+    const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+    return `${hostId}::tbl::${tKey}::r${idx}`;
+  }
 
-  const findOrDerivePromptText = (btn) => {
-    const tr = btn.closest("tr");
-    const table = btn.closest("table");
-    const section = getSection(btn);
-    const secId = section?.id || "";
+  const row = btn.closest(".checklist-row") || btn.closest(".section-block") || btn;
+  // slot index based on DOM order of all note buttons that point to same target
+  const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
+  const idx = all.indexOf(btn);
+  // fallback: if idx not found (cloned nodes), use label text hash
+  const labelText =
+    (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
+  let h = 5381;
+  for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
+  const labelHash = (h >>> 0).toString(16);
 
-    // Table notes buttons
-    if (tr && table) {
-      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+  return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
+};
 
-      let idx = -1;
-      if (secId === "training-checklist") idx = idxOf("name");
-      if (secId === "opcodes-pricing") idx = idxOf("opcode");
+const findOrDerivePromptText = (btn) => {
+  const tr = btn.closest("tr");
+  const table = btn.closest("table");
+  const section = getSection(btn);
+  const secId = section?.id || "";
 
-      // fallback: use second column if present
-      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+  if (tr && table) {
+    const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+    const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+    let idx = -1;
 
-      // fallback: first cell with a text-ish field
-      if (idx < 0) {
-        const tds = $$("td", tr);
-        for (let i = 0; i < tds.length; i++) {
-          const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
-          if (field) {
-            idx = i;
-            break;
-          }
+    if (secId === "training-checklist") idx = idxOf("name");
+    if (secId === "opcodes-pricing") idx = idxOf("opcode");
+
+    if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+
+    if (idx < 0) {
+      const tds = $$("td", tr);
+      for (let i = 0; i < tds.length; i++) {
+        const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
+        if (field) {
+          idx = i;
+          break;
         }
       }
-
-      const tds = $$("td", tr);
-      const cell = idx >= 0 ? tds[idx] : null;
-      let val = "";
-
-      if (cell) {
-        const field = $("input, textarea, select", cell);
-        if (field) val = (field.value || "").trim();
-        else val = (cell.textContent || "").trim();
-      }
-
-      const label =
-        secId === "training-checklist"
-          ? "Name"
-          : secId === "opcodes-pricing"
-          ? "Opcode"
-          : "Item";
-
-      return val ? `${label}: ${val}` : `${label}: (blank)`;
     }
 
-    // Normal Q&A row label
-    const row = btn.closest(".checklist-row");
-    const label = row ? row.querySelector("label") : null;
-    const labelText = (label?.textContent || "").trim();
-    return labelText || "Notes";
+    const tds = $$("td", tr);
+    const cell = idx >= 0 ? tds[idx] : null;
+    let val = "";
+
+    if (cell) {
+      const field = $("input, textarea, select", cell);
+      if (field) val = (field.value || "").trim();
+      else val = (cell.textContent || "").trim();
+    }
+
+    const label =
+      secId === "training-checklist" ? "Name" : secId === "opcodes-pricing" ? "Opcode" : "Item";
+
+    return val ? `${label}: ${val}` : `${label}: (blank)`;
+  }
+
+  const row = btn.closest(".checklist-row");
+  const label = row ? row.querySelector("label") : null;
+  const labelText = (label?.textContent || "").trim();
+  return labelText || "Notes";
+};
+
+// Parse existing notes blocks into {key, textBlock}
+const parseNotesBlocks = (value) => {
+  const v = normalizeNL(value || "");
+  const lines = v.split("\n");
+
+  const blocks = [];
+  let cur = null;
+
+  const keyRe = /^\s*•\s*(.*?)\s*\[mk:(.+?)\]\s*$/; // "• Prompt [mk:key]"
+  const isMain = (line) => keyRe.test(line);
+
+  const flush = () => {
+    if (cur) {
+      blocks.push(cur);
+      cur = null;
+    }
   };
 
-  const insertNotesTemplate = (ta, promptText) => {
-    const mainLine = `• ${promptText}`;
-    const subLine = `  ◦ `;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
-    let v = normalizeNL(ta.value || "");
-
-    // If main bullet exists, jump to its ◦ line (or create it)
-    const mainRe = new RegExp(`^${escapeRegex(mainLine)}\\s*$`, "m");
-    const mainMatch = v.match(mainRe);
-
-    if (mainMatch && typeof mainMatch.index === "number") {
-      const mainStart = mainMatch.index;
-      const mainEnd = mainStart + mainMatch[0].length;
-
-      // Find the next line after the main bullet
-      const after = v.slice(mainEnd);
-      const nextLineMatch = after.match(/^\n([^\n]*)/);
-      const nextLine = nextLineMatch ? nextLineMatch[1] : "";
-
-      // If next line already has a hollow bullet, place caret after it
-      if (nextLine.trim().startsWith("◦")) {
-        // caret right after "◦ " if present, otherwise at end of line
-        const within = nextLine.indexOf("◦");
-        const caretInLine = within >= 0 ? within + 2 : nextLine.length;
-        const caret = mainEnd + 1 + caretInLine;
-        return { value: v, caret };
-      }
-
-      // Otherwise inject a sub bullet line right after main line
-      let insertAt = mainEnd;
-      if (!v.slice(insertAt).startsWith("\n")) {
-        v = v.slice(0, insertAt) + "\n" + v.slice(insertAt);
-        insertAt += 1;
-      }
-      // insert: subLine + newline
-      v = v.slice(0, insertAt + 1) + subLine + "\n" + v.slice(insertAt + 1);
-      const caret = insertAt + 1 + subLine.length;
-      return { value: v, caret };
+    if (isMain(line)) {
+      flush();
+      cur = { key: line.match(keyRe)[2], lines: [line] };
+      continue;
     }
 
-    // Otherwise append at end with spacing
-    if (v.trim().length > 0) {
-      v = v.replace(/[ \t]+$/gm, "");
-      if (!/\n\s*\n$/.test(v)) v = v.replace(/\s*$/, "") + "\n\n";
-    } else {
-      v = "";
+    if (!cur) {
+      // preface junk (shouldn't happen), start a misc block
+      cur = { key: "__misc__", lines: [] };
     }
+    cur.lines.push(line);
+  }
+  flush();
 
-    v += `${mainLine}\n${subLine}`;
-    return { value: v, caret: v.length };
-  };
+  // remove pure-empty misc
+  return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
+};
 
-  const handleNotesClick = (btn) => {
-    const targetId = getNotesTargetId(btn);
-    if (!targetId) return;
+const buildBlock = (promptText, key) => {
+  // Store key inline so we can reorder later safely
+  const main = `• ${promptText} [mk:${key}]`;
+  const sub = `  ◦ `;
+  return `${main}\n${sub}`;
+};
 
-    const target = document.getElementById(targetId);
-    if (!target) return;
+const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+  // canonical order = DOM order of ALL notes buttons for that target
+  const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
+  const wantedKeys = btns.map((b) => getNotesSlotKey(b));
 
-    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+  // map existing blocks by key
+  const map = new Map();
+  blocks.forEach((b) => {
+    if (b.key && b.key !== "__misc__") map.set(b.key, b);
+  });
 
-    const ta = $("textarea", target);
-    if (!ta) return;
+  const out = [];
+  for (const k of wantedKeys) {
+    if (map.has(k)) out.push(map.get(k).lines.join("\n"));
+  }
 
-    const promptText = findOrDerivePromptText(btn);
+  // If we just added a key and it wasn't discoverable in wantedKeys (rare),
+  // append it at end.
+  if (newlyAddedKey && !wantedKeys.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+    out.push(map.get(newlyAddedKey).lines.join("\n"));
+  }
 
-    preserveScroll(() => {
-      const res = insertNotesTemplate(ta, promptText);
-      ta.value = res.value;
+  // join with ONE blank line between blocks
+  return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+};
 
-      // Cursor (NO scroll into view)
-      ta.focus({ preventScroll: true });
-      try {
-        ta.setSelectionRange(res.caret, res.caret);
-      } catch {}
+// Find caret position at the hollow bullet for a given key
+const findCaretForKey = (text, key) => {
+  const v = normalizeNL(text || "");
+  const re = new RegExp(`^\\s*•.*\\[mk:${escapeRegex(key)}\\]\\s*$`, "m");
+  const m = v.match(re);
+  if (!m || typeof m.index !== "number") return v.length;
 
-      // Persist
-      ensureId(ta);
-      saveField(ta);
-      setGhostStyles(document);
+  const mainStart = m.index;
+  const mainEnd = mainStart + m[0].length;
 
-      // Visual state
+  // find the first following line that contains ◦
+  const after = v.slice(mainEnd);
+  const nlIdx = after.indexOf("\n");
+  if (nlIdx < 0) return v.length;
+
+  const rest = after.slice(nlIdx + 1);
+  const rel = rest.indexOf("◦");
+  if (rel < 0) return mainEnd + 1; // line start
+  return mainEnd + 1 + nlIdx + 1 + rel + 2; // after "◦ "
+};
+
+const handleNotesClick = (btn) => {
+  const targetId = getNotesTargetId(btn);
+  if (!targetId) return;
+
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+  if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+  const ta = $("textarea", target);
+  if (!ta) return;
+
+  const promptText = findOrDerivePromptText(btn);
+  const slotKey = getNotesSlotKey(btn);
+
+  preserveScroll(() => {
+    // Parse existing
+    const blocks = parseNotesBlocks(ta.value);
+
+    // Do we already have this slot?
+    const exists = blocks.some((b) => b.key === slotKey);
+
+    // If not, add new block (empty notes)
+    if (!exists) {
+      blocks.push({ key: slotKey, lines: buildBlock(promptText, slotKey).split("\n") });
       btn.classList.add("has-notes");
-    });
-  };
+    }
 
-  // Detect if a textarea is a “notes big textbox” target (only ones referenced by notes buttons)
-  const isNotesTargetTextarea = (ta) => {
-    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
-    const host = ta.closest("[id]");
-    if (!host || !host.id) return false;
-    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
-  };
+    // Rebuild in canonical order
+    const rebuilt = rebuildInCanonicalOrder(targetId, blocks, slotKey);
+    ta.value = rebuilt ? rebuilt + "\n" : ""; // keep trailing newline nicer
+
+    // Focus caret at this slot’s hollow bullet
+    const caret = findCaretForKey(ta.value, slotKey);
+    ta.focus({ preventScroll: true });
+    try {
+      ta.setSelectionRange(caret, caret);
+    } catch {}
+
+    ensureId(ta);
+    saveField(ta);
+    triggerInputChange(ta);
+  });
+};
 
   /* =======================
      SUPPORT TICKETS
