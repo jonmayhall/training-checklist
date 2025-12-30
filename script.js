@@ -540,7 +540,7 @@
     cloneState.set(clones);
   };
 
-  const addPresetRowsToTable = (table, count = 3) => {
+  const addPresetRowsToTable = (table, count = 2) => {
     if (!table) return;
     const tbody = $("tbody", table);
     if (!tbody) return;
