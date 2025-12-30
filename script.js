@@ -19,6 +19,7 @@
      - De-dupes: if that • line already exists, it jumps you to its ◦ line instead of adding again
      - Works for normal Q&A rows AND table notes buttons (derives Name/Opcode if possible)
      - ENTER inside that notes textarea inserts a new hollow bullet: "\n  ◦ "
+     - Maintains QUESTION ORDER always (inserts into the correct slot by DOM order)
 
    ✅ NO PAGE SHIFT on notes click:
    - Does NOT scroll to target
@@ -26,6 +27,9 @@
 
    ✅ Notes buttons DO NOT stay orange after Reset/Clear:
    - Clears .has-notes in clearSection() and clearAll()
+
+   ✅ Removes the visible internal IDs in notes (no more “[mk:…]”)
+   - Uses an INVISIBLE marker to keep stable ordering internally
 
    ✅ Optional: Table Expand button (.mk-table-expand-btn) opens #mkTableModal if it exists
    ✅ Optional: Map button (.small-map-btn / [data-map-btn]) updates iframe if present
@@ -153,7 +157,6 @@
   };
 
   const setGhostStyles = (root = document) => {
-    // select ghost
     root.querySelectorAll("select").forEach((sel) => {
       const first = sel.options?.[0];
       const isGhost =
@@ -162,7 +165,6 @@
       sel.classList.toggle("is-placeholder", !!isGhost);
     });
 
-    // date ghost
     root.querySelectorAll('input[type="date"]').forEach((d) => {
       d.classList.toggle("is-placeholder", !d.value);
     });
@@ -223,8 +225,6 @@
     state.__activeSection = targetId;
     writeState(state);
 
-    // Keep your existing behavior (smooth to section top).
-    // If you ever want NO scroll on nav, remove this block.
     try {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
@@ -253,24 +253,20 @@
      CLEAR ALL + RESET PAGE
   ======================= */
   const removeDynamicClonesIn = (root = document) => {
-    // Trainers added rows
     const trainerContainer = $("#additionalTrainersContainer", root);
     if (trainerContainer) trainerContainer.innerHTML = "";
 
-    // POCs: remove non-base cards
     $$(".additional-poc-card", root).forEach((card) => {
       if (card.getAttribute("data-base") === "true") return;
       card.remove();
     });
 
-    // Tables: remove cloned rows
     $$("table.training-table tbody", root).forEach((tb) => {
       $$("tr", tb).forEach((tr) => {
         if (tr.getAttribute(AUTO_ROW_ATTR) === "cloned") tr.remove();
       });
     });
 
-    // Tickets: remove non-base
     $$(".ticket-group", root).forEach((g) => {
       if (g.getAttribute("data-base") === "true") return;
       g.remove();
@@ -278,31 +274,24 @@
   };
 
   const clearFieldsIn = (root = document) => {
-    // inputs
     root.querySelectorAll("input").forEach((inp) => {
       const type = (inp.type || "").toLowerCase();
       if (["button", "submit", "reset", "hidden"].includes(type)) return;
-      if (type === "checkbox" || type === "radio") {
-        inp.checked = false;
-      } else {
-        inp.value = "";
-      }
+      if (type === "checkbox" || type === "radio") inp.checked = false;
+      else inp.value = "";
       triggerInputChange(inp);
     });
 
-    // textareas
     root.querySelectorAll("textarea").forEach((ta) => {
       ta.value = "";
       triggerInputChange(ta);
     });
 
-    // selects
     root.querySelectorAll("select").forEach((sel) => {
       sel.selectedIndex = 0;
       triggerInputChange(sel);
     });
 
-    // contenteditable
     root.querySelectorAll("[contenteditable='true']").forEach((ce) => {
       ce.textContent = "";
       triggerInputChange(ce);
@@ -319,15 +308,12 @@
     removeDynamicClonesIn(document);
     clearFieldsIn(document);
 
-    // reset map
     const map = $("#dealershipMapFrame");
     if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
 
-    // reset dealership name display
     const disp = $("#dealershipNameDisplay");
     if (disp) disp.textContent = "";
 
-    // reset notes button orange state
     clearAllNotesButtonStates(document);
 
     cloneState.clearAll();
@@ -337,7 +323,6 @@
   const clearSection = (sectionEl) => {
     if (!sectionEl) return;
 
-    // remove saved field keys for this section only
     const state = readState();
     state.__fields = state.__fields || {};
     $$(`[${AUTO_ID_ATTR}]`, sectionEl).forEach((el) => {
@@ -345,7 +330,6 @@
       delete state.__fields[id];
     });
 
-    // remove clone state related to section
     if (sectionEl.id === "trainers-deployment") {
       const clones = cloneState.get();
       clones.trainers = [];
@@ -378,7 +362,6 @@
     removeDynamicClonesIn(sectionEl);
     clearFieldsIn(sectionEl);
 
-    // reset notes button orange state INSIDE this section
     clearAllNotesButtonStates(sectionEl);
 
     log("Cleared section:", sectionEl.id);
@@ -418,16 +401,14 @@
     const container = $("#additionalTrainersContainer");
     if (!input || !container) return;
 
-    const name = (input.value || "").trim(); // allowed blank
+    const name = (input.value || "").trim();
     const row = buildTrainerRow(name);
     container.appendChild(row);
 
-    // persist clone
     const clones = cloneState.get();
     clones.trainers.push({ value: name });
     cloneState.set(clones);
 
-    // reset base
     input.value = "";
     saveField(input);
     input.focus();
@@ -517,7 +498,6 @@
     const baseCard = getBasePocCard(btn);
     if (!baseCard) return;
 
-    // hard stop double-fire
     if (btn && btn.dataset.mkBusy === "1") return;
     if (btn) {
       btn.dataset.mkBusy = "1";
@@ -529,12 +509,10 @@
     const newCard = buildPocCard(values);
     baseCard.insertAdjacentElement("afterend", newCard);
 
-    // persist clone
     const clones = cloneState.get();
     clones.pocs.push(values);
     cloneState.set(clones);
 
-    // reset base fields
     if (els.nameEl) els.nameEl.value = "";
     if (els.roleEl) els.roleEl.value = "";
     if (els.cellEl) els.cellEl.value = "";
@@ -642,238 +620,261 @@
     });
   };
 
-/* =======================
-   NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
-   ✅ Maintains QUESTION ORDER always
-   - Each notes button builds a stable "slot key" based on question order in the DOM
-   - When you add a note later (even for an earlier question), it is inserted into the correct slot
-   - De-dupes by slot key (won’t add twice)
-======================= */
+  /* =======================
+     NOTES (BULLET INSERT INTO EXISTING BIG TEXTAREA)
+     ✅ Maintains QUESTION ORDER always
+     ✅ No visible [mk:...] IDs (uses invisible marker instead)
+  ======================= */
 
-// IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
-const getNotesTargetId = (btn) =>
-  btn.getAttribute("data-notes-target") ||
-  btn.getAttribute("href")?.replace("#", "") ||
-  "";
+  // IMPORTANT: DO NOT use data-target fallback here (collides with menu nav buttons).
+  const getNotesTargetId = (btn) =>
+    btn.getAttribute("data-notes-target") ||
+    btn.getAttribute("href")?.replace("#", "") ||
+    "";
 
-const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+  const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// Stable key for a question "slot"
-const getNotesSlotKey = (btn) => {
-  const hostId = getNotesTargetId(btn) || "notes";
-  const tr = btn.closest("tr");
-  if (tr) {
-    // stable-enough: table + row index within tbody
-    const table = btn.closest("table") || tr.closest("table");
-    const tb = tr.parentElement;
-    const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
-    const idx = rows.indexOf(tr);
-    const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
-    return `${hostId}::tbl::${tKey}::r${idx}`;
-  }
+  // Invisible marker (keeps stable key, not visible to user)
+  const MK_MARK = "\u2063"; // invisible separator
+  const makeKeyMarker = (key) => `${MK_MARK}mk:${key}${MK_MARK}`;
+  const stripKeyMarkers = (s) =>
+    String(s || "").replace(new RegExp(`${MK_MARK}mk:.*?${MK_MARK}`, "g"), "");
 
-  const row = btn.closest(".checklist-row") || btn.closest(".section-block") || btn;
-  // slot index based on DOM order of all note buttons that point to same target
-  const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
-  const idx = all.indexOf(btn);
-  // fallback: if idx not found (cloned nodes), use label text hash
-  const labelText =
-    (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
-  let h = 5381;
-  for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
-  const labelHash = (h >>> 0).toString(16);
+  // Stable key for a question "slot"
+  const getNotesSlotKey = (btn) => {
+    const hostId = getNotesTargetId(btn) || "notes";
+    const tr = btn.closest("tr");
 
-  return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
-};
-
-const findOrDerivePromptText = (btn) => {
-  const tr = btn.closest("tr");
-  const table = btn.closest("table");
-  const section = getSection(btn);
-  const secId = section?.id || "";
-
-  if (tr && table) {
-    const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
-    const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
-    let idx = -1;
-
-    if (secId === "training-checklist") idx = idxOf("name");
-    if (secId === "opcodes-pricing") idx = idxOf("opcode");
-
-    if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
-
-    if (idx < 0) {
-      const tds = $$("td", tr);
-      for (let i = 0; i < tds.length; i++) {
-        const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
-        if (field) {
-          idx = i;
-          break;
-        }
-      }
+    if (tr) {
+      const table = btn.closest("table") || tr.closest("table");
+      const tb = tr.parentElement;
+      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+      const idx = rows.indexOf(tr);
+      const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+      return `${hostId}::tbl::${tKey}::r${idx}`;
     }
 
-    const tds = $$("td", tr);
-    const cell = idx >= 0 ? tds[idx] : null;
-    let val = "";
+    const row = btn.closest(".checklist-row") || btn.closest(".section-block") || btn;
+    const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
+    const idx = all.indexOf(btn);
 
-    if (cell) {
-      const field = $("input, textarea, select", cell);
-      if (field) val = (field.value || "").trim();
-      else val = (cell.textContent || "").trim();
-    }
+    const labelText =
+      (row.querySelector?.("label")?.textContent || btn.textContent || "notes").trim();
+    let h = 5381;
+    for (let i = 0; i < labelText.length; i++) h = (h * 33) ^ labelText.charCodeAt(i);
+    const labelHash = (h >>> 0).toString(16);
 
-    const label =
-      secId === "training-checklist" ? "Name" : secId === "opcodes-pricing" ? "Opcode" : "Item";
-
-    return val ? `${label}: ${val}` : `${label}: (blank)`;
-  }
-
-  const row = btn.closest(".checklist-row");
-  const label = row ? row.querySelector("label") : null;
-  const labelText = (label?.textContent || "").trim();
-  return labelText || "Notes";
-};
-
-// Parse existing notes blocks into {key, textBlock}
-const parseNotesBlocks = (value) => {
-  const v = normalizeNL(value || "");
-  const lines = v.split("\n");
-
-  const blocks = [];
-  let cur = null;
-
-  const keyRe = /^\s*•\s*(.*?)\s*\[mk:(.+?)\]\s*$/; // "• Prompt [mk:key]"
-  const isMain = (line) => keyRe.test(line);
-
-  const flush = () => {
-    if (cur) {
-      blocks.push(cur);
-      cur = null;
-    }
+    return `${hostId}::q::${idx >= 0 ? idx : "x" + labelHash}`;
   };
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  const findOrDerivePromptText = (btn) => {
+    const tr = btn.closest("tr");
+    const table = btn.closest("table");
+    const section = getSection(btn);
+    const secId = section?.id || "";
 
-    if (isMain(line)) {
-      flush();
-      cur = { key: line.match(keyRe)[2], lines: [line] };
-      continue;
+    if (tr && table) {
+      const ths = $$("thead th", table).map((th) => (th.textContent || "").trim().toLowerCase());
+      const idxOf = (needle) => ths.findIndex((t) => t.includes(needle));
+      let idx = -1;
+
+      if (secId === "training-checklist") idx = idxOf("name");
+      if (secId === "opcodes-pricing") idx = idxOf("opcode");
+
+      if (idx < 0 && $$("td", tr).length >= 2) idx = 1;
+
+      if (idx < 0) {
+        const tds = $$("td", tr);
+        for (let i = 0; i < tds.length; i++) {
+          const field = $("input[type='text'], input:not([type]), textarea, select", tds[i]);
+          if (field) {
+            idx = i;
+            break;
+          }
+        }
+      }
+
+      const tds = $$("td", tr);
+      const cell = idx >= 0 ? tds[idx] : null;
+      let val = "";
+
+      if (cell) {
+        const field = $("input, textarea, select", cell);
+        if (field) val = (field.value || "").trim();
+        else val = (cell.textContent || "").trim();
+      }
+
+      const label =
+        secId === "training-checklist" ? "Name" : secId === "opcodes-pricing" ? "Opcode" : "Item";
+
+      return val ? `${label}: ${val}` : `${label}: (blank)`;
     }
 
-    if (!cur) {
-      // preface junk (shouldn't happen), start a misc block
-      cur = { key: "__misc__", lines: [] };
+    const row = btn.closest(".checklist-row");
+    const label = row ? row.querySelector("label") : null;
+    const labelText = (label?.textContent || "").trim();
+    return stripKeyMarkers(labelText) || "Notes";
+  };
+
+  // Parse existing notes blocks into {key, lines[]}
+  // Supports BOTH:
+  //   old: "• Prompt [mk:key]"
+  //   new: "• Prompt<INVISIBLE mk:key>"
+  const parseNotesBlocks = (value) => {
+    const v = normalizeNL(value || "");
+    const lines = v.split("\n");
+
+    const blocks = [];
+    let cur = null;
+
+    const oldKeyRe = /^\s*•\s*(.*?)\s*\[mk:(.+?)\]\s*$/;
+    const newKeyRe = new RegExp(
+      `^\\s*•\\s*(.*?)\\s*${MK_MARK}mk:(.+?)${MK_MARK}\\s*$`
+    );
+
+    const isMain = (line) => oldKeyRe.test(line) || newKeyRe.test(line);
+
+    const extractKey = (line) => {
+      const m1 = line.match(oldKeyRe);
+      if (m1) return { prompt: m1[1], key: m1[2] };
+      const m2 = line.match(newKeyRe);
+      if (m2) return { prompt: m2[1], key: m2[2] };
+      return null;
+    };
+
+    const flush = () => {
+      if (cur) {
+        blocks.push(cur);
+        cur = null;
+      }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (isMain(line)) {
+        flush();
+        const ex = extractKey(line);
+        cur = { key: ex ? ex.key : "__unknown__", lines: [line] };
+        continue;
+      }
+
+      if (!cur) cur = { key: "__misc__", lines: [] };
+      cur.lines.push(line);
     }
-    cur.lines.push(line);
-  }
-  flush();
+    flush();
 
-  // remove pure-empty misc
-  return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
-};
+    return blocks.filter((b) => !(b.key === "__misc__" && b.lines.join("\n").trim() === ""));
+  };
 
-const buildBlock = (promptText, key) => {
-  // Store key inline so we can reorder later safely
-  const main = `• ${promptText} [mk:${key}]`;
-  const sub = `  ◦ `;
-  return `${main}\n${sub}`;
-};
+  const buildBlock = (promptText, key) => {
+    // ✅ NO visible [mk:...] — marker is invisible but parseable
+    const main = `• ${stripKeyMarkers(promptText)}${makeKeyMarker(key)}`;
+    const sub = `  ◦ `;
+    return `${main}\n${sub}`;
+  };
 
-const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
-  // canonical order = DOM order of ALL notes buttons for that target
-  const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
-  const wantedKeys = btns.map((b) => getNotesSlotKey(b));
+  const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+    const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
+    const wantedKeys = btns.map((b) => getNotesSlotKey(b));
 
-  // map existing blocks by key
-  const map = new Map();
-  blocks.forEach((b) => {
-    if (b.key && b.key !== "__misc__") map.set(b.key, b);
-  });
+    const map = new Map();
+    blocks.forEach((b) => {
+      if (b.key && b.key !== "__misc__") map.set(b.key, b);
+    });
 
-  const out = [];
-  for (const k of wantedKeys) {
-    if (map.has(k)) out.push(map.get(k).lines.join("\n"));
-  }
-
-  // If we just added a key and it wasn't discoverable in wantedKeys (rare),
-  // append it at end.
-  if (newlyAddedKey && !wantedKeys.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
-    out.push(map.get(newlyAddedKey).lines.join("\n"));
-  }
-
-  // join with ONE blank line between blocks
-  return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-};
-
-// Find caret position at the hollow bullet for a given key
-const findCaretForKey = (text, key) => {
-  const v = normalizeNL(text || "");
-  const re = new RegExp(`^\\s*•.*\\[mk:${escapeRegex(key)}\\]\\s*$`, "m");
-  const m = v.match(re);
-  if (!m || typeof m.index !== "number") return v.length;
-
-  const mainStart = m.index;
-  const mainEnd = mainStart + m[0].length;
-
-  // find the first following line that contains ◦
-  const after = v.slice(mainEnd);
-  const nlIdx = after.indexOf("\n");
-  if (nlIdx < 0) return v.length;
-
-  const rest = after.slice(nlIdx + 1);
-  const rel = rest.indexOf("◦");
-  if (rel < 0) return mainEnd + 1; // line start
-  return mainEnd + 1 + nlIdx + 1 + rel + 2; // after "◦ "
-};
-
-const handleNotesClick = (btn) => {
-  const targetId = getNotesTargetId(btn);
-  if (!targetId) return;
-
-  const target = document.getElementById(targetId);
-  if (!target) return;
-
-  if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
-  if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
-
-  const ta = $("textarea", target);
-  if (!ta) return;
-
-  const promptText = findOrDerivePromptText(btn);
-  const slotKey = getNotesSlotKey(btn);
-
-  preserveScroll(() => {
-    // Parse existing
-    const blocks = parseNotesBlocks(ta.value);
-
-    // Do we already have this slot?
-    const exists = blocks.some((b) => b.key === slotKey);
-
-    // If not, add new block (empty notes)
-    if (!exists) {
-      blocks.push({ key: slotKey, lines: buildBlock(promptText, slotKey).split("\n") });
-      btn.classList.add("has-notes");
+    const out = [];
+    for (const k of wantedKeys) {
+      if (map.has(k)) out.push(map.get(k).lines.join("\n"));
     }
 
-    // Rebuild in canonical order
-    const rebuilt = rebuildInCanonicalOrder(targetId, blocks, slotKey);
-    ta.value = rebuilt ? rebuilt + "\n" : ""; // keep trailing newline nicer
+    if (newlyAddedKey && !wantedKeys.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+      out.push(map.get(newlyAddedKey).lines.join("\n"));
+    }
 
-    // Focus caret at this slot’s hollow bullet
-    const caret = findCaretForKey(ta.value, slotKey);
-    ta.focus({ preventScroll: true });
-    try {
-      ta.setSelectionRange(caret, caret);
-    } catch {}
+    return out.join("\n\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+  };
 
-    ensureId(ta);
-    saveField(ta);
-    triggerInputChange(ta);
-  });
-};
+  const findCaretForKey = (text, key) => {
+    const v = normalizeNL(text || "");
+
+    // match either old bracket style OR new invisible marker style
+    const re = new RegExp(
+      `^\\s*•.*(?:\\[mk:${escapeRegex(key)}\\]|${MK_MARK}mk:${escapeRegex(key)}${MK_MARK})\\s*$`,
+      "m"
+    );
+
+    const m = v.match(re);
+    if (!m || typeof m.index !== "number") return v.length;
+
+    const mainStart = m.index;
+    const mainEnd = mainStart + m[0].length;
+
+    // look for the next "◦" after the main line
+    const after = v.slice(mainEnd);
+    const nextNl = after.indexOf("\n");
+    if (nextNl < 0) return v.length;
+
+    const rest = after.slice(nextNl + 1);
+    const rel = rest.indexOf("◦");
+    if (rel < 0) return mainEnd + 1;
+
+    return mainEnd + 1 + nextNl + 1 + rel + 2; // after "◦ "
+  };
+
+  const handleNotesClick = (btn) => {
+    const targetId = getNotesTargetId(btn);
+    if (!targetId) return;
+
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+    if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+    const ta = $("textarea", target);
+    if (!ta) return;
+
+    const promptText = findOrDerivePromptText(btn);
+    const slotKey = getNotesSlotKey(btn);
+
+    preserveScroll(() => {
+      const blocks = parseNotesBlocks(ta.value);
+      const exists = blocks.some((b) => b.key === slotKey);
+
+      if (!exists) {
+        blocks.push({ key: slotKey, lines: buildBlock(promptText, slotKey).split("\n") });
+        btn.classList.add("has-notes");
+      }
+
+      const rebuilt = rebuildInCanonicalOrder(targetId, blocks, slotKey);
+      ta.value = rebuilt ? rebuilt + "\n" : "";
+
+      const caret = findCaretForKey(ta.value, slotKey);
+
+      try {
+        ta.focus({ preventScroll: true });
+      } catch {
+        ta.focus();
+      }
+      try {
+        ta.setSelectionRange(caret, caret);
+      } catch {}
+
+      ensureId(ta);
+      saveField(ta);
+      triggerInputChange(ta);
+    });
+  };
+
+  // Detect if a textarea is the “notes big textbox” target (ones referenced by notes buttons)
+  const isNotesTargetTextarea = (ta) => {
+    if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+    const host = ta.closest("[id]");
+    if (!host || !host.id) return false;
+    return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+  };
 
   /* =======================
      SUPPORT TICKETS
@@ -1086,7 +1087,8 @@ const handleNotesClick = (btn) => {
      DEALERSHIP MAP BUTTON (optional)
   ======================= */
   const updateDealershipMap = (address) => {
-    const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
+    const frame =
+      $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
     if (!frame) return;
 
     const a = String(address || "").trim();
@@ -1115,7 +1117,8 @@ const handleNotesClick = (btn) => {
     $$("div.table-container").forEach((tc) => {
       const footer = tc.parentElement?.querySelector?.(".table-footer");
       const existing =
-        $(".mk-table-expand-btn", tc) || (footer ? $(".mk-table-expand-btn", footer) : null);
+        $(".mk-table-expand-btn", tc) ||
+        (footer ? $(".mk-table-expand-btn", footer) : null);
       if (existing) return;
 
       const btn = document.createElement("button");
@@ -1353,9 +1356,7 @@ const handleNotesClick = (btn) => {
       cloneState.set(clones);
     }
 
-    if (el.matches(".ticket-number-input")) {
-      onTicketNumberChange(el);
-    }
+    if (el.matches(".ticket-number-input")) onTicketNumberChange(el);
 
     // table clone persistence
     const tr = el.closest("tr");
@@ -1381,9 +1382,7 @@ const handleNotesClick = (btn) => {
       setGhostStyles(document);
     }
 
-    if (el.matches(".ticket-status-select")) {
-      onTicketStatusChange(el);
-    }
+    if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
   });
 
   document.addEventListener("keydown", (e) => {
@@ -1391,7 +1390,15 @@ const handleNotesClick = (btn) => {
     if (!isEl(el)) return;
 
     // ENTER in Notes textarea => auto hollow bullet
-    if (e.key === "Enter" && isNotesTargetTextarea(el) && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
+    if (
+      e.key === "Enter" &&
+      isNotesTargetTextarea(el) &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
       e.preventDefault();
       preserveScroll(() => {
         const insert = "\n  ◦ ";
