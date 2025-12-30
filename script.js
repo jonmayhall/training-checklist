@@ -515,32 +515,32 @@
     }
 
 // =======================================
-// Additional POC (+): add new card
+// Additional POC (+): add new card (SINGLE-FIRE, moves ALL fields)
 // - Adds even if name is blank
 // - Moves name/role/cell/email into new card
 // - Resets the base card fields
+// - Inserts new card right after base card (same grid)
 // =======================================
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-add-poc]");
   if (!btn) return;
 
-  const page = document.querySelector("#dealership-info");
-  if (!page) return;
+  // Prevent double-fire (in case you have two handlers somewhere)
+  if (btn.dataset.mkBusy === "1") return;
+  btn.dataset.mkBusy = "1";
+  setTimeout(() => (btn.dataset.mkBusy = "0"), 0);
 
-  // Base POC card (the one with the + button)
   const baseCard = btn.closest(".additional-poc-card[data-base='true']");
   if (!baseCard) return;
 
-  // Grab ALL fields from the base card
+  // Base inputs (reliable selectors, NOT nth-of-type)
   const nameEl =
     baseCard.querySelector("#additionalPocInput") ||
-    baseCard.querySelector(".input-plus input[type='text']") ||
-    baseCard.querySelector("input[type='text']");
+    baseCard.querySelector(".input-plus input[type='text']");
 
-  // These three are the rows under it inside the same base card
-  const roleEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(2) input");
-  const cellEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(3) input");
-  const emailEl = baseCard.querySelector(".checklist-row.indent-sub:nth-of-type(4) input");
+  const roleEl = baseCard.querySelector('input[placeholder="Enter role"]');
+  const cellEl = baseCard.querySelector('input[placeholder="Enter cell"]');
+  const emailEl = baseCard.querySelector('input[type="email"]');
 
   const values = {
     name: (nameEl?.value ?? "").trim(),
@@ -574,15 +574,18 @@ document.addEventListener("click", (e) => {
     </div>
   `;
 
-  // Fill the new card with base card values
-  const inputs = newCard.querySelectorAll("input");
-  // order: name, role, cell, email
-  if (inputs[0]) inputs[0].value = values.name;
-  if (inputs[1]) inputs[1].value = values.role;
-  if (inputs[2]) inputs[2].value = values.cell;
-  if (inputs[3]) inputs[3].value = values.email;
+  // Fill new card values
+  const nameNew = newCard.querySelector('input[placeholder="Enter name"]');
+  const roleNew = newCard.querySelector('input[placeholder="Enter role"]');
+  const cellNew = newCard.querySelector('input[placeholder="Enter cell"]');
+  const emailNew = newCard.querySelector('input[type="email"]');
 
-  // Insert new card into the SAME GRID, right after the base card
+  if (nameNew) nameNew.value = values.name;
+  if (roleNew) roleNew.value = values.role;
+  if (cellNew) cellNew.value = values.cell;
+  if (emailNew) emailNew.value = values.email;
+
+  // Insert right after base card (same grid)
   baseCard.insertAdjacentElement("afterend", newCard);
 
   // Reset base card fields
@@ -591,14 +594,14 @@ document.addEventListener("click", (e) => {
   if (cellEl) cellEl.value = "";
   if (emailEl) emailEl.value = "";
 
-  // Nudge any auto-save logic listening for input
+  // Trigger autosave listeners
   [nameEl, roleEl, cellEl, emailEl].forEach((el) => {
     if (!el) return;
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
-  // Put cursor back in name field
+  // Focus name
   if (nameEl) nameEl.focus();
 });
 
