@@ -2,11 +2,17 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN)  — UPDATED/FIXED
 
-   ✅ POC FIX (YOUR NEW REQUEST):
+   ✅ POC FIX:
    - Cloned/added POC cards DO NOT include the (+) add button
    - Cloned/added POC cards get a “right-rounded” look
-     (adds classes + inline right-side radius as a safe fallback)
 
+   ✅ NOTES FIX:
+   - Table Notes buttons auto-add the ROW NAME (or OPCODE) as the main bullet text
+   - No "Name:" / "Opcode:" prefixes — just the value
+   - Caret lands at the hollow bullet (◦)
+
+   ✅ SERVICE ADVISORS TABLE:
+   - Adds 3 preset cloned rows using the same clone logic as other tables
 ======================================================= */
 
 (() => {
@@ -218,8 +224,11 @@
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
-      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes")
-      .forEach((btn) => btn.classList.remove("has-notes"));
+      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active")
+      .forEach((btn) => {
+        btn.classList.remove("has-notes");
+        btn.classList.remove("is-notes-active");
+      });
   };
 
   /* =======================
@@ -385,9 +394,7 @@
   };
 
   /* =======================
-     ADD POC (+)  — UPDATED:
-     - clones REMOVE the add button
-     - clones have right rounded side
+     ADD POC (+)  — UPDATED
   ======================= */
   const readPocCardValues = (card) => ({
     name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
@@ -416,39 +423,38 @@
   };
 
   const buildPocCard = (p = null) => {
-  const base = document.querySelector('.additional-poc-card[data-base="true"]');
-  if (!base) return null;
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return null;
 
-  const clone = base.cloneNode(true);
-  clone.setAttribute("data-base", "false");
-  clone.setAttribute(AUTO_CARD_ATTR, "poc");
+    const clone = base.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-  // ✅ Remove the add (+) button from cloned cards
-  clone
-    .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
-    .forEach((btn) => btn.remove());
+    // Remove the add (+) button from cloned cards
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
 
-  // ✅ ADD THIS BLOCK RIGHT HERE ✅
-  const row = clone.querySelector(".checklist-row.integrated-plus");
-  if (row) row.classList.remove("integrated-plus"); // stops right-side square rule
+    // Normalize "integrated-plus" look when there is no + button on clones
+    const row = clone.querySelector(".checklist-row.integrated-plus");
+    if (row) row.classList.remove("integrated-plus");
 
-  const ip = clone.querySelector(".input-plus");
-  if (ip) ip.classList.add("mk-solo-input");
-  // ✅ END BLOCK ✅
+    const ip = clone.querySelector(".input-plus");
+    if (ip) ip.classList.add("mk-solo-input");
 
-  // ✅ Right-rounded side for cloned cards
-  clone.classList.add("mk-poc-clone", "mk-round-right");
-  clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
-  clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
+    // Right-rounded side for cloned cards
+    clone.classList.add("mk-poc-clone", "mk-round-right");
+    clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
+    clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
 
-  // clear/reset inputs & ids on clone
-  $$("input, textarea, select", clone).forEach((el) => {
-    if (el.matches("input[type='checkbox']")) el.checked = false;
-    else el.value = "";
-    el.removeAttribute(AUTO_ID_ATTR);
-    ensureId(el);
-    saveField(el);
-  });
+    // clear/reset inputs & ids on clone
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
 
     if (p) writePocCardValues(clone, p);
     return clone;
@@ -534,27 +540,32 @@
     cloneState.set(clones);
   };
 
-   const addPresetRowsToTable = (table, count = 3) => {
-  if (!table) return;
-  const tbody = $("tbody", table);
-  if (!tbody) return;
+  const addPresetRowsToTable = (table, count = 3) => {
+    if (!table) return;
+    const tbody = $("tbody", table);
+    if (!tbody) return;
 
-  const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
-  if (!baseRow) return;
+    const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
+    if (!baseRow) return;
 
-  // Only count rows that are actual starter rows (cloned ones)
-  const existingClones = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).length;
-  if (existingClones > 0) return;
+    const existingClones = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).length;
+    if (existingClones > 0) return;
 
-  for (let i = 0; i < count; i++) {
-    const clone = baseRow.cloneNode(true);
-    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
-    clearRowFields(clone);
-    tbody.appendChild(clone);
-  }
+    for (let i = 0; i < count; i++) {
+      const clone = baseRow.cloneNode(true);
+      clone.setAttribute(AUTO_ROW_ATTR, "cloned");
+      clearRowFields(clone);
+      tbody.appendChild(clone);
+    }
 
-  persistTable(table);
-};
+    persistTable(table);
+
+    const first = $(
+      "input, textarea, select, [contenteditable='true']",
+      tbody.querySelector(`tr[${AUTO_ROW_ATTR}="cloned"]`) || tbody
+    );
+    if (first) first.focus();
+  };
 
   const cloneTableRow = (btn) => {
     const footer = btn.closest(".table-footer");
@@ -608,7 +619,7 @@
   };
 
   /* =======================
-     NOTES (kept as-is from your working version)
+     NOTES
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
@@ -677,48 +688,49 @@
       return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
     };
 
-  const findOrDerivePromptText = (btn) => {
-  const tr = btn.closest("tr");
-  const table = btn.closest("table");
-  const section = getSection(btn);
-  const secId = section?.id || "";
+    // ✅ TABLE NOTES: name/opcode logic (no prefixes)
+    const findOrDerivePromptText = (btn) => {
+      const tr = btn.closest("tr");
+      const table = btn.closest("table");
+      const section = getSection(btn);
+      const secId = section?.id || "";
 
-  // ===== TABLE ROW NOTES =====
-  if (tr && table) {
-    // TRAINING CHECKLIST: Name is in the FIRST cell (same cell as checkbox)
-    if (secId === "training-checklist") {
-      const nameInput =
-        tr.querySelector('td:first-child input[type="text"]') ||
-        tr.querySelector('td:nth-child(2) input[type="text"]'); // fallback if your layout changes
+      // ===== TABLE ROW NOTES =====
+      if (tr && table) {
+        // OPCODES: opcode in 2nd cell (after checkbox column)
+        if (secId === "opcodes-pricing") {
+          const opcodeField =
+            tr.querySelector("td:nth-child(2) input:not([type='checkbox']):not([type='radio'])") ||
+            tr.querySelector("td:nth-child(2) select") ||
+            tr.querySelector("td:nth-child(2) textarea") ||
+            tr.querySelector("td:nth-child(2)");
+          const value = (opcodeField?.value || opcodeField?.textContent || "").trim();
+          return value || "(blank)";
+        }
 
-      const value = (nameInput?.value || nameInput?.textContent || "").trim();
-      return value || "(blank)";
-    }
+        // ALL TRAINING TABLES: name is typically in first column (checkbox + text input)
+        // (works for Techs / Advisors / Parts etc.)
+        const nameInput =
+          tr.querySelector("td:first-child input[type='text']") ||
+          tr.querySelector("td:first-child input:not([type='checkbox']):not([type='radio'])");
 
-    // OPCODES: opcode is typically in 2nd cell (after checkbox)
-    if (secId === "opcodes-pricing") {
-      const opcodeInput =
-        tr.querySelector('td:nth-child(2) input[type="text"]') ||
-        tr.querySelector('td:nth-child(2) input, td:nth-child(2) select, td:nth-child(2) textarea');
+        const nameVal = (nameInput?.value || nameInput?.textContent || "").trim();
+        if (nameVal) return nameVal;
 
-      const value = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
-      return value || "(blank)";
-    }
+        // Fallback: first non-checkbox field in row
+        const field =
+          tr.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
+          null;
 
-    // Fallback: first non-checkbox field in the row
-    const field =
-      tr.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
-      null;
+        const value = (field?.value || field?.textContent || "").trim();
+        return value || "Item";
+      }
 
-    const value = (field?.value || field?.textContent || "").trim();
-    return value || "Item";
-  }
-
-  // ===== NON-TABLE QUESTIONS =====
-  const row = btn.closest(".checklist-row");
-  const label = row?.querySelector("label");
-  return (label?.textContent || "").trim() || "Notes";
-};
+      // ===== NON-TABLE QUESTIONS =====
+      const row = btn.closest(".checklist-row");
+      const label = row?.querySelector("label");
+      return (label?.textContent || "").trim() || "Notes";
+    };
 
     const parseBlocks = (text) => {
       const lines = normalizeNL(text || "").split("\n");
@@ -796,6 +808,8 @@
       const after = v.slice(afterMain);
       const rel = after.indexOf("◦");
       if (rel < 0) return afterMain;
+
+      // place caret AFTER "◦ " (bullet + space)
       return afterMain + rel + 2;
     };
 
@@ -838,6 +852,7 @@
         } catch {}
 
         btn.classList.add("has-notes");
+        btn.classList.add("is-notes-active");
 
         ensureId(ta);
         saveField(ta);
@@ -1410,27 +1425,38 @@
     syncDealershipName();
     ensureTableExpandButtons();
 
-       /* =======================
-     SERVICE ADVISOR TABLE — PRESET ROWS (3)
-  ======================= */
-  (() => {
-    const section = document.getElementById("service-advisors");
-    if (!section) return;
+    /* =======================
+       SERVICE ADVISORS TABLE — PRESET ROWS (3)
+       (clone-based; does NOT rely on clicking)
+    ======================= */
+    (() => {
+      // Find the section whose header contains "Service Advisors"
+      const headers = $$(".section-header");
+      const match = headers.find((h) =>
+        (h.textContent || "").toLowerCase().includes("service advisors")
+      );
+      if (!match) return;
 
-    const table = section.querySelector("table.training-table");
-    const addBtn = section.querySelector(".add-row");
-    const tbody = table?.querySelector("tbody");
+      const section = match.closest(".section");
+      if (!section) return;
 
-    if (!table || !addBtn || !tbody) return;
+      const table = section.querySelector("table.training-table");
+      if (!table) return;
 
-    // If rows already exist (saved state), DO NOTHING
-    if (tbody.querySelectorAll("tr").length > 0) return;
+      const tbody = table.querySelector("tbody");
+      if (!tbody) return;
 
-    // Add 3 starter rows
-    for (let i = 0; i < 3; i++) {
-      addBtn.click();
-    }
-  })();
+      // Don't add presets if clones already exist (either restored or already on page)
+      const existingClones = tbody.querySelectorAll(`tr[${AUTO_ROW_ATTR}="cloned"]`).length;
+      if (existingClones > 0) return;
+
+      // Don't add presets if we have saved rows for this table
+      const key = getTableKey(table);
+      const saved = cloneState.get().tables?.[key];
+      if (saved && saved.length) return;
+
+      addPresetRowsToTable(table, 3);
+    })();
 
     log("Initialized.");
   };
