@@ -1059,113 +1059,181 @@
     frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
   };
 
-  /* =======================
-     TABLE EXPAND MODAL
-  ======================= */
-  const tableModal = {
-    modal: null,
-    content: null,
-    title: null,
-    backdrop: null,
-    placeholder: null,
-    movedNode: null,
-    bodyOverflow: "",
-  };
+ /* =======================
+   TABLE + NOTES EXPAND MODAL (Pages 5 & 6 only)
+   - Moves the REAL table card + related notes blocks into a centered modal card
+   - Everything still works (notes buttons, add-row, inputs) because nodes are moved, not cloned
+======================= */
 
-  const ensureTableExpandButtons = () => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
+const tableModal = {
+  modal: null,
+  panel: null,
+  content: null,
+  title: null,
+  backdrop: null,
+  bodyOverflow: "",
+  moved: [],        // [{ node, placeholder }]
+};
 
-    $$("div.table-container").forEach((tc) => {
-      const footer = tc.parentElement?.querySelector?.(".table-footer");
-      const existing =
-        $(".mk-table-expand-btn", tc) ||
-        (footer ? $(".mk-table-expand-btn", footer) : null);
-      if (existing) return;
+const EXPAND_SECTION_IDS = new Set([
+  "training-checklist", // page 5 (change if your actual id differs)
+  "opcodes-pricing",    // page 6 (change if your actual id differs)
+]);
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-table-expand-btn";
-      btn.setAttribute("data-mk-table-expand", "1");
-      btn.title = "Expand table";
-      btn.textContent = "⤢";
+const getPageSectionIdFor = (el) => getSection(el)?.id || "";
 
-      if (footer) footer.appendChild(btn);
-      else tc.appendChild(btn);
-    });
-  };
+const ensureTableExpandButtons = () => {
+  const modal = $("#mkTableModal");
+  if (!modal) return;
 
-  const openTableModalFor = (anyInsideTableContainer) => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
+  $$("div.table-container").forEach((tc) => {
+    const secId = getPageSectionIdFor(tc);
+    if (!EXPAND_SECTION_IDS.has(secId)) return;
 
-    const panel = $(".mk-modal-panel", modal) || modal;
-    const content = $(".mk-modal-content", modal);
-    const titleEl = $(".mk-modal-title", modal);
+    const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
+    if (!footer) return;
 
-    if (!content) return;
+    // avoid duplicates
+    if ($(".mk-table-expand-btn", footer)) return;
 
-    const tableContainer =
-      anyInsideTableContainer?.closest?.(".table-container") || $(".table-container");
-    if (!tableContainer) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-table-expand-btn";
+    btn.setAttribute("data-mk-table-expand", "1");
+    btn.title = "Expand";
+    btn.textContent = "⤢";
 
-    const sectionWrap =
-      tableContainer.closest(".section") ||
-      tableContainer.closest(".section-block") ||
-      tableContainer.parentElement ||
-      tableContainer;
+    footer.appendChild(btn);
+  });
+};
 
-    tableModal.modal = modal;
-    tableModal.content = content;
-    tableModal.title = titleEl;
-    tableModal.backdrop = $(".mk-modal-backdrop", modal);
+// Given a clicked expand button (or any node inside the table card),
+// return the "bundle" nodes we want to move:
+// - The table "section card" (whatever wrapper contains the table + footer)
+// - PLUS all notes blocks referenced by notes buttons inside that card
+const getExpandBundleNodes = (anyInsideTableCard) => {
+  const tc = anyInsideTableCard?.closest?.(".table-container") || anyInsideTableCard;
+  if (!tc) return [];
 
-    const header =
-      sectionWrap.querySelector?.(".section-header") ||
-      (sectionWrap.previousElementSibling?.classList?.contains("section-header")
-        ? sectionWrap.previousElementSibling
-        : null);
+  // This is the “table card” wrapper we move (keeps header + table + footer together)
+  const tableCard =
+    tc.closest(".section") ||
+    tc.closest(".section-block") ||
+    tc.parentElement ||
+    tc;
 
-    if (titleEl) titleEl.textContent = (header?.textContent || "Table").trim();
+  // Collect all data-notes-target ids used inside this table card
+  const targets = new Set();
+  $$("[data-notes-target]", tableCard).forEach((btn) => {
+    const id = btn.getAttribute("data-notes-target");
+    if (id) targets.add(id);
+  });
 
-    tableModal.placeholder = document.createComment("mk-table-modal-placeholder");
-    sectionWrap.parentNode.insertBefore(tableModal.placeholder, sectionWrap);
-    tableModal.movedNode = sectionWrap;
+  const notesBlocks = [];
+  targets.forEach((id) => {
+    const block = document.getElementById(id);
+    if (block) notesBlocks.push(block);
+  });
 
-    content.innerHTML = "";
-    content.appendChild(sectionWrap);
+  // keep table card first, then notes blocks in the same order they appear in DOM
+  const all = [tableCard, ...notesBlocks];
 
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    tableModal.bodyOverflow = document.body.style.overflow || "";
-    document.body.style.overflow = "hidden";
+  // de-dupe + filter null
+  const uniq = [];
+  const seen = new Set();
+  all.forEach((n) => {
+    if (!n || seen.has(n)) return;
+    seen.add(n);
+    uniq.push(n);
+  });
 
-    try {
-      panel.scrollTop = 0;
-    } catch {}
-  };
+  // sort by document order (so it matches the page stacking)
+  uniq.sort((a, b) => {
+    if (a === b) return 0;
+    const pos = a.compareDocumentPosition(b);
+    return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+  });
 
-  const closeTableModal = () => {
-    const modal = tableModal.modal;
-    if (!modal) return;
+  return uniq;
+};
 
-    if (tableModal.movedNode && tableModal.placeholder && tableModal.placeholder.parentNode) {
-      tableModal.placeholder.parentNode.insertBefore(tableModal.movedNode, tableModal.placeholder);
-      tableModal.placeholder.parentNode.removeChild(tableModal.placeholder);
-    }
+const openTableModalFor = (anyInsideTableCard) => {
+  const modal = $("#mkTableModal");
+  if (!modal) return;
 
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
+  const secId = getPageSectionIdFor(anyInsideTableCard);
+  if (!EXPAND_SECTION_IDS.has(secId)) return; // only pages 5 & 6
 
-    document.body.style.overflow = tableModal.bodyOverflow || "";
+  const panel = $(".mk-modal-panel", modal) || modal;
+  const content = $(".mk-modal-content", modal);
+  const titleEl = $(".mk-modal-title", modal);
+  const backdrop = $(".mk-modal-backdrop", modal);
 
-    tableModal.modal = null;
-    tableModal.content = null;
-    tableModal.title = null;
-    tableModal.backdrop = null;
-    tableModal.placeholder = null;
-    tableModal.movedNode = null;
-  };
+  if (!content) return;
+
+  const bundle = getExpandBundleNodes(anyInsideTableCard);
+  if (!bundle.length) return;
+
+  // Title: use nearest section header text
+  const header =
+    bundle[0].querySelector?.(".section-header") ||
+    bundle[0].previousElementSibling?.classList?.contains("section-header")
+      ? bundle[0].previousElementSibling
+      : null;
+
+  if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
+
+  tableModal.modal = modal;
+  tableModal.panel = panel;
+  tableModal.content = content;
+  tableModal.title = titleEl;
+  tableModal.backdrop = backdrop;
+  tableModal.moved = [];
+
+  // clear content, then move nodes in
+  content.innerHTML = "";
+
+  bundle.forEach((node) => {
+    const ph = document.createComment("mk-expand-placeholder");
+    node.parentNode.insertBefore(ph, node);
+
+    tableModal.moved.push({ node, placeholder: ph });
+    content.appendChild(node);
+  });
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+
+  tableModal.bodyOverflow = document.body.style.overflow || "";
+  document.body.style.overflow = "hidden";
+
+  try { panel.scrollTop = 0; } catch {}
+};
+
+const closeTableModal = () => {
+  const modal = tableModal.modal;
+  if (!modal) return;
+
+  // restore moved nodes to their original locations
+  (tableModal.moved || []).forEach(({ node, placeholder }) => {
+    if (!node || !placeholder || !placeholder.parentNode) return;
+    placeholder.parentNode.insertBefore(node, placeholder);
+    placeholder.parentNode.removeChild(placeholder);
+  });
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+
+  document.body.style.overflow = tableModal.bodyOverflow || "";
+
+  tableModal.modal = null;
+  tableModal.panel = null;
+  tableModal.content = null;
+  tableModal.title = null;
+  tableModal.backdrop = null;
+  tableModal.bodyOverflow = "";
+  tableModal.moved = [];
+};
 
   /* =======================
      EVENT DELEGATION
