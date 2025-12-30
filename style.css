@@ -1801,3 +1801,30 @@ button.remove-row{
   border-radius: var(--radius-sm) !important;
 }
 
+/* =========================================================
+   ✅ TABLE NOTES CARDS — TALLER (show ~3 main bullets + notes)
+   Put at VERY BOTTOM of CSS
+========================================================= */
+
+/* Any Notes card that sits under a table */
+.section-block textarea,
+.mk-modal__notes-host textarea{
+  min-height: 320px !important;   /* main page */
+}
+
+/* If your table Notes cards are inside a specific wrapper, this helps too */
+.table-container + .section-block textarea,
+.table-notes-card textarea,
+.notes-card textarea{
+  min-height: 320px !important;
+}
+
+/* When table is expanded (mkTableModal), make notes even taller */
+#mkTableModal .mk-modal-notes textarea{
+  min-height: 380px !important;
+}
+
+/* If you use the textarea expander wrapper, ensure it grows too */
+.mk-ta-wrap > textarea{
+  min-height: 320px !important;
+}
