@@ -1771,15 +1771,11 @@ button.remove-row{
   padding:0 2px !important;
 }
 
-/* ✅ POC CLONES — FIX CARD + INPUT ROUNDING (put at very bottom) */
-
-/* Card should be rounded on ALL corners */
 #dealership-info .additional-poc-card:not([data-base="true"]) {
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
 }
 
-/* If the clone still has .input-plus but NO add button, make it a normal full-rounded input */
 #dealership-info .additional-poc-card:not([data-base="true"]) .input-plus{
   display:block !important;
   width: var(--di-input-width) !important;
@@ -1790,12 +1786,6 @@ button.remove-row{
 #dealership-info .additional-poc-card:not([data-base="true"]) .input-plus input{
   width:100% !important;
   border-radius: var(--radius-sm) !important;
-}
-
-/* Hide add button on clones */
-#dealership-info .additional-poc-card:not([data-base="true"]) .poc-add-btn,
-#dealership-info .additional-poc-card:not([data-base="true"]) [data-add-poc]{
-  display:none !important;
 }
 
 /* ✅ CLONED POC: when there's no + button, make the name input fully rounded */
