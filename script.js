@@ -416,32 +416,39 @@
   };
 
   const buildPocCard = (p = null) => {
-    const base = document.querySelector('.additional-poc-card[data-base="true"]');
-    if (!base) return null;
+  const base = document.querySelector('.additional-poc-card[data-base="true"]');
+  if (!base) return null;
 
-    const clone = base.cloneNode(true);
-    clone.setAttribute("data-base", "false");
-    clone.setAttribute(AUTO_CARD_ATTR, "poc");
+  const clone = base.cloneNode(true);
+  clone.setAttribute("data-base", "false");
+  clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    // ✅ Remove the add (+) button from cloned cards
-    clone
-      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
-      .forEach((btn) => btn.remove());
+  // ✅ Remove the add (+) button from cloned cards
+  clone
+    .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+    .forEach((btn) => btn.remove());
 
-    // ✅ Right-rounded side for cloned cards
-    // Add classes (preferred) + inline fallback (in case CSS not present yet)
-    clone.classList.add("mk-poc-clone", "mk-round-right");
-    clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
-    clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
+  // ✅ ADD THIS BLOCK RIGHT HERE ✅
+  const row = clone.querySelector(".checklist-row.integrated-plus");
+  if (row) row.classList.remove("integrated-plus"); // stops right-side square rule
 
-    // clear/reset inputs & ids on clone
-    $$("input, textarea, select", clone).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else el.value = "";
-      el.removeAttribute(AUTO_ID_ATTR);
-      ensureId(el);
-      saveField(el);
-    });
+  const ip = clone.querySelector(".input-plus");
+  if (ip) ip.classList.add("mk-solo-input");
+  // ✅ END BLOCK ✅
+
+  // ✅ Right-rounded side for cloned cards
+  clone.classList.add("mk-poc-clone", "mk-round-right");
+  clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
+  clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
+
+  // clear/reset inputs & ids on clone
+  $$("input, textarea, select", clone).forEach((el) => {
+    if (el.matches("input[type='checkbox']")) el.checked = false;
+    else el.value = "";
+    el.removeAttribute(AUTO_ID_ATTR);
+    ensureId(el);
+    saveField(el);
+  });
 
     if (p) writePocCardValues(clone, p);
     return clone;
