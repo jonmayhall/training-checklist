@@ -1312,17 +1312,15 @@ const closeTableModal = () => {
       return;
     }
 
-    const expandBtn = t.closest(
-      ".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn"
-    );
-    if (expandBtn) {
-      const modal = $("#mkTableModal");
-      if (modal) {
-        e.preventDefault();
-        openTableModalFor(expandBtn);
-        return;
-      }
-    }
+    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
+if (expandBtn) {
+  const modal = $("#mkTableModal");
+  if (modal) {
+    e.preventDefault();
+    openTableModalFor(expandBtn);
+    return;
+  }
+}
 
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
