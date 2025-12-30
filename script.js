@@ -514,49 +514,65 @@
       return;
     }
 
-     // =======================
-// ADDITIONAL POCs (PAGE 2)
-// =======================
+ // ===============================
+// Additional POC: Add card handler
+// (matches the "Additional Trainer" pattern: input + button -> adds a new mini-card)
+// ===============================
 document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-add-poc]");
+  const btn = e.target.closest("[data-add-poc], .poc-add-btn");
   if (!btn) return;
 
-  const input = document.getElementById("additionalPocInput");
-  const container = document.getElementById("additionalPocsContainer");
-  if (!input || !container) return;
+  const page = document.querySelector("#dealership-info");
+  if (!page) return;
 
-  const name = (input.value || "").trim();
+  const nameInput = page.querySelector("#additionalPocInput");
+  const anchor = page.querySelector("#additionalPocsContainer"); // used as an insertion anchor
+
+  if (!nameInput || !anchor) return;
+
+  const name = (nameInput.value || "").trim();
   if (!name) {
-    input.focus();
+    nameInput.focus();
     return;
   }
 
-  // Create a new POC mini-card (matches other contact cards)
+  // Build the new POC mini-card (NO + button on added cards)
   const card = document.createElement("div");
-  card.className = "mini-card contact-card additional-poc-added";
-  card.setAttribute("data-mk-generated", "true");
-
+  card.className = "mini-card additional-poc-card";
   card.innerHTML = `
     <div class="checklist-row">
       <label>Additional POC</label>
-      <input type="text" value="${escapeHtml(name)}" />
+      <input type="text" placeholder="Enter name" />
     </div>
+
     <div class="checklist-row indent-sub">
       <label>Role</label>
       <input type="text" placeholder="Enter role" />
     </div>
+
     <div class="checklist-row indent-sub">
       <label>Cell</label>
       <input type="text" placeholder="Enter cell" />
     </div>
+
     <div class="checklist-row indent-sub">
       <label>Email</label>
       <input type="email" placeholder="Enter company email" />
     </div>
   `;
 
-  container.appendChild(card);
-  input.value = "";
+  // Set the name safely
+  card.querySelector('input[type="text"]').value = name;
+
+  // IMPORTANT: insert as a GRID ITEM (sibling), not inside the container
+  anchor.before(card);
+
+  // Clear input
+  nameInput.value = "";
+  nameInput.focus();
+
+  // If your app auto-saves on input/change, poke it
+  nameInput.dispatchEvent(new Event("input", { bubbles: true }));
 });
 
 // basic escaping so a name like <Mike> doesn't break HTML
