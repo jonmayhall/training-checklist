@@ -22,6 +22,9 @@
       - Notes bullets + caret behavior
       - Map update
       - Table expand modal (uses real nodes so everything still works)
+
+   🔒 HARDENING CHANGE (IMPORTANT):
+      - Field IDs are now deterministic (stable across reloads) so localStorage restore works reliably
 ======================================================= */
 
 (() => {
@@ -62,10 +65,67 @@
     (el.matches("input, select, textarea") ||
       el.matches("[contenteditable='true']"));
 
+  // Stable (deterministic) signature for a field based on DOM position/context
+  const stableSignatureFor = (el) => {
+    const sec = getSection(el)?.id || "root";
+
+    // Prefer stable author-provided identifiers
+    const primary =
+      el.id ||
+      el.name ||
+      el.getAttribute("data-key") ||
+      el.getAttribute("aria-label") ||
+      el.getAttribute("placeholder") ||
+      (el.className && String(el.className).split(/\s+/).slice(0, 2).join(".")) ||
+      el.tagName;
+
+    // Add table/row/col context when applicable
+    let ctx = "";
+    const table = el.closest("table");
+    const tr = el.closest("tr");
+    const td = el.closest("td");
+
+    if (table) {
+      ctx += `::tbl:${table.id || table.getAttribute("data-table-key") || "t"}`;
+    }
+
+    if (tr) {
+      const tb = tr.parentElement;
+      const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+      ctx += `::r${Math.max(0, rows.indexOf(tr))}`;
+    }
+
+    if (td && td.parentElement) {
+      const cells = Array.from(td.parentElement.children);
+      ctx += `::c${Math.max(0, cells.indexOf(td))}`;
+    }
+
+    // If inside checklist-row, include label text (very stable)
+    const row = el.closest(".checklist-row");
+    const label = row?.querySelector?.("label")?.textContent?.trim();
+    const labelPart = label ? `::lbl:${label.slice(0, 60)}` : "";
+
+    // For selects, add option count hint; for checkboxes, add type hint
+    const typeHint = el.matches("input")
+      ? `::type:${(el.getAttribute("type") || "text").toLowerCase()}`
+      : el.matches("select")
+      ? `::opt:${el.options?.length || 0}`
+      : "";
+
+    // Make string safe-ish
+    const safe = String(primary).replace(/\s+/g, " ").trim().slice(0, 80);
+
+    return `mk::${sec}${ctx}${labelPart}${typeHint}::${safe}`;
+  };
+
   const ensureId = (el) => {
     if (!isEl(el)) return null;
-    if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, uid("fld"));
-    return el.getAttribute(AUTO_ID_ATTR);
+    const existing = el.getAttribute(AUTO_ID_ATTR);
+    if (existing) return existing;
+
+    const stable = stableSignatureFor(el);
+    el.setAttribute(AUTO_ID_ATTR, stable);
+    return stable;
   };
 
   const getFieldValue = (el) => {
@@ -167,9 +227,27 @@
   };
 
   /* =======================
+     SMALL CSS INJECT (for mk-field-error + popup)
+  ======================= */
+  const injectBaseStyles = (() => {
+    const STYLE_ID = "mk-hardening-style-v1";
+    return () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-field-error{
+          outline:2px solid #EF6D22 !important;
+          box-shadow:0 0 0 3px rgba(239,109,34,.25) !important;
+          border-radius:10px;
+        }
+      `;
+      document.head.appendChild(s);
+    };
+  })();
+
+  /* =======================
      OS-STYLE POPUPS (OK + OK/CANCEL)
-     - small centered box near upper-middle
-     - orange pill OK button
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -232,7 +310,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -286,7 +371,6 @@
       back.appendChild(box);
 
       back.addEventListener("click", (e) => {
-        // click outside closes like a system dialog backdrop
         if (e.target === back) close();
       });
 
@@ -298,7 +382,11 @@
     };
 
     const ok = (message, opts = {}) =>
-      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+      open({
+        title: opts.title || "Notice",
+        message,
+        okText: opts.okText || "OK",
+      });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -605,7 +693,8 @@
     // right-rounded look (safe fallback)
     clone.classList.add("mk-poc-clone", "mk-round-right");
     clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
-    clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
+    clone.style.borderBottomRightRadius =
+      clone.style.borderBottomRightRadius || "18px";
 
     // reset fields + ids
     $$("input, textarea, select", clone).forEach((el) => {
@@ -641,7 +730,9 @@
 
     persistAllPocs();
 
-    const first = newCard.querySelector('input[placeholder="Enter name"], input, textarea, select');
+    const first = newCard.querySelector(
+      'input[placeholder="Enter name"], input, textarea, select'
+    );
     if (first) first.focus();
   };
 
@@ -735,7 +826,8 @@
 
       $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).forEach((tr) => tr.remove());
 
-      const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
+      const baseRow =
+        tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
       if (!baseRow) return;
 
       rows.forEach((vals) => {
@@ -772,7 +864,8 @@
     const zwDecode = (zw) => {
       const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
       const bytes = [];
-      for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      for (let i = 0; i + 7 < bits.length; i += 8)
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
       try {
         return new TextDecoder().decode(new Uint8Array(bytes));
       } catch {
@@ -808,11 +901,14 @@
         const tb = tr.parentElement;
         const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
         const idx = rows.indexOf(tr);
-        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+        const tKey =
+          table?.getAttribute("data-table-key") || table?.id || "table";
         return `${hostId}::tbl::${tKey}::r${idx}`;
       }
       const all = Array.from(
-        document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`)
+        document.querySelectorAll(
+          `[data-notes-target="${CSS.escape(hostId)}"]`
+        )
       );
       const idx = all.indexOf(btn);
       return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
@@ -890,7 +986,9 @@
 
     const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
       const btns = Array.from(
-        document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`)
+        document.querySelectorAll(
+          `[data-notes-target="${CSS.escape(targetId)}"]`
+        )
       );
       const wanted = btns.map(getSlotKey);
 
@@ -1015,7 +1113,7 @@
     const status = $(".ticket-status-select", base);
     if (!status) return;
     status.value = "Open";
-    status.disabled = true; // ALWAYS locked on base
+    status.disabled = true;
     ensureId(status);
     saveField(status);
   };
@@ -1052,7 +1150,7 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "ticket");
 
-    // remove the (+) button from clones (safety; CSS may already hide it)
+    // remove the (+) button from clones
     clone.querySelectorAll(".add-ticket-btn").forEach((b) => b.remove());
 
     // assign fresh ids + clear (we'll fill immediately after)
@@ -1096,9 +1194,6 @@
     if (url) url.value = data?.url || "";
     if (sum) sum.value = data?.sum || "";
 
-    // status rules:
-    // - base: always disabled + forced Open
-    // - clone: enable only if ticket number exists
     if (card.getAttribute("data-base") === "true") {
       if (status) {
         status.value = "Open";
@@ -1144,7 +1239,6 @@
     const base = getOpenBaseTicketCard();
     if (!base) return;
 
-    // Validate BASE card (not current)
     if (!isTicketCardComplete(base)) {
       markTicketCardErrors(base);
       mkPopup.ok(
@@ -1154,7 +1248,6 @@
       return;
     }
 
-    // Transfer base values to the NEW card
     const baseVals = readTicketValues(base);
 
     const clone = buildTicketCloneFromBase(base);
@@ -1165,13 +1258,8 @@
       status: "Open",
     });
 
-    // Add clone to OPEN container (to the right / after base)
     openContainer.appendChild(clone);
-
-    // Persist clones
     persistAllTickets();
-
-    // Reset base card
     resetBaseTicketCard(base);
   };
 
@@ -1184,7 +1272,6 @@
 
     const isBase = card.getAttribute("data-base") === "true";
     if (isBase) {
-      // base ALWAYS locked
       enforceBaseTicketStatusLock();
       saveField(inputEl);
       return;
@@ -1203,7 +1290,6 @@
     const card = selectEl.closest(".ticket-group");
     if (!card) return;
 
-    // base should never change
     if (card.getAttribute("data-base") === "true") {
       enforceBaseTicketStatusLock();
       return;
@@ -1232,7 +1318,6 @@
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (!base) return;
 
-    // remove all non-base cards
     $$(".ticket-group", document).forEach((g) => {
       if (g.getAttribute("data-base") !== "true") g.remove();
     });
@@ -1269,7 +1354,6 @@
     const base = $(".additional-poc-card[data-base='true']");
     if (!base) return;
 
-    // keep order as stored
     let anchor = base;
     clones.pocs.forEach((p) => {
       const card = buildPocCard(p);
@@ -1322,7 +1406,7 @@
     content: null,
     title: null,
     backdrop: null,
-    moved: [], // [{ node, placeholder }]
+    moved: [],
     bodyOverflow: "",
   };
 
@@ -1331,7 +1415,9 @@
     if (!modal) return;
 
     $$("div.table-container").forEach((tc) => {
-      const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
+      const footer =
+        tc.querySelector(".table-footer") ||
+        tc.parentElement?.querySelector?.(".table-footer");
       if (!footer) return;
 
       if ($(".mk-table-expand-btn", footer)) return;
@@ -1369,7 +1455,6 @@
       if (block) notesBlocks.push(block);
     });
 
-    // order by DOM
     const all = [tableCard, ...notesBlocks].filter(Boolean);
     const uniq = [];
     const seen = new Set();
@@ -1394,7 +1479,6 @@
 
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
-    const backdrop = $(".mk-modal-backdrop", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) return;
 
@@ -1407,7 +1491,6 @@
     tableModal.modal = modal;
     tableModal.content = content;
     tableModal.title = titleEl;
-    tableModal.backdrop = backdrop;
     tableModal.moved = [];
 
     content.innerHTML = "";
@@ -1423,7 +1506,9 @@
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
-    try { panel.scrollTop = 0; } catch {}
+    try {
+      panel.scrollTop = 0;
+    } catch {}
   };
 
   const closeTableModal = () => {
@@ -1530,7 +1615,10 @@
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp =
+        $("input[type='text']", wrap) ||
+        $("#dealershipAddressInput") ||
+        $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
@@ -1545,8 +1633,8 @@
       }
     }
 
-    const mkTableModal = $("#mkTableModal");
-    if (mkTableModal && mkTableModal.classList.contains("open")) {
+    const mkTableModalEl = $("#mkTableModal");
+    if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
       if (
         t.closest("#mkTableModal .mk-modal-close") ||
         t.closest("#mkTableModal .mk-modal-backdrop")
@@ -1586,7 +1674,6 @@
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
 
-    // For clones: typing URL/summary should persist
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
@@ -1657,12 +1744,11 @@
     }
 
     if (e.key === "Escape") {
-      const mkTableModal = $("#mkTableModal");
-      if (mkTableModal && mkTableModal.classList.contains("open")) {
+      const mkTableModalEl = $("#mkTableModal");
+      if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
         e.preventDefault();
         closeTableModal();
       }
-      // also close popup if open
       mkPopup.close();
     }
   });
@@ -1671,7 +1757,9 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
+    injectBaseStyles();
     assignIdsToAllFields();
+
     initNav();
 
     rebuildTrainerClones();
@@ -1685,7 +1773,6 @@
     syncDealershipName();
     ensureTableExpandButtons();
 
-    // Ensure base support ticket card is always locked
     enforceBaseTicketStatusLock();
 
     log("Initialized.");
