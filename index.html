@@ -3018,85 +3018,102 @@
         </div>
       </section>
 
-      <!-- ========================================================= -->
-      <!-- PAGE 7: SUPPORT TICKETS                                   -->
-      <!-- ========================================================= -->
-      <section id="support-tickets" class="page-section">
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+    <!-- ========================================================= -->
+<!-- PAGE 7: SUPPORT TICKETS                                   -->
+<!-- ========================================================= -->
+<section id="support-tickets" class="page-section">
+  <button class="clear-page-btn" type="button" data-clear-page="support-tickets">
+    Reset This Page
+  </button>
 
-        <h1>Support Tickets</h1>
-        <p class="page-subtitle">
-          Track support tickets by status while onsite to ensure a coherent approach while onsite.
-        </p>
+  <h1>Support Tickets</h1>
+  <p class="page-subtitle">
+    Track support tickets by status while onsite to ensure a coherent approach while onsite.
+  </p>
 
-        <div class="ticket-sections-stack">
+  <div class="ticket-sections-stack">
 
-          <!-- OPEN -->
-          <div class="ticket-section section-block">
-            <h2>Open</h2>
+    <!-- OPEN -->
+    <div class="ticket-section section-block">
+      <h2>Open</h2>
 
-            <div id="openTicketsContainer">
-              <!-- BASE CARD -->
-              <div class="ticket-group" data-base="true">
-                <div class="ticket-group-inner">
+      <div id="openTicketsContainer">
+        <!-- BASE CARD (stays left; new cards append to the right) -->
+        <div class="ticket-group" data-base="true">
+          <div class="ticket-group-inner">
 
-                  <div class="ticket-row">
-                    <label>Ticket Number</label>
-                    <div class="ticket-number-wrap">
-                      <input class="ticket-number-input" type="text" placeholder="Enter ticket number" />
-                      <button class="add-ticket-btn" type="button" title="Add Ticket">+</button>
-                    </div>
-                  </div>
-
-                  <div class="ticket-row">
-                    <label>Status</label>
-                    <select class="ticket-status-select" disabled>
-                      <option value="Open" selected>Open</option>
-                      <option value="Tier Two">Tier Two</option>
-                      <option value="Closed - Resolved">Closed - Resolved</option>
-                      <option value="Closed - Feature Not Supported">Closed - Feature Not Supported</option>
-                    </select>
-                  </div>
-
-                  <div class="ticket-row">
-                    <label>Zendesk Ticket URL</label>
-                    <input class="ticket-zendesk-input" type="text" placeholder="Paste Zendesk ticket URL" />
-                  </div>
-
-                  <div class="ticket-row ticket-summary-row">
-                    <label>Short Summary of the Issue</label>
-                    <textarea class="ticket-summary-input" rows="2" placeholder="High-level description of the issue"></textarea>
-
-                    <p class="ticket-disclaimer">
-                      * This ticket must be fully completed before adding another card.
-                    </p>
-                  </div>
-
-                </div>
+            <div class="ticket-row">
+              <label>Ticket Number</label>
+              <div class="ticket-number-wrap">
+                <input
+                  class="ticket-number-input"
+                  type="text"
+                  placeholder="Enter ticket number"
+                  autocomplete="off"
+                />
+                <button class="add-ticket-btn" type="button" title="Add Ticket">+</button>
               </div>
             </div>
-          </div>
 
-          <!-- TIER TWO -->
-          <div class="ticket-section section-block">
-            <h2>Tier Two</h2>
-            <div id="tierTwoTicketsContainer"></div>
-          </div>
+            <div class="ticket-row">
+              <label>Status</label>
+              <select class="ticket-status-select" disabled>
+                <option value="Open" selected>Open</option>
+                <option value="Tier Two">Tier Two</option>
+                <option value="Closed - Resolved">Closed - Resolved</option>
+                <option value="Closed - Feature Not Supported">Closed - Feature Not Supported</option>
+              </select>
+            </div>
 
-          <!-- CLOSED - RESOLVED -->
-          <div class="ticket-section section-block">
-            <h2>Closed - Resolved</h2>
-            <div id="closedResolvedTicketsContainer"></div>
-          </div>
+            <div class="ticket-row">
+              <label>Zendesk Ticket URL</label>
+              <input
+                class="ticket-zendesk-input"
+                type="text"
+                placeholder="Paste Zendesk ticket URL"
+                autocomplete="off"
+              />
+            </div>
 
-          <!-- CLOSED - FEATURE NOT SUPPORTED -->
-          <div class="ticket-section section-block">
-            <h2>Closed - Feature Not Supported</h2>
-            <div id="closedFeatureTicketsContainer"></div>
-          </div>
+            <div class="ticket-row ticket-summary-row">
+              <label>Short Summary of the Issue</label>
+              <textarea
+                class="ticket-summary-input"
+                rows="2"
+                placeholder="High-level description of the issue"
+              ></textarea>
 
+              <p class="ticket-disclaimer">
+                * This ticket must be fully completed before adding another card.
+              </p>
+            </div>
+
+          </div>
         </div>
-      </section>
+        <!-- /BASE CARD -->
+      </div>
+    </div>
+
+    <!-- TIER TWO -->
+    <div class="ticket-section section-block">
+      <h2>Tier Two</h2>
+      <div id="tierTwoTicketsContainer"></div>
+    </div>
+
+    <!-- CLOSED - RESOLVED -->
+    <div class="ticket-section section-block">
+      <h2>Closed - Resolved</h2>
+      <div id="closedResolvedTicketsContainer"></div>
+    </div>
+
+    <!-- CLOSED - FEATURE NOT SUPPORTED -->
+    <div class="ticket-section section-block">
+      <h2>Closed - Feature Not Supported</h2>
+      <div id="closedFeatureTicketsContainer"></div>
+    </div>
+
+  </div>
+</section>
 
       <!-- ========================================================= -->
       <!-- PAGE 8: DMS Integration                                   -->
