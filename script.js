@@ -2,17 +2,15 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN)
 
-   ✅ POC FIX:
-   - Cloned/added POC cards DO NOT include the (+) add button
-   - Cloned/added POC cards get a “right-rounded” look
-     (adds classes + inline right-side radius as a safe fallback)
+   ✅ Includes:
+   - Full localStorage save/restore (fields + clones + active page)
+   - Trainers (+) add rows
+   - POCs (+) add cards (no + button on clones, right-rounded clones)
+   - Tables (+) add rows + persist/restore
+   - Notes system (table + question notes, bullet format, cursor at ◦)
+   - Table+Notes Expand Modal support (uses REAL nodes; nothing breaks)
+   - Support Tickets: FIXED add flow (default card stays rightmost, data persists)
 
-   ✅ NOTES:
-   - Table notes bullets include the row's Name/Opcode value (no prefixes)
-   - Cursor lands at the hollow bullet (◦)
-
-   ✅ SERVICE ADVISORS:
-   - 3 total rows (template + 2 clones), using the same table clone logic
 ======================================================= */
 
 (() => {
@@ -38,9 +36,7 @@
   const uid = (() => {
     let n = 0;
     return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random()
-        .toString(16)
-        .slice(2)}`;
+      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
@@ -50,8 +46,7 @@
 
   const isFormField = (el) =>
     isEl(el) &&
-    (el.matches("input, select, textarea") ||
-      el.matches("[contenteditable='true']"));
+    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -140,8 +135,7 @@
     root.querySelectorAll("select").forEach((sel) => {
       const first = sel.options?.[0];
       const isGhost =
-        !sel.value ||
-        (first && first.dataset?.ghost === "true" && sel.value === "");
+        !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
       sel.classList.toggle("is-placeholder", !!isGhost);
     });
 
@@ -224,7 +218,9 @@
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
-      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active")
+      .querySelectorAll(
+        ".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active"
+      )
       .forEach((btn) => {
         btn.classList.remove("has-notes");
         btn.classList.remove("is-notes-active");
@@ -660,16 +656,13 @@
       return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
     };
 
-    // ✅ Derive prompt text for table rows (Name/Opcode/etc) — no "Name:" prefixes
     const findOrDerivePromptText = (btn) => {
       const tr = btn.closest("tr");
       const table = btn.closest("table");
       const section = getSection(btn);
       const secId = section?.id || "";
 
-      // ===== TABLE ROW NOTES =====
       if (tr && table) {
-        // Training Checklist: name input is usually in first cell (checkbox + text)
         if (secId === "training-checklist") {
           const nameInput =
             tr.querySelector('td:first-child input[type="text"]') ||
@@ -678,7 +671,6 @@
           return v || "(blank)";
         }
 
-        // Opcodes: opcode typically in 2nd cell
         if (secId === "opcodes-pricing") {
           const opcodeInput =
             tr.querySelector('td:nth-child(2) input[type="text"]') ||
@@ -689,16 +681,14 @@
           return v || "(blank)";
         }
 
-        // Generic training tables (Service Advisors, Technicians, Parts, etc):
-        // prefer the first text input/select/textarea in the row (usually Name)
         const field =
-          tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
-          null;
+          tr.querySelector(
+            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
+          ) || null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
 
-      // ===== NON-TABLE QUESTIONS =====
       const row = btn.closest(".checklist-row");
       const label = row?.querySelector("label");
       return (label?.textContent || "").trim() || "Notes";
@@ -822,7 +812,6 @@
           ta.setSelectionRange(caret, caret);
         } catch {}
 
-        // visual state
         btn.classList.add("has-notes");
         btn.classList.add("is-notes-active");
 
@@ -842,303 +831,232 @@
     return { handleNotesClick, isNotesTargetTextarea };
   })();
 
-/* =======================
-   SUPPORT TICKETS — DROP-IN (FIXED ADD FLOW)
-   ✅ Right-most card is always the ONLY “default” card with +
-   ✅ Clicking + finalizes current default (keeps values),
-      then appends a NEW blank default card to the RIGHT
-   ✅ Status dropdown enabled when Ticket # present
-   ✅ Saved cards route to proper status containers
-======================= */
-
-const ticketContainersByStatus = () => ({
-  Open: $("#openTicketsContainer"),
-  "Tier Two": $("#tierTwoTicketsContainer"),
-  "Closed - Resolved": $("#closedResolvedTicketsContainer"),
-  "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
-});
-
-const readTicketValues = (card) => {
-  const num = $(".ticket-number-input", card)?.value?.trim() || "";
-  const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
-  const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
-  const status = $(".ticket-status-select", card)?.value || "Open";
-  return { num, url, sum, status };
-};
-
-const writeTicketValues = (card, v) => {
-  const numEl = $(".ticket-number-input", card);
-  const urlEl = $(".ticket-zendesk-input", card);
-  const sumEl = $(".ticket-summary-input", card);
-  const statusEl = $(".ticket-status-select", card);
-
-  if (numEl) numEl.value = v.num || "";
-  if (urlEl) urlEl.value = v.url || "";
-  if (sumEl) sumEl.value = v.sum || "";
-  if (statusEl) statusEl.value = v.status || "Open";
-
-  [numEl, urlEl, sumEl, statusEl].forEach((el) => {
-    if (!el) return;
-    ensureId(el);
-    saveField(el);
-    triggerInputChange(el);
-  });
-
-  // enable/disable status based on ticket number
-  if (statusEl) statusEl.disabled = !(String(v.num || "").trim());
-};
-
-const isTicketCardComplete = (card) => {
-  const v = readTicketValues(card);
-  return !!(v.num && v.url && v.sum);
-};
-
-const markTicketCardErrors = (card) => {
-  const numEl = $(".ticket-number-input", card);
-  const urlEl = $(".ticket-zendesk-input", card);
-  const sumEl = $(".ticket-summary-input", card);
-
-  [numEl, urlEl, sumEl].forEach((el) => {
-    if (!el) return;
-    const ok = (el.value || "").trim();
-    if (!ok) {
-      el.classList.add("mk-field-error");
-      setTimeout(() => el.classList.remove("mk-field-error"), 700);
-    }
-  });
-};
-
-const clearTicketCard = (card) => {
-  $$("input, textarea, select", card).forEach((el) => {
-    if (el.matches("input[type='checkbox']")) el.checked = false;
-    else el.value = "";
-
-    // re-id so base card stays unique in storage
-    el.removeAttribute(AUTO_ID_ATTR);
-    ensureId(el);
-    saveField(el);
-    triggerInputChange(el);
-  });
-
-  // reset status
-  const statusEl = $(".ticket-status-select", card);
-  if (statusEl) {
-    statusEl.value = "Open";
-    statusEl.disabled = true;
-    ensureId(statusEl);
-    saveField(statusEl);
-  }
-};
-
-const finalizeTicketCard = (card) => {
-  // Once saved, it is NOT the default card anymore
-  card.setAttribute("data-base", "false");
-  card.setAttribute(AUTO_CARD_ATTR, "ticket");
-
-  // status enabled if ticket number exists
-  const v = readTicketValues(card);
-  const statusEl = $(".ticket-status-select", card);
-  if (statusEl) statusEl.disabled = !(v.num || "").trim();
-
-  // CSS will hide the + button on non-base cards automatically
-};
-
-const ensureSingleDefaultTicketCard = () => {
-  const openContainer = $("#openTicketsContainer");
-  if (!openContainer) return;
-
-  // If there are multiple base cards (bug), keep only the LAST one as base
-  const bases = $$(".ticket-group[data-base='true']", openContainer);
-  if (bases.length > 1) {
-    bases.slice(0, -1).forEach((b) => b.setAttribute("data-base", "false"));
-  }
-
-  // If none exists, create one from the first card we can find
-  if (!$(".ticket-group[data-base='true']", openContainer)) {
-    const anyCard = $(".ticket-group", openContainer) || $(".ticket-group", document);
-    if (!anyCard) return;
-
-    const base = anyCard.cloneNode(true);
-    base.setAttribute("data-base", "true");
-    clearTicketCard(base);
-    openContainer.appendChild(base);
-  }
-};
-
-const routeTicketCardToStatusColumn = (card) => {
-  const containers = ticketContainersByStatus();
-  const v = readTicketValues(card);
-  const dest = containers[v.status] || containers.Open;
-  if (dest) dest.appendChild(card);
-};
-
-const persistAllTickets = () => {
-  const clones = cloneState.get();
-  clones.tickets = [];
-
-  // store only SAVED cards (data-base != true), across all columns
-  const allSaved = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
-
-  allSaved.forEach((card) => {
-    const v = readTicketValues(card);
-    // store even if partially filled (optional), but typically it will be complete
-    clones.tickets.push({ status: v.status || "Open", num: v.num, url: v.url, sum: v.sum });
-  });
-
-  cloneState.set(clones);
-};
-
-const rebuildTicketClones = () => {
-  const clones = cloneState.get();
-  const openContainer = $("#openTicketsContainer");
-  if (!openContainer) return;
-
-  // remove all NON-base cards (we will rebuild them)
-  $$(".ticket-group", document).forEach((g) => {
-    if (g.getAttribute("data-base") !== "true") g.remove();
-  });
-
-  // Ensure one base exists
-  ensureSingleDefaultTicketCard();
-
-  // Use the existing base card as a template for rebuilding saved cards
-  const baseTemplate = $(".ticket-group[data-base='true']", openContainer);
-  if (!baseTemplate) return;
-
-  (clones.tickets || []).forEach((t) => {
-    const card = baseTemplate.cloneNode(true);
-    finalizeTicketCard(card);
-    writeTicketValues(card, t);
-    routeTicketCardToStatusColumn(card);
-  });
-
-  // keep the base card at the END of OPEN column
-  const base = $(".ticket-group[data-base='true']", openContainer);
-  if (base) openContainer.appendChild(base);
-};
-
-const onTicketNumberChange = (inputEl) => {
-  const card = inputEl.closest(".ticket-group");
-  if (!card) return;
-
-  const status = $(".ticket-status-select", card);
-  if (!status) return;
-
-  const hasNum = (inputEl.value || "").trim().length > 0;
-  status.disabled = !hasNum;
-
-  saveField(inputEl);
-  saveField(status);
-
-  if (card.getAttribute("data-base") !== "true") persistAllTickets();
-};
-
-const onTicketStatusChange = (selectEl) => {
-  const card = selectEl.closest(".ticket-group");
-  if (!card) return;
-
-  saveField(selectEl);
-
-  // Only route SAVED cards (not the active entry card)
-  if (card.getAttribute("data-base") !== "true") {
-    routeTicketCardToStatusColumn(card);
-    persistAllTickets();
-  }
-};
-
-const addTicketCard = (btn) => {
-  const openContainer = $("#openTicketsContainer");
-  if (!openContainer) return;
-
-  const entryCard = btn.closest(".ticket-group");
-  if (!entryCard) return;
-
-  // This must work even if a “wrong” card still has a + button:
-  // we treat the clicked card as the entry card, finalize it, then add a new base to the right.
-  if (!isTicketCardComplete(entryCard)) {
-    markTicketCardErrors(entryCard);
-    return;
-  }
-
-  // Capture values BEFORE we finalize
-  const v = readTicketValues(entryCard);
-
-  // Finalize this card (becomes saved)
-  finalizeTicketCard(entryCard);
-
-  // Route saved card to its column
-  routeTicketCardToStatusColumn(entryCard);
-
-  // Build a NEW blank default card and put it to the RIGHT (end of Open column)
-  const newBase = entryCard.cloneNode(true);
-
-  // Make sure it is the ONLY base card
-  newBase.setAttribute("data-base", "true");
-  clearTicketCard(newBase);
-  openContainer.appendChild(newBase);
-
-  // IMPORTANT: ensure no other base cards exist besides this newest one
-  $$(".ticket-group[data-base='true']", openContainer).forEach((b) => {
-    if (b !== newBase) b.setAttribute("data-base", "false");
-  });
-
-  // Persist all saved cards
-  persistAllTickets();
-
-  // Focus new entry
-  $(".ticket-number-input", newBase)?.focus();
-};
-
-/* =======================
-   INIT HELPERS (call inside init())
-======================= */
-const initTickets = () => {
-  ensureSingleDefaultTicketCard();
-
-  // ensure base card sits at end of Open column
-  const openContainer = $("#openTicketsContainer");
-  const base = openContainer ? $(".ticket-group[data-base='true']", openContainer) : null;
-  if (openContainer && base) openContainer.appendChild(base);
-
-  // set initial enable/disable
-  $$(".ticket-group").forEach((card) => {
-    const num = $(".ticket-number-input", card);
-    const status = $(".ticket-status-select", card);
-    if (status) status.disabled = !((num?.value || "").trim());
-    if (num) ensureId(num);
-    if (status) ensureId(status);
-  });
-};
-
   /* =======================
-     POC / TRAINER CLONE RESTORE
+     SUPPORT TICKETS — FIXED ADD FLOW
   ======================= */
-  const rebuildPocClones = () => {
-    const clones = cloneState.get();
-    if (!clones.pocs || !clones.pocs.length) return;
+  const ticketContainersByStatus = () => ({
+    Open: $("#openTicketsContainer"),
+    "Tier Two": $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
+  });
 
-    $$(".additional-poc-card").forEach((c) => {
-      if (c.getAttribute("data-base") !== "true") c.remove();
+  const readTicketValues = (card) => {
+    const num = $(".ticket-number-input", card)?.value?.trim() || "";
+    const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
+    const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
+    const status = $(".ticket-status-select", card)?.value || "Open";
+    return { num, url, sum, status };
+  };
+
+  const writeTicketValues = (card, v) => {
+    const numEl = $(".ticket-number-input", card);
+    const urlEl = $(".ticket-zendesk-input", card);
+    const sumEl = $(".ticket-summary-input", card);
+    const statusEl = $(".ticket-status-select", card);
+
+    if (numEl) numEl.value = v.num || "";
+    if (urlEl) urlEl.value = v.url || "";
+    if (sumEl) sumEl.value = v.sum || "";
+    if (statusEl) statusEl.value = v.status || "Open";
+
+    [numEl, urlEl, sumEl, statusEl].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
     });
 
-    const base = $(".additional-poc-card[data-base='true']");
-    if (!base) return;
+    if (statusEl) statusEl.disabled = !(String(v.num || "").trim());
+  };
 
-    clones.pocs.forEach((p) => {
-      const card = buildPocCard(p);
-      if (card) base.insertAdjacentElement("afterend", card);
+  const isTicketCardComplete = (card) => {
+    const v = readTicketValues(card);
+    return !!(v.num && v.url && v.sum);
+  };
+
+  const markTicketCardErrors = (card) => {
+    const numEl = $(".ticket-number-input", card);
+    const urlEl = $(".ticket-zendesk-input", card);
+    const sumEl = $(".ticket-summary-input", card);
+
+    [numEl, urlEl, sumEl].forEach((el) => {
+      if (!el) return;
+      const ok = (el.value || "").trim();
+      if (!ok) {
+        el.classList.add("mk-field-error");
+        setTimeout(() => el.classList.remove("mk-field-error"), 700);
+      }
     });
   };
 
-  const rebuildTrainerClones = () => {
-    const clones = cloneState.get();
-    const container = $("#additionalTrainersContainer");
-    if (!container) return;
+  const clearTicketCard = (card) => {
+    $$("input, textarea, select", card).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
 
-    container.innerHTML = "";
-    (clones.trainers || []).forEach((t) => {
-      const row = buildTrainerRow(t.value || "");
-      container.appendChild(row);
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+
+    const statusEl = $(".ticket-status-select", card);
+    if (statusEl) {
+      statusEl.value = "Open";
+      statusEl.disabled = true;
+      ensureId(statusEl);
+      saveField(statusEl);
+    }
+  };
+
+  const finalizeTicketCard = (card) => {
+    card.setAttribute("data-base", "false");
+    card.setAttribute(AUTO_CARD_ATTR, "ticket");
+    const v = readTicketValues(card);
+    const statusEl = $(".ticket-status-select", card);
+    if (statusEl) statusEl.disabled = !(v.num || "").trim();
+  };
+
+  const ensureSingleDefaultTicketCard = () => {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const bases = $$(".ticket-group[data-base='true']", openContainer);
+    if (bases.length > 1) {
+      bases.slice(0, -1).forEach((b) => b.setAttribute("data-base", "false"));
+    }
+
+    if (!$(".ticket-group[data-base='true']", openContainer)) {
+      const anyCard = $(".ticket-group", openContainer) || $(".ticket-group", document);
+      if (!anyCard) return;
+
+      const base = anyCard.cloneNode(true);
+      base.setAttribute("data-base", "true");
+      clearTicketCard(base);
+      openContainer.appendChild(base);
+    }
+  };
+
+  const routeTicketCardToStatusColumn = (card) => {
+    const containers = ticketContainersByStatus();
+    const v = readTicketValues(card);
+    const dest = containers[v.status] || containers.Open;
+    if (dest) dest.appendChild(card);
+  };
+
+  const persistAllTickets = () => {
+    const clones = cloneState.get();
+    clones.tickets = [];
+
+    const allSaved = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
+    allSaved.forEach((card) => {
+      const v = readTicketValues(card);
+      clones.tickets.push({ status: v.status || "Open", num: v.num, url: v.url, sum: v.sum });
+    });
+
+    cloneState.set(clones);
+  };
+
+  const rebuildTicketClones = () => {
+    const clones = cloneState.get();
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    $$(".ticket-group", document).forEach((g) => {
+      if (g.getAttribute("data-base") !== "true") g.remove();
+    });
+
+    ensureSingleDefaultTicketCard();
+
+    const baseTemplate = $(".ticket-group[data-base='true']", openContainer);
+    if (!baseTemplate) return;
+
+    (clones.tickets || []).forEach((t) => {
+      const card = baseTemplate.cloneNode(true);
+      finalizeTicketCard(card);
+      writeTicketValues(card, t);
+      routeTicketCardToStatusColumn(card);
+    });
+
+    const base = $(".ticket-group[data-base='true']", openContainer);
+    if (base) openContainer.appendChild(base);
+  };
+
+  const onTicketNumberChange = (inputEl) => {
+    const card = inputEl.closest(".ticket-group");
+    if (!card) return;
+
+    const status = $(".ticket-status-select", card);
+    if (!status) return;
+
+    const hasNum = (inputEl.value || "").trim().length > 0;
+    status.disabled = !hasNum;
+
+    saveField(inputEl);
+    saveField(status);
+
+    if (card.getAttribute("data-base") !== "true") persistAllTickets();
+  };
+
+  const onTicketStatusChange = (selectEl) => {
+    const card = selectEl.closest(".ticket-group");
+    if (!card) return;
+
+    saveField(selectEl);
+
+    if (card.getAttribute("data-base") !== "true") {
+      routeTicketCardToStatusColumn(card);
+      persistAllTickets();
+    }
+  };
+
+  const addTicketCard = (btn) => {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const entryCard = btn.closest(".ticket-group");
+    if (!entryCard) return;
+
+    if (!isTicketCardComplete(entryCard)) {
+      markTicketCardErrors(entryCard);
+      return;
+    }
+
+    // finalize current entry card (keep values)
+    finalizeTicketCard(entryCard);
+
+    // route saved card to column
+    routeTicketCardToStatusColumn(entryCard);
+
+    // new blank default card appended to RIGHT (end of Open)
+    const newBase = entryCard.cloneNode(true);
+    newBase.setAttribute("data-base", "true");
+    clearTicketCard(newBase);
+    openContainer.appendChild(newBase);
+
+    // ensure only newest base is base
+    $$(".ticket-group[data-base='true']", openContainer).forEach((b) => {
+      if (b !== newBase) b.setAttribute("data-base", "false");
+    });
+
+    persistAllTickets();
+    $(".ticket-number-input", newBase)?.focus();
+  };
+
+  const initTickets = () => {
+    ensureSingleDefaultTicketCard();
+
+    const openContainer = $("#openTicketsContainer");
+    const base = openContainer ? $(".ticket-group[data-base='true']", openContainer) : null;
+    if (openContainer && base) openContainer.appendChild(base);
+
+    $$(".ticket-group").forEach((card) => {
+      const num = $(".ticket-number-input", card);
+      const status = $(".ticket-status-select", card);
+      if (status) status.disabled = !((num?.value || "").trim());
+      if (num) ensureId(num);
+      if (status) ensureId(status);
     });
   };
 
@@ -1156,8 +1074,7 @@ const initTickets = () => {
      MAP BTN
   ======================= */
   const updateDealershipMap = (address) => {
-    const frame =
-      $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
+    const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
     if (!frame) return;
 
     const a = String(address || "").trim();
@@ -1165,171 +1082,162 @@ const initTickets = () => {
     frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
   };
 
- /* =======================
-   /* =======================
-   TABLE + NOTES EXPAND MODAL (ROBUST)
-   - Auto-creates #mkTableModal if missing
-   - Adds ⤢ button to any table-container that contains notes buttons
-   - Opens a centered modal and MOVES the real table card + related notes blocks
-======================= */
+  /* =======================
+     TABLE + NOTES EXPAND MODAL
+     - Creates expand buttons on table footers
+     - Moves REAL nodes into modal content (keeps behavior)
+  ======================= */
+  const tableModal = {
+    modal: null,
+    panel: null,
+    content: null,
+    title: null,
+    backdrop: null,
+    bodyOverflow: "",
+    moved: [],
+  };
 
-const ensureExpandModalExists = () => {
-  let modal = document.getElementById("mkTableModal");
-  if (modal) return modal;
+  // Only add expand buttons within these sections (update ids if needed)
+  const EXPAND_SECTION_IDS = new Set([
+    "training-checklist",
+    "opcodes-pricing",
+  ]);
 
-  modal = document.createElement("div");
-  modal.id = "mkTableModal";
-  modal.setAttribute("aria-hidden", "true");
-  modal.innerHTML = `
-    <div class="mk-modal-backdrop" aria-hidden="true"></div>
-    <div class="mk-modal-panel" role="dialog" aria-modal="true">
-      <div class="mk-modal-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 6px 12px;">
-        <div class="mk-modal-title" style="font-weight:700;">Expanded View</div>
-        <button type="button" class="mk-modal-close" aria-label="Close" style="border:0;background:transparent;font-size:20px;cursor:pointer;">✕</button>
-      </div>
-      <div class="mk-modal-content"></div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  return modal;
-};
+  const getPageSectionIdFor = (el) => getSection(el)?.id || "";
 
-const tableModal = {
-  modal: null,
-  panel: null,
-  content: null,
-  title: null,
-  moved: [], // [{ node, placeholder }]
-  bodyOverflow: "",
-};
+  const ensureTableExpandButtons = () => {
+    $$("div.table-container").forEach((tc) => {
+      const secId = getPageSectionIdFor(tc);
+      if (!EXPAND_SECTION_IDS.has(secId)) return;
 
-const ensureTableExpandButtons = () => {
-  ensureExpandModalExists();
+      const footer =
+        tc.querySelector(".table-footer") ||
+        tc.parentElement?.querySelector?.(".table-footer");
+      if (!footer) return;
 
-  $$("div.table-container").forEach((tc) => {
-    // Only add expand where there are notes buttons inside this table area
-    const hasNotesBtns = !!tc.querySelector("[data-notes-target]");
-    if (!hasNotesBtns) return;
+      if ($(".mk-table-expand-btn", footer)) return;
 
-    const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
-    if (!footer) return;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-table-expand-btn";
+      btn.setAttribute("data-mk-table-expand", "1");
+      btn.title = "Expand";
+      btn.textContent = "⤢";
+      footer.appendChild(btn);
+    });
+  };
 
-    if ($(".mk-table-expand-btn", footer)) return; // no duplicates
+  const getExpandBundleNodes = (anyInsideTableCard) => {
+    const tc = anyInsideTableCard?.closest?.(".table-container") || anyInsideTableCard;
+    if (!tc) return [];
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "mk-table-expand-btn";
-    btn.setAttribute("data-mk-table-expand", "1");
-    btn.title = "Expand";
-    btn.textContent = "⤢";
+    const tableCard =
+      tc.closest(".section") ||
+      tc.closest(".section-block") ||
+      tc.parentElement ||
+      tc;
 
-    footer.appendChild(btn);
-  });
-};
+    const targets = new Set();
+    $$("[data-notes-target]", tableCard).forEach((btn) => {
+      const id = btn.getAttribute("data-notes-target");
+      if (id) targets.add(id);
+    });
 
-const getExpandBundleNodes = (anyInsideTableCard) => {
-  const tc = anyInsideTableCard?.closest?.(".table-container");
-  if (!tc) return [];
+    const notesBlocks = [];
+    targets.forEach((id) => {
+      const block = document.getElementById(id);
+      if (block) notesBlocks.push(block);
+    });
 
-  // Move the WHOLE .section that contains the table-container (keeps header + footer together)
-  const tableCard = tc.closest(".section") || tc.closest(".section-block") || tc.parentElement || tc;
+    const all = [tableCard, ...notesBlocks];
 
-  // Find related notes blocks by reading all data-notes-targets inside this table card
-  const targets = new Set();
-  $$("[data-notes-target]", tableCard).forEach((btn) => {
-    const id = btn.getAttribute("data-notes-target");
-    if (id) targets.add(id);
-  });
+    const uniq = [];
+    const seen = new Set();
+    all.forEach((n) => {
+      if (!n || seen.has(n)) return;
+      seen.add(n);
+      uniq.push(n);
+    });
 
-  const notesBlocks = [];
-  targets.forEach((id) => {
-    const block = document.getElementById(id);
-    if (block) notesBlocks.push(block);
-  });
+    uniq.sort((a, b) => {
+      if (a === b) return 0;
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
 
-  const all = [tableCard, ...notesBlocks].filter(Boolean);
+    return uniq;
+  };
 
-  // De-dupe
-  const uniq = [];
-  const seen = new Set();
-  all.forEach((n) => {
-    if (seen.has(n)) return;
-    seen.add(n);
-    uniq.push(n);
-  });
+  const openTableModalFor = (anyInsideTableCard) => {
+    const modal = $("#mkTableModal");
+    if (!modal) return;
 
-  // Keep original DOM order
-  uniq.sort((a, b) => {
-    if (a === b) return 0;
-    const pos = a.compareDocumentPosition(b);
-    return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-  });
+    const secId = getPageSectionIdFor(anyInsideTableCard);
+    if (!EXPAND_SECTION_IDS.has(secId)) return;
 
-  return uniq;
-};
+    const panel = $(".mk-modal-panel", modal) || modal;
+    const content = $(".mk-modal-content", modal);
+    const titleEl = $(".mk-modal-title", modal);
+    const backdrop = $(".mk-modal-backdrop", modal);
 
-const openTableModalFor = (anyInsideTableCard) => {
-  const modal = ensureExpandModalExists();
+    if (!content) return;
 
-  const panel = $(".mk-modal-panel", modal) || modal;
-  const content = $(".mk-modal-content", modal);
-  const titleEl = $(".mk-modal-title", modal);
+    const bundle = getExpandBundleNodes(anyInsideTableCard);
+    if (!bundle.length) return;
 
-  if (!content) return;
+    const header = bundle[0].querySelector?.(".section-header") || null;
+    if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
 
-  const bundle = getExpandBundleNodes(anyInsideTableCard);
-  if (!bundle.length) return;
+    tableModal.modal = modal;
+    tableModal.panel = panel;
+    tableModal.content = content;
+    tableModal.title = titleEl;
+    tableModal.backdrop = backdrop;
+    tableModal.moved = [];
 
-  // Title from section header if present
-  const header = bundle[0].querySelector?.(".section-header");
-  if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
+    content.innerHTML = "";
 
-  tableModal.modal = modal;
-  tableModal.panel = panel;
-  tableModal.content = content;
-  tableModal.title = titleEl;
-  tableModal.moved = [];
+    bundle.forEach((node) => {
+      const ph = document.createComment("mk-expand-placeholder");
+      node.parentNode.insertBefore(ph, node);
+      tableModal.moved.push({ node, placeholder: ph });
+      content.appendChild(node);
+    });
 
-  content.innerHTML = "";
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
 
-  bundle.forEach((node) => {
-    const ph = document.createComment("mk-expand-placeholder");
-    node.parentNode.insertBefore(ph, node);
-    tableModal.moved.push({ node, placeholder: ph });
-    content.appendChild(node);
-  });
+    tableModal.bodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
 
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
+    try {
+      panel.scrollTop = 0;
+    } catch {}
+  };
 
-  tableModal.bodyOverflow = document.body.style.overflow || "";
-  document.body.style.overflow = "hidden";
+  const closeTableModal = () => {
+    const modal = tableModal.modal;
+    if (!modal) return;
 
-  try { panel.scrollTop = 0; } catch {}
-};
+    (tableModal.moved || []).forEach(({ node, placeholder }) => {
+      if (!node || !placeholder || !placeholder.parentNode) return;
+      placeholder.parentNode.insertBefore(node, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    });
 
-const closeTableModal = () => {
-  const modal = tableModal.modal;
-  if (!modal) return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
 
-  (tableModal.moved || []).forEach(({ node, placeholder }) => {
-    if (!node || !placeholder || !placeholder.parentNode) return;
-    placeholder.parentNode.insertBefore(node, placeholder);
-    placeholder.parentNode.removeChild(placeholder);
-  });
+    document.body.style.overflow = tableModal.bodyOverflow || "";
 
-  modal.classList.remove("open");
-  modal.setAttribute("aria-hidden", "true");
-
-  document.body.style.overflow = tableModal.bodyOverflow || "";
-
-  tableModal.modal = null;
-  tableModal.panel = null;
-  tableModal.content = null;
-  tableModal.title = null;
-  tableModal.bodyOverflow = "";
-  tableModal.moved = [];
-};
+    tableModal.modal = null;
+    tableModal.panel = null;
+    tableModal.content = null;
+    tableModal.title = null;
+    tableModal.backdrop = null;
+    tableModal.bodyOverflow = "";
+    tableModal.moved = [];
+  };
 
   /* =======================
      EVENT DELEGATION
@@ -1409,21 +1317,15 @@ const closeTableModal = () => {
     }
 
     const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
-if (expandBtn) {
-  const modal = $("#mkTableModal");
-  if (modal) {
-    e.preventDefault();
-    openTableModalFor(expandBtn);
-    return;
-  }
-}
+    if (expandBtn) {
+      e.preventDefault();
+      openTableModalFor(expandBtn);
+      return;
+    }
 
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (
-        t.closest("#mkTableModal .mk-modal-close") ||
-        t.closest("#mkTableModal .mk-modal-backdrop")
-      ) {
+      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
         e.preventDefault();
         closeTableModal();
         return;
@@ -1534,6 +1436,38 @@ if (expandBtn) {
   });
 
   /* =======================
+     RESTORE CLONES
+  ======================= */
+  const rebuildPocClones = () => {
+    const clones = cloneState.get();
+    if (!clones.pocs || !clones.pocs.length) return;
+
+    $$(".additional-poc-card").forEach((c) => {
+      if (c.getAttribute("data-base") !== "true") c.remove();
+    });
+
+    const base = $(".additional-poc-card[data-base='true']");
+    if (!base) return;
+
+    clones.pocs.forEach((p) => {
+      const card = buildPocCard(p);
+      if (card) base.insertAdjacentElement("afterend", card);
+    });
+  };
+
+  const rebuildTrainerClones = () => {
+    const clones = cloneState.get();
+    const container = $("#additionalTrainersContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+    (clones.trainers || []).forEach((t) => {
+      const row = buildTrainerRow(t.value || "");
+      container.appendChild(row);
+    });
+  };
+
+  /* =======================
      INIT / RESTORE
   ======================= */
   const init = () => {
@@ -1543,77 +1477,17 @@ if (expandBtn) {
     rebuildTrainerClones();
     rebuildPocClones();
     rebuildTableClones();
+
+    // Tickets: ensure base exists, rebuild saved, then restore fields
+    initTickets();
     rebuildTicketClones();
 
     restoreAllFields();
 
-    $$(".ticket-group").forEach((card) => {
-      const num = $(".ticket-number-input", card);
-      const status = $(".ticket-status-select", card);
-      if (num && status) status.disabled = !(num.value || "").trim();
-      if (num) ensureId(num);
-      if (status) ensureId(status);
-    });
-
     setGhostStyles(document);
     syncDealershipName();
-      ensureTableExpandButtons();
 
-    /* =======================
-       SERVICE ADVISORS TABLE — FORCE 3 TOTAL ROWS
-       (template row + clones) and prevent “4 row” issue
-    ======================= */
-    (() => {
-const section = document.querySelector('[data-notes-target="notes-advisors"]')?.closest(".section");
-      if (!section) return;
-
-      const table = section.querySelector("table.training-table");
-      const tbody = table?.querySelector("tbody");
-      const addBtn = section.querySelector(".table-footer .add-row") || section.querySelector(".add-row");
-      if (!table || !tbody || !addBtn) return;
-
-      const DESIRED_TOTAL = 3;
-
-      // If there are SAVED CLONES for this table (localStorage restore), do nothing.
-      const key = getTableKey(table);
-      const saved = (cloneState.get().tables || {})[key];
-      if (Array.isArray(saved) && saved.length) return;
-
-      const rows = () => Array.from(tbody.querySelectorAll("tr"));
-
-      const rowIsEmpty = (tr) => {
-        const fields = Array.from(tr.querySelectorAll("input, select, textarea"));
-        if (!fields.length) return true;
-
-        return fields.every((el) => {
-          if (el.type === "checkbox" || el.type === "radio") return !el.checked;
-          return !(String(el.value || "").trim());
-        });
-      };
-
-      // If too many, remove ONLY empty extras from bottom (never remove the first row)
-      while (rows().length > DESIRED_TOTAL) {
-        const all = rows();
-        const last = all[all.length - 1];
-        if (!last) break;
-        if (last === all[0]) break;          // never remove template row
-        if (!rowIsEmpty(last)) break;        // don't remove real data rows
-        last.remove();
-      }
-
-      // If still too many, your HTML has extra rows that aren't empty — leave them alone.
-      if (rows().length > DESIRED_TOTAL) {
-        console.warn(
-          "[mk] Service Advisors table has extra non-empty rows in HTML. Remove extra template rows in tbody to get exactly 3 total."
-        );
-        return;
-      }
-
-      // If too few, add clones until total = 3
-      while (rows().length < DESIRED_TOTAL) {
-        addBtn.click();
-      }
-    })();
+    ensureTableExpandButtons();
 
     log("Initialized.");
   };
@@ -1624,4 +1498,3 @@ const section = document.querySelector('[data-notes-target="notes-advisors"]')?.
     init();
   }
 })();
-
