@@ -1561,3 +1561,34 @@ button.remove-btn,
 button.remove-row{
   display:none !important;
 }
+
+/* =========================================================
+   SUPPORT TICKETS: "Short Summary of the Issue" should NOT have expand
+========================================================= */
+#support-tickets .ticket-row.ticket-summary-row .mk-ta-expand,
+#support-tickets .ticket-row.ticket-summary-row .mk-notes-expand-btn,
+#support-tickets .ticket-row.ticket-summary-row .mk-mini-expand-btn{
+  display:none !important;
+}
+
+/* =========================================================
+   STACKED NOTES ONLY — 2× TALLER TEXTAREAS
+   Safe: does NOT affect side-by-side cards
+========================================================= */
+
+/* Stacked notes cards live inside .col-stack */
+.col-stack .section-block textarea{
+  min-height:440px !important; /* was ~220px → doubled */
+}
+
+/* Wrapped stacked notes */
+.col-stack .section-block .mk-ta-wrap > textarea{
+  min-height:440px !important;
+}
+
+/* Ensure side-by-side notes stay unchanged */
+.cards-grid.two-col textarea,
+.two-col-grid textarea,
+.grid-2 textarea{
+  min-height:unset !important;
+}
