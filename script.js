@@ -1261,23 +1261,6 @@
       return;
     }
 
-    // GENERATE EXEC SUMMARY
-   const resetBtn = t.closest(".clear-page-btn");
-if (resetBtn && !t.closest("#mkGenerateExecSummary") && !t.closest("#savePDF")) {
-
-    // CLEAR ALL
-    const clearAllBtn = t.closest("#clearAllBtn");
-    if (clearAllBtn) {
-      e.preventDefault();
-      mkPopup.confirm("This will clear ALL pages and ALL saved data. Continue?", {
-        title: "Clear All",
-        okText: "Clear All",
-        cancelText: "Cancel",
-        onOk: clearAll,
-      });
-      return;
-    }
-
   // 1) Generate Summary (handle FIRST)
 const genBtn = t.closest("#mkGenerateExecSummary");
 if (genBtn) {
