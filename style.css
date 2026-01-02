@@ -1406,3 +1406,22 @@ button.remove-row{
   margin-bottom:0 !important;
 }
 
+/* =========================================================
+   ✅ TABLE EXPAND — RIGHT SIDE + VERTICALLY CENTERED
+========================================================= */
+
+.table-footer{
+  position:relative !important;
+}
+
+.table-footer .mk-table-expand-btn{
+  position:absolute !important;
+  right:10px !important;
+  top:50% !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
