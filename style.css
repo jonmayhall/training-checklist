@@ -5,13 +5,15 @@
    ✅ Keeps Trainers / POCs + attached orange (+) behavior (no remove buttons)
    ✅ Keeps Support Tickets 2x2 + routing behavior
    ✅ Keeps Notes modal + Table modal + textarea expander
-   ✅ FIXES INCLUDED (your latest issues):
-      - Table spacing on pages 5/6 restored (NO global table-layout:fixed)
+   ✅ FIXES INCLUDED:
+      - Table spacing restored (NO global table-layout:fixed)
       - Name / Opcode textbox overflow fixed WITHOUT breaking column spacing
       - Table modal: tighter gap between table + notes cards
-      - Table modal header matches your card headers (flush + skinnier)
-      - Expand button stays bottom-right of table footer
+      - Table modal header matches card headers (flush + skinnier)
+      - Table expand button vertically centered on right side of footer
+      - Notes textareas now FILL the stretched card height (no huge dead space)
 ======================================================= */
+
 
 /* =======================
    CSS VARIABLES
@@ -39,14 +41,15 @@
   --notes-icon:#9aa0a6;
   --notes-icon-hover:var(--orange);
 
-  /* ✅ MASTER: Expand button size (ALL expand buttons use this) */
-  --mk-expand-size:12px;
+  /* MASTER: Expand buttons */
+  --mk-expand-size:16px;
   --mk-expand-font:10px;
   --mk-expand-radius:6px;
 
   /* Bubble icon mask used by table Notes buttons (Pages 3/4 style) */
   --notes-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3v3.5a.5.5 0 0 0 .85.35L11.7 19H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 14h-8.7l-2.3 2.3V17H4V5h16v12Z'/%3E%3C/svg%3E");
 }
+
 
 /* =======================
    GLOBAL TYPOGRAPHY + RESETS
@@ -95,6 +98,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   color:var(--ink) !important;
 }
 
+
 /* =======================
    TOP BAR
 ======================= */
@@ -135,6 +139,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   min-height:1em;
 }
 
+
 /* =======================
    APP WRAPPER
 ======================= */
@@ -144,6 +149,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   margin-top:70px;
   overflow-x:hidden;
 }
+
 
 /* =======================
    SIDEBAR
@@ -224,6 +230,7 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   box-shadow:0 5px 14px rgba(239,109,34,0.55);
 }
 
+
 /* =======================
    MAIN CONTENT
 ======================= */
@@ -234,6 +241,7 @@ main{
   background:var(--gray-bg);
   overflow-x:hidden;
 }
+
 
 /* =======================
    PAGE SECTIONS
@@ -302,6 +310,7 @@ main{
   box-shadow:0 4px 10px rgba(239,109,34,0.45);
 }
 
+
 /* =======================
    SECTION BLOCKS
 ======================= */
@@ -336,6 +345,7 @@ main{
   margin-left:0 !important;
   margin-right:0 !important;
 }
+
 
 /* =======================
    LAYOUT HELPERS
@@ -373,6 +383,7 @@ main{
 .two-col-grid{
   --input-width:150px;
 }
+
 
 /* =======================
    Q&A ROWS (NON-TABLE)
@@ -434,11 +445,10 @@ main{
   padding:7px 10px !important;
 }
 
-/* Textareas */
+/* Textareas (base) */
 .section-block textarea{
   width:100% !important;
   max-width:100% !important;
-  margin:6px 0 10px;
   display:block;
   padding:8px 10px;
   border-radius:var(--radius-sm);
@@ -446,6 +456,7 @@ main{
   background:#f7f7f7;
   font-size:13px;
   resize:vertical;
+  margin:10px 0 0; /* clean consistent top gap */
 }
 
 /* Focus */
@@ -460,6 +471,7 @@ main{
   background:#fff9f5;
 }
 
+
 /* =======================
    NOTES BUTTONS — QUESTIONS (icon-only)
 ======================= */
@@ -470,7 +482,6 @@ main{
   margin-left:auto;
 }
 
-/* icon-only notes for question rows */
 .notes-icon-btn,
 .section-block .checklist-row .notes-btn{
   appearance:none;
@@ -505,7 +516,6 @@ main{
   border-radius:8px;
 }
 
-/* inline SVG support */
 .notes-icon-btn .notes-svg,
 .section-block .checklist-row .notes-btn .notes-svg{
   width:18px;
@@ -514,7 +524,6 @@ main{
   fill:currentColor;
 }
 
-/* Legacy active class + NEW JS class */
 .notes-icon-btn.has-notes,
 .section-block .checklist-row .notes-btn.has-notes,
 .notes-icon-btn.is-notes-active,
@@ -538,6 +547,7 @@ main{
   gap:6px !important;
   margin-left:8px !important;
 }
+
 
 /* ================================
    INDENTED Q&A ROWS
@@ -566,6 +576,7 @@ main{
   padding-left:44px !important;
 }
 
+
 /* =======================
    Integrated “+” rows (base input + plus)
 ======================= */
@@ -591,6 +602,7 @@ main{
   border-top-left-radius:var(--radius-sm);
   border-bottom-left-radius:var(--radius-sm);
 }
+
 
 /* =======================================================
    DEALERSHIP INFO PAGE FIXES (dates + POC widths)
@@ -673,26 +685,60 @@ main{
   max-width:var(--di-input-width) !important;
 }
 
-/* =======================
-   Notes cards textarea fill (2-col)
-======================= */
+
+/* =========================================================
+   ✅ NOTES CARDS — IMPORTANT FIX (no dead space under textarea)
+   Works for BOTH wrapped (mk-ta-wrap) and plain textarea.
+========================================================= */
+
+/* Any 2-col note-style cards should be flex columns so content can fill height */
 .cards-grid.two-col > .section-block,
 .two-col-grid .section-block,
 .grid-2 > .section-block{
-  display:flex;
-  flex-direction:column;
+  display:flex !important;
+  flex-direction:column !important;
   min-width:0;
+  min-height:0;
 }
-.cards-grid.two-col > .section-block textarea,
-.two-col-grid .section-block textarea,
-.grid-2 > .section-block textarea{
-  flex:1 1 auto;
-  width:100% !important;
-  max-width:100% !important;
-  min-height:300px;
+
+/* If textarea is DIRECT child of the card: let it grow */
+.cards-grid.two-col > .section-block > textarea,
+.two-col-grid .section-block > textarea,
+.grid-2 > .section-block > textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;   /* key for flex fill */
+  height:100% !important;
   resize:none;
   overflow:auto;
 }
+
+/* If textarea is INSIDE mk-ta-wrap: make the wrap fill, and textarea fill the wrap */
+.cards-grid.two-col > .section-block .mk-ta-wrap,
+.two-col-grid .section-block .mk-ta-wrap,
+.grid-2 > .section-block .mk-ta-wrap{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+}
+
+.cards-grid.two-col > .section-block .mk-ta-wrap > textarea,
+.two-col-grid .section-block .mk-ta-wrap > textarea,
+.grid-2 > .section-block .mk-ta-wrap > textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:100% !important;   /* fill available height */
+  resize:none;
+  overflow:auto;
+  margin:0 !important;      /* prevents weird bottom gaps */
+}
+
+/* Keep notes cards bottom padding consistent */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.grid-2 > .section-block{
+  padding-bottom:14px !important;
+}
+
 
 /* =======================
    TRAINERS PAGE tweaks
@@ -711,9 +757,7 @@ main{
   margin-bottom:14px !important;
 }
 
-/* =========================
-   TRAINERS: INPUT + PLUS (CORRECT)
-========================= */
+/* TRAINERS: INPUT + PLUS */
 #trainers-deployment .input-plus{
   display:flex !important;
   align-items:stretch !important;
@@ -750,7 +794,6 @@ main{
 }
 #trainers-deployment .input-plus .trainer-add-btn:hover{ background:#ff8b42 !important; }
 
-/* ✅ Added trainer rows: standalone input fully rounded */
 #trainers-deployment #additionalTrainersContainer input[type="text"],
 #trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
   height:34px !important;
@@ -760,7 +803,6 @@ main{
   border-radius:var(--radius-sm) !important;
 }
 
-/* ✅ Added POCs: standalone inputs fully rounded */
 #dealership-info #additionalPocsContainer input[type="text"],
 #dealership-info #additionalPocsContainer .checklist-row input[type="text"]{
   height:34px !important;
@@ -770,7 +812,6 @@ main{
   border-radius:var(--radius-sm) !important;
 }
 
-/* ✅ Additional POC (+): match Trainer (+) exactly */
 #dealership-info .additional-poc-card .input-plus,
 #dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
   display:flex !important;
@@ -793,10 +834,8 @@ main{
   background:#f7f7f7 !important;
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
-#dealership-info .additional-poc-card .input-plus .poc-add-btn,
-#dealership-info .additional-poc-card .input-plus [data-add-poc],
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]{
+#dealership-info .additional-poc-card .input-plus button,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button{
   width:34px !important;
   min-width:34px !important;
   height:34px !important;
@@ -814,12 +853,11 @@ main{
   line-height:1 !important;
   cursor:pointer !important;
 }
-#dealership-info .additional-poc-card .input-plus .poc-add-btn:hover,
-#dealership-info .additional-poc-card .input-plus [data-add-poc]:hover,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus [data-add-poc]:hover{
+#dealership-info .additional-poc-card .input-plus button:hover,
+#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover{
   background:#ff8b42 !important;
 }
+
 
 /* =======================
    TABLES (PAGE LAYOUT)
@@ -967,26 +1005,11 @@ main{
 }
 
 /* =========================================================
-   ✅ EXPAND BUTTONS — ONE SIZE EVERYWHERE (BULLETPROOF)
-   This overrides ANY earlier expand styles.
+   ✅ EXPAND BUTTONS — ONE SYSTEM
 ========================================================= */
-
-/* Catch ALL known expand button class names (table + textarea + legacy) */
 .mk-table-expand-btn,
 .mk-ta-expand,
-.mk-mini-expand-btn,
-button.mk-table-expand-btn,
-button.mk-ta-expand,
-button.mk-mini-expand-btn,
-.table-footer button,
-.mk-ta-wrap button{
-  /* (We don't touch add-row because it has class .add-row) */
-}
-
-/* Hard-force ONLY the expand buttons */
-button.mk-table-expand-btn,
-button.mk-ta-expand,
-button.mk-mini-expand-btn{
+.mk-mini-expand-btn{
   width:var(--mk-expand-size) !important;
   height:var(--mk-expand-size) !important;
   min-width:var(--mk-expand-size) !important;
@@ -1000,7 +1023,6 @@ button.mk-mini-expand-btn{
   color:#111827 !important;
 
   cursor:pointer !important;
-
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
@@ -1011,31 +1033,33 @@ button.mk-mini-expand-btn{
   box-shadow:0 1px 3px rgba(0,0,0,0.12) !important;
   transition:border-color .12s, background .12s, transform .12s !important;
 }
-
-button.mk-table-expand-btn:hover,
-button.mk-ta-expand:hover,
-button.mk-mini-expand-btn:hover{
+.mk-table-expand-btn:hover,
+.mk-ta-expand:hover,
+.mk-mini-expand-btn:hover{
   border-color:var(--orange) !important;
   background:#fff !important;
   transform:translateY(-1px) !important;
 }
 
-/* Table expand placement */
+/* ✅ TABLE expand placement: RIGHT SIDE + VERTICALLY CENTERED */
 .table-footer .mk-table-expand-btn{
   position:absolute !important;
-  right:8px !important;
-  bottom:6px !important;
+  right:10px !important;
+  top:50% !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
 }
 
-/* Notes expand placement */
+/* Notes textarea expander placement */
+.mk-ta-wrap{
+  position:relative;
+}
 .mk-ta-wrap .mk-ta-expand{
   position:absolute !important;
   right:6px !important;
   bottom:16px !important;
   z-index:10 !important;
 }
-
-/* --- keep the rest of your CSS below unchanged --- */
 
 /* acceptance helper colors */
 .training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
@@ -1096,6 +1120,7 @@ button.mk-mini-expand-btn:hover{
 /* Names column centered */
 .training-table th:nth-child(2),
 .training-table td:nth-child(2){ text-align:center !important; }
+
 
 /* =======================
    TABLE NOTES COLUMN (headers/cells)
@@ -1162,6 +1187,7 @@ button.mk-mini-expand-btn:hover{
 .training-table .notes-btn.is-notes-active::before{
   background:var(--notes-icon-hover) !important;
 }
+
 
 /* =======================
    SUPPORT TICKETS — FULL SECTION (2x2)
@@ -1236,10 +1262,10 @@ button.mk-mini-expand-btn:hover{
   justify-content:center;
 }
 
-/* ✅ Added ticket cards: NO + button */
+/* Added ticket cards: NO + button */
 #support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{ display:none !important; }
 
-/* ✅ Added ticket cards: ticket # input rounded */
+/* Added ticket cards: ticket # input rounded */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{ display:block !important; }
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
   border-radius:var(--radius-sm) !important;
@@ -1288,10 +1314,287 @@ button.mk-mini-expand-btn:hover{
   }
 }
 
+
 /* =======================
-   DMS INTEGRATION (unchanged)
+   DMS INTEGRATION
 ======================= */
-/* (Your existing DMS section continues here — unchanged in your paste) */
+#dms-integration .dms-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:48px;
+  margin-top:14px;
+  align-items:start;
+}
+#dms-integration .dms-card{
+  width:520px;
+  max-width:100%;
+  margin:0 auto;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+#dms-integration .dms-card-header{
+  background:var(--orange) !important;
+  color:#fff !important;
+  padding:10px 16px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  border-bottom:1px solid var(--border) !important;
+}
+#dms-integration .dms-name{ font-weight:900 !important; font-size:16px !important; color:#fff !important; letter-spacing:.3px; }
+#dms-integration .dms-chip{
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.06em !important;
+  text-transform:uppercase !important;
+  padding:6px 10px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(255,255,255,0.35) !important;
+  color:#fff !important;
+}
+#dms-integration .dms-chip-push{ background:rgba(255,255,255,0.18) !important; border-color:rgba(255,255,255,0.35) !important; color:#fff !important; }
+#dms-integration .dms-card-header .dms-chip.dms-chip-pull{ background:rgba(205,220,57,0.45) !important; border-color:rgba(255,255,255,0.35) !important; color:#fff !important; }
+
+#dms-integration .dms-list{ list-style:none; padding:10px 12px 14px; margin:0; }
+#dms-integration .dms-list li{
+  position:relative;
+  padding:10px 10px;
+  padding-right:160px;
+  border-bottom:1px solid #efefef;
+}
+#dms-integration .dms-list li:last-child{ border-bottom:none; }
+#dms-integration .dms-row-top{ display:block; margin-bottom:4px; }
+#dms-integration .dms-field{ font-weight:800; color:#111827; font-size:13px; }
+#dms-integration .dms-list p{ margin:0; font-size:12px; color:#6b7280; }
+#dms-integration .dms-list .dms-tag{
+  position:absolute;
+  right:52px;
+  top:50%;
+  transform:translate(50%, -50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:3px 8px;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  text-transform:uppercase;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  color:#111827;
+  white-space:nowrap;
+}
+#dms-integration .dms-list .dms-tag-auto{ border-color:rgba(34,197,94,0.35); background:rgba(34,197,94,0.12); color:#14532d; }
+#dms-integration .dms-list .dms-tag-ondemand{ border-color:rgba(245,158,11,0.35); background:rgba(245,158,11,0.14); color:#78350f; }
+#dms-integration .dms-list .dms-tag-withro{ border-color:rgba(59,130,246,0.35); background:rgba(59,130,246,0.12); color:#1e3a8a; }
+#dms-integration .dms-list .dms-tag-planned{ border-color:rgba(99,102,241,0.35); background:rgba(99,102,241,0.12); color:#312e81; }
+#dms-integration .dms-list .dms-tag-na{ border-color:rgba(156,163,175,0.45); background:rgba(156,163,175,0.18); color:#374151; }
+
+
+/* =======================
+   EQUAL-HEIGHT 2-COL ROWS (Pre/Monday/Post)
+======================= */
+#pre-training .cards-grid.two-col,
+#monday-visit .cards-grid.two-col,
+#post-training .cards-grid.two-col{ align-items:stretch !important; }
+#pre-training .cards-grid.two-col > .section-block,
+#monday-visit .cards-grid.two-col > .section-block,
+#post-training .cards-grid.two-col > .section-block{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0;
+  min-height:0;
+}
+
+
+/* =======================
+   NOTES MODAL
+======================= */
+#mkNotesModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+#mkNotesModal.open{ display:block; }
+#mkNotesModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+}
+#mkNotesModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(980px, calc(100vw - 40px));
+  height:min(80vh, 720px);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#mkNotesModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:10px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+#mkNotesModal .mk-modal-title{ font-weight:900; font-size:16px; letter-spacing:.3px; }
+#mkNotesModal .mk-modal-close{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+#mkNotesModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
+#mkNotesModal .mk-modal-textarea{
+  flex:1 1 auto;
+  width:100%;
+  border:0;
+  outline:none;
+  padding:14px 16px;
+  font-size:13px;
+  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  resize:none;
+}
+
+
+/* =======================
+   TABLE MODAL (mkTableModal)
+======================= */
+#mkTableModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99998;
+  overflow:hidden !important;
+}
+#mkTableModal.open{ display:block; }
+#mkTableModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+}
+#mkTableModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1400px, calc(100vw - 28px));
+  max-height:90vh;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#mkTableModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:10px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid var(--border);
+}
+#mkTableModal .mk-modal-title{
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:.3px;
+  margin:0;
+}
+#mkTableModal .mk-modal-close{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  line-height:1;
+}
+#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
+
+#mkTableModal .mk-modal-content{
+  padding:14px 14px 16px;
+  overflow:auto;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+#mkTableModal .mk-modal-content > *{ margin:0 !important; }
+
+#mkTableModal .mk-modal-notes textarea{
+  width:100% !important;
+  min-height:190px;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:#f7f7f7;
+  font-size:13px;
+  resize:vertical;
+}
+
+#mkTableModal .scroll-wrapper{
+  overflow:auto !important;
+  max-width:100% !important;
+}
+#mkTableModal table.training-table{
+  width:max-content;
+  min-width:100%;
+}
+
+/* Modal-only overflow safety */
+#mkTableModal .training-table td:first-child{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  overflow:hidden !important;
+  min-width:0 !important;
+}
+#mkTableModal .training-table td:first-child input[type="text"]{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  width:auto !important;
+  max-width:100% !important;
+}
+#mkTableModal .training-table input[type="text"],
+#mkTableModal .training-table select,
+#mkTableModal .training-table textarea{
+  min-width:0 !important;
+  max-width:100% !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+
 
 /* =========================================================
    HARD RULE: no remove buttons anywhere
@@ -1303,189 +1606,3 @@ button.remove-btn,
 button.remove-row{
   display:none !important;
 }
-
-/* =========================================================
-   🔒 FORCE NOTES EXPAND BUTTONS TO MATCH TABLE EXPAND SIZE
-   (Paste at VERY BOTTOM of style.css)
-========================================================= */
-
-/* 1) Training table expand (keep consistent) */
-.mk-table-expand-btn{
-  width:16px !important;
-  height:16px !important;
-  min-width:16px !important;
-  min-height:16px !important;
-  font-size:10px !important;
-  line-height:1 !important;
-  padding:0 !important;
-  border-radius:6px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* 2) Notes textarea expand — hit ALL possible variants */
-.mk-ta-wrap .mk-ta-expand,
-.mk-ta-wrap button.mk-ta-expand,
-.mk-ta-wrap button[class*="expand"],
-.mk-ta-wrap [class*="ta-expand"],
-.section-block .mk-ta-expand,
-.section-block .mk-mini-expand-btn,
-.section-block button.mk-mini-expand-btn,
-.section-block button[class*="expand"]{
-  width:16px !important;
-  height:16px !important;
-  min-width:16px !important;
-  min-height:16px !important;
-  font-size:10px !important;
-  line-height:1 !important;
-  padding:0 !important;
-  border-radius:6px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* 3) If your notes expander is an SVG/icon inside the button */
-.mk-ta-wrap button[class*="expand"] svg,
-.mk-ta-wrap .mk-ta-expand svg,
-.section-block button[class*="expand"] svg{
-  width:12px !important;
-  height:12px !important;
-}
-
-/* 4) Hover matches */
-.mk-table-expand-btn:hover,
-.mk-ta-wrap .mk-ta-expand:hover,
-.mk-ta-wrap button[class*="expand"]:hover,
-.section-block button[class*="expand"]:hover{
-  border-color:var(--orange) !important;
-  background:#fff !important;
-}
-
-/* =========================================================
-   ✅ TABLE EXPAND BUTTON — FORCE SIZE (ONLY tables)
-   (Paste at VERY BOTTOM of style.css)
-========================================================= */
-
-/* Table expand button (footer) */
-.table-footer .mk-table-expand-btn{
-  width:16px !important;
-  height:16px !important;
-  min-width:16px !important;
-  min-height:16px !important;
-  font-size:10px !important;
-  line-height:1 !important;
-  padding:0 !important;
-  border-radius:6px !important;
-
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* Keep its position consistent */
-.table-footer .mk-table-expand-btn{
-  right:8px !important;
-  bottom:6px !important;
-}
-
-/* =========================================================
-   ✅ NOTES TEXTAREA — MATCH TOP + BOTTOM SPACING
-========================================================= */
-
-/* Standardize spacing above/below notes textareas inside cards */
-.section-block textarea{
-  margin-top:10px !important;
-  margin-bottom:10px !important;
-}
-
-/* If the textarea is wrapped in mk-ta-wrap, remove uneven margins */
-.mk-ta-wrap > textarea{
-  margin-top:0 !important;
-  margin-bottom:0 !important;
-}
-
-/* =========================================================
-   ✅ TABLE EXPAND — RIGHT SIDE + VERTICALLY CENTERED
-========================================================= */
-
-.table-footer{
-  position:relative !important;
-}
-
-.table-footer .mk-table-expand-btn{
-  position:absolute !important;
-  right:10px !important;
-  top:50% !important;
-  bottom:auto !important;
-  transform:translateY(-50%) !important;
-
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-/* =========================================================
-   ✅ NOTES CARDS — REMOVE EXTRA BOTTOM GAP (FINAL FIX)
-========================================================= */
-
-/* Notes cards should NOT stretch content vertically */
-.cards-grid.two-col > .section-block,
-.two-col-grid .section-block,
-.grid-2 > .section-block{
-  display:block !important;     /* kill flex stretch */
-}
-
-/* Kill forced textarea stretching */
-.cards-grid.two-col > .section-block textarea,
-.two-col-grid .section-block textarea,
-.grid-2 > .section-block textarea{
-  flex:none !important;
-  height:auto !important;
-  min-height:220px !important;  /* keep your visual height */
-}
-
-/* Remove artificial space added by wrapper */
-.mk-ta-wrap{
-  padding-bottom:0 !important;
-}
-
-/* Ensure textarea sits naturally */
-.mk-ta-wrap > textarea{
-  height:auto !important;
-}
-
-/* =========================================================
-   ✅ NOTES CARDS — MAKE TEXTAREA FILL CARD (remove bottom dead space)
-   Paste at VERY bottom of CSS
-========================================================= */
-
-/* keep notes cards as flex columns so textarea can expand */
-.cards-grid.two-col > .section-block,
-.two-col-grid .section-block,
-.grid-2 > .section-block{
-  display:flex !important;
-  flex-direction:column !important;
-}
-
-/* wrapper should take remaining height */
-.mk-ta-wrap{
-  flex:1 1 auto !important;
-  min-height:220px !important;   /* adjust this if you want taller baseline */
-  height:auto !important;
-}
-
-/* textarea fills wrapper (NO bottom dead zone) */
-.mk-ta-wrap > textarea{
-  flex:1 1 auto !important;
-  height:auto !important;        /* overrides your old height:100% behavior */
-  min-height:0 !important;       /* allow flex to control */
-  margin:0 !important;           /* remove extra bottom margin */
-}
-
-/* keep a clean, even bottom gap like the top gap */
-.section-block textarea{
-  margin:16px 0 0 !important;    /* consistent top spacing */
-}
-
