@@ -1753,28 +1753,73 @@ button.remove-row{
 }
 
 /* =========================================================
-   SIDE-BY-SIDE NOTES EXPAND BUTTON — SMALLER (cards only)
-   (catches mk-ta-expand, mk-mini-expand-btn, or any button with “expand”)
+   NOTES EXPAND BUTTONS — UNIFIED + A LITTLE BIGGER (GLOBAL)
+   Paste at VERY BOTTOM of style.css
 ========================================================= */
-.page-section .cards-grid.two-col > .section-block .mk-ta-expand,
-.page-section .cards-grid.two-col > .section-block .mk-mini-expand-btn,
-.page-section .cards-grid.two-col > .section-block button[class*="expand"]{
-  width:14px !important;
-  height:14px !important;
-  min-width:14px !important;
-  min-height:14px !important;
-  font-size:9px !important;
-  line-height:1 !important;
-  padding:0 !important;
-  border-radius:6px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
+
+/* Master size for NOTES expand buttons */
+:root{
+  --mk-notes-expand-size:16px;
+  --mk-notes-expand-font:10px;
+  --mk-notes-expand-radius:7px;
 }
 
-/* Keep the notes expand button tight to the bottom-right */
-.page-section .cards-grid.two-col > .section-block .mk-ta-wrap .mk-ta-expand,
-.page-section .cards-grid.two-col > .section-block .mk-ta-wrap button[class*="expand"]{
+/* Force any “expand” button inside note/textarea areas to be visible */
+.section-block .mk-ta-expand,
+.section-block .mk-mini-expand-btn,
+.section-block button[class*="expand"],
+.section-block button[data-expand],
+.section-block [data-expand]{
+  display:inline-flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+
+/* Apply consistent sizing ONLY to expand buttons (not your + buttons or Add Row) */
+.section-block .mk-ta-expand,
+.section-block .mk-mini-expand-btn,
+.section-block .mk-ta-wrap button[class*="expand"],
+.section-block button[class*="expand"][aria-label*="Expand"],
+.section-block button[data-expand]{
+  width:var(--mk-notes-expand-size) !important;
+  height:var(--mk-notes-expand-size) !important;
+  min-width:var(--mk-notes-expand-size) !important;
+  min-height:var(--mk-notes-expand-size) !important;
+
+  padding:0 !important;
+  border-radius:var(--mk-notes-expand-radius) !important;
+
+  font-size:var(--mk-notes-expand-font) !important;
+  line-height:1 !important;
+
+  border:1px solid #d1d5db !important;
+  background:#ffffffee !important;
+  color:#111827 !important;
+
+  align-items:center !important;
+  justify-content:center !important;
+
+  box-shadow:0 1px 3px rgba(0,0,0,0.12) !important;
+}
+
+/* Keep bottom-right positioning consistent anywhere the wrapper exists */
+.mk-ta-wrap{ position:relative !important; }
+
+.mk-ta-wrap .mk-ta-expand,
+.mk-ta-wrap button[class*="expand"],
+.mk-ta-wrap button[data-expand]{
+  position:absolute !important;
   right:8px !important;
   bottom:8px !important;
+  transform:none !important;
+  z-index:10 !important;
 }
+
+.section-block .mk-ta-expand:hover,
+.section-block .mk-mini-expand-btn:hover,
+.mk-ta-wrap button[class*="expand"]:hover,
+.mk-ta-wrap button[data-expand]:hover{
+  border-color:var(--orange) !important;
+  background:#fff !important;
+}
+
