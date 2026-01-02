@@ -1606,3 +1606,100 @@ button.remove-btn,
 button.remove-row{
   display:none !important;
 }
+
+/* =========================================================
+   FINAL OVERRIDES (PASTE AT VERY BOTTOM)
+   - Notes textarea: reduce bottom gap / fill card
+   - Notes expand: smaller
+   - Table expand: larger + MATCH notes size
+========================================================= */
+
+/* ---------- 1) NOTES CARDS: kill the big empty space under textarea ---------- */
+/* Notes cards live in your 2-col/grid layouts — keep them as flex columns */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.grid-2 > .section-block{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  padding-bottom:8px !important;  /* ✅ smaller gap to card bottom */
+}
+
+/* If textarea is DIRECT child, make it fill remaining height */
+.cards-grid.two-col > .section-block > textarea,
+.two-col-grid .section-block > textarea,
+.grid-2 > .section-block > textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:100% !important;
+  margin:10px 0 0 !important;     /* top spacing only */
+  resize:none !important;
+}
+
+/* If textarea is inside mk-ta-wrap, make wrapper + textarea fill the card */
+.cards-grid.two-col > .section-block .mk-ta-wrap,
+.two-col-grid .section-block .mk-ta-wrap,
+.grid-2 > .section-block .mk-ta-wrap{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  margin:10px 0 0 !important;     /* top spacing only */
+}
+
+.cards-grid.two-col > .section-block .mk-ta-wrap > textarea,
+.two-col-grid .section-block .mk-ta-wrap > textarea,
+.grid-2 > .section-block .mk-ta-wrap > textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:100% !important;
+  margin:0 !important;            /* ✅ prevents bottom dead space */
+  resize:none !important;
+}
+
+
+/* ---------- 2) EXPAND BUTTONS: Notes smaller, Tables match Notes ---------- */
+/* Pick the size you want for BOTH (this fixes “notes smaller” + “tables match”) */
+:root{
+  --mk-expand-size:14px;  /* ✅ smaller than before, bigger than your tiny tables */
+  --mk-expand-font:9px;
+  --mk-expand-radius:6px;
+}
+
+/* Force size on BOTH note + table expand buttons */
+.mk-ta-expand,
+.mk-mini-expand-btn,
+.mk-table-expand-btn{
+  width:var(--mk-expand-size) !important;
+  height:var(--mk-expand-size) !important;
+  min-width:var(--mk-expand-size) !important;
+  min-height:var(--mk-expand-size) !important;
+
+  font-size:var(--mk-expand-font) !important;
+  line-height:1 !important;
+
+  padding:0 !important;
+  border-radius:var(--mk-expand-radius) !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* Notes expand placement (stay bottom-right but not floating too high) */
+.mk-ta-wrap .mk-ta-expand{
+  right:8px !important;
+  bottom:8px !important;   /* ✅ closer to textarea/card bottom */
+}
+
+/* ---------- 3) TABLE expand: RIGHT SIDE + VERTICALLY CENTERED in footer ---------- */
+.table-footer{
+  position:relative !important;
+}
+.table-footer .mk-table-expand-btn{
+  position:absolute !important;
+  right:10px !important;
+  top:50% !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
+}
+
