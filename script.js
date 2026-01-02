@@ -67,6 +67,290 @@
       `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random()
         .toString(16)
         .slice(2)}`;
+
+     /* =======================
+   TRAINING SUMMARY — EXEC SUMMARY (AI-STYLE)
+======================= */
+const ExecSummary = (() => {
+  const norm = (s) => String(s || "").replace(/\r\n/g, "\n").trim();
+
+  const uniq = (arr) => {
+    const seen = new Set();
+    return arr.filter((x) => {
+      const k = String(x || "").trim().toLowerCase();
+      if (!k) return false;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  };
+
+  const takeTop = (arr, n = 6) => uniq(arr).slice(0, n);
+
+  const collectAllNotesText = () => {
+    // Only notes blocks that are actually "used" by notes buttons
+    const targets = new Set();
+    document.querySelectorAll("[data-notes-target]").forEach((b) => {
+      const id = b.getAttribute("data-notes-target");
+      if (id) targets.add(id);
+    });
+
+    const chunks = [];
+    targets.forEach((id) => {
+      const host = document.getElementById(id);
+      const ta = host ? host.querySelector("textarea") : null;
+      if (ta && !ta.closest("table")) {
+        const t = norm(ta.value);
+        if (t) chunks.push(`### ${id}\n${t}`);
+      }
+    });
+
+    // Also include any other "notes-only" textareas in cards (not tables)
+    document.querySelectorAll(".section-block textarea").forEach((ta) => {
+      if (ta.closest("table")) return;
+      // avoid double-counting ones already in targets
+      const hostId = ta.closest("[id]")?.id;
+      if (hostId && targets.has(hostId)) return;
+      const t = norm(ta.value);
+      if (t) chunks.push(`### ${hostId || "notes"}\n${t}`);
+    });
+
+    return norm(chunks.join("\n\n"));
+  };
+
+  const collectKeyContext = () => {
+    const dealership =
+      (document.getElementById("dealershipNameInput")?.value || "").trim() ||
+      (document.getElementById("dealershipNameDisplay")?.textContent || "").trim();
+
+    const onsite =
+      (document.getElementById("onsiteTrainingDate")?.value || "").trim() ||
+      (document.getElementById("onsiteDate")?.value || "").trim();
+
+    const end =
+      (document.getElementById("trainingEndDate")?.value || "").trim() ||
+      (document.getElementById("endDate")?.value || "").trim();
+
+    const parts = [];
+    if (dealership) parts.push(`Dealership: ${dealership}`);
+    if (onsite) parts.push(`Onsite date: ${onsite}`);
+    if (end) parts.push(`Training end: ${end}`);
+    return parts.join(" | ");
+  };
+
+  const scoreLine = (line) => {
+    // Light weighting to surface more useful statements
+    const s = line.toLowerCase();
+    let score = 0;
+    if (s.includes("completed") || s.includes("success") || s.includes("working")) score += 3;
+    if (s.includes("issue") || s.includes("problem") || s.includes("broken")) score += 3;
+    if (s.includes("need") || s.includes("next") || s.includes("follow")) score += 2;
+    if (line.length > 40) score += 1;
+    if (line.length > 90) score += 1;
+    return score;
+  };
+
+  const extractCandidates = (notesText) => {
+    const lines = norm(notesText)
+      .split("\n")
+      .map((l) => l.replace(/\u2060/g, "").trim()) // remove invisible marker wrapper if present
+      .filter((l) => l && !l.startsWith("###"));
+
+    // Remove your bullet scaffolding characters and empties like "◦"
+    const cleaned = lines
+      .map((l) =>
+        l
+          .replace(/^•\s*/g, "")
+          .replace(/^◦\s*/g, "")
+          .replace(/^\-\s*/g, "")
+          .trim()
+      )
+      .filter((l) => l && l !== "◦");
+
+    return cleaned;
+  };
+
+  const classify = (candidates) => {
+    const wins = [];
+    const risks = [];
+    const next = [];
+
+    candidates.forEach((l) => {
+      const s = l.toLowerCase();
+
+      const isNext =
+        s.startsWith("next") ||
+        s.includes("next step") ||
+        s.includes("follow up") ||
+        s.includes("follow-up") ||
+        s.includes("recommend") ||
+        s.includes("should") ||
+        s.includes("needs to") ||
+        s.includes("need to") ||
+        s.includes("action") ||
+        s.includes("schedule") ||
+        s.includes("train") ||
+        s.includes("verify") ||
+        s.includes("confirm");
+
+      const isRisk =
+        s.includes("risk") ||
+        s.includes("concern") ||
+        s.includes("blocker") ||
+        s.includes("issue") ||
+        s.includes("problem") ||
+        s.includes("not working") ||
+        s.includes("broken") ||
+        s.includes("missing") ||
+        s.includes("stuck") ||
+        s.includes("unable") ||
+        s.includes("fails") ||
+        s.includes("error");
+
+      const isWin =
+        s.includes("win") ||
+        s.includes("success") ||
+        s.includes("completed") ||
+        s.includes("resolved") ||
+        s.includes("working") ||
+        s.includes("live") ||
+        s.includes("configured") ||
+        s.includes("trained") ||
+        s.includes("implemented") ||
+        s.includes("good");
+
+      if (isNext) next.push(l);
+      else if (isRisk) risks.push(l);
+      else if (isWin) wins.push(l);
+      else {
+        // neutral: push to wins if it reads positive, else risks if it reads negative, else ignore
+        if (/(good|great|done|completed|working|resolved)/i.test(l)) wins.push(l);
+        else if (/(issue|problem|not|missing|broken|error|fail)/i.test(l)) risks.push(l);
+      }
+    });
+
+    // Sort by usefulness
+    const byScore = (a, b) => scoreLine(b) - scoreLine(a);
+
+    return {
+      wins: wins.sort(byScore),
+      risks: risks.sort(byScore),
+      next: next.sort(byScore),
+    };
+  };
+
+  const buildOutput = ({ outcome, wins, risks, nextSteps, context }) => {
+    const fmt = (title, items) =>
+      `${title}\n` + (items.length ? items.map((x) => `• ${x}`).join("\n") : "• (None captured)");
+
+    const parts = [];
+    if (context) parts.push(context);
+    parts.push(`Overall training outcome: ${outcome || "Select outcome"}`);
+    parts.push("");
+    parts.push(fmt("Key wins", wins));
+    parts.push("");
+    parts.push(fmt("Key risks or concerns", risks));
+    parts.push("");
+    parts.push(fmt("Recommended next steps", nextSteps));
+    return parts.join("\n");
+  };
+
+  const generate = () => {
+    const outcomeSel = document.getElementById("overallTrainingOutcome");
+    const outcome = outcomeSel ? outcomeSel.value : "";
+
+    const notes = collectAllNotesText();
+    const context = collectKeyContext();
+
+    const candidates = extractCandidates(notes);
+    const { wins, risks, next } = classify(candidates);
+
+    // If the notes are thin, give default scaffolding
+    const topWins = takeTop(wins, 6);
+    const topRisks = takeTop(risks, 6);
+    const topNext = takeTop(next, 6);
+
+    return {
+      outcome,
+      wins: topWins,
+      risks: topRisks,
+      nextSteps: topNext.length
+        ? topNext
+        : takeTop(
+            [
+              "Confirm remaining open items and assign owners (Advisor / Parts / Tech / Manager).",
+              "Verify DMS integration items and retest affected workflows.",
+              "Schedule a follow-up check-in to confirm adoption and resolve blockers.",
+            ],
+            6
+          ),
+      context,
+    };
+  };
+
+  const fill = (data) => {
+    const winsTa = document.getElementById("execKeyWins");
+    const risksTa = document.getElementById("execKeyRisks");
+    const nextTa = document.getElementById("execNextSteps");
+    const out = document.getElementById("execSummaryOutput");
+
+    const toText = (arr) => (arr || []).map((x) => `• ${x}`).join("\n");
+
+    if (winsTa) winsTa.value = toText(data.wins);
+    if (risksTa) risksTa.value = toText(data.risks);
+    if (nextTa) nextTa.value = toText(data.nextSteps);
+
+    const formatted = buildOutput({
+      outcome: data.outcome,
+      wins: data.wins,
+      risks: data.risks,
+      nextSteps: data.nextSteps,
+      context: data.context,
+    });
+
+    if (out) out.textContent = formatted;
+
+    // Persist with your existing save system if present
+    try {
+      if (winsTa) { ensureId(winsTa); saveField(winsTa); }
+      if (risksTa) { ensureId(risksTa); saveField(risksTa); }
+      if (nextTa) { ensureId(nextTa); saveField(nextTa); }
+      const sel = document.getElementById("overallTrainingOutcome");
+      if (sel) { ensureId(sel); saveField(sel); }
+    } catch {}
+  };
+
+  const copy = () => {
+    const out = document.getElementById("execSummaryOutput");
+    const txt = out ? out.textContent : "";
+    if (!txt) return;
+
+    navigator.clipboard?.writeText(txt).then(
+      () => mkPopup?.ok?.("Executive Summary copied to clipboard.", { title: "Copied" }),
+      () => mkPopup?.ok?.("Could not copy automatically. Please copy manually.", { title: "Copy failed" })
+    );
+  };
+
+  const bind = () => {
+    const genBtn = document.getElementById("generateExecSummaryBtn");
+    const copyBtn = document.getElementById("copyExecSummaryBtn");
+
+    if (genBtn) {
+      genBtn.addEventListener("click", () => {
+        const data = generate();
+        fill(data);
+      });
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => copy());
+    }
+  };
+
+  return { bind };
+})();
+
+// Call this inside your init() after DOM is ready:
+try { ExecSummary.bind(); } catch {}
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
