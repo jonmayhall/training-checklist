@@ -3566,22 +3566,26 @@
   </p>
 
   <!-- TOP RIGHT BUTTONS (match other pages) -->
-  <button
-    id="generateExecSummaryBtn"
-    class="clear-page-btn"
-    type="button"
-    style="right: 190px;"
-  >
-    Generate Executive Summary
+ <!-- Buttons: stacked like other pages -->
+<div class="mk-summary-actions" style="display:flex; flex-direction:column; gap:10px; margin:10px 0 18px 4px; max-width:260px;">
+  <button id="mkGenerateExecSummary" class="clear-page-btn" type="button">
+    Generate Summary
   </button>
 
-  <button class="clear-page-btn" type="button" data-clear-page="training-summary">
-    Reset This Page
-  </button>
-
-  <button id="savePDF" class="floating-btn" type="button">
+  <!-- Make PDF match other buttons (no floating style) -->
+  <button id="savePDF" class="clear-page-btn" type="button">
     Save All Pages as PDF
   </button>
+
+  <!-- Reset page button for this section (same as other pages) -->
+  <button
+    class="clear-page-btn"
+    type="button"
+    data-clear-page="training-summary"
+  >
+    Reset This Page
+  </button>
+</div>
 
   <!-- EXECUTIVE SUMMARY OUTPUT (normal card — no special orange outline) -->
   <div class="section-block">
