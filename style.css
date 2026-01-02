@@ -40,7 +40,7 @@
   --notes-icon-hover:var(--orange);
 
   /* ✅ MASTER: Expand button size (ALL expand buttons use this) */
-  --mk-expand-size:16px;
+  --mk-expand-size:6px;
   --mk-expand-font:10px;
   --mk-expand-radius:6px;
 
