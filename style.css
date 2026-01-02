@@ -1425,3 +1425,34 @@ button.remove-row{
   align-items:center !important;
   justify-content:center !important;
 }
+
+/* =========================================================
+   ✅ NOTES CARDS — REMOVE EXTRA BOTTOM GAP (FINAL FIX)
+========================================================= */
+
+/* Notes cards should NOT stretch content vertically */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.grid-2 > .section-block{
+  display:block !important;     /* kill flex stretch */
+}
+
+/* Kill forced textarea stretching */
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea,
+.grid-2 > .section-block textarea{
+  flex:none !important;
+  height:auto !important;
+  min-height:220px !important;  /* keep your visual height */
+}
+
+/* Remove artificial space added by wrapper */
+.mk-ta-wrap{
+  padding-bottom:0 !important;
+}
+
+/* Ensure textarea sits naturally */
+.mk-ta-wrap > textarea{
+  height:auto !important;
+}
+
