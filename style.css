@@ -1362,3 +1362,47 @@ button.remove-row{
   border-color:var(--orange) !important;
   background:#fff !important;
 }
+
+/* =========================================================
+   ✅ TABLE EXPAND BUTTON — FORCE SIZE (ONLY tables)
+   (Paste at VERY BOTTOM of style.css)
+========================================================= */
+
+/* Table expand button (footer) */
+.table-footer .mk-table-expand-btn{
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  min-height:16px !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  padding:0 !important;
+  border-radius:6px !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* Keep its position consistent */
+.table-footer .mk-table-expand-btn{
+  right:8px !important;
+  bottom:6px !important;
+}
+
+/* =========================================================
+   ✅ NOTES TEXTAREA — MATCH TOP + BOTTOM SPACING
+========================================================= */
+
+/* Standardize spacing above/below notes textareas inside cards */
+.section-block textarea{
+  margin-top:10px !important;
+  margin-bottom:10px !important;
+}
+
+/* If the textarea is wrapped in mk-ta-wrap, remove uneven margins */
+.mk-ta-wrap > textarea{
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+}
+
