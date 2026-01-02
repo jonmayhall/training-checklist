@@ -1278,22 +1278,59 @@ if (resetBtn && !t.closest("#mkGenerateExecSummary") && !t.closest("#savePDF")) 
       return;
     }
 
-    // RESET PAGE
-    const resetBtn = t.closest(".clear-page-btn");
-    if (resetBtn && resetBtn.hasAttribute("data-clear-page")) {
-      e.preventDefault();
-      const section =
-        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
-        resetBtn.closest(".page-section");
+  // 1) Generate Summary (handle FIRST)
+const genBtn = t.closest("#mkGenerateExecSummary");
+if (genBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+  // call your summary generator function here:
+  if (typeof window.mkGenerateTrainingSummary === "function") {
+    window.mkGenerateTrainingSummary();
+  } else {
+    // if you wired it inside the IIFE, call it directly instead
+    mkPopup.ok("Summary generator function not found (mkGenerateTrainingSummary).", { title: "Missing Function" });
+  }
+  return;
+}
 
-      mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
-        title: "Reset This Page",
-        okText: "Reset Page",
-        cancelText: "Cancel",
-        onOk: () => clearSection(section),
-      });
-      return;
-    }
+// 2) Save PDF (handle SECOND)
+const pdfBtn = t.closest("#savePDF");
+if (pdfBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  // If your PDF code already exists elsewhere, this will still run:
+  // - If you have a function, call it
+  if (typeof window.saveAllPagesAsPDF === "function") {
+    window.saveAllPagesAsPDF();
+    return;
+  }
+
+  // - If your older code attaches its own click handler, let it fire:
+  //   (We only prevented default, not stopping other listeners unless they’re in capture)
+  //   If nothing happens, show message:
+  mkPopup.ok("PDF function not found. If your PDF code is inside this same JS file, tell me the function name and I’ll wire it here.", {
+    title: "PDF Hook Missing",
+  });
+  return;
+}
+
+// 3) Reset This Page (ONLY buttons with data-clear-page)
+const resetBtn = t.closest(".clear-page-btn[data-clear-page]");
+if (resetBtn) {
+  e.preventDefault();
+  const section =
+    document.getElementById(resetBtn.getAttribute("data-clear-page")) ||
+    resetBtn.closest(".page-section");
+
+  mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
+    title: "Reset This Page",
+    okText: "Reset Page",
+    cancelText: "Cancel",
+    onOk: () => clearSection(section),
+  });
+  return;
+}
 
     // ADD ROW
     const addRowBtn = t.closest("button.add-row");
