@@ -1703,3 +1703,78 @@ button.remove-row{
   transform:translateY(-50%) !important;
 }
 
+/* =========================================================
+   SIDE-BY-SIDE NOTES CARDS — FORCE FIX (PASTE AT VERY BOTTOM)
+   - Removes dead space under textarea ONLY in 2-col cards
+   - Makes expand buttons smaller ONLY in those cards
+========================================================= */
+
+/* 1) Side-by-side cards must behave like flex columns */
+.page-section .cards-grid.two-col > .section-block{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  padding-bottom:8px !important;   /* ✅ reduces card bottom gap */
+}
+
+/* 2) Any textarea in those cards fills the remaining height */
+.page-section .cards-grid.two-col > .section-block textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  margin:10px 0 0 !important;      /* ✅ top spacing only */
+  resize:none !important;
+}
+
+/* 3) If the textarea is inside ANY wrapper, force wrapper to flex-fill */
+.page-section .cards-grid.two-col > .section-block .mk-ta-wrap,
+.page-section .cards-grid.two-col > .section-block .notes-wrap,
+.page-section .cards-grid.two-col > .section-block .textarea-wrap,
+.page-section .cards-grid.two-col > .section-block .notes-area,
+.page-section .cards-grid.two-col > .section-block .content,
+.page-section .cards-grid.two-col > .section-block .body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+/* 4) Force the textarea to truly fill (kills the “dead” bottom area) */
+.page-section .cards-grid.two-col > .section-block .mk-ta-wrap > textarea,
+.page-section .cards-grid.two-col > .section-block .notes-wrap > textarea,
+.page-section .cards-grid.two-col > .section-block .textarea-wrap > textarea,
+.page-section .cards-grid.two-col > .section-block .notes-area textarea,
+.page-section .cards-grid.two-col > .section-block .content textarea,
+.page-section .cards-grid.two-col > .section-block .body textarea{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:100% !important;
+  margin:0 !important;             /* ✅ critical: removes bottom margin gap */
+}
+
+/* =========================================================
+   SIDE-BY-SIDE NOTES EXPAND BUTTON — SMALLER (cards only)
+   (catches mk-ta-expand, mk-mini-expand-btn, or any button with “expand”)
+========================================================= */
+.page-section .cards-grid.two-col > .section-block .mk-ta-expand,
+.page-section .cards-grid.two-col > .section-block .mk-mini-expand-btn,
+.page-section .cards-grid.two-col > .section-block button[class*="expand"]{
+  width:14px !important;
+  height:14px !important;
+  min-width:14px !important;
+  min-height:14px !important;
+  font-size:9px !important;
+  line-height:1 !important;
+  padding:0 !important;
+  border-radius:6px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* Keep the notes expand button tight to the bottom-right */
+.page-section .cards-grid.two-col > .section-block .mk-ta-wrap .mk-ta-expand,
+.page-section .cards-grid.two-col > .section-block .mk-ta-wrap button[class*="expand"]{
+  right:8px !important;
+  bottom:8px !important;
+}
