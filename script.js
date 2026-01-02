@@ -1671,7 +1671,7 @@ function autoSetTrainingEndDate() {
   const applyAutoEnd = () => {
     if (!onsiteInput.value) return;
 
-    const autoVal = computePlusDays(onsiteInput.value, 2);
+    const autoVal = computePlusDays(onsiteInput.value, 3);
     if (!autoVal) return;
 
     const isManual = endInput.dataset.mkManual === "true";
