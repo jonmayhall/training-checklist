@@ -6,7 +6,6 @@
    ✅ Adds OK/Cancel confirm popups for:
       - Clear All
       - Reset This Page
-
    ✅ Support Tickets FIXES:
       - Base card stays in place (left) and NEVER becomes selectable status
       - Base Status dropdown always disabled (greyed out, not selectable)
@@ -15,10 +14,10 @@
       - If base incomplete: shows popup with OK (no browser alert)
       - Status changes move the correct card to the correct container
 
-   ✅ NOTES EXPAND BUTTONS (RESTORED):
-      - Adds Expand/Collapse button on ALL Notes cards (id="notes-*")
-      - Adds Expand/Collapse Notes-column button on ALL tables that have a Notes column
-      - Works on Pages 5 & 6 (Training Checklist + Opcodes & Pricing) and anywhere else
+   ✅ Restores your SMALL ⤢ expand buttons:
+      - Bottom-right / footer of EVERY Notes block (id="notes-*")
+      - Bottom-right / footer for TABLES on Pages 5 & 6 (tables that have Notes column)
+      - Remembers expand state in localStorage
 
    ✅ Keeps the rest of your project logic:
       - Nav
@@ -27,7 +26,7 @@
       - Table add-row clone persistence
       - Notes bullets + caret behavior
       - Map update
-      - Table expand modal (uses real nodes so everything still works)
+
 ======================================================= */
 
 (() => {
@@ -386,101 +385,6 @@
   };
 
   /* =======================
-     NOTES EXPAND BUTTONS (RESTORED)
-     - Adds expand/collapse to ALL notes blocks (id="notes-*")
-     - Adds expand/collapse notes column button to ALL tables that have Notes column
-  ======================= */
-  const NotesExpand = (() => {
-    const NOTES_BLOCK_SEL = `.section-block[id^="notes-"]`;
-    const BTN_CLASS = "mk-notes-expand-btn";
-    const EXPANDED_CLASS = "is-notes-expanded"; // your CSS can use this
-    const TABLE_EXP_CLASS = "is-notes-col-expanded"; // your CSS can use this
-
-    const setBtnLabel = (btn, expanded) => {
-      btn.textContent = expanded ? "Collapse" : "Expand";
-      btn.setAttribute("aria-pressed", expanded ? "true" : "false");
-    };
-
-    const ensureBtnOnNotesBlock = (block) => {
-      if (!block) return;
-      const h2 = block.querySelector("h2");
-      if (!h2) return;
-
-      if (h2.querySelector(`.${BTN_CLASS}`)) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = BTN_CLASS;
-      btn.setAttribute("data-mk-notes-expand", "1");
-
-      const expanded = block.classList.contains(EXPANDED_CLASS);
-      setBtnLabel(btn, expanded);
-
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        block.classList.toggle(EXPANDED_CLASS);
-        setBtnLabel(btn, block.classList.contains(EXPANDED_CLASS));
-      });
-
-      // Append at end of H2 so it sits nicely on the right if your CSS supports it
-      h2.appendChild(btn);
-    };
-
-    const injectNotesExpandButtons = (root = document) => {
-      $$(NOTES_BLOCK_SEL, root).forEach(ensureBtnOnNotesBlock);
-    };
-
-    const injectTableNotesExpandButtons = (root = document) => {
-      // For every table-container that contains a training-table with a Notes column
-      $$(".table-container", root).forEach((tc) => {
-        const table = $("table.training-table", tc);
-        if (!table) return;
-
-        // Notes column exists?
-        const hasNotesHead =
-          !!table.querySelector("th.notes-col-head") ||
-          Array.from(table.querySelectorAll("th")).some((th) =>
-            (th.textContent || "").trim().toLowerCase() === "notes"
-          );
-
-        if (!hasNotesHead) return;
-
-        const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
-        if (!footer) return;
-
-        if (footer.querySelector(".mk-table-notes-expand-btn")) return;
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "mk-table-notes-expand-btn";
-        btn.setAttribute("data-mk-notes-col-expand", "1");
-
-        const setLabel = () => {
-          const expanded = tc.classList.contains(TABLE_EXP_CLASS);
-          btn.textContent = expanded ? "Collapse Notes" : "Expand Notes";
-          btn.setAttribute("aria-pressed", expanded ? "true" : "false");
-        };
-
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          tc.classList.toggle(TABLE_EXP_CLASS);
-          setLabel();
-        });
-
-        setLabel();
-        footer.appendChild(btn);
-      });
-    };
-
-    const injectAll = (root = document) => {
-      injectNotesExpandButtons(root);
-      injectTableNotesExpandButtons(root);
-    };
-
-    return { injectAll, injectNotesExpandButtons, injectTableNotesExpandButtons };
-  })();
-
-  /* =======================
      NOTES BUTTON VISUAL RESET
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
@@ -605,6 +509,7 @@
     clearFieldsIn(sectionEl);
     clearAllNotesButtonStates(sectionEl);
 
+    // ticket base card status must be disabled after reset
     enforceBaseTicketStatusLock();
 
     log("Cleared section:", sectionEl.id);
@@ -694,20 +599,24 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
+    // remove add (+) button from clones
     clone
       .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
       .forEach((btn) => btn.remove());
 
+    // stop integrated-plus square-right behavior on clones
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
 
     const ip = clone.querySelector(".input-plus");
     if (ip) ip.classList.add("mk-solo-input");
 
+    // right-rounded look (safe fallback)
     clone.classList.add("mk-poc-clone", "mk-round-right");
     clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
     clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
 
+    // reset fields + ids
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -817,8 +726,8 @@
     tbody.appendChild(clone);
     persistTable(table);
 
-    // Make sure any new Notes expand buttons / Notes column buttons exist
-    NotesExpand.injectAll(document);
+    // ✅ re-inject small footer expand buttons (tables/notes)
+    NotesMiniExpand.injectAll(document);
 
     const first = $("input, textarea, select, [contenteditable='true']", clone);
     if (first) first.focus();
@@ -1048,9 +957,6 @@
       if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
       if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
-      // Ensure expand buttons exist on this notes block
-      NotesExpand.injectNotesExpandButtons(document);
-
       const ta = $("textarea", target);
       if (!ta) return;
 
@@ -1097,6 +1003,196 @@
     };
 
     return { handleNotesClick, isNotesTargetTextarea };
+  })();
+
+  /* =======================
+     SMALL ⤢ EXPAND BUTTONS IN FOOTERS (NOTES + TABLES P5/P6)
+  ======================= */
+  const NotesMiniExpand = (() => {
+    const STYLE_ID = "mk-mini-notes-expand-style-v1";
+    const NOTES_SEL = `.section-block[id^="notes-"]`;
+    const NOTES_EXP_CLASS = "mk-notes-expanded";
+    const TABLE_NOTES_EXP_CLASS = "mk-table-notes-expanded";
+    const STATE_KEY = "mk__notes_mini_expand_state_v1";
+
+    const readMiniState = () => {
+      try { return JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); } catch { return {}; }
+    };
+    const writeMiniState = (s) => {
+      try { localStorage.setItem(STATE_KEY, JSON.stringify(s || {})); } catch {}
+    };
+
+    const ensureStyles = () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-notes-footer{
+          position:relative;
+          display:flex;
+          justify-content:flex-end;
+          align-items:center;
+          gap:8px;
+          padding-top:8px;
+        }
+        .mk-mini-expand-btn{
+          width:28px;
+          height:28px;
+          border-radius:10px;
+          border:1px solid rgba(0,0,0,.10);
+          background:rgba(255,255,255,.92);
+          cursor:pointer;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          font-weight:900;
+          line-height:1;
+          user-select:none;
+        }
+        .mk-mini-expand-btn:hover{
+          background:#fff;
+          border-color:rgba(0,0,0,.18);
+        }
+        .${NOTES_EXP_CLASS} textarea{
+          min-height:360px !important;
+        }
+        .${TABLE_NOTES_EXP_CLASS} .notes-col,
+        .${TABLE_NOTES_EXP_CLASS} td.notes-col,
+        .${TABLE_NOTES_EXP_CLASS} th.notes-col-head{
+          width:auto !important;
+          max-width:none !important;
+        }
+      `;
+      document.head.appendChild(s);
+    };
+
+    const hasNotesColumn = (table) => {
+      if (!table) return false;
+      if (table.querySelector("th.notes-col-head")) return true;
+      return Array.from(table.querySelectorAll("th")).some((th) =>
+        (th.textContent || "").trim().toLowerCase() === "notes"
+      );
+    };
+
+    const ensureNotesFooter = (notesBlock) => {
+      if (!notesBlock) return null;
+
+      let footer =
+        notesBlock.querySelector(".notes-footer") ||
+        notesBlock.querySelector(".mk-notes-footer");
+
+      if (!footer) {
+        footer = document.createElement("div");
+        footer.className = "mk-notes-footer";
+        const ta = notesBlock.querySelector("textarea");
+        if (ta && ta.parentNode) ta.insertAdjacentElement("afterend", footer);
+        else notesBlock.appendChild(footer);
+      } else if (!footer.classList.contains("mk-notes-footer")) {
+        footer.classList.add("mk-notes-footer");
+      }
+
+      return footer;
+    };
+
+    const applyNotesState = (block) => {
+      const st = readMiniState();
+      const id = block?.id || "";
+      const on = !!st[id];
+      block.classList.toggle(NOTES_EXP_CLASS, on);
+    };
+
+    const applyTableState = (tableContainer, key) => {
+      const st = readMiniState();
+      const on = !!st[key];
+      tableContainer.classList.toggle(TABLE_NOTES_EXP_CLASS, on);
+    };
+
+    const addMiniBtnToNotesBlock = (block) => {
+      if (!block || !block.id) return;
+      ensureStyles();
+
+      const footer = ensureNotesFooter(block);
+      if (!footer) return;
+
+      if (footer.querySelector(`button[data-mk-mini-notes-expand="${block.id}"]`)) {
+        applyNotesState(block);
+        return;
+      }
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-mini-expand-btn";
+      btn.title = "Expand notes";
+      btn.textContent = "⤢";
+      btn.setAttribute("data-mk-mini-notes-expand", block.id);
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const st = readMiniState();
+        const now = !st[block.id];
+        st[block.id] = now;
+        writeMiniState(st);
+        block.classList.toggle(NOTES_EXP_CLASS, now);
+      });
+
+      footer.appendChild(btn);
+      applyNotesState(block);
+    };
+
+    const addMiniBtnToTableFooter = (tc) => {
+      if (!tc) return;
+      ensureStyles();
+
+      const table = tc.querySelector("table.training-table");
+      if (!table || !hasNotesColumn(table)) return;
+
+      const footer =
+        tc.querySelector(".table-footer") ||
+        tc.parentElement?.querySelector?.(".table-footer");
+      if (!footer) return;
+
+      if (footer.querySelector("button[data-mk-mini-table-notes-expand]")) return;
+
+      const key =
+        "tbl::" +
+        (table.getAttribute("data-table-key") ||
+          table.id ||
+          ("idx-" + Array.from(document.querySelectorAll("table.training-table")).indexOf(table)));
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-mini-expand-btn";
+      btn.title = "Expand notes";
+      btn.textContent = "⤢";
+      btn.setAttribute("data-mk-mini-table-notes-expand", key);
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const st = readMiniState();
+        const now = !st[key];
+        st[key] = now;
+        writeMiniState(st);
+        tc.classList.toggle(TABLE_NOTES_EXP_CLASS, now);
+      });
+
+      footer.appendChild(btn);
+      applyTableState(tc, key);
+    };
+
+    const injectNotesButtons = (root = document) => {
+      root.querySelectorAll(NOTES_SEL).forEach(addMiniBtnToNotesBlock);
+    };
+
+    const injectTableButtons = (root = document) => {
+      root.querySelectorAll(".table-container").forEach(addMiniBtnToTableFooter);
+    };
+
+    const injectAll = (root = document) => {
+      injectNotesButtons(root);
+      injectTableButtons(root);
+    };
+
+    return { injectAll };
   })();
 
   /* =======================
@@ -1394,7 +1490,7 @@
   };
 
   /* =======================
-     MAP
+     MAP BTN
   ======================= */
   const updateDealershipMap = (address) => {
     const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
@@ -1403,148 +1499,6 @@
     const a = String(address || "").trim();
     const q = a ? encodeURIComponent(a) : "United%20States";
     frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
-  };
-
-  /* =======================
-     TABLE EXPAND MODAL (moves real nodes)
-     NOTE: Requires #mkTableModal in your HTML.
-  ======================= */
-  const tableModal = {
-    modal: null,
-    content: null,
-    title: null,
-    backdrop: null,
-    moved: [],
-    bodyOverflow: "",
-  };
-
-  const ensureTableExpandButtons = () => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
-
-    $$("div.table-container").forEach((tc) => {
-      const footer =
-        tc.querySelector(".table-footer") ||
-        tc.parentElement?.querySelector?.(".table-footer");
-      if (!footer) return;
-
-      if ($(".mk-table-expand-btn", footer)) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-table-expand-btn";
-      btn.setAttribute("data-mk-table-expand", "1");
-      btn.title = "Expand";
-      btn.textContent = "⤢";
-
-      footer.appendChild(btn);
-    });
-  };
-
-  const getExpandBundleNodes = (anyInside) => {
-    const tc = anyInside?.closest?.(".table-container") || anyInside;
-    if (!tc) return [];
-
-    const tableCard =
-      tc.closest(".section") ||
-      tc.closest(".section-block") ||
-      tc.parentElement ||
-      tc;
-
-    const targets = new Set();
-    $$("[data-notes-target]", tableCard).forEach((btn) => {
-      const id = btn.getAttribute("data-notes-target");
-      if (id) targets.add(id);
-    });
-
-    const notesBlocks = [];
-    targets.forEach((id) => {
-      const block = document.getElementById(id);
-      if (block) notesBlocks.push(block);
-    });
-
-    const all = [tableCard, ...notesBlocks].filter(Boolean);
-    const uniq = [];
-    const seen = new Set();
-    all.forEach((n) => {
-      if (seen.has(n)) return;
-      seen.add(n);
-      uniq.push(n);
-    });
-
-    uniq.sort((a, b) => {
-      if (a === b) return 0;
-      const pos = a.compareDocumentPosition(b);
-      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
-
-    return uniq;
-  };
-
-  const openTableModalFor = (anyInside) => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
-
-    const content = $(".mk-modal-content", modal);
-    const titleEl = $(".mk-modal-title", modal);
-    const panel = $(".mk-modal-panel", modal) || modal;
-    if (!content) return;
-
-    const bundle = getExpandBundleNodes(anyInside);
-    if (!bundle.length) return;
-
-    const header = bundle[0].querySelector?.(".section-header");
-    if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
-
-    tableModal.modal = modal;
-    tableModal.content = content;
-    tableModal.title = titleEl;
-    tableModal.moved = [];
-
-    content.innerHTML = "";
-
-    bundle.forEach((node) => {
-      const ph = document.createComment("mk-expand-placeholder");
-      node.parentNode.insertBefore(ph, node);
-      tableModal.moved.push({ node, placeholder: ph });
-      content.appendChild(node);
-    });
-
-    // After moving, re-inject notes expand + notes-column expand buttons into modal content
-    NotesExpand.injectAll(content);
-
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    tableModal.bodyOverflow = document.body.style.overflow || "";
-    document.body.style.overflow = "hidden";
-    try {
-      panel.scrollTop = 0;
-    } catch {}
-  };
-
-  const closeTableModal = () => {
-    const modal = tableModal.modal;
-    if (!modal) return;
-
-    (tableModal.moved || []).forEach(({ node, placeholder }) => {
-      if (!node || !placeholder || !placeholder.parentNode) return;
-      placeholder.parentNode.insertBefore(node, placeholder);
-      placeholder.parentNode.removeChild(placeholder);
-    });
-
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = tableModal.bodyOverflow || "";
-
-    tableModal.modal = null;
-    tableModal.content = null;
-    tableModal.title = null;
-    tableModal.backdrop = null;
-    tableModal.bodyOverflow = "";
-    tableModal.moved = [];
-
-    // Re-inject in main doc after returning nodes
-    NotesExpand.injectAll(document);
   };
 
   /* =======================
@@ -1629,32 +1583,9 @@
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp =
-        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
-    }
-
-    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
-    if (expandBtn) {
-      const modal = $("#mkTableModal");
-      if (modal) {
-        e.preventDefault();
-        openTableModalFor(expandBtn);
-        return;
-      }
-    }
-
-    const mkTableModal = $("#mkTableModal");
-    if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (
-        t.closest("#mkTableModal .mk-modal-close") ||
-        t.closest("#mkTableModal .mk-modal-backdrop")
-      ) {
-        e.preventDefault();
-        closeTableModal();
-        return;
-      }
     }
   });
 
@@ -1756,11 +1687,6 @@
     }
 
     if (e.key === "Escape") {
-      const mkTableModal = $("#mkTableModal");
-      if (mkTableModal && mkTableModal.classList.contains("open")) {
-        e.preventDefault();
-        closeTableModal();
-      }
       mkPopup.close();
     }
   });
@@ -1781,10 +1707,9 @@
 
     setGhostStyles(document);
     syncDealershipName();
-    ensureTableExpandButtons();
 
-    // ✅ Restore notes expand buttons + table notes expand buttons everywhere (Pages 5/6 included)
-    NotesExpand.injectAll(document);
+    // ✅ Restore small ⤢ buttons in footers (notes + tables on P5/P6)
+    NotesMiniExpand.injectAll(document);
 
     // Ensure base support ticket card is always locked
     enforceBaseTicketStatusLock();
