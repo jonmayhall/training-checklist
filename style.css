@@ -1602,7 +1602,7 @@ button.remove-row{
 /* Notes cards that follow a table section */
 .section + .section-block textarea,
 .section + .section-block .mk-ta-wrap > textarea{
-  min-height:220px !important; /* doubled */
+  min-height:180px !important; /* doubled */
 }
 
 /* Keep side-by-side notes (2-col cards) unchanged */
