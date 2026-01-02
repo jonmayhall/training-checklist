@@ -30,6 +30,12 @@
       - Expand works even if buttons are injected by JS
       - MutationObserver re-injects expand buttons after page changes / clones
 
+   ✅ NEW REQUESTS INCLUDED (this build):
+      - Training End Date auto-sets to Onsite Date + 2 days (only if End Date empty)
+      - Service Advisors table seeds to 3 starter rows (scoped to that section only)
+      - Notes expand button is NOT added inside Support Tickets section
+      - Stacked Notes cards/textareas are forced taller (2x min-height) via JS hook
+
    NOTE:
    - Table/Notes expand uses #mkTableModal.
    - If modal missing, shows mkPopup warning instead of failing.
@@ -616,8 +622,6 @@
     const ip = clone.querySelector(".input-plus");
     if (ip) ip.classList.add("mk-solo-input");
 
-    clone.classList.add("mk-poc-clone", "mk-round-right");
-
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -759,44 +763,56 @@
       });
     });
   };
-   
-function seedStarterRowsToThree() {
-  document.querySelectorAll("table.training-table").forEach((table) => {
-    const tbody = table.querySelector("tbody");
-    if (!tbody) return;
 
-    // count only real starter rows (not your cloned rows)
-    const existing = Array.from(tbody.querySelectorAll("tr")).filter(
-      (tr) => tr.getAttribute("data-mk-row") !== "cloned"
-    );
+  /* =========================================================
+     Service Advisors — ensure 3 starter rows (ONLY there)
+     - Looks for section id containing "service" + "advisor"
+     - Adds starter rows ONLY if fewer than 3 non-cloned rows exist
+  ========================================================= */
+  function seedServiceAdvisorsStarterRowsToThree() {
+    const sections = $$(".page-section").filter((s) => {
+      const id = (s.id || "").toLowerCase();
+      return id.includes("service") && id.includes("advisor");
+    });
 
-    if (existing.length >= 3) return;
+    sections.forEach((sec) => {
+      $$("table.training-table", sec).forEach((table) => {
+        const tbody = table.querySelector("tbody");
+        if (!tbody) return;
 
-    const baseRow =
-      tbody.querySelector('tr[data-base="true"]') ||
-      existing[0];
+        const allRows = Array.from(tbody.querySelectorAll("tr"));
+        const starterRows = allRows.filter(
+          (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+        );
 
-    if (!baseRow) return;
+        if (starterRows.length >= 3) return;
 
-    // add enough starter rows to reach 3
-    const needed = 3 - existing.length;
-    for (let i = 0; i < needed; i++) {
-      const clone = baseRow.cloneNode(true);
+        const baseRow =
+          tbody.querySelector('tr[data-base="true"]') ||
+          starterRows[0];
 
-      // IMPORTANT: this is a "starter" row, not an "added row"
-      clone.removeAttribute("data-mk-row");
-      clone.removeAttribute("data-base");
+        if (!baseRow) return;
 
-      // clear inputs
-      clone.querySelectorAll("input, select, textarea").forEach((el) => {
-        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-        else el.value = "";
+        const needed = 3 - starterRows.length;
+
+        for (let i = 0; i < needed; i++) {
+          const clone = baseRow.cloneNode(true);
+
+          // starter row (NOT "added row")
+          clone.removeAttribute(AUTO_ROW_ATTR);
+          clone.removeAttribute("data-base");
+
+          // clear inputs
+          clone.querySelectorAll("input, select, textarea").forEach((el) => {
+            if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+            else el.value = "";
+          });
+
+          tbody.appendChild(clone);
+        }
       });
-
-      tbody.appendChild(clone);
-    }
-  });
-}
+    });
+  }
 
   /* =======================
      NOTES (working version)
@@ -1350,9 +1366,6 @@ function seedStarterRowsToThree() {
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES) — FIXED CATCH-ALL
-     - Table expand: adds ⤢ to EVERY .table-footer
-     - Notes expand: adds ⤢ to EVERY .section-block textarea (stacked + side-by-side)
-     - Opens #mkTableModal if present; otherwise mkPopup warning
 ========================================================= */
 
   const ensureExpandStyles = (() => {
@@ -1427,9 +1440,7 @@ function seedStarterRowsToThree() {
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
-    try {
-      panel.scrollTop = 0;
-    } catch {}
+    try { panel.scrollTop = 0; } catch {}
   };
 
   const closeTableModal = () => {
@@ -1463,7 +1474,6 @@ function seedStarterRowsToThree() {
       anyInside?.closest?.(".page-section") ||
       document.body;
 
-    // include the specific section-block that contains the table (if any)
     const tableBlock =
       footer?.closest(".section-block") ||
       footer?.closest(".section") ||
@@ -1472,7 +1482,6 @@ function seedStarterRowsToThree() {
     const nodes = [];
     if (tableBlock) nodes.push(tableBlock);
 
-    // include any notes blocks referenced by data-notes-target within same section card
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
       const id = btn.getAttribute("data-notes-target");
@@ -1483,10 +1492,8 @@ function seedStarterRowsToThree() {
       if (block) nodes.push(block);
     });
 
-    // if none found, just expand the closest container
     if (!nodes.length) nodes.push(sectionCard);
 
-    // unique + order
     const uniq = [];
     const seen = new Set();
     nodes.forEach((n) => {
@@ -1523,7 +1530,7 @@ function seedStarterRowsToThree() {
     openModalWithNodes([notesHostEl], title);
   };
 
-  // TABLE: add ⤢ to EVERY footer in the entire project
+  // TABLE: add ⤢ to EVERY footer
   const ensureTableExpandButtons = () => {
     ensureExpandStyles();
     document.querySelectorAll(".table-footer").forEach((footer) => {
@@ -1540,16 +1547,29 @@ function seedStarterRowsToThree() {
     });
   };
 
-  // NOTES: add ⤢ to EVERY notes textarea in cards (stacked + side-by-side)
+  /* =========================================================
+     NOTES EXPAND RULES (IMPORTANT)
+     - Add ⤢ to notes textareas across cards
+     - BUT: DO NOT add expand in Support Tickets section
+       (your “Short Summary of the Issue” request)
+     - Also allows opt-out with:
+       - textarea[data-no-expand="true"] or .no-expand
+  ========================================================= */
+  const shouldSkipNotesExpand = (ta) => {
+    if (!ta || !ta.closest) return true;
+    if (ta.closest("table")) return true;                 // never inside table cells
+    if (ta.closest("#support-tickets")) return true;      // ✅ no expand in support tickets
+    if (ta.matches("[data-no-expand='true'], .no-expand")) return true;
+    return false;
+  };
+
   const ensureNotesExpandButtons = () => {
     ensureExpandStyles();
 
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
-      // don’t mess with table cell textareas
-      if (ta.closest("table")) return;
+      if (shouldSkipNotesExpand(ta)) return;
 
-      // ensure wrap
       let wrap = ta.closest(".mk-ta-wrap");
       if (!wrap) {
         wrap = document.createElement("div");
@@ -1567,7 +1587,6 @@ function seedStarterRowsToThree() {
       btn.title = "Expand Notes";
       btn.textContent = "⤢";
 
-      // if the textarea is inside an element with an id, store it
       const hostId = ta.closest("[id]")?.id || "";
       if (hostId) btn.setAttribute("data-notes-id", hostId);
 
@@ -1575,24 +1594,78 @@ function seedStarterRowsToThree() {
     });
   };
 
-  // Re-inject on DOM changes (covers nav swaps + cloned rows/cards)
+  /* =========================================================
+     STACKED NOTES: force taller (2x)
+     - Applies to notes-style textareas that are NOT in two-col grids
+     - Doesn’t affect table cells or support tickets
+  ========================================================= */
+  const enforceStackedNotesTall = () => {
+    const tas = $$(".section-block textarea").filter((ta) => !shouldSkipNotesExpand(ta));
+    tas.forEach((ta) => {
+      const card = ta.closest(".section-block");
+      if (!card) return;
+
+      const isTwoCol = !!card.closest(".cards-grid.two-col, .two-col-grid, .grid-2");
+      if (isTwoCol) return; // user asked "stacked notes" to be taller
+
+      // Force a taller minimum height (2x typical)
+      // (If your CSS sets min-height already, this guarantees it)
+      ta.style.minHeight = "380px";
+    });
+  };
+
+  // Observer re-inject for nav swaps + clones
   const startExpandObserver = () => {
     const obs = new MutationObserver(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
+      enforceStackedNotesTall();
     });
     obs.observe(document.body, { childList: true, subtree: true });
 
-    // late render safety
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
+      enforceStackedNotesTall();
     }, 250);
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
+      enforceStackedNotesTall();
     }, 900);
   };
+
+  /* =======================
+     TRAINING END DATE AUTO (Onsite + 2 days)
+  ======================= */
+  function autoSetTrainingEndDate() {
+    const onsiteInput =
+      document.getElementById("onsiteTrainingDate") ||
+      document.getElementById("onsiteDate");
+
+    const endInput =
+      document.getElementById("trainingEndDate") ||
+      document.getElementById("endDate");
+
+    if (!onsiteInput || !endInput) return;
+
+    onsiteInput.addEventListener("change", () => {
+      if (!onsiteInput.value) return;
+
+      // Do not overwrite if user already set an end date
+      if (endInput.value) return;
+
+      const start = new Date(onsiteInput.value);
+      start.setDate(start.getDate() + 2);
+
+      const yyyy = start.getFullYear();
+      const mm = String(start.getMonth() + 1).padStart(2, "0");
+      const dd = String(start.getDate()).padStart(2, "0");
+
+      endInput.value = `${yyyy}-${mm}-${dd}`;
+      endInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  }
 
   /* =======================
      EVENT DELEGATION
@@ -1604,10 +1677,10 @@ function seedStarterRowsToThree() {
     if (navBtn) {
       e.preventDefault();
       setActiveSection(navBtn.getAttribute("data-target"));
-      // re-inject after section swap
       setTimeout(() => {
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
+        enforceStackedNotesTall();
       }, 0);
       return;
     }
@@ -1689,7 +1762,7 @@ function seedStarterRowsToThree() {
       return;
     }
 
-    // TABLE EXPAND (catch-all)
+    // TABLE EXPAND
     const tableExpandBtn = t.closest(".mk-table-expand-btn");
     if (tableExpandBtn) {
       e.preventDefault();
@@ -1697,7 +1770,7 @@ function seedStarterRowsToThree() {
       return;
     }
 
-    // NOTES EXPAND (catch-all)
+    // NOTES EXPAND
     const notesExpandBtn = t.closest(".mk-ta-expand");
     if (notesExpandBtn) {
       e.preventDefault();
@@ -1828,34 +1901,6 @@ function seedStarterRowsToThree() {
       mkPopup.close();
     }
   });
-function autoSetTrainingEndDate() {
-  const onsiteInput =
-    document.getElementById("onsiteTrainingDate") ||
-    document.getElementById("onsiteDate");
-
-  const endInput =
-    document.getElementById("trainingEndDate") ||
-    document.getElementById("endDate");
-
-  if (!onsiteInput || !endInput) return;
-
-  onsiteInput.addEventListener("change", () => {
-    if (!onsiteInput.value) return;
-
-    // Do not overwrite if user already set an end date
-    if (endInput.value) return;
-
-    const start = new Date(onsiteInput.value);
-    start.setDate(start.getDate() + 2);
-
-    const yyyy = start.getFullYear();
-    const mm = String(start.getMonth() + 1).padStart(2, "0");
-    const dd = String(start.getDate()).padStart(2, "0");
-
-    endInput.value = `${yyyy}-${mm}-${dd}`;
-    endInput.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-}
 
   /* =======================
      INIT / RESTORE
@@ -1868,19 +1913,22 @@ function autoSetTrainingEndDate() {
     rebuildPocClones();
     rebuildTableClones();
     rebuildTicketClones();
-    rebuildTableClones();
-seedStarterRowsToThree(); // ✅ ensures Service Advisors shows 3 starter rows
-autoSetTrainingEndDate();
 
-     
+    // ✅ Service Advisors should show 3 starter rows (not 1)
+    seedServiceAdvisorsStarterRowsToThree();
+
+    // ✅ Training End Date = Onsite + 2 days
+    autoSetTrainingEndDate();
+
     restoreAllFields();
 
     setGhostStyles(document);
     syncDealershipName();
 
-    // ✅ Restore expand buttons (tables + notes) — catch-all
+    // ✅ Expand buttons + stacked notes height enforcement
     ensureTableExpandButtons();
     ensureNotesExpandButtons();
+    enforceStackedNotesTall();
     startExpandObserver();
 
     // Ensure base support ticket card is always locked
