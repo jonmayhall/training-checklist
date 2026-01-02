@@ -1823,3 +1823,54 @@ button.remove-row{
   background:#fff !important;
 }
 
+/* =========================================================
+   ✅ NOTES TEXTAREAS — MATCH TOP + BOTTOM CARD SPACING
+   Paste at VERY BOTTOM of style.css
+========================================================= */
+
+/* 1) Make every notes card a flex column so we can control spacing cleanly */
+.section-block{
+  display:flex;
+  flex-direction:column;
+}
+
+/* 2) Standardize the “gutter” between textarea border and card edges */
+:root{
+  --mk-notes-gutter:16px; /* change this to tighten/loosen (12px–18px is typical) */
+}
+
+/* 3) Notes wrapper becomes the controlled spacing container */
+.mk-ta-wrap{
+  position:relative !important;
+  margin-top:var(--mk-notes-gutter) !important;
+  margin-bottom:var(--mk-notes-gutter) !important; /* ✅ bottom matches top */
+  flex:1 1 auto !important;
+}
+
+/* 4) Remove textarea margins so spacing is ONLY from the wrapper */
+.section-block textarea{
+  margin:0 !important;
+}
+
+/* 5) Notes textarea fills wrapper (no extra dead space) */
+.mk-ta-wrap > textarea{
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:220px !important;  /* keep your base size */
+  resize:none !important;
+  box-sizing:border-box !important;
+}
+
+/* 6) Ensure headers don’t “steal” spacing math */
+.section-block h2{
+  margin:0 !important;
+}
+
+/* 7) Keep the expand button inside the wrapper without adding bottom gap */
+.mk-ta-wrap .mk-ta-expand{
+  position:absolute !important;
+  right:8px !important;
+  bottom:8px !important;
+  z-index:5 !important;
+}
