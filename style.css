@@ -1592,3 +1592,28 @@ button.remove-row{
 .grid-2 textarea{
   min-height:unset !important;
 }
+
+/* =========================================================
+   STACKED NOTES (under tables) — 2× taller
+   Targets notes cards that are direct siblings after .section (tables)
+   (Matches your screenshot: table section -> notes card)
+========================================================= */
+
+/* Notes cards that follow a table section */
+.section + .section-block textarea,
+.section + .section-block .mk-ta-wrap > textarea{
+  min-height:440px !important; /* doubled */
+}
+
+/* Keep side-by-side notes (2-col cards) unchanged */
+.cards-grid.two-col > .section-block textarea,
+.two-col-grid .section-block textarea,
+.grid-2 > .section-block textarea{
+  min-height:220px !important;
+}
+
+/* Keep Support Tickets short summary unchanged */
+#support-tickets textarea,
+#support-tickets .ticket-summary-input{
+  min-height:80px !important;
+}
