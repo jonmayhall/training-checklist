@@ -1617,3 +1617,102 @@ button.remove-row{
 #support-tickets .ticket-summary-input{
   min-height:80px !important;
 }
+
+/* =========================================================
+   FIXES:
+   1) Additional POC (added cards): Name textbox rounded on RIGHT
+   2) Support Tickets: Ticket Number textbox same width as other inputs
+   3) Map: iframe fills the entire card
+   Paste at VERY BOTTOM of style.css
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   1) ADDITIONAL POC ADDED CARDS — round the Name textbox right side
+   (prevents “square-right” leftovers from integrated-plus rules)
+--------------------------------------------------------- */
+#dealership-info .additional-poc-card[data-base="false"] input[type="text"],
+#dealership-info .additional-poc-card[data-base="false"] input[type="email"],
+#dealership-info .additional-poc-card[data-base="false"] input[type="tel"],
+#dealership-info .additional-poc-card[data-base="false"] select{
+  border-top-right-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
+}
+
+/* If ANY old integrated-plus rule is still touching the Name field, force full rounding */
+#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="text"]{
+  border-radius: var(--radius-sm) !important;
+}
+
+
+/* ---------------------------------------------------------
+   2) SUPPORT TICKETS — Ticket Number input matches other input widths
+   Make the + button float on top, so the input can be full-width.
+--------------------------------------------------------- */
+#support-tickets .ticket-number-wrap{
+  position:relative !important;
+  width:100% !important;
+}
+
+#support-tickets .ticket-number-input{
+  width:100% !important;
+  flex:1 1 auto !important;
+  border-radius: var(--radius-sm) !important;     /* match other boxes */
+  padding-right:46px !important;                  /* room for + button */
+}
+
+/* Float the + button at the far right without shrinking the input */
+#support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
+  position:absolute !important;
+  right:0 !important;
+  top:0 !important;
+  height:34px !important;
+  width:34px !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  margin:0 !important;
+}
+
+/* Added cards already hide the + button — keep their input clean */
+#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
+  padding-right:10px !important;
+}
+
+
+/* ---------------------------------------------------------
+   3) MAP — make it take up the entire card
+   (fills remaining height in the card and removes “tiny map” behavior)
+--------------------------------------------------------- */
+
+/* If your map card is a section-block, make it a flex column */
+#dealership-info .section-block:has(#dealershipMapFrame),
+#dealership-info .section-block:has(iframe[src*="maps"]),
+#dealership-info .section-block.map-card{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+}
+
+/* Common wrappers people use */
+#dealership-info .map-frame,
+#dealership-info .map-wrapper,
+#dealership-info .map-container{
+  flex:1 1 auto !important;
+  min-height:320px !important;   /* adjust if you want it taller */
+  height:100% !important;
+  width:100% !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+/* The iframe itself: fill the wrapper/card */
+#dealershipMapFrame,
+#dealership-info .map-frame iframe,
+#dealership-info .map-wrapper iframe,
+#dealership-info iframe[src*="maps"]{
+  width:100% !important;
+  height:100% !important;
+  flex:1 1 auto !important;
+  display:block !important;
+  border:0 !important;
+}
+
