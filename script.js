@@ -1262,12 +1262,8 @@
     }
 
     // GENERATE EXEC SUMMARY
-    const genBtn = t.closest("#generateExecSummaryBtn");
-    if (genBtn) {
-      e.preventDefault();
-      generateExecutiveSummary();
-      return;
-    }
+   const resetBtn = t.closest(".clear-page-btn");
+if (resetBtn && !t.closest("#mkGenerateExecSummary") && !t.closest("#savePDF")) {
 
     // CLEAR ALL
     const clearAllBtn = t.closest("#clearAllBtn");
