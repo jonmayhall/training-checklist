@@ -759,6 +759,44 @@
       });
     });
   };
+   
+function seedStarterRowsToThree() {
+  document.querySelectorAll("table.training-table").forEach((table) => {
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    // count only real starter rows (not your cloned rows)
+    const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+      (tr) => tr.getAttribute("data-mk-row") !== "cloned"
+    );
+
+    if (existing.length >= 3) return;
+
+    const baseRow =
+      tbody.querySelector('tr[data-base="true"]') ||
+      existing[0];
+
+    if (!baseRow) return;
+
+    // add enough starter rows to reach 3
+    const needed = 3 - existing.length;
+    for (let i = 0; i < needed; i++) {
+      const clone = baseRow.cloneNode(true);
+
+      // IMPORTANT: this is a "starter" row, not an "added row"
+      clone.removeAttribute("data-mk-row");
+      clone.removeAttribute("data-base");
+
+      // clear inputs
+      clone.querySelectorAll("input, select, textarea").forEach((el) => {
+        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+        else el.value = "";
+      });
+
+      tbody.appendChild(clone);
+    }
+  });
+}
 
   /* =======================
      NOTES (working version)
@@ -1802,6 +1840,8 @@
     rebuildPocClones();
     rebuildTableClones();
     rebuildTicketClones();
+    rebuildTableClones();
+seedStarterRowsToThree(); // ✅ ensures Service Advisors shows 3 starter rows
 
     restoreAllFields();
 
