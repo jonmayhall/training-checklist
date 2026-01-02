@@ -1638,35 +1638,60 @@
   /* =======================
      TRAINING END DATE AUTO (Onsite + 2 days)
   ======================= */
-  function autoSetTrainingEndDate() {
-    const onsiteInput =
-      document.getElementById("onsiteTrainingDate") ||
-      document.getElementById("onsiteDate");
+function autoSetTrainingEndDate() {
+  const onsiteInput =
+    document.getElementById("onsiteTrainingDate") ||
+    document.getElementById("onsiteDate") ||
+    document.querySelector('input[type="date"][name*="onsite" i]') ||
+    document.querySelector('input[type="date"][id*="onsite" i]');
 
-    const endInput =
-      document.getElementById("trainingEndDate") ||
-      document.getElementById("endDate");
+  const endInput =
+    document.getElementById("trainingEndDate") ||
+    document.getElementById("endDate") ||
+    document.querySelector('input[type="date"][name*="end" i]') ||
+    document.querySelector('input[type="date"][id*="end" i]');
 
-    if (!onsiteInput || !endInput) return;
+  if (!onsiteInput || !endInput) return;
 
-    onsiteInput.addEventListener("change", () => {
-      if (!onsiteInput.value) return;
+  const computePlusDays = (yyyyMMdd, days) => {
+    const d = new Date(yyyyMMdd);
+    if (Number.isNaN(d.getTime())) return "";
+    d.setDate(d.getDate() + days);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
-      // Do not overwrite if user already set an end date
-      if (endInput.value) return;
+  // If user manually edits End Date, stop auto-overwriting
+  const markManual = () => endInput.dataset.mkManual = "true";
+  endInput.addEventListener("input", markManual);
+  endInput.addEventListener("change", markManual);
 
-      const start = new Date(onsiteInput.value);
-      start.setDate(start.getDate() + 2);
+  const applyAutoEnd = () => {
+    if (!onsiteInput.value) return;
 
-      const yyyy = start.getFullYear();
-      const mm = String(start.getMonth() + 1).padStart(2, "0");
-      const dd = String(start.getDate()).padStart(2, "0");
+    const autoVal = computePlusDays(onsiteInput.value, 2);
+    if (!autoVal) return;
 
-      endInput.value = `${yyyy}-${mm}-${dd}`;
+    const isManual = endInput.dataset.mkManual === "true";
+
+    // Set if empty OR if user hasn't manually overridden it
+    if (!endInput.value || !isManual) {
+      endInput.value = autoVal;
+      endInput.dispatchEvent(new Event("input", { bubbles: true }));
       endInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  }
+    }
+  };
 
+  // Run when onsite changes
+  onsiteInput.addEventListener("input", applyAutoEnd);
+  onsiteInput.addEventListener("change", applyAutoEnd);
+
+  // Backfill on load (if onsite already has a value)
+  setTimeout(applyAutoEnd, 0);
+}
+   
   /* =======================
      EVENT DELEGATION
   ======================= */
