@@ -1303,3 +1303,62 @@ button.remove-btn,
 button.remove-row{
   display:none !important;
 }
+
+/* =========================================================
+   🔒 FORCE NOTES EXPAND BUTTONS TO MATCH TABLE EXPAND SIZE
+   (Paste at VERY BOTTOM of style.css)
+========================================================= */
+
+/* 1) Training table expand (keep consistent) */
+.mk-table-expand-btn{
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  min-height:16px !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  padding:0 !important;
+  border-radius:6px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* 2) Notes textarea expand — hit ALL possible variants */
+.mk-ta-wrap .mk-ta-expand,
+.mk-ta-wrap button.mk-ta-expand,
+.mk-ta-wrap button[class*="expand"],
+.mk-ta-wrap [class*="ta-expand"],
+.section-block .mk-ta-expand,
+.section-block .mk-mini-expand-btn,
+.section-block button.mk-mini-expand-btn,
+.section-block button[class*="expand"]{
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  min-height:16px !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  padding:0 !important;
+  border-radius:6px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* 3) If your notes expander is an SVG/icon inside the button */
+.mk-ta-wrap button[class*="expand"] svg,
+.mk-ta-wrap .mk-ta-expand svg,
+.section-block button[class*="expand"] svg{
+  width:12px !important;
+  height:12px !important;
+}
+
+/* 4) Hover matches */
+.mk-table-expand-btn:hover,
+.mk-ta-wrap .mk-ta-expand:hover,
+.mk-ta-wrap button[class*="expand"]:hover,
+.section-block button[class*="expand"]:hover{
+  border-color:var(--orange) !important;
+  background:#fff !important;
+}
