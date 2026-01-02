@@ -6,6 +6,7 @@
    ✅ Adds OK/Cancel confirm popups for:
       - Clear All
       - Reset This Page
+
    ✅ Support Tickets FIXES:
       - Base card stays in place (left) and NEVER becomes selectable status
       - Base Status dropdown always disabled (greyed out, not selectable)
@@ -13,6 +14,11 @@
       - BASE card resets after adding (clears Ticket # / URL / Summary)
       - If base incomplete: shows popup with OK (no browser alert)
       - Status changes move the correct card to the correct container
+
+   ✅ NOTES EXPAND BUTTONS (RESTORED):
+      - Adds Expand/Collapse button on ALL Notes cards (id="notes-*")
+      - Adds Expand/Collapse Notes-column button on ALL tables that have a Notes column
+      - Works on Pages 5 & 6 (Training Checklist + Opcodes & Pricing) and anywhere else
 
    ✅ Keeps the rest of your project logic:
       - Nav
@@ -168,8 +174,6 @@
 
   /* =======================
      OS-STYLE POPUPS (OK + OK/CANCEL)
-     - small centered box near upper-middle
-     - orange pill OK button
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -232,7 +236,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -286,7 +297,6 @@
       back.appendChild(box);
 
       back.addEventListener("click", (e) => {
-        // click outside closes like a system dialog backdrop
         if (e.target === back) close();
       });
 
@@ -374,6 +384,101 @@
     const first = $$(".page-section")[0]?.id;
     setActiveSection(alreadyActive || remembered || first);
   };
+
+  /* =======================
+     NOTES EXPAND BUTTONS (RESTORED)
+     - Adds expand/collapse to ALL notes blocks (id="notes-*")
+     - Adds expand/collapse notes column button to ALL tables that have Notes column
+  ======================= */
+  const NotesExpand = (() => {
+    const NOTES_BLOCK_SEL = `.section-block[id^="notes-"]`;
+    const BTN_CLASS = "mk-notes-expand-btn";
+    const EXPANDED_CLASS = "is-notes-expanded"; // your CSS can use this
+    const TABLE_EXP_CLASS = "is-notes-col-expanded"; // your CSS can use this
+
+    const setBtnLabel = (btn, expanded) => {
+      btn.textContent = expanded ? "Collapse" : "Expand";
+      btn.setAttribute("aria-pressed", expanded ? "true" : "false");
+    };
+
+    const ensureBtnOnNotesBlock = (block) => {
+      if (!block) return;
+      const h2 = block.querySelector("h2");
+      if (!h2) return;
+
+      if (h2.querySelector(`.${BTN_CLASS}`)) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = BTN_CLASS;
+      btn.setAttribute("data-mk-notes-expand", "1");
+
+      const expanded = block.classList.contains(EXPANDED_CLASS);
+      setBtnLabel(btn, expanded);
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        block.classList.toggle(EXPANDED_CLASS);
+        setBtnLabel(btn, block.classList.contains(EXPANDED_CLASS));
+      });
+
+      // Append at end of H2 so it sits nicely on the right if your CSS supports it
+      h2.appendChild(btn);
+    };
+
+    const injectNotesExpandButtons = (root = document) => {
+      $$(NOTES_BLOCK_SEL, root).forEach(ensureBtnOnNotesBlock);
+    };
+
+    const injectTableNotesExpandButtons = (root = document) => {
+      // For every table-container that contains a training-table with a Notes column
+      $$(".table-container", root).forEach((tc) => {
+        const table = $("table.training-table", tc);
+        if (!table) return;
+
+        // Notes column exists?
+        const hasNotesHead =
+          !!table.querySelector("th.notes-col-head") ||
+          Array.from(table.querySelectorAll("th")).some((th) =>
+            (th.textContent || "").trim().toLowerCase() === "notes"
+          );
+
+        if (!hasNotesHead) return;
+
+        const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
+        if (!footer) return;
+
+        if (footer.querySelector(".mk-table-notes-expand-btn")) return;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "mk-table-notes-expand-btn";
+        btn.setAttribute("data-mk-notes-col-expand", "1");
+
+        const setLabel = () => {
+          const expanded = tc.classList.contains(TABLE_EXP_CLASS);
+          btn.textContent = expanded ? "Collapse Notes" : "Expand Notes";
+          btn.setAttribute("aria-pressed", expanded ? "true" : "false");
+        };
+
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          tc.classList.toggle(TABLE_EXP_CLASS);
+          setLabel();
+        });
+
+        setLabel();
+        footer.appendChild(btn);
+      });
+    };
+
+    const injectAll = (root = document) => {
+      injectNotesExpandButtons(root);
+      injectTableNotesExpandButtons(root);
+    };
+
+    return { injectAll, injectNotesExpandButtons, injectTableNotesExpandButtons };
+  })();
 
   /* =======================
      NOTES BUTTON VISUAL RESET
@@ -500,7 +605,6 @@
     clearFieldsIn(sectionEl);
     clearAllNotesButtonStates(sectionEl);
 
-    // ticket base card status must be disabled after reset
     enforceBaseTicketStatusLock();
 
     log("Cleared section:", sectionEl.id);
@@ -590,24 +694,20 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    // remove add (+) button from clones
     clone
       .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
       .forEach((btn) => btn.remove());
 
-    // stop integrated-plus square-right behavior on clones
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
 
     const ip = clone.querySelector(".input-plus");
     if (ip) ip.classList.add("mk-solo-input");
 
-    // right-rounded look (safe fallback)
     clone.classList.add("mk-poc-clone", "mk-round-right");
     clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
     clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
 
-    // reset fields + ids
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -716,6 +816,9 @@
 
     tbody.appendChild(clone);
     persistTable(table);
+
+    // Make sure any new Notes expand buttons / Notes column buttons exist
+    NotesExpand.injectAll(document);
 
     const first = $("input, textarea, select, [contenteditable='true']", clone);
     if (first) first.focus();
@@ -945,6 +1048,9 @@
       if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
       if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
 
+      // Ensure expand buttons exist on this notes block
+      NotesExpand.injectNotesExpandButtons(document);
+
       const ta = $("textarea", target);
       if (!ta) return;
 
@@ -1015,7 +1121,7 @@
     const status = $(".ticket-status-select", base);
     if (!status) return;
     status.value = "Open";
-    status.disabled = true; // ALWAYS locked on base
+    status.disabled = true;
     ensureId(status);
     saveField(status);
   };
@@ -1052,10 +1158,8 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "ticket");
 
-    // remove the (+) button from clones (safety; CSS may already hide it)
     clone.querySelectorAll(".add-ticket-btn").forEach((b) => b.remove());
 
-    // assign fresh ids + clear (we'll fill immediately after)
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -1066,7 +1170,7 @@
 
     const status = $(".ticket-status-select", clone);
     if (status) {
-      status.disabled = true; // will enable once ticket number exists
+      status.disabled = true;
       ensureId(status);
       saveField(status);
     }
@@ -1096,9 +1200,6 @@
     if (url) url.value = data?.url || "";
     if (sum) sum.value = data?.sum || "";
 
-    // status rules:
-    // - base: always disabled + forced Open
-    // - clone: enable only if ticket number exists
     if (card.getAttribute("data-base") === "true") {
       if (status) {
         status.value = "Open";
@@ -1144,7 +1245,6 @@
     const base = getOpenBaseTicketCard();
     if (!base) return;
 
-    // Validate BASE card (not current)
     if (!isTicketCardComplete(base)) {
       markTicketCardErrors(base);
       mkPopup.ok(
@@ -1154,7 +1254,6 @@
       return;
     }
 
-    // Transfer base values to the NEW card
     const baseVals = readTicketValues(base);
 
     const clone = buildTicketCloneFromBase(base);
@@ -1165,13 +1264,10 @@
       status: "Open",
     });
 
-    // Add clone to OPEN container (to the right / after base)
     openContainer.appendChild(clone);
 
-    // Persist clones
     persistAllTickets();
 
-    // Reset base card
     resetBaseTicketCard(base);
   };
 
@@ -1184,7 +1280,6 @@
 
     const isBase = card.getAttribute("data-base") === "true";
     if (isBase) {
-      // base ALWAYS locked
       enforceBaseTicketStatusLock();
       saveField(inputEl);
       return;
@@ -1203,7 +1298,6 @@
     const card = selectEl.closest(".ticket-group");
     if (!card) return;
 
-    // base should never change
     if (card.getAttribute("data-base") === "true") {
       enforceBaseTicketStatusLock();
       return;
@@ -1232,7 +1326,6 @@
     const base = $(".ticket-group[data-base='true']", openContainer);
     if (!base) return;
 
-    // remove all non-base cards
     $$(".ticket-group", document).forEach((g) => {
       if (g.getAttribute("data-base") !== "true") g.remove();
     });
@@ -1269,7 +1362,6 @@
     const base = $(".additional-poc-card[data-base='true']");
     if (!base) return;
 
-    // keep order as stored
     let anchor = base;
     clones.pocs.forEach((p) => {
       const card = buildPocCard(p);
@@ -1302,7 +1394,7 @@
   };
 
   /* =======================
-     MAP BTN
+     MAP
   ======================= */
   const updateDealershipMap = (address) => {
     const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
@@ -1322,7 +1414,7 @@
     content: null,
     title: null,
     backdrop: null,
-    moved: [], // [{ node, placeholder }]
+    moved: [],
     bodyOverflow: "",
   };
 
@@ -1331,7 +1423,9 @@
     if (!modal) return;
 
     $$("div.table-container").forEach((tc) => {
-      const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
+      const footer =
+        tc.querySelector(".table-footer") ||
+        tc.parentElement?.querySelector?.(".table-footer");
       if (!footer) return;
 
       if ($(".mk-table-expand-btn", footer)) return;
@@ -1369,7 +1463,6 @@
       if (block) notesBlocks.push(block);
     });
 
-    // order by DOM
     const all = [tableCard, ...notesBlocks].filter(Boolean);
     const uniq = [];
     const seen = new Set();
@@ -1394,7 +1487,6 @@
 
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
-    const backdrop = $(".mk-modal-backdrop", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) return;
 
@@ -1407,7 +1499,6 @@
     tableModal.modal = modal;
     tableModal.content = content;
     tableModal.title = titleEl;
-    tableModal.backdrop = backdrop;
     tableModal.moved = [];
 
     content.innerHTML = "";
@@ -1419,11 +1510,16 @@
       content.appendChild(node);
     });
 
+    // After moving, re-inject notes expand + notes-column expand buttons into modal content
+    NotesExpand.injectAll(content);
+
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
-    try { panel.scrollTop = 0; } catch {}
+    try {
+      panel.scrollTop = 0;
+    } catch {}
   };
 
   const closeTableModal = () => {
@@ -1446,6 +1542,9 @@
     tableModal.backdrop = null;
     tableModal.bodyOverflow = "";
     tableModal.moved = [];
+
+    // Re-inject in main doc after returning nodes
+    NotesExpand.injectAll(document);
   };
 
   /* =======================
@@ -1530,7 +1629,8 @@
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp =
+        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
@@ -1586,7 +1686,6 @@
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
 
-    // For clones: typing URL/summary should persist
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
@@ -1662,7 +1761,6 @@
         e.preventDefault();
         closeTableModal();
       }
-      // also close popup if open
       mkPopup.close();
     }
   });
@@ -1684,6 +1782,9 @@
     setGhostStyles(document);
     syncDealershipName();
     ensureTableExpandButtons();
+
+    // ✅ Restore notes expand buttons + table notes expand buttons everywhere (Pages 5/6 included)
+    NotesExpand.injectAll(document);
 
     // Ensure base support ticket card is always locked
     enforceBaseTicketStatusLock();
