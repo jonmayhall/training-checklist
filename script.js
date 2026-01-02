@@ -1555,6 +1555,61 @@
     });
   };
 
+   // ======================================================
+// AUTO-ADD NOTES EXPAND BUTTONS (for any Notes textarea)
+// ======================================================
+function ensureNotesExpandButtons() {
+  // target: any textarea that looks like a notes field inside a section-block
+  const textareas = document.querySelectorAll('.section-block textarea');
+
+  textareas.forEach((ta) => {
+    // If it's inside a table or modal textarea, skip if you don't want expand there:
+    // if (ta.closest('#mkNotesModal, #mkTableModal')) return;
+
+    // If there's already an expand button near it, do nothing
+    const wrap = ta.closest('.mk-ta-wrap') || ta.parentElement;
+    if (!wrap) return;
+
+    // If already has a button with mk-ta-expand or data-expand, skip
+    if (wrap.querySelector('.mk-ta-expand, button[data-expand], button[class*="expand"]')) return;
+
+    // Ensure wrapper is positioned for bottom-right button placement
+    if (!ta.closest('.mk-ta-wrap')) {
+      const newWrap = document.createElement('div');
+      newWrap.className = 'mk-ta-wrap';
+      ta.parentNode.insertBefore(newWrap, ta);
+      newWrap.appendChild(ta);
+    }
+
+    const finalWrap = ta.closest('.mk-ta-wrap');
+    if (!finalWrap) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mk-ta-expand';
+    btn.setAttribute('aria-label', 'Expand notes');
+    btn.textContent = '⤢';
+
+    btn.addEventListener('click', () => {
+      // Simple fullscreen-ish expand using the existing Notes modal if you have one:
+      // If you already have a modal function, call it here instead.
+      ta.focus();
+      ta.scrollIntoView({ block: 'center' });
+
+      // Fallback: temporarily enlarge in place
+      ta.style.minHeight = '520px';
+    });
+
+    finalWrap.appendChild(btn);
+  });
+}
+
+// Run once on load
+document.addEventListener('DOMContentLoaded', ensureNotesExpandButtons);
+
+// If you swap pages dynamically, call this after page changes too:
+window.ensureNotesExpandButtons = ensureNotesExpandButtons;
+
   /* =======================
      EVENT DELEGATION
   ======================= */
