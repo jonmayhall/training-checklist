@@ -1456,3 +1456,36 @@ button.remove-row{
   height:auto !important;
 }
 
+/* =========================================================
+   ✅ NOTES CARDS — MAKE TEXTAREA FILL CARD (remove bottom dead space)
+   Paste at VERY bottom of CSS
+========================================================= */
+
+/* keep notes cards as flex columns so textarea can expand */
+.cards-grid.two-col > .section-block,
+.two-col-grid .section-block,
+.grid-2 > .section-block{
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+/* wrapper should take remaining height */
+.mk-ta-wrap{
+  flex:1 1 auto !important;
+  min-height:220px !important;   /* adjust this if you want taller baseline */
+  height:auto !important;
+}
+
+/* textarea fills wrapper (NO bottom dead zone) */
+.mk-ta-wrap > textarea{
+  flex:1 1 auto !important;
+  height:auto !important;        /* overrides your old height:100% behavior */
+  min-height:0 !important;       /* allow flex to control */
+  margin:0 !important;           /* remove extra bottom margin */
+}
+
+/* keep a clean, even bottom gap like the top gap */
+.section-block textarea{
+  margin:16px 0 0 !important;    /* consistent top spacing */
+}
+
