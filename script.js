@@ -3,13 +3,36 @@
    (SINGLE SCRIPT / HARDENED / DROP-IN)
 
    ✅ OS-style OK popup (upper-middle) with orange pill button
-   ✅ OK/Cancel confirm popups for Clear All + Reset Page
-   ✅ Support Tickets hardened base-card behavior
-   ✅ Notes system + bullets/caret
-   ✅ Table row cloning + persistence
-   ✅ Restores:
-      - Training TABLE expand modal button (⤢) in table footers (opens #mkTableModal)
-      - Small Notes-box footer ⤢ expand (local textarea height / notes column width)
+   ✅ OK/Cancel confirm popups for:
+      - Clear All
+      - Reset This Page
+
+   ✅ Support Tickets FIXES:
+      - Base card stays in place (left) and NEVER becomes selectable status
+      - Base Status dropdown always disabled (greyed out, not selectable)
+      - Clicking + transfers BASE values into the NEW card
+      - BASE card resets after adding (clears Ticket # / URL / Summary)
+      - If base incomplete: shows popup with OK (no browser alert)
+      - Status changes move the correct card to the correct container
+
+   ✅ Keeps the rest of your project logic:
+      - Nav
+      - Field persistence
+      - Trainers + POCs
+      - Table add-row clone persistence
+      - Notes bullets + caret behavior
+      - Map update
+
+   ✅ FIXED / RESTORED:
+      - Training table expand buttons (⤢) in every table footer
+      - Notes expand buttons (⤢) in the bottom-right of EVERY notes box
+        (only for notes boxes referenced by data-notes-target buttons)
+      - Expand works even if buttons are injected by JS
+      - If modal missing, shows mkPopup warning instead of failing
+
+   NOTE:
+   - Table/Notes expand uses #mkTableModal (same modal for both).
+   - If your modal is missing in HTML, add it back or expand will show a warning.
 ======================================================= */
 
 (() => {
@@ -155,7 +178,7 @@
   };
 
   /* =======================
-     OS-STYLE POPUPS
+     OS-STYLE POPUPS (OK + OK/CANCEL)
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -224,7 +247,7 @@
       okText = "OK",
       cancelText = "",
       onOk,
-      onCancel,
+      onCancel
     } = {}) => {
       ensureStyles();
       close();
@@ -305,8 +328,11 @@
     return { ok, confirm, close };
   })();
 
+  // Optional: expose for debugging / reuse
+  try { window.mkPopup = mkPopup; } catch {}
+
   /* =======================
-     CLONE STATE
+     CLONE STATE (for restore)
   ======================= */
   const cloneState = {
     get() {
@@ -492,7 +518,10 @@
     clearFieldsIn(sectionEl);
     clearAllNotesButtonStates(sectionEl);
 
+    // ticket base card status must be disabled after reset
     enforceBaseTicketStatusLock();
+
+    log("Cleared section:", sectionEl.id);
   };
 
   /* =======================
@@ -579,20 +608,24 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
+    // remove add (+) button from clones
     clone
       .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
       .forEach((btn) => btn.remove());
 
+    // stop integrated-plus square-right behavior on clones
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
 
     const ip = clone.querySelector(".input-plus");
     if (ip) ip.classList.add("mk-solo-input");
 
+    // right-rounded look (safe fallback)
     clone.classList.add("mk-poc-clone", "mk-round-right");
     clone.style.borderTopRightRadius = clone.style.borderTopRightRadius || "18px";
     clone.style.borderBottomRightRadius = clone.style.borderBottomRightRadius || "18px";
 
+    // reset fields + ids
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -702,9 +735,6 @@
     tbody.appendChild(clone);
     persistTable(table);
 
-    // re-inject mini footer expand buttons
-    NotesMiniExpand.injectAll(document);
-
     const first = $("input, textarea, select, [contenteditable='true']", clone);
     if (first) first.focus();
   };
@@ -737,7 +767,7 @@
   };
 
   /* =======================
-     NOTES (your working version)
+     NOTES (working version)
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
@@ -813,6 +843,24 @@
       const secId = section?.id || "";
 
       if (tr && table) {
+        if (secId === "training-checklist") {
+          const nameInput =
+            tr.querySelector('td:first-child input[type="text"]') ||
+            tr.querySelector('td:nth-child(2) input[type="text"]');
+          const v = (nameInput?.value || "").trim();
+          return v || "(blank)";
+        }
+
+        if (secId === "opcodes-pricing") {
+          const opcodeInput =
+            tr.querySelector('td:nth-child(2) input[type="text"]') ||
+            tr.querySelector(
+              'td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea'
+            );
+          const v = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
+          return v || "(blank)";
+        }
+
         const field =
           tr.querySelector(
             'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
@@ -964,324 +1012,7 @@
   })();
 
   /* =======================
-     SMALL ⤢ (Notes footer + Notes column widen)
-  ======================= */
-  const NotesMiniExpand = (() => {
-    const STYLE_ID = "mk-mini-notes-expand-style-v1";
-    const NOTES_SEL = `.section-block[id^="notes-"]`;
-    const NOTES_EXP_CLASS = "mk-notes-expanded";
-    const TABLE_NOTES_EXP_CLASS = "mk-table-notes-expanded";
-    const STATE_KEY = "mk__notes_mini_expand_state_v1";
-
-    const readMiniState = () => {
-      try { return JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); } catch { return {}; }
-    };
-    const writeMiniState = (s) => {
-      try { localStorage.setItem(STATE_KEY, JSON.stringify(s || {})); } catch {}
-    };
-
-    const ensureStyles = () => {
-      if (document.getElementById(STYLE_ID)) return;
-      const s = document.createElement("style");
-      s.id = STYLE_ID;
-      s.textContent = `
-        .mk-notes-footer{
-          position:relative;
-          display:flex;
-          justify-content:flex-end;
-          align-items:center;
-          gap:8px;
-          padding-top:8px;
-        }
-        .mk-mini-expand-btn{
-          width:28px;
-          height:28px;
-          border-radius:10px;
-          border:1px solid rgba(0,0,0,.10);
-          background:rgba(255,255,255,.92);
-          cursor:pointer;
-          display:inline-flex;
-          align-items:center;
-          justify-content:center;
-          font-weight:900;
-          line-height:1;
-          user-select:none;
-        }
-        .mk-mini-expand-btn:hover{
-          background:#fff;
-          border-color:rgba(0,0,0,.18);
-        }
-        .${NOTES_EXP_CLASS} textarea{
-          min-height:360px !important;
-        }
-        .${TABLE_NOTES_EXP_CLASS} .notes-col,
-        .${TABLE_NOTES_EXP_CLASS} td.notes-col,
-        .${TABLE_NOTES_EXP_CLASS} th.notes-col-head{
-          width:auto !important;
-          max-width:none !important;
-        }
-      `;
-      document.head.appendChild(s);
-    };
-
-    const hasNotesColumn = (table) => {
-      if (!table) return false;
-      if (table.querySelector("th.notes-col-head")) return true;
-      return Array.from(table.querySelectorAll("th")).some((th) =>
-        (th.textContent || "").trim().toLowerCase() === "notes"
-      );
-    };
-
-    const ensureNotesFooter = (notesBlock) => {
-      if (!notesBlock) return null;
-
-      let footer =
-        notesBlock.querySelector(".notes-footer") ||
-        notesBlock.querySelector(".mk-notes-footer");
-
-      if (!footer) {
-        footer = document.createElement("div");
-        footer.className = "mk-notes-footer";
-        const ta = notesBlock.querySelector("textarea");
-        if (ta && ta.parentNode) ta.insertAdjacentElement("afterend", footer);
-        else notesBlock.appendChild(footer);
-      } else if (!footer.classList.contains("mk-notes-footer")) {
-        footer.classList.add("mk-notes-footer");
-      }
-
-      return footer;
-    };
-
-    const applyNotesState = (block) => {
-      const st = readMiniState();
-      const id = block?.id || "";
-      const on = !!st[id];
-      block.classList.toggle(NOTES_EXP_CLASS, on);
-    };
-
-    const applyTableState = (tableContainer, key) => {
-      const st = readMiniState();
-      const on = !!st[key];
-      tableContainer.classList.toggle(TABLE_NOTES_EXP_CLASS, on);
-    };
-
-    const addMiniBtnToNotesBlock = (block) => {
-      if (!block || !block.id) return;
-      ensureStyles();
-
-      const footer = ensureNotesFooter(block);
-      if (!footer) return;
-
-      if (footer.querySelector(`button[data-mk-mini-notes-expand="${block.id}"]`)) {
-        applyNotesState(block);
-        return;
-      }
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-mini-expand-btn";
-      btn.title = "Expand notes";
-      btn.textContent = "⤢";
-      btn.setAttribute("data-mk-mini-notes-expand", block.id);
-
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const st = readMiniState();
-        const now = !st[block.id];
-        st[block.id] = now;
-        writeMiniState(st);
-        block.classList.toggle(NOTES_EXP_CLASS, now);
-      });
-
-      footer.appendChild(btn);
-      applyNotesState(block);
-    };
-
-    const addMiniBtnToTableFooter = (tc) => {
-      if (!tc) return;
-      ensureStyles();
-
-      const table = tc.querySelector("table.training-table");
-      if (!table || !hasNotesColumn(table)) return;
-
-      const footer =
-        tc.querySelector(".table-footer") ||
-        tc.parentElement?.querySelector?.(".table-footer");
-      if (!footer) return;
-
-      if (footer.querySelector("button[data-mk-mini-table-notes-expand]")) return;
-
-      const key =
-        "tbl::" +
-        (table.getAttribute("data-table-key") ||
-          table.id ||
-          ("idx-" + Array.from(document.querySelectorAll("table.training-table")).indexOf(table)));
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-mini-expand-btn";
-      btn.title = "Widen notes";
-      btn.textContent = "⤢";
-      btn.setAttribute("data-mk-mini-table-notes-expand", key);
-
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const st = readMiniState();
-        const now = !st[key];
-        st[key] = now;
-        writeMiniState(st);
-        tc.classList.toggle(TABLE_NOTES_EXP_CLASS, now);
-      });
-
-      footer.appendChild(btn);
-      applyTableState(tc, key);
-    };
-
-    const injectAll = (root = document) => {
-      root.querySelectorAll(NOTES_SEL).forEach(addMiniBtnToNotesBlock);
-      root.querySelectorAll(".table-container").forEach(addMiniBtnToTableFooter);
-    };
-
-    return { injectAll };
-  })();
-
-  /* =======================
-     TABLE EXPAND MODAL (RESTORED)
-     - Requires #mkTableModal in HTML
-     - Moves REAL nodes into modal so Notes buttons still work
-  ======================= */
-  const tableModal = {
-    modal: null,
-    content: null,
-    title: null,
-    moved: [],
-    bodyOverflow: "",
-  };
-
-  const ensureTableExpandButtons = () => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
-
-    $$("div.table-container").forEach((tc) => {
-      const footer =
-        tc.querySelector(".table-footer") ||
-        tc.parentElement?.querySelector?.(".table-footer");
-      if (!footer) return;
-
-      if ($(".mk-table-expand-btn", footer)) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-table-expand-btn";
-      btn.setAttribute("data-mk-table-expand", "1");
-      btn.title = "Expand";
-      btn.textContent = "⤢";
-
-      footer.appendChild(btn);
-    });
-  };
-
-  const getExpandBundleNodes = (anyInside) => {
-    const tc = anyInside?.closest?.(".table-container") || anyInside;
-    if (!tc) return [];
-
-    // "Card" = section-block that contains table + footer (and often notes blocks)
-    const tableCard =
-      tc.closest(".section-block") ||
-      tc.closest(".section") ||
-      tc.parentElement ||
-      tc;
-
-    const targets = new Set();
-    $$("[data-notes-target]", tableCard).forEach((btn) => {
-      const id = btn.getAttribute("data-notes-target");
-      if (id) targets.add(id);
-    });
-
-    const notesBlocks = [];
-    targets.forEach((id) => {
-      const block = document.getElementById(id);
-      if (block) notesBlocks.push(block);
-    });
-
-    // bundle order by DOM
-    const all = [tableCard, ...notesBlocks].filter(Boolean);
-    const uniq = [];
-    const seen = new Set();
-    all.forEach((n) => {
-      if (seen.has(n)) return;
-      seen.add(n);
-      uniq.push(n);
-    });
-
-    uniq.sort((a, b) => {
-      if (a === b) return 0;
-      const pos = a.compareDocumentPosition(b);
-      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
-
-    return uniq;
-  };
-
-  const openTableModalFor = (anyInside) => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
-
-    const content = $(".mk-modal-content", modal);
-    const titleEl = $(".mk-modal-title", modal);
-    const panel = $(".mk-modal-panel", modal) || modal;
-    if (!content) return;
-
-    const bundle = getExpandBundleNodes(anyInside);
-    if (!bundle.length) return;
-
-    const header = bundle[0].querySelector?.("h2, .section-header");
-    if (titleEl) titleEl.textContent = (header?.textContent || "Expanded View").trim();
-
-    tableModal.modal = modal;
-    tableModal.content = content;
-    tableModal.title = titleEl;
-    tableModal.moved = [];
-
-    content.innerHTML = "";
-
-    bundle.forEach((node) => {
-      const ph = document.createComment("mk-expand-placeholder");
-      node.parentNode.insertBefore(ph, node);
-      tableModal.moved.push({ node, placeholder: ph });
-      content.appendChild(node);
-    });
-
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    tableModal.bodyOverflow = document.body.style.overflow || "";
-    document.body.style.overflow = "hidden";
-    try { panel.scrollTop = 0; } catch {}
-  };
-
-  const closeTableModal = () => {
-    const modal = tableModal.modal;
-    if (!modal) return;
-
-    (tableModal.moved || []).forEach(({ node, placeholder }) => {
-      if (!node || !placeholder || !placeholder.parentNode) return;
-      placeholder.parentNode.insertBefore(node, placeholder);
-      placeholder.parentNode.removeChild(placeholder);
-    });
-
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = tableModal.bodyOverflow || "";
-
-    tableModal.modal = null;
-    tableModal.content = null;
-    tableModal.title = null;
-    tableModal.bodyOverflow = "";
-    tableModal.moved = [];
-  };
-
-  /* =======================
-     SUPPORT TICKETS (LOCKED BASE)
+     SUPPORT TICKETS (FIXED)
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -1446,6 +1177,7 @@
     });
 
     openContainer.appendChild(clone);
+
     persistAllTickets();
     resetBaseTicketCard(base);
   };
@@ -1584,6 +1316,245 @@
     frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
   };
 
+  /* =========================================================
+     EXPAND BUTTONS (TABLES + NOTES)
+     - Uses #mkTableModal (same modal)
+     - Injects ⤢ into:
+        1) Every .table-footer (table expand)
+        2) Every notes block referenced by [data-notes-target] (notes expand)
+========================================================= */
+
+  const ensureExpandStyles = (() => {
+    const STYLE_ID = "mk-expand-style-v2";
+    return () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-table-expand-btn,
+        .mk-notes-expand-btn{
+          width:30px; height:30px;
+          border-radius:10px;
+          border:1px solid rgba(0,0,0,.15);
+          background:rgba(255,255,255,.92);
+          font-weight:900;
+          cursor:pointer;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          user-select:none;
+        }
+        .mk-table-expand-btn:hover,
+        .mk-notes-expand-btn:hover{
+          transform: translateY(-1px);
+        }
+        .mk-notes-footer{
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          padding-top:10px;
+        }
+      `;
+      document.head.appendChild(s);
+    };
+  })();
+
+  const tableModal = {
+    modal: null,
+    content: null,
+    title: null,
+    moved: [],
+    bodyOverflow: "",
+  };
+
+  const getExpandBundleNodes = (anyInside) => {
+    const tc = anyInside?.closest?.(".table-container") || anyInside;
+    if (!tc) return [];
+
+    // IMPORTANT: your page 5 uses .section wrapping the table container
+    const tableCard =
+      tc.closest(".section") ||
+      tc.closest(".section-block") ||
+      tc.parentElement ||
+      tc;
+
+    const targets = new Set();
+    $$("[data-notes-target]", tableCard).forEach((btn) => {
+      const id = btn.getAttribute("data-notes-target");
+      if (id) targets.add(id);
+    });
+
+    const notesBlocks = [];
+    targets.forEach((id) => {
+      const block = document.getElementById(id);
+      if (block) notesBlocks.push(block);
+    });
+
+    const all = [tableCard, ...notesBlocks].filter(Boolean);
+    const uniq = [];
+    const seen = new Set();
+    all.forEach((n) => {
+      if (seen.has(n)) return;
+      seen.add(n);
+      uniq.push(n);
+    });
+
+    uniq.sort((a, b) => {
+      if (a === b) return 0;
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
+    return uniq;
+  };
+
+  const openModalWithNodes = (nodes, titleText) => {
+    const modal = $("#mkTableModal");
+    if (!modal) {
+      mkPopup.ok(
+        "Your expand buttons need the #mkTableModal HTML block back on the page. Add it near the bottom of your HTML (before </body>).",
+        { title: "Missing Expand Modal" }
+      );
+      return;
+    }
+
+    const content = $(".mk-modal-content", modal);
+    const titleEl = $(".mk-modal-title", modal);
+    const panel = $(".mk-modal-panel", modal) || modal;
+    if (!content) {
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
+        title: "Modal Markup Issue",
+      });
+      return;
+    }
+
+    tableModal.modal = modal;
+    tableModal.content = content;
+    tableModal.title = titleEl;
+    tableModal.moved = [];
+    content.innerHTML = "";
+
+    if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
+
+    nodes.forEach((node) => {
+      if (!node || !node.parentNode) return;
+      const ph = document.createComment("mk-expand-placeholder");
+      node.parentNode.insertBefore(ph, node);
+      tableModal.moved.push({ node, placeholder: ph });
+      content.appendChild(node);
+    });
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    tableModal.bodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
+    try {
+      panel.scrollTop = 0;
+    } catch {}
+  };
+
+  const openTableModalFor = (anyInside) => {
+    const bundle = getExpandBundleNodes(anyInside);
+    if (!bundle.length) return;
+    const header =
+      bundle[0].querySelector?.(".section-header") ||
+      bundle[0].querySelector?.("h2");
+    const title = (header?.textContent || "Expanded View").trim();
+    openModalWithNodes(bundle, title);
+  };
+
+  const openNotesModalFor = (notesBlock) => {
+    if (!notesBlock) return;
+    const h =
+      notesBlock.querySelector("h2") ||
+      notesBlock.querySelector(".section-header") ||
+      null;
+    const title = (h?.textContent || "Notes").trim();
+    openModalWithNodes([notesBlock], title);
+  };
+
+  const closeTableModal = () => {
+    const modal = tableModal.modal;
+    if (!modal) return;
+
+    (tableModal.moved || []).forEach(({ node, placeholder }) => {
+      if (!node || !placeholder || !placeholder.parentNode) return;
+      placeholder.parentNode.insertBefore(node, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    });
+
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = tableModal.bodyOverflow || "";
+
+    tableModal.modal = null;
+    tableModal.content = null;
+    tableModal.title = null;
+    tableModal.bodyOverflow = "";
+    tableModal.moved = [];
+  };
+
+  const ensureTableExpandButtons = () => {
+    ensureExpandStyles();
+
+    $$(".table-container").forEach((tc) => {
+      const footer = tc.querySelector(".table-footer") || tc.parentElement?.querySelector?.(".table-footer");
+      if (!footer) return;
+
+      if ($(".mk-table-expand-btn", footer)) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-table-expand-btn";
+      btn.setAttribute("data-mk-table-expand", "1");
+      btn.title = "Expand";
+      btn.textContent = "⤢";
+
+      footer.appendChild(btn);
+    });
+  };
+
+  const ensureNotesExpandButtons = () => {
+    ensureExpandStyles();
+
+    // Find every notes block that is referenced by any button using data-notes-target
+    const targetIds = new Set(
+      $$("[data-notes-target]")
+        .map((b) => b.getAttribute("data-notes-target"))
+        .filter(Boolean)
+    );
+
+    targetIds.forEach((id) => {
+      const block = document.getElementById(id);
+      if (!block) return;
+
+      // only add if it's a notes block with textarea (matches your notes sections)
+      const ta = $("textarea", block);
+      if (!ta) return;
+
+      // create/ensure footer
+      let footer = $(".mk-notes-footer", block);
+      if (!footer) {
+        footer = document.createElement("div");
+        footer.className = "mk-notes-footer";
+        block.appendChild(footer);
+      }
+
+      if ($(".mk-notes-expand-btn", footer)) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-notes-expand-btn";
+      btn.setAttribute("data-mk-notes-expand", "1");
+      btn.setAttribute("data-notes-id", id);
+      btn.title = "Expand Notes";
+      btn.textContent = "⤢";
+
+      footer.appendChild(btn);
+    });
+  };
+
   /* =======================
      EVENT DELEGATION
   ======================= */
@@ -1648,27 +1619,6 @@
       return;
     }
 
-    // ✅ TRAINING TABLE MODAL EXPAND (footer ⤢)
-    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
-    if (expandBtn) {
-      const modal = $("#mkTableModal");
-      if (modal) {
-        e.preventDefault();
-        openTableModalFor(expandBtn);
-        return;
-      }
-    }
-
-    // ✅ MODAL CLOSE
-    const mkTableModalEl = $("#mkTableModal");
-    if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
-      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
-        e.preventDefault();
-        closeTableModal();
-        return;
-      }
-    }
-
     const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
     if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
@@ -1687,9 +1637,43 @@
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp =
+        $("input[type='text']", wrap) ||
+        $("#dealershipAddressInput") ||
+        $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
+    }
+
+    // TABLE EXPAND
+    const expandBtn = t.closest(".mk-table-expand-btn[data-mk-table-expand='1'], .mk-table-expand-btn");
+    if (expandBtn) {
+      e.preventDefault();
+      openTableModalFor(expandBtn);
+      return;
+    }
+
+    // NOTES EXPAND
+    const notesExpandBtn = t.closest(".mk-notes-expand-btn[data-mk-notes-expand='1']");
+    if (notesExpandBtn) {
+      e.preventDefault();
+      const id = notesExpandBtn.getAttribute("data-notes-id");
+      const block = id ? document.getElementById(id) : null;
+      openNotesModalFor(block);
+      return;
+    }
+
+    // MODAL CLOSE
+    const mkTableModal = $("#mkTableModal");
+    if (mkTableModal && mkTableModal.classList.contains("open")) {
+      if (
+        t.closest("#mkTableModal .mk-modal-close") ||
+        t.closest("#mkTableModal .mk-modal-backdrop")
+      ) {
+        e.preventDefault();
+        closeTableModal();
+        return;
+      }
     }
   });
 
@@ -1791,8 +1775,8 @@
     }
 
     if (e.key === "Escape") {
-      const mkTableModalEl = $("#mkTableModal");
-      if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
+      const mkTableModal = $("#mkTableModal");
+      if (mkTableModal && mkTableModal.classList.contains("open")) {
         e.preventDefault();
         closeTableModal();
       }
@@ -1817,12 +1801,11 @@
     setGhostStyles(document);
     syncDealershipName();
 
-    // ✅ make sure the training-table expand buttons exist
+    // ✅ Restore expand buttons (tables + notes)
     ensureTableExpandButtons();
+    ensureNotesExpandButtons();
 
-    // ✅ make sure small notes-footer ⤢ buttons exist
-    NotesMiniExpand.injectAll(document);
-
+    // Ensure base support ticket card is always locked
     enforceBaseTicketStatusLock();
 
     log("Initialized.");
