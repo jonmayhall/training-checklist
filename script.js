@@ -1828,6 +1828,34 @@ function seedStarterRowsToThree() {
       mkPopup.close();
     }
   });
+function autoSetTrainingEndDate() {
+  const onsiteInput =
+    document.getElementById("onsiteTrainingDate") ||
+    document.getElementById("onsiteDate");
+
+  const endInput =
+    document.getElementById("trainingEndDate") ||
+    document.getElementById("endDate");
+
+  if (!onsiteInput || !endInput) return;
+
+  onsiteInput.addEventListener("change", () => {
+    if (!onsiteInput.value) return;
+
+    // Do not overwrite if user already set an end date
+    if (endInput.value) return;
+
+    const start = new Date(onsiteInput.value);
+    start.setDate(start.getDate() + 2);
+
+    const yyyy = start.getFullYear();
+    const mm = String(start.getMonth() + 1).padStart(2, "0");
+    const dd = String(start.getDate()).padStart(2, "0");
+
+    endInput.value = `${yyyy}-${mm}-${dd}`;
+    endInput.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
 
   /* =======================
      INIT / RESTORE
@@ -1842,7 +1870,9 @@ function seedStarterRowsToThree() {
     rebuildTicketClones();
     rebuildTableClones();
 seedStarterRowsToThree(); // ✅ ensures Service Advisors shows 3 starter rows
+autoSetTrainingEndDate();
 
+     
     restoreAllFields();
 
     setGhostStyles(document);
