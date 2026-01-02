@@ -1716,3 +1716,106 @@ button.remove-row{
   border:0 !important;
 }
 
+/* =======================
+   TRAINING SUMMARY — EXEC SUMMARY
+======================= */
+#execSummaryCard .mk-exec-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:18px;
+  margin-top:14px;
+}
+
+#execSummaryCard .mk-exec-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  background:#fff;
+  padding:14px 14px 12px;
+  display:flex;
+  flex-direction:column;
+  min-height:260px;
+}
+
+#execSummaryCard .mk-exec-title{
+  font-weight:900;
+  font-size:14px;
+  color:#111827;
+  margin-bottom:2px;
+}
+
+#execSummaryCard .mk-exec-sub{
+  font-size:12px;
+  color:#6b7280;
+  margin-bottom:10px;
+}
+
+#execSummaryCard textarea{
+  flex:1 1 auto;
+  min-height:180px;
+  resize:vertical;
+}
+
+#execSummaryCard .mk-exec-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:14px;
+}
+
+#execSummaryCard .mk-exec-btn{
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(239,109,34,0.35);
+  transition:background .18s, transform .18s, box-shadow .18s;
+}
+#execSummaryCard .mk-exec-btn:hover{
+  background:#ff8b42;
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(239,109,34,0.45);
+}
+#execSummaryCard .mk-exec-btn--ghost{
+  background:#f3f4f6;
+  color:#111827;
+  border:1px solid rgba(0,0,0,.10);
+  box-shadow:none;
+}
+#execSummaryCard .mk-exec-btn--ghost:hover{
+  background:#e5e7eb;
+  transform:translateY(-1px);
+}
+
+#execSummaryCard .mk-exec-output{
+  margin-top:16px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+#execSummaryCard .mk-exec-output-title{
+  background:var(--light-orange);
+  color:#fff;
+  font-weight:900;
+  padding:10px 14px;
+}
+#execSummaryCard .mk-exec-output-body{
+  padding:12px 14px;
+  font-size:13px;
+  line-height:1.45;
+  color:#111827;
+  white-space:pre-wrap;
+}
+
+@media (max-width:1100px){
+  #execSummaryCard .mk-exec-grid{ grid-template-columns:1fr; }
+  #execSummaryCard .mk-exec-card{ min-height:220px; }
+}
