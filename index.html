@@ -3556,120 +3556,126 @@
         </div>
       </section>
 
-   <!-- ========================================================= -->
-<!-- PAGE 11: TRAINING SUMMARY                                 -->
+ <!-- ========================================================= -->
+<!-- PAGE 11: TRAINING SUMMARY — EXECUTIVE SUMMARY (AI-GENERATED) -->
 <!-- ========================================================= -->
 <section id="training-summary" class="page-section">
   <h1>Training Summary</h1>
   <p class="page-subtitle">
-    Capture a final summary of the onsite visit, key wins, risks, and follow-up items.
+    Generate a leadership-ready executive summary using notes and activity captured across all pages.
   </p>
 
-  <!-- TOP RIGHT BUTTONS (match other pages) -->
- <!-- Buttons: stacked like other pages -->
-<div class="mk-summary-actions" style="display:flex; flex-direction:column; gap:10px; margin:10px 0 18px 4px; max-width:260px;">
-  <button id="mkGenerateExecSummary" class="clear-page-btn" type="button">
-    Generate Summary
-  </button>
-
-  <button id="savePDF" class="clear-page-btn" type="button">
-    Save All Pages as PDF
-  </button>
-
-  <button class="clear-page-btn" type="button" data-clear-page="training-summary">
-    Reset This Page
-  </button>
-</div>
-
-  <!-- EXECUTIVE SUMMARY OUTPUT (normal card — no special orange outline) -->
-  <div class="section-block">
-    <h2>Executive Summary</h2>
-
-    <div class="checklist-row">
-      <label>Overall training outcome</label>
-      <select id="overallOutcomeSelect">
-        <option value="" data-ghost="true">Select outcome</option>
-        <option>Exceeded Expectations</option>
-        <option>Met Expectations</option>
-        <option>Partially Met Expectations</option>
-        <option>Did Not Meet Expectations</option>
-      </select>
-    </div>
-
-    <div class="checklist-row">
-      <label>Key wins</label>
-      <textarea
-        id="keyWinsText"
-        placeholder="High-level wins or successes (bullets recommended)"
-      ></textarea>
-    </div>
-
-    <div class="checklist-row">
-      <label>Key risks or concerns</label>
-      <textarea
-        id="keyRisksText"
-        placeholder="Top risks, concerns, or blockers (bullets recommended)"
-      ></textarea>
-    </div>
-
-    <div class="checklist-row">
-      <label>Recommended next steps</label>
-      <textarea
-        id="nextStepsText"
-        placeholder="Recommended actions for continued success (bullets recommended)"
-      ></textarea>
-    </div>
-
-    <div class="checklist-row" style="align-items:flex-start;">
-      <label style="padding-top:7px;">Executive narrative</label>
-      <textarea
-        id="execNarrativeText"
-        placeholder="Generated executive-style narrative will appear here (you can edit before exporting)."
-        style="min-height:220px;"
-      ></textarea>
+  <!-- Top-right dropdown (single control) -->
+  <div class="mk-actions-bar" style="position:absolute; top:16px; right:24px; z-index:20;">
+    <div class="mk-action-dropdown" id="mkSummaryActions">
+      <button type="button" class="mk-action-btn" id="mkSummaryActionsBtn">
+        Actions ▾
+      </button>
+      <div class="mk-action-menu" id="mkSummaryActionsMenu" hidden>
+        <button type="button" class="mk-action-item" data-action="generate">Generate Summary</button>
+        <button type="button" class="mk-action-item" data-action="savepdf">Save All Pages as PDF</button>
+        <button type="button" class="mk-action-item" data-action="reset">Reset This Page</button>
+      </div>
     </div>
   </div>
 
-  <!-- Your existing notes blocks (kept) -->
-  <div class="grid-2">
-    <div class="section-block" id="ts-additional-notes">
-      <h2>Training Summary – Additional Notes</h2>
-      <textarea placeholder="Additional training notes or context"></textarea>
+  <!-- Keep these hidden for compatibility with existing JS that expects them -->
+  <button id="savePDF" type="button" hidden>Save All Pages as PDF</button>
+  <button class="clear-page-btn" type="button" data-clear-page="training-summary" hidden>Reset This Page</button>
+
+  <!-- EXECUTIVE SUMMARY CARDS -->
+  <div class="cards-grid two-col" id="mkExecSummaryGrid" style="margin-top:10px;">
+    <div class="section-block">
+      <h2>Engagement Snapshot</h2>
+      <div class="checklist-row">
+        <label>Dealership</label>
+        <input id="mkSum_dealership" type="text" placeholder="Auto-filled from Dealership Info" />
+      </div>
+      <div class="checklist-row">
+        <label>Onsite Dates</label>
+        <input id="mkSum_dates" type="text" placeholder="Auto-filled from training dates" />
+      </div>
+      <div class="checklist-row">
+        <label>Trainer(s)</label>
+        <input id="mkSum_trainers" type="text" placeholder="Auto-filled from Trainers page" />
+      </div>
+      <div class="checklist-row">
+        <label>Departments / Scope</label>
+        <input id="mkSum_scope" type="text" placeholder="Auto-filled from notes + tables" />
+      </div>
     </div>
 
-    <div class="section-block" id="ts-info-for-cem">
-      <h2>Information for CEM</h2>
-      <textarea placeholder="Information or requests specifically for CEM"></textarea>
+    <div class="section-block">
+      <h2>Overall Training Outcome</h2>
+      <div class="checklist-row">
+        <label>Outcome</label>
+        <select id="mkSum_outcome">
+          <option value="" data-ghost="true">Select outcome</option>
+          <option>Exceeded Expectations</option>
+          <option>Met Expectations</option>
+          <option>Partially Met Expectations</option>
+          <option>Did Not Meet Expectations</option>
+        </select>
+      </div>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_outcomeWhy" placeholder="1–2 sentence justification (auto-generated)"></textarea>
+      </div>
     </div>
   </div>
 
-  <div class="grid-2" style="margin-top:16px;">
-    <div class="section-block" id="ts-champions-blockers">
-      <h2>Champions &amp; Blockers</h2>
-      <textarea placeholder="Key champions, blockers, and their impact"></textarea>
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Key Wins</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_wins" placeholder="High-level wins or successes (auto-generated bullets)"></textarea>
+      </div>
     </div>
 
-    <div class="section-block" id="ts-pre-monday-notes">
-      <h2>Pre-Training &amp; Monday Visit Notes</h2>
-      <textarea placeholder="Important notes from pre-training and Monday visit"></textarea>
-    </div>
-  </div>
-
-  <div class="grid-2" style="margin-top:16px;">
-    <div class="section-block" id="ts-eod-tuesday">
-      <h2>End-of-Day Summary – Tuesday</h2>
-      <textarea placeholder="End-of-day summary for Tuesday"></textarea>
-    </div>
-
-    <div class="section-block" id="ts-eod-wednesday">
-      <h2>End-of-Day Summary – Wednesday</h2>
-      <textarea placeholder="End-of-day summary for Wednesday"></textarea>
+    <div class="section-block">
+      <h2>Key Risks or Concerns</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_risks" placeholder="Top risks, concerns, or blockers (auto-generated bullets)"></textarea>
+      </div>
     </div>
   </div>
 
-  <div class="section-block" style="margin-top:16px;" id="ts-opcode-pricing-integration">
-    <h2>Opcode, Pricing &amp; Integration Notes</h2>
-    <textarea placeholder="Notes related to opcodes, pricing, and integrations"></textarea>
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Recommended Next Steps</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_nextSteps" placeholder="Actionable next steps with owners/timeframes (auto-generated)"></textarea>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2>Support & Escalations</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_support" placeholder="Ticket summary, status breakdown, and high-impact escalations (auto-generated)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Champions & Blockers</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_champions" placeholder="Champions, blockers, and decision bottlenecks (auto-generated)"></textarea>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2>Notable Decisions & Commitments</h2>
+      <div class="mk-ta-wrap">
+        <textarea id="mkSum_decisions" placeholder="Confirmed workflow decisions and commitments (auto-generated)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block" style="margin-top:16px;">
+    <h2>Executive Narrative (One-Page Summary)</h2>
+    <div class="mk-ta-wrap">
+      <textarea id="mkSum_narrative" placeholder="A polished executive-style narrative pulled from all pages (auto-generated)"></textarea>
+    </div>
   </div>
 </section>
 
