@@ -1,1821 +1,2167 @@
 /* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT CSS (CLEAN + CONSOLIDATED)
-   ✅ Preserves existing layout/spacing across ALL pages
-   ✅ Keeps table Notes buttons EXACTLY like Pages 3/4 (white button + bubble icon)
-   ✅ Keeps Trainers / POCs + attached orange (+) behavior (no remove buttons)
-   ✅ Keeps Support Tickets 2x2 + routing behavior
-   ✅ Keeps Notes modal + Table modal + textarea expander
-   ✅ FIXES INCLUDED:
-      - No global table-layout:fixed
-      - Name / Opcode textbox overflow fixed
-      - Table expand button vertically centered (right)
-      - Notes textareas: bottom spacing matches top spacing (NO dead space)
+   myKaarma Interactive Training Checklist — FULL PROJECT JS
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v6)
+
+   ✅ Topbar title now supports:
+      DID - 1234 DealerGroup Dealership Name
+      DID - 1234 Dealership Name (if no dealer group)
+
+   ✅ Executive Summary injection support:
+      - DID / Dealership / Dealer Group lines available for summary layouts
+      - Departments/Scope line NOT forced (removed from our injected snapshot)
+
+   ✅ Training Summary page injection:
+      - Auto-inject Lead Trainer into "Trainer(s)" field (if present + empty)
+
+   ✅ Training End Date auto-set:
+      - Sets to 2 days after onsite date
+      - More flexible ID/label matching
+      - Won’t overwrite if user already set an end date
+
+   ✅ Keeps the rest:
+      - Nav, persistence
+      - Trainers + POCs
+      - Table add-row clone persistence
+      - Notes bullets + caret behavior
+      - Map update
+      - Expand buttons: tables + notes (MutationObserver catch-all)
+      - Support tickets hardened behavior
 ======================================================= */
 
-/* =======================
-   CSS VARIABLES
-======================= */
-:root{
-  --orange:#EF6D22;
-  --mykaarma-green:#CDDC39;
-
-  --light-orange:#f8b17b;
-  --gray-bg:#d7d7d7;
-  --card-bg:#ffffff;
-  --border:#dcdcdc;
-  --ink:#222222;
-
-  --radius-lg:18px;
-  --radius-md:16px;
-  --radius-sm:14px;
-
-  --shadow:0 2px 8px rgba(0,0,0,0.10);
-
-  /* default (single-column pages) */
-  --input-width:340px;
-
-  /* Notes icon colors */
-  --notes-icon:#9aa0a6;
-  --notes-icon-hover:var(--orange);
-
-  /* ✅ Expand buttons (ONE system) */
-  --mk-expand-size:16px;
-  --mk-expand-font:10px;
-  --mk-expand-radius:6px;
-
-  /* ✅ Notes textarea spacing (top == bottom) */
-  --mk-notes-gap:10px;      /* space ABOVE textarea */
-  --mk-notes-gap-bottom:10px; /* space BELOW textarea */
-
-  /* Bubble icon mask used by table Notes buttons (Pages 3/4 style) */
-  --notes-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3v3.5a.5.5 0 0 0 .85.35L11.7 19H20a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 14h-8.7l-2.3 2.3V17H4V5h16v12Z'/%3E%3C/svg%3E");
-}
-
-/* =======================
-   GLOBAL TYPOGRAPHY + RESETS
-======================= */
-html,body{
-  margin:0;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  background:var(--gray-bg);
-  color:var(--ink);
-  overflow-x:hidden;
-}
-*{ box-sizing:border-box; }
-
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-textarea,
-select{
-  font-size:13px;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-}
-
-input::placeholder,
-textarea::placeholder{
-  font-size:13px;
-  color:#9ca3af;
-  opacity:1;
-}
-
-/* Ghost placeholders */
-select{ color:var(--ink); }
-select.is-placeholder{ color:#9ca3af; }
-select:has(option[data-ghost="true"]:checked){ color:#9ca3af !important; }
-select:has(option[value=""]:checked){ color:#9ca3af !important; }
-
-input[type="date"]{ color:var(--ink); }
-input[type="date"].is-placeholder{ color:#9ca3af; }
-input[type="date"]::-webkit-datetime-edit{ color:inherit; }
-input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
-
-/* Tables should never look ghosted */
-.training-table select,
-.training-table select.is-placeholder{
-  color:var(--ink) !important;
-}
-
-/* =======================
-   TOP BAR
-======================= */
-#topbar{
-  background:linear-gradient(90deg,#000 0%, var(--orange) 100%);
-  height:70px;
-  display:flex;
-  align-items:center;
-  padding:0 40px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.25);
-  position:fixed;
-  top:0; left:0; right:0;
-  z-index:9999;
-}
-#topbar .topbar-content{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.top-logo,
-#topbar img.top-logo{
-  height:42px;
-  width:auto;
-  object-fit:contain;
-  display:block;
-}
-.topbar-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-#dealershipNameDisplay{
-  color:#fff;
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:.5px;
-  min-height:1em;
-}
-
-/* =======================
-   APP WRAPPER
-======================= */
-#app{
-  display:flex;
-  min-height:100vh;
-  margin-top:70px;
-  overflow-x:hidden;
-}
-
-/* =======================
-   SIDEBAR
-======================= */
-#sidebar{
-  background:linear-gradient(180deg,#0b1220 0%, #111827 35%, #020617 100%);
-  border-right:1px solid rgba(15,23,42,0.8);
-  width:230px;
-  padding:20px 12px 90px;
-  box-shadow:0 0 18px rgba(15,23,42,0.6);
-  position:fixed;
-  top:70px;
-  bottom:0;
-  overflow-y:auto;
-  z-index:40;
-}
-#sidebar-nav{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.nav-icon{ display:none; }
-
-.nav-btn{
-  background:transparent;
-  border:1px solid transparent;
-  padding:9px 12px;
-  font-size:12px;
-  text-align:left;
-  border-radius:999px;
-  cursor:pointer;
-  color:#e5e7eb;
-  transition:.18s;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-}
-.nav-btn:hover{
-  background:rgba(15,23,42,0.85);
-  color:#f9fafb;
-  border-color:rgba(148,163,184,0.45);
-  box-shadow:0 2px 8px rgba(15,23,42,0.7);
-}
-.nav-btn.active{
-  background:rgba(15,23,42,0.95);
-  color:#f9fafb;
-  font-weight:700;
-  border-color:var(--orange);
-  box-shadow:0 4px 10px rgba(0,0,0,0.65);
-}
-
-/* Clear All */
-#clearAllBtn{
-  position:fixed;
-  left:24px;
-  bottom:18px;
-  width:calc(230px - 48px);
-  padding:8px 12px;
-  font-size:11px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  border-radius:999px;
-  border:none;
-  background:var(--orange);
-  color:#fff;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  box-shadow:0 3px 10px rgba(239,109,34,0.45);
-  transition:background .16s, transform .16s, box-shadow .16s;
-  z-index:60;
-}
-#clearAllBtn:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-  box-shadow:0 5px 14px rgba(239,109,34,0.55);
-}
-
-/* =======================
-   MAIN CONTENT
-======================= */
-main{
-  flex:1;
-  margin-left:230px;
-  padding:30px 44px;
-  background:var(--gray-bg);
-  overflow-x:hidden;
-}
-
-/* =======================
-   PAGE SECTIONS
-======================= */
-.page-section{
-  position:relative;
-  display:none;
-  background:var(--card-bg);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
-  padding:22px 34px 28px;
-  margin:0 auto 40px;
-  width:100%;
-  max-width:1240px;
-}
-.page-section.active{ display:block; }
-
-.page-section h1{
-  color:var(--orange);
-  margin:4px 0 8px 4px;
-  font-size:26px;
-  font-weight:800;
-  text-align:left;
-  letter-spacing:.3px;
-}
-.page-section h1::after{
-  content:"";
-  display:block;
-  width:360px;
-  max-width:80%;
-  height:4px;
-  background:var(--orange);
-  margin-top:8px;
-  border-radius:2px;
-}
-.page-subtitle{
-  margin:4px 0 20px 4px;
-  font-size:13px;
-  color:#555;
-}
-#dms-integration .page-subtitle{ margin-bottom:40px; }
-
-/* Reset This Page */
-.page-section .clear-page-btn{
-  position:absolute !important;
-  top:16px !important;
-  right:24px !important;
-  left:auto !important;
-  padding:6px 14px;
-  font-size:11px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  border-radius:999px;
-  border:none;
-  background:var(--orange);
-  color:#fff;
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(239,109,34,0.35);
-  transition:background .18s, transform .18s, box-shadow .18s;
-  z-index:10;
-}
-.page-section .clear-page-btn:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(239,109,34,0.45);
-}
-
-/* =======================
-   SECTION BLOCKS
-======================= */
-.section-block{
-  background:#fff;
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  padding:0 16px 14px;
-  margin-bottom:24px;
-  position:relative;
-}
-.section-block h2{
-  margin:0 0 16px;
-  padding:10px 16px;
-  background:var(--orange);
-  color:#fff;
-  font-size:16px;
-  font-weight:800;
-  border-bottom:1px solid var(--border);
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-  margin-left:-16px;
-  margin-right:-16px;
-}
-.orange-outline-card{ border:2px solid var(--orange); }
-
-/* ✅ EXCEPTION: keep POC mini-cards exactly as they are */
-#dealership-info .primary-contacts-grid .mini-card{
-  padding:14px 14px 6px !important;
-}
-#dealership-info .primary-contacts-grid .mini-card h2{
-  margin-left:0 !important;
-  margin-right:0 !important;
-}
-
-/* =======================
-   LAYOUT HELPERS
-======================= */
-.grid-2{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
-  margin-bottom:24px;
-}
-.cards-grid{
-  display:grid;
-  gap:18px;
-  margin-bottom:24px;
-}
-.cards-grid.two-col{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-.cards-grid.three-col{ grid-template-columns:repeat(3,minmax(0,1fr)); }
-.cards-grid > .section-block{ margin-bottom:0; }
-
-.two-col-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
-  margin-bottom:24px;
-  align-items:start;
-}
-.col-stack{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-/* side-by-side layouts: shrink default right-side input width */
-.cards-grid,
-.two-col-grid{
-  --input-width:150px;
-}
-
-/* =======================
-   Q&A ROWS (NON-TABLE)
-======================= */
-.checklist-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:14px;
-  font-size:14px;
-  padding-left:32px;
-  padding-bottom:10px;
-  border-bottom:1px solid #e0e0e0;
-  position:relative;
-}
-.section-block .checklist-row:last-of-type{
-  border-bottom:none;
-  margin-bottom:8px;
-  padding-bottom:0;
-}
-.checklist-row label{
-  flex:1 1 auto;
-  min-width:0;
-  font-weight:500;
-  text-align:left;
-  padding-right:16px;
-  white-space:normal;
-}
-
-/* Default right-side inputs */
-.section-block .checklist-row input[type="text"],
-.section-block .checklist-row input[type="number"],
-.section-block .checklist-row input[type="email"],
-.section-block .checklist-row input[type="tel"],
-.section-block .checklist-row input[type="date"],
-.section-block .checklist-row select{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  height:34px;
-}
-
-/* Date inputs match + prevent giant squares */
-.section-block .checklist-row input[type="date"],
-.section-block input[type="date"]{
-  -webkit-appearance:none;
-  appearance:none;
-  box-shadow:none;
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  line-height:34px !important;
-  border-radius:var(--radius-sm) !important;
-  padding:7px 10px !important;
-}
-
-/* Textareas (base) */
-.section-block textarea{
-  width:100% !important;
-  max-width:100% !important;
-  display:block;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  resize:vertical;
-  margin:10px 0 0; /* default top gap */
-}
-
-/* Focus */
-.section-block input:focus,
-.section-block select:focus,
-.section-block textarea:focus,
-.training-table input:focus,
-.training-table select:focus{
-  border-color:var(--orange);
-  box-shadow:0 0 4px rgba(239,109,34,0.35);
-  outline:none;
-  background:#fff9f5;
-}
-
-/* =======================
-   NOTES BUTTONS — QUESTIONS (icon-only)
-======================= */
-.row-actions{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  margin-left:auto;
-}
-
-.notes-icon-btn,
-.section-block .checklist-row .notes-btn{
-  appearance:none;
-  border:0;
-  background:transparent !important;
-  padding:0 !important;
-  margin:0 !important;
-  width:20px;
-  height:20px;
-  min-width:20px;
-  min-height:20px;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  cursor:pointer;
-  user-select:none;
-  line-height:0;
-  color:var(--notes-icon);
-  transition:color .15s ease, transform .08s ease;
-}
-.notes-icon-btn:hover,
-.section-block .checklist-row .notes-btn:hover{ color:var(--notes-icon-hover); }
-.notes-icon-btn:active,
-.section-block .checklist-row .notes-btn:active{ transform:translateY(1px); }
-.notes-icon-btn:focus-visible,
-.section-block .checklist-row .notes-btn:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(239,109,34,0.28);
-  border-radius:8px;
-}
-.notes-icon-btn .notes-svg,
-.section-block .checklist-row .notes-btn .notes-svg{
-  width:18px;
-  height:18px;
-  display:block;
-  fill:currentColor;
-}
-.notes-icon-btn.has-notes,
-.section-block .checklist-row .notes-btn.has-notes,
-.notes-icon-btn.is-notes-active,
-.section-block .checklist-row .notes-btn.is-notes-active{
-  color:var(--orange);
-}
-
-/* Keep select + notes area aligned */
-.checklist-row .row-actions{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:6px !important;
-  margin-left:auto !important;
-  flex:0 0 auto !important;
-  width:auto !important;
-  max-width:none !important;
-}
-.checklist-row.integrated-plus > .row-actions{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:6px !important;
-  margin-left:8px !important;
-}
-
-/* ================================
-   INDENTED Q&A ROWS
-================================ */
-.section-block .checklist-row{ padding-right:22px; }
-.section-block .checklist-row.indent-sub{ padding-right:22px !important; }
-.section-block .checklist-row.indent-sub label{ flex:1 1 auto !important; }
-.section-block .checklist-row.indent-sub input[type="text"],
-.section-block .checklist-row.indent-sub input[type="number"],
-.section-block .checklist-row.indent-sub input[type="email"],
-.section-block .checklist-row.indent-sub input[type="tel"],
-.section-block .checklist-row.indent-sub input[type="date"],
-.section-block .checklist-row.indent-sub select{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:0 !important;
-}
-
-/* 2x2 cards: shift questions left */
-.page-section:not(#dealership-info):not(#dms-integration)
-  .cards-grid.two-col > .section-block .checklist-row{
-  padding-left:16px !important;
-}
-.page-section:not(#dealership-info):not(#dms-integration)
-  .cards-grid.two-col > .section-block .checklist-row.indent-sub{
-  padding-left:44px !important;
-}
-
-/* =======================
-   Integrated “+” rows (base input + plus)
-======================= */
-.section-block .checklist-row.integrated-plus{
-  display:flex;
-  align-items:stretch;
-  gap:0;
-}
-.section-block .checklist-row.integrated-plus label{
-  flex:1 1 auto;
-  padding-right:16px;
-  display:flex;
-  align-items:center;
-}
-.section-block .checklist-row.integrated-plus input[type="text"],
-.section-block .checklist-row.integrated-plus input[type="tel"]{
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  margin-left:auto;
-  height:34px;
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-  border-top-left-radius:var(--radius-sm);
-  border-bottom-left-radius:var(--radius-sm);
-}
-
-/* =======================================================
-   DEALERSHIP INFO PAGE FIXES (dates + POC widths)
-======================================================= */
-.training-dates-row,
-.onsite-training-dates-row{ align-items:flex-start !important; }
-.training-dates-row label,
-.onsite-training-dates-row label{ padding-top:7px !important; }
-.training-dates-row .date-stack,
-.onsite-training-dates-row .date-stack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  margin-left:auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-  align-items:stretch !important;
-}
-.training-dates-row .date-stack input[type="date"],
-.onsite-training-dates-row .date-stack input[type="date"]{
-  width:100% !important;
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  border-radius:var(--radius-sm) !important;
-  background:#f7f7f7 !important;
-  color:var(--ink) !important;
-  font-size:13px !important;
-  -webkit-appearance:none !important;
-  appearance:none !important;
-  box-shadow:none !important;
-}
-
-/* Primary contacts */
-#dealership-info{
-  --di-input-width:225px;
-  --pc-gap:30px;
-}
-#dealership-info .primary-contacts-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:var(--pc-gap) !important;
-  padding:var(--pc-gap) !important;
-  margin-top:10px;
-  align-items:start;
-  justify-items:stretch;
-}
-#dealership-info .primary-contacts-grid .mini-card{
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
-  background:#fff;
-  overflow:hidden;
-  width:100%;
-  min-width:0;
-}
-#dealership-info .primary-contacts-grid .mini-card .checklist-row{
-  padding-left:18px;
-  padding-right:18px;
-}
-#dealership-info .primary-contacts-grid .checklist-row{ padding-left:16px !important; }
-#dealership-info .primary-contacts-grid .checklist-row.indent-sub{ padding-left:30px !important; }
-#dealership-info .primary-contacts-grid .checklist-row input[type="text"],
-#dealership-info .primary-contacts-grid .checklist-row input[type="email"],
-#dealership-info .primary-contacts-grid .checklist-row input[type="tel"],
-#dealership-info .primary-contacts-grid .checklist-row select{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  height:34px !important;
-}
-
-/* Additional POC textbox width must match others */
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row input[type="text"]{
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-}
-
-/* =======================
-   ✅ NOTES CARDS — FIX (no dead space, top gap == bottom gap)
-   Only applies to NOTE-style cards in 2-col layouts (your problem area)
-======================= */
-
-/* Make ONLY the 2-col cards flex columns (NOT every .section-block globally) */
-.cards-grid.two-col > .section-block,
-.two-col-grid .section-block,
-.grid-2 > .section-block{
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-  padding-bottom:14px !important; /* keep base card padding intact */
-}
-
-/* Wrap textarea spacing control:
-   - If textarea is direct child: use margin-top + margin-bottom
-   - If textarea is in mk-ta-wrap: use wrapper margin-top + margin-bottom */
-.cards-grid.two-col > .section-block > textarea,
-.two-col-grid .section-block > textarea,
-.grid-2 > .section-block > textarea{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  resize:none !important;
-  overflow:auto !important;
-  margin:var(--mk-notes-gap) 0 var(--mk-notes-gap-bottom) !important; /* ✅ top == bottom */
-}
-
-.cards-grid.two-col > .section-block .mk-ta-wrap,
-.two-col-grid .section-block .mk-ta-wrap,
-.grid-2 > .section-block .mk-ta-wrap{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  display:flex !important;
-  flex-direction:column !important;
-  margin:var(--mk-notes-gap) 0 var(--mk-notes-gap-bottom) !important; /* ✅ top == bottom */
-}
-
-/* Kill textarea margin INSIDE wrapper so wrapper controls spacing */
-.cards-grid.two-col > .section-block .mk-ta-wrap > textarea,
-.two-col-grid .section-block .mk-ta-wrap > textarea,
-.grid-2 > .section-block .mk-ta-wrap > textarea{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  height:100% !important;
-  margin:0 !important; /* ✅ prevents “mystery” bottom gap */
-  resize:none !important;
-  overflow:auto !important;
-}
-
-/* =======================
-   TRAINERS PAGE tweaks
-======================= */
-#trainers-deployment .grid-2{ grid-template-columns:1fr !important; }
-#trainers-deployment .grid-2 > .section-block{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-}
-
-/* Divider line under base + added rows (force) */
-#trainers-deployment .section-block .checklist-row{
-  border-bottom:1px solid #e0e0e0 !important;
-  padding-bottom:10px !important;
-  margin-bottom:14px !important;
-}
-
-/* TRAINERS: INPUT + PLUS */
-#trainers-deployment .input-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  margin-left:auto !important;
-  min-width:0 !important;
-}
-#trainers-deployment .input-plus input{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  height:34px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-#trainers-deployment .input-plus .trainer-add-btn{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-#trainers-deployment .input-plus .trainer-add-btn:hover{ background:#ff8b42 !important; }
-
-#trainers-deployment #additionalTrainersContainer input[type="text"],
-#trainers-deployment #additionalTrainersContainer .checklist-row input[type="text"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-#dealership-info #additionalPocsContainer input[type="text"],
-#dealership-info #additionalPocsContainer .checklist-row input[type="text"]{
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) !important;
-}
-
-#dealership-info .additional-poc-card .input-plus,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  flex:0 0 var(--di-input-width) !important;
-  width:var(--di-input-width) !important;
-  max-width:var(--di-input-width) !important;
-  margin-left:auto !important;
-  min-width:0 !important;
-}
-#dealership-info .additional-poc-card .input-plus input,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus input[type="text"]{
-  flex:1 1 auto !important;
-  width:auto !important;
-  min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-#dealership-info .additional-poc-card .input-plus button,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button{
-  width:34px !important;
-  min-width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-}
-#dealership-info .additional-poc-card .input-plus button:hover,
-#dealership-info .primary-contacts-grid .additional-poc-card .checklist-row.integrated-plus .input-plus button:hover{
-  background:#ff8b42 !important;
-}
-
-/* =======================
-   TABLES (PAGE LAYOUT)
-======================= */
-.section{ margin-bottom:40px; }
-
-.section-header{
-  background:var(--orange);
-  color:#fff;
-  font-size:15px;
-  font-weight:900;
-  padding:10px 18px;
-  margin:18px 0 0;
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-  border-bottom:1px solid var(--border);
-}
-.table-container{
-  width:100%;
-  background:#fff;
-  border:1px solid var(--border);
-  border-top:none;
-  border-radius:0 0 var(--radius-lg) var(--radius-lg);
-  box-shadow:var(--shadow);
-  margin-bottom:32px;
-  padding:0;
-  max-width:100%;
-  position:relative;
-}
-.scroll-wrapper{
-  display:block;
-  width:100%;
-  overflow-x:auto;
-  overflow-y:hidden;
-  background:#fff;
-  padding-bottom:4px;
-  -webkit-overflow-scrolling:touch;
-}
-.training-table{
-  border-collapse:collapse;
-  width:max-content;
-  min-width:1200px;
-  table-layout:auto;
-}
-.training-table th,
-.training-table td{
-  white-space:nowrap;
-  text-align:center;
-  font-size:13px;
-  border-right:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  padding:6px 6px;
-  vertical-align:middle;
-}
-.training-table thead th{
-  background:var(--light-orange);
-  color:#fff;
-  font-weight:900;
-  position:sticky;
-  top:0;
-  z-index:3;
-}
-.training-table thead tr{ height:auto !important; }
-.training-table thead th{ padding-top:8px; padding-bottom:8px; }
-.training-table thead input,
-.training-table thead select,
-.training-table thead button{ display:none !important; }
-
-/* Sticky first column (default tables) */
-.training-table th:first-child,
-.training-table td:first-child{
-  position:sticky;
-  left:0;
-  z-index:4;
-  background:#fff;
-  padding-left:10px;
-}
-.training-table thead th:first-child{
-  background:var(--light-orange) !important;
-  color:#fff !important;
-  z-index:5;
-}
-
-/* column widths */
-.training-table th:first-child,
-.training-table td:first-child{ width:240px; min-width:240px; }
-.training-table th:nth-child(2),
-.training-table td:nth-child(2){ width:210px; min-width:210px; }
-
-/* table inputs */
-.training-table input[type="text"],
-.training-table select{
-  width:100%;
-  min-width:180px;
-  padding:5px 5px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  text-align:center;
-  height:32px;
-  box-sizing:border-box;
-  max-width:100%;
-}
-.training-table td input,
-.training-table td select,
-.training-table td textarea{
-  max-width:100%;
-  box-sizing:border-box;
-  min-width:0;
-}
-
-.training-table tr:nth-child(odd){ background:#fff; }
-.training-table tr:nth-child(even){ background:#fafafa; }
-
-/* Table footer */
-.table-footer{
-  width:100%;
-  background:#f5f5f5;
-  border-top:1px solid var(--border);
-  padding:6px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  border-bottom-left-radius:var(--radius-lg);
-  border-bottom-right-radius:var(--radius-lg);
-  position:relative;
-}
-.table-footer .add-row{
-  background:var(--orange);
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:14px;
-  font-weight:900;
-  cursor:pointer;
-  transition:.2s;
-  box-shadow:0 1px 3px rgba(239,109,34,0.25);
-  line-height:1;
-}
-.table-footer .add-row:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-}
-
-/* =========================================================
-   ✅ EXPAND BUTTONS — ONE SYSTEM
-========================================================= */
-.mk-table-expand-btn,
-.mk-ta-expand,
-.mk-mini-expand-btn{
-  width:var(--mk-expand-size) !important;
-  height:var(--mk-expand-size) !important;
-  min-width:var(--mk-expand-size) !important;
-  min-height:var(--mk-expand-size) !important;
-  padding:0 !important;
-  border-radius:var(--mk-expand-radius) !important;
-  border:1px solid #d1d5db !important;
-  background:#ffffffee !important;
-  color:#111827 !important;
-  cursor:pointer !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  font-size:var(--mk-expand-font) !important;
-  line-height:1 !important;
-  box-shadow:0 1px 3px rgba(0,0,0,0.12) !important;
-  transition:border-color .12s, background .12s, transform .12s !important;
-}
-.mk-table-expand-btn:hover,
-.mk-ta-expand:hover,
-.mk-mini-expand-btn:hover{
-  border-color:var(--orange) !important;
-  background:#fff !important;
-  transform:translateY(-1px) !important;
-}
-
-/* ✅ TABLE expand placement */
-.table-footer .mk-table-expand-btn{
-  position:absolute !important;
-  right:10px !important;
-  top:50% !important;
-  bottom:auto !important;
-  transform:translateY(-50%) !important;
-}
-
-/* Notes expander placement */
-.mk-ta-wrap{ position:relative; }
-.mk-ta-wrap .mk-ta-expand{
-  position:absolute !important;
-  right:8px !important;
-  bottom:8px !important;
-  z-index:10 !important;
-}
-
-/* acceptance helper colors */
-.training-table select.accept-yes{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
-.training-table select.accept-neutral{ background:#fef9c3; border-color:#eab308; color:#854d0e; }
-.training-table select.accept-no{ background:#fee2e2; border-color:#ef4444; color:#7f1d1d; }
-.training-table select.accept-na{ background:#e5e7eb; border-color:#9ca3af; color:#374151; }
-
-/* Opcodes: first column not sticky */
-#opcodes-pricing .training-table th:first-child,
-#opcodes-pricing .training-table td:first-child{
-  position:static;
-  left:auto;
-  z-index:1;
-  width:60px;
-  min-width:60px;
-  background:inherit;
-  padding-left:6px;
-  text-align:center !important;
-}
-#opcodes-pricing .training-table td:first-child input[type="checkbox"]{
-  display:inline-block !important;
-  margin:0 auto !important;
-}
-
-/* Training Checklist — checkbox + input spacing */
-#training-checklist .training-table td:first-child{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  padding-left:10px;
-  padding-right:10px;
-}
-#training-checklist .training-table td:first-child input[type="checkbox"]{
-  flex:0 0 auto;
-  margin:0;
-}
-#training-checklist .training-table td:first-child input[type="text"]{
-  flex:1 1 auto;
-  width:auto;
-  min-width:0;
-  padding-left:10px;
-  padding-right:10px;
-  text-align:center;
-}
-
-/* Names/Opcode overflow containment */
-#training-checklist .training-table td:first-child input[type="text"],
-#opcodes-pricing .training-table td:nth-child(2) input[type="text"],
-#opcodes-pricing .training-table td:nth-child(2) input[type="number"],
-#opcodes-pricing .training-table td:nth-child(2) textarea{
-  max-width:100% !important;
-  width:100% !important;
-  min-width:0 !important;
-  box-sizing:border-box !important;
-}
-
-/* Names column centered */
-.training-table th:nth-child(2),
-.training-table td:nth-child(2){ text-align:center !important; }
-
-/* =======================
-   TABLE NOTES COLUMN
-======================= */
-.notes-col-head,
-.notes-col-cell{
-  width:56px;
-  text-align:center;
-  white-space:nowrap;
-}
-.training-table .notes-col-head,
-.training-table .notes-col-cell{
-  width:56px !important;
-  min-width:56px !important;
-  max-width:56px !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-  padding:8px 6px !important;
-}
-
-/* =========================================================
-   ✅ TABLE NOTES BUTTON — P3/P4 Match
-========================================================= */
-.training-table .notes-btn{
-  width:34px !important;
-  height:34px !important;
-  border-radius:10px !important;
-  border:1px solid var(--border) !important;
-  background:#fff !important;
-  cursor:pointer !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  box-shadow:0 1px 2px rgba(0,0,0,.06) !important;
-  transition:transform .08s ease, background .15s ease, border-color .15s ease !important;
-}
-.training-table .notes-btn:hover{
-  border-color:rgba(239,109,34,.45) !important;
-  background:rgba(239,109,34,.06) !important;
-}
-.training-table .notes-btn:active{ transform:translateY(1px) !important; }
-.training-table .notes-btn:focus-visible{
-  outline:2px solid rgba(239,109,34,.55) !important;
-  outline-offset:2px !important;
-}
-.training-table .notes-btn::before{
-  content:"";
-  width:18px;
-  height:18px;
-  display:block;
-  background:var(--notes-icon);
-  -webkit-mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-  mask: var(--notes-icon-mask) center / 18px 18px no-repeat;
-}
-.training-table .notes-btn:hover::before{ background:var(--notes-icon-hover); }
-.training-table .notes-btn.is-notes-active{
-  border-color:rgba(239,109,34,.55) !important;
-  background:rgba(239,109,34,.06) !important;
-}
-.training-table .notes-btn.is-notes-active::before{
-  background:var(--notes-icon-hover) !important;
-}
-
-/* =======================
-   SUPPORT TICKETS — FULL SECTION (2x2)
-   (unchanged from your file)
-======================= */
-#support-tickets .ticket-sections-stack{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
-#support-tickets #openTicketsContainer,
-#support-tickets #tierTwoTicketsContainer,
-#support-tickets #closedResolvedTicketsContainer,
-#support-tickets #closedFeatureTicketsContainer{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
-  align-items:start;
-}
-#support-tickets .ticket-group{
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  background:#fff;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  width:100%;
-  min-width:0;
-}
-#support-tickets .ticket-group-inner{ padding:16px 18px 16px; font-size:13px; line-height:1.4; }
-#support-tickets .ticket-group-inner,
-#support-tickets .ticket-group-inner *{ font-weight:400; }
-#support-tickets .ticket-row label{ font-weight:500; font-size:13px; color:#222; }
-
-#support-tickets .ticket-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  column-gap:18px;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid #ececec;
-}
-#support-tickets .ticket-row:last-child{ border-bottom:none; }
-#support-tickets .ticket-row > input[type="text"],
-#support-tickets .ticket-row > select{
-  width:100%;
-  height:34px;
-  padding:7px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-}
-#support-tickets .ticket-number-wrap{ display:flex; align-items:stretch; width:100%; }
-#support-tickets .ticket-number-input{
-  flex:1;
-  height:34px;
-  padding:7px 10px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
-}
-#support-tickets .add-ticket-btn{
-  width:34px;
-  height:34px;
-  border:1px solid var(--orange);
-  background:var(--orange);
-  color:#fff;
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-#support-tickets .ticket-group:not([data-base="true"]) .add-ticket-btn{ display:none !important; }
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-wrap{ display:block !important; }
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  border-radius:var(--radius-sm) !important;
-  border-right:1px solid var(--border) !important;
-}
-#support-tickets .ticket-row.ticket-summary-row{
-  grid-template-columns:1fr;
-  align-items:start;
-  border-bottom:none;
-  padding:10px 0;
-}
-#support-tickets .ticket-row.ticket-summary-row textarea{
-  width:100%;
-  min-height:80px;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  resize:vertical;
-  margin-bottom:6px;
-}
-#support-tickets .ticket-group[data-base="true"] .ticket-disclaimer{
-  margin-top:6px;
-  padding:6px 12px;
-  font-size:12px;
-  line-height:1.35;
-  color:#6b7280;
-}
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-disclaimer{ display:none; }
-#support-tickets .ticket-group[data-base="true"] .ticket-group-inner{ padding-bottom:10px; }
-#support-tickets .ticket-status-select,
-#support-tickets .ticket-status-select:disabled{
-  color:#111;
-  opacity:1;
-  background:#f7f7f7;
-  cursor:default;
-}
-@media (max-width:980px){
-  #support-tickets #openTicketsContainer,
-  #support-tickets #tierTwoTicketsContainer,
-  #support-tickets #closedResolvedTicketsContainer,
-  #support-tickets #closedFeatureTicketsContainer{
-    grid-template-columns:1fr;
+(() => {
+  "use strict";
+
+  /* =======================
+     CONFIG
+  ======================= */
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const AUTO_ID_ATTR = "data-mk-id";
+  const AUTO_ROW_ATTR = "data-mk-row";
+  const AUTO_CARD_ATTR = "data-mk-card";
+
+  const DEBUG = false;
+  const log = (...args) => (DEBUG ? console.log("[mk]", ...args) : void 0);
+
+  // ====== TOPBAR + SUMMARY SOURCE FIELD IDS ======
+  const MK_IDS = {
+    dealershipName: ["dealershipNameInput"],
+    did: ["dealershipDidInput"],
+    dealerGroup: ["dealerGroupInput"],
+
+    // best-effort date ids (we also label-scan)
+    onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
+    trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
+
+    // best-effort lead trainer ids (we also label/placeholder scan)
+    leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+
+    // best-effort training summary trainer(s) field ids (we also label scan)
+    summaryTrainers: ["trainingSummaryTrainers", "trainerSummaryInput", "trainersSummaryInput", "trainerInputSummary"],
+  };
+
+  /* =======================
+     HELPERS
+  ======================= */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const uid = (() => {
+    let n = 0;
+    return (prefix = "mk") =>
+      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
+  })();
+
+  const isEl = (x) => x && x.nodeType === 1;
+
+  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
+
+  const isFormField = (el) =>
+    isEl(el) &&
+    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
+
+  const ensureId = (el) => {
+    if (!isEl(el)) return null;
+    if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, uid("fld"));
+    return el.getAttribute(AUTO_ID_ATTR);
+  };
+
+  const getFieldValue = (el) => {
+    if (!isFormField(el)) return null;
+    if (el.matches("input[type='checkbox']")) return !!el.checked;
+    if (el.matches("input[type='radio']")) return el.checked ? el.value : null;
+    if (el.matches("input, select, textarea")) return el.value;
+    if (el.matches("[contenteditable='true']")) return el.textContent || "";
+    return null;
+  };
+
+  const setFieldValue = (el, val) => {
+    if (!isFormField(el)) return;
+    if (el.matches("input[type='checkbox']")) {
+      el.checked = !!val;
+      return;
+    }
+    if (el.matches("input[type='radio']")) {
+      el.checked = el.value === val;
+      return;
+    }
+    if (el.matches("input, select, textarea")) {
+      el.value = val ?? "";
+      return;
+    }
+    if (el.matches("[contenteditable='true']")) {
+      el.textContent = val ?? "";
+      return;
+    }
+  };
+
+  const readState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  };
+
+  const writeState = (state) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn("Could not save state:", e);
+    }
+  };
+
+  const saveField = (el) => {
+    if (!isFormField(el)) return;
+    ensureId(el);
+    const id = el.getAttribute(AUTO_ID_ATTR);
+    const state = readState();
+    state.__fields = state.__fields || {};
+    state.__fields[id] = getFieldValue(el);
+    writeState(state);
+  };
+
+  const restoreAllFields = () => {
+    const state = readState();
+    const fieldsState = state.__fields || {};
+    const fields = $$(`[${AUTO_ID_ATTR}]`);
+    fields.forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      if (!(id in fieldsState)) return;
+      setFieldValue(el, fieldsState[id]);
+    });
+  };
+
+  const assignIdsToAllFields = (root = document) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", root);
+    fields.forEach((el) => ensureId(el));
+  };
+
+  const triggerInputChange = (el) => {
+    if (!el) return;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const setGhostStyles = (root = document) => {
+    root.querySelectorAll("select").forEach((sel) => {
+      const first = sel.options?.[0];
+      const isGhost =
+        !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
+      sel.classList.toggle("is-placeholder", !!isGhost);
+    });
+
+    root.querySelectorAll('input[type="date"]').forEach((d) => {
+      d.classList.toggle("is-placeholder", !d.value);
+    });
+  };
+
+  const preserveScroll = (fn) => {
+    const x = window.scrollX || 0;
+    const y = window.scrollY || 0;
+    fn();
+    requestAnimationFrame(() => window.scrollTo(x, y));
+  };
+
+  const mkFirstValueByIds = (...ids) => {
+    for (const id of ids.flat()) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const v = (el.value || "").trim();
+      if (v) return v;
+    }
+    return "";
+  };
+
+  const mkFormatTopbarTitle = ({ did, dealerGroup, dealership }) => {
+    const d = String(did || "").trim();
+    const g = String(dealerGroup || "").trim();
+    const n = String(dealership || "").trim();
+
+    if (!d && !n) return "";
+    if (!d) return n;
+
+    if (g) return `DID - ${d} ${g} ${n}`.replace(/\s+/g, " ").trim();
+    return `DID - ${d} ${n}`.replace(/\s+/g, " ").trim();
+  };
+
+  const mkSyncTopbarTitle = () => {
+    const display = document.getElementById("dealershipNameDisplay");
+    if (!display) return;
+
+    const dealership = mkFirstValueByIds(MK_IDS.dealershipName);
+    const did = mkFirstValueByIds(MK_IDS.did);
+    const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
+
+    display.textContent = mkFormatTopbarTitle({ did, dealerGroup, dealership });
+  };
+
+  /* =======================
+     LABEL + PLACEHOLDER FINDERS (best-effort)
+  ======================= */
+  const mkFindFieldByLabelText = (sectionEl, labelIncludes) => {
+    if (!sectionEl) return null;
+    const want = String(labelIncludes || "").toLowerCase().trim();
+    if (!want) return null;
+
+    const rows = $$(".checklist-row", sectionEl);
+    for (const row of rows) {
+      const lab = row.querySelector("label");
+      const t = (lab?.textContent || "").toLowerCase().trim();
+      if (!t) continue;
+      if (!t.includes(want)) continue;
+
+      const field =
+        row.querySelector("input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea") ||
+        null;
+      if (field) return field;
+    }
+    return null;
+  };
+
+  const mkFindTextInputByPlaceholder = (root, placeholderIncludes) => {
+    const want = String(placeholderIncludes || "").toLowerCase().trim();
+    if (!want) return null;
+    const inputs = $$("input[type='text'], input[type='email'], input[type='tel']", root);
+    for (const inp of inputs) {
+      const ph = (inp.getAttribute("placeholder") || "").toLowerCase();
+      if (ph.includes(want)) return inp;
+    }
+    return null;
+  };
+
+  const mkFindDateInputByLabelOrId = (root, ids, labelIncludes) => {
+    // 1) explicit ids
+    for (const id of ids || []) {
+      const el = document.getElementById(id);
+      if (el && el.matches('input[type="date"]')) return el;
+    }
+    // 2) label scan
+    const sections = $$(".page-section", root);
+    for (const sec of sections) {
+      const found = mkFindFieldByLabelText(sec, labelIncludes);
+      if (found && found.matches('input[type="date"]')) return found;
+    }
+    // 3) fallback: any date input whose id/name hints
+    const allDates = $$('input[type="date"]', root);
+    for (const d of allDates) {
+      const id = (d.id || "").toLowerCase();
+      const nm = (d.name || "").toLowerCase();
+      if (id.includes(labelIncludes) || nm.includes(labelIncludes)) return d;
+    }
+    return null;
+  };
+
+  /* =======================
+     OS-STYLE POPUPS (OK + OK/CANCEL)
+  ======================= */
+  const mkPopup = (() => {
+    const STYLE_ID = "mk-popup-style-v1";
+    let active = null;
+
+    const ensureStyles = () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-pop-backdrop{
+          position:fixed; inset:0; background:rgba(0,0,0,.35);
+          z-index:100000; display:flex; align-items:flex-start; justify-content:center;
+          padding-top:110px;
+        }
+        .mk-pop-box{
+          width:min(520px, calc(100vw - 28px));
+          background:#fff; border:1px solid rgba(0,0,0,.10);
+          border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25);
+          overflow:hidden;
+        }
+        .mk-pop-head{
+          background:#EF6D22; color:#fff;
+          padding:10px 16px;
+          font-weight:900; letter-spacing:.2px;
+          display:flex; align-items:center; justify-content:space-between;
+        }
+        .mk-pop-title{ font-size:15px; }
+        .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap;}
+        .mk-pop-actions{
+          padding:12px 16px 14px;
+          display:flex; justify-content:flex-end; gap:10px;
+        }
+        .mk-pop-btn{
+          border:none; cursor:pointer;
+          height:34px; padding:0 16px;
+          border-radius:999px; font-weight:900; font-size:12px;
+          letter-spacing:.08em; text-transform:uppercase;
+          display:inline-flex; align-items:center; justify-content:center;
+        }
+        .mk-pop-btn--ok{ background:#EF6D22; color:#fff; box-shadow:0 3px 10px rgba(239,109,34,.35); }
+        .mk-pop-btn--ok:hover{ background:#ff8b42; }
+        .mk-pop-btn--cancel{
+          background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);
+        }
+        .mk-pop-btn--cancel:hover{ background:#e5e7eb; }
+      `;
+      document.head.appendChild(s);
+    };
+
+    const close = () => {
+      if (!active) return;
+      active.remove();
+      active = null;
+      document.removeEventListener("keydown", onKey);
+    };
+
+    const onKey = (e) => {
+      if (!active) return;
+      if (e.key === "Escape") close();
+    };
+
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
+      ensureStyles();
+      close();
+
+      const back = document.createElement("div");
+      back.className = "mk-pop-backdrop";
+
+      const box = document.createElement("div");
+      box.className = "mk-pop-box";
+
+      const head = document.createElement("div");
+      head.className = "mk-pop-head";
+
+      const t = document.createElement("div");
+      t.className = "mk-pop-title";
+      t.textContent = title;
+
+      head.appendChild(t);
+
+      const body = document.createElement("div");
+      body.className = "mk-pop-body";
+      body.textContent = message;
+
+      const actions = document.createElement("div");
+      actions.className = "mk-pop-actions";
+
+      if (cancelText) {
+        const cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.className = "mk-pop-btn mk-pop-btn--cancel";
+        cancel.textContent = cancelText;
+        cancel.addEventListener("click", () => {
+          close();
+          if (typeof onCancel === "function") onCancel();
+        });
+        actions.appendChild(cancel);
+      }
+
+      const ok = document.createElement("button");
+      ok.type = "button";
+      ok.className = "mk-pop-btn mk-pop-btn--ok";
+      ok.textContent = okText;
+      ok.addEventListener("click", () => {
+        close();
+        if (typeof onOk === "function") onOk();
+      });
+      actions.appendChild(ok);
+
+      box.appendChild(head);
+      box.appendChild(body);
+      box.appendChild(actions);
+      back.appendChild(box);
+
+      back.addEventListener("click", (e) => {
+        if (e.target === back) close();
+      });
+
+      document.body.appendChild(back);
+      active = back;
+
+      document.addEventListener("keydown", onKey);
+      ok.focus();
+    };
+
+    const ok = (message, opts = {}) =>
+      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+
+    const confirm = (message, opts = {}) =>
+      open({
+        title: opts.title || "Confirm",
+        message,
+        okText: opts.okText || "OK",
+        cancelText: opts.cancelText || "Cancel",
+        onOk: opts.onOk,
+        onCancel: opts.onCancel,
+      });
+
+    return { ok, confirm, close };
+  })();
+
+  try {
+    window.mkPopup = mkPopup;
+  } catch {}
+
+  /* =======================
+     CLONE STATE (for restore)
+  ======================= */
+  const cloneState = {
+    get() {
+      const state = readState();
+      state.__clones = state.__clones || {
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
+      };
+      return state.__clones;
+    },
+    set(next) {
+      const state = readState();
+      state.__clones = next;
+      writeState(state);
+    },
+    clearAll() {
+      const state = readState();
+      state.__clones = { trainers: [], pocs: [], tables: {}, tickets: [] };
+      writeState(state);
+    },
+  };
+
+  /* =======================
+     NAV
+  ======================= */
+  const setActiveSection = (targetId) => {
+    if (!targetId) return;
+
+    const allSections = $$(".page-section");
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    allSections.forEach((s) => s.classList.remove("active"));
+    target.classList.add("active");
+
+    $$(".nav-btn").forEach((b) => b.classList.remove("active"));
+    const activeBtn = $(`.nav-btn[data-target="${CSS.escape(targetId)}"]`);
+    if (activeBtn) activeBtn.classList.add("active");
+
+    const state = readState();
+    state.__activeSection = targetId;
+    writeState(state);
+
+    try {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      target.scrollIntoView(true);
+    }
+  };
+
+  const initNav = () => {
+    const state = readState();
+    const remembered = state.__activeSection;
+    const alreadyActive = $(".page-section.active")?.id;
+    const first = $$(".page-section")[0]?.id;
+    setActiveSection(alreadyActive || remembered || first);
+  };
+
+  /* =======================
+     NOTES BUTTON VISUAL RESET
+  ======================= */
+  const clearAllNotesButtonStates = (root = document) => {
+    root
+      .querySelectorAll(
+        ".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active"
+      )
+      .forEach((btn) => {
+        btn.classList.remove("has-notes");
+        btn.classList.remove("is-notes-active");
+      });
+  };
+
+  /* =======================
+     CLEAR ALL + RESET PAGE
+  ======================= */
+  const removeDynamicClonesIn = (root = document) => {
+    const trainerContainer = $("#additionalTrainersContainer", root);
+    if (trainerContainer) trainerContainer.innerHTML = "";
+
+    $$(".additional-poc-card", root).forEach((card) => {
+      if (card.getAttribute("data-base") === "true") return;
+      card.remove();
+    });
+
+    $$("table.training-table tbody", root).forEach((tb) => {
+      $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tb).forEach((tr) => tr.remove());
+    });
+
+    $$(".ticket-group", root).forEach((g) => {
+      if (g.getAttribute("data-base") === "true") return;
+      g.remove();
+    });
+  };
+
+  const clearFieldsIn = (root = document) => {
+    root.querySelectorAll("input").forEach((inp) => {
+      const type = (inp.type || "").toLowerCase();
+      if (["button", "submit", "reset", "hidden"].includes(type)) return;
+      if (type === "checkbox" || type === "radio") inp.checked = false;
+      else inp.value = "";
+      triggerInputChange(inp);
+    });
+
+    root.querySelectorAll("textarea").forEach((ta) => {
+      ta.value = "";
+      triggerInputChange(ta);
+    });
+
+    root.querySelectorAll("select").forEach((sel) => {
+      sel.selectedIndex = 0;
+      triggerInputChange(sel);
+    });
+
+    root.querySelectorAll("[contenteditable='true']").forEach((ce) => {
+      ce.textContent = "";
+      triggerInputChange(ce);
+    });
+
+    setGhostStyles(root);
+  };
+
+  const clearAll = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+
+    removeDynamicClonesIn(document);
+    clearFieldsIn(document);
+
+    const map = $("#dealershipMapFrame");
+    if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
+
+    const disp = $("#dealershipNameDisplay");
+    if (disp) disp.textContent = "";
+
+    clearAllNotesButtonStates(document);
+    cloneState.clearAll();
+    log("Clear All complete");
+  };
+
+  const clearSection = (sectionEl) => {
+    if (!sectionEl) return;
+
+    const state = readState();
+    state.__fields = state.__fields || {};
+    $$(`[${AUTO_ID_ATTR}]`, sectionEl).forEach((el) => {
+      const id = el.getAttribute(AUTO_ID_ATTR);
+      delete state.__fields[id];
+    });
+
+    if (sectionEl.id === "trainers-deployment") {
+      const clones = cloneState.get();
+      clones.trainers = [];
+      cloneState.set(clones);
+    }
+
+    if (sectionEl.id === "dealership-info") {
+      const clones = cloneState.get();
+      clones.pocs = [];
+      cloneState.set(clones);
+
+      const map = $("#dealershipMapFrame", sectionEl);
+      if (map) map.src = "https://www.google.com/maps?q=United%20States&z=4&output=embed";
+    }
+
+    if ($("table.training-table", sectionEl)) {
+      const clones = cloneState.get();
+      clones.tables = {};
+      cloneState.set(clones);
+    }
+
+    if ($(".ticket-group", sectionEl)) {
+      const clones = cloneState.get();
+      clones.tickets = [];
+      cloneState.set(clones);
+    }
+
+    writeState(state);
+
+    removeDynamicClonesIn(sectionEl);
+    clearFieldsIn(sectionEl);
+    clearAllNotesButtonStates(sectionEl);
+
+    enforceBaseTicketStatusLock();
+    mkSyncTopbarTitle();
+    mkAutofillSummaryTrainerIfEmpty();
+
+    log("Cleared section:", sectionEl.id);
+  };
+
+  /* =======================
+     ADD TRAINER (+)
+  ======================= */
+  const buildTrainerRow = (value = "") => {
+    const wrap = document.createElement("div");
+    wrap.className = "checklist-row integrated-plus indent-sub";
+    wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
+
+    const label = document.createElement("label");
+    label.textContent = "Additional Trainer";
+
+    const inputPlus = document.createElement("div");
+    inputPlus.className = "input-plus";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Enter additional trainer name";
+    input.autocomplete = "off";
+    input.value = value;
+
+    inputPlus.appendChild(input);
+    wrap.appendChild(label);
+    wrap.appendChild(inputPlus);
+
+    ensureId(input);
+    saveField(input);
+    return wrap;
+  };
+
+  const addTrainerRow = () => {
+    const input = $("#additionalTrainerInput");
+    const container = $("#additionalTrainersContainer");
+    if (!input || !container) return;
+
+    const name = (input.value || "").trim();
+    const row = buildTrainerRow(name);
+    container.appendChild(row);
+
+    const clones = cloneState.get();
+    clones.trainers.push({ value: name });
+    cloneState.set(clones);
+
+    input.value = "";
+    saveField(input);
+    input.focus();
+
+    // keep summary trainer(s) filled if empty
+    mkAutofillSummaryTrainerIfEmpty();
+  };
+
+  /* =======================
+     ADD POC (+)
+  ======================= */
+  const readPocCardValues = (card) => ({
+    name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
+    role: (card.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
+    cell: (card.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
+    email: (card.querySelector('input[type="email"]')?.value || "").trim(),
+  });
+
+  const writePocCardValues = (card, p) => {
+    const name = card.querySelector('input[placeholder="Enter name"]');
+    const role = card.querySelector('input[placeholder="Enter role"]');
+    const cell = card.querySelector('input[placeholder="Enter cell"]');
+    const email = card.querySelector('input[type="email"]');
+
+    if (name) name.value = p?.name || "";
+    if (role) role.value = p?.role || "";
+    if (cell) cell.value = p?.cell || "";
+    if (email) email.value = p?.email || "";
+
+    [name, role, cell, email].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+  };
+
+  const buildPocCard = (p = null) => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return null;
+
+    const clone = base.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "poc");
+
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
+
+    const row = clone.querySelector(".checklist-row.integrated-plus");
+    if (row) row.classList.remove("integrated-plus");
+
+    const ip = clone.querySelector(".input-plus");
+    if (ip) ip.classList.add("mk-solo-input");
+
+    clone.classList.add("mk-poc-clone", "mk-round-right");
+
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
+
+    if (p) writePocCardValues(clone, p);
+    return clone;
+  };
+
+  const persistAllPocs = () => {
+    const clones = cloneState.get();
+    clones.pocs = $$(".additional-poc-card")
+      .filter((c) => c.getAttribute("data-base") !== "true")
+      .map((c) => readPocCardValues(c));
+    cloneState.set(clones);
+  };
+
+  const addPocCard = () => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return;
+
+    const newCard = buildPocCard(null);
+    if (!newCard) return;
+
+    const allCards = $$(".additional-poc-card");
+    const last = allCards[allCards.length - 1] || base;
+    last.insertAdjacentElement("afterend", newCard);
+
+    persistAllPocs();
+
+    const first = newCard.querySelector('input[placeholder="Enter name"], input, textarea, select');
+    if (first) first.focus();
+  };
+
+  /* =======================
+     TABLES: ADD ROW + PERSIST/RESTORE
+  ======================= */
+  const getTableKey = (table) =>
+    table?.getAttribute("data-table-key") ||
+    table?.id ||
+    `table-${$$("table.training-table").indexOf(table)}`;
+
+  const clearRowFields = (tr) => {
+    $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
+      if (el.matches("input[type='checkbox'], input[type='radio']")) {
+        el.checked = false;
+      } else if (el.matches("[contenteditable='true']")) {
+        el.textContent = "";
+      } else {
+        el.value = "";
+      }
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+  };
+
+  const extractRowValues = (tr) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", tr);
+    if (!fields.length) return $$("td", tr).map((td) => (td.textContent || "").trim());
+    return fields.map((el) => getFieldValue(el));
+  };
+
+  const applyRowValues = (tr, values) => {
+    const fields = $$("input, select, textarea, [contenteditable='true']", tr);
+    if (!fields.length) return;
+    fields.forEach((el, i) => {
+      setFieldValue(el, Array.isArray(values) ? values[i] : "");
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+  };
+
+  const persistTable = (table) => {
+    const key = getTableKey(table);
+    const clones = cloneState.get();
+    const tbody = $("tbody", table);
+    if (!tbody) return;
+    const clonedRows = $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody);
+    clones.tables[key] = clonedRows.map((r) => extractRowValues(r));
+    cloneState.set(clones);
+  };
+
+  const cloneTableRow = (btn) => {
+    const footer = btn.closest(".table-footer");
+    const table =
+      footer?.closest(".section")?.querySelector("table.training-table") ||
+      footer?.closest(".section-block")?.querySelector("table.training-table") ||
+      footer?.parentElement?.querySelector("table.training-table") ||
+      footer?.closest(".table-container")?.querySelector("table.training-table") ||
+      footer?.closest("table.training-table");
+    if (!table) return;
+
+    const tbody = $("tbody", table);
+    if (!tbody) return;
+
+    const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
+    if (!baseRow) return;
+
+    const clone = baseRow.cloneNode(true);
+    clone.setAttribute(AUTO_ROW_ATTR, "cloned");
+    clearRowFields(clone);
+
+    tbody.appendChild(clone);
+    persistTable(table);
+
+    const first = $("input, textarea, select, [contenteditable='true']", clone);
+    if (first) first.focus();
+  };
+
+  const rebuildTableClones = () => {
+    const clones = cloneState.get();
+    const tables = $$("table.training-table");
+
+    tables.forEach((table) => {
+      const key = getTableKey(table);
+      const rows = clones.tables?.[key];
+      if (!rows || !rows.length) return;
+
+      const tbody = $("tbody", table);
+      if (!tbody) return;
+
+      $$(`tr[${AUTO_ROW_ATTR}="cloned"]`, tbody).forEach((tr) => tr.remove());
+
+      const baseRow = tbody.querySelector('tr[data-base="true"]') || tbody.querySelector("tr");
+      if (!baseRow) return;
+
+      rows.forEach((vals) => {
+        const tr = baseRow.cloneNode(true);
+        tr.setAttribute(AUTO_ROW_ATTR, "cloned");
+        clearRowFields(tr);
+        applyRowValues(tr, vals);
+        tbody.appendChild(tr);
+      });
+    });
+  };
+
+  // Ensure each table has at least 3 starter rows (not "added rows")
+  function seedStarterRowsToThree() {
+    document.querySelectorAll("table.training-table").forEach((table) => {
+      const tbody = table.querySelector("tbody");
+      if (!tbody) return;
+
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+      );
+      if (existing.length >= 3) return;
+
+      const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
+      if (!baseRow) return;
+
+      const needed = 3 - existing.length;
+      for (let i = 0; i < needed; i++) {
+        const clone = baseRow.cloneNode(true);
+
+        clone.removeAttribute(AUTO_ROW_ATTR);
+        clone.removeAttribute("data-base");
+
+        clone.querySelectorAll("input, select, textarea").forEach((el) => {
+          if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+          else el.value = "";
+          el.removeAttribute(AUTO_ID_ATTR);
+          ensureId(el);
+          saveField(el);
+        });
+
+        tbody.appendChild(clone);
+      }
+    });
   }
-}
 
-/* =======================
-   DMS INTEGRATION
-   (unchanged from your file)
-======================= */
-#dms-integration .dms-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:48px;
-  margin-top:14px;
-  align-items:start;
-}
-#dms-integration .dms-card{
-  width:520px;
-  max-width:100%;
-  margin:0 auto;
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  background:#fff;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-#dms-integration .dms-card-header{
-  background:var(--orange) !important;
-  color:#fff !important;
-  padding:10px 16px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:12px !important;
-  border-bottom:1px solid var(--border) !important;
-}
-#dms-integration .dms-name{ font-weight:900 !important; font-size:16px !important; color:#fff !important; letter-spacing:.3px; }
-#dms-integration .dms-chip{
-  font-size:11px !important;
-  font-weight:900 !important;
-  letter-spacing:0.06em !important;
-  text-transform:uppercase !important;
-  padding:6px 10px !important;
-  border-radius:999px !important;
-  border:1px solid rgba(255,255,255,0.35) !important;
-  color:#fff !important;
-}
-#dms-integration .dms-chip-push{ background:rgba(255,255,255,0.18) !important; border-color:rgba(255,255,255,0.35) !important; color:#fff !important; }
-#dms-integration .dms-card-header .dms-chip.dms-chip-pull{ background:rgba(205,220,57,0.45) !important; border-color:rgba(255,255,255,0.35) !important; color:#fff !important; }
+  /* =======================
+     NOTES (working version)
+  ======================= */
+  const Notes = (() => {
+    const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
-#dms-integration .dms-list{ list-style:none; padding:10px 12px 14px; margin:0; }
-#dms-integration .dms-list li{
-  position:relative;
-  padding:10px 10px;
-  padding-right:160px;
-  border-bottom:1px solid #efefef;
-}
-#dms-integration .dms-list li:last-child{ border-bottom:none; }
-#dms-integration .dms-row-top{ display:block; margin-bottom:4px; }
-#dms-integration .dms-field{ font-weight:800; color:#111827; font-size:13px; }
-#dms-integration .dms-list p{ margin:0; font-size:12px; color:#6b7280; }
-#dms-integration .dms-list .dms-tag{
-  position:absolute;
-  right:52px;
-  top:50%;
-  transform:translate(50%, -50%);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:3px 8px;
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:0.02em;
-  text-transform:uppercase;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  color:#111827;
-  white-space:nowrap;
-}
-#dms-integration .dms-list .dms-tag-auto{ border-color:rgba(34,197,94,0.35); background:rgba(34,197,94,0.12); color:#14532d; }
-#dms-integration .dms-list .dms-tag-ondemand{ border-color:rgba(245,158,11,0.35); background:rgba(245,158,11,0.14); color:#78350f; }
-#dms-integration .dms-list .dms-tag-withro{ border-color:rgba(59,130,246,0.35); background:rgba(59,130,246,0.12); color:#1e3a8a; }
-#dms-integration .dms-list .dms-tag-planned{ border-color:rgba(99,102,241,0.35); background:rgba(99,102,241,0.12); color:#312e81; }
-#dms-integration .dms-list .dms-tag-na{ border-color:rgba(156,163,175,0.45); background:rgba(156,163,175,0.18); color:#374151; }
+    const ZW0 = "\u200B";
+    const ZW1 = "\u200C";
+    const WRAP = "\u2060";
 
-/* =======================
-   EQUAL-HEIGHT 2-COL ROWS (Pre/Monday/Post)
-======================= */
-#pre-training .cards-grid.two-col,
-#monday-visit .cards-grid.two-col,
-#post-training .cards-grid.two-col{ align-items:stretch !important; }
-#pre-training .cards-grid.two-col > .section-block,
-#monday-visit .cards-grid.two-col > .section-block,
-#post-training .cards-grid.two-col > .section-block{
-  height:100% !important;
-  display:flex !important;
-  flex-direction:column !important;
-  min-width:0;
-  min-height:0;
-}
+    const zwEncode = (plain) => {
+      const bytes = new TextEncoder().encode(String(plain));
+      let bits = "";
+      for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+      return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+    };
 
-/* =======================
-   NOTES MODAL
-======================= */
-#mkNotesModal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:99999;
-}
-#mkNotesModal.open{ display:block; }
-#mkNotesModal .mk-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-}
-#mkNotesModal .mk-modal-panel{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:min(980px, calc(100vw - 40px));
-  height:min(80vh, 720px);
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-#mkNotesModal .mk-modal-header{
-  background:var(--orange);
-  color:#fff;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-#mkNotesModal .mk-modal-title{ font-weight:900; font-size:16px; letter-spacing:.3px; }
-#mkNotesModal .mk-modal-close{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.55);
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  line-height:1;
-}
-#mkNotesModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
-#mkNotesModal .mk-modal-textarea{
-  flex:1 1 auto;
-  width:100%;
-  border:0;
-  outline:none;
-  padding:14px 16px;
-  font-size:13px;
-  font-family:"Roboto","Inter",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  resize:none;
-}
+    const zwDecode = (zw) => {
+      const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+      const bytes = [];
+      for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      try {
+        return new TextDecoder().decode(new Uint8Array(bytes));
+      } catch {
+        return "";
+      }
+    };
 
-/* =======================
-   TABLE MODAL (mkTableModal)
-======================= */
-#mkTableModal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:99998;
-  overflow:hidden !important;
-}
-#mkTableModal.open{ display:block; }
-#mkTableModal .mk-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.65);
-}
-#mkTableModal .mk-modal-panel{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:min(1400px, calc(100vw - 28px));
-  max-height:90vh;
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-#mkTableModal .mk-modal-header{
-  background:var(--orange);
-  color:#fff;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  border-bottom:1px solid var(--border);
-}
-#mkTableModal .mk-modal-title{
-  font-weight:900;
-  font-size:16px;
-  letter-spacing:.3px;
-  margin:0;
-}
-#mkTableModal .mk-modal-close{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.55);
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  line-height:1;
-}
-#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
+    const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
 
-#mkTableModal .mk-modal-content{
-  padding:14px 14px 16px;
-  overflow:auto;
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-#mkTableModal .mk-modal-content > *{ margin:0 !important; }
+    const extractKeyFromLine = (line) => {
+      const s = String(line || "");
+      const a = s.indexOf(WRAP);
+      if (a < 0) return null;
+      const b = s.indexOf(WRAP, a + 1);
+      if (b < 0) return null;
+      const payload = s.slice(a + 1, b);
+      const decoded = zwDecode(payload);
+      return decoded || null;
+    };
 
-#mkTableModal .mk-modal-notes textarea{
-  width:100% !important;
-  min-height:190px;
-  padding:8px 10px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:#f7f7f7;
-  font-size:13px;
-  resize:vertical;
-}
+    const cleanupLegacyVisibleKeys = (text) => {
+      let v = normalizeNL(text || "");
+      v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
+      v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");
+      return v;
+    };
 
-#mkTableModal .scroll-wrapper{
-  overflow:auto !important;
-  max-width:100% !important;
-}
-#mkTableModal table.training-table{
-  width:max-content;
-  min-width:100%;
-}
+    const getSlotKey = (btn) => {
+      const hostId = getNotesTargetId(btn) || "notes";
+      const tr = btn.closest("tr");
+      if (tr) {
+        const table = btn.closest("table") || tr.closest("table");
+        const tb = tr.parentElement;
+        const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+        const idx = rows.indexOf(tr);
+        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+        return `${hostId}::tbl::${tKey}::r${idx}`;
+      }
+      const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
+      const idx = all.indexOf(btn);
+      return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
+    };
 
-/* Modal-only overflow safety */
-#mkTableModal .training-table td:first-child{
-  display:flex !important;
-  align-items:center !important;
-  gap:10px !important;
-  overflow:hidden !important;
-  min-width:0 !important;
-}
-#mkTableModal .training-table td:first-child input[type="text"]{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  width:auto !important;
-  max-width:100% !important;
-}
-#mkTableModal .training-table input[type="text"],
-#mkTableModal .training-table select,
-#mkTableModal .training-table textarea{
-  min-width:0 !important;
-  max-width:100% !important;
-  width:100% !important;
-  box-sizing:border-box !important;
-}
+    const findOrDerivePromptText = (btn) => {
+      const tr = btn.closest("tr");
+      const table = btn.closest("table");
+      const section = getSection(btn);
+      const secId = section?.id || "";
 
-/* =========================================================
-   HARD RULE: no remove buttons anywhere
+      if (tr && table) {
+        if (secId === "training-checklist") {
+          const nameInput =
+            tr.querySelector('td:first-child input[type="text"]') ||
+            tr.querySelector('td:nth-child(2) input[type="text"]');
+          const v = (nameInput?.value || "").trim();
+          return v || "(blank)";
+        }
+
+        if (secId === "opcodes-pricing") {
+          const opcodeInput =
+            tr.querySelector('td:nth-child(2) input[type="text"]') ||
+            tr.querySelector(
+              'td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea'
+            );
+          const v = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
+          return v || "(blank)";
+        }
+
+        const field =
+          tr.querySelector(
+            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
+          ) || null;
+        const value = (field?.value || field?.textContent || "").trim();
+        return value || "Item";
+      }
+
+      const row = btn.closest(".checklist-row");
+      const label = row?.querySelector("label");
+      return (label?.textContent || "").trim() || "Notes";
+    };
+
+    const parseBlocks = (text) => {
+      const lines = normalizeNL(text || "").split("\n");
+      const blocks = [];
+      let cur = null;
+
+      const isMain = (line) => String(line || "").trim().startsWith("•");
+
+      const flush = () => {
+        if (cur) blocks.push(cur);
+        cur = null;
+      };
+
+      for (const line of lines) {
+        if (isMain(line)) {
+          flush();
+          const key = extractKeyFromLine(line);
+          cur = { key: key || "__misc__", lines: [line] };
+        } else {
+          if (!cur) cur = { key: "__misc__", lines: [] };
+          cur.lines.push(line);
+        }
+      }
+      flush();
+      return blocks;
+    };
+
+    const buildBlockLines = (promptText, key) => {
+      const main = `• ${promptText}${makeMarker(key)}`;
+      const sub = `  ◦ `;
+      return [main, sub];
+    };
+
+    const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+      const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
+      const wanted = btns.map(getSlotKey);
+
+      const map = new Map();
+      const miscChunks = [];
+
+      blocks.forEach((b) => {
+        if (!b || !b.lines) return;
+        if (b.key && b.key !== "__misc__") map.set(b.key, b);
+        else miscChunks.push(b.lines.join("\n"));
+      });
+
+      const out = [];
+      for (const k of wanted) {
+        if (map.has(k)) out.push(map.get(k).lines.join("\n"));
+      }
+
+      if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+        out.push(map.get(newlyAddedKey).lines.join("\n"));
+      }
+
+      const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+      const miscText = miscChunks.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+
+      if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
+      if (rebuilt) return rebuilt.trimEnd();
+      return miscText.trimEnd();
+    };
+
+    const caretAtHollowForKey = (text, key) => {
+      const v = normalizeNL(text || "");
+      const marker = makeMarker(key);
+      const idx = v.indexOf(marker);
+      if (idx < 0) return v.length;
+
+      const lineEnd = v.indexOf("\n", idx);
+      const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
+
+      const after = v.slice(afterMain);
+      const rel = after.indexOf("◦");
+      if (rel < 0) return afterMain;
+      return afterMain + rel + 2;
+    };
+
+    const handleNotesClick = (btn) => {
+      const targetId = getNotesTargetId(btn);
+      if (!targetId) return;
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+      if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+      const ta = $("textarea", target);
+      if (!ta) return;
+
+      const promptText = findOrDerivePromptText(btn);
+      const slotKey = getSlotKey(btn);
+
+      preserveScroll(() => {
+        ta.value = cleanupLegacyVisibleKeys(ta.value);
+
+        const blocks = parseBlocks(ta.value);
+        const exists = blocks.some((b) => b.key === slotKey);
+
+        if (!exists) {
+          blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+        }
+
+        ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
+
+        const caret = caretAtHollowForKey(ta.value, slotKey);
+
+        try {
+          ta.focus({ preventScroll: true });
+        } catch {
+          ta.focus();
+        }
+        try {
+          ta.setSelectionRange(caret, caret);
+        } catch {}
+
+        btn.classList.add("has-notes");
+        btn.classList.add("is-notes-active");
+
+        ensureId(ta);
+        saveField(ta);
+        triggerInputChange(ta);
+      });
+    };
+
+    const isNotesTargetTextarea = (ta) => {
+      if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+      const host = ta.closest("[id]");
+      if (!host || !host.id) return false;
+      return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+    };
+
+    return { handleNotesClick, isNotesTargetTextarea };
+  })();
+
+  /* =======================
+     SUPPORT TICKETS (FIXED)
+  ======================= */
+  const ticketContainersByStatus = () => ({
+    Open: $("#openTicketsContainer"),
+    "Tier Two": $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
+  });
+
+  const getOpenBaseTicketCard = () => {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return null;
+    return $(".ticket-group[data-base='true']", openContainer);
+  };
+
+  const enforceBaseTicketStatusLock = () => {
+    const base = getOpenBaseTicketCard();
+    if (!base) return;
+    const status = $(".ticket-status-select", base);
+    if (!status) return;
+    status.value = "Open";
+    status.disabled = true;
+    ensureId(status);
+    saveField(status);
+  };
+
+  const readTicketValues = (card) => {
+    const num = $(".ticket-number-input", card)?.value?.trim() || "";
+    const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
+    const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
+    const status = $(".ticket-status-select", card)?.value || "Open";
+    return { num, url, sum, status };
+  };
+
+  const isTicketCardComplete = (card) => {
+    const v = readTicketValues(card);
+    return !!(v.num && v.url && v.sum);
+  };
+
+  const markTicketCardErrors = (card) => {
+    const numEl = $(".ticket-number-input", card);
+    const urlEl = $(".ticket-zendesk-input", card);
+    const sumEl = $(".ticket-summary-input", card);
+    [numEl, urlEl, sumEl].forEach((el) => {
+      if (!el) return;
+      const v = (el.value || "").trim();
+      if (!v) {
+        el.classList.add("mk-field-error");
+        setTimeout(() => el.classList.remove("mk-field-error"), 700);
+      }
+    });
+  };
+
+  const buildTicketCloneFromBase = (baseCard) => {
+    const clone = baseCard.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "ticket");
+
+    clone.querySelectorAll(".add-ticket-btn").forEach((b) => b.remove());
+
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      saveField(el);
+    });
+
+    const status = $(".ticket-status-select", clone);
+    if (status) {
+      status.disabled = true;
+      ensureId(status);
+      saveField(status);
+    }
+    return clone;
+  };
+
+  const persistAllTickets = () => {
+    const clones = cloneState.get();
+    clones.tickets = [];
+
+    const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
+    all.forEach((card) => {
+      const v = readTicketValues(card);
+      clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
+    });
+
+    cloneState.set(clones);
+  };
+
+  const setTicketCardValues = (card, data) => {
+    const num = $(".ticket-number-input", card);
+    const url = $(".ticket-zendesk-input", card);
+    const sum = $(".ticket-summary-input", card);
+    const status = $(".ticket-status-select", card);
+
+    if (num) num.value = data?.num || "";
+    if (url) url.value = data?.url || "";
+    if (sum) sum.value = data?.sum || "";
+
+    if (card.getAttribute("data-base") === "true") {
+      if (status) {
+        status.value = "Open";
+        status.disabled = true;
+      }
+    } else {
+      if (status) {
+        status.value = data?.status || "Open";
+        status.disabled = !(data?.num || "").trim().length;
+      }
+    }
+
+    [num, url, sum, status].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+  };
+
+  const resetBaseTicketCard = (baseCard) => {
+    if (!baseCard) return;
+    const num = $(".ticket-number-input", baseCard);
+    const url = $(".ticket-zendesk-input", baseCard);
+    const sum = $(".ticket-summary-input", baseCard);
+    if (num) num.value = "";
+    if (url) url.value = "";
+    if (sum) sum.value = "";
+    [num, url, sum].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
+    });
+    enforceBaseTicketStatusLock();
+    num?.focus?.();
+  };
+
+  const addTicketCard = () => {
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const base = getOpenBaseTicketCard();
+    if (!base) return;
+
+    if (!isTicketCardComplete(base)) {
+      markTicketCardErrors(base);
+      mkPopup.ok(
+        "Please fill out Ticket Number, Zendesk Ticket URL, and Short Summary on the BASE card before adding a new ticket card.",
+        { title: "Ticket not complete" }
+      );
+      return;
+    }
+
+    const baseVals = readTicketValues(base);
+
+    const clone = buildTicketCloneFromBase(base);
+    setTicketCardValues(clone, {
+      num: baseVals.num,
+      url: baseVals.url,
+      sum: baseVals.sum,
+      status: "Open",
+    });
+
+    openContainer.appendChild(clone);
+
+    persistAllTickets();
+    resetBaseTicketCard(base);
+  };
+
+  const onTicketNumberInput = (inputEl) => {
+    const card = inputEl.closest(".ticket-group");
+    if (!card) return;
+
+    const status = $(".ticket-status-select", card);
+    if (!status) return;
+
+    const isBase = card.getAttribute("data-base") === "true";
+    if (isBase) {
+      enforceBaseTicketStatusLock();
+      saveField(inputEl);
+      return;
+    }
+
+    const hasNum = (inputEl.value || "").trim().length > 0;
+    status.disabled = !hasNum;
+
+    saveField(inputEl);
+    saveField(status);
+
+    persistAllTickets();
+  };
+
+  const onTicketStatusChange = (selectEl) => {
+    const card = selectEl.closest(".ticket-group");
+    if (!card) return;
+
+    if (card.getAttribute("data-base") === "true") {
+      enforceBaseTicketStatusLock();
+      return;
+    }
+
+    const statusVal = selectEl.value;
+    const containers = ticketContainersByStatus();
+    const dest = containers[statusVal] || containers.Open;
+    if (dest) dest.appendChild(card);
+
+    saveField(selectEl);
+    persistAllTickets();
+  };
+
+  const rebuildTicketClones = () => {
+    const clones = cloneState.get();
+    const list = clones.tickets || [];
+    if (!list.length) {
+      enforceBaseTicketStatusLock();
+      return;
+    }
+
+    const openContainer = $("#openTicketsContainer");
+    if (!openContainer) return;
+
+    const base = $(".ticket-group[data-base='true']", openContainer);
+    if (!base) return;
+
+    $$(".ticket-group", document).forEach((g) => {
+      if (g.getAttribute("data-base") !== "true") g.remove();
+    });
+
+    list.forEach((t) => {
+      const clone = buildTicketCloneFromBase(base);
+
+      setTicketCardValues(clone, {
+        num: t.num || "",
+        url: t.url || "",
+        sum: t.sum || "",
+        status: t.status || "Open",
+      });
+
+      const containers = ticketContainersByStatus();
+      const dest = containers[t.status] || containers.Open || openContainer;
+      dest.appendChild(clone);
+    });
+
+    enforceBaseTicketStatusLock();
+  };
+
+  /* =======================
+     POC / TRAINER CLONE RESTORE
+  ======================= */
+  const rebuildPocClones = () => {
+    const clones = cloneState.get();
+    if (!clones.pocs || !clones.pocs.length) return;
+
+    $$(".additional-poc-card").forEach((c) => {
+      if (c.getAttribute("data-base") !== "true") c.remove();
+    });
+
+    const base = $(".additional-poc-card[data-base='true']");
+    if (!base) return;
+
+    let anchor = base;
+    clones.pocs.forEach((p) => {
+      const card = buildPocCard(p);
+      if (!card) return;
+      anchor.insertAdjacentElement("afterend", card);
+      anchor = card;
+    });
+  };
+
+  const rebuildTrainerClones = () => {
+    const clones = cloneState.get();
+    const container = $("#additionalTrainersContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+    (clones.trainers || []).forEach((t) => {
+      const row = buildTrainerRow(t.value || "");
+      container.appendChild(row);
+    });
+  };
+
+  /* =======================
+     DEALERSHIP NAME DISPLAY
+  ======================= */
+  const syncDealershipName = () => {
+    mkSyncTopbarTitle();
+  };
+
+  /* =======================
+     MAP BTN
+  ======================= */
+  const updateDealershipMap = (address) => {
+    const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
+    if (!frame) return;
+
+    const a = String(address || "").trim();
+    const q = a ? encodeURIComponent(a) : "United%20States";
+    frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
+  };
+
+  /* =======================
+     TRAINING END DATE AUTO-SET (2 days after onsite)
+  ======================= */
+  const mkAutoSetTrainingEndDate = () => {
+    const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
+    const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+
+    if (!onsiteInput || !endInput) return;
+
+    const compute = () => {
+      if (!onsiteInput.value) return;
+
+      // do not overwrite if user already set an end date
+      if (endInput.value) return;
+
+      const start = new Date(onsiteInput.value);
+      if (Number.isNaN(start.getTime())) return;
+
+      start.setDate(start.getDate() + 2); // ✅ 2 days after
+
+      const yyyy = start.getFullYear();
+      const mm = String(start.getMonth() + 1).padStart(2, "0");
+      const dd = String(start.getDate()).padStart(2, "0");
+
+      endInput.value = `${yyyy}-${mm}-${dd}`;
+      triggerInputChange(endInput);
+    };
+
+    onsiteInput.addEventListener("change", compute);
+    // also try immediately (after restore)
+    setTimeout(compute, 0);
+    setTimeout(compute, 300);
+  };
+
+  /* =======================
+     LEAD TRAINER -> SUMMARY "Trainer(s)" INJECTION
+  ======================= */
+  const mkGetLeadTrainer = () => {
+    // 1) explicit ids
+    const byId = mkFirstValueByIds(MK_IDS.leadTrainer);
+    if (byId) return byId;
+
+    // 2) label scan in trainers page
+    const trainersSec = document.getElementById("trainers-deployment");
+    if (trainersSec) {
+      const leadByLabel =
+        mkFindFieldByLabelText(trainersSec, "lead trainer") ||
+        mkFindFieldByLabelText(trainersSec, "trainer") ||
+        null;
+      if (leadByLabel && leadByLabel.matches("input, textarea, select")) {
+        const v = (leadByLabel.value || "").trim();
+        if (v) return v;
+      }
+
+      // 3) placeholder scan
+      const ph = mkFindTextInputByPlaceholder(trainersSec, "lead trainer");
+      if (ph) {
+        const v = (ph.value || "").trim();
+        if (v) return v;
+      }
+
+      // 4) fallback: first non-empty text input in trainers section (excluding additional trainer entry box)
+      const inputs = $$('input[type="text"]', trainersSec).filter((i) => i.id !== "additionalTrainerInput");
+      for (const i of inputs) {
+        const v = (i.value || "").trim();
+        if (v) return v;
+      }
+    }
+
+    // 5) fallback: dealership page might store trainer elsewhere (global search)
+    const globalCandidates = $$('input[type="text"]')
+      .filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
+
+    for (const i of globalCandidates) {
+      const v = (i.value || "").trim();
+      if (v) return v;
+    }
+
+    return "";
+  };
+
+  const mkFindSummaryTrainersField = () => {
+    // 1) explicit ids
+    for (const id of MK_IDS.summaryTrainers) {
+      const el = document.getElementById(id);
+      if (el && el.matches("input, textarea")) return el;
+    }
+
+    // 2) label scan in training-summary section
+    const summarySec = document.getElementById("training-summary");
+    if (summarySec) {
+      const byLabel =
+        mkFindFieldByLabelText(summarySec, "trainer(s)") ||
+        mkFindFieldByLabelText(summarySec, "trainers") ||
+        mkFindFieldByLabelText(summarySec, "trainer") ||
+        null;
+      if (byLabel && byLabel.matches("input, textarea")) return byLabel;
+
+      // 3) placeholder scan
+      const byPh = mkFindTextInputByPlaceholder(summarySec, "trainer");
+      if (byPh) return byPh;
+    }
+
+    return null;
+  };
+
+  const mkAutofillSummaryTrainerIfEmpty = () => {
+    const lead = mkGetLeadTrainer();
+    if (!lead) return;
+
+    const field = mkFindSummaryTrainersField();
+    if (!field) return;
+
+    const current = (field.value || "").trim();
+    if (current) return; // do not overwrite
+
+    field.value = lead;
+    ensureId(field);
+    saveField(field);
+    triggerInputChange(field);
+  };
+
+  /* =======================
+     EXEC SUMMARY INJECTION (best-effort hooks)
+     - If your AI summary layout has elements like:
+       [data-mk-summary="did"], [data-mk-summary="dealership"], [data-mk-summary="dealerGroup"]
+     this will fill them whenever Generate Summary runs or on init.
+  ======================= */
+  const mkGetDealerSnapshot = () => {
+    const did = mkFirstValueByIds(MK_IDS.did);
+    const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
+    const dealership = mkFirstValueByIds(MK_IDS.dealershipName);
+    return { did, dealerGroup, dealership };
+  };
+
+  const mkInjectSummaryTokens = (root = document) => {
+    const snap = mkGetDealerSnapshot();
+    const setToken = (key, val) => {
+      root.querySelectorAll(`[data-mk-summary="${key}"]`).forEach((el) => {
+        if (el.matches("input, textarea, select")) el.value = val || "";
+        else el.textContent = val || "";
+      });
+    };
+    setToken("did", snap.did || "");
+    setToken("dealership", snap.dealership || "");
+    setToken("dealerGroup", snap.dealerGroup || "");
+
+    // common combined header token
+    setToken("title", mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership }));
+  };
+
+  /* =========================================================
+     EXPAND BUTTONS (TABLES + NOTES) — FIXED CATCH-ALL
+     - Table expand: adds ⤢ to EVERY .table-footer
+     - Notes expand: adds ⤢ to note textareas (excludes support ticket short summary)
 ========================================================= */
-.remove-btn,
-.remove-row,
-[data-remove-trainer],
-button.remove-btn,
-button.remove-row{
-  display:none !important;
-}
+  const ensureExpandStyles = (() => {
+    const STYLE_ID = "mk-expand-style-v3";
+    return () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-table-expand-btn,
+        .mk-ta-expand{
+          border:1px solid rgba(0,0,0,.15);
+          background:rgba(255,255,255,.92);
+          font-weight:900;
+          cursor:pointer;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          user-select:none;
+        }
+        .mk-field-error{
+          box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
+          border-color:#EF6D22 !important;
+        }
+      `;
+      document.head.appendChild(s);
+    };
+  })();
 
-/* =========================================================
-   SUPPORT TICKETS: "Short Summary of the Issue" should NOT have expand
-========================================================= */
-#support-tickets .ticket-row.ticket-summary-row .mk-ta-expand,
-#support-tickets .ticket-row.ticket-summary-row .mk-notes-expand-btn,
-#support-tickets .ticket-row.ticket-summary-row .mk-mini-expand-btn{
-  display:none !important;
-}
+  const tableModal = {
+    modal: null,
+    content: null,
+    title: null,
+    moved: [],
+    bodyOverflow: "",
+  };
 
-/* =========================================================
-   STACKED NOTES ONLY — 2× TALLER TEXTAREAS
-   Safe: does NOT affect side-by-side cards
-========================================================= */
+  const openModalWithNodes = (nodes, titleText) => {
+    const modal = $("#mkTableModal");
+    if (!modal) {
+      mkPopup.ok(
+        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
+        { title: "Missing Expand Modal" }
+      );
+      return;
+    }
 
-/* Stacked notes cards live inside .col-stack */
-.col-stack .section-block textarea{
-  min-height:440px !important; /* was ~220px → doubled */
-}
+    const content = $(".mk-modal-content", modal);
+    const titleEl = $(".mk-modal-title", modal);
+    const panel = $(".mk-modal-panel", modal) || modal;
+    if (!content) {
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
+        title: "Modal Markup Issue",
+      });
+      return;
+    }
 
-/* Wrapped stacked notes */
-.col-stack .section-block .mk-ta-wrap > textarea{
-  min-height:440px !important;
-}
+    tableModal.modal = modal;
+    tableModal.content = content;
+    tableModal.title = titleEl;
+    tableModal.moved = [];
+    content.innerHTML = "";
 
-/* Ensure side-by-side notes stay unchanged */
-.cards-grid.two-col textarea,
-.two-col-grid textarea,
-.grid-2 textarea{
-  min-height:unset !important;
-}
+    if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
 
-/* =========================================================
-   STACKED NOTES (under tables) — 2× taller
-   Targets notes cards that are direct siblings after .section (tables)
-   (Matches your screenshot: table section -> notes card)
-========================================================= */
+    nodes.forEach((node) => {
+      if (!node || !node.parentNode) return;
+      const ph = document.createComment("mk-expand-placeholder");
+      node.parentNode.insertBefore(ph, node);
+      tableModal.moved.push({ node, placeholder: ph });
+      content.appendChild(node);
+    });
 
-/* Notes cards that follow a table section */
-.section + .section-block textarea,
-.section + .section-block .mk-ta-wrap > textarea{
-  min-height:180px !important; /* doubled */
-}
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    tableModal.bodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
+    try {
+      panel.scrollTop = 0;
+    } catch {}
+  };
 
-/* Keep side-by-side notes (2-col cards) unchanged */
-.cards-grid.two-col > .section-block textarea,
-.two-col-grid .section-block textarea,
-.grid-2 > .section-block textarea{
-  min-height:220px !important;
-}
+  const closeTableModal = () => {
+    const modal = tableModal.modal;
+    if (!modal) return;
 
-/* Keep Support Tickets short summary unchanged */
-#support-tickets textarea,
-#support-tickets .ticket-summary-input{
-  min-height:80px !important;
-}
+    (tableModal.moved || []).forEach(({ node, placeholder }) => {
+      if (!node || !placeholder || !placeholder.parentNode) return;
+      placeholder.parentNode.insertBefore(node, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    });
 
-/* =========================================================
-   FIXES:
-   1) Additional POC (added cards): Name textbox rounded on RIGHT
-   2) Support Tickets: Ticket Number textbox same width as other inputs
-   3) Map: iframe fills the entire card
-   Paste at VERY BOTTOM of style.css
-========================================================= */
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = tableModal.bodyOverflow || "";
 
+    tableModal.modal = null;
+    tableModal.content = null;
+    tableModal.title = null;
+    tableModal.bodyOverflow = "";
+    tableModal.moved = [];
+  };
 
-/* ---------------------------------------------------------
-   1) ADDITIONAL POC ADDED CARDS — round the Name textbox right side
-   (prevents “square-right” leftovers from integrated-plus rules)
---------------------------------------------------------- */
-#dealership-info .additional-poc-card[data-base="false"] input[type="text"],
-#dealership-info .additional-poc-card[data-base="false"] input[type="email"],
-#dealership-info .additional-poc-card[data-base="false"] input[type="tel"],
-#dealership-info .additional-poc-card[data-base="false"] select{
-  border-top-right-radius: var(--radius-sm) !important;
-  border-bottom-right-radius: var(--radius-sm) !important;
-}
+  const getExpandBundleNodes = (anyInside) => {
+    const footer = anyInside?.closest?.(".table-footer");
+    const sectionCard =
+      footer?.closest(".section") ||
+      footer?.closest(".section-block") ||
+      footer?.parentElement ||
+      anyInside?.closest?.(".section-block") ||
+      anyInside?.closest?.(".page-section") ||
+      document.body;
 
-/* If ANY old integrated-plus rule is still touching the Name field, force full rounding */
-#dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="text"]{
-  border-radius: var(--radius-sm) !important;
-}
+    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
 
+    const nodes = [];
+    if (tableBlock) nodes.push(tableBlock);
 
-/* ---------------------------------------------------------
-   2) SUPPORT TICKETS — Ticket Number input matches other input widths
-   Make the + button float on top, so the input can be full-width.
---------------------------------------------------------- */
-#support-tickets .ticket-number-wrap{
-  position:relative !important;
-  width:100% !important;
-}
+    const targets = new Set();
+    $$("[data-notes-target]", sectionCard).forEach((btn) => {
+      const id = btn.getAttribute("data-notes-target");
+      if (id) targets.add(id);
+    });
+    targets.forEach((id) => {
+      const block = document.getElementById(id);
+      if (block) nodes.push(block);
+    });
 
-#support-tickets .ticket-number-input{
-  width:100% !important;
-  flex:1 1 auto !important;
-  border-radius: var(--radius-sm) !important;     /* match other boxes */
-  padding-right:46px !important;                  /* room for + button */
-}
+    if (!nodes.length) nodes.push(sectionCard);
 
-/* Float the + button at the far right without shrinking the input */
-#support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
-  position:absolute !important;
-  right:0 !important;
-  top:0 !important;
-  height:34px !important;
-  width:34px !important;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
-  margin:0 !important;
-}
+    const uniq = [];
+    const seen = new Set();
+    nodes.forEach((n) => {
+      if (!n || seen.has(n)) return;
+      seen.add(n);
+      uniq.push(n);
+    });
 
-/* Added cards already hide the + button — keep their input clean */
-#support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
-  padding-right:10px !important;
-}
+    uniq.sort((a, b) => {
+      if (a === b) return 0;
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
 
+    return uniq;
+  };
 
-/* ---------------------------------------------------------
-   3) MAP — make it take up the entire card
-   (fills remaining height in the card and removes “tiny map” behavior)
---------------------------------------------------------- */
+  const openTableModalFor = (anyInside) => {
+    const bundle = getExpandBundleNodes(anyInside);
+    const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
+    const title = (header?.textContent || "Expanded View").trim();
+    openModalWithNodes(bundle, title);
+  };
 
-/* If your map card is a section-block, make it a flex column */
-#dealership-info .section-block:has(#dealershipMapFrame),
-#dealership-info .section-block:has(iframe[src*="maps"]),
-#dealership-info .section-block.map-card{
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-}
+  const openNotesModalFor = (notesHostEl) => {
+    if (!notesHostEl) return;
+    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
+    const title = (h?.textContent || "Notes").trim();
+    openModalWithNodes([notesHostEl], title);
+  };
 
-/* Common wrappers people use */
-#dealership-info .map-frame,
-#dealership-info .map-wrapper,
-#dealership-info .map-container{
-  flex:1 1 auto !important;
-  min-height:320px !important;   /* adjust if you want it taller */
-  height:100% !important;
-  width:100% !important;
-  padding:0 !important;
-  margin:0 !important;
-}
+  const ensureTableExpandButtons = () => {
+    ensureExpandStyles();
+    document.querySelectorAll(".table-footer").forEach((footer) => {
+      if (footer.querySelector(".mk-table-expand-btn")) return;
 
-/* The iframe itself: fill the wrapper/card */
-#dealershipMapFrame,
-#dealership-info .map-frame iframe,
-#dealership-info .map-wrapper iframe,
-#dealership-info iframe[src*="maps"]{
-  width:100% !important;
-  height:100% !important;
-  flex:1 1 auto !important;
-  display:block !important;
-  border:0 !important;
-}
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-table-expand-btn";
+      btn.setAttribute("data-mk-table-expand", "1");
+      btn.title = "Expand";
+      btn.textContent = "⤢";
 
-/* =======================
-   TRAINING SUMMARY — EXEC SUMMARY
-======================= */
-#execSummaryCard .mk-exec-grid{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:18px;
-  margin-top:14px;
-}
+      footer.appendChild(btn);
+    });
+  };
 
-#execSummaryCard .mk-exec-card{
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
-  background:#fff;
-  padding:14px 14px 12px;
-  display:flex;
-  flex-direction:column;
-  min-height:260px;
-}
+  const ensureNotesExpandButtons = () => {
+    ensureExpandStyles();
 
-#execSummaryCard .mk-exec-title{
-  font-weight:900;
-  font-size:14px;
-  color:#111827;
-  margin-bottom:2px;
-}
+    const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
+    textareas.forEach((ta) => {
+      // don’t mess with table cell textareas
+      if (ta.closest("table")) return;
 
-#execSummaryCard .mk-exec-sub{
-  font-size:12px;
-  color:#6b7280;
-  margin-bottom:10px;
-}
+      // ✅ exclude Support Tickets "Short Summary..." area
+      if (ta.closest("#support-tickets")) return;
+      if (ta.classList.contains("ticket-summary-input")) return;
+      if (ta.closest(".ticket-group")) return;
 
-#execSummaryCard textarea{
-  flex:1 1 auto;
-  min-height:180px;
-  resize:vertical;
-}
+      // ensure wrap
+      let wrap = ta.closest(".mk-ta-wrap");
+      if (!wrap) {
+        wrap = document.createElement("div");
+        wrap.className = "mk-ta-wrap";
+        ta.parentNode.insertBefore(wrap, ta);
+        wrap.appendChild(ta);
+      }
 
-#execSummaryCard .mk-exec-actions{
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  margin-top:14px;
-}
+      if (wrap.querySelector(".mk-ta-expand")) return;
 
-#execSummaryCard .mk-exec-btn{
-  background:var(--orange);
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:8px 14px;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(239,109,34,0.35);
-  transition:background .18s, transform .18s, box-shadow .18s;
-}
-#execSummaryCard .mk-exec-btn:hover{
-  background:#ff8b42;
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(239,109,34,0.45);
-}
-#execSummaryCard .mk-exec-btn--ghost{
-  background:#f3f4f6;
-  color:#111827;
-  border:1px solid rgba(0,0,0,.10);
-  box-shadow:none;
-}
-#execSummaryCard .mk-exec-btn--ghost:hover{
-  background:#e5e7eb;
-  transform:translateY(-1px);
-}
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-ta-expand";
+      btn.setAttribute("data-mk-notes-expand", "1");
+      btn.title = "Expand Notes";
+      btn.textContent = "⤢";
 
-#execSummaryCard .mk-exec-output{
-  margin-top:16px;
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  background:#fff;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-#execSummaryCard .mk-exec-output-title{
-  background:var(--light-orange);
-  color:#fff;
-  font-weight:900;
-  padding:10px 14px;
-}
-#execSummaryCard .mk-exec-output-body{
-  padding:12px 14px;
-  font-size:13px;
-  line-height:1.45;
-  color:#111827;
-  white-space:pre-wrap;
-}
+      const hostId = ta.closest("[id]")?.id || "";
+      if (hostId) btn.setAttribute("data-notes-id", hostId);
 
-@media (max-width:1100px){
-  #execSummaryCard .mk-exec-grid{ grid-template-columns:1fr; }
-  #execSummaryCard .mk-exec-card{ min-height:220px; }
-}
+      wrap.appendChild(btn);
+    });
+  };
+
+  const startExpandObserver = () => {
+    const obs = new MutationObserver(() => {
+      ensureTableExpandButtons();
+      ensureNotesExpandButtons();
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+
+    setTimeout(() => {
+      ensureTableExpandButtons();
+      ensureNotesExpandButtons();
+    }, 250);
+    setTimeout(() => {
+      ensureTableExpandButtons();
+      ensureNotesExpandButtons();
+    }, 900);
+  };
+
+  /* =======================
+     SAVE PDF (safe hook)
+  ======================= */
+  const mkHandleSavePDF = () => {
+    // If you have an existing PDF function, we’ll call it.
+    const fn =
+      window.saveAllPagesAsPDF ||
+      window.savePDF ||
+      window.generatePDF ||
+      window.exportPDF ||
+      null;
+
+    if (typeof fn === "function") {
+      try {
+        fn();
+        return;
+      } catch (e) {
+        mkPopup.ok(`Save PDF failed:\n${e?.message || e}`, { title: "PDF Error" });
+        return;
+      }
+    }
+
+    // Otherwise, emit an event so any other script can listen
+    try {
+      document.dispatchEvent(new CustomEvent("mk:savepdf"));
+      mkPopup.ok(
+        "PDF handler not found in this script. I fired a 'mk:savepdf' event. If you have a PDF script, hook into that event or add a global function like window.saveAllPagesAsPDF().",
+        { title: "PDF Hook" }
+      );
+    } catch {
+      mkPopup.ok(
+        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
+        { title: "PDF Hook" }
+      );
+    }
+  };
+
+  /* =======================
+     EVENT DELEGATION
+  ======================= */
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+
+    const navBtn = t.closest(".nav-btn[data-target]");
+    if (navBtn) {
+      e.preventDefault();
+      setActiveSection(navBtn.getAttribute("data-target"));
+      setTimeout(() => {
+        ensureTableExpandButtons();
+        ensureNotesExpandButtons();
+      }, 0);
+      return;
+    }
+
+    const clearAllBtn = t.closest("#clearAllBtn");
+    if (clearAllBtn) {
+      e.preventDefault();
+      mkPopup.confirm("This will clear ALL pages and ALL saved data. Continue?", {
+        title: "Clear All",
+        okText: "Clear All",
+        cancelText: "Cancel",
+        onOk: clearAll,
+      });
+      return;
+    }
+
+    const resetBtn = t.closest(".clear-page-btn");
+    if (resetBtn) {
+      e.preventDefault();
+      const section =
+        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
+        resetBtn.closest(".page-section");
+
+      mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
+        title: "Reset This Page",
+        okText: "Reset Page",
+        cancelText: "Cancel",
+        onOk: () => clearSection(section),
+      });
+      return;
+    }
+
+    // Save PDF
+    const savePdfBtn = t.closest("#savePDF, [data-mk-action='save-pdf']");
+    if (savePdfBtn) {
+      e.preventDefault();
+      mkHandleSavePDF();
+      return;
+    }
+
+    // Generate Summary (if your dropdown or button uses this hook)
+    const genSummaryBtn = t.closest("#mkGenerateSummaryBtn, [data-mk-action='generate-summary']");
+    if (genSummaryBtn) {
+      e.preventDefault();
+      // best-effort injections (your summary builder can do more; this ensures DID/dealerGroup/name are populated)
+      mkInjectSummaryTokens(document);
+      mkAutofillSummaryTrainerIfEmpty();
+      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", {
+        title: "Generate Summary",
+      });
+      return;
+    }
+
+    const addTrainerBtn =
+      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+    if (addTrainerBtn) {
+      e.preventDefault();
+      addTrainerRow();
+      return;
+    }
+
+    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
+    if (pocBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      addPocCard();
+      return;
+    }
+
+    const addRowBtn = t.closest("button.add-row");
+    if (addRowBtn && addRowBtn.closest(".table-footer")) {
+      e.preventDefault();
+      cloneTableRow(addRowBtn);
+      return;
+    }
+
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+      e.preventDefault();
+      Notes.handleNotesClick(notesBtn);
+      return;
+    }
+
+    const ticketAddBtn = t.closest(".add-ticket-btn");
+    if (ticketAddBtn) {
+      e.preventDefault();
+      addTicketCard();
+      return;
+    }
+
+    const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
+    if (mapBtn) {
+      e.preventDefault();
+      const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
+      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      updateDealershipMap(inp ? inp.value : "");
+      return;
+    }
+
+    // TABLE EXPAND (catch-all)
+    const tableExpandBtn = t.closest(".mk-table-expand-btn");
+    if (tableExpandBtn) {
+      e.preventDefault();
+      openTableModalFor(tableExpandBtn);
+      return;
+    }
+
+    // NOTES EXPAND (catch-all)
+    const notesExpandBtn = t.closest(".mk-ta-expand");
+    if (notesExpandBtn) {
+      e.preventDefault();
+      const id = notesExpandBtn.getAttribute("data-notes-id");
+      const block = id ? document.getElementById(id) : null;
+      if (block) openNotesModalFor(block);
+      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes");
+      return;
+    }
+
+    // MODAL CLOSE
+    const mkTableModal = $("#mkTableModal");
+    if (mkTableModal && mkTableModal.classList.contains("open")) {
+      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+        e.preventDefault();
+        closeTableModal();
+        return;
+      }
+    }
+  });
+
+  document.addEventListener("input", (e) => {
+    const el = e.target;
+
+    if (isFormField(el)) {
+      ensureId(el);
+      saveField(el);
+      setGhostStyles(document);
+    }
+
+    // Topbar title should update if any of these change
+    if (el.id === "dealershipNameInput" || el.id === "dealershipDidInput" || el.id === "dealerGroupInput") {
+      mkSyncTopbarTitle();
+      mkInjectSummaryTokens(document);
+    }
+
+    if (el.closest("#additionalTrainersContainer")) {
+      const clones = cloneState.get();
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
+        value: (i.value || "").trim(),
+      }));
+      cloneState.set(clones);
+
+      mkAutofillSummaryTrainerIfEmpty();
+    }
+
+    // If a lead trainer field changes anywhere, keep summary trainers filled if empty
+    if (
+      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
+      (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
+    ) {
+      mkAutofillSummaryTrainerIfEmpty();
+    }
+
+    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
+      persistAllPocs();
+    }
+
+    if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
+
+    if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
+      persistAllTickets();
+    }
+
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
+    if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
+      persistTable(table);
+    }
+  });
+
+  document.addEventListener("change", (e) => {
+    const el = e.target;
+
+    if (isFormField(el)) {
+      ensureId(el);
+      saveField(el);
+      setGhostStyles(document);
+    }
+
+    if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
+
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
+    if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
+      persistTable(table);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const el = e.target;
+
+    if (
+      e.key === "Enter" &&
+      Notes.isNotesTargetTextarea(el) &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
+      e.preventDefault();
+      preserveScroll(() => {
+        const insert = "\n  ◦ ";
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        const before = el.value.slice(0, start);
+        const after = el.value.slice(end);
+        el.value = before + insert + after;
+
+        const caret = start + insert.length;
+        try {
+          el.focus({ preventScroll: true });
+          el.setSelectionRange(caret, caret);
+        } catch {}
+
+        ensureId(el);
+        saveField(el);
+        triggerInputChange(el);
+      });
+      return;
+    }
+
+    if (el.id === "additionalTrainerInput" && e.key === "Enter") {
+      e.preventDefault();
+      addTrainerRow();
+      return;
+    }
+
+    if (e.key === "Escape") {
+      const mkTableModal = $("#mkTableModal");
+      if (mkTableModal && mkTableModal.classList.contains("open")) {
+        e.preventDefault();
+        closeTableModal();
+      }
+      mkPopup.close();
+    }
+  });
+
+  /* =======================
+     INIT / RESTORE
+  ======================= */
+  const init = () => {
+    assignIdsToAllFields();
+    initNav();
+
+    rebuildTrainerClones();
+    rebuildPocClones();
+    rebuildTableClones();
+    rebuildTicketClones();
+
+    seedStarterRowsToThree();
+
+    restoreAllFields();
+
+    setGhostStyles(document);
+
+    // ✅ Topbar title + summary tokens
+    mkSyncTopbarTitle();
+    mkInjectSummaryTokens(document);
+
+    // ✅ Lead trainer -> summary Trainer(s) (only fills if empty)
+    mkAutofillSummaryTrainerIfEmpty();
+
+    // ✅ Training End Date = onsite + 2 days (won’t overwrite)
+    mkAutoSetTrainingEndDate();
+
+    // ✅ Expand buttons restore (tables + notes)
+    ensureTableExpandButtons();
+    ensureNotesExpandButtons();
+    startExpandObserver();
+
+    // Ensure base support ticket card is always locked
+    enforceBaseTicketStatusLock();
+
+    log("Initialized.");
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
