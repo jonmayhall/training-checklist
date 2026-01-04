@@ -1,4 +1,3 @@
-
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS (CLEAN + CONSOLIDATED)
    ✅ Preserves existing layout/spacing across ALL pages
@@ -11,6 +10,7 @@
       - Name / Opcode textbox overflow fixed
       - Table expand button vertically centered (right)
       - Notes textareas: bottom spacing matches top spacing (NO dead space)
+      - Training Summary Actions pill (top-right)
 ======================================================= */
 
 /* =======================
@@ -684,9 +684,7 @@ main{
   padding-bottom:14px !important; /* keep base card padding intact */
 }
 
-/* Wrap textarea spacing control:
-   - If textarea is direct child: use margin-top + margin-bottom
-   - If textarea is in mk-ta-wrap: use wrapper margin-top + margin-bottom */
+/* Wrap textarea spacing control */
 .cards-grid.two-col > .section-block > textarea,
 .two-col-grid .section-block > textarea,
 .grid-2 > .section-block > textarea{
@@ -1156,7 +1154,6 @@ main{
 
 /* =======================
    SUPPORT TICKETS — FULL SECTION (2x2)
-   (unchanged from your file)
 ======================= */
 #support-tickets .ticket-sections-stack{
   display:flex;
@@ -1276,7 +1273,6 @@ main{
 
 /* =======================
    DMS INTEGRATION
-   (unchanged from your file)
 ======================= */
 #dms-integration .dms-grid{
   display:grid;
@@ -1596,8 +1592,6 @@ button.remove-row{
 
 /* =========================================================
    STACKED NOTES (under tables) — 2× taller
-   Targets notes cards that are direct siblings after .section (tables)
-   (Matches your screenshot: table section -> notes card)
 ========================================================= */
 
 /* Notes cards that follow a table section */
@@ -1620,18 +1614,13 @@ button.remove-row{
 }
 
 /* =========================================================
-   FIXES:
+   FIXES (BOTTOM OF FILE)
    1) Additional POC (added cards): Name textbox rounded on RIGHT
    2) Support Tickets: Ticket Number textbox same width as other inputs
    3) Map: iframe fills the entire card
-   Paste at VERY BOTTOM of style.css
 ========================================================= */
 
-
-/* ---------------------------------------------------------
-   1) ADDITIONAL POC ADDED CARDS — round the Name textbox right side
-   (prevents “square-right” leftovers from integrated-plus rules)
---------------------------------------------------------- */
+/* 1) ADDITIONAL POC ADDED CARDS — round the Name textbox right side */
 #dealership-info .additional-poc-card[data-base="false"] input[type="text"],
 #dealership-info .additional-poc-card[data-base="false"] input[type="email"],
 #dealership-info .additional-poc-card[data-base="false"] input[type="tel"],
@@ -1639,30 +1628,21 @@ button.remove-row{
   border-top-right-radius: var(--radius-sm) !important;
   border-bottom-right-radius: var(--radius-sm) !important;
 }
-
-/* If ANY old integrated-plus rule is still touching the Name field, force full rounding */
 #dealership-info .additional-poc-card[data-base="false"] .checklist-row.integrated-plus input[type="text"]{
   border-radius: var(--radius-sm) !important;
 }
 
-
-/* ---------------------------------------------------------
-   2) SUPPORT TICKETS — Ticket Number input matches other input widths
-   Make the + button float on top, so the input can be full-width.
---------------------------------------------------------- */
+/* 2) SUPPORT TICKETS — Ticket Number input matches other input widths */
 #support-tickets .ticket-number-wrap{
   position:relative !important;
   width:100% !important;
 }
-
 #support-tickets .ticket-number-input{
   width:100% !important;
   flex:1 1 auto !important;
-  border-radius: var(--radius-sm) !important;     /* match other boxes */
-  padding-right:46px !important;                  /* room for + button */
+  border-radius: var(--radius-sm) !important;
+  padding-right:46px !important;
 }
-
-/* Float the + button at the far right without shrinking the input */
 #support-tickets .ticket-group[data-base="true"] .add-ticket-btn{
   position:absolute !important;
   right:0 !important;
@@ -1672,19 +1652,11 @@ button.remove-row{
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
   margin:0 !important;
 }
-
-/* Added cards already hide the + button — keep their input clean */
 #support-tickets .ticket-group:not([data-base="true"]) .ticket-number-input{
   padding-right:10px !important;
 }
 
-
-/* ---------------------------------------------------------
-   3) MAP — make it take up the entire card
-   (fills remaining height in the card and removes “tiny map” behavior)
---------------------------------------------------------- */
-
-/* If your map card is a section-block, make it a flex column */
+/* 3) MAP — make it take up the entire card */
 #dealership-info .section-block:has(#dealershipMapFrame),
 #dealership-info .section-block:has(iframe[src*="maps"]),
 #dealership-info .section-block.map-card{
@@ -1692,20 +1664,16 @@ button.remove-row{
   flex-direction:column !important;
   min-height:0 !important;
 }
-
-/* Common wrappers people use */
 #dealership-info .map-frame,
 #dealership-info .map-wrapper,
 #dealership-info .map-container{
   flex:1 1 auto !important;
-  min-height:320px !important;   /* adjust if you want it taller */
+  min-height:320px !important;
   height:100% !important;
   width:100% !important;
   padding:0 !important;
   margin:0 !important;
 }
-
-/* The iframe itself: fill the wrapper/card */
 #dealershipMapFrame,
 #dealership-info .map-frame iframe,
 #dealership-info .map-wrapper iframe,
@@ -1718,7 +1686,8 @@ button.remove-row{
 }
 
 /* =======================
-   TRAINING SUMMARY — EXEC SUMMARY
+   TRAINING SUMMARY — EXEC SUMMARY (kept as-is)
+   NOTE: these only apply if you use #execSummaryCard in your HTML
 ======================= */
 #execSummaryCard .mk-exec-grid{
   display:grid;
@@ -1726,7 +1695,6 @@ button.remove-row{
   gap:18px;
   margin-top:14px;
 }
-
 #execSummaryCard .mk-exec-card{
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
@@ -1737,33 +1705,28 @@ button.remove-row{
   flex-direction:column;
   min-height:260px;
 }
-
 #execSummaryCard .mk-exec-title{
   font-weight:900;
   font-size:14px;
   color:#111827;
   margin-bottom:2px;
 }
-
 #execSummaryCard .mk-exec-sub{
   font-size:12px;
   color:#6b7280;
   margin-bottom:10px;
 }
-
 #execSummaryCard textarea{
   flex:1 1 auto;
   min-height:180px;
   resize:vertical;
 }
-
 #execSummaryCard .mk-exec-actions{
   display:flex;
   gap:10px;
   justify-content:flex-end;
   margin-top:14px;
 }
-
 #execSummaryCard .mk-exec-btn{
   background:var(--orange);
   color:#fff;
@@ -1793,7 +1756,6 @@ button.remove-row{
   background:#e5e7eb;
   transform:translateY(-1px);
 }
-
 #execSummaryCard .mk-exec-output{
   margin-top:16px;
   border:1px solid var(--border);
@@ -1815,86 +1777,76 @@ button.remove-row{
   color:#111827;
   white-space:pre-wrap;
 }
-
 @media (max-width:1100px){
   #execSummaryCard .mk-exec-grid{ grid-template-columns:1fr; }
   #execSummaryCard .mk-exec-card{ min-height:220px; }
 }
 
 /* =========================================================
-   TRAINING SUMMARY — ACTIONS (top-right orange pill)
+   TRAINING SUMMARY — ACTIONS (YOUR ACTUAL MARKUP)
+   Targets: #mkSummaryActions + #mkSummaryActionsBtn + #mkSummaryActionsMenu
 ========================================================= */
-
-/* Make the Training Summary page a positioning context */
 #training-summary{ position:relative; }
 
-/* Best-effort: target common actions controls inside Training Summary */
-#training-summary .actions,
-#training-summary .actions-wrap,
-#training-summary .mk-actions,
-#training-summary .summary-actions,
-#training-summary .dropdown,
-#training-summary .dropdown-wrap{
+#training-summary #mkSummaryActions.mk-summary-actions{
   position:absolute !important;
-  top:86px !important;     /* adjust if needed (sits under title/subtitle) */
+  top:22px !important;
   right:34px !important;
-  z-index:20 !important;
+  z-index:50 !important;
+  display:inline-flex !important;
+  align-items:center !important;
 }
 
-/* Style the actual button/select as an orange pill */
-#training-summary .actions button,
-#training-summary .actions-wrap button,
-#training-summary .mk-actions button,
-#training-summary .summary-actions button,
-#training-summary button.actions-btn,
-#training-summary button.dropdown-btn,
-#training-summary .dropdown button,
-#training-summary select.actions-select,
-#training-summary select.dropdown-select{
+#training-summary #mkSummaryActionsBtn.mk-action-btn{
   background:var(--orange) !important;
   color:#fff !important;
-  border:1px solid rgba(255,255,255,0.25) !important;
+  border:none !important;
   border-radius:999px !important;
-  padding:8px 14px !important;
   height:34px !important;
+  padding:0 14px !important;
   font-size:11px !important;
   font-weight:900 !important;
-  letter-spacing:0.08em !important;
+  letter-spacing:.08em !important;
   text-transform:uppercase !important;
-  box-shadow:0 3px 10px rgba(239,109,34,0.35) !important;
   cursor:pointer !important;
+  box-shadow:0 3px 10px rgba(239,109,34,0.35) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
 }
-
-/* Hover */
-#training-summary .actions button:hover,
-#training-summary .actions-wrap button:hover,
-#training-summary .mk-actions button:hover,
-#training-summary .summary-actions button:hover,
-#training-summary button.actions-btn:hover,
-#training-summary button.dropdown-btn:hover{
+#training-summary #mkSummaryActionsBtn.mk-action-btn:hover{
   background:#ff8b42 !important;
   transform:translateY(-1px) !important;
 }
 
-/* CSS-only best effort: first four section-blocks become a 2×2 grid */
-#training-summary{
-  display:block;
+/* Dropdown menu (panel) */
+#training-summary #mkSummaryActionsMenu.mk-action-menu{
+  position:absolute !important;
+  top:42px !important;
+  right:0 !important;
+  min-width:220px !important;
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-radius:14px !important;
+  box-shadow:0 14px 40px rgba(0,0,0,0.20) !important;
+  padding:8px !important;
+  z-index:60 !important;
+}
+#training-summary #mkSummaryActionsMenu .mk-action-item{
+  width:100% !important;
+  text-align:left !important;
+  border:none !important;
+  background:#fff !important;
+  padding:10px 12px !important;
+  border-radius:12px !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  cursor:pointer !important;
+}
+#training-summary #mkSummaryActionsMenu .mk-action-item:hover{
+  background:rgba(239,109,34,0.08) !important;
 }
 
-#training-summary .page-section > .section-block{
-  /* leave other cards alone by default */
-}
-
-#training-summary .page-section > .section-block:nth-of-type(-n+4){
-  /* put the first four cards into a grid via a generated grid wrapper behavior */
-}
-
-#training-summary .page-section{
-  /* create a grid for the top card group area */
-}
-
-#training-summary .page-section .mk-summary-auto-2x2{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
-}
+/* Optional: tighten spacing between the top 2x2 grids if you add mk-summary-topgrid class */
+#training-summary .mk-summary-topgrid{ margin-bottom:0 !important; }
+#training-summary .mk-summary-topgrid + .cards-grid.two-col{ margin-top:18px !important; }
