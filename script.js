@@ -1,36 +1,19 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — STABLE BUILD v6
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — STABLE PATCHED BUILD
 
-   ✅ Nav + persistence
-   ✅ Clear All + Reset Page (OS-style popups)
-   ✅ Trainers (+) + POCs (+) cloning + persistence
-   ✅ Tables: Add Row clone + persistence
-   ✅ Notes bullets + caret behavior (• / ◦)
-   ✅ Expand buttons:
-      - Table expand (⤢) in EVERY .table-footer
-      - Notes expand (⤢) for notes textareas (EXCLUDES Support Ticket "Short Summary")
-   ✅ Support Tickets:
-      - Base card locked to Open and disabled
-      - + clones base into new card, then clears base
-      - Status moves cards to correct buckets
-   ✅ Training dates:
-      - Training End Date auto-sets to 2 days after Onsite date
-      - Will keep updating unless user manually edits end date
-   ✅ Training Summary:
-      - Actions dropdown support (Generate Summary / Save PDF / Reset)
-      - Executive summary generation pulls from ALL pages (notes + fields + tickets)
-   ✅ Fixes:
-      - Service Advisors – Checklist seeds to 3 starter rows (only that table)
-      - Additional POC clones no longer force weird rounded-right class
-      - Ticket Number input forced to 100% width
-      - Dealership map iframe forced to fill its card
-
-   NOTE on PDF:
-   - If your original jsPDF/html2canvas PDF logic exists elsewhere, this script will
-     trigger it via #savePDF click.
-   - If not found, it shows a popup instead of silently failing.
-
+   ✅ Nav (sidebar buttons)
+   ✅ Field persistence (localStorage)
+   ✅ Trainers + Additional Trainers
+   ✅ POCs + Additional POCs
+   ✅ Training tables: Add Row + persist/restore
+   ✅ Notes system (bullets/caret) + Notes modal
+   ✅ Support Tickets routing (base card locked)
+   ✅ Map update
+   ✅ Expand buttons (tables + notes) with mkTableModal
+   ✅ FIX: Dealership title shows DID + DealerGroup + Name
+   ✅ FIX: Training End Date auto-sets +2 days after onsite date
+   ✅ FIX: Inject Lead Trainer into Training Summary Trainer(s) field (if empty)
 ======================================================= */
 
 (() => {
@@ -39,7 +22,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v5";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -175,15 +158,6 @@
     requestAnimationFrame(() => window.scrollTo(x, y));
   };
 
-  const mkTextClean = (s) => {
-    return String(s || "")
-      .replace(/\u2060/g, "")
-      .replace(/[\u200B\u200C]/g, "")
-      .replace(/[ \t]+\n/g, "\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-  };
-
   /* =======================
      OS-STYLE POPUPS (OK + OK/CANCEL)
   ======================= */
@@ -214,7 +188,7 @@
           display:flex; align-items:center; justify-content:space-between;
         }
         .mk-pop-title{ font-size:15px; }
-        .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap; }
+        .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; }
         .mk-pop-actions{
           padding:12px 16px 14px;
           display:flex; justify-content:flex-end; gap:10px;
@@ -389,17 +363,6 @@
     } catch {
       target.scrollIntoView(true);
     }
-
-    // after section swap, ensure dynamic UI
-    setTimeout(() => {
-      ensureTableExpandButtons();
-      ensureNotesExpandButtons();
-      enforceDoubleTallStackedNotes();
-      enforceMapFillCard();
-      enforceTicketInputWidths();
-      seedServiceAdvisorsRowsToThree();
-      initTrainingSummaryDropdown(); // safe no-op if missing
-    }, 0);
   };
 
   const initNav = () => {
@@ -489,11 +452,6 @@
 
     clearAllNotesButtonStates(document);
     cloneState.clearAll();
-
-    // reset manual end-date lock
-    const end = $("#trainingEndDate") || $("#endDate");
-    if (end) end.removeAttribute("data-mk-manual");
-
     log("Clear All complete");
   };
 
@@ -524,7 +482,6 @@
 
     if ($("table.training-table", sectionEl)) {
       const clones = cloneState.get();
-      // only clear tables belonging to this section (safe fallback: clear all tables)
       clones.tables = {};
       cloneState.set(clones);
     }
@@ -542,12 +499,7 @@
     clearAllNotesButtonStates(sectionEl);
 
     enforceBaseTicketStatusLock();
-
-    // reset manual end-date lock if clearing dealership-info
-    if (sectionEl.id === "dealership-info") {
-      const end = $("#trainingEndDate") || $("#endDate");
-      if (end) end.removeAttribute("data-mk-manual");
-    }
+    syncDealershipTitle(); // keep title correct after clears
 
     log("Cleared section:", sectionEl.id);
   };
@@ -636,16 +588,19 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    // remove any add buttons from clone
     clone
       .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
       .forEach((btn) => btn.remove());
 
-    // IMPORTANT: do NOT add rounding hack classes (this caused odd rounding)
-    clone.classList.add("mk-poc-clone");
+    const row = clone.querySelector(".checklist-row.integrated-plus");
+    if (row) row.classList.remove("integrated-plus");
+
+    const ip = clone.querySelector(".input-plus");
+    if (ip) ip.classList.add("mk-solo-input");
+
+    // (fix for “rounded right side” issues: do NOT add extra rounding classes)
     clone.classList.remove("mk-round-right");
 
-    // Clean and re-id fields
     $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
@@ -788,50 +743,45 @@
     });
   };
 
-  /* =======================
-     Service Advisors — seed to 3 starter rows ONLY for that table
-  ======================= */
-  const seedServiceAdvisorsRowsToThree = () => {
-    // find table(s) whose nearest section header includes "Service Advisors" and "Checklist"
-    const tables = $$("table.training-table");
-    tables.forEach((table) => {
-      const section = table.closest(".section") || table.closest(".section-block") || table.parentElement;
-      const header =
-        section?.querySelector?.(".section-header") ||
-        section?.querySelector?.("h2") ||
-        null;
-      const title = (header?.textContent || "").trim().toLowerCase();
-      if (!title) return;
-      if (!(title.includes("service advisors") && title.includes("checklist"))) return;
-
+  /* =========================================================
+     OPTIONAL: Ensure at least 3 starter rows (only when table has <=1 row)
+     (This is a “starter rows” UI convenience, not persisted clones)
+========================================================= */
+  function seedStarterRowsToThree() {
+    document.querySelectorAll("table.training-table").forEach((table) => {
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const rowsAll = Array.from(tbody.querySelectorAll("tr"));
-      // starter rows = not cloned rows
-      const starter = rowsAll.filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
-      if (starter.length >= 3) return;
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+      );
 
-      const baseRow = tbody.querySelector('tr[data-base="true"]') || starter[0];
+      if (existing.length >= 3) return;
+
+      const baseRow =
+        tbody.querySelector('tr[data-base="true"]') ||
+        existing[0];
+
       if (!baseRow) return;
 
-      const needed = 3 - starter.length;
+      const needed = 3 - existing.length;
       for (let i = 0; i < needed; i++) {
         const clone = baseRow.cloneNode(true);
+
+        // starter row, not an "added row"
         clone.removeAttribute(AUTO_ROW_ATTR);
         clone.removeAttribute("data-base");
+
         clone.querySelectorAll("input, select, textarea").forEach((el) => {
           if (el.type === "checkbox" || el.type === "radio") el.checked = false;
           else el.value = "";
-          // give new ids so persistence doesn't collide
-          el.removeAttribute(AUTO_ID_ATTR);
-          ensureId(el);
-          saveField(el);
+          triggerInputChange(el);
         });
+
         tbody.appendChild(clone);
       }
     });
-  };
+  }
 
   /* =======================
      NOTES (working version)
@@ -1050,14 +1000,8 @@
 
         const caret = caretAtHollowForKey(ta.value, slotKey);
 
-        try {
-          ta.focus({ preventScroll: true });
-        } catch {
-          ta.focus();
-        }
-        try {
-          ta.setSelectionRange(caret, caret);
-        } catch {}
+        try { ta.focus({ preventScroll: true }); } catch { ta.focus(); }
+        try { ta.setSelectionRange(caret, caret); } catch {}
 
         btn.classList.add("has-notes");
         btn.classList.add("is-notes-active");
@@ -1079,7 +1023,7 @@
   })();
 
   /* =======================
-     SUPPORT TICKETS (FIXED)
+     SUPPORT TICKETS (LOCKED BASE)
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -1153,11 +1097,6 @@
       ensureId(status);
       saveField(status);
     }
-
-    // Width fix (requested): Ticket Number matches other inputs
-    const num = $(".ticket-number-input", clone);
-    if (num) num.style.width = "100%";
-
     return clone;
   };
 
@@ -1202,8 +1141,6 @@
       saveField(el);
       triggerInputChange(el);
     });
-
-    if (num) num.style.width = "100%";
   };
 
   const resetBaseTicketCard = (baseCard) => {
@@ -1369,14 +1306,29 @@
   };
 
   /* =======================
-     DEALERSHIP NAME DISPLAY
+     TOP TITLE: DID + DealerGroup + Dealership Name
   ======================= */
-  const syncDealershipName = () => {
-    const input = $("#dealershipNameInput");
+  function syncDealershipTitle() {
     const display = $("#dealershipNameDisplay");
-    if (!input || !display) return;
-    display.textContent = (input.value || "").trim();
-  };
+    if (!display) return;
+
+    const did = ($("#dealershipDidInput")?.value || "").trim();
+    const group = ($("#dealerGroupInput")?.value || "").trim();
+    const name = ($("#dealershipNameInput")?.value || "").trim();
+
+    if (!did && !name) {
+      display.textContent = "";
+      return;
+    }
+    if (!did) {
+      display.textContent = name;
+      return;
+    }
+
+    display.textContent = group
+      ? `DID - ${did} ${group} ${name}`.replace(/\s+/g, " ").trim()
+      : `DID - ${did} ${name}`.replace(/\s+/g, " ").trim();
+  }
 
   /* =======================
      MAP
@@ -1390,88 +1342,86 @@
     frame.src = `https://www.google.com/maps?q=${q}&z=${a ? 14 : 4}&output=embed`;
   };
 
-  const enforceMapFillCard = () => {
-    const frame = $("#dealershipMapFrame");
-    if (!frame) return;
-    frame.style.width = "100%";
-    frame.style.height = "100%";
-    frame.style.minHeight = "420px";
-    frame.style.border = "0";
-    const parent = frame.parentElement;
-    if (parent) {
-      parent.style.width = "100%";
-    }
-  };
-
   /* =======================
-     DATE AUTO-SET: End date = Onsite + 2 days
-     - updates until user manually edits end date
+     TRAINING END DATE: +2 days after onsite date
   ======================= */
-  const parseISODate = (iso) => {
-    // iso: YYYY-MM-DD
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "").trim());
-    if (!m) return null;
-    const y = Number(m[1]);
-    const mo = Number(m[2]) - 1;
-    const d = Number(m[3]);
-    const dt = new Date(y, mo, d);
-    if (Number.isNaN(dt.getTime())) return null;
-    return dt;
-  };
-
-  const toISODate = (dt) => {
-    const yyyy = dt.getFullYear();
-    const mm = String(dt.getMonth() + 1).padStart(2, "0");
-    const dd = String(dt.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  };
-
-  const initAutoTrainingEndDate = () => {
+  function autoSetTrainingEndDatePlus2() {
     const onsite =
       $("#onsiteTrainingDate") ||
       $("#onsiteDate") ||
-      $("#onsite_training_date") ||
-      $("#onsite-training-date");
+      $("#trainingStartDate") ||
+      $("#onsiteTrainingStartDate");
 
     const end =
       $("#trainingEndDate") ||
       $("#endDate") ||
-      $("#training_end_date") ||
-      $("#training-end-date");
+      $("#onsiteTrainingEndDate");
 
     if (!onsite || !end) return;
 
-    // Mark manual edits
-    end.addEventListener("input", () => {
-      if ((end.value || "").trim()) end.setAttribute("data-mk-manual", "1");
+    onsite.addEventListener("change", () => {
+      if (!onsite.value) return;
+
+      // don't overwrite if user already set an end date
+      if (end.value) return;
+
+      const d = new Date(onsite.value);
+      if (Number.isNaN(d.getTime())) return;
+
+      d.setDate(d.getDate() + 2);
+
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+
+      end.value = `${yyyy}-${mm}-${dd}`;
+      end.dispatchEvent(new Event("input", { bubbles: true }));
+      end.dispatchEvent(new Event("change", { bubbles: true }));
     });
+  }
 
-    const recalc = () => {
-      const dt = parseISODate(onsite.value);
-      if (!dt) return;
+  /* =======================
+     Inject Lead Trainer into Training Summary (if empty)
+  ======================= */
+  function injectLeadTrainerIntoSummary() {
+    // lead trainer select (common patterns)
+    const leadSelect =
+      $("#leadTrainerSelect") ||
+      $("#leadTrainer") ||
+      $("#trainers-deployment select") ||
+      document.querySelector('select[id*="trainer" i]');
 
-      // if user manually set it, don't override
-      if (end.getAttribute("data-mk-manual") === "1") return;
+    const lead = (leadSelect?.value || "").trim();
+    if (!lead) return;
 
-      const plus = new Date(dt.getTime());
-      plus.setDate(plus.getDate() + 2); // ✅ two days after
-      end.value = toISODate(plus);
-      triggerInputChange(end);
-      saveField(end);
-    };
+    const summary = $("#training-summary");
+    if (!summary) return;
 
-    onsite.addEventListener("change", recalc);
-    onsite.addEventListener("input", recalc);
+    // find "Trainer(s)" input by label
+    const rows = Array.from(summary.querySelectorAll(".checklist-row"));
+    let trainerInput = null;
 
-    // on load: if onsite has value and end empty, set it
-    if (onsite.value && !end.value) recalc();
-  };
+    for (const row of rows) {
+      const label = (row.querySelector("label")?.textContent || "").toLowerCase();
+      if (label.includes("trainer")) {
+        trainerInput = row.querySelector("input[type='text'], textarea");
+        if (trainerInput) break;
+      }
+    }
+
+    if (!trainerInput) return;
+    if ((trainerInput.value || "").trim()) return; // don't overwrite user entry
+
+    trainerInput.value = lead;
+    trainerInput.dispatchEvent(new Event("input", { bubbles: true }));
+    trainerInput.dispatchEvent(new Event("change", { bubbles: true }));
+  }
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES) — CATCH-ALL
 ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v4";
+    const STYLE_ID = "mk-expand-style-v3";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1542,9 +1492,7 @@
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
-    try {
-      panel.scrollTop = 0;
-    } catch {}
+    try { panel.scrollTop = 0; } catch {}
   };
 
   const closeTableModal = () => {
@@ -1586,7 +1534,6 @@
     const nodes = [];
     if (tableBlock) nodes.push(tableBlock);
 
-    // include any notes blocks referenced by data-notes-target within same section card
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
       const id = btn.getAttribute("data-notes-target");
@@ -1651,22 +1598,18 @@
     });
   };
 
-  const shouldExcludeNotesExpand = (ta) => {
-    // Exclude:
-    // - anything in tables
-    // - Support Tickets "Short Summary" textarea/input area
-    if (ta.closest("table")) return true;
-    if (ta.closest("#support-tickets")) return true; // ✅ prevents expand on ticket short summary
-    // Exclude modal notes if desired? keep allowed.
-    return false;
-  };
-
   const ensureNotesExpandButtons = () => {
     ensureExpandStyles();
 
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
-      if (shouldExcludeNotesExpand(ta)) return;
+      if (ta.closest("table")) return; // not table cell notes
+
+      // DO NOT add expand to Support Ticket "Short Summary" textarea if you have one:
+      // (your tickets use .ticket-summary-input (input), but this is a safety)
+      const ticketWrap = ta.closest("#support-tickets, .ticket-group");
+      if (ticketWrap && (ta.classList.contains("ticket-summary-input") || ta.name?.toLowerCase?.().includes("summary")))
+        return;
 
       let wrap = ta.closest(".mk-ta-wrap");
       if (!wrap) {
@@ -1696,408 +1639,37 @@
     const obs = new MutationObserver(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      enforceDoubleTallStackedNotes();
-      enforceMapFillCard();
-      enforceTicketInputWidths();
     });
     obs.observe(document.body, { childList: true, subtree: true });
 
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      enforceDoubleTallStackedNotes();
-      enforceMapFillCard();
-      enforceTicketInputWidths();
     }, 250);
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      enforceDoubleTallStackedNotes();
-      enforceMapFillCard();
-      enforceTicketInputWidths();
     }, 900);
   };
 
   /* =======================
-     NOTES HEIGHT RULE
-     - “stacked” notes = textareas NOT inside .cards-grid.two-col
-     - make them ~2x taller
-  ======================= */
-  const enforceDoubleTallStackedNotes = () => {
-    const notesTextareas = Array.from(document.querySelectorAll(".section-block textarea"));
-    notesTextareas.forEach((ta) => {
-      if (ta.closest("table")) return;
-      if (ta.closest("#support-tickets")) return;
-
-      // stacked = not in side-by-side two-col cards
-      const inTwoCol = !!ta.closest(".cards-grid.two-col");
-
-      if (!inTwoCol) {
-        // twice tall
-        ta.style.minHeight = "440px";
-      }
-    });
-
-    // Table modal notes textarea (if present) also twice tall
-    const modalNotes = document.querySelector("#mkTableModal .mk-modal-notes textarea");
-    if (modalNotes) modalNotes.style.minHeight = "380px";
-  };
-
-  /* =======================
-     Ticket input widths
-  ======================= */
-  const enforceTicketInputWidths = () => {
-    $$("#support-tickets .ticket-number-input").forEach((inp) => {
-      inp.style.width = "100%";
-      inp.style.maxWidth = "100%";
-      inp.style.boxSizing = "border-box";
-    });
-  };
-
-  /* =======================
-     PDF BUTTON (guarded)
-  ======================= */
-  const guardedSaveAllPagesPDF = () => {
-    const btn = $("#savePDF");
-    if (btn && btn !== document.activeElement) {
-      // if they already have a handler attached elsewhere, this will trigger it
-      btn.click();
-      return;
-    }
-
-    mkPopup.ok(
-      "PDF export logic wasn’t found. If your project uses jsPDF/html2canvas, make sure that script is loaded and your Save PDF handler is attached to #savePDF.",
-      { title: "PDF Export" }
-    );
-  };
-
-  /* =======================
-     TRAINING SUMMARY — Dropdown + Generator
-  ======================= */
-  const mkGetAllNotesText = () => {
-    const tAs = Array.from(document.querySelectorAll("textarea"));
-    const parts = tAs
-      .map((ta) => mkTextClean(ta.value))
-      .filter(Boolean);
-    return parts.join("\n\n");
-  };
-
-  const mkGetValueById = (...ids) => {
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (!el) continue;
-      if (el.matches("input, textarea, select")) return (el.value || "").trim();
-    }
-    return "";
-  };
-
-  const mkBulletsFromText = (text, keywords, max = 6) => {
-    const lines = mkTextClean(text).split(/\n+/).map(l => l.trim()).filter(Boolean);
-    const bullets = lines.filter(l => l.startsWith("•") || l.startsWith("-") || l.startsWith("◦"));
-    const pool = bullets.length ? bullets : lines;
-
-    const hits = [];
-    for (const line of pool) {
-      const low = line.toLowerCase();
-      if (keywords.some(k => low.includes(k))) hits.push(line.replace(/^[•\-◦]\s*/, ""));
-    }
-
-    const out = (hits.length ? hits : pool.map(l => l.replace(/^[•\-◦]\s*/, ""))).slice(0, max);
-    return out.map(x => `• ${x}`).join("\n");
-  };
-
-  const mkTicketSummary = () => {
-    const cards = Array.from(document.querySelectorAll("#support-tickets .ticket-group"));
-    if (!cards.length) return "";
-
-    const totals = { Open: 0, "Tier Two": 0, "Closed - Resolved": 0, "Closed - Feature Not Supported": 0, Other: 0 };
-    const notable = [];
-
-    cards.forEach((card) => {
-      const status = card.querySelector(".ticket-status-select")?.value || "Open";
-      const sum = mkTextClean(card.querySelector(".ticket-summary-input")?.value || "");
-      const num = mkTextClean(card.querySelector(".ticket-number-input")?.value || "");
-      const url = mkTextClean(card.querySelector(".ticket-zendesk-input")?.value || "");
-
-      if (totals[status] != null) totals[status] += 1;
-      else totals.Other += 1;
-
-      if (sum && (status === "Open" || status === "Tier Two")) {
-        notable.push(`• ${num ? `#${num} — ` : ""}${sum}${url ? ` (${url})` : ""}`);
-      }
-    });
-
-    const breakdown =
-      `• Ticket status breakdown:\n` +
-      `  ◦ Open: ${totals.Open}\n` +
-      `  ◦ Tier Two: ${totals["Tier Two"]}\n` +
-      `  ◦ Closed - Resolved: ${totals["Closed - Resolved"]}\n` +
-      `  ◦ Closed - Feature Not Supported: ${totals["Closed - Feature Not Supported"]}` +
-      (totals.Other ? `\n  ◦ Other: ${totals.Other}` : "");
-
-    const top = notable.length
-      ? `\n\n• High-impact open items:\n${notable.slice(0, 6).join("\n")}`
-      : "";
-
-    return breakdown + top;
-  };
-
-  const mkInferSnapshot = () => {
-    const dealership =
-      mkGetValueById("dealershipNameInput") ||
-      (document.getElementById("dealershipNameDisplay")?.textContent || "").trim();
-
-    const onsiteStart = mkGetValueById("onsiteTrainingDate", "onsiteDate");
-    const endDate = mkGetValueById("trainingEndDate", "endDate");
-
-    const dates =
-      onsiteStart && endDate ? `${onsiteStart} → ${endDate}` :
-      onsiteStart ? `${onsiteStart} → (end date not set)` :
-      "";
-
-    const trainerBase = mkGetValueById("trainerNameInput", "trainerName") || "";
-    const trainerAdds = Array.from(document.querySelectorAll("#additionalTrainersContainer input[type='text']"))
-      .map(i => (i.value || "").trim())
-      .filter(Boolean);
-    const trainers = [trainerBase, ...trainerAdds].filter(Boolean).join(", ");
-
-    return { dealership, dates, trainers };
-  };
-
-  const mkSetIfExists = (id, val) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = mkTextClean(val);
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-    ensureId(el);
-    saveField(el);
-  };
-
-  const mkGenerateExecutiveSummary = () => {
-    const allText = mkGetAllNotesText();
-    const snap = mkInferSnapshot();
-
-    // Snapshot fields (only fill if empty)
-    const dealershipEl = document.getElementById("mkSum_dealership");
-    const datesEl = document.getElementById("mkSum_dates");
-    const trainersEl = document.getElementById("mkSum_trainers");
-    const scopeEl = document.getElementById("mkSum_scope");
-
-    if (dealershipEl && snap.dealership && !dealershipEl.value) dealershipEl.value = snap.dealership;
-    if (datesEl && snap.dates && !datesEl.value) datesEl.value = snap.dates;
-    if (trainersEl && snap.trainers && !trainersEl.value) trainersEl.value = snap.trainers;
-
-    if (scopeEl && !scopeEl.value) {
-      const scopeGuess = [];
-      if (document.querySelector("#training-checklist")) scopeGuess.push("Training Checklist");
-      if (document.querySelector("#support-tickets")) scopeGuess.push("Support Tickets");
-      if (document.querySelector("#dms-integration")) scopeGuess.push("DMS Integration");
-      scopeEl.value = scopeGuess.length ? scopeGuess.join(" + ") : "Onsite enablement + workflow readiness";
-    }
-
-    [dealershipEl, datesEl, trainersEl, scopeEl].forEach((el) => {
-      if (!el) return;
-      ensureId(el);
-      saveField(el);
-    });
-
-    const wins = mkBulletsFromText(allText, [
-      "fixed", "resolved", "completed", "implemented", "working", "configured", "success", "good", "passed", "enabled", "trained"
-    ], 8);
-
-    const risks = mkBulletsFromText(allText, [
-      "issue", "problem", "blocked", "concern", "risk", "confusion", "missing", "doesn't", "not working", "broken", "fragile", "needs"
-    ], 8);
-
-    const nextSteps = mkBulletsFromText(allText, [
-      "next", "follow", "schedule", "need to", "should", "recommend", "verify", "confirm", "send", "review", "monitor"
-    ], 10);
-
-    const champions = mkBulletsFromText(allText, [
-      "champion", "owner", "lead", "point person", "manager", "supportive", "engaged", "blocker", "resistance", "pushback"
-    ], 8);
-
-    const decisions = mkBulletsFromText(allText, [
-      "decided", "agreed", "confirmed", "standard", "process", "workflow", "go live", "rollout", "expectation", "ownership"
-    ], 8);
-
-    const support = mkTicketSummary();
-
-    const outcomeWhy =
-      `• Adoption + readiness summary based on captured notes:\n` +
-      `  ◦ Wins observed: ${wins ? "Yes" : "Unknown"}\n` +
-      `  ◦ Risks remaining: ${risks ? "Yes" : "Unknown"}\n` +
-      `  ◦ Support load: ${support ? "Documented" : "Not captured"}`;
-
-    const narrative =
-`This onsite engagement focused on stabilizing day-to-day myKaarma workflows, validating readiness across roles, and resolving blockers that impact adoption and operational consistency. The summary below is built from captured training notes, table activity, and support-ticket tracking.
-
-Key wins included:
-${wins || "• (No wins detected — add notes and re-generate)"}
-
-Primary risks/concerns included:
-${risks || "• (No risks detected — add notes and re-generate)"}
-
-Recommended next steps:
-${nextSteps || "• (No next steps detected — add notes and re-generate)"}
-
-Support & escalations:
-${support || "• (No tickets detected)"}`
-;
-
-    mkSetIfExists("mkSum_outcomeWhy", outcomeWhy);
-    mkSetIfExists("mkSum_wins", wins);
-    mkSetIfExists("mkSum_risks", risks);
-    mkSetIfExists("mkSum_nextSteps", nextSteps);
-    mkSetIfExists("mkSum_support", support);
-    mkSetIfExists("mkSum_champions", champions);
-    mkSetIfExists("mkSum_decisions", decisions);
-    mkSetIfExists("mkSum_narrative", narrative);
-
-    const outcomeSel = document.getElementById("mkSum_outcome");
-    if (outcomeSel && !outcomeSel.value) outcomeSel.focus();
-
-    mkPopup.ok("Executive summary generated. Review and edit any sections as needed.", {
-      title: "Generate Summary",
-      okText: "OK",
-    });
-  };
-
-  const injectSummaryDropdownStyles = () => {
-    const id = "mk-summary-dropdown-style";
-    if (document.getElementById(id)) return;
-    const s = document.createElement("style");
-    s.id = id;
-    s.textContent = `
-      .mk-action-btn{
-        border:none;
-        background: var(--orange);
-        color:#fff;
-        border-radius:999px;
-        padding:6px 14px;
-        font-size:11px;
-        font-weight:900;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-        cursor:pointer;
-        box-shadow:0 2px 6px rgba(239,109,34,0.35);
-        transition:background .18s, transform .18s, box-shadow .18s;
-        height:34px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-      }
-      .mk-action-btn:hover{
-        background:#ff8b42;
-        transform:translateY(-1px);
-        box-shadow:0 4px 10px rgba(239,109,34,0.45);
-      }
-      .mk-action-dropdown{ position:relative; display:inline-block; }
-      .mk-action-menu{
-        position:absolute;
-        right:0;
-        top:40px;
-        min-width:220px;
-        background:#fff;
-        border:1px solid rgba(0,0,0,.10);
-        border-radius:14px;
-        box-shadow:0 18px 50px rgba(0,0,0,.18);
-        overflow:hidden;
-        padding:6px;
-        z-index:9999;
-      }
-      .mk-action-item{
-        width:100%;
-        border:none;
-        background:transparent;
-        text-align:left;
-        padding:10px 10px;
-        border-radius:10px;
-        font-size:12px;
-        font-weight:800;
-        cursor:pointer;
-        color:#111827;
-      }
-      .mk-action-item:hover{
-        background:rgba(239,109,34,.08);
-      }
-    `;
-    document.head.appendChild(s);
-  };
-
-  const initTrainingSummaryDropdown = () => {
-    const btn = document.getElementById("mkSummaryActionsBtn");
-    const menu = document.getElementById("mkSummaryActionsMenu");
-    const wrap = document.getElementById("mkSummaryActions");
-    if (!btn || !menu || !wrap) return;
-
-    injectSummaryDropdownStyles();
-
-    const closeMenu = () => { menu.hidden = true; };
-    const toggleMenu = () => { menu.hidden = !menu.hidden; };
-
-    // avoid double-binding
-    if (btn.getAttribute("data-mk-bound") === "1") return;
-    btn.setAttribute("data-mk-bound", "1");
-
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    menu.addEventListener("click", (e) => {
-      const item = e.target.closest(".mk-action-item[data-action]");
-      if (!item) return;
-      const action = item.getAttribute("data-action");
-      closeMenu();
-
-      if (action === "generate") {
-        mkGenerateExecutiveSummary();
-        return;
-      }
-
-      if (action === "savepdf") {
-        const save = document.getElementById("savePDF");
-        if (save) save.click();
-        else guardedSaveAllPagesPDF();
-        return;
-      }
-
-      if (action === "reset") {
-        const reset =
-          document.querySelector('#training-summary .clear-page-btn') ||
-          document.querySelector('.clear-page-btn[data-clear-page="training-summary"]');
-        if (reset) reset.click();
-        else mkPopup.ok("Reset button not found for this page.", { title: "Reset Page" });
-        return;
-      }
-    });
-
-    document.addEventListener("click", () => closeMenu());
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeMenu();
-    });
-  };
-
-  /* =======================
-     EVENT DELEGATION (single)
+     EVENT DELEGATION
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // NAV
-    const navBtn = t.closest?.(".nav-btn[data-target]");
+    const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
       setActiveSection(navBtn.getAttribute("data-target"));
+      setTimeout(() => {
+        ensureTableExpandButtons();
+        ensureNotesExpandButtons();
+      }, 0);
       return;
     }
 
-    // CLEAR ALL
-    const clearAllBtn = t.closest?.("#clearAllBtn");
+    const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
       mkPopup.confirm("This will clear ALL pages and ALL saved data. Continue?", {
@@ -2109,8 +1681,7 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // RESET THIS PAGE (any page)
-    const resetBtn = t.closest?.(".clear-page-btn");
+    const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
       const section =
@@ -2126,17 +1697,15 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // ADD TRAINER (+)
     const addTrainerBtn =
-      t.closest?.("[data-add-trainer]") || t.closest?.("#trainers-deployment .trainer-add-btn");
+      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
     if (addTrainerBtn) {
       e.preventDefault();
       addTrainerRow();
       return;
     }
 
-    // ADD POC (+)
-    const pocBtn = t.closest?.("[data-add-poc], .additional-poc-add, .poc-add-btn");
+    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
     if (pocBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -2144,32 +1713,28 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // TABLE ADD ROW
-    const addRowBtn = t.closest?.("button.add-row");
-    if (addRowBtn && addRowBtn.closest?.(".table-footer")) {
+    const addRowBtn = t.closest("button.add-row");
+    if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
       cloneTableRow(addRowBtn);
       return;
     }
 
-    // NOTES BUTTON
-    const notesBtn = t.closest?.("[data-notes-target], .notes-btn, .notes-icon-btn");
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
     if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
       Notes.handleNotesClick(notesBtn);
       return;
     }
 
-    // SUPPORT TICKET ADD
-    const ticketAddBtn = t.closest?.(".add-ticket-btn");
+    const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
       addTicketCard();
       return;
     }
 
-    // MAP BUTTON
-    const mapBtn = t.closest?.(".small-map-btn, [data-map-btn]");
+    const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
@@ -2181,16 +1746,14 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // TABLE EXPAND
-    const tableExpandBtn = t.closest?.(".mk-table-expand-btn");
+    const tableExpandBtn = t.closest(".mk-table-expand-btn");
     if (tableExpandBtn) {
       e.preventDefault();
       openTableModalFor(tableExpandBtn);
       return;
     }
 
-    // NOTES EXPAND
-    const notesExpandBtn = t.closest?.(".mk-ta-expand");
+    const notesExpandBtn = t.closest(".mk-ta-expand");
     if (notesExpandBtn) {
       e.preventDefault();
       const id = notesExpandBtn.getAttribute("data-notes-id");
@@ -2200,12 +1763,11 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // MODAL CLOSE
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
       if (
-        t.closest?.("#mkTableModal .mk-modal-close") ||
-        t.closest?.("#mkTableModal .mk-modal-backdrop")
+        t.closest("#mkTableModal .mk-modal-close") ||
+        t.closest("#mkTableModal .mk-modal-backdrop")
       ) {
         e.preventDefault();
         closeTableModal();
@@ -2223,9 +1785,16 @@ ${support || "• (No tickets detected)"}`
       setGhostStyles(document);
     }
 
-    if (el.id === "dealershipNameInput") syncDealershipName();
+    // keep title synced
+    if (
+      el.id === "dealershipDidInput" ||
+      el.id === "dealerGroupInput" ||
+      el.id === "dealershipNameInput"
+    ) {
+      syncDealershipTitle();
+    }
 
-    if (el.closest?.("#additionalTrainersContainer")) {
+    if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
         value: (i.value || "").trim(),
@@ -2234,25 +1803,23 @@ ${support || "• (No tickets detected)"}`
     }
 
     if (
-      el.closest?.(".additional-poc-card") &&
+      el.closest(".additional-poc-card") &&
       el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
     ) {
       persistAllPocs();
     }
 
-    if (el.matches?.(".ticket-number-input")) onTicketNumberInput(el);
+    if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
 
-    if (el.closest?.(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
+    if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
 
-    const tr = el.closest?.("tr");
-    const table = el.closest?.("table.training-table");
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
       persistTable(table);
     }
-
-    // end date manual lock handled in initAutoTrainingEndDate()
   });
 
   document.addEventListener("change", (e) => {
@@ -2264,10 +1831,15 @@ ${support || "• (No tickets detected)"}`
       setGhostStyles(document);
     }
 
-    if (el.matches?.(".ticket-status-select")) onTicketStatusChange(el);
+    // lead trainer changed -> inject into summary if empty
+    if (el.matches("#leadTrainerSelect, #leadTrainer") || el.closest("#trainers-deployment")) {
+      injectLeadTrainerIntoSummary();
+    }
 
-    const tr = el.closest?.("tr");
-    const table = el.closest?.("table.training-table");
+    if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
+
+    const tr = el.closest("tr");
+    const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
       persistTable(table);
     }
@@ -2276,7 +1848,6 @@ ${support || "• (No tickets detected)"}`
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // Notes textarea: Enter inserts sub-bullet
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -2308,14 +1879,12 @@ ${support || "• (No tickets detected)"}`
       return;
     }
 
-    // Trainers: Enter adds trainer
-    if (el?.id === "additionalTrainerInput" && e.key === "Enter") {
+    if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
       return;
     }
 
-    // Escape closes modal/popup
     if (e.key === "Escape") {
       const mkTableModal = $("#mkTableModal");
       if (mkTableModal && mkTableModal.classList.contains("open")) {
@@ -2338,33 +1907,30 @@ ${support || "• (No tickets detected)"}`
     rebuildTableClones();
     rebuildTicketClones();
 
-    // Seed Service Advisors table starter rows
-    seedServiceAdvisorsRowsToThree();
+    // convenience rows
+    seedStarterRowsToThree();
 
-    // Restore saved fields AFTER clones and seeds exist
+    // restore fields AFTER clones exist
     restoreAllFields();
 
     setGhostStyles(document);
-    syncDealershipName();
 
-    // Expand buttons
+    // title sync (DID/group/name)
+    syncDealershipTitle();
+
+    // end date +2 days
+    autoSetTrainingEndDatePlus2();
+
+    // expand buttons
     ensureTableExpandButtons();
     ensureNotesExpandButtons();
     startExpandObserver();
 
-    // Support ticket base lock
+    // base ticket status always locked
     enforceBaseTicketStatusLock();
 
-    // Auto end date = onsite +2 days
-    initAutoTrainingEndDate();
-
-    // Training Summary dropdown (safe no-op if page not using it yet)
-    initTrainingSummaryDropdown();
-
-    // UI polish
-    enforceDoubleTallStackedNotes();
-    enforceMapFillCard();
-    enforceTicketInputWidths();
+    // lead trainer -> summary (if empty)
+    injectLeadTrainerIntoSummary();
 
     log("Initialized.");
   };
