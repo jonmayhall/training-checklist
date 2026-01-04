@@ -1820,3 +1820,81 @@ button.remove-row{
   #execSummaryCard .mk-exec-grid{ grid-template-columns:1fr; }
   #execSummaryCard .mk-exec-card{ min-height:220px; }
 }
+
+/* =========================================================
+   TRAINING SUMMARY — ACTIONS (top-right orange pill)
+========================================================= */
+
+/* Make the Training Summary page a positioning context */
+#training-summary{ position:relative; }
+
+/* Best-effort: target common actions controls inside Training Summary */
+#training-summary .actions,
+#training-summary .actions-wrap,
+#training-summary .mk-actions,
+#training-summary .summary-actions,
+#training-summary .dropdown,
+#training-summary .dropdown-wrap{
+  position:absolute !important;
+  top:86px !important;     /* adjust if needed (sits under title/subtitle) */
+  right:34px !important;
+  z-index:20 !important;
+}
+
+/* Style the actual button/select as an orange pill */
+#training-summary .actions button,
+#training-summary .actions-wrap button,
+#training-summary .mk-actions button,
+#training-summary .summary-actions button,
+#training-summary button.actions-btn,
+#training-summary button.dropdown-btn,
+#training-summary .dropdown button,
+#training-summary select.actions-select,
+#training-summary select.dropdown-select{
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,0.25) !important;
+  border-radius:999px !important;
+  padding:8px 14px !important;
+  height:34px !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  box-shadow:0 3px 10px rgba(239,109,34,0.35) !important;
+  cursor:pointer !important;
+}
+
+/* Hover */
+#training-summary .actions button:hover,
+#training-summary .actions-wrap button:hover,
+#training-summary .mk-actions button:hover,
+#training-summary .summary-actions button:hover,
+#training-summary button.actions-btn:hover,
+#training-summary button.dropdown-btn:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px) !important;
+}
+
+/* CSS-only best effort: first four section-blocks become a 2×2 grid */
+#training-summary{
+  display:block;
+}
+
+#training-summary .page-section > .section-block{
+  /* leave other cards alone by default */
+}
+
+#training-summary .page-section > .section-block:nth-of-type(-n+4){
+  /* put the first four cards into a grid via a generated grid wrapper behavior */
+}
+
+#training-summary .page-section{
+  /* create a grid for the top card group area */
+}
+
+#training-summary .page-section .mk-summary-auto-2x2{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+}
