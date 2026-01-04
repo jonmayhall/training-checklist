@@ -3613,6 +3613,59 @@
     </div>
   </div>
 
+  <!-- Outcome / Wins / Risks / Next Steps -->
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Outcome</h2>
+
+      <div class="checklist-row">
+        <label>Overall training outcome</label>
+        <select id="mkSum_outcome">
+          <option value="" data-ghost="true">Select outcome</option>
+          <option>Exceeded Expectations</option>
+          <option>Met Expectations</option>
+          <option>Partially Met Expectations</option>
+          <option>Did Not Meet Expectations</option>
+        </select>
+      </div>
+
+      <div class="checklist-row" style="margin-top:10px;">
+        <label>Outcome rationale</label>
+        <textarea id="mkSum_outcomeWhy" placeholder="Short rationale based on what was completed vs. what remains"></textarea>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2>Recommended Next Steps</h2>
+      <textarea id="mkSum_nextSteps" placeholder="Top actions for continued success (bulleted)"></textarea>
+    </div>
+  </div>
+
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Key Wins</h2>
+      <textarea id="mkSum_wins" placeholder="High-level wins or successes (bulleted)"></textarea>
+    </div>
+
+    <div class="section-block">
+      <h2>Key Risks / Concerns</h2>
+      <textarea id="mkSum_risks" placeholder="Top risks, concerns, or blockers (bulleted)"></textarea>
+    </div>
+  </div>
+
+  <!-- Operational / Support / Leadership -->
+  <div class="cards-grid two-col" style="margin-top:16px;">
+    <div class="section-block">
+      <h2>Support &amp; Escalations</h2>
+      <textarea id="mkSum_support" placeholder="Ticket status breakdown + high-impact open items"></textarea>
+    </div>
+
+    <div class="section-block">
+      <h2>Champions &amp; Blockers</h2>
+      <textarea id="mkSum_champions" placeholder="Key champions, blockers, and impact"></textarea>
+    </div>
+  </div>
+
   <div class="section-block">
     <h2>Key Decisions / Commitments</h2>
     <textarea id="mkSum_decisions" placeholder="Decisions made, ownership assigned, and commitments"></textarea>
