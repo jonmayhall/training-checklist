@@ -3557,11 +3557,12 @@
       </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 11: TRAINING SUMMARY (CLEAN 2-COL STACKED ROWS)        -->
-<!-- Fix: NO nested 2-col grids inside a 2-col grid              -->
-<!-- Result: each “row” is its own 2-col grid (2 cards per row)  -->
+<!-- PAGE 11: TRAINING SUMMARY (FIXED STRUCTURE)                -->
+<!-- One page-section wrapper                                  -->
+<!-- No nested grids                                           -->
 <!-- ========================================================= -->
 <section id="training-summary" class="page-section">
+
   <h1>Training Summary</h1>
   <p class="page-subtitle">
     Generate an executive summary from captured notes, tables, and support tickets. Review and edit before exporting.
@@ -3585,14 +3586,13 @@
       <button class="mk-action-item" type="button" data-action="reset">Reset This Page</button>
     </div>
 
-    <!-- keep your existing PDF button in DOM for whatever PDF logic you already have -->
     <button id="savePDF" type="button" hidden>Save All Pages as PDF</button>
   </div>
 
   <!-- ========================= -->
-  <!-- ROW 1 (2 cards)           -->
+  <!-- ROW 1                    -->
   <!-- ========================= -->
-  <div class="cards-grid two-col mk-summary-topgrid" style="margin-top:14px;">
+  <div class="cards-grid two-col" style="margin-top:14px;">
 
     <!-- Engagement Snapshot -->
     <div class="section-block">
@@ -3639,26 +3639,24 @@
         </select>
       </div>
 
-     <!-- Outcome rationale (FULL WIDTH) -->
-<div class="checklist-row mk-fullwidth-row" style="margin-top:10px;">
-  <label>Outcome rationale</label>
-</div>
-<textarea
-  id="mkSum_outcomeWhy"
-  class="mk-fullwidth-textarea"
-  placeholder="Short rationale based on what was completed vs. what remains"
-></textarea>
+      <!-- Full-width rationale -->
+      <div class="checklist-row mk-fullwidth-row" style="margin-top:10px;">
+        <label>Outcome rationale</label>
       </div>
+      <textarea
+        id="mkSum_outcomeWhy"
+        class="mk-fullwidth-textarea"
+        placeholder="Short rationale based on what was completed vs. what remains"
+      ></textarea>
     </div>
 
   </div>
 
   <!-- ========================= -->
-  <!-- ROW 2 (2 cards)           -->
+  <!-- ROW 2                    -->
   <!-- ========================= -->
   <div class="cards-grid two-col" style="margin-top:16px;">
 
-    <!-- Recommended Next Steps -->
     <div class="section-block">
       <h2>Recommended Next Steps</h2>
       <textarea
@@ -3667,7 +3665,6 @@
       ></textarea>
     </div>
 
-    <!-- Key Wins -->
     <div class="section-block">
       <h2>Key Wins</h2>
       <textarea
@@ -3679,11 +3676,10 @@
   </div>
 
   <!-- ========================= -->
-  <!-- ROW 3 (2 cards)           -->
+  <!-- ROW 3                    -->
   <!-- ========================= -->
   <div class="cards-grid two-col" style="margin-top:16px;">
 
-    <!-- Key Risks / Concerns -->
     <div class="section-block">
       <h2>Key Risks / Concerns</h2>
       <textarea
@@ -3692,7 +3688,6 @@
       ></textarea>
     </div>
 
-    <!-- Support & Escalations -->
     <div class="section-block">
       <h2>Support &amp; Escalations</h2>
       <textarea
@@ -3704,11 +3699,10 @@
   </div>
 
   <!-- ========================= -->
-  <!-- ROW 4 (2 cards)           -->
+  <!-- ROW 4                    -->
   <!-- ========================= -->
   <div class="cards-grid two-col" style="margin-top:16px;">
 
-    <!-- Champions & Blockers -->
     <div class="section-block">
       <h2>Champions &amp; Blockers</h2>
       <textarea
@@ -3717,7 +3711,6 @@
       ></textarea>
     </div>
 
-    <!-- Key Decisions / Commitments -->
     <div class="section-block">
       <h2>Key Decisions / Commitments</h2>
       <textarea
@@ -3729,7 +3722,7 @@
   </div>
 
   <!-- ========================= -->
-  <!-- FULL-WIDTH (single card)  -->
+  <!-- FULL-WIDTH CARD           -->
   <!-- ========================= -->
   <div class="section-block" style="margin-top:16px;">
     <h2>Executive Narrative</h2>
