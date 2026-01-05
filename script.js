@@ -2,21 +2,13 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7)
 
-   Fixes in v7:
-   ✅ Notes caret always lands AFTER the hollow bullet "◦ " (right side)
-   ✅ Notes blocks always contain a hollow bullet line to land on
-   ✅ Notes-only popups: NO "card inside card" (moves only textarea wrapper)
-   ✅ Notes popups: bigger textarea
-   ✅ Opcodes popup "Updated" checkbox column aligns like normal table
+   ✅ FIXES IN THIS BUILD:
+   - Notes caret ALWAYS lands to the RIGHT of the hollow bullet "◦ " (for ALL Add Notes buttons)
+   - Notes expand popup no longer "card inside card" (adds mk-notes-only mode)
+   - Notes popup textarea is taller + larger font (injected CSS)
+   - Expand popup no longer breaks page layout (uses SAME-HEIGHT placeholder blocks)
+   - Popup tables inherit same .page-section scope so checkbox/updated column styling matches main tables better
 
-   Keeps:
-   - Nav, persistence
-   - Trainers + POCs
-   - Table add-row clone persistence
-   - Notes bullets + Enter behavior
-   - Map update
-   - Expand buttons (tables + notes)
-   - Support tickets hardened behavior
 ======================================================= */
 
 (() => {
@@ -43,6 +35,7 @@
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
     leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+
     summaryTrainers: ["trainingSummaryTrainers", "trainerSummaryInput", "trainersSummaryInput", "trainerInputSummary"],
   };
 
@@ -63,8 +56,7 @@
   const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
-    isEl(el) &&
-    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
+    isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -152,7 +144,8 @@
   const setGhostStyles = (root = document) => {
     root.querySelectorAll("select").forEach((sel) => {
       const first = sel.options?.[0];
-      const isGhost = !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
+      const isGhost =
+        !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
       sel.classList.toggle("is-placeholder", !!isGhost);
     });
 
@@ -202,7 +195,7 @@
   };
 
   /* =======================
-     LABEL + PLACEHOLDER FINDERS
+     LABEL + PLACEHOLDER FINDERS (best-effort)
   ======================= */
   const mkFindFieldByLabelText = (sectionEl, labelIncludes) => {
     if (!sectionEl) return null;
@@ -217,9 +210,8 @@
       if (!t.includes(want)) continue;
 
       const field =
-        row.querySelector(
-          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
-        ) || null;
+        row.querySelector("input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea") ||
+        null;
       if (field) return field;
     }
     return null;
@@ -256,7 +248,7 @@
   };
 
   /* =======================
-     OS-STYLE POPUPS
+     OS-STYLE POPUPS (OK + OK/CANCEL)
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -267,16 +259,41 @@
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
-        .mk-pop-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100000; display:flex; align-items:flex-start; justify-content:center; padding-top:110px;}
-        .mk-pop-box{width:min(520px, calc(100vw - 28px)); background:#fff; border:1px solid rgba(0,0,0,.10); border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25); overflow:hidden;}
-        .mk-pop-head{background:#EF6D22; color:#fff; padding:10px 16px; font-weight:900; letter-spacing:.2px; display:flex; align-items:center; justify-content:space-between;}
+        .mk-pop-backdrop{
+          position:fixed; inset:0; background:rgba(0,0,0,.35);
+          z-index:100000; display:flex; align-items:flex-start; justify-content:center;
+          padding-top:110px;
+        }
+        .mk-pop-box{
+          width:min(520px, calc(100vw - 28px));
+          background:#fff; border:1px solid rgba(0,0,0,.10);
+          border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25);
+          overflow:hidden;
+        }
+        .mk-pop-head{
+          background:#EF6D22; color:#fff;
+          padding:10px 16px;
+          font-weight:900; letter-spacing:.2px;
+          display:flex; align-items:center; justify-content:space-between;
+        }
         .mk-pop-title{ font-size:15px; }
         .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap;}
-        .mk-pop-actions{ padding:12px 16px 14px; display:flex; justify-content:flex-end; gap:10px;}
-        .mk-pop-btn{ border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900; font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;}
+        .mk-pop-actions{
+          padding:12px 16px 14px;
+          display:flex; justify-content:flex-end; gap:10px;
+        }
+        .mk-pop-btn{
+          border:none; cursor:pointer;
+          height:34px; padding:0 16px;
+          border-radius:999px; font-weight:900; font-size:12px;
+          letter-spacing:.08em; text-transform:uppercase;
+          display:inline-flex; align-items:center; justify-content:center;
+        }
         .mk-pop-btn--ok{ background:#EF6D22; color:#fff; box-shadow:0 3px 10px rgba(239,109,34,.35); }
         .mk-pop-btn--ok:hover{ background:#ff8b42; }
-        .mk-pop-btn--cancel{ background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10); }
+        .mk-pop-btn--cancel{
+          background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);
+        }
         .mk-pop-btn--cancel:hover{ background:#e5e7eb; }
       `;
       document.head.appendChild(s);
@@ -294,7 +311,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -358,7 +382,8 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) =>
+      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -378,12 +403,17 @@
   } catch {}
 
   /* =======================
-     CLONE STATE
+     CLONE STATE (for restore)
   ======================= */
   const cloneState = {
     get() {
       const state = readState();
-      state.__clones = state.__clones || { trainers: [], pocs: [], tables: {}, tickets: [] };
+      state.__clones = state.__clones || {
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
+      };
       return state.__clones;
     },
     set(next) {
@@ -439,7 +469,9 @@
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
-      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active")
+      .querySelectorAll(
+        ".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active"
+      )
       .forEach((btn) => {
         btn.classList.remove("has-notes");
         btn.classList.remove("is-notes-active");
@@ -650,7 +682,9 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
 
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
@@ -701,14 +735,19 @@
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
   const getTableKey = (table) =>
-    table?.getAttribute("data-table-key") || table?.id || `table-${$$("table.training-table").indexOf(table)}`;
+    table?.getAttribute("data-table-key") ||
+    table?.id ||
+    `table-${$$("table.training-table").indexOf(table)}`;
 
   const clearRowFields = (tr) => {
     $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
-      if (el.matches("input[type='checkbox'], input[type='radio']")) el.checked = false;
-      else if (el.matches("[contenteditable='true']")) el.textContent = "";
-      else el.value = "";
-
+      if (el.matches("input[type='checkbox'], input[type='radio']")) {
+        el.checked = false;
+      } else if (el.matches("[contenteditable='true']")) {
+        el.textContent = "";
+      } else {
+        el.value = "";
+      }
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       saveField(el);
@@ -802,7 +841,9 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+      );
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -811,6 +852,7 @@
       const needed = 3 - existing.length;
       for (let i = 0; i < needed; i++) {
         const clone = baseRow.cloneNode(true);
+
         clone.removeAttribute(AUTO_ROW_ATTR);
         clone.removeAttribute("data-base");
 
@@ -828,11 +870,12 @@
   }
 
   /* =======================
-     NOTES (FIXED CARET + NOTES-ONLY POPUP)
+     NOTES (FIXED caret + stable)
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-    const getNotesTargetId = (btn) => btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
     const ZW0 = "\u200B";
     const ZW1 = "\u200C";
@@ -900,7 +943,9 @@
 
       if (tr && table) {
         if (secId === "training-checklist") {
-          const nameInput = tr.querySelector('td:first-child input[type="text"]') || tr.querySelector('td:nth-child(2) input[type="text"]');
+          const nameInput =
+            tr.querySelector('td:first-child input[type="text"]') ||
+            tr.querySelector('td:nth-child(2) input[type="text"]');
           const v = (nameInput?.value || "").trim();
           return v || "(blank)";
         }
@@ -908,12 +953,17 @@
         if (secId === "opcodes-pricing") {
           const opcodeInput =
             tr.querySelector('td:nth-child(2) input[type="text"]') ||
-            tr.querySelector('td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea');
+            tr.querySelector(
+              'td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea'
+            );
           const v = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
           return v || "(blank)";
         }
 
-        const field = tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') || null;
+        const field =
+          tr.querySelector(
+            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
+          ) || null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
@@ -951,20 +1001,8 @@
 
     const buildBlockLines = (promptText, key) => {
       const main = `• ${promptText}${makeMarker(key)}`;
-      const sub = `  ◦ `; // <-- trailing space is IMPORTANT (caret lands after it)
+      const sub = `  ◦ `;
       return [main, sub];
-    };
-
-    // Ensure a block always has a hollow bullet line as the first sub line
-    const ensureBlockHasHollow = (block) => {
-      if (!block || !Array.isArray(block.lines) || !block.lines.length) return block;
-      const hollow = "  ◦ ";
-      // find any hollow line in this block
-      const has = block.lines.some((l) => String(l).startsWith(hollow));
-      if (has) return block;
-      // insert immediately after main line
-      block.lines.splice(1, 0, hollow);
-      return block;
     };
 
     const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
@@ -976,7 +1014,7 @@
 
       blocks.forEach((b) => {
         if (!b || !b.lines) return;
-        if (b.key && b.key !== "__misc__") map.set(b.key, ensureBlockHasHollow(b));
+        if (b.key && b.key !== "__misc__") map.set(b.key, b);
         else miscChunks.push(b.lines.join("\n"));
       });
 
@@ -997,28 +1035,46 @@
       return miscText.trimEnd();
     };
 
-    // ✅ CARET: land to the RIGHT of "◦ " within the correct block
+    // ✅ FIXED: always returns { text, caret } and ensures hollow bullet is "  ◦ " (with trailing space)
     const caretAtHollowForKey = (text, key) => {
       const v = normalizeNL(text || "");
       const marker = makeMarker(key);
 
       const markerIdx = v.indexOf(marker);
-      if (markerIdx < 0) return v.length;
+      if (markerIdx < 0) return { text: v, caret: v.length };
 
-      const mainLineEndIdx = v.indexOf("\n", markerIdx);
-      const afterMainLine = (mainLineEndIdx < 0 ? v.length : mainLineEndIdx + 1);
+      const mainLineEnd = v.indexOf("\n", markerIdx);
+      const afterMain = mainLineEnd < 0 ? v.length : mainLineEnd + 1;
 
-      const nextMain = v.indexOf("\n• ", afterMainLine);
+      const nextMain = v.indexOf("\n• ", afterMain);
       const blockEnd = nextMain >= 0 ? nextMain : v.length;
 
-      // Search inside this block for the first hollow bullet line
-      // We want the caret AFTER "  ◦ "
-      const hollow = "  ◦ ";
-      const subIdx = v.indexOf(hollow, afterMainLine);
-      if (subIdx >= 0 && subIdx < blockEnd) return subIdx + hollow.length;
+      const hollowNoSpace = "  ◦";
+      const hollowWithSpace = "  ◦ ";
 
-      // fallback: if hollow line is missing, land on first position after main line
-      return Math.min(afterMainLine, v.length);
+      let out = v;
+
+      // preferred: already has trailing space
+      let subIdx = out.indexOf(hollowWithSpace, afterMain);
+      if (subIdx >= 0 && subIdx < blockEnd) {
+        return { text: out, caret: subIdx + hollowWithSpace.length };
+      }
+
+      // exists but missing trailing space -> insert it so caret lands to the RIGHT
+      subIdx = out.indexOf(hollowNoSpace, afterMain);
+      if (subIdx >= 0 && subIdx < blockEnd) {
+        const insertAt = subIdx + hollowNoSpace.length;
+        if (out[insertAt] !== " ") {
+          out = out.slice(0, insertAt) + " " + out.slice(insertAt);
+          return { text: out, caret: insertAt + 1 };
+        }
+        return { text: out, caret: insertAt + 1 };
+      }
+
+      // hollow bullet line deleted -> create it directly under the main bullet
+      const insertion = "  ◦ ";
+      out = out.slice(0, afterMain) + insertion + out.slice(afterMain);
+      return { text: out, caret: afterMain + insertion.length };
     };
 
     const handleNotesClick = (btn) => {
@@ -1041,28 +1097,23 @@
         ta.value = cleanupLegacyVisibleKeys(ta.value);
 
         const blocks = parseBlocks(ta.value);
-        let block = blocks.find((b) => b.key === slotKey);
+        const exists = blocks.some((b) => b.key === slotKey);
 
-        if (!block) {
-          block = { key: slotKey, lines: buildBlockLines(promptText, slotKey) };
-          blocks.push(block);
-        } else {
-          // Make sure existing block always has a hollow bullet line
-          ensureBlockHasHollow(block);
-        }
+        if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
-        const caret = caretAtHollowForKey(ta.value, slotKey);
+        // ✅ ensure caret is AFTER "◦ "
+        const res = caretAtHollowForKey(ta.value, slotKey);
+        ta.value = res.text;
 
         try {
           ta.focus({ preventScroll: true });
         } catch {
           ta.focus();
         }
-
         try {
-          ta.setSelectionRange(caret, caret);
+          ta.setSelectionRange(res.caret, res.caret);
         } catch {}
 
         btn.classList.add("has-notes");
@@ -1085,7 +1136,7 @@
   })();
 
   /* =======================
-     SUPPORT TICKETS
+     SUPPORT TICKETS (FIXED)
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -1242,7 +1293,12 @@
     const baseVals = readTicketValues(base);
 
     const clone = buildTicketCloneFromBase(base);
-    setTicketCardValues(clone, { num: baseVals.num, url: baseVals.url, sum: baseVals.sum, status: "Open" });
+    setTicketCardValues(clone, {
+      num: baseVals.num,
+      url: baseVals.url,
+      sum: baseVals.sum,
+      status: "Open",
+    });
 
     openContainer.appendChild(clone);
 
@@ -1269,6 +1325,7 @@
 
     saveField(inputEl);
     saveField(status);
+
     persistAllTickets();
   };
 
@@ -1311,7 +1368,12 @@
     list.forEach((t) => {
       const clone = buildTicketCloneFromBase(base);
 
-      setTicketCardValues(clone, { num: t.num || "", url: t.url || "", sum: t.sum || "", status: t.status || "Open" });
+      setTicketCardValues(clone, {
+        num: t.num || "",
+        url: t.url || "",
+        sum: t.sum || "",
+        status: t.status || "Open",
+      });
 
       const containers = ticketContainersByStatus();
       const dest = containers[t.status] || containers.Open || openContainer;
@@ -1369,11 +1431,12 @@
   };
 
   /* =======================
-     TRAINING END DATE AUTO-SET
+     TRAINING END DATE AUTO-SET (2 days after onsite)
   ======================= */
   const mkAutoSetTrainingEndDate = () => {
     const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
     const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+
     if (!onsiteInput || !endInput) return;
 
     const compute = () => {
@@ -1399,7 +1462,7 @@
   };
 
   /* =======================
-     LEAD TRAINER -> SUMMARY "Trainer(s)"
+     LEAD TRAINER -> SUMMARY "Trainer(s)" INJECTION
   ======================= */
   const mkGetLeadTrainer = () => {
     const byId = mkFirstValueByIds(MK_IDS.leadTrainer);
@@ -1407,7 +1470,10 @@
 
     const trainersSec = document.getElementById("trainers-deployment");
     if (trainersSec) {
-      const leadByLabel = mkFindFieldByLabelText(trainersSec, "lead trainer") || mkFindFieldByLabelText(trainersSec, "trainer") || null;
+      const leadByLabel =
+        mkFindFieldByLabelText(trainersSec, "lead trainer") ||
+        mkFindFieldByLabelText(trainersSec, "trainer") ||
+        null;
       if (leadByLabel && leadByLabel.matches("input, textarea, select")) {
         const v = (leadByLabel.value || "").trim();
         if (v) return v;
@@ -1426,7 +1492,9 @@
       }
     }
 
-    const globalCandidates = $$('input[type="text"]').filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
+    const globalCandidates = $$('input[type="text"]')
+      .filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
+
     for (const i of globalCandidates) {
       const v = (i.value || "").trim();
       if (v) return v;
@@ -1443,7 +1511,11 @@
 
     const summarySec = document.getElementById("training-summary");
     if (summarySec) {
-      const byLabel = mkFindFieldByLabelText(summarySec, "trainer(s)") || mkFindFieldByLabelText(summarySec, "trainers") || mkFindFieldByLabelText(summarySec, "trainer") || null;
+      const byLabel =
+        mkFindFieldByLabelText(summarySec, "trainer(s)") ||
+        mkFindFieldByLabelText(summarySec, "trainers") ||
+        mkFindFieldByLabelText(summarySec, "trainer") ||
+        null;
       if (byLabel && byLabel.matches("input, textarea")) return byLabel;
 
       const byPh = mkFindTextInputByPlaceholder(summarySec, "trainer");
@@ -1494,10 +1566,13 @@
   };
 
   /* =========================================================
-     EXPAND BUTTONS (TABLES + NOTES) + NOTES-ONLY MODAL FIX
+     EXPAND BUTTONS (TABLES + NOTES) — FIXED + NO PAGE BREAK
+     - Uses SAME-HEIGHT placeholders so the page doesn’t collapse
+     - Adds .page-section scope inside modal content to inherit table/checkbox styling
+     - Adds mk-notes-only mode for single-card notes popup styling
 ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v4";
+    const STYLE_ID = "mk-expand-style-v7";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1519,6 +1594,46 @@
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
           border-color:#EF6D22 !important;
         }
+
+        /* Keep layout when nodes are moved into modal */
+        .mk-expand-placeholder{
+          display:block;
+          width:100%;
+        }
+
+        /* Notes-only popup: remove the BIG outer "card" feel */
+        #mkTableModal.mk-notes-only .mk-modal-panel{
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        #mkTableModal.mk-notes-only .mk-modal-content{
+          padding: 0 !important;
+        }
+        #mkTableModal.mk-notes-only .section-block{
+          margin: 0 !important;
+        }
+
+        /* Bigger notes text area inside ANY popup */
+        #mkTableModal textarea{
+          min-height: 360px !important;
+          font-size: 16px !important;
+          line-height: 1.45 !important;
+        }
+
+        /* Help popup checkboxes resemble main tables (scope-safe) */
+        #mkTableModal table.training-table input[type="checkbox"]{
+          width:16px; height:16px;
+          accent-color:#EF6D22;
+          margin:0 auto;
+          display:inline-block;
+        }
+        #mkTableModal table.training-table th:first-child,
+        #mkTableModal table.training-table td:first-child{
+          text-align:center !important;
+          vertical-align:middle !important;
+        }
       `;
       document.head.appendChild(s);
     };
@@ -1532,16 +1647,13 @@
     bodyOverflow: "",
   };
 
-  const setModalNotesOnly = (isNotesOnly) => {
-    const modal = $("#mkTableModal");
-    if (!modal) return;
-    modal.classList.toggle("mk-notes-only", !!isNotesOnly);
-  };
-
-  const openModalWithNodes = (nodes, titleText, { notesOnly = false } = {}) => {
+  const openModalWithNodes = (nodes, titleText) => {
     const modal = $("#mkTableModal");
     if (!modal) {
-      mkPopup.ok("Missing #mkTableModal HTML block on the page (needed for expand popups).", { title: "Missing Expand Modal" });
+      mkPopup.ok(
+        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
+        { title: "Missing Expand Modal" }
+      );
       return;
     }
 
@@ -1549,11 +1661,11 @@
     const titleEl = $(".mk-modal-title", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) {
-      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", { title: "Modal Markup Issue" });
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
+        title: "Modal Markup Issue",
+      });
       return;
     }
-
-    setModalNotesOnly(notesOnly);
 
     tableModal.modal = modal;
     tableModal.content = content;
@@ -1561,11 +1673,20 @@
     tableModal.moved = [];
     content.innerHTML = "";
 
+    // ✅ IMPORTANT: give modal content page-section scope so your existing table/checkbox CSS applies
+    content.classList.add("page-section");
+
     if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
 
     nodes.forEach((node) => {
       if (!node || !node.parentNode) return;
-      const ph = document.createComment("mk-expand-placeholder");
+
+      // ✅ placeholder keeps the page from collapsing/breaking while content is moved
+      const rect = node.getBoundingClientRect();
+      const ph = document.createElement("div");
+      ph.className = "mk-expand-placeholder";
+      ph.style.height = `${Math.max(0, rect.height)}px`;
+
       node.parentNode.insertBefore(ph, node);
       tableModal.moved.push({ node, placeholder: ph });
       content.appendChild(node);
@@ -1575,6 +1696,7 @@
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
     document.body.style.overflow = "hidden";
+
     try {
       panel.scrollTop = 0;
     } catch {}
@@ -1591,10 +1713,14 @@
     });
 
     modal.classList.remove("open");
+    modal.classList.remove("mk-notes-only");
     modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = tableModal.bodyOverflow || "";
 
-    setModalNotesOnly(false);
+    // remove modal content scope class
+    const content = $(".mk-modal-content", modal);
+    if (content) content.classList.remove("page-section");
+
+    document.body.style.overflow = tableModal.bodyOverflow || "";
 
     tableModal.modal = null;
     tableModal.content = null;
@@ -1648,39 +1774,24 @@
   };
 
   const openTableModalFor = (anyInside) => {
+    const modal = $("#mkTableModal");
+    if (modal) modal.classList.remove("mk-notes-only");
+
     const bundle = getExpandBundleNodes(anyInside);
     const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
     const title = (header?.textContent || "Expanded View").trim();
-    openModalWithNodes(bundle, title, { notesOnly: false });
+    openModalWithNodes(bundle, title);
   };
 
-  // ✅ Notes-only popup should be ONE notes card (not card within a card)
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
 
-    const title = (notesHostEl.querySelector("h2")?.textContent || notesHostEl.querySelector(".section-header")?.textContent || "Notes").trim();
+    const modal = $("#mkTableModal");
+    if (modal) modal.classList.add("mk-notes-only");
 
-    const ta = notesHostEl.querySelector("textarea");
-    if (!ta) {
-      openModalWithNodes([notesHostEl], title, { notesOnly: true });
-      return;
-    }
-
-    const wrap = ta.closest(".mk-ta-wrap") || ta;
-
-    // Put wrapper inside a single modal notes card
-    const holder = document.createElement("div");
-    holder.className = "mk-modal-noteswrap";
-    holder.appendChild(wrap);
-
-    openModalWithNodes([holder], title, { notesOnly: true });
-
-    // ensure caret behavior is preserved if user just opened notes
-    setTimeout(() => {
-      try {
-        ta.focus({ preventScroll: true });
-      } catch {}
-    }, 0);
+    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
+    const title = (h?.textContent || "Notes").trim();
+    openModalWithNodes([notesHostEl], title);
   };
 
   const ensureTableExpandButtons = () => {
@@ -1694,6 +1805,7 @@
       btn.setAttribute("data-mk-table-expand", "1");
       btn.title = "Expand";
       btn.textContent = "⤢";
+
       footer.appendChild(btn);
     });
   };
@@ -1704,6 +1816,7 @@
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
+
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -1753,7 +1866,12 @@
      SAVE PDF (safe hook)
   ======================= */
   const mkHandleSavePDF = () => {
-    const fn = window.saveAllPagesAsPDF || window.savePDF || window.generatePDF || window.exportPDF || null;
+    const fn =
+      window.saveAllPagesAsPDF ||
+      window.savePDF ||
+      window.generatePDF ||
+      window.exportPDF ||
+      null;
 
     if (typeof fn === "function") {
       try {
@@ -1772,7 +1890,10 @@
         { title: "PDF Hook" }
       );
     } catch {
-      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", { title: "PDF Hook" });
+      mkPopup.ok(
+        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
+        { title: "PDF Hook" }
+      );
     }
   };
 
@@ -1808,7 +1929,9 @@
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
-      const section = (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) || resetBtn.closest(".page-section");
+      const section =
+        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
+        resetBtn.closest(".page-section");
 
       mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
         title: "Reset This Page",
@@ -1831,11 +1954,14 @@
       e.preventDefault();
       mkInjectSummaryTokens(document);
       mkAutofillSummaryTrainerIfEmpty();
-      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", { title: "Generate Summary" });
+      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", {
+        title: "Generate Summary",
+      });
       return;
     }
 
-    const addTrainerBtn = t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+    const addTrainerBtn =
+      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
     if (addTrainerBtn) {
       e.preventDefault();
       addTrainerRow();
@@ -1893,7 +2019,7 @@
       const id = notesExpandBtn.getAttribute("data-notes-id");
       const block = id ? document.getElementById(id) : null;
       if (block) openNotesModalFor(block);
-      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes", { notesOnly: true });
+      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes");
       return;
     }
 
@@ -1923,12 +2049,18 @@
 
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({ value: (i.value || "").trim() }));
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
+        value: (i.value || "").trim(),
+      }));
       cloneState.set(clones);
+
       mkAutofillSummaryTrainerIfEmpty();
     }
 
-    if (/lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") || (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")) {
+    if (
+      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
+      (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
+    ) {
       mkAutofillSummaryTrainerIfEmpty();
     }
 
@@ -1937,6 +2069,7 @@
     }
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
+
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
@@ -2029,13 +2162,16 @@
     rebuildTicketClones();
 
     seedStarterRowsToThree();
+
     restoreAllFields();
 
     setGhostStyles(document);
 
     mkSyncTopbarTitle();
     mkInjectSummaryTokens(document);
+
     mkAutofillSummaryTrainerIfEmpty();
+
     mkAutoSetTrainingEndDate();
 
     ensureTableExpandButtons();
@@ -2044,7 +2180,7 @@
 
     enforceBaseTicketStatusLock();
 
-    log("Initialized v7.");
+    log("Initialized.");
   };
 
   if (document.readyState === "loading") {
