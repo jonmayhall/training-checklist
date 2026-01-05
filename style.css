@@ -1510,39 +1510,48 @@ button.remove-row{
 #mkTableModal #opcodes-pricing table.training-table td:first-child{
   background: inherit !important;
 }
+
 /* =========================================================
-   FIX: "White slab" / extra card on right side of popup
-   Cause: JS adds .page-section to #mkTableModal .mk-modal-content
+   FIX: White "panel/card" showing on RIGHT side in popup
+   Cause: a .page-section (max-width:1240px) is being moved into #mkTableModal
 ========================================================= */
 
-/* Kill page-section card styling INSIDE the modal content */
-#mkTableModal .mk-modal-content.page-section{
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-
-  /* override .page-section sizing that creates that "extra card" look */
+/* If ANY page-section gets moved into the modal, strip its card sizing */
+#mkTableModal .page-section{
   max-width: none !important;
   width: 100% !important;
   margin: 0 !important;
-  padding: 14px 14px 16px !important; /* keep your modal padding */
+
+  /* remove page card look inside modal */
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  display: block !important;
 }
 
-/* Make everything moved into the modal stretch full width */
+/* Make modal content stretch children full width */
 #mkTableModal .mk-modal-content{
   align-items: stretch !important;
 }
-#mkTableModal .mk-modal-content > .section-block,
-#mkTableModal .mk-modal-content > .section,
-#mkTableModal .mk-modal-content > .table-container{
+#mkTableModal .mk-modal-content > *{
   width: 100% !important;
   max-width: 100% !important;
-}
-
-/* If a moved "section-block" still has auto margins from somewhere */
-#mkTableModal .mk-modal-content .section-block{
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+
+/* Keep your normal card look for section-block/table-container */
+#mkTableModal .section-block,
+#mkTableModal .table-container,
+#mkTableModal .section{
+  background: #fff !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Opcodes popup: force the first header cell to match the rest (light orange) */
+#mkTableModal #opcodes-pricing .training-table thead th:first-child{
+  background: var(--light-orange) !important;
+  color: #fff !important;
 }
 
