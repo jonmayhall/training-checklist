@@ -3319,6 +3319,8 @@
 
 <!-- ========================================================= -->
 <!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
+<!-- Standardized: notes buttons (icon-only)                    -->
+<!-- uses data-notes-btn + data-notes-target                    -->
 <!-- ========================================================= -->
 <section id="post-training" class="page-section">
   <h1>Post-Training Verification</h1>
@@ -3330,83 +3332,164 @@
     Reset This Page
   </button>
 
-  <!-- ✅ ONE grid (same base layout as pages 3–4) -->
+  <!-- ROW 1: Training Completion by Role + Notes -->
   <div class="cards-grid two-col">
-
-    <!-- =========================
-         Training Completion
-    ========================== -->
     <div class="section-block">
       <h2>Training Completion by Role</h2>
 
       <div class="checklist-row">
         <label>Advisors using myKaarma independently?</label>
-        <select>
-          <option value="" data-ghost="true">Usage</option>
-          <option>Efficiently</option>
-          <option>Adequately</option>
-          <option>Inconsistently</option>
-          <option>Poorly</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Usage</option>
+            <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-completion"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path
+                d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7"
+                opacity=".35"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
         <label>Technicians using myKaarma independently?</label>
-        <select>
-          <option value="" data-ghost="true">Usage</option>
-          <option>Efficiently</option>
-          <option>Adequately</option>
-          <option>Inconsistently</option>
-          <option>Poorly</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Usage</option>
+            <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-completion"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path
+                d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7"
+                opacity=".35"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
         <label>Parts representatives using myKaarma independently?</label>
-        <select>
-          <option value="" data-ghost="true">Usage</option>
-          <option>Efficiently</option>
-          <option>Adequately</option>
-          <option>Inconsistently</option>
-          <option>Poorly</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Usage</option>
+            <option>Efficiently</option>
+            <option>Adequately</option>
+            <option>Inconsistently</option>
+            <option>Poorly</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-completion"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path
+                d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7"
+                opacity=".35"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="section-block">
+    <div class="section-block" id="notes-post-training-completion">
       <h2>Notes — Training Completion</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
-
-        <!-- ✅ REQUIRED if JS isn’t injecting the expand button on Page 9 -->
-        <button type="button" class="mk-ta-expand" aria-label="Expand notes">⤢</button>
-      </div>
+      <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
     </div>
+  </div>
 
-    <!-- =========================
-         Final Sign-Off
-    ========================== -->
+  <!-- ROW 2: Final Sign-Off + Notes -->
+  <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Final Sign-Off</h2>
 
       <div class="checklist-row">
         <label>Tech and advisors walkthrough with Service Manager?</label>
-        <select>
-          <option value="" data-ghost="true">Walkthrough</option>
-          <option>Yes, manager signs off</option>
-          <option>Yes, manager has reservations</option>
-          <option>No, manager didn't find time</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Walkthrough</option>
+            <option>Yes, manager signs off</option>
+            <option>Yes, manager has reservations</option>
+            <option>No, manager didn't find time</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-final-signoff"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
         <label>Parts rep walkthrough with Parts Manager?</label>
-        <select>
-          <option value="" data-ghost="true">Walkthrough</option>
-          <option>Yes, manager signs off</option>
-          <option>Yes, manager has reservations</option>
-          <option>No, manager didn't find time</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Walkthrough</option>
+            <option>Yes, manager signs off</option>
+            <option>Yes, manager has reservations</option>
+            <option>No, manager didn't find time</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-final-signoff"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
@@ -3415,60 +3498,80 @@
       </div>
     </div>
 
-    <div class="section-block">
+    <div class="section-block" id="notes-post-training-final-signoff">
       <h2>Notes — Final Sign-Off</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
-
-        <!-- ✅ REQUIRED if JS isn’t injecting the expand button on Page 9 -->
-        <button type="button" class="mk-ta-expand" aria-label="Expand notes">⤢</button>
-      </div>
+      <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
     </div>
+  </div>
 
-    <!-- =========================
-         Management Buy-in
-    ========================== -->
+  <!-- ROW 3: Management Buy-in + Notes -->
+  <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Management Buy-in</h2>
 
       <div class="checklist-row">
         <label>Service manager buy-in</label>
-        <select>
-          <option value="" data-ghost="true">Buy-in</option>
-          <option>Fully Engaged</option>
-          <option>Supportive</option>
-          <option>Developing</option>
-          <option>Lacking</option>
-          <option>Not present</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Buy-in</option>
+            <option>Fully Engaged</option>
+            <option>Supportive</option>
+            <option>Developing</option>
+            <option>Lacking</option>
+            <option>Not present</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-buyin"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row">
         <label>Parts manager buy-in</label>
-        <select>
-          <option value="" data-ghost="true">Buy-in</option>
-          <option>Fully Engaged</option>
-          <option>Supportive</option>
-          <option>Developing</option>
-          <option>Lacking</option>
-          <option>Not present</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Buy-in</option>
+            <option>Fully Engaged</option>
+            <option>Supportive</option>
+            <option>Developing</option>
+            <option>Lacking</option>
+            <option>Not present</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-buyin"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="section-block">
+    <div class="section-block" id="notes-post-training-buyin">
       <h2>Notes — Management Buy-in</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
-
-        <!-- ✅ REQUIRED if JS isn’t injecting the expand button on Page 9 -->
-        <button type="button" class="mk-ta-expand" aria-label="Expand notes">⤢</button>
-      </div>
+      <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
     </div>
+  </div>
 
-    <!-- =========================
-         Automations
-    ========================== -->
+  <!-- ROW 4: Automations + Notes -->
+  <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Automations</h2>
 
@@ -3478,79 +3581,133 @@
 
       <div class="checklist-row indent-sub">
         <label>Appointment Reminders</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-post-training-automations"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
         <label>Welcome Texts</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
         <label>MPIs</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
         <label>Videos</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
         <label>Payment Requests</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="checklist-row indent-sub">
         <label>ServiceConnect/Follow-up</label>
-        <select>
-          <option value="" data-ghost="true">Select answer</option>
-          <option>Yes</option>
-          <option>No</option>
-          <option>N/A</option>
-        </select>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select answer</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="section-block">
+    <div class="section-block" id="notes-post-training-automations">
       <h2>Notes — Automations</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
-
-        <!-- ✅ REQUIRED if JS isn’t injecting the expand button on Page 9 -->
-        <button type="button" class="mk-ta-expand" aria-label="Expand notes">⤢</button>
-      </div>
+      <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
     </div>
-
   </div>
 </section>
 
-      <!-- ========================================================= -->
+        <!-- ========================================================= -->
       <!-- PAGE 10: RESOURCES                                        -->
       <!-- ========================================================= -->
       <section id="resources" class="page-section">
