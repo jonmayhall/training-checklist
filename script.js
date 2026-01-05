@@ -1073,6 +1073,32 @@
     return lineEnd < 0 ? v.length : lineEnd;
   })();
 
+   const caretAtHollowForKey_v2 = (text, key) => {
+  const v = normalizeNL(text || "");
+  const marker = makeMarker(key);
+  const markerIdx = v.indexOf(marker);
+  if (markerIdx < 0) return v.length;
+
+  // end of the line containing the marker
+  const mainLineEnd = v.indexOf("\n", markerIdx);
+  const afterMainLine = (mainLineEnd < 0 ? v.length : mainLineEnd + 1);
+
+  // end of this bullet block = next "\n• " or end of text
+  const nextMain = v.indexOf("\n• ", afterMainLine);
+  const blockEnd = nextMain >= 0 ? nextMain : v.length;
+
+  // find first hollow bullet inside this block
+  const subPrefix = "  ◦ ";
+  const subIdx = v.indexOf(subPrefix, afterMainLine);
+
+  if (subIdx >= 0 && subIdx < blockEnd) {
+    return subIdx + subPrefix.length; // ✅ right after hollow bullet
+  }
+
+  // if hollow bullet was deleted, land on the first line after main bullet
+  return Math.min(afterMainLine, v.length);
+};
+
   // Find where THIS block ends (next main bullet "• " after the main line)
   // We look for "\n• " starting after the main line.
   const nextMainBullet = v.indexOf("\n• ", endOfMain);
@@ -1126,7 +1152,7 @@ if (!exists) {
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
-        const caret = caretAtHollowForKey(ta.value, slotKey);
+       const caret = caretAtHollowForKey_v2(ta.value, slotKey);
 
         try {
           ta.focus({ preventScroll: true });
