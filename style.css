@@ -1730,34 +1730,3 @@ button.remove-row{
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
 }
-
-/* =========================================================
-   Post-Training: make date row match select+notes rows EXACTLY
-   ========================================================= */
-
-/* 1) One source of truth for the notes icon size */
-:root{
-  --notes-btn-size: 22px;   /* adjust if your icon button is bigger/smaller */
-}
-
-/* 2) Force the notes icon button to a fixed width (matches all pages) */
-.notes-icon-btn--sm{
-  width: var(--notes-btn-size);
-  height: var(--notes-btn-size);
-  flex: 0 0 var(--notes-btn-size);
-  padding: 0;               /* important: prevents “mystery” width */
-}
-
-/* 3) Spacer must be IDENTICAL to the button */
-.notes-icon-spacer{
-  width: var(--notes-btn-size);
-  height: var(--notes-btn-size);
-  flex: 0 0 var(--notes-btn-size);
-  display: inline-block;
-}
-
-/* 4) Make the date input behave like the selects (width + flex lock) */
-#post-training .row-actions > input[type="date"]{
-  width: var(--input-width) !important;
-  flex: 0 0 var(--input-width) !important;
-}
