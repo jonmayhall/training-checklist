@@ -1061,27 +1061,34 @@
       return miscText.trimEnd();
     };
 
-    const caretAtHollowForKey = (text, key) => {
+   const caretAtHollowForKey = (text, key) => {
   const v = normalizeNL(text || "");
   const marker = makeMarker(key);
   const markerIdx = v.indexOf(marker);
   if (markerIdx < 0) return v.length;
 
-  // Find the exact line that contains the marker (the main bullet line)
-  const mainLineStart = v.lastIndexOf("\n", markerIdx);
-  const mainStart = mainLineStart < 0 ? 0 : mainLineStart + 1;
+  // Find end of the main bullet line (line that contains the marker)
+  const endOfMain = (() => {
+    const lineEnd = v.indexOf("\n", markerIdx);
+    return lineEnd < 0 ? v.length : lineEnd;
+  })();
 
-  const mainLineEnd = v.indexOf("\n", markerIdx);
-  const endOfMain = mainLineEnd < 0 ? v.length : mainLineEnd;
+  // Find where THIS block ends (next main bullet "• " after the main line)
+  // We look for "\n• " starting after the main line.
+  const nextMainBullet = v.indexOf("\n• ", endOfMain);
+  const blockEnd = nextMainBullet >= 0 ? nextMainBullet : v.length;
 
-  // Candidate subline is the very next line after the main bullet
-  const nextLineStart = endOfMain < v.length ? endOfMain + 1 : v.length;
-
-  // If next line starts with "  ◦", place caret AFTER "  ◦ "
+  // Search for the first hollow bullet starter within this block
   const subPrefix = "  ◦ ";
-  if (v.slice(nextLineStart, nextLineStart + subPrefix.length) === subPrefix) {
-    return nextLineStart + subPrefix.length;
+  const subIdx = v.indexOf(subPrefix, endOfMain);
+
+  if (subIdx >= 0 && subIdx < blockEnd) {
+    return subIdx + subPrefix.length; // ✅ after "  ◦ "
   }
+
+  // If the user deleted it, place caret at start of the block area after main line
+  return Math.min(endOfMain + 1, v.length);
+};
 
   // Otherwise search forward for the first "  ◦ " that follows this block
   const nextHollowIdx = v.indexOf(subPrefix, nextLineStart);
