@@ -1608,3 +1608,55 @@ button.remove-row{
 #dealership-info .primary-contacts-grid .mini-card{
   margin: 0 !important;
 }
+
+/* =========================================================
+   ADDITIONAL POC — FIX INPUT + BUTTON TO MATCH APP STANDARD
+========================================================= */
+
+/* Target ONLY the Additional POC base card row */
+#dealership-info .additional-poc-card[data-base="true"] .checklist-row{
+  align-items: center !important;
+}
+
+/* Convert input + button into integrated-plus layout */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus{
+  display: flex !important;
+  align-items: stretch !important;
+  width: var(--di-input-width) !important;
+  max-width: var(--di-input-width) !important;
+  margin-left: auto !important;
+}
+
+/* Input styling (match others) */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus input{
+  flex: 1 1 auto !important;
+  height: 34px !important;
+  padding: 7px 10px !important;
+  border: 1px solid var(--border) !important;
+  background: #f7f7f7 !important;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+  font-size: 13px !important;
+}
+
+/* + button styling (match Trainers / Tickets) */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus button{
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  margin-left: -1px !important;
+  border: 1px solid var(--orange) !important;
+  background: var(--orange) !important;
+  color: #fff !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+/* Hover consistency */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus button:hover{
+  background: #ff8b42 !important;
+}
