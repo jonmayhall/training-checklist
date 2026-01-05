@@ -2,24 +2,21 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7)
 
-   ✅ FIX: Expand popup no longer "breaks" page
-      - Expand moves ONLY the table container + related notes blocks
-      - Does NOT move the entire section-block card
+   Fixes in v7:
+   ✅ Notes caret always lands AFTER the hollow bullet "◦ " (right side)
+   ✅ Notes blocks always contain a hollow bullet line to land on
+   ✅ Notes-only popups: NO "card inside card" (moves only textarea wrapper)
+   ✅ Notes popups: bigger textarea
+   ✅ Opcodes popup "Updated" checkbox column aligns like normal table
 
-   ✅ FIX: Opcodes popup "Updated" checkbox column matches page table
-      - Forces first column to checkbox width + centered (in modal too)
-
-   ✅ Notes caret behavior (unchanged from working baseline)
-      - Cursor lands AFTER the hollow bullet "  ◦ " (right side)
-
-   ✅ Keeps the rest:
-      - Nav, persistence
-      - Trainers + POCs
-      - Table add-row clone persistence
-      - Notes bullets + caret behavior
-      - Map update
-      - Expand buttons: tables + notes (MutationObserver catch-all)
-      - Support tickets hardened behavior
+   Keeps:
+   - Nav, persistence
+   - Trainers + POCs
+   - Table add-row clone persistence
+   - Notes bullets + Enter behavior
+   - Map update
+   - Expand buttons (tables + notes)
+   - Support tickets hardened behavior
 ======================================================= */
 
 (() => {
@@ -66,7 +63,8 @@
   const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
-    isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
+    isEl(el) &&
+    (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const ensureId = (el) => {
     if (!isEl(el)) return null;
@@ -219,8 +217,9 @@
       if (!t.includes(want)) continue;
 
       const field =
-        row.querySelector("input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea") ||
-        null;
+        row.querySelector(
+          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
+        ) || null;
       if (field) return field;
     }
     return null;
@@ -257,7 +256,7 @@
   };
 
   /* =======================
-     POPUPS
+     OS-STYLE POPUPS
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -268,41 +267,16 @@
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
-        .mk-pop-backdrop{
-          position:fixed; inset:0; background:rgba(0,0,0,.35);
-          z-index:100000; display:flex; align-items:flex-start; justify-content:center;
-          padding-top:110px;
-        }
-        .mk-pop-box{
-          width:min(520px, calc(100vw - 28px));
-          background:#fff; border:1px solid rgba(0,0,0,.10);
-          border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25);
-          overflow:hidden;
-        }
-        .mk-pop-head{
-          background:#EF6D22; color:#fff;
-          padding:10px 16px;
-          font-weight:900; letter-spacing:.2px;
-          display:flex; align-items:center; justify-content:space-between;
-        }
+        .mk-pop-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100000; display:flex; align-items:flex-start; justify-content:center; padding-top:110px;}
+        .mk-pop-box{width:min(520px, calc(100vw - 28px)); background:#fff; border:1px solid rgba(0,0,0,.10); border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25); overflow:hidden;}
+        .mk-pop-head{background:#EF6D22; color:#fff; padding:10px 16px; font-weight:900; letter-spacing:.2px; display:flex; align-items:center; justify-content:space-between;}
         .mk-pop-title{ font-size:15px; }
         .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap;}
-        .mk-pop-actions{
-          padding:12px 16px 14px;
-          display:flex; justify-content:flex-end; gap:10px;
-        }
-        .mk-pop-btn{
-          border:none; cursor:pointer;
-          height:34px; padding:0 16px;
-          border-radius:999px; font-weight:900; font-size:12px;
-          letter-spacing:.08em; text-transform:uppercase;
-          display:inline-flex; align-items:center; justify-content:center;
-        }
+        .mk-pop-actions{ padding:12px 16px 14px; display:flex; justify-content:flex-end; gap:10px;}
+        .mk-pop-btn{ border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900; font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;}
         .mk-pop-btn--ok{ background:#EF6D22; color:#fff; box-shadow:0 3px 10px rgba(239,109,34,.35); }
         .mk-pop-btn--ok:hover{ background:#ff8b42; }
-        .mk-pop-btn--cancel{
-          background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);
-        }
+        .mk-pop-btn--cancel{ background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10); }
         .mk-pop-btn--cancel:hover{ background:#e5e7eb; }
       `;
       document.head.appendChild(s);
@@ -320,14 +294,7 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({
-      title = "Notice",
-      message = "",
-      okText = "OK",
-      cancelText = "",
-      onOk,
-      onCancel,
-    } = {}) => {
+    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
       ensureStyles();
       close();
 
@@ -391,8 +358,7 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) =>
-      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -412,17 +378,12 @@
   } catch {}
 
   /* =======================
-     CLONE STATE (for restore)
+     CLONE STATE
   ======================= */
   const cloneState = {
     get() {
       const state = readState();
-      state.__clones = state.__clones || {
-        trainers: [],
-        pocs: [],
-        tables: {},
-        tickets: [],
-      };
+      state.__clones = state.__clones || { trainers: [], pocs: [], tables: {}, tickets: [] };
       return state.__clones;
     },
     set(next) {
@@ -478,9 +439,7 @@
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
-      .querySelectorAll(
-        ".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active"
-      )
+      .querySelectorAll(".notes-btn.has-notes, .notes-icon-btn.has-notes, .notes-btn.is-notes-active, .notes-icon-btn.is-notes-active")
       .forEach((btn) => {
         btn.classList.remove("has-notes");
         btn.classList.remove("is-notes-active");
@@ -691,9 +650,7 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    clone
-      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
-      .forEach((btn) => btn.remove());
+    clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
 
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
@@ -744,19 +701,14 @@
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
   const getTableKey = (table) =>
-    table?.getAttribute("data-table-key") ||
-    table?.id ||
-    `table-${$$("table.training-table").indexOf(table)}`;
+    table?.getAttribute("data-table-key") || table?.id || `table-${$$("table.training-table").indexOf(table)}`;
 
   const clearRowFields = (tr) => {
     $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
-      if (el.matches("input[type='checkbox'], input[type='radio']")) {
-        el.checked = false;
-      } else if (el.matches("[contenteditable='true']")) {
-        el.textContent = "";
-      } else {
-        el.value = "";
-      }
+      if (el.matches("input[type='checkbox'], input[type='radio']")) el.checked = false;
+      else if (el.matches("[contenteditable='true']")) el.textContent = "";
+      else el.value = "";
+
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       saveField(el);
@@ -850,9 +802,7 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
-        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
-      );
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -861,7 +811,6 @@
       const needed = 3 - existing.length;
       for (let i = 0; i < needed; i++) {
         const clone = baseRow.cloneNode(true);
-
         clone.removeAttribute(AUTO_ROW_ATTR);
         clone.removeAttribute("data-base");
 
@@ -879,12 +828,11 @@
   }
 
   /* =======================
-     NOTES
+     NOTES (FIXED CARET + NOTES-ONLY POPUP)
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-    const getNotesTargetId = (btn) =>
-      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+    const getNotesTargetId = (btn) => btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
     const ZW0 = "\u200B";
     const ZW1 = "\u200C";
@@ -952,9 +900,7 @@
 
       if (tr && table) {
         if (secId === "training-checklist") {
-          const nameInput =
-            tr.querySelector('td:first-child input[type="text"]') ||
-            tr.querySelector('td:nth-child(2) input[type="text"]');
+          const nameInput = tr.querySelector('td:first-child input[type="text"]') || tr.querySelector('td:nth-child(2) input[type="text"]');
           const v = (nameInput?.value || "").trim();
           return v || "(blank)";
         }
@@ -962,17 +908,12 @@
         if (secId === "opcodes-pricing") {
           const opcodeInput =
             tr.querySelector('td:nth-child(2) input[type="text"]') ||
-            tr.querySelector(
-              'td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea'
-            );
+            tr.querySelector('td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea');
           const v = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
           return v || "(blank)";
         }
 
-        const field =
-          tr.querySelector(
-            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
-          ) || null;
+        const field = tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') || null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
@@ -1010,8 +951,20 @@
 
     const buildBlockLines = (promptText, key) => {
       const main = `• ${promptText}${makeMarker(key)}`;
-      const sub = `  ◦ `;
+      const sub = `  ◦ `; // <-- trailing space is IMPORTANT (caret lands after it)
       return [main, sub];
+    };
+
+    // Ensure a block always has a hollow bullet line as the first sub line
+    const ensureBlockHasHollow = (block) => {
+      if (!block || !Array.isArray(block.lines) || !block.lines.length) return block;
+      const hollow = "  ◦ ";
+      // find any hollow line in this block
+      const has = block.lines.some((l) => String(l).startsWith(hollow));
+      if (has) return block;
+      // insert immediately after main line
+      block.lines.splice(1, 0, hollow);
+      return block;
     };
 
     const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
@@ -1023,7 +976,7 @@
 
       blocks.forEach((b) => {
         if (!b || !b.lines) return;
-        if (b.key && b.key !== "__misc__") map.set(b.key, b);
+        if (b.key && b.key !== "__misc__") map.set(b.key, ensureBlockHasHollow(b));
         else miscChunks.push(b.lines.join("\n"));
       });
 
@@ -1044,26 +997,27 @@
       return miscText.trimEnd();
     };
 
-    // ✅ Cursor lands AFTER the "  ◦ " inside THIS block
+    // ✅ CARET: land to the RIGHT of "◦ " within the correct block
     const caretAtHollowForKey = (text, key) => {
       const v = normalizeNL(text || "");
       const marker = makeMarker(key);
+
       const markerIdx = v.indexOf(marker);
       if (markerIdx < 0) return v.length;
 
-      const mainLineEnd = v.indexOf("\n", markerIdx);
-      const afterMainLine = mainLineEnd < 0 ? v.length : mainLineEnd + 1;
+      const mainLineEndIdx = v.indexOf("\n", markerIdx);
+      const afterMainLine = (mainLineEndIdx < 0 ? v.length : mainLineEndIdx + 1);
 
       const nextMain = v.indexOf("\n• ", afterMainLine);
       const blockEnd = nextMain >= 0 ? nextMain : v.length;
 
-      const subPrefix = "  ◦ ";
-      const subIdx = v.indexOf(subPrefix, afterMainLine);
+      // Search inside this block for the first hollow bullet line
+      // We want the caret AFTER "  ◦ "
+      const hollow = "  ◦ ";
+      const subIdx = v.indexOf(hollow, afterMainLine);
+      if (subIdx >= 0 && subIdx < blockEnd) return subIdx + hollow.length;
 
-      if (subIdx >= 0 && subIdx < blockEnd) {
-        return subIdx + subPrefix.length;
-      }
-
+      // fallback: if hollow line is missing, land on first position after main line
       return Math.min(afterMainLine, v.length);
     };
 
@@ -1087,9 +1041,15 @@
         ta.value = cleanupLegacyVisibleKeys(ta.value);
 
         const blocks = parseBlocks(ta.value);
-        const exists = blocks.some((b) => b.key === slotKey);
+        let block = blocks.find((b) => b.key === slotKey);
 
-        if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+        if (!block) {
+          block = { key: slotKey, lines: buildBlockLines(promptText, slotKey) };
+          blocks.push(block);
+        } else {
+          // Make sure existing block always has a hollow bullet line
+          ensureBlockHasHollow(block);
+        }
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
@@ -1100,6 +1060,7 @@
         } catch {
           ta.focus();
         }
+
         try {
           ta.setSelectionRange(caret, caret);
         } catch {}
@@ -1281,12 +1242,7 @@
     const baseVals = readTicketValues(base);
 
     const clone = buildTicketCloneFromBase(base);
-    setTicketCardValues(clone, {
-      num: baseVals.num,
-      url: baseVals.url,
-      sum: baseVals.sum,
-      status: "Open",
-    });
+    setTicketCardValues(clone, { num: baseVals.num, url: baseVals.url, sum: baseVals.sum, status: "Open" });
 
     openContainer.appendChild(clone);
 
@@ -1313,7 +1269,6 @@
 
     saveField(inputEl);
     saveField(status);
-
     persistAllTickets();
   };
 
@@ -1356,12 +1311,7 @@
     list.forEach((t) => {
       const clone = buildTicketCloneFromBase(base);
 
-      setTicketCardValues(clone, {
-        num: t.num || "",
-        url: t.url || "",
-        sum: t.sum || "",
-        status: t.status || "Open",
-      });
+      setTicketCardValues(clone, { num: t.num || "", url: t.url || "", sum: t.sum || "", status: t.status || "Open" });
 
       const containers = ticketContainersByStatus();
       const dest = containers[t.status] || containers.Open || openContainer;
@@ -1407,7 +1357,7 @@
   };
 
   /* =======================
-     MAP
+     MAP BTN
   ======================= */
   const updateDealershipMap = (address) => {
     const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
@@ -1419,12 +1369,11 @@
   };
 
   /* =======================
-     TRAINING END DATE AUTO-SET (2 days after onsite)
+     TRAINING END DATE AUTO-SET
   ======================= */
   const mkAutoSetTrainingEndDate = () => {
     const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
     const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
-
     if (!onsiteInput || !endInput) return;
 
     const compute = () => {
@@ -1458,10 +1407,7 @@
 
     const trainersSec = document.getElementById("trainers-deployment");
     if (trainersSec) {
-      const leadByLabel =
-        mkFindFieldByLabelText(trainersSec, "lead trainer") ||
-        mkFindFieldByLabelText(trainersSec, "trainer") ||
-        null;
+      const leadByLabel = mkFindFieldByLabelText(trainersSec, "lead trainer") || mkFindFieldByLabelText(trainersSec, "trainer") || null;
       if (leadByLabel && leadByLabel.matches("input, textarea, select")) {
         const v = (leadByLabel.value || "").trim();
         if (v) return v;
@@ -1480,10 +1426,7 @@
       }
     }
 
-    const globalCandidates = $$('input[type="text"]').filter((i) =>
-      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || "")
-    );
-
+    const globalCandidates = $$('input[type="text"]').filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
     for (const i of globalCandidates) {
       const v = (i.value || "").trim();
       if (v) return v;
@@ -1500,11 +1443,7 @@
 
     const summarySec = document.getElementById("training-summary");
     if (summarySec) {
-      const byLabel =
-        mkFindFieldByLabelText(summarySec, "trainer(s)") ||
-        mkFindFieldByLabelText(summarySec, "trainers") ||
-        mkFindFieldByLabelText(summarySec, "trainer") ||
-        null;
+      const byLabel = mkFindFieldByLabelText(summarySec, "trainer(s)") || mkFindFieldByLabelText(summarySec, "trainers") || mkFindFieldByLabelText(summarySec, "trainer") || null;
       if (byLabel && byLabel.matches("input, textarea")) return byLabel;
 
       const byPh = mkFindTextInputByPlaceholder(summarySec, "trainer");
@@ -1555,12 +1494,10 @@
   };
 
   /* =========================================================
-     EXPAND BUTTONS (TABLES + NOTES) — FIXES IN v7:
-     - Expanding a table moves ONLY the table container (not the whole card)
-     - Modal CSS forces checkbox column to match page table
+     EXPAND BUTTONS (TABLES + NOTES) + NOTES-ONLY MODAL FIX
 ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v7";
+    const STYLE_ID = "mk-expand-style-v4";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1582,18 +1519,6 @@
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
           border-color:#EF6D22 !important;
         }
-
-        /* ✅ Match checkbox "Updated" column inside the modal */
-        #mkTableModal table.training-table th:first-child,
-        #mkTableModal table.training-table td:first-child{
-          width:110px !important;
-          text-align:center !important;
-          vertical-align:middle !important;
-        }
-        #mkTableModal table.training-table td:first-child input[type="checkbox"]{
-          margin:0 auto !important;
-          display:inline-block !important;
-        }
       `;
       document.head.appendChild(s);
     };
@@ -1607,13 +1532,16 @@
     bodyOverflow: "",
   };
 
-  const openModalWithNodes = (nodes, titleText) => {
+  const setModalNotesOnly = (isNotesOnly) => {
+    const modal = $("#mkTableModal");
+    if (!modal) return;
+    modal.classList.toggle("mk-notes-only", !!isNotesOnly);
+  };
+
+  const openModalWithNodes = (nodes, titleText, { notesOnly = false } = {}) => {
     const modal = $("#mkTableModal");
     if (!modal) {
-      mkPopup.ok(
-        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
-        { title: "Missing Expand Modal" }
-      );
+      mkPopup.ok("Missing #mkTableModal HTML block on the page (needed for expand popups).", { title: "Missing Expand Modal" });
       return;
     }
 
@@ -1621,11 +1549,11 @@
     const titleEl = $(".mk-modal-title", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) {
-      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
-        title: "Modal Markup Issue",
-      });
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", { title: "Modal Markup Issue" });
       return;
     }
+
+    setModalNotesOnly(notesOnly);
 
     tableModal.modal = modal;
     tableModal.content = content;
@@ -1666,6 +1594,8 @@
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = tableModal.bodyOverflow || "";
 
+    setModalNotesOnly(false);
+
     tableModal.modal = null;
     tableModal.content = null;
     tableModal.title = null;
@@ -1673,34 +1603,20 @@
     tableModal.moved = [];
   };
 
-  // ✅ NEW: return ONLY the table container (so the page doesn’t blank out)
-  const getTableExpandNodes = (anyInside) => {
+  const getExpandBundleNodes = (anyInside) => {
     const footer = anyInside?.closest?.(".table-footer");
-    const table =
-      footer?.closest(".table-container")?.querySelector("table.training-table") ||
-      footer?.closest(".section-block")?.querySelector("table.training-table") ||
-      anyInside?.closest?.(".section-block")?.querySelector("table.training-table") ||
-      anyInside?.closest?.("table.training-table") ||
-      null;
-
-    if (!table) return [];
-
-    // choose container wrapper if present; otherwise the table itself + footer
-    const container =
-      table.closest(".table-container") ||
-      table.parentElement ||
-      table;
-
-    // ensure footer included if it exists and is not already inside container
-    const nodes = [container];
-    if (footer && !container.contains(footer)) nodes.push(footer);
-
-    // also move notes blocks associated with this card (if any)
     const sectionCard =
-      table.closest(".section-block") ||
-      table.closest(".section") ||
-      table.closest(".page-section") ||
+      footer?.closest(".section") ||
+      footer?.closest(".section-block") ||
+      footer?.parentElement ||
+      anyInside?.closest?.(".section-block") ||
+      anyInside?.closest?.(".page-section") ||
       document.body;
+
+    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
+
+    const nodes = [];
+    if (tableBlock) nodes.push(tableBlock);
 
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
@@ -1712,7 +1628,8 @@
       if (block) nodes.push(block);
     });
 
-    // uniq
+    if (!nodes.length) nodes.push(sectionCard);
+
     const uniq = [];
     const seen = new Set();
     nodes.forEach((n) => {
@@ -1721,29 +1638,49 @@
       uniq.push(n);
     });
 
+    uniq.sort((a, b) => {
+      if (a === b) return 0;
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
     return uniq;
   };
 
   const openTableModalFor = (anyInside) => {
-    const bundle = getTableExpandNodes(anyInside);
-    if (!bundle.length) return;
-
-    const first = bundle[0];
-    const header =
-      first.closest(".section-block")?.querySelector?.("h2") ||
-      first.querySelector?.("h2") ||
-      first.closest(".page-section")?.querySelector("h1") ||
-      null;
-
+    const bundle = getExpandBundleNodes(anyInside);
+    const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
     const title = (header?.textContent || "Expanded View").trim();
-    openModalWithNodes(bundle, title);
+    openModalWithNodes(bundle, title, { notesOnly: false });
   };
 
+  // ✅ Notes-only popup should be ONE notes card (not card within a card)
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
-    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
-    const title = (h?.textContent || "Notes").trim();
-    openModalWithNodes([notesHostEl], title);
+
+    const title = (notesHostEl.querySelector("h2")?.textContent || notesHostEl.querySelector(".section-header")?.textContent || "Notes").trim();
+
+    const ta = notesHostEl.querySelector("textarea");
+    if (!ta) {
+      openModalWithNodes([notesHostEl], title, { notesOnly: true });
+      return;
+    }
+
+    const wrap = ta.closest(".mk-ta-wrap") || ta;
+
+    // Put wrapper inside a single modal notes card
+    const holder = document.createElement("div");
+    holder.className = "mk-modal-noteswrap";
+    holder.appendChild(wrap);
+
+    openModalWithNodes([holder], title, { notesOnly: true });
+
+    // ensure caret behavior is preserved if user just opened notes
+    setTimeout(() => {
+      try {
+        ta.focus({ preventScroll: true });
+      } catch {}
+    }, 0);
   };
 
   const ensureTableExpandButtons = () => {
@@ -1757,7 +1694,6 @@
       btn.setAttribute("data-mk-table-expand", "1");
       btn.title = "Expand";
       btn.textContent = "⤢";
-
       footer.appendChild(btn);
     });
   };
@@ -1768,7 +1704,6 @@
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
-
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -1818,12 +1753,7 @@
      SAVE PDF (safe hook)
   ======================= */
   const mkHandleSavePDF = () => {
-    const fn =
-      window.saveAllPagesAsPDF ||
-      window.savePDF ||
-      window.generatePDF ||
-      window.exportPDF ||
-      null;
+    const fn = window.saveAllPagesAsPDF || window.savePDF || window.generatePDF || window.exportPDF || null;
 
     if (typeof fn === "function") {
       try {
@@ -1842,9 +1772,7 @@
         { title: "PDF Hook" }
       );
     } catch {
-      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", {
-        title: "PDF Hook",
-      });
+      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", { title: "PDF Hook" });
     }
   };
 
@@ -1857,11 +1785,6 @@
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
-
-      // ✅ if modal open, close first so nodes return before navigating
-      const mkTableModal = $("#mkTableModal");
-      if (mkTableModal && mkTableModal.classList.contains("open")) closeTableModal();
-
       setActiveSection(navBtn.getAttribute("data-target"));
       setTimeout(() => {
         ensureTableExpandButtons();
@@ -1885,9 +1808,7 @@
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
-      const section =
-        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
-        resetBtn.closest(".page-section");
+      const section = (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) || resetBtn.closest(".page-section");
 
       mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
         title: "Reset This Page",
@@ -1910,9 +1831,7 @@
       e.preventDefault();
       mkInjectSummaryTokens(document);
       mkAutofillSummaryTrainerIfEmpty();
-      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", {
-        title: "Generate Summary",
-      });
+      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", { title: "Generate Summary" });
       return;
     }
 
@@ -1974,11 +1893,10 @@
       const id = notesExpandBtn.getAttribute("data-notes-id");
       const block = id ? document.getElementById(id) : null;
       if (block) openNotesModalFor(block);
-      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes");
+      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes", { notesOnly: true });
       return;
     }
 
-    // MODAL CLOSE
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
       if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
@@ -2005,18 +1923,12 @@
 
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
-        value: (i.value || "").trim(),
-      }));
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({ value: (i.value || "").trim() }));
       cloneState.set(clones);
-
       mkAutofillSummaryTrainerIfEmpty();
     }
 
-    if (
-      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
-      (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
-    ) {
+    if (/lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") || (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")) {
       mkAutofillSummaryTrainerIfEmpty();
     }
 
@@ -2025,7 +1937,6 @@
     }
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
-
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
@@ -2118,13 +2029,12 @@
     rebuildTicketClones();
 
     seedStarterRowsToThree();
-
     restoreAllFields();
+
     setGhostStyles(document);
 
     mkSyncTopbarTitle();
     mkInjectSummaryTokens(document);
-
     mkAutofillSummaryTrainerIfEmpty();
     mkAutoSetTrainingEndDate();
 
@@ -2134,7 +2044,7 @@
 
     enforceBaseTicketStatusLock();
 
-    log("Initialized.");
+    log("Initialized v7.");
   };
 
   if (document.readyState === "loading") {
