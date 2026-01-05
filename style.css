@@ -1691,3 +1691,67 @@ button.remove-row{
 #dealership-info .additional-poc-card[data-base="true"] .input-plus input{
   border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
 }
+
+/* =========================================================
+   FIX: Additional POC "Name + plus" should match other inputs
+   (forces 34px height + 34px button + consistent rounding)
+   Put at VERY BOTTOM of CSS
+========================================================= */
+
+/* Catch as many real-world structures as possible */
+#dealership-info .additional-poc-card .input-plus,
+#dealership-info #additionalPocsContainer .input-plus,
+#dealership-info .primary-contacts-grid .additional-poc-card .input-plus,
+#dealership-info .additional-poc-card .checklist-row .input-plus{
+  height:34px !important;
+  align-items:stretch !important;
+  display:flex !important;
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  margin-left:auto !important;
+}
+
+/* The textbox inside the input-plus */
+#dealership-info .additional-poc-card .input-plus input,
+#dealership-info #additionalPocsContainer .input-plus input,
+#dealership-info .primary-contacts-grid .additional-poc-card .input-plus input{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  line-height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+  box-shadow:none !important;
+}
+
+/* The plus button inside the input-plus */
+#dealership-info .additional-poc-card .input-plus button,
+#dealership-info #additionalPocsContainer .input-plus button,
+#dealership-info .primary-contacts-grid .additional-poc-card .input-plus button{
+  width:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:1 !important;
+  font-size:18px !important;
+}
+
+/* Safety: if your button is using a class instead */
+#dealership-info .additional-poc-card .trainer-add-btn,
+#dealership-info .additional-poc-card .add-btn,
+#dealership-info .additional-poc-card .add-poc-btn{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  min-height:34px !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  padding:0 !important;
+}
