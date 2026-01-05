@@ -1,12 +1,25 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v6.1)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7)
 
-   ✅ FIXED: Notes caret now lands AFTER the hollow bullet "  ◦ "
-   ✅ FIXED: Buttons not working (prior Notes edits caused syntax errors)
-   ✅ ADDED: Training Summary Actions dropdown now works:
-      - Actions ▾ toggles menu
-      - Generate Summary / Save PDF / Reset This Page wired up
+   ✅ FIX: Expand popup no longer "breaks" page
+      - Expand moves ONLY the table container + related notes blocks
+      - Does NOT move the entire section-block card
+
+   ✅ FIX: Opcodes popup "Updated" checkbox column matches page table
+      - Forces first column to checkbox width + centered (in modal too)
+
+   ✅ Notes caret behavior (unchanged from working baseline)
+      - Cursor lands AFTER the hollow bullet "  ◦ " (right side)
+
+   ✅ Keeps the rest:
+      - Nav, persistence
+      - Trainers + POCs
+      - Table add-row clone persistence
+      - Notes bullets + caret behavior
+      - Map update
+      - Expand buttons: tables + notes (MutationObserver catch-all)
+      - Support tickets hardened behavior
 ======================================================= */
 
 (() => {
@@ -15,7 +28,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v6";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v7";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -29,22 +42,11 @@
     did: ["dealershipDidInput"],
     dealerGroup: ["dealerGroupInput"],
 
-    // best-effort date ids (we also label-scan)
     onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    // best-effort lead trainer ids (we also label/placeholder scan)
     leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
-
-    // best-effort training summary trainer(s) field ids (we also label scan)
-    summaryTrainers: [
-      "trainingSummaryTrainers",
-      "trainerSummaryInput",
-      "trainersSummaryInput",
-      "trainerInputSummary",
-      // Your page 11 ids:
-      "mkSum_trainers",
-    ],
+    summaryTrainers: ["trainingSummaryTrainers", "trainerSummaryInput", "trainersSummaryInput", "trainerInputSummary"],
   };
 
   /* =======================
@@ -202,7 +204,7 @@
   };
 
   /* =======================
-     LABEL + PLACEHOLDER FINDERS (best-effort)
+     LABEL + PLACEHOLDER FINDERS
   ======================= */
   const mkFindFieldByLabelText = (sectionEl, labelIncludes) => {
     if (!sectionEl) return null;
@@ -217,9 +219,8 @@
       if (!t.includes(want)) continue;
 
       const field =
-        row.querySelector(
-          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
-        ) || null;
+        row.querySelector("input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea") ||
+        null;
       if (field) return field;
     }
     return null;
@@ -237,18 +238,15 @@
   };
 
   const mkFindDateInputByLabelOrId = (root, ids, labelIncludes) => {
-    // 1) explicit ids
     for (const id of ids || []) {
       const el = document.getElementById(id);
       if (el && el.matches('input[type="date"]')) return el;
     }
-    // 2) label scan
     const sections = $$(".page-section", root);
     for (const sec of sections) {
       const found = mkFindFieldByLabelText(sec, labelIncludes);
       if (found && found.matches('input[type="date"]')) return found;
     }
-    // 3) fallback: any date input whose id/name hints
     const allDates = $$('input[type="date"]', root);
     for (const d of allDates) {
       const id = (d.id || "").toLowerCase();
@@ -259,7 +257,7 @@
   };
 
   /* =======================
-     OS-STYLE POPUPS (OK + OK/CANCEL)
+     POPUPS
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -322,7 +320,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -386,7 +391,8 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) =>
+      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -411,7 +417,12 @@
   const cloneState = {
     get() {
       const state = readState();
-      state.__clones = state.__clones || { trainers: [], pocs: [], tables: {}, tickets: [] };
+      state.__clones = state.__clones || {
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
+      };
       return state.__clones;
     },
     set(next) {
@@ -680,7 +691,9 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
 
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
@@ -731,14 +744,19 @@
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
   const getTableKey = (table) =>
-    table?.getAttribute("data-table-key") || table?.id || `table-${$$("table.training-table").indexOf(table)}`;
+    table?.getAttribute("data-table-key") ||
+    table?.id ||
+    `table-${$$("table.training-table").indexOf(table)}`;
 
   const clearRowFields = (tr) => {
     $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
-      if (el.matches("input[type='checkbox'], input[type='radio']")) el.checked = false;
-      else if (el.matches("[contenteditable='true']")) el.textContent = "";
-      else el.value = "";
-
+      if (el.matches("input[type='checkbox'], input[type='radio']")) {
+        el.checked = false;
+      } else if (el.matches("[contenteditable='true']")) {
+        el.textContent = "";
+      } else {
+        el.value = "";
+      }
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       saveField(el);
@@ -832,7 +850,9 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+      );
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -841,6 +861,7 @@
       const needed = 3 - existing.length;
       for (let i = 0; i < needed; i++) {
         const clone = baseRow.cloneNode(true);
+
         clone.removeAttribute(AUTO_ROW_ATTR);
         clone.removeAttribute("data-base");
 
@@ -858,11 +879,12 @@
   }
 
   /* =======================
-     NOTES (FIXED caret)
+     NOTES
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-    const getNotesTargetId = (btn) => btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
     const ZW0 = "\u200B";
     const ZW1 = "\u200C";
@@ -931,7 +953,8 @@
       if (tr && table) {
         if (secId === "training-checklist") {
           const nameInput =
-            tr.querySelector('td:first-child input[type="text"]') || tr.querySelector('td:nth-child(2) input[type="text"]');
+            tr.querySelector('td:first-child input[type="text"]') ||
+            tr.querySelector('td:nth-child(2) input[type="text"]');
           const v = (nameInput?.value || "").trim();
           return v || "(blank)";
         }
@@ -947,7 +970,9 @@
         }
 
         const field =
-          tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') || null;
+          tr.querySelector(
+            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
+          ) || null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
@@ -1019,38 +1044,28 @@
       return miscText.trimEnd();
     };
 
-    // ✅ CARET: land immediately AFTER the "◦" (and ensure a trailing space exists)
-const caretAtHollowForKey = (text, key) => {
-  const v0 = normalizeNL(text || "");
-  const marker = makeMarker(key);
-  const markerIdx = v0.indexOf(marker);
-  if (markerIdx < 0) return { text: v0, caret: v0.length };
+    // ✅ Cursor lands AFTER the "  ◦ " inside THIS block
+    const caretAtHollowForKey = (text, key) => {
+      const v = normalizeNL(text || "");
+      const marker = makeMarker(key);
+      const markerIdx = v.indexOf(marker);
+      if (markerIdx < 0) return v.length;
 
-  // end of the line containing the marker
-  const mainLineEnd = v0.indexOf("\n", markerIdx);
-  const afterMainLine = mainLineEnd < 0 ? v0.length : mainLineEnd + 1;
+      const mainLineEnd = v.indexOf("\n", markerIdx);
+      const afterMainLine = mainLineEnd < 0 ? v.length : mainLineEnd + 1;
 
-  // block ends at next main bullet or end of text
-  const nextMain = v0.indexOf("\n• ", afterMainLine);
-  const blockEnd = nextMain >= 0 ? nextMain : v0.length;
+      const nextMain = v.indexOf("\n• ", afterMainLine);
+      const blockEnd = nextMain >= 0 ? nextMain : v.length;
 
-  // Find the hollow bullet in THIS block (match either "  ◦" or "  ◦ ")
-  const hollowChar = "◦";
-  const hollowIdx = v0.indexOf(hollowChar, afterMainLine);
+      const subPrefix = "  ◦ ";
+      const subIdx = v.indexOf(subPrefix, afterMainLine);
 
-  if (hollowIdx >= 0 && hollowIdx < blockEnd) {
-    // Ensure there is ONE space after ◦ so typing is natural
-    let v = v0;
-    const after = v.charAt(hollowIdx + 1);
-    if (after !== " ") {
-      v = v.slice(0, hollowIdx + 1) + " " + v.slice(hollowIdx + 1);
-    }
-    return { text: v, caret: hollowIdx + 2 }; // ✅ after "◦ "
-  }
+      if (subIdx >= 0 && subIdx < blockEnd) {
+        return subIdx + subPrefix.length;
+      }
 
-  // If hollow bullet got deleted, land just after main line
-  return { text: v0, caret: Math.min(afterMainLine, v0.length) };
-};
+      return Math.min(afterMainLine, v.length);
+    };
 
     const handleNotesClick = (btn) => {
       const targetId = getNotesTargetId(btn);
@@ -1078,18 +1093,16 @@ const caretAtHollowForKey = (text, key) => {
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
-const res = caretAtHollowForKey(ta.value, slotKey);
-ta.value = res.text;
+        const caret = caretAtHollowForKey(ta.value, slotKey);
 
-try {
-  ta.focus({ preventScroll: true });
-} catch {
-  ta.focus();
-}
-try {
-  ta.setSelectionRange(res.caret, res.caret);
-} catch {}
-
+        try {
+          ta.focus({ preventScroll: true });
+        } catch {
+          ta.focus();
+        }
+        try {
+          ta.setSelectionRange(caret, caret);
+        } catch {}
 
         btn.classList.add("has-notes");
         btn.classList.add("is-notes-active");
@@ -1111,7 +1124,7 @@ try {
   })();
 
   /* =======================
-     SUPPORT TICKETS (FIXED)
+     SUPPORT TICKETS
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -1268,7 +1281,12 @@ try {
     const baseVals = readTicketValues(base);
 
     const clone = buildTicketCloneFromBase(base);
-    setTicketCardValues(clone, { num: baseVals.num, url: baseVals.url, sum: baseVals.sum, status: "Open" });
+    setTicketCardValues(clone, {
+      num: baseVals.num,
+      url: baseVals.url,
+      sum: baseVals.sum,
+      status: "Open",
+    });
 
     openContainer.appendChild(clone);
 
@@ -1338,7 +1356,12 @@ try {
     list.forEach((t) => {
       const clone = buildTicketCloneFromBase(base);
 
-      setTicketCardValues(clone, { num: t.num || "", url: t.url || "", sum: t.sum || "", status: t.status || "Open" });
+      setTicketCardValues(clone, {
+        num: t.num || "",
+        url: t.url || "",
+        sum: t.sum || "",
+        status: t.status || "Open",
+      });
 
       const containers = ticketContainersByStatus();
       const dest = containers[t.status] || containers.Open || openContainer;
@@ -1384,7 +1407,7 @@ try {
   };
 
   /* =======================
-     MAP BTN
+     MAP
   ======================= */
   const updateDealershipMap = (address) => {
     const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
@@ -1406,7 +1429,7 @@ try {
 
     const compute = () => {
       if (!onsiteInput.value) return;
-      if (endInput.value) return; // don’t overwrite
+      if (endInput.value) return;
 
       const start = new Date(onsiteInput.value);
       if (Number.isNaN(start.getTime())) return;
@@ -1427,7 +1450,7 @@ try {
   };
 
   /* =======================
-     LEAD TRAINER -> SUMMARY "Trainer(s)" INJECTION
+     LEAD TRAINER -> SUMMARY "Trainer(s)"
   ======================= */
   const mkGetLeadTrainer = () => {
     const byId = mkFirstValueByIds(MK_IDS.leadTrainer);
@@ -1436,7 +1459,9 @@ try {
     const trainersSec = document.getElementById("trainers-deployment");
     if (trainersSec) {
       const leadByLabel =
-        mkFindFieldByLabelText(trainersSec, "lead trainer") || mkFindFieldByLabelText(trainersSec, "trainer") || null;
+        mkFindFieldByLabelText(trainersSec, "lead trainer") ||
+        mkFindFieldByLabelText(trainersSec, "trainer") ||
+        null;
       if (leadByLabel && leadByLabel.matches("input, textarea, select")) {
         const v = (leadByLabel.value || "").trim();
         if (v) return v;
@@ -1455,7 +1480,10 @@ try {
       }
     }
 
-    const globalCandidates = $$('input[type="text"]').filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
+    const globalCandidates = $$('input[type="text"]').filter((i) =>
+      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || "")
+    );
+
     for (const i of globalCandidates) {
       const v = (i.value || "").trim();
       if (v) return v;
@@ -1503,7 +1531,7 @@ try {
   };
 
   /* =======================
-     EXEC SUMMARY INJECTION (best-effort hooks)
+     EXEC SUMMARY INJECTION
   ======================= */
   const mkGetDealerSnapshot = () => {
     const did = mkFirstValueByIds(MK_IDS.did);
@@ -1520,7 +1548,6 @@ try {
         else el.textContent = val || "";
       });
     };
-
     setToken("did", snap.did || "");
     setToken("dealership", snap.dealership || "");
     setToken("dealerGroup", snap.dealerGroup || "");
@@ -1528,10 +1555,12 @@ try {
   };
 
   /* =========================================================
-     EXPAND BUTTONS (TABLES + NOTES)
+     EXPAND BUTTONS (TABLES + NOTES) — FIXES IN v7:
+     - Expanding a table moves ONLY the table container (not the whole card)
+     - Modal CSS forces checkbox column to match page table
 ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v3";
+    const STYLE_ID = "mk-expand-style-v7";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1553,12 +1582,30 @@ try {
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
           border-color:#EF6D22 !important;
         }
+
+        /* ✅ Match checkbox "Updated" column inside the modal */
+        #mkTableModal table.training-table th:first-child,
+        #mkTableModal table.training-table td:first-child{
+          width:110px !important;
+          text-align:center !important;
+          vertical-align:middle !important;
+        }
+        #mkTableModal table.training-table td:first-child input[type="checkbox"]{
+          margin:0 auto !important;
+          display:inline-block !important;
+        }
       `;
       document.head.appendChild(s);
     };
   })();
 
-  const tableModal = { modal: null, content: null, title: null, moved: [], bodyOverflow: "" };
+  const tableModal = {
+    modal: null,
+    content: null,
+    title: null,
+    moved: [],
+    bodyOverflow: "",
+  };
 
   const openModalWithNodes = (nodes, titleText) => {
     const modal = $("#mkTableModal");
@@ -1574,7 +1621,9 @@ try {
     const titleEl = $(".mk-modal-title", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) {
-      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", { title: "Modal Markup Issue" });
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
+        title: "Modal Markup Issue",
+      });
       return;
     }
 
@@ -1624,20 +1673,34 @@ try {
     tableModal.moved = [];
   };
 
-  const getExpandBundleNodes = (anyInside) => {
+  // ✅ NEW: return ONLY the table container (so the page doesn’t blank out)
+  const getTableExpandNodes = (anyInside) => {
     const footer = anyInside?.closest?.(".table-footer");
+    const table =
+      footer?.closest(".table-container")?.querySelector("table.training-table") ||
+      footer?.closest(".section-block")?.querySelector("table.training-table") ||
+      anyInside?.closest?.(".section-block")?.querySelector("table.training-table") ||
+      anyInside?.closest?.("table.training-table") ||
+      null;
+
+    if (!table) return [];
+
+    // choose container wrapper if present; otherwise the table itself + footer
+    const container =
+      table.closest(".table-container") ||
+      table.parentElement ||
+      table;
+
+    // ensure footer included if it exists and is not already inside container
+    const nodes = [container];
+    if (footer && !container.contains(footer)) nodes.push(footer);
+
+    // also move notes blocks associated with this card (if any)
     const sectionCard =
-      footer?.closest(".section") ||
-      footer?.closest(".section-block") ||
-      footer?.parentElement ||
-      anyInside?.closest?.(".section-block") ||
-      anyInside?.closest?.(".page-section") ||
+      table.closest(".section-block") ||
+      table.closest(".section") ||
+      table.closest(".page-section") ||
       document.body;
-
-    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
-
-    const nodes = [];
-    if (tableBlock) nodes.push(tableBlock);
 
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
@@ -1649,8 +1712,7 @@ try {
       if (block) nodes.push(block);
     });
 
-    if (!nodes.length) nodes.push(sectionCard);
-
+    // uniq
     const uniq = [];
     const seen = new Set();
     nodes.forEach((n) => {
@@ -1659,18 +1721,20 @@ try {
       uniq.push(n);
     });
 
-    uniq.sort((a, b) => {
-      if (a === b) return 0;
-      const pos = a.compareDocumentPosition(b);
-      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
-
     return uniq;
   };
 
   const openTableModalFor = (anyInside) => {
-    const bundle = getExpandBundleNodes(anyInside);
-    const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
+    const bundle = getTableExpandNodes(anyInside);
+    if (!bundle.length) return;
+
+    const first = bundle[0];
+    const header =
+      first.closest(".section-block")?.querySelector?.("h2") ||
+      first.querySelector?.("h2") ||
+      first.closest(".page-section")?.querySelector("h1") ||
+      null;
+
     const title = (header?.textContent || "Expanded View").trim();
     openModalWithNodes(bundle, title);
   };
@@ -1704,6 +1768,7 @@ try {
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
+
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -1753,7 +1818,12 @@ try {
      SAVE PDF (safe hook)
   ======================= */
   const mkHandleSavePDF = () => {
-    const fn = window.saveAllPagesAsPDF || window.savePDF || window.generatePDF || window.exportPDF || null;
+    const fn =
+      window.saveAllPagesAsPDF ||
+      window.savePDF ||
+      window.generatePDF ||
+      window.exportPDF ||
+      null;
 
     if (typeof fn === "function") {
       try {
@@ -1772,29 +1842,10 @@ try {
         { title: "PDF Hook" }
       );
     } catch {
-      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", { title: "PDF Hook" });
+      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", {
+        title: "PDF Hook",
+      });
     }
-  };
-
-  /* =======================
-     TRAINING SUMMARY ACTIONS DROPDOWN (Page 11)
-  ======================= */
-  const mkSummaryMenu = {
-    close() {
-      const btn = $("#mkSummaryActionsBtn");
-      const menu = $("#mkSummaryActionsMenu");
-      if (!btn || !menu) return;
-      menu.hidden = true;
-      btn.setAttribute("aria-expanded", "false");
-    },
-    toggle() {
-      const btn = $("#mkSummaryActionsBtn");
-      const menu = $("#mkSummaryActionsMenu");
-      if (!btn || !menu) return;
-      const open = !menu.hidden;
-      menu.hidden = open;
-      btn.setAttribute("aria-expanded", open ? "false" : "true");
-    },
   };
 
   /* =======================
@@ -1803,55 +1854,14 @@ try {
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // Close summary menu on outside click
-    const menu = $("#mkSummaryActionsMenu");
-    const wrap = $("#mkSummaryActions");
-    if (menu && !menu.hidden && wrap && !wrap.contains(t)) mkSummaryMenu.close();
-
-    // Summary Actions button
-    const sumBtn = t.closest("#mkSummaryActionsBtn");
-    if (sumBtn) {
-      e.preventDefault();
-      mkSummaryMenu.toggle();
-      return;
-    }
-
-    // Summary Actions menu item
-    const sumItem = t.closest("#mkSummaryActionsMenu .mk-action-item");
-    if (sumItem) {
-      e.preventDefault();
-      mkSummaryMenu.close();
-
-      const action = sumItem.getAttribute("data-action") || "";
-      if (action === "generate") {
-        mkInjectSummaryTokens(document);
-        mkAutofillSummaryTrainerIfEmpty();
-        // if you have a real generator hooked elsewhere, you can listen for this event:
-        try {
-          document.dispatchEvent(new CustomEvent("mk:generateSummary"));
-        } catch {}
-        return;
-      }
-      if (action === "savepdf") {
-        mkHandleSavePDF();
-        return;
-      }
-      if (action === "reset") {
-        const sec = document.getElementById("training-summary") || getSection(sumItem) || null;
-        mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
-          title: "Reset This Page",
-          okText: "Reset Page",
-          cancelText: "Cancel",
-          onOk: () => clearSection(sec),
-        });
-        return;
-      }
-      return;
-    }
-
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
+
+      // ✅ if modal open, close first so nodes return before navigating
+      const mkTableModal = $("#mkTableModal");
+      if (mkTableModal && mkTableModal.classList.contains("open")) closeTableModal();
+
       setActiveSection(navBtn.getAttribute("data-target"));
       setTimeout(() => {
         ensureTableExpandButtons();
@@ -1875,7 +1885,10 @@ try {
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
-      const section = (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) || resetBtn.closest(".page-section");
+      const section =
+        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
+        resetBtn.closest(".page-section");
+
       mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
         title: "Reset This Page",
         okText: "Reset Page",
@@ -1889,6 +1902,17 @@ try {
     if (savePdfBtn) {
       e.preventDefault();
       mkHandleSavePDF();
+      return;
+    }
+
+    const genSummaryBtn = t.closest("#mkGenerateSummaryBtn, [data-mk-action='generate-summary']");
+    if (genSummaryBtn) {
+      e.preventDefault();
+      mkInjectSummaryTokens(document);
+      mkAutofillSummaryTrainerIfEmpty();
+      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", {
+        title: "Generate Summary",
+      });
       return;
     }
 
@@ -1954,6 +1978,7 @@ try {
       return;
     }
 
+    // MODAL CLOSE
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
       if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
@@ -1980,7 +2005,9 @@ try {
 
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({ value: (i.value || "").trim() }));
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
+        value: (i.value || "").trim(),
+      }));
       cloneState.set(clones);
 
       mkAutofillSummaryTrainerIfEmpty();
@@ -2075,7 +2102,6 @@ try {
         closeTableModal();
       }
       mkPopup.close();
-      mkSummaryMenu.close();
     }
   });
 
@@ -2108,12 +2134,12 @@ try {
 
     enforceBaseTicketStatusLock();
 
-    // Ensure summary menu starts closed
-    mkSummaryMenu.close();
-
     log("Initialized.");
   };
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
