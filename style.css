@@ -1872,3 +1872,64 @@ button.remove-row{
   margin:0 0 10px 0 !important; /* no forced left/right */
 }
 
+/* =========================================================
+   POPUP / MODAL FIXES
+   - Bigger notes textareas in popups
+   - Notes popups should not look like "card inside card"
+   - Opcodes popup Updated column matches table column
+========================================================= */
+
+/* Bigger textarea in modal (notes popups) */
+#mkTableModal .mk-modal-content textarea {
+  min-height: 260px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+/* Notes-only modal content wrapper (we add this in JS) */
+#mkTableModal.mk-notes-only .mk-modal-content {
+  padding: 16px !important;
+}
+#mkTableModal.mk-notes-only .mk-modal-content .mk-modal-noteswrap {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  padding: 14px;
+}
+
+/* If any section-block accidentally ends up in notes-only modal, flatten it */
+#mkTableModal.mk-notes-only .mk-modal-content .section-block {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#mkTableModal.mk-notes-only .mk-modal-content .section-block h2 {
+  display: none !important;
+}
+
+/* ===== Updated column alignment in popup tables ===== */
+#mkTableModal table.training-table th:first-child,
+#mkTableModal table.training-table td:first-child {
+  width: 110px;
+  min-width: 110px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Make popup checkboxes match the page table look */
+#mkTableModal table.training-table td:first-child input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
+  transform: scale(1.05);
+  accent-color: #ef6d22; /* matches your orange */
+}
+
+/* Prevent odd padding/indent in the popup Updated column */
+#mkTableModal table.training-table td:first-child {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
