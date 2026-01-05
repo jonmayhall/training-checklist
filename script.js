@@ -1,13 +1,14 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7.1)
 
    ✅ FIXES IN THIS BUILD:
-   - Notes caret ALWAYS lands to the RIGHT of the hollow bullet "◦ " (for ALL Add Notes buttons)
-   - Notes expand popup no longer "card inside card" (adds mk-notes-only mode)
-   - Notes popup textarea is taller + larger font (injected CSS)
-   - Expand popup no longer breaks page layout (uses SAME-HEIGHT placeholder blocks)
-   - Popup tables inherit same .page-section scope so checkbox/updated column styling matches main tables better
+   - Notes caret ALWAYS lands to the RIGHT of the hollow bullet "◦ " (ALL Add Notes buttons)
+   - Notes expand popup no longer "card inside card" (mk-notes-only mode)
+   - Notes popup textarea taller + larger font (injected CSS)
+   - Expand popup no longer breaks page layout (same-height placeholders)
+   - Popup tables inherit .page-section scope so checkbox/Updated column styling matches main tables
+   - Auto-creates #mkTableModal markup if missing (so expand works even if HTML block not present)
 
 ======================================================= */
 
@@ -210,8 +211,9 @@
       if (!t.includes(want)) continue;
 
       const field =
-        row.querySelector("input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea") ||
-        null;
+        row.querySelector(
+          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
+        ) || null;
       if (field) return field;
     }
     return null;
@@ -1035,7 +1037,7 @@
       return miscText.trimEnd();
     };
 
-    // ✅ FIXED: always returns { text, caret } and ensures hollow bullet is "  ◦ " (with trailing space)
+    // ✅ ALWAYS places caret AFTER "  ◦ " and fixes missing trailing space.
     const caretAtHollowForKey = (text, key) => {
       const v = normalizeNL(text || "");
       const marker = makeMarker(key);
@@ -1054,13 +1056,11 @@
 
       let out = v;
 
-      // preferred: already has trailing space
       let subIdx = out.indexOf(hollowWithSpace, afterMain);
       if (subIdx >= 0 && subIdx < blockEnd) {
         return { text: out, caret: subIdx + hollowWithSpace.length };
       }
 
-      // exists but missing trailing space -> insert it so caret lands to the RIGHT
       subIdx = out.indexOf(hollowNoSpace, afterMain);
       if (subIdx >= 0 && subIdx < blockEnd) {
         const insertAt = subIdx + hollowNoSpace.length;
@@ -1071,7 +1071,6 @@
         return { text: out, caret: insertAt + 1 };
       }
 
-      // hollow bullet line deleted -> create it directly under the main bullet
       const insertion = "  ◦ ";
       out = out.slice(0, afterMain) + insertion + out.slice(afterMain);
       return { text: out, caret: afterMain + insertion.length };
@@ -1103,7 +1102,6 @@
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
-        // ✅ ensure caret is AFTER "◦ "
         const res = caretAtHollowForKey(ta.value, slotKey);
         ta.value = res.text;
 
@@ -1492,8 +1490,9 @@
       }
     }
 
-    const globalCandidates = $$('input[type="text"]')
-      .filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
+    const globalCandidates = $$('input[type="text"]').filter((i) =>
+      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || "")
+    );
 
     for (const i of globalCandidates) {
       const v = (i.value || "").trim();
@@ -1562,15 +1561,34 @@
     setToken("did", snap.did || "");
     setToken("dealership", snap.dealership || "");
     setToken("dealerGroup", snap.dealerGroup || "");
-    setToken("title", mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership }));
+    setToken(
+      "title",
+      mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership })
+    );
   };
 
   /* =========================================================
-     EXPAND BUTTONS (TABLES + NOTES) — FIXED + NO PAGE BREAK
-     - Uses SAME-HEIGHT placeholders so the page doesn’t collapse
-     - Adds .page-section scope inside modal content to inherit table/checkbox styling
-     - Adds mk-notes-only mode for single-card notes popup styling
+     EXPAND MODAL (AUTO-INJECT MARKUP + STYLES)
 ========================================================= */
+  const ensureMkTableModalMarkup = () => {
+    if ($("#mkTableModal")) return;
+
+    const wrap = document.createElement("div");
+    wrap.id = "mkTableModal";
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.innerHTML = `
+      <div class="mk-modal-backdrop"></div>
+      <div class="mk-modal-panel" role="dialog" aria-modal="true">
+        <div class="mk-modal-header">
+          <div class="mk-modal-title">Expanded View</div>
+          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
+        </div>
+        <div class="mk-modal-content"></div>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+  };
+
   const ensureExpandStyles = (() => {
     const STYLE_ID = "mk-expand-style-v7";
     return () => {
@@ -1578,6 +1596,49 @@
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
+        /* Modal base */
+        #mkTableModal{ position:fixed; inset:0; z-index:100001; display:none; }
+        #mkTableModal.open{ display:block; }
+        #mkTableModal .mk-modal-backdrop{
+          position:absolute; inset:0;
+          background:rgba(0,0,0,.45);
+        }
+        #mkTableModal .mk-modal-panel{
+          position:absolute;
+          left:50%; top:64px; transform:translateX(-50%);
+          width:min(1200px, calc(100vw - 28px));
+          max-height:calc(100vh - 92px);
+          overflow:auto;
+          background:#ffffff;
+          border:1px solid rgba(0,0,0,.12);
+          border-radius:18px;
+          box-shadow:0 22px 60px rgba(0,0,0,.35);
+        }
+        #mkTableModal .mk-modal-header{
+          position:sticky; top:0;
+          background:linear-gradient(90deg, #111827, #EF6D22);
+          color:#fff;
+          display:flex; align-items:center; justify-content:space-between;
+          padding:10px 14px;
+          z-index:2;
+        }
+        #mkTableModal .mk-modal-title{
+          font-weight:900; letter-spacing:.2px; font-size:14px;
+        }
+        #mkTableModal .mk-modal-close{
+          width:34px; height:34px;
+          border-radius:10px;
+          border:1px solid rgba(255,255,255,.25);
+          background:rgba(255,255,255,.10);
+          color:#fff;
+          font-size:20px;
+          cursor:pointer;
+          display:inline-flex; align-items:center; justify-content:center;
+        }
+        #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,.18); }
+        #mkTableModal .mk-modal-content{ padding:16px; }
+
+        /* Expand buttons */
         .mk-table-expand-btn,
         .mk-ta-expand{
           border:1px solid rgba(0,0,0,.15);
@@ -1589,6 +1650,10 @@
           justify-content:center;
           line-height:1;
           user-select:none;
+          margin-left:10px;
+          width:34px;
+          height:30px;
+          border-radius:10px;
         }
         .mk-field-error{
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
@@ -1606,7 +1671,6 @@
           background: transparent !important;
           border: none !important;
           box-shadow: none !important;
-          padding: 0 !important;
         }
         #mkTableModal.mk-notes-only .mk-modal-content{
           padding: 0 !important;
@@ -1648,15 +1712,10 @@
   };
 
   const openModalWithNodes = (nodes, titleText) => {
-    const modal = $("#mkTableModal");
-    if (!modal) {
-      mkPopup.ok(
-        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
-        { title: "Missing Expand Modal" }
-      );
-      return;
-    }
+    ensureMkTableModalMarkup();
+    ensureExpandStyles();
 
+    const modal = $("#mkTableModal");
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
@@ -1734,7 +1793,6 @@
     const sectionCard =
       footer?.closest(".section") ||
       footer?.closest(".section-block") ||
-      footer?.parentElement ||
       anyInside?.closest?.(".section-block") ||
       anyInside?.closest?.(".page-section") ||
       document.body;
@@ -1744,6 +1802,7 @@
     const nodes = [];
     if (tableBlock) nodes.push(tableBlock);
 
+    // Include the notes blocks that belong to this section (keeps "popup matches page" rule)
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
       const id = btn.getAttribute("data-notes-target");
@@ -1795,7 +1854,9 @@
   };
 
   const ensureTableExpandButtons = () => {
+    ensureMkTableModalMarkup();
     ensureExpandStyles();
+
     document.querySelectorAll(".table-footer").forEach((footer) => {
       if (footer.querySelector(".mk-table-expand-btn")) return;
 
@@ -1811,6 +1872,7 @@
   };
 
   const ensureNotesExpandButtons = () => {
+    ensureMkTableModalMarkup();
     ensureExpandStyles();
 
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
@@ -2153,6 +2215,9 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
+    ensureMkTableModalMarkup();
+    ensureExpandStyles();
+
     assignIdsToAllFields();
     initNav();
 
