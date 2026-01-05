@@ -1933,3 +1933,46 @@ button.remove-row{
   padding-right: 0 !important;
 }
 
+/* ===== Notes popup should NOT be "card inside card" ===== */
+#mkTableModal.mk-notes-only .mk-modal-panel{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#mkTableModal.mk-notes-only .mk-modal-content{
+  padding: 0 !important;
+}
+
+/* Keep the REAL notes card styling */
+#mkTableModal.mk-notes-only .section-block{
+  margin: 0 !important;
+}
+
+/* Taller notes textarea inside popup */
+#mkTableModal.mk-notes-only textarea{
+  min-height: 360px !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+}
+
+/* ===== Make popup tables match main tables checkbox columns ===== */
+#mkTableModal table.training-table th:first-child,
+#mkTableModal table.training-table td:first-child{
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 110px;
+  min-width: 110px;
+}
+
+/* Match checkbox look */
+#mkTableModal table.training-table input[type="checkbox"]{
+  width: 16px;
+  height: 16px;
+  accent-color: #ef6d22;
+  display: inline-block;
+  margin: 0 auto;
+}
