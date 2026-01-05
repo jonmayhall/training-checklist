@@ -1755,3 +1755,27 @@ button.remove-row{
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
   padding:0 !important;
 }
+
+/* ===== FIX Additional POC sizing + restore rounded right on added cards ===== */
+
+/* Keep the Name+Plus row same width as other inputs */
+#dealership-info .additional-poc-card .input-plus{
+  width:var(--di-input-width) !important;
+  max-width:var(--di-input-width) !important;
+  height:34px !important;
+}
+
+/* Only the BASE card (with +) should have split rounding */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus input{
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+#dealership-info .additional-poc-card[data-base="true"] .input-plus button{
+  width:34px !important;
+  height:34px !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
+/* Added cards MUST have fully-rounded Name input */
+#dealership-info .additional-poc-card[data-base="false"] input[type="text"]{
+  border-radius:var(--radius-sm) !important;
+}
