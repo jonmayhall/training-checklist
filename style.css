@@ -1660,3 +1660,34 @@ button.remove-row{
 #dealership-info .additional-poc-card[data-base="true"] .input-plus button:hover{
   background: #ff8b42 !important;
 }
+
+/* =========================================================
+   ADDITIONAL POC — MATCH INPUT + PLUS SIZE TO ALL TEXTBOXES
+========================================================= */
+
+/* Lock the height to match standard inputs */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus{
+  height: 34px !important;
+}
+
+/* Input: same height + vertical centering */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus input{
+  height: 34px !important;
+  line-height: 34px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Plus button: SAME height + radius as other add buttons */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus button{
+  height: 34px !important;
+  min-height: 34px !important;
+  line-height: 1 !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove any pill-style rounding bleed */
+#dealership-info .additional-poc-card[data-base="true"] .input-plus input{
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
