@@ -1579,3 +1579,32 @@ button.remove-row{
 #training-summary textarea.mk-fullwidth-textarea{
   min-height: 160px !important;
 }
+
+/* =========================================================
+   PRIMARY CONTACTS — SPACING CLEANUP
+   - Reduce gap under header
+   - Match top/bottom spacing of cards
+========================================================= */
+
+/* Reduce space under the "Primary Contacts" header */
+#dealership-info .primary-contacts-grid{
+  margin-top: 8px !important;      /* was too large */
+  padding-top: 12px !important;    /* tighten */
+  padding-bottom: 12px !important; /* match bottom spacing */
+}
+
+/* Tighten header spacing itself */
+#dealership-info .section-block h2{
+  margin-bottom: 10px !important;  /* reduces gap before cards */
+}
+
+/* Ensure cards align visually with section bottom */
+#dealership-info .primary-contacts-grid .mini-card{
+  margin-bottom: 0 !important;
+}
+
+/* Make bottom of Primary Contacts section match card spacing */
+#dealership-info .section-block{
+  padding-bottom: 14px !important;
+}
+
