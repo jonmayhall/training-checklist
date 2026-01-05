@@ -1736,3 +1736,11 @@ button.remove-row{
   width: var(--input-width);
   flex: 0 0 var(--input-width);
 }
+
+/* reserves the notes-icon width so non-notes rows still align */
+.notes-icon-spacer{
+  width:20px;
+  height:20px;
+  display:inline-block;
+}
+
