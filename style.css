@@ -1563,7 +1563,7 @@ button.remove-row{
 #opcodes-pricing .section + .section-block textarea,
 #training-checklist .section + .section-block .mk-ta-wrap > textarea,
 #opcodes-pricing .section + .section-block .mk-ta-wrap > textarea{
-  min-height: 200px !important;  /* was ~180 → doubled */
+  min-height: 160px !important;  /* was ~180 → doubled */
 }
 
 /* =========================================================
@@ -1572,10 +1572,10 @@ button.remove-row{
 ========================================================= */
 #training-summary .section-block textarea,
 #training-summary .section-block .mk-ta-wrap > textarea{
-  min-height: 2000px !important;
+  min-height: 160px !important;
 }
 
 /* If any Training Summary textarea uses a special class, keep it tall too */
 #training-summary textarea.mk-fullwidth-textarea{
-  min-height: 200px !important;
+  min-height: 160px !important;
 }
