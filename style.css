@@ -1730,3 +1730,9 @@ button.remove-row{
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
 }
+
+/* Post-training: make lone date inputs align like select+notes rows */
+#post-training .checklist-row .row-actions > input[type="date"]{
+  width: var(--input-width);
+  flex: 0 0 var(--input-width);
+}
