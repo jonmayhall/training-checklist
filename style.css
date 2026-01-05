@@ -1974,5 +1974,42 @@ button.remove-row{
   height: 16px;
   accent-color: #ef6d22;
   display: inline-block;
+  margin: 0 auto;   
+}
+
+/* =========================================================
+   POPUP TABLE PARITY (Pages 5–6)
+   ========================================================= */
+
+/* Make modal content inherit page styling if your CSS scopes to .page-section */
+#mkTableModal .mk-modal-content.page-section {
+  background: transparent;
+}
+
+/* Checkbox look (use your existing checkbox style if you already have one) */
+#mkTableModal table.training-table input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #EF6D22;
+}
+
+/* ✅ Opcodes table: first column is "Updated" (single checkbox) */
+table.training-table.mk-updated-first-col th:first-child,
+table.training-table.mk-updated-first-col td:first-child {
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Center checkbox in Updated column ONLY (don’t affect "Name" column tables) */
+table.training-table.mk-updated-first-col td:first-child {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+table.training-table.mk-updated-first-col td:first-child input[type="checkbox"] {
   margin: 0 auto;
+  display: block;
 }
