@@ -1494,3 +1494,19 @@ button.remove-row{
   margin:0 !important;
 }
 #mkTableModal.mk-notes-only .section-block h2{ display:none !important; }
+
+/* =========================================================
+   OPCODES POPUP — force "Updated" HEADER to light orange
+   (fixes white header cell in modal)
+========================================================= */
+
+/* If your modal is showing the Opcodes table */
+#mkTableModal #opcodes-pricing table.training-table thead th:first-child{
+  background: var(--light-orange) !important;
+  color:#fff !important;
+}
+
+/* And ensure the body cells keep the row striping (not white) */
+#mkTableModal #opcodes-pricing table.training-table td:first-child{
+  background: inherit !important;
+}
