@@ -1581,30 +1581,30 @@ button.remove-row{
 }
 
 /* =========================================================
-   PRIMARY CONTACTS — SPACING CLEANUP
-   - Reduce gap under header
-   - Match top/bottom spacing of cards
+   PRIMARY CONTACTS — ACTUAL GAP FIX (scoped)
+   The large white space is coming from .primary-contacts-grid padding
 ========================================================= */
 
-/* Reduce space under the "Primary Contacts" header */
+/* Target ONLY the section-block that contains the contacts grid */
+#dealership-info .section-block:has(.primary-contacts-grid){
+  padding-bottom: 14px !important;   /* consistent bottom spacing */
+}
+
+/* Tighten the gap directly under the orange "Primary Contacts" bar */
+#dealership-info .section-block:has(.primary-contacts-grid) > h2{
+  margin-bottom: 8px !important;     /* was effectively 16px */
+}
+
+/* THIS is the big one: reduce the grid padding + remove extra margin */
 #dealership-info .primary-contacts-grid{
-  margin-top: 8px !important;      /* was too large */
-  padding-top: 12px !important;    /* tighten */
-  padding-bottom: 12px !important; /* match bottom spacing */
+  --pc-gap: 12px !important;         /* overrides your 30px variable */
+  padding: 12px !important;          /* was 30px */
+  margin-top: 0 !important;          /* was 10px */
+  row-gap: 14px !important;          /* keep breathing room */
+  column-gap: 18px !important;
 }
 
-/* Tighten header spacing itself */
-#dealership-info .section-block h2{
-  margin-bottom: 10px !important;  /* reduces gap before cards */
-}
-
-/* Ensure cards align visually with section bottom */
+/* Ensure the cards don't add their own extra spacing */
 #dealership-info .primary-contacts-grid .mini-card{
-  margin-bottom: 0 !important;
+  margin: 0 !important;
 }
-
-/* Make bottom of Primary Contacts section match card spacing */
-#dealership-info .section-block{
-  padding-bottom: 14px !important;
-}
-
