@@ -1821,3 +1821,54 @@ button.remove-row{
 #dealership-info .additional-poc-card[data-base="false"] input[type="text"]{
   border-radius: var(--radius-sm) !important;
 }
+
+/* =========================================================
+   OVERRIDE: Additional POC BASE card "Name + +" must equal other inputs
+   (Input was being forced to --di-input-width by the grid-wide input rule)
+========================================================= */
+
+/* Total combo width = same as all other inputs */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .input-plus{
+  flex: 0 0 var(--di-input-width) !important;
+  width: var(--di-input-width) !important;
+  max-width: var(--di-input-width) !important;
+  margin-left: auto !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+/* Button stays 34px */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .input-plus button{
+  flex: 0 0 34px !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  margin-left: -1px !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
+/* ✅ Critical: shrink the textbox (225 - 34 + 1 seam px = 192px)
+   This MUST beat the grid-wide input width rule. */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="true"]
+  .input-plus input[type="text"]{
+  flex: 0 0 calc(var(--di-input-width) - 33px) !important;
+  width: calc(var(--di-input-width) - 33px) !important;
+  max-width: calc(var(--di-input-width) - 33px) !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  box-sizing: border-box !important;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+/* Added cards (no + button): keep fully-rounded name */
+#dealership-info .primary-contacts-grid
+  .additional-poc-card[data-base="false"]
+  input[type="text"]{
+  border-radius: var(--radius-sm) !important;
+}
