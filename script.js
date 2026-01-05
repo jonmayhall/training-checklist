@@ -1019,27 +1019,38 @@
       return miscText.trimEnd();
     };
 
-    // ✅ CARET: land right after the FIRST "  ◦ " inside THIS block
-    const caretAtHollowForKey = (text, key) => {
-      const v = normalizeNL(text || "");
-      const marker = makeMarker(key);
-      const markerIdx = v.indexOf(marker);
-      if (markerIdx < 0) return v.length;
+    // ✅ CARET: land immediately AFTER the "◦" (and ensure a trailing space exists)
+const caretAtHollowForKey = (text, key) => {
+  const v0 = normalizeNL(text || "");
+  const marker = makeMarker(key);
+  const markerIdx = v0.indexOf(marker);
+  if (markerIdx < 0) return { text: v0, caret: v0.length };
 
-      const mainLineEnd = v.indexOf("\n", markerIdx);
-      const afterMainLine = mainLineEnd < 0 ? v.length : mainLineEnd + 1;
+  // end of the line containing the marker
+  const mainLineEnd = v0.indexOf("\n", markerIdx);
+  const afterMainLine = mainLineEnd < 0 ? v0.length : mainLineEnd + 1;
 
-      const nextMain = v.indexOf("\n• ", afterMainLine);
-      const blockEnd = nextMain >= 0 ? nextMain : v.length;
+  // block ends at next main bullet or end of text
+  const nextMain = v0.indexOf("\n• ", afterMainLine);
+  const blockEnd = nextMain >= 0 ? nextMain : v0.length;
 
-      const subPrefix = "  ◦ ";
-      const subIdx = v.indexOf(subPrefix, afterMainLine);
+  // Find the hollow bullet in THIS block (match either "  ◦" or "  ◦ ")
+  const hollowChar = "◦";
+  const hollowIdx = v0.indexOf(hollowChar, afterMainLine);
 
-      if (subIdx >= 0 && subIdx < blockEnd) return subIdx + subPrefix.length;
+  if (hollowIdx >= 0 && hollowIdx < blockEnd) {
+    // Ensure there is ONE space after ◦ so typing is natural
+    let v = v0;
+    const after = v.charAt(hollowIdx + 1);
+    if (after !== " ") {
+      v = v.slice(0, hollowIdx + 1) + " " + v.slice(hollowIdx + 1);
+    }
+    return { text: v, caret: hollowIdx + 2 }; // ✅ after "◦ "
+  }
 
-      // If hollow bullet got deleted, place cursor at start of area after main line
-      return Math.min(afterMainLine, v.length);
-    };
+  // If hollow bullet got deleted, land just after main line
+  return { text: v0, caret: Math.min(afterMainLine, v0.length) };
+};
 
     const handleNotesClick = (btn) => {
       const targetId = getNotesTargetId(btn);
@@ -1067,16 +1078,18 @@
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
-        const caret = caretAtHollowForKey(ta.value, slotKey);
+const res = caretAtHollowForKey(ta.value, slotKey);
+ta.value = res.text;
 
-        try {
-          ta.focus({ preventScroll: true });
-        } catch {
-          ta.focus();
-        }
-        try {
-          ta.setSelectionRange(caret, caret);
-        } catch {}
+try {
+  ta.focus({ preventScroll: true });
+} catch {
+  ta.focus();
+}
+try {
+  ta.setSelectionRange(res.caret, res.caret);
+} catch {}
+
 
         btn.classList.add("has-notes");
         btn.classList.add("is-notes-active");
