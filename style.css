@@ -1582,3 +1582,70 @@ button.remove-row{
   margin:0 !important;
 }
 #mkTableModal.mk-notes-only .section-block h2{ display:none !important; }
+
+/* =========================================================
+   FIX: Dealership Address "Map" button (align + match styling)
+   - Keeps the input+button grouped on the right
+   - Matches your 34px input height + rounded look
+========================================================= */
+
+#dealership-address-card .address-input-wrap{
+  /* make the input + button behave like a single right-side control */
+  margin-left:auto;
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+
+  /* match the standard right-side input width */
+  flex:0 0 var(--input-width);
+  width:var(--input-width);
+  max-width:var(--input-width);
+}
+
+/* input inside the wrap should fill the remaining space */
+#dealership-address-card .address-input-wrap .address-input,
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto;
+  width:auto !important;
+  min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  font-size:13px !important;
+  box-sizing:border-box !important;
+}
+
+/* Map button should match your orange action buttons */
+#dealership-address-card .address-input-wrap .small-map-btn,
+#dealership-address-card #openAddressInMapsBtn{
+  flex:0 0 54px;           /* nice compact width */
+  width:54px;
+  min-width:54px;
+
+  height:34px !important;
+  padding:0 !important;
+
+  border:none !important;
+  border-radius:var(--radius-sm) !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+
+  font-size:12px !important;
+  font-weight:900 !important;
+  text-transform:uppercase !important;
+  letter-spacing:0.06em !important;
+
+  cursor:pointer !important;
+  box-shadow:0 1px 3px rgba(239,109,34,0.25) !important;
+}
+
+#dealership-address-card .address-input-wrap .small-map-btn:hover,
+#dealership-address-card #openAddressInMapsBtn:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px);
+}
+
