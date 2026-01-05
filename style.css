@@ -1555,3 +1555,27 @@ button.remove-row{
   color: #fff !important;
 }
 
+/* =========================================================
+   PAGES 5–6: Notes UNDER TABLES = 2× taller
+   (targets the Section Block that comes right after a .section (table block))
+========================================================= */
+#training-checklist .section + .section-block textarea,
+#opcodes-pricing .section + .section-block textarea,
+#training-checklist .section + .section-block .mk-ta-wrap > textarea,
+#opcodes-pricing .section + .section-block .mk-ta-wrap > textarea{
+  min-height: 360px !important;  /* was ~180 → doubled */
+}
+
+/* =========================================================
+   FINAL PAGE: All notes cards = 2× taller
+   (targets every textarea inside Training Summary section)
+========================================================= */
+#training-summary .section-block textarea,
+#training-summary .section-block .mk-ta-wrap > textarea{
+  min-height: 360px !important;
+}
+
+/* If any Training Summary textarea uses a special class, keep it tall too */
+#training-summary textarea.mk-fullwidth-textarea{
+  min-height: 360px !important;
+}
