@@ -1510,3 +1510,39 @@ button.remove-row{
 #mkTableModal #opcodes-pricing table.training-table td:first-child{
   background: inherit !important;
 }
+/* =========================================================
+   FIX: "White slab" / extra card on right side of popup
+   Cause: JS adds .page-section to #mkTableModal .mk-modal-content
+========================================================= */
+
+/* Kill page-section card styling INSIDE the modal content */
+#mkTableModal .mk-modal-content.page-section{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+
+  /* override .page-section sizing that creates that "extra card" look */
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 14px 14px 16px !important; /* keep your modal padding */
+}
+
+/* Make everything moved into the modal stretch full width */
+#mkTableModal .mk-modal-content{
+  align-items: stretch !important;
+}
+#mkTableModal .mk-modal-content > .section-block,
+#mkTableModal .mk-modal-content > .section,
+#mkTableModal .mk-modal-content > .table-container{
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* If a moved "section-block" still has auto margins from somewhere */
+#mkTableModal .mk-modal-content .section-block{
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
