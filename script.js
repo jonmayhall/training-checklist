@@ -1,14 +1,14 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v7.1)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v8)
 
    ✅ FIXES IN THIS BUILD:
-   - Notes caret ALWAYS lands to the RIGHT of the hollow bullet "◦ " (ALL Add Notes buttons)
-   - Notes expand popup no longer "card inside card" (mk-notes-only mode)
-   - Notes popup textarea taller + larger font (injected CSS)
-   - Expand popup no longer breaks page layout (same-height placeholders)
-   - Popup tables inherit .page-section scope so checkbox/Updated column styling matches main tables
-   - Auto-creates #mkTableModal markup if missing (so expand works even if HTML block not present)
+   - Popup tables now inherit the EXACT same CSS as their page (including page-ID selectors like #opcodes-pricing / #training-checklist)
+     by temporarily “ID-swapping” the source page-section onto a wrapper INSIDE the modal while open.
+     → This fixes Updated column + checkbox styling mismatches in popups.
+   - Removes the “random card behind” (outer modal panel becomes transparent / no padding),
+     so you only see your real table card + notes card (no extra container card).
+   - Keeps your Notes caret logic (◦ ) intact (still lands to the RIGHT).
 
 ======================================================= */
 
@@ -872,7 +872,7 @@
   }
 
   /* =======================
-     NOTES (FIXED caret + stable)
+     NOTES (caret stays RIGHT of "◦ ")
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
@@ -1037,7 +1037,7 @@
       return miscText.trimEnd();
     };
 
-    // ✅ ALWAYS places caret AFTER "  ◦ " and fixes missing trailing space.
+    // always returns { text, caret } and ensures hollow bullet is "  ◦ " (with trailing space)
     const caretAtHollowForKey = (text, key) => {
       const v = normalizeNL(text || "");
       const marker = makeMarker(key);
@@ -1134,7 +1134,7 @@
   })();
 
   /* =======================
-     SUPPORT TICKETS (FIXED)
+     SUPPORT TICKETS
   ======================= */
   const ticketContainersByStatus = () => ({
     Open: $("#openTicketsContainer"),
@@ -1490,9 +1490,8 @@
       }
     }
 
-    const globalCandidates = $$('input[type="text"]').filter((i) =>
-      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || "")
-    );
+    const globalCandidates = $$('input[type="text"]')
+      .filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
 
     for (const i of globalCandidates) {
       const v = (i.value || "").trim();
@@ -1561,84 +1560,21 @@
     setToken("did", snap.did || "");
     setToken("dealership", snap.dealership || "");
     setToken("dealerGroup", snap.dealerGroup || "");
-    setToken(
-      "title",
-      mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership })
-    );
+    setToken("title", mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership }));
   };
 
   /* =========================================================
-     EXPAND MODAL (AUTO-INJECT MARKUP + STYLES)
+     EXPAND BUTTONS (TABLES + NOTES)
+     ✅ v8: modal styling matches page exactly by ID-swapping wrapper
+     ✅ Removes “random card behind” by removing modal panel background/padding
 ========================================================= */
-  const ensureMkTableModalMarkup = () => {
-    if ($("#mkTableModal")) return;
-
-    const wrap = document.createElement("div");
-    wrap.id = "mkTableModal";
-    wrap.setAttribute("aria-hidden", "true");
-    wrap.innerHTML = `
-      <div class="mk-modal-backdrop"></div>
-      <div class="mk-modal-panel" role="dialog" aria-modal="true">
-        <div class="mk-modal-header">
-          <div class="mk-modal-title">Expanded View</div>
-          <button type="button" class="mk-modal-close" aria-label="Close">×</button>
-        </div>
-        <div class="mk-modal-content"></div>
-      </div>
-    `;
-    document.body.appendChild(wrap);
-  };
-
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v7";
+    const STYLE_ID = "mk-expand-style-v8";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
-        /* Modal base */
-        #mkTableModal{ position:fixed; inset:0; z-index:100001; display:none; }
-        #mkTableModal.open{ display:block; }
-        #mkTableModal .mk-modal-backdrop{
-          position:absolute; inset:0;
-          background:rgba(0,0,0,.45);
-        }
-        #mkTableModal .mk-modal-panel{
-          position:absolute;
-          left:50%; top:64px; transform:translateX(-50%);
-          width:min(1200px, calc(100vw - 28px));
-          max-height:calc(100vh - 92px);
-          overflow:auto;
-          background:#ffffff;
-          border:1px solid rgba(0,0,0,.12);
-          border-radius:18px;
-          box-shadow:0 22px 60px rgba(0,0,0,.35);
-        }
-        #mkTableModal .mk-modal-header{
-          position:sticky; top:0;
-          background:linear-gradient(90deg, #111827, #EF6D22);
-          color:#fff;
-          display:flex; align-items:center; justify-content:space-between;
-          padding:10px 14px;
-          z-index:2;
-        }
-        #mkTableModal .mk-modal-title{
-          font-weight:900; letter-spacing:.2px; font-size:14px;
-        }
-        #mkTableModal .mk-modal-close{
-          width:34px; height:34px;
-          border-radius:10px;
-          border:1px solid rgba(255,255,255,.25);
-          background:rgba(255,255,255,.10);
-          color:#fff;
-          font-size:20px;
-          cursor:pointer;
-          display:inline-flex; align-items:center; justify-content:center;
-        }
-        #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,.18); }
-        #mkTableModal .mk-modal-content{ padding:16px; }
-
-        /* Expand buttons */
         .mk-table-expand-btn,
         .mk-ta-expand{
           border:1px solid rgba(0,0,0,.15);
@@ -1650,10 +1586,6 @@
           justify-content:center;
           line-height:1;
           user-select:none;
-          margin-left:10px;
-          width:34px;
-          height:30px;
-          border-radius:10px;
         }
         .mk-field-error{
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
@@ -1666,15 +1598,18 @@
           width:100%;
         }
 
-        /* Notes-only popup: remove the BIG outer "card" feel */
-        #mkTableModal.mk-notes-only .mk-modal-panel{
+        /* ✅ REMOVE OUTER "RANDOM CARD" behind content */
+        #mkTableModal .mk-modal-panel{
           background: transparent !important;
           border: none !important;
           box-shadow: none !important;
-        }
-        #mkTableModal.mk-notes-only .mk-modal-content{
           padding: 0 !important;
         }
+        #mkTableModal .mk-modal-content{
+          padding: 0 !important;
+        }
+
+        /* Notes-only popup: also remove any extra spacing */
         #mkTableModal.mk-notes-only .section-block{
           margin: 0 !important;
         }
@@ -1684,19 +1619,6 @@
           min-height: 360px !important;
           font-size: 16px !important;
           line-height: 1.45 !important;
-        }
-
-        /* Help popup checkboxes resemble main tables (scope-safe) */
-        #mkTableModal table.training-table input[type="checkbox"]{
-          width:16px; height:16px;
-          accent-color:#EF6D22;
-          margin:0 auto;
-          display:inline-block;
-        }
-        #mkTableModal table.training-table th:first-child,
-        #mkTableModal table.training-table td:first-child{
-          text-align:center !important;
-          vertical-align:middle !important;
         }
       `;
       document.head.appendChild(s);
@@ -1709,13 +1631,25 @@
     title: null,
     moved: [],
     bodyOverflow: "",
+    // ✅ track the id swap so we can restore perfectly
+    origin: {
+      sectionEl: null,
+      originalId: "",
+      tempId: "",
+      wrapperEl: null,
+    },
   };
 
-  const openModalWithNodes = (nodes, titleText) => {
-    ensureMkTableModalMarkup();
-    ensureExpandStyles();
-
+  const openModalWithNodes = (nodes, titleText, originSectionEl) => {
     const modal = $("#mkTableModal");
+    if (!modal) {
+      mkPopup.ok(
+        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
+        { title: "Missing Expand Modal" }
+      );
+      return;
+    }
+
     const content = $(".mk-modal-content", modal);
     const titleEl = $(".mk-modal-title", modal);
     const panel = $(".mk-modal-panel", modal) || modal;
@@ -1732,15 +1666,42 @@
     tableModal.moved = [];
     content.innerHTML = "";
 
-    // ✅ IMPORTANT: give modal content page-section scope so your existing table/checkbox CSS applies
-    content.classList.add("page-section");
-
     if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
+
+    // ✅ ID-SWAP WRAPPER: make CSS selectors like #opcodes-pricing ... apply inside modal
+    // Strategy:
+    // - If originSectionEl has an id (e.g. "opcodes-pricing"), temporarily rename it to "opcodes-pricing__mk_hold"
+    // - Create wrapper inside modal content with id="opcodes-pricing" and class="page-section active"
+    // - Put moved nodes inside wrapper
+    let wrapper = content;
+    const originId = originSectionEl?.id ? String(originSectionEl.id).trim() : "";
+    if (originSectionEl && originId) {
+      const holdId = `${originId}__mk_hold`;
+
+      // if already swapped for some reason, avoid double-swap
+      if (originSectionEl.id === originId) {
+        originSectionEl.id = holdId;
+      }
+
+      wrapper = document.createElement("div");
+      wrapper.id = originId;
+      wrapper.className = "page-section active";
+
+      content.appendChild(wrapper);
+
+      tableModal.origin.sectionEl = originSectionEl;
+      tableModal.origin.originalId = originId;
+      tableModal.origin.tempId = holdId;
+      tableModal.origin.wrapperEl = wrapper;
+    } else {
+      // still give generic scope for non-id pages
+      content.classList.add("page-section", "active");
+    }
 
     nodes.forEach((node) => {
       if (!node || !node.parentNode) return;
 
-      // ✅ placeholder keeps the page from collapsing/breaking while content is moved
+      // placeholder keeps the page from collapsing/breaking while content is moved
       const rect = node.getBoundingClientRect();
       const ph = document.createElement("div");
       ph.className = "mk-expand-placeholder";
@@ -1748,7 +1709,7 @@
 
       node.parentNode.insertBefore(ph, node);
       tableModal.moved.push({ node, placeholder: ph });
-      content.appendChild(node);
+      wrapper.appendChild(node);
     });
 
     modal.classList.add("open");
@@ -1771,13 +1732,21 @@
       placeholder.parentNode.removeChild(placeholder);
     });
 
+    // ✅ restore origin section id if we swapped it
+    if (tableModal.origin.sectionEl && tableModal.origin.originalId && tableModal.origin.tempId) {
+      const sec = tableModal.origin.sectionEl;
+      // restore only if still the hold id
+      if (sec.id === tableModal.origin.tempId) {
+        sec.id = tableModal.origin.originalId;
+      }
+    }
+
     modal.classList.remove("open");
     modal.classList.remove("mk-notes-only");
     modal.setAttribute("aria-hidden", "true");
 
-    // remove modal content scope class
     const content = $(".mk-modal-content", modal);
-    if (content) content.classList.remove("page-section");
+    if (content) content.classList.remove("page-section", "active");
 
     document.body.style.overflow = tableModal.bodyOverflow || "";
 
@@ -1786,6 +1755,7 @@
     tableModal.title = null;
     tableModal.bodyOverflow = "";
     tableModal.moved = [];
+    tableModal.origin = { sectionEl: null, originalId: "", tempId: "", wrapperEl: null };
   };
 
   const getExpandBundleNodes = (anyInside) => {
@@ -1793,6 +1763,7 @@
     const sectionCard =
       footer?.closest(".section") ||
       footer?.closest(".section-block") ||
+      footer?.parentElement ||
       anyInside?.closest?.(".section-block") ||
       anyInside?.closest?.(".page-section") ||
       document.body;
@@ -1802,7 +1773,6 @@
     const nodes = [];
     if (tableBlock) nodes.push(tableBlock);
 
-    // Include the notes blocks that belong to this section (keeps "popup matches page" rule)
     const targets = new Set();
     $$("[data-notes-target]", sectionCard).forEach((btn) => {
       const id = btn.getAttribute("data-notes-target");
@@ -1839,7 +1809,10 @@
     const bundle = getExpandBundleNodes(anyInside);
     const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
     const title = (header?.textContent || "Expanded View").trim();
-    openModalWithNodes(bundle, title);
+
+    const originSectionEl = anyInside.closest(".page-section") || anyInside.closest("section") || null;
+
+    openModalWithNodes(bundle, title, originSectionEl);
   };
 
   const openNotesModalFor = (notesHostEl) => {
@@ -1850,13 +1823,14 @@
 
     const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
     const title = (h?.textContent || "Notes").trim();
-    openModalWithNodes([notesHostEl], title);
+
+    const originSectionEl = notesHostEl.closest(".page-section") || notesHostEl.closest("section") || null;
+
+    openModalWithNodes([notesHostEl], title, originSectionEl);
   };
 
   const ensureTableExpandButtons = () => {
-    ensureMkTableModalMarkup();
     ensureExpandStyles();
-
     document.querySelectorAll(".table-footer").forEach((footer) => {
       if (footer.querySelector(".mk-table-expand-btn")) return;
 
@@ -1872,7 +1846,6 @@
   };
 
   const ensureNotesExpandButtons = () => {
-    ensureMkTableModalMarkup();
     ensureExpandStyles();
 
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
@@ -2081,7 +2054,7 @@
       const id = notesExpandBtn.getAttribute("data-notes-id");
       const block = id ? document.getElementById(id) : null;
       if (block) openNotesModalFor(block);
-      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes");
+      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes", notesExpandBtn.closest(".page-section"));
       return;
     }
 
@@ -2215,9 +2188,6 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
-    ensureMkTableModalMarkup();
-    ensureExpandStyles();
-
     assignIdsToAllFields();
     initNav();
 
