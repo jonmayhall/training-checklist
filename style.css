@@ -1649,3 +1649,84 @@ button.remove-row{
   transform:translateY(-1px);
 }
 
+/* =========================================================
+   Dealership Address — make "Map" match other textbox buttons
+   (same style as Trainers/Tickets: attached, 34px, seam)
+========================================================= */
+
+#dealership-address-card .checklist-row{
+  align-items:center !important;
+}
+
+/* Make the wrapper behave like your other input+button groups */
+#dealership-address-card .address-input-wrap{
+  margin-left:auto !important;
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+
+  /* match normal right-side input width */
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+
+  height:34px !important;
+}
+
+/* Input becomes "left half" */
+#dealership-address-card .address-input-wrap .address-input,
+#dealership-address-card .address-input-wrap input[type="text"]{
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+
+  height:34px !important;
+  padding:7px 10px !important;
+
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  /* attached shape */
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+
+  box-sizing:border-box !important;
+}
+
+/* Button becomes "right half" */
+#dealership-address-card .address-input-wrap .small-map-btn,
+#dealership-address-card #openAddressInMapsBtn{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+
+  height:34px !important;
+  padding:0 !important;
+  margin:0 !important;
+
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+
+  /* attached shape */
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+
+  font-size:12px !important;
+  font-weight:900 !important;
+  text-transform:uppercase !important;
+  letter-spacing:0.06em !important;
+  line-height:1 !important;
+
+  cursor:pointer !important;
+
+  /* seam like your + buttons */
+  margin-left:-1px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+#dealership-address-card .address-input-wrap .small-map-btn:hover,
+#dealership-address-card #openAddressInMapsBtn:hover{
+  background:#ff8b42 !important;
+}
