@@ -1062,19 +1062,34 @@
     };
 
     const caretAtHollowForKey = (text, key) => {
-      const v = normalizeNL(text || "");
-      const marker = makeMarker(key);
-      const idx = v.indexOf(marker);
-      if (idx < 0) return v.length;
+  const v = normalizeNL(text || "");
+  const marker = makeMarker(key);
+  const markerIdx = v.indexOf(marker);
+  if (markerIdx < 0) return v.length;
 
-      const lineEnd = v.indexOf("\n", idx);
-      const afterMain = lineEnd >= 0 ? lineEnd + 1 : v.length;
+  // Find the exact line that contains the marker (the main bullet line)
+  const mainLineStart = v.lastIndexOf("\n", markerIdx);
+  const mainStart = mainLineStart < 0 ? 0 : mainLineStart + 1;
 
-      const after = v.slice(afterMain);
-      const rel = after.indexOf("◦");
-      if (rel < 0) return afterMain;
-      return afterMain + rel + 2;
-    };
+  const mainLineEnd = v.indexOf("\n", markerIdx);
+  const endOfMain = mainLineEnd < 0 ? v.length : mainLineEnd;
+
+  // Candidate subline is the very next line after the main bullet
+  const nextLineStart = endOfMain < v.length ? endOfMain + 1 : v.length;
+
+  // If next line starts with "  ◦", place caret AFTER "  ◦ "
+  const subPrefix = "  ◦ ";
+  if (v.slice(nextLineStart, nextLineStart + subPrefix.length) === subPrefix) {
+    return nextLineStart + subPrefix.length;
+  }
+
+  // Otherwise search forward for the first "  ◦ " that follows this block
+  const nextHollowIdx = v.indexOf(subPrefix, nextLineStart);
+  if (nextHollowIdx >= 0) return nextHollowIdx + subPrefix.length;
+
+  // Fallback: if user deleted the hollow bullet, place caret at end of the main line
+  return endOfMain;
+};
 
     const handleNotesClick = (btn) => {
       const targetId = getNotesTargetId(btn);
@@ -1098,9 +1113,9 @@
         const blocks = parseBlocks(ta.value);
         const exists = blocks.some((b) => b.key === slotKey);
 
-        if (!exists) {
-          blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
-        }
+if (!exists) {
+  blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+}
 
         ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
 
