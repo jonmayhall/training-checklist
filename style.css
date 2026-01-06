@@ -2062,3 +2062,76 @@ button.remove-row{
   border-radius: 12px;
   overflow: hidden;
 }
+
+/* =========================================================
+   MODAL HEADERS — UNIFIED NOTES HEADER STYLE
+   Applies to ALL popups (notes + tables)
+========================================================= */
+
+/* Modal shell */
+#mkTableModal .mk-modal-panel {
+  border-radius: 14px;
+  overflow: hidden; /* critical for clean rounding */
+}
+
+/* Modal header = notes header */
+#mkTableModal .mk-modal-header {
+  background: var(--orange);
+  color: #fff;
+
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  border-bottom: 1px solid rgba(0,0,0,.12);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Header title text */
+#mkTableModal .mk-modal-title {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* Close button matches notes header style */
+#mkTableModal .mk-modal-close {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+}
+
+/* Content connects flush to header */
+#mkTableModal .mk-modal-content {
+  padding-top: 0;
+}
+
+/* Notes cards inside modal */
+#mkTableModal .notes-block,
+#mkTableModal .section-block[id^="notes-"] {
+  margin-top: 0;
+}
+
+/* Notes header inside modal cards */
+#mkTableModal .notes-block h2,
+#mkTableModal .section-block[id^="notes-"] h2 {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* White textarea connects cleanly */
+#mkTableModal textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
