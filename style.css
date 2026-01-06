@@ -1800,3 +1800,65 @@ button.remove-row{
   margin:0 !important; /* mk-ta-wrap controls spacing */
 }
 
+/* =======================================================
+   PATCH — Make NON-TABLE Notes popups match TABLE-popup Notes
+   Goal: use the SAME inner “notes card” look (inset border + padding)
+   Applies ONLY when the modal does NOT contain a training table.
+======================================================= */
+
+/* 1) Modal shell stays as-is (you already like the header rounding) */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-panel{
+  overflow:hidden !important;
+}
+
+/* 2) Make modal content spacing match how table-popups frame notes cards */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
+  padding:14px 14px 16px !important;   /* table popup spacing */
+  background:#fff !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:14px !important;
+}
+
+/* 3) Create the SAME “inner notes card” container used in table popups
+      (your table popups have a notes card with an inset bordered area) */
+#mkTableModal:not(:has(table.training-table)) textarea{
+  /* turn the textarea into the inner bordered area */
+  width:100% !important;
+  display:block !important;
+
+  background:#fff !important;                 /* white interior like table-popup notes */
+  border:2px solid #e6e6e6 !important;        /* small white/soft border feel */
+  border-radius:22px !important;              /* rounded inner edge */
+  padding:16px 18px !important;               /* inset spacing like table-popup notes */
+  margin:0 !important;
+
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.03) !important;
+  resize:none !important;
+  min-height:calc(90vh - 170px) !important;   /* tall like the popup */
+  font-size:16px !important;
+  line-height:1.45 !important;
+}
+
+/* 4) If you wrap textarea in .mk-ta-wrap, make the wrapper look like the
+      “outer white area” seen in table popups (gives the framed look) */
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-lg) !important;
+  padding:18px !important;                    /* outer padding around inner border */
+  margin:0 !important;
+  position:relative !important;
+}
+
+/* If .mk-ta-wrap exists, keep textarea filling inside it */
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap > textarea{
+  min-height:calc(90vh - 230px) !important;
+}
+
+/* 5) Focus matches your app */
+#mkTableModal:not(:has(table.training-table)) textarea:focus{
+  border-color:rgba(239,109,34,0.55) !important;
+  box-shadow:0 0 0 3px rgba(239,109,34,0.18), inset 0 0 0 1px rgba(0,0,0,0.03) !important;
+  outline:none !important;
+}
