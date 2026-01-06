@@ -2653,19 +2653,27 @@
     return (localStorage.getItem(LS_LEAD) || "").trim();
   }
 
-  function getAddlTrainersFromPage1(){
-    const container = el("additionalTrainersContainer");
-    if (!container) return [];
+ function getAddlTrainersFromPage1(){
+  const baseInput = el("additionalTrainerInput"); // Page 1 default textbox
+  const container = el("additionalTrainersContainer");
+  const list = [];
 
-    // Collect ALL added trainer inputs in order
-    const list = [];
+  // 1) include the DEFAULT textbox value too (if it has a name typed)
+  const baseVal = (baseInput?.value || "").trim();
+  if (baseVal) list.push(baseVal);
+
+  // 2) include ALL added trainer inputs
+  if (container){
     container.querySelectorAll('input[type="text"]').forEach(inp => {
       const v = (inp.value || "").trim();
       if (v) list.push(v);
     });
-
-    return list;
   }
+
+  // 3) de-dupe while preserving order (prevents baseVal duplicating an added row)
+  const seen = new Set();
+  return list.filter(v => (seen.has(v) ? false : (seen.add(v), true)));
+}
 
   function saveAddlTrainers(list){
     const clean = Array.isArray(list) ? list.map(v => (v || "").trim()).filter(Boolean) : [];
