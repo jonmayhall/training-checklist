@@ -3483,15 +3483,27 @@
   <input id="mkSum_leadTrainer" type="text" placeholder="Lead trainer" />
 </div>
 
-<!-- Additional Trainers (stacked like page 1/2) -->
-<div class="checklist-row">
+<div class="checklist-row" id="mkSum_addlTrainersRow">
   <label>Additional Trainers</label>
-  <div class="mk-stack">
-    <input id="mkSum_trainer2" type="text" placeholder="Additional trainer" />
-    <input id="mkSum_trainer3" type="text" placeholder="Additional trainer" />
+
+  <div class="mk-stack" id="mkSum_addlTrainersStack">
+    <!-- Base input + plus button -->
+    <div class="input-plus mk-sum-addl-plus">
+      <input
+        id="mkSum_addTrainer_0"
+        type="text"
+        placeholder="Additional trainer"
+      />
+      <button
+        type="button"
+        class="mkSumAddTrainerBtn"
+        aria-label="Add additional trainer"
+      >+</button>
+    </div>
+
+    <!-- Additional inputs get appended here by JS -->
   </div>
 </div>
-
 
     <!-- Outcome -->
     <div class="section-block">
