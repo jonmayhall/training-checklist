@@ -1689,3 +1689,33 @@ button.remove-row{
   border-bottom:none !important;
 }
 #training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
+
+/* =========================================================
+   PATCH — Table Popups: Add side padding to cards & notes
+   Scope: table popups ONLY
+========================================================= */
+
+/* Add horizontal inset inside table popup content */
+#mkTableModal:has(table.training-table) .mk-modal-content{
+  padding-left:24px !important;
+  padding-right:24px !important;
+}
+
+/* Ensure table containers don't stretch edge-to-edge */
+#mkTableModal:has(table.training-table) .table-container{
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* Notes cards inside table popups match the same inset */
+#mkTableModal:has(table.training-table) .section-block{
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* Keep scroll wrapper aligned with padding */
+#mkTableModal:has(table.training-table) .scroll-wrapper{
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
