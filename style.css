@@ -2083,3 +2083,73 @@ button.remove-row{
 .section-block .mk-card-close{
   display:none !important;
 }
+
+/* =========================================================
+   FIX: Popup tables header attach + orange X in white space
+   (PASTE THIS AT THE VERY BOTTOM OF YOUR CSS)
+========================================================= */
+
+/* ---- Create WHITE space above content + push content down (tables + notes) ---- */
+#mkTableModal .mk-modal-panel{
+  position:relative !important;
+  padding-top:56px !important; /* white band above table/notes */
+}
+
+#mkTableModal .mk-modal-content{
+  padding:18px 18px 18px !important; /* shifts table + notes down */
+}
+
+/* ---- ONE orange X in the top-right of the BIG white modal panel ---- */
+#mkTableModal .mk-modal-close{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+  border:1px solid rgba(255,255,255,0.45) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:22px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
+  z-index:99999 !important;
+}
+#mkTableModal .mk-modal-close:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px) !important;
+}
+
+/* =========================================================
+   TABLE POPUPS ONLY: attach header to table as ONE border
+========================================================= */
+#mkTableModal:has(table.training-table) .section-header{
+  display:block !important;
+  margin:0 !important;
+  border:1px solid var(--border) !important;
+  border-bottom:none !important;          /* connects to table-container */
+  border-top-left-radius:var(--radius-lg) !important;
+  border-top-right-radius:var(--radius-lg) !important;
+}
+
+#mkTableModal:has(table.training-table) .table-container{
+  margin:0 0 16px 0 !important;           /* NO gap under header */
+  border:1px solid var(--border) !important;
+  border-top:none !important;             /* connects to section-header */
+  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
+  overflow:hidden !important;             /* clean side edges */
+}
+
+/* Square light-orange table thead corners (no rounding) */
+#mkTableModal:has(table.training-table) table.training-table thead th,
+#mkTableModal:has(table.training-table) table.training-table thead th:first-child,
+#mkTableModal:has(table.training-table) table.training-table thead th:last-child{
+  border-radius:0 !important;
+}
+
+/* ---- Kill any stray "card X" buttons that may be injected ---- */
+.mk-card-close{ display:none !important; }
