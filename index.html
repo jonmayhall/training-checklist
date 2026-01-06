@@ -2500,10 +2500,9 @@
       </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 9: POST-TRAINING CHECKLIST                           -->
-<!-- Updated: standardized notes buttons (icon-only),           -->
-<!-- uses data-notes-btn + data-notes-target                    -->
-<!-- Matches Page 3 / 4 structure: cards-grid two-col rows      -->
+<!-- PAGE 9: POST-TRAINING CHECKLIST (FIXED STRUCTURE)          -->
+<!-- Matches Page 3/4: each section is a 2-col row with notes right -->
+<!-- Keeps icon-only notes buttons using data-notes-btn/target  -->
 <!-- ========================================================= -->
 <section id="post-training" class="page-section">
   <h1>Post-Training Verification</h1>
@@ -2511,12 +2510,12 @@
     Validate training completion by role, confirm workflows, and document any remaining action items.
   </p>
 
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+  <button class="clear-page-btn" type="button" data-clear-page="post-training">
+    Reset This Page
+  </button>
 
-  <!-- ROW 1 (Side-by-side): Training Completion by Role + Notes -->
+  <!-- ROW 1: Training Completion by Role + Notes -->
   <div class="cards-grid two-col">
-
-    <!-- Training Completion by Role -->
     <div class="section-block">
       <h2>Training Completion by Role</h2>
 
@@ -2530,13 +2529,9 @@
             <option>Inconsistently</option>
             <option>Poorly</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-completion"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-completion" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2555,13 +2550,9 @@
             <option>Inconsistently</option>
             <option>Poorly</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-completion"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-completion" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2580,13 +2571,9 @@
             <option>Inconsistently</option>
             <option>Poorly</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-completion"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-completion" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2596,18 +2583,16 @@
       </div>
     </div>
 
-    <!-- Notes — Training Completion -->
-    <div class="section-block" id="notes-post-training-completion">
+    <div class="section-block notes-block" id="notes-post-training-completion">
       <h2>Notes — Training Completion</h2>
-      <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
+      </div>
     </div>
-
   </div>
 
-  <!-- ROW 2 (Side-by-side): Final Sign-Off + Notes -->
+  <!-- ROW 2: Final Sign-Off + Notes -->
   <div class="cards-grid two-col">
-
-    <!-- Final Sign-Off -->
     <div class="section-block">
       <h2>Final Sign-Off</h2>
 
@@ -2620,13 +2605,9 @@
             <option>Yes, manager has reservations</option>
             <option>No, manager didn't find time</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-final-signoff"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-final-signoff" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2644,13 +2625,9 @@
             <option>Yes, manager has reservations</option>
             <option>No, manager didn't find time</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-final-signoff"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-final-signoff" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2663,13 +2640,8 @@
         <label>Post-training CEM call</label>
         <div class="row-actions">
           <input type="date" />
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-final-signoff"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-final-signoff" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2679,18 +2651,16 @@
       </div>
     </div>
 
-    <!-- Notes — Final Sign-Off -->
-    <div class="section-block" id="notes-post-training-final-signoff">
+    <div class="section-block notes-block" id="notes-post-training-final-signoff">
       <h2>Notes — Final Sign-Off</h2>
-      <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
+      </div>
     </div>
-
   </div>
 
-  <!-- ROW 3 (Side-by-side): Management Buy-in + Notes -->
+  <!-- ROW 3: Management Buy-in + Notes -->
   <div class="cards-grid two-col">
-
-    <!-- Management Buy-in -->
     <div class="section-block">
       <h2>Management Buy-in</h2>
 
@@ -2705,13 +2675,9 @@
             <option>Lacking</option>
             <option>Not present</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-buyin"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-buyin" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2731,13 +2697,9 @@
             <option>Lacking</option>
             <option>Not present</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-buyin"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-buyin" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2747,18 +2709,16 @@
       </div>
     </div>
 
-    <!-- Notes — Management Buy-in -->
-    <div class="section-block" id="notes-post-training-buyin">
+    <div class="section-block notes-block" id="notes-post-training-buyin">
       <h2>Notes — Management Buy-in</h2>
-      <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
+      </div>
     </div>
-
   </div>
 
-  <!-- ROW 4 (Side-by-side): Automations + Notes -->
+  <!-- ROW 4: Automations + Notes -->
   <div class="cards-grid two-col">
-
-    <!-- Automations -->
     <div class="section-block">
       <h2>Automations</h2>
 
@@ -2775,13 +2735,9 @@
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-post-training-automations"
-            aria-label="Add/View Notes"
-          >
+
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-automations" aria-label="Add/View Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -2790,15 +2746,15 @@
         </div>
       </div>
 
-      <!-- Repeat your other automation rows here exactly like Page 3/4 structure -->
+      <!-- (repeat your other automation rows as-is) -->
     </div>
 
-    <!-- Notes — Automations -->
-    <div class="section-block" id="notes-post-training-automations">
+    <div class="section-block notes-block" id="notes-post-training-automations">
       <h2>Notes — Automations</h2>
-      <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
+      </div>
     </div>
-
   </div>
 </section>
 
