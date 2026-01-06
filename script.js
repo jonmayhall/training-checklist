@@ -2617,3 +2617,226 @@
   setSummaryLeadTrainer();
   rebuildSummaryAdditionalTrainers();
 })();
+
+/* =========================================================
+   FIX: Page 1 -> Page 11 mirroring (Lead + Additional Trainers)
+   ✅ Fixes "+ adds two rows" by wiping prior click handlers (clone button)
+   ✅ Saves Lead Trainer + ALL Additional Trainers to localStorage
+   ✅ Page 11 auto-populates Lead Trainer
+   ✅ Page 11 auto-creates one input per Additional Trainer (no add button)
+========================================================= */
+
+(function mkTrainerMirrorV2(){
+  if (window.__mkTrainerMirrorV2) return;
+  window.__mkTrainerMirrorV2 = true;
+
+  const LS_LEAD = "mk_leadTrainer";
+  const LS_ADDL = "mk_addlTrainers";
+
+  // ---------- DOM getters ----------
+  function el(id){ return document.getElementById(id); }
+
+  function getLeadTrainer(){
+    const sel = el("leadTrainerSelect");
+    if (!sel) return "";
+    // ignore ghost option
+    const val = (sel.value || "").trim();
+    return val;
+  }
+
+  function setLeadTrainer(val){
+    const clean = (val || "").trim();
+    localStorage.setItem(LS_LEAD, clean);
+  }
+
+  function readLeadTrainer(){
+    return (localStorage.getItem(LS_LEAD) || "").trim();
+  }
+
+  function getAddlTrainersFromPage1(){
+    const container = el("additionalTrainersContainer");
+    if (!container) return [];
+
+    // Collect ALL added trainer inputs in order
+    const list = [];
+    container.querySelectorAll('input[type="text"]').forEach(inp => {
+      const v = (inp.value || "").trim();
+      if (v) list.push(v);
+    });
+
+    return list;
+  }
+
+  function saveAddlTrainers(list){
+    const clean = Array.isArray(list) ? list.map(v => (v || "").trim()).filter(Boolean) : [];
+    localStorage.setItem(LS_ADDL, JSON.stringify(clean));
+  }
+
+  function readAddlTrainers(){
+    try{
+      const raw = localStorage.getItem(LS_ADDL);
+      const arr = JSON.parse(raw || "[]");
+      return Array.isArray(arr) ? arr.map(v => (v || "").trim()).filter(Boolean) : [];
+    }catch{
+      return [];
+    }
+  }
+
+  // ---------- Page 11 builders ----------
+  function syncPage11Lead(){
+    const target = el("mkSum_leadTrainer");
+    if (!target) return;
+
+    const lead = readLeadTrainer();
+    target.value = lead;
+  }
+
+  function syncPage11Addl(){
+    const stack = el("mkSum_addlTrainersStack");
+    const row = el("mkSum_addlTrainersRow"); // optional show/hide
+    if (!stack) return;
+
+    const names = readAddlTrainers();
+
+    // Ensure base exists
+    let base = el("mkSum_addTrainer_0");
+    if (!base) {
+      base = document.createElement("input");
+      base.type = "text";
+      base.id = "mkSum_addTrainer_0";
+      base.placeholder = "Additional trainer";
+      stack.prepend(base);
+    }
+
+    // Remove all dynamically added summary inputs (keep base)
+    stack.querySelectorAll('input[type="text"]').forEach(inp => {
+      if (inp !== base) inp.remove();
+    });
+
+    // Fill base + create the rest (ALL of them)
+    base.value = names[0] || "";
+    for (let i = 1; i < names.length; i++){
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = `mkSum_addTrainer_${i}`;
+      input.placeholder = "Additional trainer";
+      input.value = names[i];
+      stack.appendChild(input);
+    }
+
+    // Optional: hide the row if none exist
+    if (row) row.style.display = names.length ? "" : "none";
+  }
+
+  function syncAllToPage11(){
+    syncPage11Lead();
+    syncPage11Addl();
+  }
+
+  // ---------- Page 1: fix "+" handler (single add) ----------
+  function bindPage1AddButton(){
+    const addBtn = document.querySelector("[data-add-trainer]");
+    const baseInput = el("additionalTrainerInput");
+    const container = el("additionalTrainersContainer");
+
+    if (!addBtn || !baseInput || !container) return;
+
+    // Clone button to wipe ALL old click handlers (fixes “adds two rows”)
+    const freshBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(freshBtn, addBtn);
+
+    function addTrainerFromBase(){
+      const name = (baseInput.value || "").trim();
+      if (!name) return;
+
+      // Create ONE row
+      const row = document.createElement("div");
+      row.className = "checklist-row integrated-plus indent-sub";
+      row.dataset.base = "false";
+
+      const label = document.createElement("label");
+      label.textContent = "Additional Trainer";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = name;
+      input.autocomplete = "off";
+
+      row.appendChild(label);
+      row.appendChild(input);
+      container.appendChild(row);
+
+      baseInput.value = "";
+
+      // Save + sync
+      saveAddlTrainers(getAddlTrainersFromPage1());
+      syncPage11Addl();
+    }
+
+    freshBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addTrainerFromBase();
+    });
+
+    baseInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        addTrainerFromBase();
+      }
+    });
+
+    // Any edits to added trainer rows update storage + Page 11
+    container.addEventListener("input", (e) => {
+      if (e.target && e.target.matches('input[type="text"]')){
+        saveAddlTrainers(getAddlTrainersFromPage1());
+        syncPage11Addl();
+      }
+    });
+  }
+
+  // ---------- Page 1: lead trainer save ----------
+  function bindLeadTrainer(){
+    const sel = el("leadTrainerSelect");
+    if (!sel) return;
+
+    sel.addEventListener("change", () => {
+      setLeadTrainer(getLeadTrainer());
+      syncPage11Lead();
+    });
+
+    // Save once on load too
+    setLeadTrainer(getLeadTrainer());
+  }
+
+  // ---------- Re-sync when navigating to Training Summary ----------
+  function bindNavSync(){
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest && e.target.closest(".nav-btn");
+      if (!btn) return;
+
+      // If the nav button activates training-summary, sync after DOM updates
+      const targetId = btn.getAttribute("data-target") || btn.dataset.target;
+      if (targetId === "training-summary") {
+        setTimeout(syncAllToPage11, 0);
+      }
+    });
+  }
+
+  // ---------- init ----------
+  function init(){
+    bindPage1AddButton();
+    bindLeadTrainer();
+    bindNavSync();
+
+    // Save initial additional trainers + sync summary once
+    saveAddlTrainers(getAddlTrainersFromPage1());
+    syncAllToPage11();
+  }
+
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
