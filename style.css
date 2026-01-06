@@ -1398,9 +1398,11 @@ button.remove-row{
 }
 
 /* =========================================================
-   TABLE MODAL (mkTableModal) — FIXES
+   TABLE MODAL (mkTableModal) — FIXES + CONSISTENT POPUP NOTES
+   ✅ Popup header has rounded top corners
+   ✅ Popup textarea connects to header (square top corners)
    ✅ Removes right-side “white strip/card”
-   ✅ Popup tables parity for Opcodes + Training Checklist
+   ✅ Table popup hides only table section header bars (keeps notes headers)
 ========================================================= */
 #mkTableModal{
   position:fixed;
@@ -1415,6 +1417,8 @@ button.remove-row{
   inset:0;
   background:rgba(0,0,0,0.65);
 }
+
+/* PANEL — rounded top corners ALWAYS */
 #mkTableModal .mk-modal-panel{
   position:absolute;
   left:50%;
@@ -1423,12 +1427,14 @@ button.remove-row{
   width:min(1400px, calc(100vw - 28px));
   max-height:90vh;
   background:#fff;
-  border-radius:18px;
+  border-radius:18px;              /* ✅ rounded top corners */
   box-shadow:0 20px 60px rgba(0,0,0,0.35);
   display:flex;
   flex-direction:column;
-  overflow:hidden;
+  overflow:hidden;                 /* ✅ clips header/body together cleanly */
 }
+
+/* HEADER — rounded top corners ALWAYS */
 #mkTableModal .mk-modal-header{
   background:var(--orange);
   color:#fff;
@@ -1438,6 +1444,9 @@ button.remove-row{
   justify-content:space-between;
   gap:12px;
   border-bottom:1px solid var(--border);
+
+  border-top-left-radius:18px;     /* ✅ rounded top corners */
+  border-top-right-radius:18px;    /* ✅ rounded top corners */
 }
 #mkTableModal .mk-modal-title{
   font-weight:900;
@@ -1461,8 +1470,9 @@ button.remove-row{
 }
 #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
 
+/* CONTENT — remove header/body gap */
 #mkTableModal .mk-modal-content{
-  padding:14px 14px 16px;
+  padding:0 14px 16px;             /* ✅ no top padding = no “clear band” */
   overflow:auto;
   background:#fff;
   display:flex;
@@ -1489,7 +1499,7 @@ button.remove-row{
   margin-right:0 !important;
 }
 
-/* Keep card look inside modal for actual blocks */
+/* Keep card look inside modal for blocks */
 #mkTableModal .section-block,
 #mkTableModal .table-container,
 #mkTableModal .section{
@@ -1512,6 +1522,10 @@ button.remove-row{
   min-height:360px !important;
   font-size:16px !important;
   line-height:1.45 !important;
+
+  /* ✅ square top corners so it connects flush under header */
+  border-top-left-radius:0 !important;
+  border-top-right-radius:0 !important;
 }
 
 /* Popup checkbox size */
@@ -1564,108 +1578,59 @@ button.remove-row{
   color:#fff !important;
 }
 
-/* Notes-only modal flattening */
+/* NOTES-ONLY modal flattening (keep mk-modal-header; remove inner card header) */
 #mkTableModal.mk-notes-only .mk-modal-panel{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
+  background:#fff !important;
 }
 #mkTableModal.mk-notes-only .mk-modal-content{
-  background:transparent !important;
   padding:0 !important;
+  background:#fff !important;
 }
 #mkTableModal.mk-notes-only .section-block{
-  background:transparent !important;
   border:none !important;
   box-shadow:none !important;
   padding:0 !important;
   margin:0 !important;
+  border-radius:0 !important;
 }
 #mkTableModal.mk-notes-only .section-block h2{ display:none !important; }
 
-/* =========================================================
-   FIX: Dealership Address "Map" button (align + match styling)
-   - Keeps the input+button grouped on the right
-   - Matches your 34px input height + rounded look
-========================================================= */
-
-#dealership-address-card .address-input-wrap{
-  /* make the input + button behave like a single right-side control */
-  margin-left:auto;
-  display:flex;
-  align-items:stretch;
-  gap:8px;
-
-  /* match the standard right-side input width */
-  flex:0 0 var(--input-width);
-  width:var(--input-width);
-  max-width:var(--input-width);
+/* ✅ Remove gap inside notes blocks (header-to-textarea) */
+#mkTableModal .notes-block h2,
+#mkTableModal .section-block[id^="notes-"] h2{
+  margin-bottom:0 !important;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
 }
 
-/* input inside the wrap should fill the remaining space */
-#dealership-address-card .address-input-wrap .address-input,
-#dealership-address-card .address-input-wrap input[type="text"]{
-  flex:1 1 auto;
-  width:auto !important;
-  min-width:0 !important;
-
-  height:34px !important;
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  font-size:13px !important;
-  box-sizing:border-box !important;
-}
-
-/* Map button should match your orange action buttons */
-#dealership-address-card .address-input-wrap .small-map-btn,
-#dealership-address-card #openAddressInMapsBtn{
-  flex:0 0 54px;           /* nice compact width */
-  width:54px;
-  min-width:54px;
-
-  height:34px !important;
-  padding:0 !important;
-
-  border:none !important;
-  border-radius:var(--radius-sm) !important;
-
-  background:var(--orange) !important;
-  color:#fff !important;
-
-  font-size:12px !important;
-  font-weight:900 !important;
-  text-transform:uppercase !important;
-  letter-spacing:0.06em !important;
-
-  cursor:pointer !important;
-  box-shadow:0 1px 3px rgba(239,109,34,0.25) !important;
-}
-
-#dealership-address-card .address-input-wrap .small-map-btn:hover,
-#dealership-address-card #openAddressInMapsBtn:hover{
-  background:#ff8b42 !important;
-  transform:translateY(-1px);
+/* ✅ Ensure notes wrapper doesn't add “air” above textarea */
+#mkTableModal .notes-block .mk-ta-wrap,
+#mkTableModal .section-block[id^="notes-"] .mk-ta-wrap{
+  margin-top:0 !important;
+  padding-top:0 !important;
 }
 
 /* =========================================================
-   Dealership Address — make "Map" match other textbox buttons
-   (same style as Trainers/Tickets: attached, 34px, seam)
+   TABLE POPUPS — remove ONLY the table section header bar
+   (keeps white card + table and keeps notes headers)
 ========================================================= */
+#mkTableModal .mk-modal-content .section-header{
+  display:none !important;
+}
 
+/* =========================================================
+   Dealership Address — Map button attached (your style)
+========================================================= */
 #dealership-address-card .checklist-row{
   align-items:center !important;
 }
 
-/* Make the wrapper behave like your other input+button groups */
 #dealership-address-card .address-input-wrap{
   margin-left:auto !important;
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
 
-  /* match normal right-side input width */
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
@@ -1673,7 +1638,6 @@ button.remove-row{
   height:34px !important;
 }
 
-/* Input becomes "left half" */
 #dealership-address-card .address-input-wrap .address-input,
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
@@ -1686,13 +1650,10 @@ button.remove-row{
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
 
-  /* attached shape */
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-
   box-sizing:border-box !important;
 }
 
-/* Button becomes "right half" */
 #dealership-address-card .address-input-wrap .small-map-btn,
 #dealership-address-card #openAddressInMapsBtn{
   flex:0 0 34px !important;
@@ -1707,7 +1668,6 @@ button.remove-row{
   background:var(--orange) !important;
   color:#fff !important;
 
-  /* attached shape */
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
 
   font-size:12px !important;
@@ -1717,8 +1677,6 @@ button.remove-row{
   line-height:1 !important;
 
   cursor:pointer !important;
-
-  /* seam like your + buttons */
   margin-left:-1px !important;
 
   display:flex !important;
@@ -1730,408 +1688,3 @@ button.remove-row{
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
 }
-
-/* =======================================================
-   NOTES POPUP (EXPANDED CARD) — SINGLE-CARD FIX
-   - Removes header/body gap
-   - Makes popup look like one section-block card
-   - Squares textarea top corners so it connects
-======================================================= */
-
-/* 1) Overlay (if you use one) */
-.notes-modal-overlay,
-.modal-overlay,
-.notes-overlay {
-  /* keep whatever you already have; these are harmless fallbacks */
-}
-
-/* 2) Make the popup container behave like ONE card */
-.notes-modal,
-.notes-popup,
-.modal.notes,
-#notesModal,
-#notes-modal {
-  /* no changes here unless you want; most projects style the overlay here */
-}
-
-/* 3) The actual popup “card” wrapper */
-.notes-modal .notes-modal-content,
-.notes-popup .notes-popup-content,
-.modal.notes .modal-content,
-#notesModal .modal-content,
-#notes-modal .modal-content,
-.notes-modal-content,
-.notes-popup-content,
-.modal-content.notes-content {
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border, #dcdcdc);
-  border-radius: 16px;              /* match your card rounding */
-  overflow: hidden;                 /* 🔥 key: clips header + body into one card */
-  box-shadow: 0 18px 50px rgba(0,0,0,.28);
-  display: flex;
-  flex-direction: column;
-}
-
-/* 4) Header is part of the same card (no gap, no separate rounding) */
-.notes-modal .notes-modal-header,
-.notes-popup .notes-popup-header,
-.modal.notes .modal-header,
-#notesModal .modal-header,
-#notes-modal .modal-header,
-.notes-modal-header,
-.notes-popup-header,
-.modal-header.notes-header {
-  margin: 0 !important;             /* 🔥 kill the gap */
-  border: 0 !important;
-  border-bottom: 1px solid rgba(0,0,0,.10);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  /* keep your orange header look */
-  background: var(--orange, #EF6D22);
-  color: #fff;
-}
-
-/* 5) Body connects directly under the header */
-.notes-modal .notes-modal-body,
-.notes-popup .notes-popup-body,
-.modal.notes .modal-body,
-#notesModal .modal-body,
-#notes-modal .modal-body,
-.notes-modal-body,
-.notes-popup-body,
-.modal-body.notes-body {
-  margin: 0 !important;             /* 🔥 kill the gap */
-  padding: 12px 12px 14px;
-  background: transparent;
-}
-
-/* 6) Textarea should not look like its own separate card */
-.notes-modal textarea,
-.notes-popup textarea,
-.modal.notes textarea,
-#notesModal textarea,
-#notes-modal textarea {
-  width: 100%;
-  min-height: 360px;                /* adjust if you want */
-  border: 1px solid var(--border, #dcdcdc);
-  border-radius: 0 0 12px 12px;     /* 🔥 only bottom corners rounded */
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-  outline: none;
-  padding: 12px 12px;
-  resize: vertical;
-  box-shadow: none;
-}
-
-/* If your popup has a “content area” above textarea, keep it square too */
-.notes-modal .notes-modal-body > *:first-child,
-.notes-popup .notes-popup-body > *:first-child,
-.modal.notes .modal-body > *:first-child {
-  margin-top: 0 !important;
-}
-
-/* 7) Close button stays visually integrated */
-.notes-modal .notes-close-btn,
-.notes-popup .notes-close-btn,
-.modal.notes .close-btn,
-.modal .close-btn {
-  border: 1px solid rgba(255,255,255,.45);
-  background: rgba(255,255,255,.12);
-  color: #fff;
-  border-radius: 10px;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-}
-.notes-modal .notes-close-btn:hover,
-.notes-popup .notes-close-btn:hover,
-.modal.notes .close-btn:hover,
-.modal .close-btn:hover {
-  background: rgba(255,255,255,.20);
-}
-
-/* =========================================================
-   NOTES POPUP (Modal) — remove header-to-textbox gap
-   Makes modal notes look like on-page notes cards
-========================================================= */
-
-/* Kill any extra spacing inside modal notes blocks */
-#mkTableModal .mk-modal-content .notes-block h2,
-#mkTableModal .mk-modal-content .section-block h2 {
-  margin-bottom: 0 !important;   /* removes the clear band */
-  padding-bottom: 10px;          /* keeps nice header spacing */
-  border-bottom: 1px solid var(--border);
-}
-
-/* If your modal wrapper adds padding that creates “air”, tighten it */
-#mkTableModal .mk-modal-content .notes-block .mk-ta-wrap,
-#mkTableModal .mk-modal-content .notes-block textarea {
-  margin-top: 0 !important;
-}
-
-/* Connect textarea to header (no rounded corners on top) */
-#mkTableModal .mk-modal-content .notes-block textarea {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-/* If the textarea itself is sitting lower because of padding on wrapper */
-#mkTableModal .mk-modal-content .notes-block .mk-ta-wrap {
-  padding-top: 0 !important;
-}
-
-/* OPTIONAL: If you see a thin white strip between header + textarea,
-   it's usually background showing through—force same background */
-#mkTableModal .mk-modal-content .notes-block {
-  overflow: hidden; /* ensures header + textarea look like one card */
-}
-
-/* =========================================================
-   NOTES POPUP — square top corners (no rounding)
-========================================================= */
-
-/* Only when modal contains a notes block */
-#mkTableModal:has(.notes-block),
-#mkTableModal:has([id^="notes-"]) {
-  /* no-op: selector anchor */
-}
-
-#mkTableModal:has(.notes-block) .mk-modal-panel,
-#mkTableModal:has([id^="notes-"]) .mk-modal-panel {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-#mkTableModal:has(.notes-block) .mk-modal-header,
-#mkTableModal:has([id^="notes-"]) .mk-modal-header {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-/* =========================================================
-   TABLE POPUP — remove the section header bar inside modal
-   (keeps the white card + table)
-========================================================= */
-
-#mkTableModal .mk-modal-content:has(table.training-table) .section-header,
-#mkTableModal .mk-modal-content:has(table.training-table) .section-header * {
-  display: none !important;
-}
-
-/* If your expanded content uses an h2 above the table, hide that too */
-#mkTableModal .mk-modal-content:has(table.training-table) > h2,
-#mkTableModal .mk-modal-content:has(table.training-table) .section-block > h2 {
-  display: none !important;
-}
-
-/* Keep spacing tight so there isn't a blank band where the header was */
-#mkTableModal .mk-modal-content:has(table.training-table) .section-header {
-  padding: 0 !important;
-  margin: 0 !important;
-  height: 0 !important;
-  border: 0 !important;
-}
-
-/* =========================================================
-   NOTES MODAL — CORRECT ROUNDING & SEAMLESS JOIN
-========================================================= */
-
-/* 1️⃣ Ensure modal panel + header KEEP rounded top corners */
-#mkTableModal .mk-modal-panel {
-  border-top-left-radius: 14px !important;
-  border-top-right-radius: 14px !important;
-  overflow: hidden; /* critical: clips children cleanly */
-}
-
-#mkTableModal .mk-modal-header {
-  border-top-left-radius: 14px !important;
-  border-top-right-radius: 14px !important;
-}
-
-/* 2️⃣ Remove spacing between header and body */
-#mkTableModal .mk-modal-content {
-  padding-top: 0 !important;
-}
-
-/* 3️⃣ Notes card inside modal behaves like a real section-block */
-#mkTableModal .notes-block,
-#mkTableModal .section-block[id^="notes-"] {
-  margin-top: 0 !important;
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-/* 4️⃣ Remove header bottom gap inside notes card */
-#mkTableModal .notes-block h2,
-#mkTableModal .section-block[id^="notes-"] h2 {
-  margin-bottom: 0 !important;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* 5️⃣ Square the WHITE textarea where it meets the header */
-#mkTableModal .notes-block textarea,
-#mkTableModal .section-block[id^="notes-"] textarea {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-/* 6️⃣ Remove any wrapper padding that creates a “white strip” */
-#mkTableModal .notes-block .mk-ta-wrap {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-
-/* =========================================================
-   MODAL — NOTES vs TABLES (CORRECT, SEPARATE BEHAVIOR)
-========================================================= */
-
-/* =========================================================
-   1️⃣ NOTES POPUPS — LOOK LIKE REAL CARDS
-========================================================= */
-
-/* Modal shell keeps rounded top */
-#mkTableModal .mk-modal-panel {
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-  overflow: hidden;
-}
-
-/* Orange modal header (Notes — X) stays rounded */
-#mkTableModal .mk-modal-header {
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-}
-
-/* Remove spacing between header and content */
-#mkTableModal .mk-modal-content {
-  padding-top: 0;
-}
-
-/* Notes cards inside modal */
-#mkTableModal .notes-block,
-#mkTableModal .section-block[id^="notes-"] {
-  margin-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-/* Notes header inside the card */
-#mkTableModal .notes-block h2,
-#mkTableModal .section-block[id^="notes-"] h2 {
-  margin-bottom: 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* White textarea connects flush to header */
-#mkTableModal .notes-block textarea,
-#mkTableModal .section-block[id^="notes-"] textarea {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-/* Remove wrapper spacing that causes white band */
-#mkTableModal .notes-block .mk-ta-wrap {
-  padding-top: 0;
-  margin-top: 0;
-}
-
-/* =========================================================
-   2️⃣ TABLE POPUPS — KEEP NOTES HEADERS, REMOVE GENERIC ONES
-========================================================= */
-
-/* Hide ONLY the generic table section headers in modal */
-#mkTableModal .mk-modal-content:has(table.training-table) .section-header {
-  display: none !important;
-}
-
-/* Do NOT hide notes headers inside table popups */
-#mkTableModal .mk-modal-content:has(table.training-table)
-  .section-block[id^="notes-"] h2 {
-  display: block !important;
-}
-
-/* Ensure notes cards inside table popup retain card styling */
-#mkTableModal .mk-modal-content:has(table.training-table)
-  .section-block[id^="notes-"] {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* =========================================================
-   MODAL HEADERS — UNIFIED NOTES HEADER STYLE
-   Applies to ALL popups (notes + tables)
-========================================================= */
-
-/* Modal shell */
-#mkTableModal .mk-modal-panel {
-  border-radius: 14px;
-  overflow: hidden; /* critical for clean rounding */
-}
-
-/* Modal header = notes header */
-#mkTableModal .mk-modal-header {
-  background: var(--orange);
-  color: #fff;
-
-  padding: 14px 18px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.2;
-
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-  border-bottom: 1px solid rgba(0,0,0,.12);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Header title text */
-#mkTableModal .mk-modal-title {
-  font-size: inherit;
-  font-weight: inherit;
-}
-
-/* Close button matches notes header style */
-#mkTableModal .mk-modal-close {
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border-radius: 999px;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-}
-
-/* Content connects flush to header */
-#mkTableModal .mk-modal-content {
-  padding-top: 0;
-}
-
-/* Notes cards inside modal */
-#mkTableModal .notes-block,
-#mkTableModal .section-block[id^="notes-"] {
-  margin-top: 0;
-}
-
-/* Notes header inside modal cards */
-#mkTableModal .notes-block h2,
-#mkTableModal .section-block[id^="notes-"] h2 {
-  margin-bottom: 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* White textarea connects cleanly */
-#mkTableModal textarea {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
