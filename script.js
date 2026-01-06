@@ -2412,3 +2412,188 @@
     }, 0);
   });
 })();
+
+/* =========================================================
+   TRAINING SUMMARY — Autopull (stacked dates + stacked trainers)
+========================================================= */
+(function () {
+  const byId = (id) => document.getElementById(id);
+
+  function getVal(el) {
+    return el ? (el.value || "").trim() : "";
+  }
+  function setVal(el, v) {
+    if (!el) return;
+    const nv = (v || "").trim();
+    if ((el.value || "").trim() !== nv) el.value = nv;
+  }
+
+  // Find an input/select/textarea in a section by label text (robust across ID changes)
+  function findFieldByLabel(sectionEl, labelText) {
+    if (!sectionEl) return null;
+    const rows = Array.from(sectionEl.querySelectorAll(".checklist-row"));
+    const target = labelText.toLowerCase();
+
+    for (const row of rows) {
+      const lab = row.querySelector("label");
+      if (!lab) continue;
+      const t = (lab.textContent || "").trim().toLowerCase();
+      if (t === target || t.includes(target)) {
+        return row.querySelector('input, select, textarea');
+      }
+    }
+    return null;
+  }
+
+  function getDealershipDetails() {
+    // Your known IDs from Page 1
+    return {
+      did: getVal(byId("dealershipDidInput")),
+      dealerGroup: getVal(byId("dealerGroupInput")),
+      dealership: getVal(byId("dealershipNameInput")),
+    };
+  }
+
+  function getDatesFromPages() {
+    // Prefer exact IDs if present
+    const start =
+      getVal(byId("onsiteStartDateInput")) ||
+      getVal(byId("trainingStartDateInput")) ||
+      getVal(byId("onsiteStartDate")) ||
+      getVal(byId("trainingStartDate"));
+
+    const end =
+      getVal(byId("onsiteEndDateInput")) ||
+      getVal(byId("trainingEndDateInput")) ||
+      getVal(byId("onsiteEndDate")) ||
+      getVal(byId("trainingEndDate"));
+
+    // If your dates are not ID-driven, try to find them by label on Page 1
+    if (!start || !end) {
+      const page1 = byId("dealership-info") || document.querySelector("#dealership-info");
+      if (page1) {
+        const startField =
+          findFieldByLabel(page1, "Start Date") || findFieldByLabel(page1, "Training Start Date");
+        const endField =
+          findFieldByLabel(page1, "End Date") || findFieldByLabel(page1, "Training End Date");
+
+        return {
+          start: start || getVal(startField),
+          end: end || getVal(endField),
+        };
+      }
+    }
+
+    return { start, end };
+  }
+
+  function getTrainersFromPages() {
+    // Try common IDs first
+    const lead =
+      getVal(byId("leadTrainerInput")) ||
+      getVal(byId("primaryTrainerInput")) ||
+      getVal(byId("leadTrainer")) ||
+      getVal(byId("trainerLeadInput"));
+
+    // Additional trainers: pull from the container you’re already using
+    const container =
+      byId("additionalTrainersContainer") ||
+      byId("additionalTrainerContainer") ||
+      document.querySelector("#trainers-deployment #additionalTrainersContainer");
+
+    let additional = [];
+    if (container) {
+      additional = Array.from(container.querySelectorAll('input[type="text"]'))
+        .map((i) => (i.value || "").trim())
+        .filter(Boolean);
+    } else {
+      // fallback: try label-based on trainers page
+      const page2 = byId("trainers-deployment") || document.querySelector("#trainers-deployment");
+      const addField = findFieldByLabel(page2, "Additional Trainers");
+      const val = getVal(addField);
+      if (val) additional = val.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+
+    return { lead, additional };
+  }
+
+  function autopullSummaryEngagement() {
+    // Dealership
+    const d = getDealershipDetails();
+    setVal(byId("mkSum_did_2"), d.did);
+    setVal(byId("mkSum_dealerGroup_2"), d.dealerGroup);
+    setVal(byId("mkSum_dealership_2"), d.dealership);
+
+    // Dates (stacked)
+    const dates = getDatesFromPages();
+    setVal(byId("mkSum_startDate"), dates.start);
+    setVal(byId("mkSum_endDate"), dates.end);
+
+    // Trainers (stacked)
+    const t = getTrainersFromPages();
+    setVal(byId("mkSum_leadTrainer"), t.lead);
+
+    const slots = [
+      byId("mkSum_addTrainer1"),
+      byId("mkSum_addTrainer2"),
+      byId("mkSum_addTrainer3"),
+      byId("mkSum_addTrainer4"),
+    ];
+
+    slots.forEach((el, idx) => setVal(el, t.additional[idx] || ""));
+  }
+
+  function bindAutopullSummary() {
+    // Re-pull whenever these known Page 1 fields change
+    ["dealershipDidInput", "dealerGroupInput", "dealershipNameInput"].forEach((id) => {
+      const el = byId(id);
+      if (!el) return;
+      el.addEventListener("input", autopullSummaryEngagement);
+      el.addEventListener("change", autopullSummaryEngagement);
+    });
+
+    // Trainers container changes (dynamic adds)
+    const addContainer =
+      byId("additionalTrainersContainer") || byId("additionalTrainerContainer");
+    if (addContainer) {
+      addContainer.addEventListener("input", autopullSummaryEngagement);
+      addContainer.addEventListener("change", autopullSummaryEngagement);
+
+      // Watch for newly added trainer inputs
+      const mo = new MutationObserver(() => autopullSummaryEngagement());
+      mo.observe(addContainer, { childList: true, subtree: true });
+    }
+
+    // Date fields if you have them by ID
+    [
+      "onsiteStartDateInput",
+      "onsiteEndDateInput",
+      "trainingStartDateInput",
+      "trainingEndDateInput",
+      "leadTrainerInput",
+      "primaryTrainerInput",
+    ].forEach((id) => {
+      const el = byId(id);
+      if (!el) return;
+      el.addEventListener("input", autopullSummaryEngagement);
+      el.addEventListener("change", autopullSummaryEngagement);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    autopullSummaryEngagement();
+    bindAutopullSummary();
+  });
+
+  // Also refresh when you navigate to the summary page (matches your nav-button behavior)
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".nav-btn");
+    if (!btn) return;
+    setTimeout(() => {
+      const summary = byId("training-summary");
+      if (summary && summary.classList.contains("active")) {
+        autopullSummaryEngagement();
+      }
+    }, 0);
+  });
+})();
