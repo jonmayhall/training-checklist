@@ -1745,3 +1745,62 @@ button.remove-row{
 #mkTableModal .table-container{
   overflow:hidden !important; /* clean side borders */
 }
+
+/* =========================================================
+   TABLE POPUPS — Header + borders cleanup (FINAL)
+   - Remove modal main header (orange top bar)
+   - Show the table section header (.section-header) again
+   - Square light-orange THEAD
+   - Make section header + table container appear as one border
+========================================================= */
+
+/* Only target TABLE popups (not notes-only popups) */
+#mkTableModal:has(table.training-table) .mk-modal-header{
+  display:none !important; /* removes the main popup header */
+}
+
+/* Re-space content now that modal header is gone */
+#mkTableModal:has(table.training-table) .mk-modal-content{
+  padding:16px !important;
+}
+
+/* Bring back the table header bar inside popups */
+#mkTableModal:has(table.training-table) .mk-modal-content .section-header{
+  display:block !important;
+  margin:0 !important;
+
+  /* make it align perfectly with the table container */
+  border:1px solid var(--border) !important;
+  border-bottom:none !important;
+
+  border-top-left-radius:var(--radius-lg) !important;
+  border-top-right-radius:var(--radius-lg) !important;
+
+  /* keep your orange look */
+  background:var(--orange) !important;
+  color:#fff !important;
+}
+
+/* Make the table container attach to the header as ONE border */
+#mkTableModal:has(table.training-table) .mk-modal-content .table-container{
+  margin:0 0 16px 0 !important;        /* no gap under header */
+  border:1px solid var(--border) !important;
+  border-top:none !important;          /* connects to section-header */
+  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
+  overflow:hidden !important;          /* cleans side edges */
+  box-shadow:var(--shadow) !important;
+}
+
+/* IMPORTANT: keep light-orange table header perfectly square */
+#mkTableModal:has(table.training-table) table.training-table thead th{
+  border-radius:0 !important;
+}
+#mkTableModal:has(table.training-table) table.training-table thead th:first-child,
+#mkTableModal:has(table.training-table) table.training-table thead th:last-child{
+  border-radius:0 !important;
+}
+
+/* If your scroll wrapper adds a “lip”/misalignment, flatten it */
+#mkTableModal:has(table.training-table) .table-container .scroll-wrapper{
+  padding-bottom:0 !important;
+}
