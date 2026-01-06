@@ -2848,3 +2848,60 @@
     init();
   }
 })();
+/* =========================================================
+   TABLE POPUPS — Card-level Close X buttons
+========================================================= */
+(function () {
+  function closeMkTableModal() {
+    const modal = document.getElementById("mkTableModal");
+    if (!modal) return;
+
+    // Prefer your existing close button if present (keeps your cleanup logic)
+    const existingClose = modal.querySelector(".mk-modal-close");
+    if (existingClose) {
+      existingClose.click();
+      return;
+    }
+
+    // Fallback close (in case your header is removed)
+    modal.classList.remove("open");
+    modal.classList.remove("mk-notes-only");
+    modal.style.display = "none";
+  }
+
+  function ensureCardCloseButtons() {
+    const modal = document.getElementById("mkTableModal");
+    if (!modal || !modal.classList.contains("open")) return;
+
+    const content = modal.querySelector(".mk-modal-content");
+    if (!content) return;
+
+    // Only on TABLE popups (you asked specifically for table popups)
+    const hasTable = !!content.querySelector("table.training-table");
+    if (!hasTable) return;
+
+    const cards = content.querySelectorAll(".table-container, .section-block");
+    cards.forEach((card) => {
+      if (card.querySelector(".mk-card-close")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mk-card-close";
+      btn.setAttribute("aria-label", "Close popup");
+      btn.innerHTML = "&times;";
+      btn.addEventListener("click", closeMkTableModal);
+
+      card.appendChild(btn);
+    });
+  }
+
+  // Run whenever modal opens / content changes
+  const modal = document.getElementById("mkTableModal");
+  if (!modal) return;
+
+  const obs = new MutationObserver(() => ensureCardCloseButtons());
+  obs.observe(modal, { attributes: true, childList: true, subtree: true });
+
+  // Also run once on load (in case modal is already open)
+  ensureCardCloseButtons();
+})();
