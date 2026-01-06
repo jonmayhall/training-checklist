@@ -1889,3 +1889,50 @@ button.remove-row{
 #mkTableModal .mk-modal-content .notes-block {
   overflow: hidden; /* ensures header + textarea look like one card */
 }
+
+/* =========================================================
+   NOTES POPUP — square top corners (no rounding)
+========================================================= */
+
+/* Only when modal contains a notes block */
+#mkTableModal:has(.notes-block),
+#mkTableModal:has([id^="notes-"]) {
+  /* no-op: selector anchor */
+}
+
+#mkTableModal:has(.notes-block) .mk-modal-panel,
+#mkTableModal:has([id^="notes-"]) .mk-modal-panel {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+#mkTableModal:has(.notes-block) .mk-modal-header,
+#mkTableModal:has([id^="notes-"]) .mk-modal-header {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* =========================================================
+   TABLE POPUP — remove the section header bar inside modal
+   (keeps the white card + table)
+========================================================= */
+
+#mkTableModal .mk-modal-content:has(table.training-table) .section-header,
+#mkTableModal .mk-modal-content:has(table.training-table) .section-header * {
+  display: none !important;
+}
+
+/* If your expanded content uses an h2 above the table, hide that too */
+#mkTableModal .mk-modal-content:has(table.training-table) > h2,
+#mkTableModal .mk-modal-content:has(table.training-table) .section-block > h2 {
+  display: none !important;
+}
+
+/* Keep spacing tight so there isn't a blank band where the header was */
+#mkTableModal .mk-modal-content:has(table.training-table) .section-header {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+}
+
