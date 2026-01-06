@@ -1,14 +1,24 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — UPDATED BUILD (v8)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.1)
 
-   ✅ FIXES IN THIS BUILD:
-   - Popup tables now inherit the EXACT same CSS as their page (including page-ID selectors like #opcodes-pricing / #training-checklist)
-     by temporarily “ID-swapping” the source page-section onto a wrapper INSIDE the modal while open.
-     → This fixes Updated column + checkbox styling mismatches in popups.
-   - Removes the “random card behind” (outer modal panel becomes transparent / no padding),
-     so you only see your real table card + notes card (no extra container card).
-   - Keeps your Notes caret logic (◦ ) intact (still lands to the RIGHT).
+   ✅ INCLUDES:
+   - Full state save/restore for inputs/selects/textareas/contenteditable
+   - Nav (page-section switching + remember last page)
+   - Notes logic (• main + "  ◦ " caret stays to the RIGHT)
+   - Additional Trainers (+) on Trainers page (page 2) persistence
+   - Additional POC (+) persistence
+   - Tables: Add Row + persist/restore cloned rows
+   - Support Tickets: add card + status move + persist/restore
+   - Expand modal for tables + notes, with CSS parity via ID-swapping wrapper
+   - Topbar dealer title sync (DID + Group + Dealer)
+   - Training end date auto-set (+3 days after onsite start)
+   - Training Summary (Page 11) Engagement Snapshot autopull:
+       DID / Dealer / Group / Dates / Lead Trainer / Additional Trainers
+       ✅ Additional Trainers on summary:
+         - NO add button
+         - 1 input by default
+         - more inputs appear ONLY if added on page 2 (trainers page)
 
 ======================================================= */
 
@@ -18,7 +28,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v7";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_1";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -27,6 +37,7 @@
   const log = (...args) => (DEBUG ? console.log("[mk]", ...args) : void 0);
 
   // ====== TOPBAR + SUMMARY SOURCE FIELD IDS ======
+  // Adjust/add IDs here if your HTML differs.
   const MK_IDS = {
     dealershipName: ["dealershipNameInput"],
     did: ["dealershipDidInput"],
@@ -36,8 +47,21 @@
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
     leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+  };
 
-    summaryTrainers: ["trainingSummaryTrainers", "trainerSummaryInput", "trainersSummaryInput", "trainerInputSummary"],
+  // ====== SUMMARY PAGE 11 IDS (Engagement Snapshot) ======
+  const MK_SUMMARY_IDS = {
+    did: "mkSum_did_2",
+    dealership: "mkSum_dealership_2",
+    dealerGroup: "mkSum_dealerGroup_2",
+    dateStart: "mkSum_dateStart",
+    dateEnd: "mkSum_dateEnd",
+    leadTrainer: "mkSum_leadTrainer",
+
+    // Additional Trainers (stack + base input)
+    addlStack: "mkSum_addlTrainersStack",
+    addlBase: "mkSum_addTrainer_0",
+    addlRow: "mkSum_addlTrainersRow",
   };
 
   /* =======================
@@ -53,7 +77,6 @@
   })();
 
   const isEl = (x) => x && x.nodeType === 1;
-
   const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
@@ -244,7 +267,8 @@
     for (const d of allDates) {
       const id = (d.id || "").toLowerCase();
       const nm = (d.name || "").toLowerCase();
-      if (id.includes(labelIncludes) || nm.includes(labelIncludes)) return d;
+      const want = String(labelIncludes || "").toLowerCase();
+      if (want && (id.includes(want) || nm.includes(want))) return d;
     }
     return null;
   };
@@ -593,13 +617,13 @@
 
     enforceBaseTicketStatusLock();
     mkSyncTopbarTitle();
-    mkAutofillSummaryTrainerIfEmpty();
+    mkSyncSummaryEngagementSnapshot();
 
     log("Cleared section:", sectionEl.id);
   };
 
   /* =======================
-     ADD TRAINER (+)
+     ADD TRAINER (+) — Page 2
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -644,7 +668,7 @@
     saveField(input);
     input.focus();
 
-    mkAutofillSummaryTrainerIfEmpty();
+    mkSyncSummaryEngagementSnapshot();
   };
 
   /* =======================
@@ -1037,7 +1061,6 @@
       return miscText.trimEnd();
     };
 
-    // always returns { text, caret } and ensures hollow bullet is "  ◦ " (with trailing space)
     const caretAtHollowForKey = (text, key) => {
       const v = normalizeNL(text || "");
       const marker = makeMarker(key);
@@ -1429,12 +1452,11 @@
   };
 
   /* =======================
-     TRAINING END DATE AUTO-SET (2 days after onsite)
+     TRAINING END DATE AUTO-SET (3 days after onsite)
   ======================= */
   const mkAutoSetTrainingEndDate = () => {
     const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
     const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
-
     if (!onsiteInput || !endInput) return;
 
     const compute = () => {
@@ -1460,114 +1482,121 @@
   };
 
   /* =======================
-     LEAD TRAINER -> SUMMARY "Trainer(s)" INJECTION
+     TRAINING SUMMARY (PAGE 11) — Engagement Snapshot autopull
+     ✅ Additional Trainers: 1 base + more ONLY if exist on Trainers page
   ======================= */
-  const mkGetLeadTrainer = () => {
-    const byId = mkFirstValueByIds(MK_IDS.leadTrainer);
-    if (byId) return byId;
+  const mkGetTrainerCloneValues = () => {
+    // Source of truth: cloneState (covers restored state too)
+    const clones = cloneState.get();
+    const arr = (clones.trainers || [])
+      .map((t) => String(t?.value || "").trim())
+      .filter(Boolean);
 
-    const trainersSec = document.getElementById("trainers-deployment");
-    if (trainersSec) {
-      const leadByLabel =
-        mkFindFieldByLabelText(trainersSec, "lead trainer") ||
-        mkFindFieldByLabelText(trainersSec, "trainer") ||
-        null;
-      if (leadByLabel && leadByLabel.matches("input, textarea, select")) {
-        const v = (leadByLabel.value || "").trim();
-        if (v) return v;
-      }
-
-      const ph = mkFindTextInputByPlaceholder(trainersSec, "lead trainer");
-      if (ph) {
-        const v = (ph.value || "").trim();
-        if (v) return v;
-      }
-
-      const inputs = $$('input[type="text"]', trainersSec).filter((i) => i.id !== "additionalTrainerInput");
-      for (const i of inputs) {
-        const v = (i.value || "").trim();
-        if (v) return v;
+    // Fallback: DOM container if needed
+    if (!arr.length) {
+      const container = $("#additionalTrainersContainer");
+      if (container) {
+        return $$("input[type='text']", container)
+          .map((i) => (i.value || "").trim())
+          .filter(Boolean);
       }
     }
-
-    const globalCandidates = $$('input[type="text"]')
-      .filter((i) => /lead.*trainer|trainer.*lead|primary.*trainer/i.test(i.id || i.name || ""));
-
-    for (const i of globalCandidates) {
-      const v = (i.value || "").trim();
-      if (v) return v;
-    }
-
-    return "";
+    return arr;
   };
 
-  const mkFindSummaryTrainersField = () => {
-    for (const id of MK_IDS.summaryTrainers) {
-      const el = document.getElementById(id);
-      if (el && el.matches("input, textarea")) return el;
+  const mkSyncAdditionalTrainersToSummary = () => {
+    const stack = document.getElementById(MK_SUMMARY_IDS.addlStack);
+    const base = document.getElementById(MK_SUMMARY_IDS.addlBase);
+    const row = document.getElementById(MK_SUMMARY_IDS.addlRow);
+
+    if (!stack || !base) return;
+
+    // wipe any dynamic inputs (keep base only)
+    $$(`input[id^="mkSum_addTrainer_"]`, stack).forEach((el) => {
+      if (el.id !== MK_SUMMARY_IDS.addlBase) el.remove();
+    });
+
+    const values = mkGetTrainerCloneValues();
+
+    base.value = values[0] || "";
+    ensureId(base);
+    saveField(base);
+
+    for (let i = 1; i < values.length; i++) {
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.id = `mkSum_addTrainer_${i}`;
+      inp.placeholder = "Additional trainer";
+      inp.value = values[i];
+      stack.appendChild(inp);
+
+      ensureId(inp);
+      saveField(inp);
     }
 
-    const summarySec = document.getElementById("training-summary");
-    if (summarySec) {
-      const byLabel =
-        mkFindFieldByLabelText(summarySec, "trainer(s)") ||
-        mkFindFieldByLabelText(summarySec, "trainers") ||
-        mkFindFieldByLabelText(summarySec, "trainer") ||
-        null;
-      if (byLabel && byLabel.matches("input, textarea")) return byLabel;
-
-      const byPh = mkFindTextInputByPlaceholder(summarySec, "trainer");
-      if (byPh) return byPh;
+    // Optional: hide the whole row if no additional trainers
+    // (comment out if you always want the base input visible)
+    if (row) {
+      row.style.display = "flex";
     }
 
-    return null;
+    setGhostStyles(document);
   };
 
-  const mkAutofillSummaryTrainerIfEmpty = () => {
-    const lead = mkGetLeadTrainer();
-    if (!lead) return;
+  const mkSyncSummaryEngagementSnapshot = () => {
+    const summarySection = document.getElementById("training-summary");
+    if (!summarySection) return;
 
-    const field = mkFindSummaryTrainersField();
-    if (!field) return;
+    // Engagement snapshot fields
+    const didEl = document.getElementById(MK_SUMMARY_IDS.did);
+    const dealerEl = document.getElementById(MK_SUMMARY_IDS.dealership);
+    const groupEl = document.getElementById(MK_SUMMARY_IDS.dealerGroup);
 
-    const current = (field.value || "").trim();
-    if (current) return;
+    const startEl = document.getElementById(MK_SUMMARY_IDS.dateStart);
+    const endEl = document.getElementById(MK_SUMMARY_IDS.dateEnd);
 
-    field.value = lead;
-    ensureId(field);
-    saveField(field);
-    triggerInputChange(field);
-  };
+    const leadEl = document.getElementById(MK_SUMMARY_IDS.leadTrainer);
 
-  /* =======================
-     EXEC SUMMARY INJECTION
-  ======================= */
-  const mkGetDealerSnapshot = () => {
+    // Pull dealership data from known IDs (page 1)
     const did = mkFirstValueByIds(MK_IDS.did);
     const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
     const dealership = mkFirstValueByIds(MK_IDS.dealershipName);
-    return { did, dealerGroup, dealership };
-  };
 
-  const mkInjectSummaryTokens = (root = document) => {
-    const snap = mkGetDealerSnapshot();
-    const setToken = (key, val) => {
-      root.querySelectorAll(`[data-mk-summary="${key}"]`).forEach((el) => {
-        if (el.matches("input, textarea, select")) el.value = val || "";
-        else el.textContent = val || "";
-      });
-    };
-    setToken("did", snap.did || "");
-    setToken("dealership", snap.dealership || "");
-    setToken("dealerGroup", snap.dealerGroup || "");
-    setToken("title", mkFormatTopbarTitle({ did: snap.did, dealerGroup: snap.dealerGroup, dealership: snap.dealership }));
+    if (didEl && (didEl.value || "").trim() !== did) didEl.value = did || "";
+    if (dealerEl && (dealerEl.value || "").trim() !== dealership) dealerEl.value = dealership || "";
+    if (groupEl && (groupEl.value || "").trim() !== dealerGroup) groupEl.value = dealerGroup || "";
+
+    // Pull dates
+    const startSrc = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
+    const endSrc = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+
+    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) {
+      startEl.value = startSrc.value || "";
+    }
+    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) {
+      endEl.value = endSrc.value || "";
+    }
+
+    // Pull lead trainer
+    const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
+    if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
+
+    // Save IDs (so reset/page restore behaves)
+    [didEl, dealerEl, groupEl, startEl, endEl, leadEl].forEach((el) => {
+      if (!el) return;
+      ensureId(el);
+      saveField(el);
+    });
+
+    // Additional Trainers (base + dynamic)
+    mkSyncAdditionalTrainersToSummary();
   };
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES)
-     ✅ v8: modal styling matches page exactly by ID-swapping wrapper
+     ✅ Modal styling matches page exactly by ID-swapping wrapper
      ✅ Removes “random card behind” by removing modal panel background/padding
-========================================================= */
+  ========================================================= */
   const ensureExpandStyles = (() => {
     const STYLE_ID = "mk-expand-style-v8";
     return () => {
@@ -1591,14 +1620,10 @@
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
           border-color:#EF6D22 !important;
         }
-
-        /* Keep layout when nodes are moved into modal */
         .mk-expand-placeholder{
           display:block;
           width:100%;
         }
-
-        /* ✅ REMOVE OUTER "RANDOM CARD" behind content */
         #mkTableModal .mk-modal-panel{
           background: transparent !important;
           border: none !important;
@@ -1608,13 +1633,9 @@
         #mkTableModal .mk-modal-content{
           padding: 0 !important;
         }
-
-        /* Notes-only popup: also remove any extra spacing */
         #mkTableModal.mk-notes-only .section-block{
           margin: 0 !important;
         }
-
-        /* Bigger notes text area inside ANY popup */
         #mkTableModal textarea{
           min-height: 360px !important;
           font-size: 16px !important;
@@ -1631,7 +1652,6 @@
     title: null,
     moved: [],
     bodyOverflow: "",
-    // ✅ track the id swap so we can restore perfectly
     origin: {
       sectionEl: null,
       originalId: "",
@@ -1668,17 +1688,10 @@
 
     if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
 
-    // ✅ ID-SWAP WRAPPER: make CSS selectors like #opcodes-pricing ... apply inside modal
-    // Strategy:
-    // - If originSectionEl has an id (e.g. "opcodes-pricing"), temporarily rename it to "opcodes-pricing__mk_hold"
-    // - Create wrapper inside modal content with id="opcodes-pricing" and class="page-section active"
-    // - Put moved nodes inside wrapper
     let wrapper = content;
     const originId = originSectionEl?.id ? String(originSectionEl.id).trim() : "";
     if (originSectionEl && originId) {
       const holdId = `${originId}__mk_hold`;
-
-      // if already swapped for some reason, avoid double-swap
       if (originSectionEl.id === originId) {
         originSectionEl.id = holdId;
       }
@@ -1694,14 +1707,12 @@
       tableModal.origin.tempId = holdId;
       tableModal.origin.wrapperEl = wrapper;
     } else {
-      // still give generic scope for non-id pages
       content.classList.add("page-section", "active");
     }
 
     nodes.forEach((node) => {
       if (!node || !node.parentNode) return;
 
-      // placeholder keeps the page from collapsing/breaking while content is moved
       const rect = node.getBoundingClientRect();
       const ph = document.createElement("div");
       ph.className = "mk-expand-placeholder";
@@ -1732,10 +1743,8 @@
       placeholder.parentNode.removeChild(placeholder);
     });
 
-    // ✅ restore origin section id if we swapped it
     if (tableModal.origin.sectionEl && tableModal.origin.originalId && tableModal.origin.tempId) {
       const sec = tableModal.origin.sectionEl;
-      // restore only if still the hold id
       if (sec.id === tableModal.origin.tempId) {
         sec.id = tableModal.origin.originalId;
       }
@@ -1811,7 +1820,6 @@
     const title = (header?.textContent || "Expanded View").trim();
 
     const originSectionEl = anyInside.closest(".page-section") || anyInside.closest("section") || null;
-
     openModalWithNodes(bundle, title, originSectionEl);
   };
 
@@ -1825,7 +1833,6 @@
     const title = (h?.textContent || "Notes").trim();
 
     const originSectionEl = notesHostEl.closest(".page-section") || notesHostEl.closest("section") || null;
-
     openModalWithNodes([notesHostEl], title, originSectionEl);
   };
 
@@ -1933,6 +1940,73 @@
   };
 
   /* =======================
+     ACTIONS DROPDOWN (Page 11)
+  ======================= */
+  const initSummaryActionsDropdown = () => {
+    const wrap = document.getElementById("mkSummaryActions");
+    const btn = document.getElementById("mkSummaryActionsBtn");
+    const menu = document.getElementById("mkSummaryActionsMenu");
+    if (!wrap || !btn || !menu) return;
+
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      menu.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function toggleMenu() {
+      if (menu.hidden) openMenu();
+      else closeMenu();
+    }
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!wrap.contains(e.target)) closeMenu();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
+
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest(".mk-action-item");
+      if (!item) return;
+
+      const action = item.getAttribute("data-action");
+
+      if (action === "generate") {
+        mkSyncSummaryEngagementSnapshot();
+        mkPopup.ok("Engagement Snapshot refreshed from the project.", { title: "Generate Summary" });
+      }
+
+      if (action === "savepdf") {
+        const hiddenBtn = document.getElementById("savePDF");
+        if (hiddenBtn) hiddenBtn.click();
+        else mkHandleSavePDF();
+      }
+
+      if (action === "reset") {
+        const summary = document.getElementById("training-summary");
+        mkPopup.confirm("Reset this page? This will clear only the fields on Training Summary.", {
+          title: "Reset This Page",
+          okText: "Reset Page",
+          cancelText: "Cancel",
+          onOk: () => clearSection(summary),
+        });
+      }
+
+      closeMenu();
+    });
+  };
+
+  /* =======================
      EVENT DELEGATION
   ======================= */
   document.addEventListener("click", (e) => {
@@ -1941,11 +2015,19 @@
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
-      setActiveSection(navBtn.getAttribute("data-target"));
+      const targetId = navBtn.getAttribute("data-target");
+      setActiveSection(targetId);
+
       setTimeout(() => {
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
+
+        // If landing on Training Summary, refresh snapshot
+        if (targetId === "training-summary") {
+          mkSyncSummaryEngagementSnapshot();
+        }
       }, 0);
+
       return;
     }
 
@@ -1981,17 +2063,6 @@
     if (savePdfBtn) {
       e.preventDefault();
       mkHandleSavePDF();
-      return;
-    }
-
-    const genSummaryBtn = t.closest("#mkGenerateSummaryBtn, [data-mk-action='generate-summary']");
-    if (genSummaryBtn) {
-      e.preventDefault();
-      mkInjectSummaryTokens(document);
-      mkAutofillSummaryTrainerIfEmpty();
-      mkPopup.ok("Summary data tokens refreshed (DID / Dealership / Dealer Group + Trainer(s)).", {
-        title: "Generate Summary",
-      });
       return;
     }
 
@@ -2036,7 +2107,8 @@
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp =
+        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
@@ -2077,11 +2149,13 @@
       setGhostStyles(document);
     }
 
+    // Topbar + summary snapshot sources
     if (el.id === "dealershipNameInput" || el.id === "dealershipDidInput" || el.id === "dealerGroupInput") {
       mkSyncTopbarTitle();
-      mkInjectSummaryTokens(document);
+      mkSyncSummaryEngagementSnapshot();
     }
 
+    // Trainer clones (page 2 additional trainers)
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
@@ -2089,26 +2163,29 @@
       }));
       cloneState.set(clones);
 
-      mkAutofillSummaryTrainerIfEmpty();
+      mkSyncSummaryEngagementSnapshot();
     }
 
+    // Lead trainer changes
     if (
       /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
       (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
     ) {
-      mkAutofillSummaryTrainerIfEmpty();
+      mkSyncSummaryEngagementSnapshot();
     }
 
+    // POC clones
     if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
       persistAllPocs();
     }
 
+    // Tickets
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
-
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
 
+    // Table cloned rows
     const tr = el.closest("tr");
     const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
@@ -2123,6 +2200,11 @@
       ensureId(el);
       saveField(el);
       setGhostStyles(document);
+    }
+
+    // Date changes should refresh summary snapshot too
+    if (el.matches('input[type="date"]')) {
+      mkSyncSummaryEngagementSnapshot();
     }
 
     if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
@@ -2203,9 +2285,7 @@
     setGhostStyles(document);
 
     mkSyncTopbarTitle();
-    mkInjectSummaryTokens(document);
-
-    mkAutofillSummaryTrainerIfEmpty();
+    mkSyncSummaryEngagementSnapshot();
 
     mkAutoSetTrainingEndDate();
 
@@ -2214,8 +2294,9 @@
     startExpandObserver();
 
     enforceBaseTicketStatusLock();
+    initSummaryActionsDropdown();
 
-    log("Initialized.");
+    log("Initialized v8.1.");
   };
 
   if (document.readyState === "loading") {
@@ -2224,440 +2305,3 @@
     init();
   }
 })();
-
-/* =========================================================
-   TRAINING SUMMARY — Actions dropdown + Engagement Snapshot autopull
-========================================================= */
-
-(function () {
-  const $ = (sel) => document.querySelector(sel);
-
-  function getVal(id) {
-    const el = document.getElementById(id);
-    return el ? (el.value || "").trim() : "";
-  }
-
-  function setVal(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if ((el.value || "").trim() !== (value || "").trim()) el.value = value || "";
-  }
-
-  // ---------- 1) Actions dropdown ----------
-  function initSummaryActionsDropdown() {
-    const wrap = document.getElementById("mkSummaryActions");
-    const btn = document.getElementById("mkSummaryActionsBtn");
-    const menu = document.getElementById("mkSummaryActionsMenu");
-    if (!wrap || !btn || !menu) return;
-
-    function openMenu() {
-      menu.hidden = false;
-      btn.setAttribute("aria-expanded", "true");
-    }
-    function closeMenu() {
-      menu.hidden = true;
-      btn.setAttribute("aria-expanded", "false");
-    }
-    function toggleMenu() {
-      if (menu.hidden) openMenu();
-      else closeMenu();
-    }
-
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    // Close on outside click
-    document.addEventListener("click", (e) => {
-      if (!wrap.contains(e.target)) closeMenu();
-    });
-
-    // Close on ESC
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeMenu();
-    });
-
-    // Hook menu actions (keeps your existing logic intact if you already have handlers)
-    menu.addEventListener("click", (e) => {
-      const item = e.target.closest(".mk-action-item");
-      if (!item) return;
-
-      const action = item.getAttribute("data-action");
-
-      // If you already have global handlers, call them here or keep these as fallbacks
-      if (action === "savepdf") {
-        const hiddenBtn = document.getElementById("savePDF");
-        if (hiddenBtn) hiddenBtn.click();
-      }
-
-      closeMenu();
-    });
-  }
-
-  // ---------- 2) Engagement Snapshot autopull ----------
-  function collectTrainingDates() {
-    // Try a few common IDs used in your project (adjust if yours are different)
-    const start =
-      getVal("onsiteStartDateInput") ||
-      getVal("onsiteStartDate") ||
-      getVal("trainingStartDateInput") ||
-      getVal("trainingStartDate");
-
-    const end =
-      getVal("onsiteEndDateInput") ||
-      getVal("onsiteEndDate") ||
-      getVal("trainingEndDateInput") ||
-      getVal("trainingEndDate");
-
-    if (start && end) return `${start} → ${end}`;
-    if (start) return `${start}`;
-    return "";
-  }
-
-  function collectLeadTrainer() {
-    return (
-      getVal("leadTrainerInput") ||
-      getVal("primaryTrainerInput") ||
-      getVal("leadTrainer") ||
-      getVal("trainerLeadInput")
-    );
-  }
-
-  function collectAdditionalTrainers() {
-    // If you store added trainers as inputs inside a container
-    const container =
-      document.getElementById("additionalTrainersContainer") ||
-      document.getElementById("additionalTrainerContainer");
-
-    if (!container) {
-      return getVal("additionalTrainersInput") || "";
-    }
-
-    const names = Array.from(container.querySelectorAll('input[type="text"]'))
-      .map((i) => (i.value || "").trim())
-      .filter(Boolean);
-
-    return names.join(", ");
-  }
-
-  function autopullEngagementSnapshot() {
-    // Page 1 Dealership Details IDs (you posted these earlier)
-    const did = getVal("dealershipDidInput");
-    const dealerGroup = getVal("dealerGroupInput");
-    const dealershipName = getVal("dealershipNameInput");
-
-    // Dates + trainers from Page 1/2
-    const dates = collectTrainingDates();
-    const leadTrainer = collectLeadTrainer();
-    const addTrainers = collectAdditionalTrainers();
-
-    setVal("mkSum_did_2", did);
-    setVal("mkSum_dealerGroup_2", dealerGroup);
-    setVal("mkSum_dealership_2", dealershipName);
-    setVal("mkSum_dates", dates);
-
-    // IMPORTANT: these are the IDs you must use on summary page
-    setVal("mkSum_leadTrainer", leadTrainer);
-    setVal("mkSum_addTrainers", addTrainers);
-  }
-
-  function bindAutopullListeners() {
-    const sourceIds = [
-      "dealershipDidInput",
-      "dealerGroupInput",
-      "dealershipNameInput",
-      "onsiteStartDateInput",
-      "onsiteEndDateInput",
-      "trainingStartDateInput",
-      "trainingEndDateInput",
-      "leadTrainerInput",
-      "primaryTrainerInput",
-      "additionalTrainersInput",
-    ];
-
-    sourceIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener("input", autopullEngagementSnapshot);
-      el.addEventListener("change", autopullEngagementSnapshot);
-    });
-
-    const addContainer = document.getElementById("additionalTrainersContainer");
-    if (addContainer) {
-      addContainer.addEventListener("input", autopullEngagementSnapshot);
-      addContainer.addEventListener("change", autopullEngagementSnapshot);
-    }
-  }
-
-  // Run on load
-  document.addEventListener("DOMContentLoaded", () => {
-    initSummaryActionsDropdown();
-    autopullEngagementSnapshot();
-    bindAutopullListeners();
-  });
-
-  // OPTIONAL: if your app uses nav buttons + .active page switching,
-  // this keeps the snapshot fresh when you open Training Summary.
-  document.addEventListener("click", (e) => {
-    const navBtn = e.target.closest(".nav-btn");
-    if (!navBtn) return;
-    // let your nav code run first
-    setTimeout(() => {
-      const summary = document.getElementById("training-summary");
-      if (summary && summary.classList.contains("active")) {
-        autopullEngagementSnapshot();
-      }
-    }, 0);
-  });
-})();
-
-/* =========================================================
-   TRAINING SUMMARY — Autopull (stacked dates + stacked trainers)
-========================================================= */
-(function () {
-  const byId = (id) => document.getElementById(id);
-
-  function getVal(el) {
-    return el ? (el.value || "").trim() : "";
-  }
-  function setVal(el, v) {
-    if (!el) return;
-    const nv = (v || "").trim();
-    if ((el.value || "").trim() !== nv) el.value = nv;
-  }
-
-  // Find an input/select/textarea in a section by label text (robust across ID changes)
-  function findFieldByLabel(sectionEl, labelText) {
-    if (!sectionEl) return null;
-    const rows = Array.from(sectionEl.querySelectorAll(".checklist-row"));
-    const target = labelText.toLowerCase();
-
-    for (const row of rows) {
-      const lab = row.querySelector("label");
-      if (!lab) continue;
-      const t = (lab.textContent || "").trim().toLowerCase();
-      if (t === target || t.includes(target)) {
-        return row.querySelector('input, select, textarea');
-      }
-    }
-    return null;
-  }
-
-  function getDealershipDetails() {
-    // Your known IDs from Page 1
-    return {
-      did: getVal(byId("dealershipDidInput")),
-      dealerGroup: getVal(byId("dealerGroupInput")),
-      dealership: getVal(byId("dealershipNameInput")),
-    };
-  }
-
-  function getDatesFromPages() {
-    // Prefer exact IDs if present
-    const start =
-      getVal(byId("onsiteStartDateInput")) ||
-      getVal(byId("trainingStartDateInput")) ||
-      getVal(byId("onsiteStartDate")) ||
-      getVal(byId("trainingStartDate"));
-
-    const end =
-      getVal(byId("onsiteEndDateInput")) ||
-      getVal(byId("trainingEndDateInput")) ||
-      getVal(byId("onsiteEndDate")) ||
-      getVal(byId("trainingEndDate"));
-
-    // If your dates are not ID-driven, try to find them by label on Page 1
-    if (!start || !end) {
-      const page1 = byId("dealership-info") || document.querySelector("#dealership-info");
-      if (page1) {
-        const startField =
-          findFieldByLabel(page1, "Start Date") || findFieldByLabel(page1, "Training Start Date");
-        const endField =
-          findFieldByLabel(page1, "End Date") || findFieldByLabel(page1, "Training End Date");
-
-        return {
-          start: start || getVal(startField),
-          end: end || getVal(endField),
-        };
-      }
-    }
-
-    return { start, end };
-  }
-
-  function getTrainersFromPages() {
-    // Try common IDs first
-    const lead =
-      getVal(byId("leadTrainerInput")) ||
-      getVal(byId("primaryTrainerInput")) ||
-      getVal(byId("leadTrainer")) ||
-      getVal(byId("trainerLeadInput"));
-
-    // Additional trainers: pull from the container you’re already using
-    const container =
-      byId("additionalTrainersContainer") ||
-      byId("additionalTrainerContainer") ||
-      document.querySelector("#trainers-deployment #additionalTrainersContainer");
-
-    let additional = [];
-    if (container) {
-      additional = Array.from(container.querySelectorAll('input[type="text"]'))
-        .map((i) => (i.value || "").trim())
-        .filter(Boolean);
-    } else {
-      // fallback: try label-based on trainers page
-      const page2 = byId("trainers-deployment") || document.querySelector("#trainers-deployment");
-      const addField = findFieldByLabel(page2, "Additional Trainers");
-      const val = getVal(addField);
-      if (val) additional = val.split(",").map((s) => s.trim()).filter(Boolean);
-    }
-
-    return { lead, additional };
-  }
-
-  function autopullSummaryEngagement() {
-    // Dealership
-    const d = getDealershipDetails();
-    setVal(byId("mkSum_did_2"), d.did);
-    setVal(byId("mkSum_dealerGroup_2"), d.dealerGroup);
-    setVal(byId("mkSum_dealership_2"), d.dealership);
-
-    // Dates (stacked)
-    const dates = getDatesFromPages();
-    setVal(byId("mkSum_startDate"), dates.start);
-    setVal(byId("mkSum_endDate"), dates.end);
-
-    // Trainers (stacked)
-    const t = getTrainersFromPages();
-    setVal(byId("mkSum_leadTrainer"), t.lead);
-
-    const slots = [
-      byId("mkSum_addTrainer1"),
-      byId("mkSum_addTrainer2"),
-      byId("mkSum_addTrainer3"),
-      byId("mkSum_addTrainer4"),
-    ];
-
-    slots.forEach((el, idx) => setVal(el, t.additional[idx] || ""));
-  }
-
-  function bindAutopullSummary() {
-    // Re-pull whenever these known Page 1 fields change
-    ["dealershipDidInput", "dealerGroupInput", "dealershipNameInput"].forEach((id) => {
-      const el = byId(id);
-      if (!el) return;
-      el.addEventListener("input", autopullSummaryEngagement);
-      el.addEventListener("change", autopullSummaryEngagement);
-    });
-
-    // Trainers container changes (dynamic adds)
-    const addContainer =
-      byId("additionalTrainersContainer") || byId("additionalTrainerContainer");
-    if (addContainer) {
-      addContainer.addEventListener("input", autopullSummaryEngagement);
-      addContainer.addEventListener("change", autopullSummaryEngagement);
-
-      // Watch for newly added trainer inputs
-      const mo = new MutationObserver(() => autopullSummaryEngagement());
-      mo.observe(addContainer, { childList: true, subtree: true });
-    }
-
-    // Date fields if you have them by ID
-    [
-      "onsiteStartDateInput",
-      "onsiteEndDateInput",
-      "trainingStartDateInput",
-      "trainingEndDateInput",
-      "leadTrainerInput",
-      "primaryTrainerInput",
-    ].forEach((id) => {
-      const el = byId(id);
-      if (!el) return;
-      el.addEventListener("input", autopullSummaryEngagement);
-      el.addEventListener("change", autopullSummaryEngagement);
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    autopullSummaryEngagement();
-    bindAutopullSummary();
-  });
-
-  // Also refresh when you navigate to the summary page (matches your nav-button behavior)
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".nav-btn");
-    if (!btn) return;
-    setTimeout(() => {
-      const summary = byId("training-summary");
-      if (summary && summary.classList.contains("active")) {
-        autopullSummaryEngagement();
-      }
-    }, 0);
-  });
-})();
-
-/* =========================================================
-   PATCH: Training Summary - Additional Trainers (one input + add more)
-========================================================= */
-(function initSummaryAdditionalTrainers() {
-  const stack = document.getElementById("mkSum_addlTrainersStack");
-  if (!stack) return;
-
-  const addBtn = stack.querySelector(".mkSumAddTrainerBtn");
-  if (!addBtn) return;
-
-  // Remove any accidental duplicate inputs that might already exist from older builds
-  const existing = Array.from(stack.querySelectorAll('input[type="text"]'));
-  // Keep the first input (base), remove the rest
-  existing.slice(1).forEach(el => el.remove());
-
-  let idx = 1;
-
-  addBtn.addEventListener("click", () => {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "mk-sum-addl-input";
-    input.placeholder = "Additional trainer";
-    input.id = `mkSum_addTrainer_${idx++}`;
-    stack.appendChild(input);
-    input.focus();
-  });
-})();
-
-function mkSyncAdditionalTrainersToSummary() {
-  const stack = document.getElementById("mkSum_addlTrainersStack");
-  if (!stack) return;
-
-  // remove any dynamically added fields (keep base input 0)
-  [...stack.querySelectorAll('input[id^="mkSum_addTrainer_"]')].forEach((el) => {
-    if (el.id !== "mkSum_addTrainer_0") el.remove();
-  });
-
-  // pull from page 1 additional trainers container (adjust selector if yours differs)
-  const page1Inputs = document.querySelectorAll(
-    "#additionalTrainersContainer input[type='text']"
-  );
-
-  const values = [...page1Inputs]
-    .map((i) => (i.value || "").trim())
-    .filter(Boolean);
-
-  // base field
-  const base = document.getElementById("mkSum_addTrainer_0");
-  if (!base) return;
-
-  base.value = values[0] || "";
-
-  // create extra fields ONLY if they exist
-  for (let i = 1; i < values.length; i++) {
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.id = `mkSum_addTrainer_${i}`;
-    inp.placeholder = "Additional trainer";
-    inp.value = values[i];
-    stack.appendChild(inp);
-  }
-}
-
