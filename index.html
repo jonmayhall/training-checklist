@@ -1330,7 +1330,10 @@
 </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 4: MONDAY VISIT (UPDATED: notes-block added everywhere) -->
+<!-- PAGE 4: MONDAY VISIT -->
+<!-- Updated: standardized notes buttons (icon-only), -->
+<!-- uses data-notes-btn + data-notes-target -->
+<!-- Notes cards use the BETTER pattern: section-block notes-block -->
 <!-- ========================================================= -->
 <section id="monday-visit" class="page-section">
   <h1>Monday Visit</h1>
@@ -1347,11 +1350,160 @@
         <label>Did you review the following with the Service Manager?</label>
       </div>
 
-      <!-- (your existing rows unchanged) -->
-      <!-- ... -->
+      <div class="checklist-row indent-sub">
+        <label>On-site training agenda</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Training agenda</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Settings tab</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Settings</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Workflow setup</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Workflow</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>MPI setup</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MPI</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Parts &amp; labor pricing</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Pricing</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Dealership using MCI?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">MCI users</option>
+            <option>Advisors</option>
+            <option>Porters</option>
+            <option>Advisors &amp; Porters</option>
+            <option>No</option>
+            <option>Other</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-review"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Notes — Service Manager Review (already had notes-block; kept) -->
     <div class="section-block notes-block" id="notes-sm-review">
       <h2>Notes — Service Manager Review</h2>
       <textarea placeholder="Notes from the Service Manager review and expectations"></textarea>
@@ -1366,11 +1518,82 @@
         <label>Did the service manager agree to the following?</label>
       </div>
 
-      <!-- (your existing rows unchanged) -->
-      <!-- ... -->
+      <div class="checklist-row indent-sub">
+        <label>myKaarma daily arrival</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select arrival time</option>
+            <option>7:00 am</option>
+            <option>8:00 am</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-alignment"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>myKaarma daily departure</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Select departure time</option>
+            <option>Yes, 5:00 pm</option>
+            <option>Different time</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-alignment"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>Daily morning meetings with managers, techs, &amp; advisors</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Morning meetings</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-sm-alignment"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Notes — Service Manager Alignment (already had notes-block; kept) -->
     <div class="section-block notes-block" id="notes-sm-alignment">
       <h2>Notes — Service Manager Alignment</h2>
       <textarea placeholder="Notes about ongoing alignment with the Service Manager"></textarea>
@@ -1382,11 +1605,148 @@
     <div class="section-block">
       <h2>Devices &amp; Access</h2>
 
-      <!-- (your existing rows unchanged) -->
-      <!-- ... -->
+      <div class="checklist-row">
+        <label>All technicians have iOS devices?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">iOS devices</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>If no, how many iOS devices short?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices" />
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>How many techs are using Android devices?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of techs on Android" />
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>All advisors have iOS devices?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">iOS devices</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>N/A</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row indent-sub">
+        <label>If no, how many iOS devices short?</label>
+        <div class="row-actions">
+          <input type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices" />
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Any device or app-access issues that could block training?</label>
+        <div class="row-actions">
+          <select>
+            <option value="" data-ghost="true">Risk</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-devices"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
+              />
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Notes — Devices (UPDATED: notes-block added) -->
+    <!-- UPDATED: added notes-block -->
     <div class="section-block notes-block" id="notes-devices">
       <h2>Notes — Devices</h2>
       <textarea placeholder="Comments for iOS/Android devices, WiFi, VPN, firewalls, or app store access"></textarea>
