@@ -2458,3 +2458,162 @@
   // Run once on load
   syncToSummary();
 })();
+
+/* =========================================================
+   TRAINERS MIRRORING (Page 1 -> Page 11)
+   ✅ Fixes Page 1 + adding two rows (double-binding)
+   ✅ Mirrors Lead Trainer to Page 11 Lead Trainer input
+   ✅ Mirrors Additional Trainers to Page 11 stacked inputs
+========================================================= */
+
+(function mkTrainerMirroringInit(){
+  // Prevent double-binding if script injected / loaded twice
+  if (window.__mkTrainerMirrorBound) return;
+  window.__mkTrainerMirrorBound = true;
+
+  const leadSelect = document.getElementById("leadTrainerSelect");
+  const addBaseInput = document.getElementById("additionalTrainerInput");
+  const addBtn = document.querySelector("[data-add-trainer]");
+  const addContainer = document.getElementById("additionalTrainersContainer");
+
+  // Page 11 targets
+  const sumLeadInput = document.getElementById("mkSum_leadTrainer");
+  const sumStack = document.getElementById("mkSum_addlTrainersStack");
+
+  if (!addContainer || !sumStack) return;
+
+  // ---------- helpers ----------
+  const normalizeName = (v) => (v || "").trim();
+
+  function getAdditionalTrainersFromPage1(){
+    const names = [];
+
+    // base input (only if user typed and then added? we treat it as “pending”)
+    const baseVal = normalizeName(addBaseInput?.value);
+    if (baseVal) names.push(baseVal);
+
+    // added trainer inputs in the container
+    addContainer.querySelectorAll('input[type="text"]').forEach((inp) => {
+      const val = normalizeName(inp.value);
+      if (val) names.push(val);
+    });
+
+    // de-dupe while preserving order
+    return [...new Set(names)];
+  }
+
+  function setSummaryLeadTrainer(){
+    if (!sumLeadInput || !leadSelect) return;
+    const val = normalizeName(leadSelect.value);
+    sumLeadInput.value = val;
+  }
+
+  function rebuildSummaryAdditionalTrainers(){
+    if (!sumStack) return;
+
+    const names = getAdditionalTrainersFromPage1();
+
+    // Keep the base input (mkSum_addTrainer_0) but rebuild everything after it
+    const base = document.getElementById("mkSum_addTrainer_0");
+
+    // remove any dynamically created inputs (everything except base)
+    sumStack.querySelectorAll('input[type="text"]').forEach((inp) => {
+      if (base && inp === base) return;
+      inp.remove();
+    });
+
+    // Ensure base exists
+    if (base) {
+      base.value = names[0] || "";
+      base.classList.add("mk-sum-addl-input");
+    }
+
+    // Add additional inputs for remaining names
+    names.slice(1).forEach((name, idx) => {
+      const i = idx + 1;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = `mkSum_addTrainer_${i}`;
+      input.placeholder = "Additional trainer";
+      input.value = name;
+      input.className = "mk-sum-addl-input";
+      sumStack.appendChild(input);
+    });
+
+    // If ALL empty, keep just base blank
+    if (!names.length && base) base.value = "";
+  }
+
+  // ---------- Page 1: add one trainer per click ----------
+  function addTrainerRow(name){
+    const val = normalizeName(name);
+    if (!val) return;
+
+    // Build one row only
+    const row = document.createElement("div");
+    row.className = "checklist-row integrated-plus indent-sub";
+    row.dataset.base = "false";
+
+    const label = document.createElement("label");
+    label.textContent = "Additional Trainer";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = val;
+    input.autocomplete = "off";
+
+    // match your existing styling in container
+    row.appendChild(label);
+    row.appendChild(input);
+    addContainer.appendChild(row);
+
+    // Clear base input after add
+    if (addBaseInput) addBaseInput.value = "";
+
+    // Mirror to summary immediately
+    rebuildSummaryAdditionalTrainers();
+  }
+
+  // IMPORTANT: bind click ONLY once and stop duplicate handlers
+  if (addBtn) {
+    addBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addTrainerRow(addBaseInput?.value);
+    }, { capture: true });
+  }
+
+  // Add on Enter in base field (optional but nice)
+  if (addBaseInput) {
+    addBaseInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addTrainerRow(addBaseInput.value);
+      }
+    });
+  }
+
+  // Mirror lead trainer whenever selection changes
+  if (leadSelect) {
+    leadSelect.addEventListener("change", () => {
+      setSummaryLeadTrainer();
+    });
+  }
+
+  // Mirror when any added trainer input changes
+  addContainer.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t && t.matches('input[type="text"]')) rebuildSummaryAdditionalTrainers();
+  });
+
+  // Also mirror when base input changes (so summary shows it even before "+")
+  if (addBaseInput) {
+    addBaseInput.addEventListener("input", () => {
+      rebuildSummaryAdditionalTrainers();
+    });
+  }
+
+  // Initial sync on load
+  setSummaryLeadTrainer();
+  rebuildSummaryAdditionalTrainers();
+})();
