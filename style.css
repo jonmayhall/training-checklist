@@ -1869,3 +1869,87 @@ button.remove-row{
   outline:none !important;
   box-shadow:0 0 0 3px rgba(239,109,34,0.25), 0 10px 22px rgba(0,0,0,0.18) !important;
 }
+
+/* =========================================================
+   MODAL (mkTableModal) — Single header, panel X, shift content down
+   ✅ X is orange, top-right of the BIG white modal card
+   ✅ Notes popups: remove duplicate inner header
+   ✅ Shift content down for BOTH tables + notes
+========================================================= */
+
+/* --- (A) Shift EVERYTHING down inside the modal (tables + notes) --- */
+#mkTableModal .mk-modal-content{
+  /* adds breathing room BELOW the top area */
+  padding: 22px 18px 18px !important;
+}
+
+/* Give the first card a little top margin so it sits lower */
+#mkTableModal .mk-modal-content > .section-block:first-child,
+#mkTableModal .mk-modal-content > .table-container:first-child,
+#mkTableModal .mk-modal-content > .section:first-child{
+  margin-top: 10px !important;
+}
+
+/* --- (B) Panel-level close button (orange) --- */
+#mkTableModal .mk-modal-panel{
+  position: relative !important; /* allows absolute X */
+}
+
+/* If your .mk-modal-close exists, make it the orange X in the top-right of the panel */
+#mkTableModal .mk-modal-close,
+#mkTableModal .mk-panel-close{
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+
+  width: 38px !important;
+  height: 38px !important;
+
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.45) !important;
+
+  background: var(--orange) !important;
+  color: #fff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 22px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+
+  box-shadow: 0 10px 22px rgba(0,0,0,0.25) !important;
+  z-index: 99999 !important;
+}
+
+#mkTableModal .mk-modal-close:hover,
+#mkTableModal .mk-panel-close:hover{
+  background: #ff8b42 !important;
+  transform: translateY(-1px) !important;
+}
+
+#mkTableModal .mk-modal-close:focus-visible,
+#mkTableModal .mk-panel-close:focus-visible{
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(239,109,34,0.28), 0 10px 22px rgba(0,0,0,0.25) !important;
+}
+
+/* --- (C) Notes popups: SINGLE header only ---
+   Keep mk-modal-header (top bar), HIDE the inner .section-block h2
+*/
+#mkTableModal:not(:has(table.training-table)) .section-block > h2{
+  display: none !important;
+}
+
+/* Notes popups: keep your existing interior border/padding look
+   (no extra weird rounding/overrides here)
+*/
+#mkTableModal:not(:has(table.training-table)) .section-block{
+  margin-top: 0 !important;
+}
+
+/* --- (D) Remove any old "card X buttons" styling if it exists --- */
+#mkTableModal .mk-card-close{
+  display: none !important;
+}
