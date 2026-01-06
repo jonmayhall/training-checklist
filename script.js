@@ -2305,3 +2305,156 @@
     init();
   }
 })();
+
+/* =========================================================
+   FIX — Page 1 Trainers + Page 11 Training Summary Sync
+   ✅ Page 1 "+" adds ONLY ONE line (blocks duplicate handlers)
+   ✅ Page 11 Lead Trainer mirrors #leadTrainerSelect
+   ✅ Page 11 Additional Trainers auto-build inputs (no + button)
+========================================================= */
+
+(function mkFixTrainersAndSummary(){
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  // ---- Page 1 refs ----
+  const leadTrainerSelect = $("#leadTrainerSelect");
+  const addlBaseInput     = $("#additionalTrainerInput");
+  const addBtn            = $("#trainers-deployment .trainer-add-btn") || $("[data-add-trainer]");
+  const addlContainer     = $("#additionalTrainersContainer");
+
+  // ---- Page 11 refs ----
+  const sumLeadTrainer = $("#mkSum_leadTrainer");
+  const sumRow         = $("#mkSum_addlTrainersRow");
+  const sumStack       = $("#mkSum_addlTrainersStack");
+
+  if (!leadTrainerSelect || !addlBaseInput || !addBtn || !addlContainer) {
+    // If any are missing, don't throw—just exit safely.
+    return;
+  }
+
+  // -----------------------------------------
+  // Build ONE additional trainer row on Page 1
+  // -----------------------------------------
+  function createAddedTrainerRow(value=""){
+    const row = document.createElement("div");
+    row.className = "checklist-row indent-sub";
+
+    const label = document.createElement("label");
+    label.textContent = ""; // keep alignment consistent with your added rows
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Enter additional trainer name";
+    input.autocomplete = "off";
+    input.value = value;
+
+    row.appendChild(label);
+    row.appendChild(input);
+    return row;
+  }
+
+  // -----------------------------------------
+  // Read trainers from Page 1 (base + added)
+  // -----------------------------------------
+  function readAdditionalTrainersPage1(){
+    const vals = [];
+
+    const baseVal = (addlBaseInput.value || "").trim();
+    if (baseVal) vals.push(baseVal);
+
+    // any inputs created in the added container
+    $$("input[type='text']", addlContainer).forEach(inp => {
+      const v = (inp.value || "").trim();
+      if (v) vals.push(v);
+    });
+
+    // de-dupe
+    return Array.from(new Set(vals));
+  }
+
+  // -----------------------------------------
+  // Sync Page 1 -> Page 11
+  // -----------------------------------------
+  function syncToSummary(){
+    // Lead trainer (Page 1 select -> Page 11 input)
+    if (sumLeadTrainer) {
+      sumLeadTrainer.value = leadTrainerSelect.value || "";
+    }
+
+    if (!sumStack) return;
+
+    const trainers = readAdditionalTrainersPage1();
+
+    // show/hide row if needed
+    if (sumRow) sumRow.style.display = trainers.length ? "" : "none";
+
+    // rebuild stack cleanly (NO add button on summary page)
+    sumStack.innerHTML = "";
+
+    // always create base input so layout stays stable
+    const base = document.createElement("input");
+    base.type = "text";
+    base.placeholder = "Additional trainer";
+    base.id = "mkSum_addTrainer_0";
+    base.value = trainers[0] || "";
+    sumStack.appendChild(base);
+
+    for (let i = 1; i < trainers.length; i++){
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "Additional trainer";
+      inp.id = `mkSum_addTrainer_${i}`;
+      inp.value = trainers[i];
+      sumStack.appendChild(inp);
+    }
+  }
+
+  // -----------------------------------------
+  // HARD FIX: Stop duplicate "+" handlers
+  // Use CAPTURE listener + stopImmediatePropagation()
+  // so ONLY THIS handler runs.
+  // -----------------------------------------
+  if (!addBtn.dataset.mkSingleAddBound) {
+    addBtn.dataset.mkSingleAddBound = "true";
+    addBtn.type = "button";
+
+    addBtn.addEventListener("click", (e) => {
+      // 🔥 This blocks other click listeners attached elsewhere
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const val = (addlBaseInput.value || "").trim();
+      if (!val) {
+        // If they click + with nothing typed, do nothing.
+        // (If you want it to add a blank row anyway, tell me.)
+        syncToSummary();
+        return;
+      }
+
+      // Add exactly ONE row with the typed value
+      addlContainer.appendChild(createAddedTrainerRow(val));
+
+      // Clear the base input after adding (matches expected UX)
+      addlBaseInput.value = "";
+
+      // Sync summary after add
+      syncToSummary();
+    }, true); // ✅ capture phase
+  }
+
+  // -----------------------------------------
+  // Live sync listeners
+  // -----------------------------------------
+  leadTrainerSelect.addEventListener("change", syncToSummary);
+  addlBaseInput.addEventListener("input", syncToSummary);
+
+  // Event delegation for added trainer inputs on page 1
+  addlContainer.addEventListener("input", (e) => {
+    if (e.target && e.target.matches("input[type='text']")) syncToSummary();
+  });
+
+  // Run once on load
+  syncToSummary();
+})();
