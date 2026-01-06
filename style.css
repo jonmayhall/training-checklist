@@ -1936,3 +1936,52 @@ button.remove-row{
   border: 0 !important;
 }
 
+/* =========================================================
+   NOTES MODAL — CORRECT ROUNDING & SEAMLESS JOIN
+========================================================= */
+
+/* 1️⃣ Ensure modal panel + header KEEP rounded top corners */
+#mkTableModal .mk-modal-panel {
+  border-top-left-radius: 14px !important;
+  border-top-right-radius: 14px !important;
+  overflow: hidden; /* critical: clips children cleanly */
+}
+
+#mkTableModal .mk-modal-header {
+  border-top-left-radius: 14px !important;
+  border-top-right-radius: 14px !important;
+}
+
+/* 2️⃣ Remove spacing between header and body */
+#mkTableModal .mk-modal-content {
+  padding-top: 0 !important;
+}
+
+/* 3️⃣ Notes card inside modal behaves like a real section-block */
+#mkTableModal .notes-block,
+#mkTableModal .section-block[id^="notes-"] {
+  margin-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* 4️⃣ Remove header bottom gap inside notes card */
+#mkTableModal .notes-block h2,
+#mkTableModal .section-block[id^="notes-"] h2 {
+  margin-bottom: 0 !important;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 5️⃣ Square the WHITE textarea where it meets the header */
+#mkTableModal .notes-block textarea,
+#mkTableModal .section-block[id^="notes-"] textarea {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* 6️⃣ Remove any wrapper padding that creates a “white strip” */
+#mkTableModal .notes-block .mk-ta-wrap {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
