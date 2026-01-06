@@ -2626,3 +2626,38 @@
   });
 })();
 
+function mkSyncAdditionalTrainersToSummary() {
+  const stack = document.getElementById("mkSum_addlTrainersStack");
+  if (!stack) return;
+
+  // remove any dynamically added fields (keep base input 0)
+  [...stack.querySelectorAll('input[id^="mkSum_addTrainer_"]')].forEach((el) => {
+    if (el.id !== "mkSum_addTrainer_0") el.remove();
+  });
+
+  // pull from page 1 additional trainers container (adjust selector if yours differs)
+  const page1Inputs = document.querySelectorAll(
+    "#additionalTrainersContainer input[type='text']"
+  );
+
+  const values = [...page1Inputs]
+    .map((i) => (i.value || "").trim())
+    .filter(Boolean);
+
+  // base field
+  const base = document.getElementById("mkSum_addTrainer_0");
+  if (!base) return;
+
+  base.value = values[0] || "";
+
+  // create extra fields ONLY if they exist
+  for (let i = 1; i < values.length; i++) {
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.id = `mkSum_addTrainer_${i}`;
+    inp.placeholder = "Additional trainer";
+    inp.value = values[i];
+    stack.appendChild(inp);
+  }
+}
+
