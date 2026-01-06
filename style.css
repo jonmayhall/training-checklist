@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS
-   CLEAN / CONSOLIDATED (Stable Consolidation Build)
+   CLEAN / CONSOLIDATED (Stable Consolidation Build — CLEANED)
 
    ✅ Includes:
    - Full app layout (topbar / sidebar / pages / cards)
@@ -8,12 +8,11 @@
    - Notes buttons + notes modal sizing
    - Support Tickets 2x2 layout
    - DMS Integration cards
-   - Modal popup table fixes (removes “white strip/card” on right)
-   - Opcodes popup “Updated” header + column shading parity
-   - Pages 5–6 notes blocks taller + Training Summary notes taller
+   - Modal popup table fixes (no “white strip/card” + clean spacing)
+   - Pages 5–6 notes taller + Training Summary notes taller
    - Primary Contacts spacing tightened
    - Additional POC base card “Name + +” width matches other inputs
-   - ✅ FIX: Page 11 Additional Trainers matches other inputs (height/width)
+   - Page 11 Additional Trainers matches other inputs (height/width)
 ======================================================= */
 
 /* =======================
@@ -622,6 +621,7 @@ main{
   padding:0;
   max-width:100%;
   position:relative;
+  overflow:hidden; /* clean modal + normal edges */
 }
 .scroll-wrapper{
   display:block;
@@ -655,6 +655,7 @@ main{
   position:sticky;
   top:0;
   z-index:3;
+  border-radius:0 !important; /* square THEAD always */
 }
 .training-table thead tr{ height:auto !important; }
 .training-table thead th{ padding-top:8px; padding-bottom:8px; }
@@ -681,7 +682,7 @@ main{
 .training-table th:first-child,
 .training-table td:first-child{ width:240px; min-width:240px; }
 .training-table th:nth-child(2),
-.training-table td:nth-child(2){ width:210px; min-width:210px; }
+.training-table td:nth-child(2){ width:210px; min-width:210px; text-align:center !important; }
 
 /* table inputs */
 .training-table input[type="text"],
@@ -741,9 +742,9 @@ main{
   transform:translateY(-1px);
 }
 
-/* =========================================================
+/* =======================
    EXPAND BUTTONS — ONE SYSTEM
-========================================================= */
+======================= */
 .mk-table-expand-btn,
 .mk-ta-expand,
 .mk-mini-expand-btn{
@@ -841,11 +842,9 @@ main{
   min-width:0 !important;
   box-sizing:border-box !important;
 }
-.training-table th:nth-child(2),
-.training-table td:nth-child(2){ text-align:center !important; }
 
 /* =======================
-   TABLE NOTES COLUMN
+   TABLE NOTES COLUMN + BUTTON
 ======================= */
 .training-table .notes-col-head,
 .training-table .notes-col-cell{
@@ -1018,9 +1017,7 @@ main{
   }
 }
 
-/* =========================================================
-   SUPPORT TICKETS: "Short Summary" no expand
-========================================================= */
+/* Support Tickets: “Short Summary” no expand */
 #support-tickets .ticket-row.ticket-summary-row .mk-ta-expand,
 #support-tickets .ticket-row.ticket-summary-row .mk-notes-expand-btn,
 #support-tickets .ticket-row.ticket-summary-row .mk-mini-expand-btn{
@@ -1123,9 +1120,9 @@ main{
   min-height:0;
 }
 
-/* =========================================================
+/* =======================
    MAP — iframe fills card
-========================================================= */
+======================= */
 #dealership-info .section-block:has(#dealershipMapFrame),
 #dealership-info .section-block:has(iframe[src*="maps"]),
 #dealership-info .section-block.map-card{
@@ -1154,13 +1151,14 @@ main{
   border:0 !important;
 }
 
-/* =======================================================
+/* =======================
    DEALERSHIP INFO PAGE
-======================================================= */
+======================= */
 #dealership-info{
   --di-input-width:225px;
 }
 
+/* Stacked date rows */
 .training-dates-row,
 .onsite-training-dates-row{ align-items:flex-start !important; }
 .training-dates-row label,
@@ -1197,7 +1195,6 @@ main{
 #dealership-info .section-block:has(.primary-contacts-grid) > h2{
   margin-bottom:8px !important;
 }
-
 #dealership-info .primary-contacts-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -1241,9 +1238,7 @@ main{
   height:34px !important;
 }
 
-/* =========================================================
-   Additional POC — normalized input+plus + correct width
-========================================================= */
+/* Additional POC — normalized input+plus + correct width */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .checklist-row{
   align-items:center !important;
 }
@@ -1357,9 +1352,9 @@ main{
   border-radius:var(--radius-sm) !important;
 }
 
-/* =========================================================
+/* =======================
    PAGES 5–6: Notes UNDER TABLES = taller
-========================================================= */
+======================= */
 #training-checklist .section + .section-block textarea,
 #opcodes-pricing .section + .section-block textarea,
 #training-checklist .section + .section-block .mk-ta-wrap > textarea,
@@ -1367,9 +1362,9 @@ main{
   min-height:160px !important;
 }
 
-/* =========================================================
+/* =======================
    FINAL PAGE: All notes cards taller
-========================================================= */
+======================= */
 #training-summary .section-block textarea,
 #training-summary .section-block .mk-ta-wrap > textarea{
   min-height:160px !important;
@@ -1378,9 +1373,9 @@ main{
   min-height:160px !important;
 }
 
-/* =========================================================
+/* =======================
    HARD RULE: no remove buttons anywhere
-========================================================= */
+======================= */
 .remove-btn,
 .remove-row,
 [data-remove-trainer],
@@ -1389,124 +1384,9 @@ button.remove-row{
   display:none !important;
 }
 
-/* =========================================================
-   TABLE MODAL (mkTableModal) — FIXES
-========================================================= */
-#mkTableModal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:99998;
-  overflow:hidden !important;
-}
-#mkTableModal.open{ display:block; }
-#mkTableModal .mk-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.65);
-}
-#mkTableModal .mk-modal-panel{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:min(1400px, calc(100vw - 28px));
-  max-height:90vh;
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-#mkTableModal .mk-modal-header{
-  background:var(--orange);
-  color:#fff;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  border-bottom:1px solid var(--border);
-}
-#mkTableModal .mk-modal-title{
-  font-weight:900;
-  font-size:16px;
-  letter-spacing:.3px;
-  margin:0;
-}
-#mkTableModal .mk-modal-close{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.55);
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  line-height:1;
-}
-#mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
-
-#mkTableModal .mk-modal-content{
-  padding:0 14px 16px;
-  overflow:auto;
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  align-items:stretch !important;
-}
-
-/* If any .page-section is moved into the modal, strip page sizing + card look */
-#mkTableModal .page-section{
-  display:block !important;
-  max-width:none !important;
-  width:100% !important;
-  margin:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  border-radius:0 !important;
-  padding:0 !important;
-}
-#mkTableModal .mk-modal-content > *{
-  width:100% !important;
-  max-width:100% !important;
-  margin-left:0 !important;
-  margin-right:0 !important;
-}
-
-/* Keep card look inside modal for blocks */
-#mkTableModal .section-block,
-#mkTableModal .table-container,
-#mkTableModal .section{
-  background:#fff !important;
-  border-radius:var(--radius-lg) !important;
-}
-
-/* Modal scroll wrapper */
-#mkTableModal .scroll-wrapper{
-  overflow:auto !important;
-  max-width:100% !important;
-}
-#mkTableModal table.training-table{
-  width:max-content;
-  min-width:100%;
-}
-
-/* Bigger notes textareas inside popup */
-#mkTableModal textarea{
-  min-height:360px !important;
-  font-size:16px !important;
-  line-height:1.45 !important;
-}
-
-/* =========================================================
+/* =======================
    Dealership Address — Map button attached
-========================================================= */
+======================= */
 #dealership-address-card .checklist-row{ align-items:center !important; }
 #dealership-address-card .address-input-wrap{
   margin-left:auto !important;
@@ -1558,9 +1438,9 @@ button.remove-row{
   background:#ff8b42 !important;
 }
 
-/* =========================================================
+/* =======================
    TRAINING SUMMARY — Actions pill dropdown (top-right)
-========================================================= */
+======================= */
 #training-summary{ position:relative; }
 #training-summary .mk-summary-actions{
   position:absolute;
@@ -1615,15 +1495,13 @@ button.remove-row{
   background:rgba(239,109,34,0.08);
 }
 
-/* =========================================================
-   ✅ TRAINING SUMMARY — STACKS (DATES + ADDL TRAINERS)
-   Fix: Additional Trainers is a NORMAL input (34px),
-        same width as other answers in Engagement Snapshot
-========================================================= */
+/* =======================
+   TRAINING SUMMARY — STACKS (DATES + ADDL TRAINERS)
+======================= */
 
 /* Engagement Snapshot card controls the answer-column width */
 #training-summary .cards-grid.two-col > .section-block:first-child{
-  --mk-sum-wide: 340px; /* you can bump to 360/380 if you want */
+  --mk-sum-wide: 340px; /* bump to 360/380 if desired */
 }
 
 /* Normal answer inputs in Engagement Snapshot */
@@ -1650,7 +1528,7 @@ button.remove-row{
   align-items:stretch !important;
 }
 
-/* ✅ The KEY FIX: force addl trainer inputs to be identical to normal inputs */
+/* Additional Trainers inputs match other inputs */
 #training-summary #mkSum_addlTrainersStack input[type="text"]{
   width:100% !important;
   max-width:100% !important;
@@ -1665,7 +1543,7 @@ button.remove-row{
   box-shadow:none !important;
 }
 
-/* Keeps label aligned to top like your date stack rows */
+/* Keep labels aligned to top for stack rows */
 #training-summary .checklist-row:has(.mk-stack),
 #training-summary .checklist-row:has(#mkSum_addlTrainersStack){
   align-items:flex-start !important;
@@ -1690,266 +1568,154 @@ button.remove-row{
 }
 #training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
 
-/* =========================================================
-   PATCH — Table Popups: Add side padding to cards & notes
-   Scope: table popups ONLY
-========================================================= */
+/* =======================
+   TABLE MODAL (mkTableModal) — CLEAN / FINAL
+   - No “white strip/card” at right
+   - Single modal header (title + orange X)
+   - Notes popups hide inner H2 to avoid double headers
+   - Tables keep square THEAD + good padding
+======================= */
+#mkTableModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99998;
+  overflow:hidden !important;
+}
+#mkTableModal.open{ display:block; }
 
-/* Add horizontal inset inside table popup content */
-#mkTableModal:has(table.training-table) .mk-modal-content{
-  padding-left:24px !important;
-  padding-right:24px !important;
+#mkTableModal .mk-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.65);
 }
 
-/* Ensure table containers don't stretch edge-to-edge */
-#mkTableModal:has(table.training-table) .table-container{
-  margin-left:auto !important;
-  margin-right:auto !important;
+/* Panel is a positioning shell — JS may also enforce transparency */
+#mkTableModal .mk-modal-panel{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1400px, calc(100vw - 28px));
+  max-height:90vh;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
-/* Notes cards inside table popups match the same inset */
-#mkTableModal:has(table.training-table) .section-block{
-  margin-left:auto !important;
-  margin-right:auto !important;
+/* Header bar (single header for both tables + notes) */
+#mkTableModal .mk-modal-header{
+  background:var(--orange);
+  color:#fff;
+  padding:10px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid rgba(255,255,255,0.25);
+}
+#mkTableModal .mk-modal-title{
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:.3px;
+  margin:0;
 }
 
-/* Keep scroll wrapper aligned with padding */
-#mkTableModal:has(table.training-table) .scroll-wrapper{
-  padding-left:0 !important;
-  padding-right:0 !important;
+/* Orange X in top-right of the BIG modal card */
+#mkTableModal .mk-modal-close{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.45);
+  background:var(--orange);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  line-height:1;
+  box-shadow:0 10px 22px rgba(0,0,0,0.25);
+}
+#mkTableModal .mk-modal-close:hover{
+  background:#ff8b42;
+  transform:translateY(-1px);
+}
+#mkTableModal .mk-modal-close:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(239,109,34,0.28), 0 10px 22px rgba(0,0,0,0.25);
 }
 
-/* =========================================================
-   POPUP FIX — Remove top orange section-header again
-   + Ensure table THEAD (light orange) has square corners
-========================================================= */
+/* Content area (override JS injected padding=0 with higher specificity) */
+body #mkTableModal .mk-modal-content{
+  padding:22px 18px 18px !important;
+  overflow:auto;
+  background:transparent !important; /* content holds cards */
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:stretch !important;
+}
 
-/* 1) Remove the very top header bar inside table popups (again) */
+/* If any .page-section is moved into the modal, strip page sizing + card look */
+#mkTableModal .page-section{
+  display:block !important;
+  max-width:none !important;
+  width:100% !important;
+  margin:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+}
+#mkTableModal .mk-modal-content > *{
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+
+/* Hide inner table section header inside modal (modal title is the header) */
 #mkTableModal .mk-modal-content .section-header{
   display:none !important;
 }
 
-/* 2) Keep table cards clean, but DON'T round the light-orange thead */
-#mkTableModal table.training-table thead th{
-  border-radius:0 !important;  /* prevents rounded light-orange corners */
-}
-
-/* Safety: if any browser applies radius to first/last TH */
-#mkTableModal table.training-table thead th:first-child,
-#mkTableModal table.training-table thead th:last-child{
-  border-radius:0 !important;
-}
-
-/* 3) If your table container is clipping corners too aggressively,
-      keep it clean but square at the top edge of the TABLE itself */
+/* Keep card look inside modal for blocks */
+#mkTableModal .section-block,
 #mkTableModal .table-container{
-  overflow:hidden !important; /* clean side borders */
-}
-
-/* =========================================================
-   TABLE POPUPS — Header + borders cleanup (FINAL)
-   - Remove modal main header (orange top bar)
-   - Show the table section header (.section-header) again
-   - Square light-orange THEAD
-   - Make section header + table container appear as one border
-========================================================= */
-
-/* Only target TABLE popups (not notes-only popups) */
-#mkTableModal:has(table.training-table) .mk-modal-header{
-  display:none !important; /* removes the main popup header */
-}
-
-/* Re-space content now that modal header is gone */
-#mkTableModal:has(table.training-table) .mk-modal-content{
-  padding:16px !important;
-}
-
-/* Bring back the table header bar inside popups */
-#mkTableModal:has(table.training-table) .mk-modal-content .section-header{
-  display:block !important;
-  margin:0 !important;
-
-  /* make it align perfectly with the table container */
-  border:1px solid var(--border) !important;
-  border-bottom:none !important;
-
-  border-top-left-radius:var(--radius-lg) !important;
-  border-top-right-radius:var(--radius-lg) !important;
-
-  /* keep your orange look */
-  background:var(--orange) !important;
-  color:#fff !important;
-}
-
-/* Make the table container attach to the header as ONE border */
-#mkTableModal:has(table.training-table) .mk-modal-content .table-container{
-  margin:0 0 16px 0 !important;        /* no gap under header */
-  border:1px solid var(--border) !important;
-  border-top:none !important;          /* connects to section-header */
-  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
-  overflow:hidden !important;          /* cleans side edges */
+  background:#fff !important;
+  border-radius:var(--radius-lg) !important;
   box-shadow:var(--shadow) !important;
 }
 
-/* IMPORTANT: keep light-orange table header perfectly square */
-#mkTableModal:has(table.training-table) table.training-table thead th{
-  border-radius:0 !important;
-}
-#mkTableModal:has(table.training-table) table.training-table thead th:first-child,
-#mkTableModal:has(table.training-table) table.training-table thead th:last-child{
-  border-radius:0 !important;
+/* Notes popups: remove duplicate inner card header (H2) */
+#mkTableModal.mk-notes-only .section-block > h2{
+  display:none !important;
 }
 
-/* If your scroll wrapper adds a “lip”/misalignment, flatten it */
-#mkTableModal:has(table.training-table) .table-container .scroll-wrapper{
+/* Modal scroll wrapper */
+#mkTableModal .scroll-wrapper{
+  overflow:auto !important;
+  max-width:100% !important;
   padding-bottom:0 !important;
 }
-
-/* =========================================================
-   TABLE POPUPS — Shift cards down + add card-level X buttons
-========================================================= */
-
-/* TABLE popups only */
-#mkTableModal:has(table.training-table) .mk-modal-content{
-  /* push everything down a bit */
-  padding:28px 16px 18px !important;
+#mkTableModal table.training-table{
+  width:max-content;
+  min-width:100%;
+}
+#mkTableModal table.training-table thead th{
+  border-radius:0 !important;
 }
 
-/* Give cards breathing room from the top edge */
-#mkTableModal:has(table.training-table) .mk-modal-content .table-container,
-#mkTableModal:has(table.training-table) .mk-modal-content .section-block{
-  margin-top:14px !important;
+/* Bigger notes textareas inside popup */
+#mkTableModal textarea{
+  min-height:360px !important;
+  font-size:16px !important;
+  line-height:1.45 !important;
 }
 
-/* Make sure cards can host an absolute-positioned X */
-#mkTableModal:has(table.training-table) .mk-modal-content .table-container,
-#mkTableModal:has(table.training-table) .mk-modal-content .section-block{
-  position:relative !important;
-}
-
-/* Card-level close X button */
+/* Safety: never show card-level X buttons (panel X only) */
 #mkTableModal .mk-card-close{
-  position:absolute !important;
-  top:10px !important;
-  right:10px !important;
-
-  width:34px !important;
-  height:34px !important;
-  border-radius:10px !important;
-
-  border:1px solid rgba(0,0,0,0.14) !important;
-  background:#fff !important;
-  color:#111827 !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  font-size:20px !important;
-  line-height:1 !important;
-
-  cursor:pointer !important;
-  box-shadow:0 6px 16px rgba(0,0,0,0.14) !important;
-  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease !important;
-
-  z-index:50 !important;
-}
-
-#mkTableModal .mk-card-close:hover{
-  transform:translateY(-1px) !important;
-  border-color:rgba(239,109,34,0.55) !important;
-  box-shadow:0 10px 22px rgba(0,0,0,0.18) !important;
-}
-
-#mkTableModal .mk-card-close:active{
-  transform:translateY(0) !important;
-}
-
-#mkTableModal .mk-card-close:focus-visible{
-  outline:none !important;
-  box-shadow:0 0 0 3px rgba(239,109,34,0.25), 0 10px 22px rgba(0,0,0,0.18) !important;
-}
-
-/* =========================================================
-   MODAL (mkTableModal) — Single header, panel X, shift content down
-   ✅ X is orange, top-right of the BIG white modal card
-   ✅ Notes popups: remove duplicate inner header
-   ✅ Shift content down for BOTH tables + notes
-========================================================= */
-
-/* --- (A) Shift EVERYTHING down inside the modal (tables + notes) --- */
-#mkTableModal .mk-modal-content{
-  /* adds breathing room BELOW the top area */
-  padding: 22px 18px 18px !important;
-}
-
-/* Give the first card a little top margin so it sits lower */
-#mkTableModal .mk-modal-content > .section-block:first-child,
-#mkTableModal .mk-modal-content > .table-container:first-child,
-#mkTableModal .mk-modal-content > .section:first-child{
-  margin-top: 10px !important;
-}
-
-/* --- (B) Panel-level close button (orange) --- */
-#mkTableModal .mk-modal-panel{
-  position: relative !important; /* allows absolute X */
-}
-
-/* If your .mk-modal-close exists, make it the orange X in the top-right of the panel */
-#mkTableModal .mk-modal-close,
-#mkTableModal .mk-panel-close{
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-
-  width: 38px !important;
-  height: 38px !important;
-
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.45) !important;
-
-  background: var(--orange) !important;
-  color: #fff !important;
-
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  font-size: 22px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-
-  box-shadow: 0 10px 22px rgba(0,0,0,0.25) !important;
-  z-index: 99999 !important;
-}
-
-#mkTableModal .mk-modal-close:hover,
-#mkTableModal .mk-panel-close:hover{
-  background: #ff8b42 !important;
-  transform: translateY(-1px) !important;
-}
-
-#mkTableModal .mk-modal-close:focus-visible,
-#mkTableModal .mk-panel-close:focus-visible{
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(239,109,34,0.28), 0 10px 22px rgba(0,0,0,0.25) !important;
-}
-
-/* --- (C) Notes popups: SINGLE header only ---
-   Keep mk-modal-header (top bar), HIDE the inner .section-block h2
-*/
-#mkTableModal:not(:has(table.training-table)) .section-block > h2{
-  display: none !important;
-}
-
-/* Notes popups: keep your existing interior border/padding look
-   (no extra weird rounding/overrides here)
-*/
-#mkTableModal:not(:has(table.training-table)) .section-block{
-  margin-top: 0 !important;
-}
-
-/* --- (D) Remove any old "card X buttons" styling if it exists --- */
-#mkTableModal .mk-card-close{
-  display: none !important;
+  display:none !important;
 }
