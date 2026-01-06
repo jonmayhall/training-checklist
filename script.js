@@ -2224,3 +2224,191 @@
     init();
   }
 })();
+
+/* =========================================================
+   TRAINING SUMMARY — Actions dropdown + Engagement Snapshot autopull
+========================================================= */
+
+(function () {
+  const $ = (sel) => document.querySelector(sel);
+
+  function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? (el.value || "").trim() : "";
+  }
+
+  function setVal(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if ((el.value || "").trim() !== (value || "").trim()) el.value = value || "";
+  }
+
+  // ---------- 1) Actions dropdown ----------
+  function initSummaryActionsDropdown() {
+    const wrap = document.getElementById("mkSummaryActions");
+    const btn = document.getElementById("mkSummaryActionsBtn");
+    const menu = document.getElementById("mkSummaryActionsMenu");
+    if (!wrap || !btn || !menu) return;
+
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      menu.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function toggleMenu() {
+      if (menu.hidden) openMenu();
+      else closeMenu();
+    }
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+      if (!wrap.contains(e.target)) closeMenu();
+    });
+
+    // Close on ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
+
+    // Hook menu actions (keeps your existing logic intact if you already have handlers)
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest(".mk-action-item");
+      if (!item) return;
+
+      const action = item.getAttribute("data-action");
+
+      // If you already have global handlers, call them here or keep these as fallbacks
+      if (action === "savepdf") {
+        const hiddenBtn = document.getElementById("savePDF");
+        if (hiddenBtn) hiddenBtn.click();
+      }
+
+      closeMenu();
+    });
+  }
+
+  // ---------- 2) Engagement Snapshot autopull ----------
+  function collectTrainingDates() {
+    // Try a few common IDs used in your project (adjust if yours are different)
+    const start =
+      getVal("onsiteStartDateInput") ||
+      getVal("onsiteStartDate") ||
+      getVal("trainingStartDateInput") ||
+      getVal("trainingStartDate");
+
+    const end =
+      getVal("onsiteEndDateInput") ||
+      getVal("onsiteEndDate") ||
+      getVal("trainingEndDateInput") ||
+      getVal("trainingEndDate");
+
+    if (start && end) return `${start} → ${end}`;
+    if (start) return `${start}`;
+    return "";
+  }
+
+  function collectLeadTrainer() {
+    return (
+      getVal("leadTrainerInput") ||
+      getVal("primaryTrainerInput") ||
+      getVal("leadTrainer") ||
+      getVal("trainerLeadInput")
+    );
+  }
+
+  function collectAdditionalTrainers() {
+    // If you store added trainers as inputs inside a container
+    const container =
+      document.getElementById("additionalTrainersContainer") ||
+      document.getElementById("additionalTrainerContainer");
+
+    if (!container) {
+      return getVal("additionalTrainersInput") || "";
+    }
+
+    const names = Array.from(container.querySelectorAll('input[type="text"]'))
+      .map((i) => (i.value || "").trim())
+      .filter(Boolean);
+
+    return names.join(", ");
+  }
+
+  function autopullEngagementSnapshot() {
+    // Page 1 Dealership Details IDs (you posted these earlier)
+    const did = getVal("dealershipDidInput");
+    const dealerGroup = getVal("dealerGroupInput");
+    const dealershipName = getVal("dealershipNameInput");
+
+    // Dates + trainers from Page 1/2
+    const dates = collectTrainingDates();
+    const leadTrainer = collectLeadTrainer();
+    const addTrainers = collectAdditionalTrainers();
+
+    setVal("mkSum_did_2", did);
+    setVal("mkSum_dealerGroup_2", dealerGroup);
+    setVal("mkSum_dealership_2", dealershipName);
+    setVal("mkSum_dates", dates);
+
+    // IMPORTANT: these are the IDs you must use on summary page
+    setVal("mkSum_leadTrainer", leadTrainer);
+    setVal("mkSum_addTrainers", addTrainers);
+  }
+
+  function bindAutopullListeners() {
+    const sourceIds = [
+      "dealershipDidInput",
+      "dealerGroupInput",
+      "dealershipNameInput",
+      "onsiteStartDateInput",
+      "onsiteEndDateInput",
+      "trainingStartDateInput",
+      "trainingEndDateInput",
+      "leadTrainerInput",
+      "primaryTrainerInput",
+      "additionalTrainersInput",
+    ];
+
+    sourceIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", autopullEngagementSnapshot);
+      el.addEventListener("change", autopullEngagementSnapshot);
+    });
+
+    const addContainer = document.getElementById("additionalTrainersContainer");
+    if (addContainer) {
+      addContainer.addEventListener("input", autopullEngagementSnapshot);
+      addContainer.addEventListener("change", autopullEngagementSnapshot);
+    }
+  }
+
+  // Run on load
+  document.addEventListener("DOMContentLoaded", () => {
+    initSummaryActionsDropdown();
+    autopullEngagementSnapshot();
+    bindAutopullListeners();
+  });
+
+  // OPTIONAL: if your app uses nav buttons + .active page switching,
+  // this keeps the snapshot fresh when you open Training Summary.
+  document.addEventListener("click", (e) => {
+    const navBtn = e.target.closest(".nav-btn");
+    if (!navBtn) return;
+    // let your nav code run first
+    setTimeout(() => {
+      const summary = document.getElementById("training-summary");
+      if (summary && summary.classList.contains("active")) {
+        autopullEngagementSnapshot();
+      }
+    }, 0);
+  });
+})();
