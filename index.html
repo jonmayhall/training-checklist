@@ -3487,13 +3487,14 @@
         <input id="mkSum_leadTrainer" type="text" placeholder="Lead trainer" />
       </div>
 
-     <!-- Additional Trainers (pulled from page 1, no + button) -->
+    <!-- Additional Trainers (auto-populated from page 1; hidden unless used) -->
 <div class="checklist-row" id="mkSum_addlTrainersRow">
   <label>Additional Trainers</label>
 
   <div class="mk-stack" id="mkSum_addlTrainersStack">
+    <!-- base (always present) -->
     <input id="mkSum_addTrainer_0" type="text" placeholder="Additional trainer" />
-    <input id="mkSum_addTrainer_1" type="text" placeholder="Additional trainer" />
+    <!-- JS will append more inputs here ONLY if they exist -->
   </div>
 </div>
 
