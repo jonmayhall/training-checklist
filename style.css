@@ -1742,3 +1742,61 @@ button.remove-row{
   border-top-left-radius: var(--radius-lg) !important;
   border-top-right-radius: var(--radius-lg) !important;
 }
+
+/* =======================================================
+   PATCH — Make NOTES popups match on-page NOTES CARDS exactly
+   (scoped to notes popups only — NOT table popups)
+======================================================= */
+
+/* NOTES popup = when the modal does NOT contain a training table */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-panel{
+  /* same outer card feel as your section-block cards */
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-lg) !important;
+  box-shadow:var(--shadow) !important;
+  overflow:hidden !important;
+}
+
+/* Orange header: same rounding as cards */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-header{
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0 !important;
+  border-bottom:1px solid var(--border) !important;
+}
+
+/* Body padding should match section-block (card interior) */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
+  padding:0 16px 14px !important;     /* same as .section-block */
+  background:#fff !important;
+}
+
+/* Notes textarea inside popup should look like the real card textarea */
+#mkTableModal:not(:has(table.training-table)) textarea{
+  width:100% !important;
+  display:block !important;
+
+  /* exact same as .section-block textarea */
+  padding:8px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  font-size:13px !important;
+  resize:vertical !important;
+
+  /* match the spacing you have on cards */
+  margin:10px 0 0 !important;
+
+  /* keep popup tall, but still “card-looking” */
+  min-height:360px !important;
+  box-shadow:none !important;
+}
+
+/* If your notes popup uses mk-ta-wrap, keep the same gap behavior */
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
+  margin:var(--mk-notes-gap) 0 var(--mk-notes-gap-bottom) !important;
+  padding:0 !important;
+}
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap > textarea{
+  margin:0 !important; /* mk-ta-wrap controls spacing */
+}
+
