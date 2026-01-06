@@ -2597,3 +2597,32 @@
     }, 0);
   });
 })();
+
+/* =========================================================
+   PATCH: Training Summary - Additional Trainers (one input + add more)
+========================================================= */
+(function initSummaryAdditionalTrainers() {
+  const stack = document.getElementById("mkSum_addlTrainersStack");
+  if (!stack) return;
+
+  const addBtn = stack.querySelector(".mkSumAddTrainerBtn");
+  if (!addBtn) return;
+
+  // Remove any accidental duplicate inputs that might already exist from older builds
+  const existing = Array.from(stack.querySelectorAll('input[type="text"]'));
+  // Keep the first input (base), remove the rest
+  existing.slice(1).forEach(el => el.remove());
+
+  let idx = 1;
+
+  addBtn.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "mk-sum-addl-input";
+    input.placeholder = "Additional trainer";
+    input.id = `mkSum_addTrainer_${idx++}`;
+    stack.appendChild(input);
+    input.focus();
+  });
+})();
+
