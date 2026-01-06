@@ -2068,3 +2068,39 @@ button.remove-row{
   box-sizing:border-box !important;
 }
 
+/* =========================================================
+   PATCH — Training Summary layout refinements
+========================================================= */
+
+/* -----------------------------------------
+   1) Engagement Snapshot inputs wider
+   (+33% vs default input width)
+----------------------------------------- */
+#training-summary .section-block:first-child{
+  --input-width: calc(var(--input-width) * 1.33);
+}
+
+/* -----------------------------------------
+   2) Outcome dropdown wide enough to read text
+----------------------------------------- */
+#training-summary #mkSum_outcome{
+  width: max-content !important;
+  min-width: 260px !important;      /* safety floor */
+  padding-right: 34px !important;   /* room for caret */
+}
+
+/* -----------------------------------------
+   3) Outcome rationale = single question block
+----------------------------------------- */
+
+/* Remove bottom border + spacing on the label row */
+#training-summary .mk-fullwidth-row{
+  margin-bottom: 4px !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+/* Pull textarea closer to label */
+#training-summary #mkSum_outcomeWhy{
+  margin-top: 6px !important;
+}
