@@ -1862,3 +1862,23 @@ button.remove-row{
   box-shadow:0 0 0 3px rgba(239,109,34,0.18), inset 0 0 0 1px rgba(0,0,0,0.03) !important;
   outline:none !important;
 }
+
+/* =======================================================
+   PATCH — Remove thin inner border, keep thick rounded border
+   (Notes popups only, non-table)
+======================================================= */
+
+#mkTableModal:not(:has(table.training-table)) textarea{
+  /* REMOVE the fake inner hairline */
+  box-shadow: none !important;
+
+  /* KEEP the main, thick rounded border */
+  border: 2px solid #e6e6e6 !important;
+  border-radius: 22px !important;
+}
+
+/* Also ensure focus does NOT reintroduce an inner line */
+#mkTableModal:not(:has(table.training-table)) textarea:focus{
+  box-shadow: 0 0 0 3px rgba(239,109,34,0.18) !important;
+}
+
