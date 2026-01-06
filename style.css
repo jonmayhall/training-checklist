@@ -1688,3 +1688,57 @@ button.remove-row{
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
 }
+
+/* =======================================================
+   PATCH — Notes popup textarea should look like on-page notes cards
+   ✅ Keep orange popup header rounded on top
+   ✅ Give the textarea an inner “card” look (small white border + rounded edge)
+   ✅ Remove the big “flat” look inside the popup
+======================================================= */
+
+/* 1) Ensure popup/modal top header stays rounded */
+#mkTableModal .mk-modal-panel{
+  border-top-left-radius: var(--radius-lg) !important;
+  border-top-right-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+}
+#mkTableModal .mk-modal-header{
+  border-top-left-radius: var(--radius-lg) !important;
+  border-top-right-radius: var(--radius-lg) !important;
+}
+
+/* 2) Notes popups: make the inside look like a notes card */
+#mkTableModal .mk-modal-content{
+  padding: 14px 14px 16px !important; /* restores breathing room */
+  background:#fff !important;
+}
+
+/* 3) The notes textarea itself becomes the “inner card” */
+#mkTableModal textarea{
+  background:#fff !important;
+
+  /* the small white-border card look */
+  border: 2px solid #e5e7eb !important;
+  border-radius: var(--radius-lg) !important;
+
+  /* subtle inset feel like your on-page notes */
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.05) !important;
+
+  padding: 14px 14px !important;
+  margin: 14px 0 0 !important;
+
+  min-height: 360px !important;
+  resize: none !important;  /* matches your card behavior */
+}
+
+/* 4) If the textarea is wrapped in mk-ta-wrap, match spacing */
+#mkTableModal .mk-ta-wrap{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 5) Remove any rules that were forcing “connected” square corners in the modal */
+#mkTableModal textarea{
+  border-top-left-radius: var(--radius-lg) !important;
+  border-top-right-radius: var(--radius-lg) !important;
+}
