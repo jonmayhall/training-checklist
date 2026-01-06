@@ -1798,3 +1798,47 @@ button.remove-row{
   box-shadow:0 0 0 3px rgba(239,109,34,0.18) !important;
   outline:none !important;
 }
+
+/* =========================================================
+   FIX — Page 11 (Training Summary): Additional Trainers box
+   Force it to behave EXACTLY like the other inputs
+   (height + padding + border + background)
+========================================================= */
+
+#training-summary #mkSum_addlTrainersRow{
+  align-items:center !important; /* keep row consistent with others */
+}
+
+/* lock the right-side column width to match other rows */
+#training-summary #mkSum_addlTrainersStack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+
+/* If anything (input OR textarea) ends up inside this stack, force it to look like a normal input */
+#training-summary #mkSum_addlTrainersStack input[type="text"],
+#training-summary #mkSum_addlTrainersStack input[type="date"],
+#training-summary #mkSum_addlTrainersStack textarea{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+
+  font-size:13px !important;
+  line-height:normal !important;
+  box-sizing:border-box !important;
+
+  /* kills “textarea behavior” if one sneaks in */
+  resize:none !important;
+  overflow:hidden !important;
+}
