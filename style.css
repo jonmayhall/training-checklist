@@ -1970,3 +1970,32 @@ button.remove-row{
 #training-summary .mk-action-item:hover{
   background:rgba(239,109,34,0.08);
 }
+
+/* =========================================================
+   TRAINING SUMMARY — stacked inputs (dates + additional trainers)
+========================================================= */
+.mk-stack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+
+.mk-stack input[type="text"],
+.mk-stack input[type="date"]{
+  width:100% !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important;
+  background:#f7f7f7 !important;
+  box-sizing:border-box !important;
+}
+
+/* keeps label aligned to top like your date stack cards */
+#training-summary .checklist-row:has(.mk-stack){ align-items:flex-start !important; }
+#training-summary .checklist-row:has(.mk-stack) label{ padding-top:7px !important; }
