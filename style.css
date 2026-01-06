@@ -13,7 +13,7 @@
    - Pages 5–6 notes blocks taller + Training Summary notes taller
    - Primary Contacts spacing tightened
    - Additional POC base card “Name + +” width matches other inputs
-   - ✅ FIXED: Page 11 “Additional Trainers” input width matches other inputs
+   - ✅ FIX: Page 11 Additional Trainers matches other inputs (height/width)
 ======================================================= */
 
 /* =======================
@@ -409,7 +409,6 @@ main{
 .section-block .checklist-row select{
   flex:0 0 var(--input-width);
   width:var(--input-width);
-  max-width:var(--input-width);
   margin-left:auto;
   padding:7px 10px;
   border-radius:var(--radius-sm);
@@ -417,7 +416,6 @@ main{
   background:#f7f7f7;
   font-size:13px;
   height:34px;
-  box-sizing:border-box;
 }
 
 /* Date inputs */
@@ -446,7 +444,6 @@ main{
   font-size:13px;
   resize:vertical;
   margin:10px 0 0;
-  box-sizing:border-box;
 }
 
 /* Focus */
@@ -540,7 +537,6 @@ main{
 .section-block .checklist-row.indent-sub select{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
   margin-left:0 !important;
 }
 
@@ -672,7 +668,7 @@ main{
   position:sticky;
   left:0;
   z-index:4;
-  background:inherit; /* inherit row shading */
+  background:inherit;
   padding-left:10px;
 }
 .training-table thead th:first-child{
@@ -709,6 +705,7 @@ main{
   box-sizing:border-box;
   min-width:0;
 }
+
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
@@ -1021,7 +1018,9 @@ main{
   }
 }
 
-/* SUPPORT TICKETS: "Short Summary" no expand */
+/* =========================================================
+   SUPPORT TICKETS: "Short Summary" no expand
+========================================================= */
 #support-tickets .ticket-row.ticket-summary-row .mk-ta-expand,
 #support-tickets .ticket-row.ticket-summary-row .mk-notes-expand-btn,
 #support-tickets .ticket-row.ticket-summary-row .mk-mini-expand-btn{
@@ -1244,13 +1243,10 @@ main{
 
 /* =========================================================
    Additional POC — normalized input+plus + correct width
-   Goal: total combo width == other inputs (225px)
 ========================================================= */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .checklist-row{
   align-items:center !important;
 }
-
-/* lock combo width */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .input-plus{
   display:flex !important;
   align-items:stretch !important;
@@ -1260,10 +1256,8 @@ main{
   margin-left:auto !important;
   height:34px !important;
 }
-
-/* input shrinks to allow 34px button (+ seam) */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .input-plus input[type="text"]{
-  flex:0 0 calc(var(--di-input-width) - 33px) !important; /* 225 - 34 + 1 seam */
+  flex:0 0 calc(var(--di-input-width) - 33px) !important;
   width:calc(var(--di-input-width) - 33px) !important;
   max-width:calc(var(--di-input-width) - 33px) !important;
   min-width:0 !important;
@@ -1274,8 +1268,6 @@ main{
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
   box-sizing:border-box !important;
 }
-
-/* plus button */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .input-plus button{
   flex:0 0 34px !important;
   width:34px !important;
@@ -1298,8 +1290,6 @@ main{
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="true"] .input-plus button:hover{
   background:#ff8b42 !important;
 }
-
-/* Added cards (no +) keep fully-rounded inputs */
 #dealership-info .primary-contacts-grid .additional-poc-card[data-base="false"] input[type="text"]{
   border-radius:var(--radius-sm) !important;
 }
@@ -1400,10 +1390,7 @@ button.remove-row{
 }
 
 /* =========================================================
-   TABLE MODAL (mkTableModal) — FIXES + CONSISTENT POPUP NOTES
-   ✅ Popup header has rounded top corners
-   ✅ Removes right-side “white strip/card”
-   ✅ Table popup hides only table section header bars (keeps notes headers)
+   TABLE MODAL (mkTableModal) — FIXES
 ========================================================= */
 #mkTableModal{
   position:fixed;
@@ -1418,8 +1405,6 @@ button.remove-row{
   inset:0;
   background:rgba(0,0,0,0.65);
 }
-
-/* PANEL */
 #mkTableModal .mk-modal-panel{
   position:absolute;
   left:50%;
@@ -1434,8 +1419,6 @@ button.remove-row{
   flex-direction:column;
   overflow:hidden;
 }
-
-/* HEADER */
 #mkTableModal .mk-modal-header{
   background:var(--orange);
   color:#fff;
@@ -1468,7 +1451,6 @@ button.remove-row{
 }
 #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
 
-/* CONTENT */
 #mkTableModal .mk-modal-content{
   padding:0 14px 16px;
   overflow:auto;
@@ -1522,88 +1504,18 @@ button.remove-row{
   line-height:1.45 !important;
 }
 
-/* Popup checkbox size */
-#mkTableModal table.training-table input[type="checkbox"]{
-  width:16px;
-  height:16px;
-  accent-color:var(--orange);
-}
-
-/* Training Checklist in popup: keep first column as flex */
-#mkTableModal #training-checklist .training-table td:first-child{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:12px !important;
-  padding-left:10px !important;
-  padding-right:10px !important;
-  overflow:hidden !important;
-  min-width:0 !important;
-}
-#mkTableModal #training-checklist .training-table td:first-child input[type="text"]{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  width:auto !important;
-  max-width:100% !important;
-}
-
-/* Opcodes in popup: Updated column table-cell + inherits striping */
-#mkTableModal #opcodes-pricing .training-table th:first-child,
-#mkTableModal #opcodes-pricing .training-table td:first-child{
-  display:table-cell !important;
-  position:static !important;
-  left:auto !important;
-  width:60px !important;
-  min-width:60px !important;
-  padding-left:0 !important;
-  padding-right:0 !important;
-  background:inherit !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-#mkTableModal #opcodes-pricing .training-table td:first-child input[type="checkbox"]{
-  display:block !important;
-  margin:0 auto !important;
-}
-
-/* Opcodes popup: Updated HEADER must be light orange */
-#mkTableModal #opcodes-pricing table.training-table thead th:first-child{
-  background:var(--light-orange) !important;
-  color:#fff !important;
-}
-
-/* NOTES-ONLY modal flattening (keep mk-modal-header; remove inner card header) */
-#mkTableModal.mk-notes-only .mk-modal-panel{ background:#fff !important; }
-#mkTableModal.mk-notes-only .mk-modal-content{ padding:0 !important; background:#fff !important; }
-#mkTableModal.mk-notes-only .section-block{
-  border:none !important;
-  box-shadow:none !important;
-  padding:0 !important;
-  margin:0 !important;
-  border-radius:0 !important;
-}
-#mkTableModal.mk-notes-only .section-block h2{ display:none !important; }
-
-/* Remove ONLY the table section header bar (keeps notes headers) */
-#mkTableModal .mk-modal-content .section-header{
-  display:none !important;
-}
-
 /* =========================================================
    Dealership Address — Map button attached
 ========================================================= */
 #dealership-address-card .checklist-row{ align-items:center !important; }
-
 #dealership-address-card .address-input-wrap{
   margin-left:auto !important;
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
-
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
   max-width:var(--input-width) !important;
-
   height:34px !important;
 }
 #dealership-address-card .address-input-wrap .address-input,
@@ -1611,13 +1523,10 @@ button.remove-row{
   flex:1 1 auto !important;
   width:auto !important;
   min-width:0 !important;
-
   height:34px !important;
   padding:7px 10px !important;
-
   border:1px solid var(--border) !important;
   background:#f7f7f7 !important;
-
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
   box-sizing:border-box !important;
 }
@@ -1626,26 +1535,20 @@ button.remove-row{
   flex:0 0 34px !important;
   width:34px !important;
   min-width:34px !important;
-
   height:34px !important;
   padding:0 !important;
   margin:0 !important;
-
   border:1px solid var(--orange) !important;
   background:var(--orange) !important;
   color:#fff !important;
-
   border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-
   font-size:12px !important;
   font-weight:900 !important;
   text-transform:uppercase !important;
   letter-spacing:0.06em !important;
   line-height:1 !important;
-
   cursor:pointer !important;
   margin-left:-1px !important;
-
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
@@ -1659,7 +1562,6 @@ button.remove-row{
    TRAINING SUMMARY — Actions pill dropdown (top-right)
 ========================================================= */
 #training-summary{ position:relative; }
-
 #training-summary .mk-summary-actions{
   position:absolute;
   top:16px;
@@ -1714,131 +1616,76 @@ button.remove-row{
 }
 
 /* =========================================================
-   TRAINING SUMMARY — stacked inputs (dates + additional trainers)
-   ✅ Use same fixed "answer column" sizing as regular inputs
+   ✅ TRAINING SUMMARY — STACKS (DATES + ADDL TRAINERS)
+   Fix: Additional Trainers is a NORMAL input (34px),
+        same width as other answers in Engagement Snapshot
 ========================================================= */
-.mk-stack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
+
+/* Engagement Snapshot card controls the answer-column width */
+#training-summary .cards-grid.two-col > .section-block:first-child{
+  --mk-sum-wide: 340px; /* you can bump to 360/380 if you want */
+}
+
+/* Normal answer inputs in Engagement Snapshot */
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="text"],
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="date"],
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row select{
+  flex:0 0 var(--mk-sum-wide) !important;
+  width:var(--mk-sum-wide) !important;
+  max-width:var(--mk-sum-wide) !important;
+  margin-left:auto !important;
+  height:34px !important;
+}
+
+/* Shared stack container sizing (Onsite Dates + Additional Trainers stack) */
+#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack,
+#training-summary #mkSum_addlTrainersStack{
+  flex:0 0 var(--mk-sum-wide) !important;
+  width:var(--mk-sum-wide) !important;
+  max-width:var(--mk-sum-wide) !important;
   margin-left:auto !important;
   display:flex !important;
   flex-direction:column !important;
   gap:8px !important;
   align-items:stretch !important;
 }
-.mk-stack input[type="text"],
-.mk-stack input[type="date"]{
+
+/* ✅ The KEY FIX: force addl trainer inputs to be identical to normal inputs */
+#training-summary #mkSum_addlTrainersStack input[type="text"]{
   width:100% !important;
+  max-width:100% !important;
   height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
   padding:7px 10px !important;
   border:1px solid var(--border) !important;
   border-radius:var(--radius-sm) !important;
   background:#f7f7f7 !important;
   box-sizing:border-box !important;
+  box-shadow:none !important;
 }
 
-/* keeps label aligned to top like your date stack cards */
-#training-summary .checklist-row:has(.mk-stack){ align-items:flex-start !important; }
-#training-summary .checklist-row:has(.mk-stack) label{ padding-top:7px !important; }
-
-/* =========================================================
-   ✅ PAGE 11 FIX — Engagement Snapshot widths (includes Additional Trainers)
-   Root cause was “fighting” rules that stretched mk-stack to 100%.
-   We lock the Engagement Snapshot card to a single right-column width.
-========================================================= */
-
-/* Engagement Snapshot card (first card in row 1) */
-#training-summary .cards-grid.two-col > .section-block:first-child{
-  --input-width:260px;   /* adjust if you want wider/narrower */
+/* Keeps label aligned to top like your date stack rows */
+#training-summary .checklist-row:has(.mk-stack),
+#training-summary .checklist-row:has(#mkSum_addlTrainersStack){
+  align-items:flex-start !important;
+}
+#training-summary .checklist-row:has(.mk-stack) label,
+#training-summary .checklist-row:has(#mkSum_addlTrainersStack) label{
+  padding-top:7px !important;
 }
 
-/* Ensure Outcome dropdown is readable (optional, safe) */
+/* Outcome dropdown wide enough */
 #training-summary #mkSum_outcome{
+  width:max-content !important;
   min-width:260px !important;
   padding-right:34px !important;
 }
 
-/* =========================================================
-   PATCH — Training Summary: Outcome rationale label row spacing
-========================================================= */
+/* Outcome rationale label row */
 #training-summary .mk-fullwidth-row{
   margin-bottom:4px !important;
   padding-bottom:0 !important;
   border-bottom:none !important;
 }
 #training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
-
-/* =========================================================
-   OPTIONAL: Notes popup styling (non-table notes)
-   (kept minimal + non-conflicting)
-========================================================= */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
-  padding:14px 14px 16px !important;
-}
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
-  border:none !important;
-  box-shadow:none !important;
-  background:transparent !important;
-  padding:0 !important;
-  margin:0 !important;
-}
-#mkTableModal:not(:has(table.training-table)) textarea{
-  background:#fff !important;
-  border:2px solid #e6e6e6 !important;
-  border-radius:22px !important;
-  box-shadow:none !important;
-  padding:16px 18px !important;
-  margin:0 !important;
-  resize:none !important;
-  min-height:calc(90vh - 230px) !important;
-}
-#mkTableModal:not(:has(table.training-table)) textarea:focus{
-  border-color:rgba(239,109,34,0.55) !important;
-  box-shadow:0 0 0 3px rgba(239,109,34,0.18) !important;
-  outline:none !important;
-}
-
-/* =========================================================
-   FIX — Page 11 (Training Summary): Additional Trainers box
-   Force it to behave EXACTLY like the other inputs
-   (height + padding + border + background)
-========================================================= */
-
-#training-summary #mkSum_addlTrainersRow{
-  align-items:center !important; /* keep row consistent with others */
-}
-
-/* lock the right-side column width to match other rows */
-#training-summary #mkSum_addlTrainersStack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  margin-left:auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-  align-items:stretch !important;
-}
-
-/* If anything (input OR textarea) ends up inside this stack, force it to look like a normal input */
-#training-summary #mkSum_addlTrainersStack input[type="text"],
-#training-summary #mkSum_addlTrainersStack input[type="date"],
-#training-summary #mkSum_addlTrainersStack textarea{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-
-  font-size:13px !important;
-  line-height:normal !important;
-  box-sizing:border-box !important;
-
-  /* kills “textarea behavior” if one sneaks in */
-  resize:none !important;
-  overflow:hidden !important;
-}
