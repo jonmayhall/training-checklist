@@ -1730,3 +1730,126 @@ button.remove-row{
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
 }
+
+/* =======================================================
+   NOTES POPUP (EXPANDED CARD) — SINGLE-CARD FIX
+   - Removes header/body gap
+   - Makes popup look like one section-block card
+   - Squares textarea top corners so it connects
+======================================================= */
+
+/* 1) Overlay (if you use one) */
+.notes-modal-overlay,
+.modal-overlay,
+.notes-overlay {
+  /* keep whatever you already have; these are harmless fallbacks */
+}
+
+/* 2) Make the popup container behave like ONE card */
+.notes-modal,
+.notes-popup,
+.modal.notes,
+#notesModal,
+#notes-modal {
+  /* no changes here unless you want; most projects style the overlay here */
+}
+
+/* 3) The actual popup “card” wrapper */
+.notes-modal .notes-modal-content,
+.notes-popup .notes-popup-content,
+.modal.notes .modal-content,
+#notesModal .modal-content,
+#notes-modal .modal-content,
+.notes-modal-content,
+.notes-popup-content,
+.modal-content.notes-content {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #dcdcdc);
+  border-radius: 16px;              /* match your card rounding */
+  overflow: hidden;                 /* 🔥 key: clips header + body into one card */
+  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 4) Header is part of the same card (no gap, no separate rounding) */
+.notes-modal .notes-modal-header,
+.notes-popup .notes-popup-header,
+.modal.notes .modal-header,
+#notesModal .modal-header,
+#notes-modal .modal-header,
+.notes-modal-header,
+.notes-popup-header,
+.modal-header.notes-header {
+  margin: 0 !important;             /* 🔥 kill the gap */
+  border: 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,.10);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* keep your orange header look */
+  background: var(--orange, #EF6D22);
+  color: #fff;
+}
+
+/* 5) Body connects directly under the header */
+.notes-modal .notes-modal-body,
+.notes-popup .notes-popup-body,
+.modal.notes .modal-body,
+#notesModal .modal-body,
+#notes-modal .modal-body,
+.notes-modal-body,
+.notes-popup-body,
+.modal-body.notes-body {
+  margin: 0 !important;             /* 🔥 kill the gap */
+  padding: 12px 12px 14px;
+  background: transparent;
+}
+
+/* 6) Textarea should not look like its own separate card */
+.notes-modal textarea,
+.notes-popup textarea,
+.modal.notes textarea,
+#notesModal textarea,
+#notes-modal textarea {
+  width: 100%;
+  min-height: 360px;                /* adjust if you want */
+  border: 1px solid var(--border, #dcdcdc);
+  border-radius: 0 0 12px 12px;     /* 🔥 only bottom corners rounded */
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  outline: none;
+  padding: 12px 12px;
+  resize: vertical;
+  box-shadow: none;
+}
+
+/* If your popup has a “content area” above textarea, keep it square too */
+.notes-modal .notes-modal-body > *:first-child,
+.notes-popup .notes-popup-body > *:first-child,
+.modal.notes .modal-body > *:first-child {
+  margin-top: 0 !important;
+}
+
+/* 7) Close button stays visually integrated */
+.notes-modal .notes-close-btn,
+.notes-popup .notes-close-btn,
+.modal.notes .close-btn,
+.modal .close-btn {
+  border: 1px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+}
+.notes-modal .notes-close-btn:hover,
+.notes-popup .notes-close-btn:hover,
+.modal.notes .close-btn:hover,
+.modal .close-btn:hover {
+  background: rgba(255,255,255,.20);
+}
