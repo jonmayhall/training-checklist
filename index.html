@@ -3412,9 +3412,12 @@
       </section>
 
 <!-- ========================================================= -->
-<!-- PAGE 11: TRAINING SUMMARY (FIXED STRUCTURE)                -->
-<!-- One page-section wrapper                                  -->
-<!-- No nested grids                                           -->
+<!-- PAGE 11: TRAINING SUMMARY (CLEAN / FIXED STRUCTURE)        -->
+<!-- ✅ One page-section wrapper                                -->
+<!-- ✅ Engagement Snapshot + Outcome are side-by-side in ROW 1  -->
+<!-- ✅ Onsite Dates stacked (2 date inputs)                     -->
+<!-- ✅ Additional Trainers = ONE base input+plus (more via JS)  -->
+<!-- ✅ All divs properly closed (no nesting breaks)             -->
 <!-- ========================================================= -->
 <section id="training-summary" class="page-section">
 
@@ -3441,6 +3444,7 @@
       <button class="mk-action-item" type="button" data-action="reset">Reset This Page</button>
     </div>
 
+    <!-- legacy hook (kept) -->
     <button id="savePDF" type="button" hidden>Save All Pages as PDF</button>
   </div>
 
@@ -3468,59 +3472,69 @@
         <input id="mkSum_dealerGroup_2" type="text" placeholder="Dealer group / ownership group" />
       </div>
 
-<!-- Onsite Dates (stacked like page 1/2) -->
-<div class="checklist-row">
-  <label>Onsite Dates</label>
-  <div class="mk-stack">
-    <input id="mkSum_dateStart" type="date" />
-    <input id="mkSum_dateEnd" type="date" />
-  </div>
-</div>
+      <!-- Onsite Dates (stacked like page 1/2) -->
+      <div class="checklist-row">
+        <label>Onsite Dates</label>
+        <div class="mk-stack">
+          <input id="mkSum_dateStart" type="date" />
+          <input id="mkSum_dateEnd" type="date" />
+        </div>
+      </div>
 
-<!-- Lead Trainer -->
-<div class="checklist-row">
-  <label>Lead Trainer</label>
-  <input id="mkSum_leadTrainer" type="text" placeholder="Lead trainer" />
-</div>
+      <!-- Lead Trainer -->
+      <div class="checklist-row">
+        <label>Lead Trainer</label>
+        <input id="mkSum_leadTrainer" type="text" placeholder="Lead trainer" />
+      </div>
 
-<!-- Additional Trainers (one base + add more) -->
-<div class="checklist-row" id="mkSum_addlTrainersRow">
-  <label>Additional Trainers</label>
+      <!-- Additional Trainers (one base + add more via JS) -->
+      <div class="checklist-row" id="mkSum_addlTrainersRow">
+        <label>Additional Trainers</label>
 
-  <div class="mk-stack" id="mkSum_addlTrainersStack">
-    <div class="input-plus mk-sum-addl-plus">
-      <input id="mkSum_addTrainer_0" type="text" placeholder="Additional trainer" />
-      <button type="button" class="mkSumAddTrainerBtn" aria-label="Add additional trainer">+</button>
-    </div>
-    <!-- JS appends more inputs here -->
-  </div>
-</div>
+        <div class="mk-stack" id="mkSum_addlTrainersStack">
+          <div class="input-plus mk-sum-addl-plus">
+            <input id="mkSum_addTrainer_0" type="text" placeholder="Additional trainer" />
+            <button
+              type="button"
+              class="mkSumAddTrainerBtn"
+              aria-label="Add additional trainer"
+            >+</button>
+          </div>
+          <!-- JS appends more inputs here -->
+        </div>
+      </div>
 
-<!-- Outcome (this must be OUTSIDE the checklist-row above) -->
-<div class="section-block">
-  <h2>Outcome</h2>
+    </div><!-- /Engagement Snapshot -->
 
-  <div class="checklist-row">
-    <label>Overall training outcome</label>
-    <select id="mkSum_outcome">
-      <option value="" data-ghost="true">Select outcome</option>
-      <option>Exceeded Expectations</option>
-      <option>Met Expectations</option>
-      <option>Partially Met Expectations</option>
-      <option>Did Not Meet Expectations</option>
-    </select>
-  </div>
+    <!-- Outcome -->
+    <div class="section-block">
+      <h2>Outcome</h2>
 
-  <div class="checklist-row mk-fullwidth-row" style="margin-top:10px;">
-    <label>Outcome rationale</label>
-  </div>
+      <div class="checklist-row">
+        <label>Overall training outcome</label>
+        <select id="mkSum_outcome">
+          <option value="" data-ghost="true">Select outcome</option>
+          <option>Exceeded Expectations</option>
+          <option>Met Expectations</option>
+          <option>Partially Met Expectations</option>
+          <option>Did Not Meet Expectations</option>
+        </select>
+      </div>
 
-  <textarea
-    id="mkSum_outcomeWhy"
-    class="mk-fullwidth-textarea"
-    placeholder="Short rationale based on what was completed vs. what remains"
-  ></textarea>
-</div>
+      <!-- Full-width rationale -->
+      <div class="checklist-row mk-fullwidth-row" style="margin-top:10px;">
+        <label>Outcome rationale</label>
+      </div>
+
+      <textarea
+        id="mkSum_outcomeWhy"
+        class="mk-fullwidth-textarea"
+        placeholder="Short rationale based on what was completed vs. what remains"
+      ></textarea>
+    </div><!-- /Outcome -->
+
+  </div><!-- /ROW 1 -->
+
 
   <!-- ========================= -->
   <!-- ROW 2                    -->
@@ -3543,7 +3557,8 @@
       ></textarea>
     </div>
 
-  </div>
+  </div><!-- /ROW 2 -->
+
 
   <!-- ========================= -->
   <!-- ROW 3                    -->
@@ -3566,7 +3581,8 @@
       ></textarea>
     </div>
 
-  </div>
+  </div><!-- /ROW 3 -->
+
 
   <!-- ========================= -->
   <!-- ROW 4                    -->
@@ -3589,7 +3605,8 @@
       ></textarea>
     </div>
 
-  </div>
+  </div><!-- /ROW 4 -->
+
 
   <!-- ========================= -->
   <!-- FULL-WIDTH CARD           -->
