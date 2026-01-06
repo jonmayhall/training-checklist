@@ -1882,3 +1882,28 @@ button.remove-row{
   box-shadow: 0 0 0 3px rgba(239,109,34,0.18) !important;
 }
 
+/* =======================================================
+   PATCH — Remove extra thin border in NOTES popups
+   Root cause: .mk-ta-wrap still has a border
+======================================================= */
+
+/* NOTES popups only (NOT table popups) */
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
+  border: none !important;        /* 🔥 removes thin border */
+  box-shadow: none !important;   /* safety */
+  background: transparent !important;
+  padding: 0 !important;         /* let textarea define the card */
+}
+
+/* The textarea is the ONLY visual card */
+#mkTableModal:not(:has(table.training-table)) textarea{
+  border: 2px solid #e6e6e6 !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Focus should not reintroduce a fake inner line */
+#mkTableModal:not(:has(table.training-table)) textarea:focus{
+  box-shadow: 0 0 0 3px rgba(239,109,34,0.18) !important;
+}
