@@ -1853,3 +1853,39 @@ button.remove-row{
 .modal .close-btn:hover {
   background: rgba(255,255,255,.20);
 }
+
+/* =========================================================
+   NOTES POPUP (Modal) — remove header-to-textbox gap
+   Makes modal notes look like on-page notes cards
+========================================================= */
+
+/* Kill any extra spacing inside modal notes blocks */
+#mkTableModal .mk-modal-content .notes-block h2,
+#mkTableModal .mk-modal-content .section-block h2 {
+  margin-bottom: 0 !important;   /* removes the clear band */
+  padding-bottom: 10px;          /* keeps nice header spacing */
+  border-bottom: 1px solid var(--border);
+}
+
+/* If your modal wrapper adds padding that creates “air”, tighten it */
+#mkTableModal .mk-modal-content .notes-block .mk-ta-wrap,
+#mkTableModal .mk-modal-content .notes-block textarea {
+  margin-top: 0 !important;
+}
+
+/* Connect textarea to header (no rounded corners on top) */
+#mkTableModal .mk-modal-content .notes-block textarea {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* If the textarea itself is sitting lower because of padding on wrapper */
+#mkTableModal .mk-modal-content .notes-block .mk-ta-wrap {
+  padding-top: 0 !important;
+}
+
+/* OPTIONAL: If you see a thin white strip between header + textarea,
+   it's usually background showing through—force same background */
+#mkTableModal .mk-modal-content .notes-block {
+  overflow: hidden; /* ensures header + textarea look like one card */
+}
