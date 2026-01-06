@@ -2185,3 +2185,28 @@ button.remove-row{
   height: 40px; /* match your global input height */
 }
 
+/* =========================================================
+   PAGE 11 — Additional Trainers width match (Engagement Snapshot)
+========================================================= */
+#training-summary #mkSum_addlTrainersRow{
+  align-items: flex-start; /* prevents weird vertical centering */
+}
+
+#training-summary #mkSum_addlTrainersRow #mkSum_addlTrainersStack{
+  /* THIS is the key: make the stack take the exact same "answer column" width */
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Force each additional trainer input to fill the stack */
+#training-summary #mkSum_addlTrainersRow #mkSum_addlTrainersStack input{
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
