@@ -3332,8 +3332,12 @@
     Reset This Page
   </button>
 
-  <!-- ROW 1: Training Completion by Role + Notes -->
-  <div class="cards-grid two-col">
+  <!-- ========================= -->
+  <!-- 2x2 CARDS GRID (matches Pages 3 & 4) -->
+  <!-- ========================= -->
+  <div class="cards-grid two-col" style="margin-top:16px;">
+
+    <!-- CARD 1: Training Completion by Role -->
     <div class="section-block">
       <h2>Training Completion by Role</h2>
 
@@ -3401,16 +3405,7 @@
       </div>
     </div>
 
-    <div class="section-block" id="notes-post-training-completion">
-      <h2>Notes — Training Completion</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 2: Final Sign-Off + Notes -->
-  <div class="cards-grid two-col">
+    <!-- CARD 2: Final Sign-Off -->
     <div class="section-block">
       <h2>Final Sign-Off</h2>
 
@@ -3454,36 +3449,23 @@
         </div>
       </div>
 
-    <div class="checklist-row">
-  <label>Post-training CEM call</label>
-  <div class="row-actions">
-    <input type="date" />
+      <div class="checklist-row">
+        <label>Post-training CEM call</label>
+        <div class="row-actions">
+          <input type="date" />
 
-    <button
-      type="button"
-      class="notes-icon-btn notes-icon-btn--sm"
-      data-notes-btn
-      data-notes-target="notes-post-training-final-signoff"
-      aria-label="Add/View Notes"
-    >
-      <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-        <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-      </svg>
-    </button>
-  </div>
-</div>
-
-    <div class="section-block" id="notes-post-training-final-signoff">
-      <h2>Notes — Final Sign-Off</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn data-notes-target="notes-post-training-final-signoff" aria-label="Add/View Notes">
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ROW 3: Management Buy-in + Notes -->
-  <div class="cards-grid two-col">
+    <!-- CARD 3: Management Buy-in -->
     <div class="section-block">
       <h2>Management Buy-in</h2>
 
@@ -3532,16 +3514,7 @@
       </div>
     </div>
 
-    <div class="section-block" id="notes-post-training-buyin">
-      <h2>Notes — Management Buy-in</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 4: Automations + Notes -->
-  <div class="cards-grid two-col">
+    <!-- CARD 4: Automations -->
     <div class="section-block">
       <h2>Automations</h2>
 
@@ -3569,17 +3542,43 @@
         </div>
       </div>
 
-      <!-- (repeat your other automation rows as-is) -->
-
+      <!-- Repeat other automation rows as needed, same pattern -->
     </div>
 
-    <div class="section-block" id="notes-post-training-automations">
-      <h2>Notes — Automations</h2>
-      <div class="mk-ta-wrap">
-        <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
-      </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- NOTES BLOCKS (targets kept the same) -->
+  <!-- ========================= -->
+
+  <div class="section-block" id="notes-post-training-completion" style="margin-top:16px;">
+    <h2>Notes — Training Completion</h2>
+    <div class="mk-ta-wrap">
+      <textarea placeholder="Notes about users who still need help, retraining needs, or role-specific gaps"></textarea>
     </div>
   </div>
+
+  <div class="section-block" id="notes-post-training-final-signoff" style="margin-top:16px;">
+    <h2>Notes — Final Sign-Off</h2>
+    <div class="mk-ta-wrap">
+      <textarea placeholder="Any final thoughts, risks, or context for CEM / Deployment / Support"></textarea>
+    </div>
+  </div>
+
+  <div class="section-block" id="notes-post-training-buyin" style="margin-top:16px;">
+    <h2>Notes — Management Buy-in</h2>
+    <div class="mk-ta-wrap">
+      <textarea placeholder="Notes on leadership alignment and engagement"></textarea>
+    </div>
+  </div>
+
+  <div class="section-block" id="notes-post-training-automations" style="margin-top:16px;">
+    <h2>Notes — Automations</h2>
+    <div class="mk-ta-wrap">
+      <textarea placeholder="Notes on active/inactive automations, why, and timeline to enable."></textarea>
+    </div>
+  </div>
+
 </section>
 
         <!-- ========================================================= -->
