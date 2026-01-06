@@ -2112,7 +2112,7 @@ button.remove-row{
 
 /* Engagement Snapshot card only (first card in row 1) */
 #training-summary .cards-grid.two-col > .section-block:first-child{
-  --mk-sum-wide: 460px; /* tweak if you want (430–520) */
+  --mk-sum-wide: 260px; /* tweak if you want (430–520) */
 }
 
 /* Make ALL right-side inputs use the wider width */
