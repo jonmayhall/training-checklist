@@ -1,25 +1,27 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.1)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.2)
 
    ✅ INCLUDES:
    - Full state save/restore for inputs/selects/textareas/contenteditable
    - Nav (page-section switching + remember last page)
    - Notes logic (• main + "  ◦ " caret stays to the RIGHT)
-   - Additional Trainers (+) on Trainers page (page 2) persistence
+   - Additional Trainers (+) on Trainers page (trainers-deployment) persistence
+     ✅ "+" adds ONE row per click (single handler)
+     ✅ Base textbox value is included in summary mirroring
    - Additional POC (+) persistence
    - Tables: Add Row + persist/restore cloned rows
    - Support Tickets: add card + status move + persist/restore
    - Expand modal for tables + notes, with CSS parity via ID-swapping wrapper
+   - Modal close: panel-level X support (no per-card X injection)
    - Topbar dealer title sync (DID + Group + Dealer)
    - Training end date auto-set (+3 days after onsite start)
-   - Training Summary (Page 11) Engagement Snapshot autopull:
+   - Training Summary (training-summary) Engagement Snapshot autopull:
        DID / Dealer / Group / Dates / Lead Trainer / Additional Trainers
        ✅ Additional Trainers on summary:
          - NO add button
          - 1 input by default
-         - more inputs appear ONLY if added on page 2 (trainers page)
-
+         - more inputs appear ONLY if there are more names on trainers page
 ======================================================= */
 
 (() => {
@@ -28,16 +30,15 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_1";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_2";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
-
   const DEBUG = false;
   const log = (...args) => (DEBUG ? console.log("[mk]", ...args) : void 0);
 
   // ====== TOPBAR + SUMMARY SOURCE FIELD IDS ======
-  // Adjust/add IDs here if your HTML differs.
+  // Add/adjust IDs here if your HTML differs.
   const MK_IDS = {
     dealershipName: ["dealershipNameInput"],
     did: ["dealershipDidInput"],
@@ -46,10 +47,15 @@
     onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+    // Lead trainer SOURCE on trainers page:
+    // You shared: <select id="leadTrainerSelect">
+    leadTrainerSelect: ["leadTrainerSelect"],
+
+    // Some builds also have a text input lead trainer; keep as fallback:
+    leadTrainerText: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
   };
 
-  // ====== SUMMARY PAGE 11 IDS (Engagement Snapshot) ======
+  // ====== SUMMARY PAGE IDs (Engagement Snapshot) ======
   const MK_SUMMARY_IDS = {
     did: "mkSum_did_2",
     dealership: "mkSum_dealership_2",
@@ -58,7 +64,7 @@
     dateEnd: "mkSum_dateEnd",
     leadTrainer: "mkSum_leadTrainer",
 
-    // Additional Trainers (stack + base input)
+    // Additional Trainers stack (container) + base input
     addlStack: "mkSum_addlTrainersStack",
     addlBase: "mkSum_addTrainer_0",
     addlRow: "mkSum_addlTrainersRow",
@@ -202,7 +208,6 @@
 
     if (!d && !n) return "";
     if (!d) return n;
-
     if (g) return `DID - ${d} ${g} ${n}`.replace(/\s+/g, " ").trim();
     return `DID - ${d} ${n}`.replace(/\s+/g, " ").trim();
   };
@@ -216,61 +221,6 @@
     const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
 
     display.textContent = mkFormatTopbarTitle({ did, dealerGroup, dealership });
-  };
-
-  /* =======================
-     LABEL + PLACEHOLDER FINDERS (best-effort)
-  ======================= */
-  const mkFindFieldByLabelText = (sectionEl, labelIncludes) => {
-    if (!sectionEl) return null;
-    const want = String(labelIncludes || "").toLowerCase().trim();
-    if (!want) return null;
-
-    const rows = $$(".checklist-row", sectionEl);
-    for (const row of rows) {
-      const lab = row.querySelector("label");
-      const t = (lab?.textContent || "").toLowerCase().trim();
-      if (!t) continue;
-      if (!t.includes(want)) continue;
-
-      const field =
-        row.querySelector(
-          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
-        ) || null;
-      if (field) return field;
-    }
-    return null;
-  };
-
-  const mkFindTextInputByPlaceholder = (root, placeholderIncludes) => {
-    const want = String(placeholderIncludes || "").toLowerCase().trim();
-    if (!want) return null;
-    const inputs = $$("input[type='text'], input[type='email'], input[type='tel']", root);
-    for (const inp of inputs) {
-      const ph = (inp.getAttribute("placeholder") || "").toLowerCase();
-      if (ph.includes(want)) return inp;
-    }
-    return null;
-  };
-
-  const mkFindDateInputByLabelOrId = (root, ids, labelIncludes) => {
-    for (const id of ids || []) {
-      const el = document.getElementById(id);
-      if (el && el.matches('input[type="date"]')) return el;
-    }
-    const sections = $$(".page-section", root);
-    for (const sec of sections) {
-      const found = mkFindFieldByLabelText(sec, labelIncludes);
-      if (found && found.matches('input[type="date"]')) return found;
-    }
-    const allDates = $$('input[type="date"]', root);
-    for (const d of allDates) {
-      const id = (d.id || "").toLowerCase();
-      const nm = (d.name || "").toLowerCase();
-      const want = String(labelIncludes || "").toLowerCase();
-      if (want && (id.includes(want) || nm.includes(want))) return d;
-    }
-    return null;
   };
 
   /* =======================
@@ -360,7 +310,6 @@
       const t = document.createElement("div");
       t.className = "mk-pop-title";
       t.textContent = title;
-
       head.appendChild(t);
 
       const body = document.createElement("div");
@@ -491,7 +440,7 @@
   };
 
   /* =======================
-     NOTES BUTTON VISUAL RESET
+     CLEAR ALL + RESET PAGE
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
@@ -504,9 +453,6 @@
       });
   };
 
-  /* =======================
-     CLEAR ALL + RESET PAGE
-  ======================= */
   const removeDynamicClonesIn = (root = document) => {
     const trainerContainer = $("#additionalTrainersContainer", root);
     if (trainerContainer) trainerContainer.innerHTML = "";
@@ -623,7 +569,9 @@
   };
 
   /* =======================
-     ADD TRAINER (+) — Page 2
+     ADD TRAINER (+) — trainers-deployment
+     ✅ Single handler
+     ✅ Adds ONE row per click
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -651,23 +599,39 @@
     return wrap;
   };
 
+  const persistAdditionalTrainerClones = () => {
+    const container = $("#additionalTrainersContainer");
+    const clones = cloneState.get();
+    clones.trainers = container
+      ? $$("input[type='text']", container).map((i) => ({ value: (i.value || "").trim() }))
+      : [];
+    cloneState.set(clones);
+  };
+
   const addTrainerRow = () => {
     const input = $("#additionalTrainerInput");
     const container = $("#additionalTrainersContainer");
     if (!input || !container) return;
 
     const name = (input.value || "").trim();
+    if (!name) {
+      mkSyncSummaryEngagementSnapshot();
+      return;
+    }
+
     const row = buildTrainerRow(name);
     container.appendChild(row);
 
-    const clones = cloneState.get();
-    clones.trainers.push({ value: name });
-    cloneState.set(clones);
+    // persist
+    persistAdditionalTrainerClones();
 
+    // clear base input
     input.value = "";
     saveField(input);
+    triggerInputChange(input);
     input.focus();
 
+    // mirror summary
     mkSyncSummaryEngagementSnapshot();
   };
 
@@ -1346,7 +1310,6 @@
 
     saveField(inputEl);
     saveField(status);
-
     persistAllTickets();
   };
 
@@ -1454,9 +1417,28 @@
   /* =======================
      TRAINING END DATE AUTO-SET (3 days after onsite)
   ======================= */
+  const mkFindDateInputByIdOrLabelGuess = (ids, labelIncludes) => {
+    // id first
+    for (const id of ids || []) {
+      const el = document.getElementById(id);
+      if (el && el.matches('input[type="date"]')) return el;
+    }
+    // best-effort label search
+    const want = String(labelIncludes || "").toLowerCase();
+    const rows = $$(".checklist-row");
+    for (const row of rows) {
+      const lab = row.querySelector("label");
+      const txt = (lab?.textContent || "").toLowerCase();
+      if (!txt.includes(want)) continue;
+      const fld = row.querySelector('input[type="date"]');
+      if (fld) return fld;
+    }
+    return null;
+  };
+
   const mkAutoSetTrainingEndDate = () => {
-    const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
-    const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+    const onsiteInput = mkFindDateInputByIdOrLabelGuess(MK_IDS.onsiteDate, "onsite");
+    const endInput = mkFindDateInputByIdOrLabelGuess(MK_IDS.trainingEndDate, "end");
     if (!onsiteInput || !endInput) return;
 
     const compute = () => {
@@ -1482,26 +1464,38 @@
   };
 
   /* =======================
-     TRAINING SUMMARY (PAGE 11) — Engagement Snapshot autopull
-     ✅ Additional Trainers: 1 base + more ONLY if exist on Trainers page
+     TRAINING SUMMARY — Engagement Snapshot autopull
+     ✅ Lead trainer from select (#leadTrainerSelect) (fallback to text inputs)
+     ✅ Additional trainers includes BASE textbox + ALL added rows
   ======================= */
-  const mkGetTrainerCloneValues = () => {
-    // Source of truth: cloneState (covers restored state too)
+  const mkGetLeadTrainerValue = () => {
+    const fromSelect = mkFirstValueByIds(MK_IDS.leadTrainerSelect);
+    if (fromSelect) return fromSelect;
+    return mkFirstValueByIds(MK_IDS.leadTrainerText);
+  };
+
+  const mkGetAdditionalTrainersAll = () => {
+    const base = ($("#additionalTrainerInput")?.value || "").trim();
+
     const clones = cloneState.get();
-    const arr = (clones.trainers || [])
+    const added = (clones.trainers || [])
       .map((t) => String(t?.value || "").trim())
       .filter(Boolean);
 
-    // Fallback: DOM container if needed
-    if (!arr.length) {
-      const container = $("#additionalTrainersContainer");
-      if (container) {
-        return $$("input[type='text']", container)
-          .map((i) => (i.value || "").trim())
-          .filter(Boolean);
-      }
-    }
-    return arr;
+    // also read DOM if needed (covers live edits)
+    const container = $("#additionalTrainersContainer");
+    const domAdded = container
+      ? $$("input[type='text']", container).map((i) => (i.value || "").trim()).filter(Boolean)
+      : [];
+
+    const all = [];
+    if (base) all.push(base);
+    all.push(...added);
+    all.push(...domAdded);
+
+    // de-dupe keep order
+    const seen = new Set();
+    return all.filter((v) => (seen.has(v) ? false : (seen.add(v), true)));
   };
 
   const mkSyncAdditionalTrainersToSummary = () => {
@@ -1509,18 +1503,28 @@
     const base = document.getElementById(MK_SUMMARY_IDS.addlBase);
     const row = document.getElementById(MK_SUMMARY_IDS.addlRow);
 
-    if (!stack || !base) return;
+    if (!stack) return;
 
-    // wipe any dynamic inputs (keep base only)
+    // ensure base exists
+    let baseInput = base;
+    if (!baseInput) {
+      baseInput = document.createElement("input");
+      baseInput.type = "text";
+      baseInput.id = MK_SUMMARY_IDS.addlBase;
+      baseInput.placeholder = "Additional trainer";
+      stack.prepend(baseInput);
+    }
+
+    // remove all other summary inputs
     $$(`input[id^="mkSum_addTrainer_"]`, stack).forEach((el) => {
       if (el.id !== MK_SUMMARY_IDS.addlBase) el.remove();
     });
 
-    const values = mkGetTrainerCloneValues();
+    const values = mkGetAdditionalTrainersAll();
 
-    base.value = values[0] || "";
-    ensureId(base);
-    saveField(base);
+    baseInput.value = values[0] || "";
+    ensureId(baseInput);
+    saveField(baseInput);
 
     for (let i = 1; i < values.length; i++) {
       const inp = document.createElement("input");
@@ -1534,12 +1538,7 @@
       saveField(inp);
     }
 
-    // Optional: hide the whole row if no additional trainers
-    // (comment out if you always want the base input visible)
-    if (row) {
-      row.style.display = "flex";
-    }
-
+    if (row) row.style.display = ""; // keep visible (you wanted the base to show too)
     setGhostStyles(document);
   };
 
@@ -1547,7 +1546,6 @@
     const summarySection = document.getElementById("training-summary");
     if (!summarySection) return;
 
-    // Engagement snapshot fields
     const didEl = document.getElementById(MK_SUMMARY_IDS.did);
     const dealerEl = document.getElementById(MK_SUMMARY_IDS.dealership);
     const groupEl = document.getElementById(MK_SUMMARY_IDS.dealerGroup);
@@ -1557,48 +1555,39 @@
 
     const leadEl = document.getElementById(MK_SUMMARY_IDS.leadTrainer);
 
-    // Pull dealership data from known IDs (page 1)
     const did = mkFirstValueByIds(MK_IDS.did);
     const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
     const dealership = mkFirstValueByIds(MK_IDS.dealershipName);
 
-    if (didEl && (didEl.value || "").trim() !== did) didEl.value = did || "";
-    if (dealerEl && (dealerEl.value || "").trim() !== dealership) dealerEl.value = dealership || "";
-    if (groupEl && (groupEl.value || "").trim() !== dealerGroup) groupEl.value = dealerGroup || "";
+    if (didEl) didEl.value = did || "";
+    if (dealerEl) dealerEl.value = dealership || "";
+    if (groupEl) groupEl.value = dealerGroup || "";
 
-    // Pull dates
-    const startSrc = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
-    const endSrc = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+    const startSrc = mkFindDateInputByIdOrLabelGuess(MK_IDS.onsiteDate, "onsite");
+    const endSrc = mkFindDateInputByIdOrLabelGuess(MK_IDS.trainingEndDate, "end");
 
-    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) {
-      startEl.value = startSrc.value || "";
-    }
-    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) {
-      endEl.value = endSrc.value || "";
-    }
+    if (startEl && startSrc) startEl.value = startSrc.value || "";
+    if (endEl && endSrc) endEl.value = endSrc.value || "";
 
-    // Pull lead trainer
-    const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
-    if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
+    const lead = mkGetLeadTrainerValue();
+    if (leadEl) leadEl.value = lead || "";
 
-    // Save IDs (so reset/page restore behaves)
     [didEl, dealerEl, groupEl, startEl, endEl, leadEl].forEach((el) => {
       if (!el) return;
       ensureId(el);
       saveField(el);
     });
 
-    // Additional Trainers (base + dynamic)
     mkSyncAdditionalTrainersToSummary();
   };
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES)
-     ✅ Modal styling matches page exactly by ID-swapping wrapper
-     ✅ Removes “random card behind” by removing modal panel background/padding
+     ✅ Modal styling parity via ID-swapping wrapper
+     ✅ No per-card close injection (panel-level X handled by CSS/your modal)
   ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8";
+    const STYLE_ID = "mk-expand-style-v8_2";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1620,10 +1609,7 @@
           box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
           border-color:#EF6D22 !important;
         }
-        .mk-expand-placeholder{
-          display:block;
-          width:100%;
-        }
+        .mk-expand-placeholder{ display:block; width:100%; }
         #mkTableModal .mk-modal-panel{
           background: transparent !important;
           border: none !important;
@@ -1649,22 +1635,16 @@
   const tableModal = {
     modal: null,
     content: null,
-    title: null,
     moved: [],
     bodyOverflow: "",
-    origin: {
-      sectionEl: null,
-      originalId: "",
-      tempId: "",
-      wrapperEl: null,
-    },
+    origin: { sectionEl: null, originalId: "", tempId: "" },
   };
 
   const openModalWithNodes = (nodes, titleText, originSectionEl) => {
     const modal = $("#mkTableModal");
     if (!modal) {
       mkPopup.ok(
-        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
+        "Your expand buttons need the #mkTableModal HTML block on the page (before </body>).",
         { title: "Missing Expand Modal" }
       );
       return;
@@ -1682,7 +1662,6 @@
 
     tableModal.modal = modal;
     tableModal.content = content;
-    tableModal.title = titleEl;
     tableModal.moved = [];
     content.innerHTML = "";
 
@@ -1692,27 +1671,22 @@
     const originId = originSectionEl?.id ? String(originSectionEl.id).trim() : "";
     if (originSectionEl && originId) {
       const holdId = `${originId}__mk_hold`;
-      if (originSectionEl.id === originId) {
-        originSectionEl.id = holdId;
-      }
+      if (originSectionEl.id === originId) originSectionEl.id = holdId;
 
       wrapper = document.createElement("div");
       wrapper.id = originId;
       wrapper.className = "page-section active";
-
       content.appendChild(wrapper);
 
       tableModal.origin.sectionEl = originSectionEl;
       tableModal.origin.originalId = originId;
       tableModal.origin.tempId = holdId;
-      tableModal.origin.wrapperEl = wrapper;
     } else {
       content.classList.add("page-section", "active");
     }
 
     nodes.forEach((node) => {
       if (!node || !node.parentNode) return;
-
       const rect = node.getBoundingClientRect();
       const ph = document.createElement("div");
       ph.className = "mk-expand-placeholder";
@@ -1734,7 +1708,7 @@
   };
 
   const closeTableModal = () => {
-    const modal = tableModal.modal;
+    const modal = tableModal.modal || $("#mkTableModal");
     if (!modal) return;
 
     (tableModal.moved || []).forEach(({ node, placeholder }) => {
@@ -1745,9 +1719,7 @@
 
     if (tableModal.origin.sectionEl && tableModal.origin.originalId && tableModal.origin.tempId) {
       const sec = tableModal.origin.sectionEl;
-      if (sec.id === tableModal.origin.tempId) {
-        sec.id = tableModal.origin.originalId;
-      }
+      if (sec.id === tableModal.origin.tempId) sec.id = tableModal.origin.originalId;
     }
 
     modal.classList.remove("open");
@@ -1761,13 +1733,15 @@
 
     tableModal.modal = null;
     tableModal.content = null;
-    tableModal.title = null;
     tableModal.bodyOverflow = "";
     tableModal.moved = [];
-    tableModal.origin = { sectionEl: null, originalId: "", tempId: "", wrapperEl: null };
+    tableModal.origin = { sectionEl: null, originalId: "", tempId: "" };
   };
 
-  const getExpandBundleNodes = (anyInside) => {
+  const openTableModalFor = (anyInside) => {
+    const modal = $("#mkTableModal");
+    if (modal) modal.classList.remove("mk-notes-only");
+
     const footer = anyInside?.closest?.(".table-footer");
     const sectionCard =
       footer?.closest(".section") ||
@@ -1777,9 +1751,9 @@
       anyInside?.closest?.(".page-section") ||
       document.body;
 
-    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
-
+    // bundle: table card + related notes blocks found in same card
     const nodes = [];
+    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
     if (tableBlock) nodes.push(tableBlock);
 
     const targets = new Set();
@@ -1792,8 +1766,6 @@
       if (block) nodes.push(block);
     });
 
-    if (!nodes.length) nodes.push(sectionCard);
-
     const uniq = [];
     const seen = new Set();
     nodes.forEach((n) => {
@@ -1802,25 +1774,11 @@
       uniq.push(n);
     });
 
-    uniq.sort((a, b) => {
-      if (a === b) return 0;
-      const pos = a.compareDocumentPosition(b);
-      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
-
-    return uniq;
-  };
-
-  const openTableModalFor = (anyInside) => {
-    const modal = $("#mkTableModal");
-    if (modal) modal.classList.remove("mk-notes-only");
-
-    const bundle = getExpandBundleNodes(anyInside);
-    const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
+    const header = uniq[0]?.querySelector?.(".section-header") || uniq[0]?.querySelector?.("h2");
     const title = (header?.textContent || "Expanded View").trim();
-
     const originSectionEl = anyInside.closest(".page-section") || anyInside.closest("section") || null;
-    openModalWithNodes(bundle, title, originSectionEl);
+
+    openModalWithNodes(uniq.length ? uniq : [sectionCard], title, originSectionEl);
   };
 
   const openNotesModalFor = (notesHostEl) => {
@@ -1831,8 +1789,8 @@
 
     const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
     const title = (h?.textContent || "Notes").trim();
-
     const originSectionEl = notesHostEl.closest(".page-section") || notesHostEl.closest("section") || null;
+
     openModalWithNodes([notesHostEl], title, originSectionEl);
   };
 
@@ -1858,7 +1816,6 @@
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
-
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -1905,42 +1862,7 @@
   };
 
   /* =======================
-     SAVE PDF (safe hook)
-  ======================= */
-  const mkHandleSavePDF = () => {
-    const fn =
-      window.saveAllPagesAsPDF ||
-      window.savePDF ||
-      window.generatePDF ||
-      window.exportPDF ||
-      null;
-
-    if (typeof fn === "function") {
-      try {
-        fn();
-        return;
-      } catch (e) {
-        mkPopup.ok(`Save PDF failed:\n${e?.message || e}`, { title: "PDF Error" });
-        return;
-      }
-    }
-
-    try {
-      document.dispatchEvent(new CustomEvent("mk:savepdf"));
-      mkPopup.ok(
-        "PDF handler not found in this script. I fired a 'mk:savepdf' event. If you have a PDF script, hook into that event or add a global function like window.saveAllPagesAsPDF().",
-        { title: "PDF Hook" }
-      );
-    } catch {
-      mkPopup.ok(
-        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
-        { title: "PDF Hook" }
-      );
-    }
-  };
-
-  /* =======================
-     ACTIONS DROPDOWN (Page 11)
+     ACTIONS DROPDOWN (optional)
   ======================= */
   const initSummaryActionsDropdown = () => {
     const wrap = document.getElementById("mkSummaryActions");
@@ -1956,15 +1878,12 @@
       menu.hidden = true;
       btn.setAttribute("aria-expanded", "false");
     }
-    function toggleMenu() {
-      if (menu.hidden) openMenu();
-      else closeMenu();
-    }
 
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      toggleMenu();
+      if (menu.hidden) openMenu();
+      else closeMenu();
     });
 
     document.addEventListener("click", (e) => {
@@ -1978,18 +1897,11 @@
     menu.addEventListener("click", (e) => {
       const item = e.target.closest(".mk-action-item");
       if (!item) return;
-
       const action = item.getAttribute("data-action");
 
       if (action === "generate") {
         mkSyncSummaryEngagementSnapshot();
         mkPopup.ok("Engagement Snapshot refreshed from the project.", { title: "Generate Summary" });
-      }
-
-      if (action === "savepdf") {
-        const hiddenBtn = document.getElementById("savePDF");
-        if (hiddenBtn) hiddenBtn.click();
-        else mkHandleSavePDF();
       }
 
       if (action === "reset") {
@@ -2009,136 +1921,135 @@
   /* =======================
      EVENT DELEGATION
   ======================= */
-  document.addEventListener("click", (e) => {
-    const t = e.target;
+  document.addEventListener(
+    "click",
+    (e) => {
+      const t = e.target;
 
-    const navBtn = t.closest(".nav-btn[data-target]");
-    if (navBtn) {
-      e.preventDefault();
-      const targetId = navBtn.getAttribute("data-target");
-      setActiveSection(targetId);
-
-      setTimeout(() => {
-        ensureTableExpandButtons();
-        ensureNotesExpandButtons();
-
-        // If landing on Training Summary, refresh snapshot
-        if (targetId === "training-summary") {
-          mkSyncSummaryEngagementSnapshot();
-        }
-      }, 0);
-
-      return;
-    }
-
-    const clearAllBtn = t.closest("#clearAllBtn");
-    if (clearAllBtn) {
-      e.preventDefault();
-      mkPopup.confirm("This will clear ALL pages and ALL saved data. Continue?", {
-        title: "Clear All",
-        okText: "Clear All",
-        cancelText: "Cancel",
-        onOk: clearAll,
-      });
-      return;
-    }
-
-    const resetBtn = t.closest(".clear-page-btn");
-    if (resetBtn) {
-      e.preventDefault();
-      const section =
-        (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
-        resetBtn.closest(".page-section");
-
-      mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
-        title: "Reset This Page",
-        okText: "Reset Page",
-        cancelText: "Cancel",
-        onOk: () => clearSection(section),
-      });
-      return;
-    }
-
-    const savePdfBtn = t.closest("#savePDF, [data-mk-action='save-pdf']");
-    if (savePdfBtn) {
-      e.preventDefault();
-      mkHandleSavePDF();
-      return;
-    }
-
-    const addTrainerBtn =
-      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
-    if (addTrainerBtn) {
-      e.preventDefault();
-      addTrainerRow();
-      return;
-    }
-
-    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
-    if (pocBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      addPocCard();
-      return;
-    }
-
-    const addRowBtn = t.closest("button.add-row");
-    if (addRowBtn && addRowBtn.closest(".table-footer")) {
-      e.preventDefault();
-      cloneTableRow(addRowBtn);
-      return;
-    }
-
-    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
-    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
-      e.preventDefault();
-      Notes.handleNotesClick(notesBtn);
-      return;
-    }
-
-    const ticketAddBtn = t.closest(".add-ticket-btn");
-    if (ticketAddBtn) {
-      e.preventDefault();
-      addTicketCard();
-      return;
-    }
-
-    const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
-    if (mapBtn) {
-      e.preventDefault();
-      const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp =
-        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
-      updateDealershipMap(inp ? inp.value : "");
-      return;
-    }
-
-    const tableExpandBtn = t.closest(".mk-table-expand-btn");
-    if (tableExpandBtn) {
-      e.preventDefault();
-      openTableModalFor(tableExpandBtn);
-      return;
-    }
-
-    const notesExpandBtn = t.closest(".mk-ta-expand");
-    if (notesExpandBtn) {
-      e.preventDefault();
-      const id = notesExpandBtn.getAttribute("data-notes-id");
-      const block = id ? document.getElementById(id) : null;
-      if (block) openNotesModalFor(block);
-      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes", notesExpandBtn.closest(".page-section"));
-      return;
-    }
-
-    const mkTableModal = $("#mkTableModal");
-    if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+      const navBtn = t.closest(".nav-btn[data-target]");
+      if (navBtn) {
         e.preventDefault();
-        closeTableModal();
+        const targetId = navBtn.getAttribute("data-target");
+        setActiveSection(targetId);
+
+        setTimeout(() => {
+          ensureTableExpandButtons();
+          ensureNotesExpandButtons();
+          if (targetId === "training-summary") mkSyncSummaryEngagementSnapshot();
+        }, 0);
         return;
       }
-    }
-  });
+
+      const clearAllBtn = t.closest("#clearAllBtn");
+      if (clearAllBtn) {
+        e.preventDefault();
+        mkPopup.confirm("This will clear ALL pages and ALL saved data. Continue?", {
+          title: "Clear All",
+          okText: "Clear All",
+          cancelText: "Cancel",
+          onOk: clearAll,
+        });
+        return;
+      }
+
+      const resetBtn = t.closest(".clear-page-btn");
+      if (resetBtn) {
+        e.preventDefault();
+        const section =
+          (resetBtn.dataset.clearPage && document.getElementById(resetBtn.dataset.clearPage)) ||
+          resetBtn.closest(".page-section");
+
+        mkPopup.confirm("Reset this page? This will clear only the fields on this page.", {
+          title: "Reset This Page",
+          okText: "Reset Page",
+          cancelText: "Cancel",
+          onOk: () => clearSection(section),
+        });
+        return;
+      }
+
+      // Add Trainer (+) — single handler
+      const addTrainerBtn = t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
+      if (addTrainerBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow();
+        return;
+      }
+
+      // Add POC (+)
+      const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
+      if (pocBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        addPocCard();
+        return;
+      }
+
+      // Add row in tables
+      const addRowBtn = t.closest("button.add-row");
+      if (addRowBtn && addRowBtn.closest(".table-footer")) {
+        e.preventDefault();
+        cloneTableRow(addRowBtn);
+        return;
+      }
+
+      // Notes click
+      const notesBtn = t.closest("[data-notes-target]");
+      if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+        e.preventDefault();
+        Notes.handleNotesClick(notesBtn);
+        return;
+      }
+
+      // Tickets add
+      const ticketAddBtn = t.closest(".add-ticket-btn");
+      if (ticketAddBtn) {
+        e.preventDefault();
+        addTicketCard();
+        return;
+      }
+
+      // Map
+      const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
+      if (mapBtn) {
+        e.preventDefault();
+        const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
+        const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+        updateDealershipMap(inp ? inp.value : "");
+        return;
+      }
+
+      // Expand table
+      const tableExpandBtn = t.closest(".mk-table-expand-btn");
+      if (tableExpandBtn) {
+        e.preventDefault();
+        openTableModalFor(tableExpandBtn);
+        return;
+      }
+
+      // Expand notes
+      const notesExpandBtn = t.closest(".mk-ta-expand");
+      if (notesExpandBtn) {
+        e.preventDefault();
+        const id = notesExpandBtn.getAttribute("data-notes-id");
+        const block = id ? document.getElementById(id) : null;
+        if (block) openNotesModalFor(block);
+        return;
+      }
+
+      // Close modal (backdrop or .mk-modal-close)
+      const mkTableModal = $("#mkTableModal");
+      if (mkTableModal && mkTableModal.classList.contains("open")) {
+        if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+          e.preventDefault();
+          closeTableModal();
+          return;
+        }
+      }
+    },
+    true
+  );
 
   document.addEventListener("input", (e) => {
     const el = e.target;
@@ -2149,28 +2060,25 @@
       setGhostStyles(document);
     }
 
-    // Topbar + summary snapshot sources
+    // Topbar sources
     if (el.id === "dealershipNameInput" || el.id === "dealershipDidInput" || el.id === "dealerGroupInput") {
       mkSyncTopbarTitle();
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // Trainer clones (page 2 additional trainers)
-    if (el.closest("#additionalTrainersContainer")) {
-      const clones = cloneState.get();
-      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
-        value: (i.value || "").trim(),
-      }));
-      cloneState.set(clones);
-
+    // Lead trainer select changes should mirror
+    if (el.id === "leadTrainerSelect") {
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // Lead trainer changes
-    if (
-      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
-      (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
-    ) {
+    // Base additional trainer textbox should be mirrored (even before +)
+    if (el.id === "additionalTrainerInput") {
+      mkSyncSummaryEngagementSnapshot();
+    }
+
+    // Added trainer rows changes
+    if (el.closest("#additionalTrainersContainer")) {
+      persistAdditionalTrainerClones();
       mkSyncSummaryEngagementSnapshot();
     }
 
@@ -2202,7 +2110,6 @@
       setGhostStyles(document);
     }
 
-    // Date changes should refresh summary snapshot too
     if (el.matches('input[type="date"]')) {
       mkSyncSummaryEngagementSnapshot();
     }
@@ -2219,6 +2126,7 @@
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
+    // Notes: Enter inserts "  ◦ "
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -2250,6 +2158,7 @@
       return;
     }
 
+    // Base additional trainer: Enter = add row
     if (el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
@@ -2282,6 +2191,9 @@
 
     restoreAllFields();
 
+    // after restore, re-persist trainer clones once (keeps cloneState accurate)
+    persistAdditionalTrainerClones();
+
     setGhostStyles(document);
 
     mkSyncTopbarTitle();
@@ -2296,7 +2208,7 @@
     enforceBaseTicketStatusLock();
     initSummaryActionsDropdown();
 
-    log("Initialized v8.1.");
+    log("Initialized v8.2.");
   };
 
   if (document.readyState === "loading") {
@@ -2304,604 +2216,4 @@
   } else {
     init();
   }
-})();
-
-/* =========================================================
-   FIX — Page 1 Trainers + Page 11 Training Summary Sync
-   ✅ Page 1 "+" adds ONLY ONE line (blocks duplicate handlers)
-   ✅ Page 11 Lead Trainer mirrors #leadTrainerSelect
-   ✅ Page 11 Additional Trainers auto-build inputs (no + button)
-========================================================= */
-
-(function mkFixTrainersAndSummary(){
-  const $  = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-  // ---- Page 1 refs ----
-  const leadTrainerSelect = $("#leadTrainerSelect");
-  const addlBaseInput     = $("#additionalTrainerInput");
-  const addBtn            = $("#trainers-deployment .trainer-add-btn") || $("[data-add-trainer]");
-  const addlContainer     = $("#additionalTrainersContainer");
-
-  // ---- Page 11 refs ----
-  const sumLeadTrainer = $("#mkSum_leadTrainer");
-  const sumRow         = $("#mkSum_addlTrainersRow");
-  const sumStack       = $("#mkSum_addlTrainersStack");
-
-  if (!leadTrainerSelect || !addlBaseInput || !addBtn || !addlContainer) {
-    // If any are missing, don't throw—just exit safely.
-    return;
-  }
-
-  // -----------------------------------------
-  // Build ONE additional trainer row on Page 1
-  // -----------------------------------------
-  function createAddedTrainerRow(value=""){
-    const row = document.createElement("div");
-    row.className = "checklist-row indent-sub";
-
-    const label = document.createElement("label");
-    label.textContent = ""; // keep alignment consistent with your added rows
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Enter additional trainer name";
-    input.autocomplete = "off";
-    input.value = value;
-
-    row.appendChild(label);
-    row.appendChild(input);
-    return row;
-  }
-
-  // -----------------------------------------
-  // Read trainers from Page 1 (base + added)
-  // -----------------------------------------
-  function readAdditionalTrainersPage1(){
-    const vals = [];
-
-    const baseVal = (addlBaseInput.value || "").trim();
-    if (baseVal) vals.push(baseVal);
-
-    // any inputs created in the added container
-    $$("input[type='text']", addlContainer).forEach(inp => {
-      const v = (inp.value || "").trim();
-      if (v) vals.push(v);
-    });
-
-    // de-dupe
-    return Array.from(new Set(vals));
-  }
-
-  // -----------------------------------------
-  // Sync Page 1 -> Page 11
-  // -----------------------------------------
-  function syncToSummary(){
-    // Lead trainer (Page 1 select -> Page 11 input)
-    if (sumLeadTrainer) {
-      sumLeadTrainer.value = leadTrainerSelect.value || "";
-    }
-
-    if (!sumStack) return;
-
-    const trainers = readAdditionalTrainersPage1();
-
-    // show/hide row if needed
-    if (sumRow) sumRow.style.display = trainers.length ? "" : "none";
-
-    // rebuild stack cleanly (NO add button on summary page)
-    sumStack.innerHTML = "";
-
-    // always create base input so layout stays stable
-    const base = document.createElement("input");
-    base.type = "text";
-    base.placeholder = "Additional trainer";
-    base.id = "mkSum_addTrainer_0";
-    base.value = trainers[0] || "";
-    sumStack.appendChild(base);
-
-    for (let i = 1; i < trainers.length; i++){
-      const inp = document.createElement("input");
-      inp.type = "text";
-      inp.placeholder = "Additional trainer";
-      inp.id = `mkSum_addTrainer_${i}`;
-      inp.value = trainers[i];
-      sumStack.appendChild(inp);
-    }
-  }
-
-  // -----------------------------------------
-  // HARD FIX: Stop duplicate "+" handlers
-  // Use CAPTURE listener + stopImmediatePropagation()
-  // so ONLY THIS handler runs.
-  // -----------------------------------------
-  if (!addBtn.dataset.mkSingleAddBound) {
-    addBtn.dataset.mkSingleAddBound = "true";
-    addBtn.type = "button";
-
-    addBtn.addEventListener("click", (e) => {
-      // 🔥 This blocks other click listeners attached elsewhere
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
-      const val = (addlBaseInput.value || "").trim();
-      if (!val) {
-        // If they click + with nothing typed, do nothing.
-        // (If you want it to add a blank row anyway, tell me.)
-        syncToSummary();
-        return;
-      }
-
-      // Add exactly ONE row with the typed value
-      addlContainer.appendChild(createAddedTrainerRow(val));
-
-      // Clear the base input after adding (matches expected UX)
-      addlBaseInput.value = "";
-
-      // Sync summary after add
-      syncToSummary();
-    }, true); // ✅ capture phase
-  }
-
-  // -----------------------------------------
-  // Live sync listeners
-  // -----------------------------------------
-  leadTrainerSelect.addEventListener("change", syncToSummary);
-  addlBaseInput.addEventListener("input", syncToSummary);
-
-  // Event delegation for added trainer inputs on page 1
-  addlContainer.addEventListener("input", (e) => {
-    if (e.target && e.target.matches("input[type='text']")) syncToSummary();
-  });
-
-  // Run once on load
-  syncToSummary();
-})();
-
-/* =========================================================
-   TRAINERS MIRRORING (Page 1 -> Page 11)
-   ✅ Fixes Page 1 + adding two rows (double-binding)
-   ✅ Mirrors Lead Trainer to Page 11 Lead Trainer input
-   ✅ Mirrors Additional Trainers to Page 11 stacked inputs
-========================================================= */
-
-(function mkTrainerMirroringInit(){
-  // Prevent double-binding if script injected / loaded twice
-  if (window.__mkTrainerMirrorBound) return;
-  window.__mkTrainerMirrorBound = true;
-
-  const leadSelect = document.getElementById("leadTrainerSelect");
-  const addBaseInput = document.getElementById("additionalTrainerInput");
-  const addBtn = document.querySelector("[data-add-trainer]");
-  const addContainer = document.getElementById("additionalTrainersContainer");
-
-  // Page 11 targets
-  const sumLeadInput = document.getElementById("mkSum_leadTrainer");
-  const sumStack = document.getElementById("mkSum_addlTrainersStack");
-
-  if (!addContainer || !sumStack) return;
-
-  // ---------- helpers ----------
-  const normalizeName = (v) => (v || "").trim();
-
-  function getAdditionalTrainersFromPage1(){
-    const names = [];
-
-    // base input (only if user typed and then added? we treat it as “pending”)
-    const baseVal = normalizeName(addBaseInput?.value);
-    if (baseVal) names.push(baseVal);
-
-    // added trainer inputs in the container
-    addContainer.querySelectorAll('input[type="text"]').forEach((inp) => {
-      const val = normalizeName(inp.value);
-      if (val) names.push(val);
-    });
-
-    // de-dupe while preserving order
-    return [...new Set(names)];
-  }
-
-  function setSummaryLeadTrainer(){
-    if (!sumLeadInput || !leadSelect) return;
-    const val = normalizeName(leadSelect.value);
-    sumLeadInput.value = val;
-  }
-
-  function rebuildSummaryAdditionalTrainers(){
-    if (!sumStack) return;
-
-    const names = getAdditionalTrainersFromPage1();
-
-    // Keep the base input (mkSum_addTrainer_0) but rebuild everything after it
-    const base = document.getElementById("mkSum_addTrainer_0");
-
-    // remove any dynamically created inputs (everything except base)
-    sumStack.querySelectorAll('input[type="text"]').forEach((inp) => {
-      if (base && inp === base) return;
-      inp.remove();
-    });
-
-    // Ensure base exists
-    if (base) {
-      base.value = names[0] || "";
-      base.classList.add("mk-sum-addl-input");
-    }
-
-    // Add additional inputs for remaining names
-    names.slice(1).forEach((name, idx) => {
-      const i = idx + 1;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = `mkSum_addTrainer_${i}`;
-      input.placeholder = "Additional trainer";
-      input.value = name;
-      input.className = "mk-sum-addl-input";
-      sumStack.appendChild(input);
-    });
-
-    // If ALL empty, keep just base blank
-    if (!names.length && base) base.value = "";
-  }
-
-  // ---------- Page 1: add one trainer per click ----------
-  function addTrainerRow(name){
-    const val = normalizeName(name);
-    if (!val) return;
-
-    // Build one row only
-    const row = document.createElement("div");
-    row.className = "checklist-row integrated-plus indent-sub";
-    row.dataset.base = "false";
-
-    const label = document.createElement("label");
-    label.textContent = "Additional Trainer";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = val;
-    input.autocomplete = "off";
-
-    // match your existing styling in container
-    row.appendChild(label);
-    row.appendChild(input);
-    addContainer.appendChild(row);
-
-    // Clear base input after add
-    if (addBaseInput) addBaseInput.value = "";
-
-    // Mirror to summary immediately
-    rebuildSummaryAdditionalTrainers();
-  }
-
-  // IMPORTANT: bind click ONLY once and stop duplicate handlers
-  if (addBtn) {
-    addBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerRow(addBaseInput?.value);
-    }, { capture: true });
-  }
-
-  // Add on Enter in base field (optional but nice)
-  if (addBaseInput) {
-    addBaseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addTrainerRow(addBaseInput.value);
-      }
-    });
-  }
-
-  // Mirror lead trainer whenever selection changes
-  if (leadSelect) {
-    leadSelect.addEventListener("change", () => {
-      setSummaryLeadTrainer();
-    });
-  }
-
-  // Mirror when any added trainer input changes
-  addContainer.addEventListener("input", (e) => {
-    const t = e.target;
-    if (t && t.matches('input[type="text"]')) rebuildSummaryAdditionalTrainers();
-  });
-
-  // Also mirror when base input changes (so summary shows it even before "+")
-  if (addBaseInput) {
-    addBaseInput.addEventListener("input", () => {
-      rebuildSummaryAdditionalTrainers();
-    });
-  }
-
-  // Initial sync on load
-  setSummaryLeadTrainer();
-  rebuildSummaryAdditionalTrainers();
-})();
-
-/* =========================================================
-   FIX: Page 1 -> Page 11 mirroring (Lead + Additional Trainers)
-   ✅ Fixes "+ adds two rows" by wiping prior click handlers (clone button)
-   ✅ Saves Lead Trainer + ALL Additional Trainers to localStorage
-   ✅ Page 11 auto-populates Lead Trainer
-   ✅ Page 11 auto-creates one input per Additional Trainer (no add button)
-========================================================= */
-
-(function mkTrainerMirrorV2(){
-  if (window.__mkTrainerMirrorV2) return;
-  window.__mkTrainerMirrorV2 = true;
-
-  const LS_LEAD = "mk_leadTrainer";
-  const LS_ADDL = "mk_addlTrainers";
-
-  // ---------- DOM getters ----------
-  function el(id){ return document.getElementById(id); }
-
-  function getLeadTrainer(){
-    const sel = el("leadTrainerSelect");
-    if (!sel) return "";
-    // ignore ghost option
-    const val = (sel.value || "").trim();
-    return val;
-  }
-
-  function setLeadTrainer(val){
-    const clean = (val || "").trim();
-    localStorage.setItem(LS_LEAD, clean);
-  }
-
-  function readLeadTrainer(){
-    return (localStorage.getItem(LS_LEAD) || "").trim();
-  }
-
- function getAddlTrainersFromPage1(){
-  const baseInput = el("additionalTrainerInput"); // Page 1 default textbox
-  const container = el("additionalTrainersContainer");
-  const list = [];
-
-  // 1) include the DEFAULT textbox value too (if it has a name typed)
-  const baseVal = (baseInput?.value || "").trim();
-  if (baseVal) list.push(baseVal);
-
-  // 2) include ALL added trainer inputs
-  if (container){
-    container.querySelectorAll('input[type="text"]').forEach(inp => {
-      const v = (inp.value || "").trim();
-      if (v) list.push(v);
-    });
-  }
-
-  // 3) de-dupe while preserving order (prevents baseVal duplicating an added row)
-  const seen = new Set();
-  return list.filter(v => (seen.has(v) ? false : (seen.add(v), true)));
-}
-
-  function saveAddlTrainers(list){
-    const clean = Array.isArray(list) ? list.map(v => (v || "").trim()).filter(Boolean) : [];
-    localStorage.setItem(LS_ADDL, JSON.stringify(clean));
-  }
-
-  function readAddlTrainers(){
-    try{
-      const raw = localStorage.getItem(LS_ADDL);
-      const arr = JSON.parse(raw || "[]");
-      return Array.isArray(arr) ? arr.map(v => (v || "").trim()).filter(Boolean) : [];
-    }catch{
-      return [];
-    }
-  }
-
-  // ---------- Page 11 builders ----------
-  function syncPage11Lead(){
-    const target = el("mkSum_leadTrainer");
-    if (!target) return;
-
-    const lead = readLeadTrainer();
-    target.value = lead;
-  }
-
-  function syncPage11Addl(){
-    const stack = el("mkSum_addlTrainersStack");
-    const row = el("mkSum_addlTrainersRow"); // optional show/hide
-    if (!stack) return;
-
-    const names = readAddlTrainers();
-
-    // Ensure base exists
-    let base = el("mkSum_addTrainer_0");
-    if (!base) {
-      base = document.createElement("input");
-      base.type = "text";
-      base.id = "mkSum_addTrainer_0";
-      base.placeholder = "Additional trainer";
-      stack.prepend(base);
-    }
-
-    // Remove all dynamically added summary inputs (keep base)
-    stack.querySelectorAll('input[type="text"]').forEach(inp => {
-      if (inp !== base) inp.remove();
-    });
-
-    // Fill base + create the rest (ALL of them)
-    base.value = names[0] || "";
-    for (let i = 1; i < names.length; i++){
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = `mkSum_addTrainer_${i}`;
-      input.placeholder = "Additional trainer";
-      input.value = names[i];
-      stack.appendChild(input);
-    }
-
-    // Optional: hide the row if none exist
-    if (row) row.style.display = names.length ? "" : "none";
-  }
-
-  function syncAllToPage11(){
-    syncPage11Lead();
-    syncPage11Addl();
-  }
-
-  // ---------- Page 1: fix "+" handler (single add) ----------
-  function bindPage1AddButton(){
-    const addBtn = document.querySelector("[data-add-trainer]");
-    const baseInput = el("additionalTrainerInput");
-    const container = el("additionalTrainersContainer");
-
-    if (!addBtn || !baseInput || !container) return;
-
-    // Clone button to wipe ALL old click handlers (fixes “adds two rows”)
-    const freshBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(freshBtn, addBtn);
-
-    function addTrainerFromBase(){
-      const name = (baseInput.value || "").trim();
-      if (!name) return;
-
-      // Create ONE row
-      const row = document.createElement("div");
-      row.className = "checklist-row integrated-plus indent-sub";
-      row.dataset.base = "false";
-
-      const label = document.createElement("label");
-      label.textContent = "Additional Trainer";
-
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = name;
-      input.autocomplete = "off";
-
-      row.appendChild(label);
-      row.appendChild(input);
-      container.appendChild(row);
-
-      baseInput.value = "";
-
-      // Save + sync
-      saveAddlTrainers(getAddlTrainersFromPage1());
-      syncPage11Addl();
-    }
-
-    freshBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerFromBase();
-    });
-
-    baseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter"){
-        e.preventDefault();
-        addTrainerFromBase();
-      }
-    });
-
-    // Any edits to added trainer rows update storage + Page 11
-    container.addEventListener("input", (e) => {
-      if (e.target && e.target.matches('input[type="text"]')){
-        saveAddlTrainers(getAddlTrainersFromPage1());
-        syncPage11Addl();
-      }
-    });
-  }
-
-  // ---------- Page 1: lead trainer save ----------
-  function bindLeadTrainer(){
-    const sel = el("leadTrainerSelect");
-    if (!sel) return;
-
-    sel.addEventListener("change", () => {
-      setLeadTrainer(getLeadTrainer());
-      syncPage11Lead();
-    });
-
-    // Save once on load too
-    setLeadTrainer(getLeadTrainer());
-  }
-
-  // ---------- Re-sync when navigating to Training Summary ----------
-  function bindNavSync(){
-    document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest && e.target.closest(".nav-btn");
-      if (!btn) return;
-
-      // If the nav button activates training-summary, sync after DOM updates
-      const targetId = btn.getAttribute("data-target") || btn.dataset.target;
-      if (targetId === "training-summary") {
-        setTimeout(syncAllToPage11, 0);
-      }
-    });
-  }
-
-  // ---------- init ----------
-  function init(){
-    bindPage1AddButton();
-    bindLeadTrainer();
-    bindNavSync();
-
-    // Save initial additional trainers + sync summary once
-    saveAddlTrainers(getAddlTrainersFromPage1());
-    syncAllToPage11();
-  }
-
-  if (document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-/* =========================================================
-   TABLE POPUPS — Card-level Close X buttons
-========================================================= */
-(function () {
-  function closeMkTableModal() {
-    const modal = document.getElementById("mkTableModal");
-    if (!modal) return;
-
-    // Prefer your existing close button if present (keeps your cleanup logic)
-    const existingClose = modal.querySelector(".mk-modal-close");
-    if (existingClose) {
-      existingClose.click();
-      return;
-    }
-
-    // Fallback close (in case your header is removed)
-    modal.classList.remove("open");
-    modal.classList.remove("mk-notes-only");
-    modal.style.display = "none";
-  }
-
-  function ensureCardCloseButtons() {
-    const modal = document.getElementById("mkTableModal");
-    if (!modal || !modal.classList.contains("open")) return;
-
-    const content = modal.querySelector(".mk-modal-content");
-    if (!content) return;
-
-    // Only on TABLE popups (you asked specifically for table popups)
-    const hasTable = !!content.querySelector("table.training-table");
-    if (!hasTable) return;
-
-    const cards = content.querySelectorAll(".table-container, .section-block");
-    cards.forEach((card) => {
-      if (card.querySelector(".mk-card-close")) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-card-close";
-      btn.setAttribute("aria-label", "Close popup");
-      btn.innerHTML = "&times;";
-      btn.addEventListener("click", closeMkTableModal);
-
-      card.appendChild(btn);
-    });
-  }
-
-  // Run whenever modal opens / content changes
-  const modal = document.getElementById("mkTableModal");
-  if (!modal) return;
-
-  const obs = new MutationObserver(() => ensureCardCloseButtons());
-  obs.observe(modal, { attributes: true, childList: true, subtree: true });
-
-  // Also run once on load (in case modal is already open)
-  ensureCardCloseButtons();
 })();
