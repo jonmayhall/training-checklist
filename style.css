@@ -13,6 +13,7 @@
    - Pages 5–6 notes blocks taller + Training Summary notes taller
    - Primary Contacts spacing tightened
    - Additional POC base card “Name + +” width matches other inputs
+   - ✅ FIXED: Page 11 “Additional Trainers” input width matches other inputs
 ======================================================= */
 
 /* =======================
@@ -408,6 +409,7 @@ main{
 .section-block .checklist-row select{
   flex:0 0 var(--input-width);
   width:var(--input-width);
+  max-width:var(--input-width);
   margin-left:auto;
   padding:7px 10px;
   border-radius:var(--radius-sm);
@@ -415,6 +417,7 @@ main{
   background:#f7f7f7;
   font-size:13px;
   height:34px;
+  box-sizing:border-box;
 }
 
 /* Date inputs */
@@ -443,6 +446,7 @@ main{
   font-size:13px;
   resize:vertical;
   margin:10px 0 0;
+  box-sizing:border-box;
 }
 
 /* Focus */
@@ -536,6 +540,7 @@ main{
 .section-block .checklist-row.indent-sub select{
   flex:0 0 var(--input-width) !important;
   width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
   margin-left:0 !important;
 }
 
@@ -704,7 +709,6 @@ main{
   box-sizing:border-box;
   min-width:0;
 }
-
 .training-table tr:nth-child(odd){ background:#fff; }
 .training-table tr:nth-child(even){ background:#fafafa; }
 
@@ -1017,9 +1021,7 @@ main{
   }
 }
 
-/* =========================================================
-   SUPPORT TICKETS: "Short Summary" no expand
-========================================================= */
+/* SUPPORT TICKETS: "Short Summary" no expand */
 #support-tickets .ticket-row.ticket-summary-row .mk-ta-expand,
 #support-tickets .ticket-row.ticket-summary-row .mk-notes-expand-btn,
 #support-tickets .ticket-row.ticket-summary-row .mk-mini-expand-btn{
@@ -1400,7 +1402,6 @@ button.remove-row{
 /* =========================================================
    TABLE MODAL (mkTableModal) — FIXES + CONSISTENT POPUP NOTES
    ✅ Popup header has rounded top corners
-   ✅ Popup textarea connects to header (square top corners)
    ✅ Removes right-side “white strip/card”
    ✅ Table popup hides only table section header bars (keeps notes headers)
 ========================================================= */
@@ -1418,7 +1419,7 @@ button.remove-row{
   background:rgba(0,0,0,0.65);
 }
 
-/* PANEL — rounded top corners ALWAYS */
+/* PANEL */
 #mkTableModal .mk-modal-panel{
   position:absolute;
   left:50%;
@@ -1427,14 +1428,14 @@ button.remove-row{
   width:min(1400px, calc(100vw - 28px));
   max-height:90vh;
   background:#fff;
-  border-radius:18px;              /* ✅ rounded top corners */
+  border-radius:18px;
   box-shadow:0 20px 60px rgba(0,0,0,0.35);
   display:flex;
   flex-direction:column;
-  overflow:hidden;                 /* ✅ clips header/body together cleanly */
+  overflow:hidden;
 }
 
-/* HEADER — rounded top corners ALWAYS */
+/* HEADER */
 #mkTableModal .mk-modal-header{
   background:var(--orange);
   color:#fff;
@@ -1444,9 +1445,6 @@ button.remove-row{
   justify-content:space-between;
   gap:12px;
   border-bottom:1px solid var(--border);
-
-  border-top-left-radius:18px;     /* ✅ rounded top corners */
-  border-top-right-radius:18px;    /* ✅ rounded top corners */
 }
 #mkTableModal .mk-modal-title{
   font-weight:900;
@@ -1470,9 +1468,9 @@ button.remove-row{
 }
 #mkTableModal .mk-modal-close:hover{ background:rgba(255,255,255,0.25); }
 
-/* CONTENT — remove header/body gap */
+/* CONTENT */
 #mkTableModal .mk-modal-content{
-  padding:0 14px 16px;             /* ✅ no top padding = no “clear band” */
+  padding:0 14px 16px;
   overflow:auto;
   background:#fff;
   display:flex;
@@ -1522,10 +1520,6 @@ button.remove-row{
   min-height:360px !important;
   font-size:16px !important;
   line-height:1.45 !important;
-
-  /* ✅ square top corners so it connects flush under header */
-  border-top-left-radius:0 !important;
-  border-top-right-radius:0 !important;
 }
 
 /* Popup checkbox size */
@@ -1579,13 +1573,8 @@ button.remove-row{
 }
 
 /* NOTES-ONLY modal flattening (keep mk-modal-header; remove inner card header) */
-#mkTableModal.mk-notes-only .mk-modal-panel{
-  background:#fff !important;
-}
-#mkTableModal.mk-notes-only .mk-modal-content{
-  padding:0 !important;
-  background:#fff !important;
-}
+#mkTableModal.mk-notes-only .mk-modal-panel{ background:#fff !important; }
+#mkTableModal.mk-notes-only .mk-modal-content{ padding:0 !important; background:#fff !important; }
 #mkTableModal.mk-notes-only .section-block{
   border:none !important;
   box-shadow:none !important;
@@ -1595,35 +1584,15 @@ button.remove-row{
 }
 #mkTableModal.mk-notes-only .section-block h2{ display:none !important; }
 
-/* ✅ Remove gap inside notes blocks (header-to-textarea) */
-#mkTableModal .notes-block h2,
-#mkTableModal .section-block[id^="notes-"] h2{
-  margin-bottom:0 !important;
-  padding-bottom:10px;
-  border-bottom:1px solid var(--border);
-}
-
-/* ✅ Ensure notes wrapper doesn't add “air” above textarea */
-#mkTableModal .notes-block .mk-ta-wrap,
-#mkTableModal .section-block[id^="notes-"] .mk-ta-wrap{
-  margin-top:0 !important;
-  padding-top:0 !important;
-}
-
-/* =========================================================
-   TABLE POPUPS — remove ONLY the table section header bar
-   (keeps white card + table and keeps notes headers)
-========================================================= */
+/* Remove ONLY the table section header bar (keeps notes headers) */
 #mkTableModal .mk-modal-content .section-header{
   display:none !important;
 }
 
 /* =========================================================
-   Dealership Address — Map button attached (your style)
+   Dealership Address — Map button attached
 ========================================================= */
-#dealership-address-card .checklist-row{
-  align-items:center !important;
-}
+#dealership-address-card .checklist-row{ align-items:center !important; }
 
 #dealership-address-card .address-input-wrap{
   margin-left:auto !important;
@@ -1637,7 +1606,6 @@ button.remove-row{
 
   height:34px !important;
 }
-
 #dealership-address-card .address-input-wrap .address-input,
 #dealership-address-card .address-input-wrap input[type="text"]{
   flex:1 1 auto !important;
@@ -1653,7 +1621,6 @@ button.remove-row{
   border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
   box-sizing:border-box !important;
 }
-
 #dealership-address-card .address-input-wrap .small-map-btn,
 #dealership-address-card #openAddressInMapsBtn{
   flex:0 0 34px !important;
@@ -1683,229 +1650,9 @@ button.remove-row{
   align-items:center !important;
   justify-content:center !important;
 }
-
 #dealership-address-card .address-input-wrap .small-map-btn:hover,
 #dealership-address-card #openAddressInMapsBtn:hover{
   background:#ff8b42 !important;
-}
-
-/* =======================================================
-   PATCH — Notes popup textarea should look like on-page notes cards
-   ✅ Keep orange popup header rounded on top
-   ✅ Give the textarea an inner “card” look (small white border + rounded edge)
-   ✅ Remove the big “flat” look inside the popup
-======================================================= */
-
-/* 1) Ensure popup/modal top header stays rounded */
-#mkTableModal .mk-modal-panel{
-  border-top-left-radius: var(--radius-lg) !important;
-  border-top-right-radius: var(--radius-lg) !important;
-  overflow: hidden !important;
-}
-#mkTableModal .mk-modal-header{
-  border-top-left-radius: var(--radius-lg) !important;
-  border-top-right-radius: var(--radius-lg) !important;
-}
-
-/* 2) Notes popups: make the inside look like a notes card */
-#mkTableModal .mk-modal-content{
-  padding: 14px 14px 16px !important; /* restores breathing room */
-  background:#fff !important;
-}
-
-/* 3) The notes textarea itself becomes the “inner card” */
-#mkTableModal textarea{
-  background:#fff !important;
-
-  /* the small white-border card look */
-  border: 2px solid #e5e7eb !important;
-  border-radius: var(--radius-lg) !important;
-
-  /* subtle inset feel like your on-page notes */
-  box-shadow: inset 0 1px 0 rgba(0,0,0,0.05) !important;
-
-  padding: 14px 14px !important;
-  margin: 14px 0 0 !important;
-
-  min-height: 360px !important;
-  resize: none !important;  /* matches your card behavior */
-}
-
-/* 4) If the textarea is wrapped in mk-ta-wrap, match spacing */
-#mkTableModal .mk-ta-wrap{
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* 5) Remove any rules that were forcing “connected” square corners in the modal */
-#mkTableModal textarea{
-  border-top-left-radius: var(--radius-lg) !important;
-  border-top-right-radius: var(--radius-lg) !important;
-}
-
-/* =======================================================
-   PATCH — Make NOTES popups match on-page NOTES CARDS exactly
-   (scoped to notes popups only — NOT table popups)
-======================================================= */
-
-/* NOTES popup = when the modal does NOT contain a training table */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-panel{
-  /* same outer card feel as your section-block cards */
-  background:#fff !important;
-  border:1px solid var(--border) !important;
-  border-radius:var(--radius-lg) !important;
-  box-shadow:var(--shadow) !important;
-  overflow:hidden !important;
-}
-
-/* Orange header: same rounding as cards */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-header{
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0 !important;
-  border-bottom:1px solid var(--border) !important;
-}
-
-/* Body padding should match section-block (card interior) */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
-  padding:0 16px 14px !important;     /* same as .section-block */
-  background:#fff !important;
-}
-
-/* Notes textarea inside popup should look like the real card textarea */
-#mkTableModal:not(:has(table.training-table)) textarea{
-  width:100% !important;
-  display:block !important;
-
-  /* exact same as .section-block textarea */
-  padding:8px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  font-size:13px !important;
-  resize:vertical !important;
-
-  /* match the spacing you have on cards */
-  margin:10px 0 0 !important;
-
-  /* keep popup tall, but still “card-looking” */
-  min-height:360px !important;
-  box-shadow:none !important;
-}
-
-/* If your notes popup uses mk-ta-wrap, keep the same gap behavior */
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
-  margin:var(--mk-notes-gap) 0 var(--mk-notes-gap-bottom) !important;
-  padding:0 !important;
-}
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap > textarea{
-  margin:0 !important; /* mk-ta-wrap controls spacing */
-}
-
-/* =======================================================
-   PATCH — Make NON-TABLE Notes popups match TABLE-popup Notes
-   Goal: use the SAME inner “notes card” look (inset border + padding)
-   Applies ONLY when the modal does NOT contain a training table.
-======================================================= */
-
-/* 1) Modal shell stays as-is (you already like the header rounding) */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-panel{
-  overflow:hidden !important;
-}
-
-/* 2) Make modal content spacing match how table-popups frame notes cards */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
-  padding:14px 14px 16px !important;   /* table popup spacing */
-  background:#fff !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:14px !important;
-}
-
-/* 3) Create the SAME “inner notes card” container used in table popups
-      (your table popups have a notes card with an inset bordered area) */
-#mkTableModal:not(:has(table.training-table)) textarea{
-  /* turn the textarea into the inner bordered area */
-  width:100% !important;
-  display:block !important;
-
-  background:#fff !important;                 /* white interior like table-popup notes */
-  border:2px solid #e6e6e6 !important;        /* small white/soft border feel */
-  border-radius:22px !important;              /* rounded inner edge */
-  padding:16px 18px !important;               /* inset spacing like table-popup notes */
-  margin:0 !important;
-
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.03) !important;
-  resize:none !important;
-  min-height:calc(90vh - 170px) !important;   /* tall like the popup */
-  font-size:16px !important;
-  line-height:1.45 !important;
-}
-
-/* 4) If you wrap textarea in .mk-ta-wrap, make the wrapper look like the
-      “outer white area” seen in table popups (gives the framed look) */
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
-  background:#fff !important;
-  border:1px solid var(--border) !important;
-  border-radius:var(--radius-lg) !important;
-  padding:18px !important;                    /* outer padding around inner border */
-  margin:0 !important;
-  position:relative !important;
-}
-
-/* If .mk-ta-wrap exists, keep textarea filling inside it */
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap > textarea{
-  min-height:calc(90vh - 230px) !important;
-}
-
-/* 5) Focus matches your app */
-#mkTableModal:not(:has(table.training-table)) textarea:focus{
-  border-color:rgba(239,109,34,0.55) !important;
-  box-shadow:0 0 0 3px rgba(239,109,34,0.18), inset 0 0 0 1px rgba(0,0,0,0.03) !important;
-  outline:none !important;
-}
-
-/* =======================================================
-   PATCH — Remove thin inner border, keep thick rounded border
-   (Notes popups only, non-table)
-======================================================= */
-
-#mkTableModal:not(:has(table.training-table)) textarea{
-  /* REMOVE the fake inner hairline */
-  box-shadow: none !important;
-
-  /* KEEP the main, thick rounded border */
-  border: 2px solid #e6e6e6 !important;
-  border-radius: 22px !important;
-}
-
-/* Also ensure focus does NOT reintroduce an inner line */
-#mkTableModal:not(:has(table.training-table)) textarea:focus{
-  box-shadow: 0 0 0 3px rgba(239,109,34,0.18) !important;
-}
-
-/* =======================================================
-   PATCH — Remove extra thin border in NOTES popups
-   Root cause: .mk-ta-wrap still has a border
-======================================================= */
-
-/* NOTES popups only (NOT table popups) */
-#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
-  border: none !important;        /* 🔥 removes thin border */
-  box-shadow: none !important;   /* safety */
-  background: transparent !important;
-  padding: 0 !important;         /* let textarea define the card */
-}
-
-/* The textarea is the ONLY visual card */
-#mkTableModal:not(:has(table.training-table)) textarea{
-  border: 2px solid #e6e6e6 !important;
-  border-radius: 22px !important;
-  background: #fff !important;
-  box-shadow: none !important;
-}
-
-/* Focus should not reintroduce a fake inner line */
-#mkTableModal:not(:has(table.training-table)) textarea:focus{
-  box-shadow: 0 0 0 3px rgba(239,109,34,0.18) !important;
 }
 
 /* =========================================================
@@ -1919,7 +1666,6 @@ button.remove-row{
   right:24px;
   z-index:20;
 }
-
 #training-summary .mk-action-btn{
   border:none;
   background:var(--orange);
@@ -1934,13 +1680,11 @@ button.remove-row{
   box-shadow:0 2px 6px rgba(239,109,34,0.35);
   transition:background .16s, transform .16s, box-shadow .16s;
 }
-
 #training-summary .mk-action-btn:hover{
   background:#ff8b42;
   transform:translateY(-1px);
   box-shadow:0 4px 10px rgba(239,109,34,0.45);
 }
-
 #training-summary .mk-action-menu{
   position:absolute;
   top:44px;
@@ -1953,7 +1697,6 @@ button.remove-row{
   overflow:hidden;
   padding:6px;
 }
-
 #training-summary .mk-action-item{
   width:100%;
   text-align:left;
@@ -1966,13 +1709,13 @@ button.remove-row{
   cursor:pointer;
   color:#111827;
 }
-
 #training-summary .mk-action-item:hover{
   background:rgba(239,109,34,0.08);
 }
 
 /* =========================================================
    TRAINING SUMMARY — stacked inputs (dates + additional trainers)
+   ✅ Use same fixed "answer column" sizing as regular inputs
 ========================================================= */
 .mk-stack{
   flex:0 0 var(--input-width) !important;
@@ -1984,7 +1727,6 @@ button.remove-row{
   gap:8px !important;
   align-items:stretch !important;
 }
-
 .mk-stack input[type="text"],
 .mk-stack input[type="date"]{
   width:100% !important;
@@ -2000,213 +1742,59 @@ button.remove-row{
 #training-summary .checklist-row:has(.mk-stack){ align-items:flex-start !important; }
 #training-summary .checklist-row:has(.mk-stack) label{ padding-top:7px !important; }
 
-/* ==============================
-   PATCH: Training Summary - Additional Trainers (stack + add)
-============================== */
-
-/* Make sure the summary “Additional Trainers” stack behaves like your other stacks */
-#training-summary #mkSum_addlTrainersStack{
-  flex:0 0 var(--input-width) !important;
-  width:var(--input-width) !important;
-  max-width:var(--input-width) !important;
-  margin-left:auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-  align-items:stretch !important;
-}
-
-/* Base input+plus styling to match your system */
-#training-summary .mk-sum-addl-plus{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  height:34px !important;
-}
-
-#training-summary .mk-sum-addl-plus input{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
-  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
-}
-
-#training-summary .mk-sum-addl-plus .mkSumAddTrainerBtn{
-  flex:0 0 34px !important;
-  width:34px !important;
-  height:34px !important;
-  margin-left:-1px !important;
-  border:1px solid var(--orange) !important;
-  background:var(--orange) !important;
-  color:#fff !important;
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
-  font-size:18px !important;
-  font-weight:900 !important;
-  cursor:pointer !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  line-height:1 !important;
-  padding:0 !important;
-}
-
-#training-summary .mk-sum-addl-plus .mkSumAddTrainerBtn:hover{
-  background:#ff8b42 !important;
-}
-
-/* Additional trainer inputs added by JS */
-#training-summary .mk-sum-addl-input{
-  width:100% !important;
-  height:34px !important;
-  padding:7px 10px !important;
-  border:1px solid var(--border) !important;
-  border-radius:var(--radius-sm) !important;
-  background:#f7f7f7 !important;
-  box-sizing:border-box !important;
-}
-
 /* =========================================================
-   PATCH — Training Summary layout refinements
+   ✅ PAGE 11 FIX — Engagement Snapshot widths (includes Additional Trainers)
+   Root cause was “fighting” rules that stretched mk-stack to 100%.
+   We lock the Engagement Snapshot card to a single right-column width.
 ========================================================= */
 
-/* -----------------------------------------
-   1) Engagement Snapshot inputs wider
-   (+33% vs default input width)
------------------------------------------ */
-#training-summary .section-block:first-child{
-  --input-width: calc(var(--input-width) * 1.33);
-}
-
-/* -----------------------------------------
-   2) Outcome dropdown wide enough to read text
------------------------------------------ */
-#training-summary #mkSum_outcome{
-  width: max-content !important;
-  min-width: 260px !important;      /* safety floor */
-  padding-right: 34px !important;   /* room for caret */
-}
-
-/* -----------------------------------------
-   3) Outcome rationale = single question block
------------------------------------------ */
-
-/* Remove bottom border + spacing on the label row */
-#training-summary .mk-fullwidth-row{
-  margin-bottom: 4px !important;
-  padding-bottom: 0 !important;
-  border-bottom: none !important;
-}
-
-/* Pull textarea closer to label */
-#training-summary #mkSum_outcomeWhy{
-  margin-top: 6px !important;
-}
-
-/* =========================================================
-   PATCH — Training Summary: Engagement Snapshot input width
-   Goal: keep RIGHT edge, extend LEFT edge (wider inputs)
-========================================================= */
-
-/* Engagement Snapshot card only (first card in row 1) */
+/* Engagement Snapshot card (first card in row 1) */
 #training-summary .cards-grid.two-col > .section-block:first-child{
-  --mk-sum-wide: 260px; /* tweak if you want (430–520) */
+  --input-width:260px;   /* adjust if you want wider/narrower */
 }
 
-/* Make ALL right-side inputs use the wider width */
-#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="text"],
-#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="date"],
-#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row select{
-  flex: 0 0 var(--mk-sum-wide) !important;
-  width: var(--mk-sum-wide) !important;
-  max-width: var(--mk-sum-wide) !important;
-  margin-left: auto !important; /* keeps the RIGHT edge fixed */
-}
-
-/* Onsite Dates stack should match the same right-side width */
-#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack{
-  flex: 0 0 var(--mk-sum-wide) !important;
-  width: var(--mk-sum-wide) !important;
-  max-width: var(--mk-sum-wide) !important;
-  margin-left: auto !important; /* keeps the RIGHT edge fixed */
-}
-
-/* Ensure stacked date inputs fill the stack */
-#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack input[type="date"],
-#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack input[type="text"]{
-  width: 100% !important;
-  max-width: 100% !important;
+/* Ensure Outcome dropdown is readable (optional, safe) */
+#training-summary #mkSum_outcome{
+  min-width:260px !important;
+  padding-right:34px !important;
 }
 
 /* =========================================================
-   PATCH — Page 11: Additional Trainers should be normal inputs
-   (not tall textarea-looking boxes)
+   PATCH — Training Summary: Outcome rationale label row spacing
 ========================================================= */
-
-/* Engagement Snapshot only (first card) */
-#training-summary .cards-grid.two-col > .section-block:first-child
-  #mkSum_addlTrainersStack{
-  gap:8px !important;
+#training-summary .mk-fullwidth-row{
+  margin-bottom:4px !important;
+  padding-bottom:0 !important;
+  border-bottom:none !important;
 }
+#training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
 
-/* Force Additional Trainer fields to look like the other inputs */
-#training-summary .cards-grid.two-col > .section-block:first-child
-  #mkSum_addlTrainersStack input[type="text"]{
-  height:34px !important;
-  min-height:34px !important;
-  max-height:34px !important;
-  padding:7px 10px !important;
-  border-radius:var(--radius-sm) !important;
-  border:1px solid var(--border) !important;
-  background:#f7f7f7 !important;
+/* =========================================================
+   OPTIONAL: Notes popup styling (non-table notes)
+   (kept minimal + non-conflicting)
+========================================================= */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-content{
+  padding:14px 14px 16px !important;
+}
+#mkTableModal:not(:has(table.training-table)) .mk-ta-wrap{
+  border:none !important;
   box-shadow:none !important;
+  background:transparent !important;
+  padding:0 !important;
+  margin:0 !important;
 }
-
-/* PAGE 11 — make stacked inputs match normal row sizing */
-#training-summary .mk-stack{
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+#mkTableModal:not(:has(table.training-table)) textarea{
+  background:#fff !important;
+  border:2px solid #e6e6e6 !important;
+  border-radius:22px !important;
+  box-shadow:none !important;
+  padding:16px 18px !important;
+  margin:0 !important;
+  resize:none !important;
+  min-height:calc(90vh - 230px) !important;
 }
-
-#training-summary .mk-stack input,
-#training-summary .mk-stack select,
-#training-summary .mk-stack textarea{
-  width: 100% !important;
-  box-sizing: border-box;
+#mkTableModal:not(:has(table.training-table)) textarea:focus{
+  border-color:rgba(239,109,34,0.55) !important;
+  box-shadow:0 0 0 3px rgba(239,109,34,0.18) !important;
+  outline:none !important;
 }
-
-/* If your standard inputs have a fixed height, match it here */
-#training-summary .mk-stack input[type="text"],
-#training-summary .mk-stack input[type="date"]{
-  height: 40px; /* match your global input height */
-}
-
-/* =========================================================
-   PAGE 11 — Additional Trainers width match (Engagement Snapshot)
-========================================================= */
-#training-summary #mkSum_addlTrainersRow{
-  align-items: flex-start; /* prevents weird vertical centering */
-}
-
-#training-summary #mkSum_addlTrainersRow #mkSum_addlTrainersStack{
-  /* THIS is the key: make the stack take the exact same "answer column" width */
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Force each additional trainer input to fill the stack */
-#training-summary #mkSum_addlTrainersRow #mkSum_addlTrainersStack input{
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box;
-}
-
