@@ -1719,3 +1719,44 @@ button.remove-row{
   padding-right:0 !important;
 }
 
+/* =========================================================
+   PATCH — Popup Cards: Clean side borders + header width
+========================================================= */
+
+/* Make popup cards slightly inset from modal edges */
+#mkTableModal .section-block,
+#mkTableModal .table-container{
+  margin-left:12px !important;
+  margin-right:12px !important;
+}
+
+/* Ensure headers do NOT overhang the card */
+#mkTableModal .section-block h2,
+#mkTableModal .section-header{
+  margin-left:0 !important;
+  margin-right:0 !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Remove negative margin tricks inside popup only */
+#mkTableModal .section-block h2{
+  padding-left:16px !important;
+  padding-right:16px !important;
+}
+
+/* Match header rounding to card exactly */
+#mkTableModal .section-block{
+  overflow:hidden !important; /* clips header cleanly */
+}
+
+/* Table header bars (orange) align perfectly with card */
+#mkTableModal .section-header{
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0 !important;
+}
+
+/* Prevent scroll wrapper from pushing card edges */
+#mkTableModal .scroll-wrapper{
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
