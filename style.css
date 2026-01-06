@@ -1999,3 +1999,72 @@ button.remove-row{
 /* keeps label aligned to top like your date stack cards */
 #training-summary .checklist-row:has(.mk-stack){ align-items:flex-start !important; }
 #training-summary .checklist-row:has(.mk-stack) label{ padding-top:7px !important; }
+
+/* ==============================
+   PATCH: Training Summary - Additional Trainers (stack + add)
+============================== */
+
+/* Make sure the summary “Additional Trainers” stack behaves like your other stacks */
+#training-summary #mkSum_addlTrainersStack{
+  flex:0 0 var(--input-width) !important;
+  width:var(--input-width) !important;
+  max-width:var(--input-width) !important;
+  margin-left:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  align-items:stretch !important;
+}
+
+/* Base input+plus styling to match your system */
+#training-summary .mk-sum-addl-plus{
+  display:flex !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  height:34px !important;
+}
+
+#training-summary .mk-sum-addl-plus input{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+#training-summary .mk-sum-addl-plus .mkSumAddTrainerBtn{
+  flex:0 0 34px !important;
+  width:34px !important;
+  height:34px !important;
+  margin-left:-1px !important;
+  border:1px solid var(--orange) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:1 !important;
+  padding:0 !important;
+}
+
+#training-summary .mk-sum-addl-plus .mkSumAddTrainerBtn:hover{
+  background:#ff8b42 !important;
+}
+
+/* Additional trainer inputs added by JS */
+#training-summary .mk-sum-addl-input{
+  width:100% !important;
+  height:34px !important;
+  padding:7px 10px !important;
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important;
+  background:#f7f7f7 !important;
+  box-sizing:border-box !important;
+}
+
