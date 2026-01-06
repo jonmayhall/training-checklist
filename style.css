@@ -1720,58 +1720,28 @@ button.remove-row{
 }
 
 /* =========================================================
-   FIX — Popup alignment for TABLE title bars + NOTES headers
-   (replaces the previous popup patch)
+   POPUP FIX — Remove top orange section-header again
+   + Ensure table THEAD (light orange) has square corners
 ========================================================= */
 
-/* 1) One source of inset: pad the modal content
-      This automatically insets BOTH:
-      - .section-header (orange title bars)
-      - .table-container (table cards)
-      - .section-block (notes cards)
-*/
-#mkTableModal .mk-modal-content{
-  padding:16px 18px 18px !important;
+/* 1) Remove the very top header bar inside table popups (again) */
+#mkTableModal .mk-modal-content .section-header{
+  display:none !important;
 }
 
-/* 2) Remove any per-card left/right margin hacks inside the modal */
-#mkTableModal .section,
-#mkTableModal .section-block,
+/* 2) Keep table cards clean, but DON'T round the light-orange thead */
+#mkTableModal table.training-table thead th{
+  border-radius:0 !important;  /* prevents rounded light-orange corners */
+}
+
+/* Safety: if any browser applies radius to first/last TH */
+#mkTableModal table.training-table thead th:first-child,
+#mkTableModal table.training-table thead th:last-child{
+  border-radius:0 !important;
+}
+
+/* 3) If your table container is clipping corners too aggressively,
+      keep it clean but square at the top edge of the TABLE itself */
 #mkTableModal .table-container{
-  margin-left:0 !important;
-  margin-right:0 !important;
-}
-
-/* 3) TABLE POPUP: Make the orange title bar match the table card width exactly */
-#mkTableModal .section-header{
-  margin:0 !important;
-  width:100% !important;
-  box-sizing:border-box !important;
-  border-radius:var(--radius-lg) var(--radius-lg) 0 0 !important;
-}
-
-/* 4) TABLE POPUP: Make the table card edges clean + clip anything inside */
-#mkTableModal .table-container{
-  margin:0 0 18px !important;
-  overflow:hidden !important; /* clean vertical edges */
-}
-
-/* 5) NOTES POPUP: restore your original “full-bleed” h2 header inside the card,
-      but keep edges clean by clipping on the card */
-#mkTableModal .section-block{
-  overflow:hidden !important; /* clips header to card edges */
-}
-
-/* Restore the normal header bleed (your base CSS uses -16px) */
-#mkTableModal .section-block h2{
-  margin-left:-16px !important;
-  margin-right:-16px !important;
-  width:auto !important;
-  box-sizing:border-box !important;
-}
-
-/* 6) Safety: if any earlier patch forced header widths, undo it */
-#mkTableModal .section-block h2,
-#mkTableModal .section-header{
-  max-width:none !important;
+  overflow:hidden !important; /* clean side borders */
 }
