@@ -2104,3 +2104,38 @@ button.remove-row{
 #training-summary #mkSum_outcomeWhy{
   margin-top: 6px !important;
 }
+
+/* =========================================================
+   PATCH — Training Summary: Engagement Snapshot input width
+   Goal: keep RIGHT edge, extend LEFT edge (wider inputs)
+========================================================= */
+
+/* Engagement Snapshot card only (first card in row 1) */
+#training-summary .cards-grid.two-col > .section-block:first-child{
+  --mk-sum-wide: 460px; /* tweak if you want (430–520) */
+}
+
+/* Make ALL right-side inputs use the wider width */
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="text"],
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row input[type="date"],
+#training-summary .cards-grid.two-col > .section-block:first-child .checklist-row select{
+  flex: 0 0 var(--mk-sum-wide) !important;
+  width: var(--mk-sum-wide) !important;
+  max-width: var(--mk-sum-wide) !important;
+  margin-left: auto !important; /* keeps the RIGHT edge fixed */
+}
+
+/* Onsite Dates stack should match the same right-side width */
+#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack{
+  flex: 0 0 var(--mk-sum-wide) !important;
+  width: var(--mk-sum-wide) !important;
+  max-width: var(--mk-sum-wide) !important;
+  margin-left: auto !important; /* keeps the RIGHT edge fixed */
+}
+
+/* Ensure stacked date inputs fill the stack */
+#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack input[type="date"],
+#training-summary .cards-grid.two-col > .section-block:first-child .mk-stack input[type="text"]{
+  width: 100% !important;
+  max-width: 100% !important;
+}
