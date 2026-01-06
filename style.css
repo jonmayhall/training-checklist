@@ -1952,3 +1952,134 @@ button.remove-row{
 #mkTableModal .mk-card-close{
   display: none !important;
 }
+
+/* =========================================================
+   FINAL FIX — mkTableModal popups (tables + notes)
+   - TABLE popups: section-header attaches to table-container (one border)
+   - TABLE + NOTES: content shifted down
+   - Orange X: top-right in WHITE SPACE of the big modal panel
+   - Notes popups: X sits in the header correctly
+   - Kill any stray mk-card-close X (prevents random bottom-right X)
+========================================================= */
+
+/* ---------------------------------------------------------
+   0) Kill any "card close" X buttons everywhere (stray)
+--------------------------------------------------------- */
+.mk-card-close{
+  display:none !important;
+}
+
+/* ---------------------------------------------------------
+   1) Base modal panel: create white top padding space
+      (this is the WHITE SPACE above table/notes)
+--------------------------------------------------------- */
+#mkTableModal .mk-modal-panel{
+  position:relative !important;
+  padding-top:54px !important; /* creates the white band above content */
+}
+
+/* Shift BOTH tables + notes down inside the modal */
+#mkTableModal .mk-modal-content{
+  padding:18px 18px 18px !important;
+}
+
+/* ---------------------------------------------------------
+   2) ORANGE X button positioning
+--------------------------------------------------------- */
+
+/* Default: put X in the top-right of the big WHITE panel space */
+#mkTableModal .mk-modal-close{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+  border:1px solid rgba(255,255,255,0.45) !important;
+  background:var(--orange) !important;
+  color:#fff !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:22px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
+  z-index:99999 !important;
+}
+#mkTableModal .mk-modal-close:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px) !important;
+}
+
+/* ---------------------------------------------------------
+   3) TABLE POPUPS ONLY
+   - Remove the orange modal header bar
+   - Attach .section-header to .table-container as one border
+--------------------------------------------------------- */
+#mkTableModal:has(table.training-table) .mk-modal-header{
+  display:none !important; /* no orange bar on table popups */
+}
+
+/* Make the orange section-header align/attach perfectly */
+#mkTableModal:has(table.training-table) .section-header{
+  margin:0 !important;
+  border:1px solid var(--border) !important;
+  border-bottom:none !important;
+  border-top-left-radius:var(--radius-lg) !important;
+  border-top-right-radius:var(--radius-lg) !important;
+}
+
+/* Make the table container connect to header (no gap, no double border) */
+#mkTableModal:has(table.training-table) .table-container{
+  margin:0 0 16px 0 !important;
+  border:1px solid var(--border) !important;
+  border-top:none !important; /* connects to section-header */
+  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
+  overflow:hidden !important; /* cleans side borders */
+}
+
+/* Square the light-orange THEAD inside table popups */
+#mkTableModal:has(table.training-table) table.training-table thead th,
+#mkTableModal:has(table.training-table) table.training-table thead th:first-child,
+#mkTableModal:has(table.training-table) table.training-table thead th:last-child{
+  border-radius:0 !important;
+}
+
+/* ---------------------------------------------------------
+   4) NOTES POPUPS ONLY
+   - Keep the orange modal header bar
+   - Put the X inside the header correctly (not floating weird)
+--------------------------------------------------------- */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-header{
+  display:flex !important;
+  position:absolute !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  height:54px !important;
+  border-top-left-radius:18px !important;
+  border-top-right-radius:18px !important;
+}
+
+/* For notes popups, X should live in the header area */
+#mkTableModal:not(:has(table.training-table)) .mk-modal-close{
+  position:absolute !important;
+  top:8px !important;
+  right:10px !important;
+}
+
+/* IMPORTANT: do NOT hide inner section-block headers for notes (restore normal) */
+#mkTableModal:not(:has(table.training-table)) .section-block > h2{
+  display:block !important;
+}
+
+/* ---------------------------------------------------------
+   5) If you saw borders/X on ACTUAL page tables:
+      hide any accidental close buttons in normal page cards
+--------------------------------------------------------- */
+.page-section .mk-card-close,
+.table-container .mk-card-close,
+.section-block .mk-card-close{
+  display:none !important;
+}
