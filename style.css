@@ -2139,3 +2139,27 @@ button.remove-row{
   width: 100% !important;
   max-width: 100% !important;
 }
+
+/* =========================================================
+   PATCH — Page 11: Additional Trainers should be normal inputs
+   (not tall textarea-looking boxes)
+========================================================= */
+
+/* Engagement Snapshot only (first card) */
+#training-summary .cards-grid.two-col > .section-block:first-child
+  #mkSum_addlTrainersStack{
+  gap:8px !important;
+}
+
+/* Force Additional Trainer fields to look like the other inputs */
+#training-summary .cards-grid.two-col > .section-block:first-child
+  #mkSum_addlTrainersStack input[type="text"]{
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  padding:7px 10px !important;
+  border-radius:var(--radius-sm) !important;
+  border:1px solid var(--border) !important;
+  background:#f7f7f7 !important;
+  box-shadow:none !important;
+}
