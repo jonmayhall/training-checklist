@@ -1985,3 +1985,80 @@ button.remove-row{
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
+
+/* =========================================================
+   MODAL — NOTES vs TABLES (CORRECT, SEPARATE BEHAVIOR)
+========================================================= */
+
+/* =========================================================
+   1️⃣ NOTES POPUPS — LOOK LIKE REAL CARDS
+========================================================= */
+
+/* Modal shell keeps rounded top */
+#mkTableModal .mk-modal-panel {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  overflow: hidden;
+}
+
+/* Orange modal header (Notes — X) stays rounded */
+#mkTableModal .mk-modal-header {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+/* Remove spacing between header and content */
+#mkTableModal .mk-modal-content {
+  padding-top: 0;
+}
+
+/* Notes cards inside modal */
+#mkTableModal .notes-block,
+#mkTableModal .section-block[id^="notes-"] {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Notes header inside the card */
+#mkTableModal .notes-block h2,
+#mkTableModal .section-block[id^="notes-"] h2 {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* White textarea connects flush to header */
+#mkTableModal .notes-block textarea,
+#mkTableModal .section-block[id^="notes-"] textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Remove wrapper spacing that causes white band */
+#mkTableModal .notes-block .mk-ta-wrap {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* =========================================================
+   2️⃣ TABLE POPUPS — KEEP NOTES HEADERS, REMOVE GENERIC ONES
+========================================================= */
+
+/* Hide ONLY the generic table section headers in modal */
+#mkTableModal .mk-modal-content:has(table.training-table) .section-header {
+  display: none !important;
+}
+
+/* Do NOT hide notes headers inside table popups */
+#mkTableModal .mk-modal-content:has(table.training-table)
+  .section-block[id^="notes-"] h2 {
+  display: block !important;
+}
+
+/* Ensure notes cards inside table popup retain card styling */
+#mkTableModal .mk-modal-content:has(table.training-table)
+  .section-block[id^="notes-"] {
+  border-radius: 12px;
+  overflow: hidden;
+}
