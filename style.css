@@ -1804,3 +1804,68 @@ button.remove-row{
 #mkTableModal:has(table.training-table) .table-container .scroll-wrapper{
   padding-bottom:0 !important;
 }
+
+/* =========================================================
+   TABLE POPUPS — Shift cards down + add card-level X buttons
+========================================================= */
+
+/* TABLE popups only */
+#mkTableModal:has(table.training-table) .mk-modal-content{
+  /* push everything down a bit */
+  padding:28px 16px 18px !important;
+}
+
+/* Give cards breathing room from the top edge */
+#mkTableModal:has(table.training-table) .mk-modal-content .table-container,
+#mkTableModal:has(table.training-table) .mk-modal-content .section-block{
+  margin-top:14px !important;
+}
+
+/* Make sure cards can host an absolute-positioned X */
+#mkTableModal:has(table.training-table) .mk-modal-content .table-container,
+#mkTableModal:has(table.training-table) .mk-modal-content .section-block{
+  position:relative !important;
+}
+
+/* Card-level close X button */
+#mkTableModal .mk-card-close{
+  position:absolute !important;
+  top:10px !important;
+  right:10px !important;
+
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+
+  border:1px solid rgba(0,0,0,0.14) !important;
+  background:#fff !important;
+  color:#111827 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:20px !important;
+  line-height:1 !important;
+
+  cursor:pointer !important;
+  box-shadow:0 6px 16px rgba(0,0,0,0.14) !important;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease !important;
+
+  z-index:50 !important;
+}
+
+#mkTableModal .mk-card-close:hover{
+  transform:translateY(-1px) !important;
+  border-color:rgba(239,109,34,0.55) !important;
+  box-shadow:0 10px 22px rgba(0,0,0,0.18) !important;
+}
+
+#mkTableModal .mk-card-close:active{
+  transform:translateY(0) !important;
+}
+
+#mkTableModal .mk-card-close:focus-visible{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(239,109,34,0.25), 0 10px 22px rgba(0,0,0,0.18) !important;
+}
