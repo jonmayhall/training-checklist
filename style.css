@@ -1389,7 +1389,7 @@ button.remove-row{
 }
 
 /* =========================================================
-   TABLE MODAL (mkTableModal) — FIXES
+   TABLE MODAL (mkTableModal) — BASE (STRUCTURE)
 ========================================================= */
 #mkTableModal{
   position:fixed;
@@ -1616,8 +1616,6 @@ button.remove-row{
 
 /* =========================================================
    ✅ TRAINING SUMMARY — STACKS (DATES + ADDL TRAINERS)
-   Fix: Additional Trainers is a NORMAL input (34px),
-        same width as other answers in Engagement Snapshot
 ========================================================= */
 
 /* Engagement Snapshot card controls the answer-column width */
@@ -1649,7 +1647,7 @@ button.remove-row{
   align-items:stretch !important;
 }
 
-/* ✅ The KEY FIX: force addl trainer inputs to be identical to normal inputs */
+/* ✅ addl trainer inputs match normal inputs */
 #training-summary #mkSum_addlTrainersStack input[type="text"]{
   width:100% !important;
   max-width:100% !important;
@@ -1690,165 +1688,30 @@ button.remove-row{
 #training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
 
 /* =========================================================
-   FINAL OVERRIDE — mkTableModal (tables + notes)
-   - TABLE: section-header attached to table-container (no gap)
-   - TABLE: no orange modal header bar
-   - NOTES: keep orange modal header bar
-   - Orange X: visible and correctly positioned
-   - Kills stray mk-card-close buttons (bottom-right X)
-========================================================= */
-
-/* Kill any injected card-level X buttons */
-.mk-card-close{ display:none !important; }
-
-/* Always make sure the panel can anchor the X */
-#mkTableModal .mk-modal-panel{ position:relative !important; }
-
-/* Shift content down a bit (tables + notes) */
-#mkTableModal .mk-modal-content{
-  padding:18px 18px 18px !important;
-}
-
-/* Orange X button (always top-right of the modal panel) */
-#mkTableModal .mk-modal-close{
-  position:absolute !important;
-  top:12px !important;
-  right:12px !important;
-
-  width:38px !important;
-  height:38px !important;
-
-  border-radius:12px !important;
-  border:1px solid rgba(255,255,255,0.45) !important;
-
-  background:var(--orange) !important;
-  color:#fff !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  font-size:22px !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-
-  box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
-  z-index:99999 !important;
-}
-#mkTableModal .mk-modal-close:hover{
-  background:#ff8b42 !important;
-  transform:translateY(-1px) !important;
-}
-
-/* =========================
-   TABLE POPUPS ONLY
-========================= */
-#mkTableModal:has(table.training-table) .mk-modal-header{
-  display:none !important; /* remove orange modal header */
-}
-
-/* Attach header to table container (no separation) */
-#mkTableModal:has(table.training-table) .section-header{
-  display:block !important;
-  margin:0 !important;
-
-  border:1px solid var(--border) !important;
-  border-bottom:none !important;
-
-  border-top-left-radius:var(--radius-lg) !important;
-  border-top-right-radius:var(--radius-lg) !important;
-}
-
-#mkTableModal:has(table.training-table) .table-container{
-  margin:0 0 16px 0 !important;
-
-  border:1px solid var(--border) !important;
-  border-top:none !important;
-
-  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
-  overflow:hidden !important;
-}
-
-/* Square the light-orange THEAD corners in popup */
-#mkTableModal:has(table.training-table) table.training-table thead th,
-#mkTableModal:has(table.training-table) table.training-table thead th:first-child,
-#mkTableModal:has(table.training-table) table.training-table thead th:last-child{
-  border-radius:0 !important;
-}
-
-/* =========================
-   NOTES POPUPS ONLY
-========================= */
-#mkTableModal:not(:has(table.training-table)) .mk-modal-header{
-  display:flex !important; /* keep orange header for notes */
-}
-
-
-/* ---- Kill any stray "card X" buttons that may be injected ---- */
-.mk-card-close{ display:none !important; }
-
-/* =========================================================
-   PATCH — TABLE POPUPS: restore orange X in top-right
-   (without bringing back the header)
-========================================================= */
-
-/* Ensure modal panel can host the X */
-#mkTableModal .mk-modal-panel{
-  position:relative !important;
-}
-
-/* TABLE popups: header stays hidden */
-#mkTableModal:has(table.training-table) .mk-modal-header{
-  display:none !important;
-}
-
-/* TABLE popups: show the orange X in top-right white space */
-#mkTableModal:has(table.training-table) .mk-modal-close{
-  display:flex !important;
-
-  position:absolute !important;
-  top:12px !important;
-  right:12px !important;
-
-  width:38px !important;
-  height:38px !important;
-  border-radius:12px !important;
-
-  background:var(--orange) !important;
-  color:#fff !important;
-  border:none !important;
-
-  font-size:22px !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-
-  box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
-  z-index:100000 !important;
-}
-
-#mkTableModal:has(table.training-table) .mk-modal-close:hover{
-  background:#ff8b42 !important;
-  transform:translateY(-1px) !important;
-}
-
-/* =========================================================
-   MODAL BEHAVIOR FIX (Notes vs Tables)
+   ✅ MODAL BEHAVIOR — SINGLE SOURCE OF TRUTH (CLASS-BASED)
    - Notes: ONE header (modal header). Hide inner card header.
-   - Tables: No orange modal bar. White strip area w/ X + Add Row.
+   - Notes: X inside orange header.
+   - Tables: no orange bar; white strip with X + Add Row; content pushed down.
 ========================================================= */
+
+/* ---- Kill any injected card-level X buttons ---- */
+.mk-card-close{ display:none !important; }
+
+/* Ensure panel can anchor absolute elements */
+#mkTableModal .mk-modal-panel{ position:relative !important; }
 
 /* ---------- NOTES MODE ---------- */
 #mkTableModal.mk-is-notes .mk-modal-header{
   display:flex !important;
 }
 
-/* Hide the orange card header INSIDE the notes block so you don't see 2 headers */
+/* Hide inner section headers so you don't see 2 headers */
 #mkTableModal.mk-is-notes .section-block > h2,
 #mkTableModal.mk-is-notes .section-header{
   display:none !important;
 }
 
-/* Notes mode: X lives INSIDE the orange header (top-right) */
+/* Notes mode: X sits INSIDE orange header */
 #mkTableModal.mk-is-notes .mk-modal-close{
   position:static !important;
   margin-left:auto !important;
@@ -1868,9 +1731,12 @@ button.remove-row{
   transform:none !important;
 }
 
+/* Bigger notes textareas remain (already set above) */
+
+
 /* ---------- TABLE MODE ---------- */
 
-/* Keep header element (so close button exists), but remove orange bar + title */
+/* No orange header bar (but keep close button element existing) */
 #mkTableModal.mk-is-table .mk-modal-header{
   background:transparent !important;
   border-bottom:none !important;
@@ -1878,19 +1744,16 @@ button.remove-row{
   min-height:0 !important;
   height:0 !important;
 }
-#mkTableModal.mk-is-table .mk-modal-title{
-  display:none !important;
-}
+#mkTableModal.mk-is-table .mk-modal-title{ display:none !important; }
 
-/* Create a WHITE STRIP area above tables by padding modal content */
+/* Create the white strip space above content */
 #mkTableModal.mk-is-table .mk-modal-content{
-  padding:62px 18px 18px !important; /* ✅ pushes tables/notes down */
+  padding:62px 18px 18px !important;
 }
 
-/* Table mode: orange X sits in the top-right white strip */
+/* Orange X in the top-right white strip */
 #mkTableModal.mk-is-table .mk-modal-close{
   display:flex !important;
-
   position:absolute !important;
   top:12px !important;
   right:12px !important;
@@ -1915,7 +1778,7 @@ button.remove-row{
   transform:translateY(-1px) !important;
 }
 
-/* In table popups, the section header should attach to the table container (no gap) */
+/* In table popups, attach section header to table container */
 #mkTableModal.mk-is-table .section-header{
   margin:0 !important;
   border:1px solid var(--border) !important;
@@ -1931,12 +1794,10 @@ button.remove-row{
   overflow:hidden !important;
 }
 
-/* Hide expand button inside modal (no need to expand while expanded) */
-#mkTableModal.mk-is-table .mk-table-expand-btn{
-  display:none !important;
-}
+/* Hide expand button inside modal */
+#mkTableModal.mk-is-table .mk-table-expand-btn{ display:none !important; }
 
-/* Move the "+" Add Row button into the white strip above tables */
+/* Move "+" Add Row into the white strip */
 #mkTableModal.mk-is-table .table-footer{
   background:transparent !important;
   border:none !important;
@@ -1947,11 +1808,9 @@ button.remove-row{
 #mkTableModal.mk-is-table .table-footer .add-row{
   position:absolute !important;
   top:14px !important;
-  right:62px !important; /* leaves room for the X */
+  right:62px !important; /* leaves room for X */
   z-index:100000 !important;
 }
-
-/* If the footer had any other layout artifacts, kill them */
 #mkTableModal.mk-is-table .table-footer::before,
 #mkTableModal.mk-is-table .table-footer::after{
   display:none !important;
