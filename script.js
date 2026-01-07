@@ -1,12 +1,12 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.1)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.2)
 
    ✅ INCLUDES:
    - Full state save/restore for inputs/selects/textareas/contenteditable
    - Nav (page-section switching + remember last page)
    - Notes logic (• main + "  ◦ " caret stays to the RIGHT)
-   - Additional Trainers (+) on Trainers page (page 2) persistence
+   - Additional Trainers (+) on Trainers page persistence
    - Additional POC (+) persistence
    - Tables: Add Row + persist/restore cloned rows
    - Support Tickets: add card + status move + persist/restore
@@ -15,11 +15,14 @@
    - Training end date auto-set (+3 days after onsite start)
    - Training Summary (Page 11) Engagement Snapshot autopull:
        DID / Dealer / Group / Dates / Lead Trainer / Additional Trainers
-       ✅ Additional Trainers on summary:
-         - NO add button
-         - 1 input by default
-         - more inputs appear ONLY if added on page 2 (trainers page)
 
+   ✅ MODAL BEHAVIOR (per your latest request):
+   - Notes popups: use ONE header (modal header). X sits INSIDE that header.
+   - Table popups: NO orange modal header bar; X sits top-right in white area.
+   - Table popups: content moves DOWN so X and + live in white strip area.
+   - Adds mode classes for CSS targeting:
+       #mkTableModal.mk-is-notes
+       #mkTableModal.mk-is-table
 ======================================================= */
 
 (() => {
@@ -28,7 +31,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_1";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_2";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -37,7 +40,6 @@
   const log = (...args) => (DEBUG ? console.log("[mk]", ...args) : void 0);
 
   // ====== TOPBAR + SUMMARY SOURCE FIELD IDS ======
-  // Adjust/add IDs here if your HTML differs.
   const MK_IDS = {
     dealershipName: ["dealershipNameInput"],
     did: ["dealershipDidInput"],
@@ -58,7 +60,6 @@
     dateEnd: "mkSum_dateEnd",
     leadTrainer: "mkSum_leadTrainer",
 
-    // Additional Trainers (stack + base input)
     addlStack: "mkSum_addlTrainersStack",
     addlBase: "mkSum_addTrainer_0",
     addlRow: "mkSum_addlTrainersRow",
@@ -238,17 +239,6 @@
           "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
         ) || null;
       if (field) return field;
-    }
-    return null;
-  };
-
-  const mkFindTextInputByPlaceholder = (root, placeholderIncludes) => {
-    const want = String(placeholderIncludes || "").toLowerCase().trim();
-    if (!want) return null;
-    const inputs = $$("input[type='text'], input[type='email'], input[type='tel']", root);
-    for (const inp of inputs) {
-      const ph = (inp.getAttribute("placeholder") || "").toLowerCase();
-      if (ph.includes(want)) return inp;
     }
     return null;
   };
@@ -623,7 +613,7 @@
   };
 
   /* =======================
-     ADD TRAINER (+) — Page 2
+     ADD TRAINER (+) — Trainers page
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -657,10 +647,13 @@
     if (!input || !container) return;
 
     const name = (input.value || "").trim();
+    if (!name) return;
+
     const row = buildTrainerRow(name);
     container.appendChild(row);
 
     const clones = cloneState.get();
+    clones.trainers = clones.trainers || [];
     clones.trainers.push({ value: name });
     cloneState.set(clones);
 
@@ -1483,16 +1476,13 @@
 
   /* =======================
      TRAINING SUMMARY (PAGE 11) — Engagement Snapshot autopull
-     ✅ Additional Trainers: 1 base + more ONLY if exist on Trainers page
   ======================= */
   const mkGetTrainerCloneValues = () => {
-    // Source of truth: cloneState (covers restored state too)
     const clones = cloneState.get();
     const arr = (clones.trainers || [])
       .map((t) => String(t?.value || "").trim())
       .filter(Boolean);
 
-    // Fallback: DOM container if needed
     if (!arr.length) {
       const container = $("#additionalTrainersContainer");
       if (container) {
@@ -1511,7 +1501,6 @@
 
     if (!stack || !base) return;
 
-    // wipe any dynamic inputs (keep base only)
     $$(`input[id^="mkSum_addTrainer_"]`, stack).forEach((el) => {
       if (el.id !== MK_SUMMARY_IDS.addlBase) el.remove();
     });
@@ -1534,12 +1523,7 @@
       saveField(inp);
     }
 
-    // Optional: hide the whole row if no additional trainers
-    // (comment out if you always want the base input visible)
-    if (row) {
-      row.style.display = "flex";
-    }
-
+    if (row) row.style.display = "flex";
     setGhostStyles(document);
   };
 
@@ -1547,7 +1531,6 @@
     const summarySection = document.getElementById("training-summary");
     if (!summarySection) return;
 
-    // Engagement snapshot fields
     const didEl = document.getElementById(MK_SUMMARY_IDS.did);
     const dealerEl = document.getElementById(MK_SUMMARY_IDS.dealership);
     const groupEl = document.getElementById(MK_SUMMARY_IDS.dealerGroup);
@@ -1557,7 +1540,6 @@
 
     const leadEl = document.getElementById(MK_SUMMARY_IDS.leadTrainer);
 
-    // Pull dealership data from known IDs (page 1)
     const did = mkFirstValueByIds(MK_IDS.did);
     const dealerGroup = mkFirstValueByIds(MK_IDS.dealerGroup);
     const dealership = mkFirstValueByIds(MK_IDS.dealershipName);
@@ -1566,7 +1548,6 @@
     if (dealerEl && (dealerEl.value || "").trim() !== dealership) dealerEl.value = dealership || "";
     if (groupEl && (groupEl.value || "").trim() !== dealerGroup) groupEl.value = dealerGroup || "";
 
-    // Pull dates
     const startSrc = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
     const endSrc = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
 
@@ -1577,28 +1558,24 @@
       endEl.value = endSrc.value || "";
     }
 
-    // Pull lead trainer
     const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
     if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
 
-    // Save IDs (so reset/page restore behaves)
     [didEl, dealerEl, groupEl, startEl, endEl, leadEl].forEach((el) => {
       if (!el) return;
       ensureId(el);
       saveField(el);
     });
 
-    // Additional Trainers (base + dynamic)
     mkSyncAdditionalTrainersToSummary();
   };
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES)
      ✅ Modal styling matches page exactly by ID-swapping wrapper
-     ✅ Removes “random card behind” by removing modal panel background/padding
-  ========================================================= */
+========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8";
+    const STYLE_ID = "mk-expand-style-v8_2";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1632,14 +1609,6 @@
         }
         #mkTableModal .mk-modal-content{
           padding: 0 !important;
-        }
-        #mkTableModal.mk-notes-only .section-block{
-          margin: 0 !important;
-        }
-        #mkTableModal textarea{
-          min-height: 360px !important;
-          font-size: 16px !important;
-          line-height: 1.45 !important;
         }
       `;
       document.head.appendChild(s);
@@ -1752,6 +1721,8 @@
 
     modal.classList.remove("open");
     modal.classList.remove("mk-notes-only");
+    modal.classList.remove("mk-is-table");   // ✅ IMPORTANT
+    modal.classList.remove("mk-is-notes");   // ✅ IMPORTANT
     modal.setAttribute("aria-hidden", "true");
 
     const content = $(".mk-modal-content", modal);
@@ -1811,9 +1782,14 @@
     return uniq;
   };
 
+  // ✅ TABLE MODE: no orange header bar; X in white strip via CSS
   const openTableModalFor = (anyInside) => {
     const modal = $("#mkTableModal");
-    if (modal) modal.classList.remove("mk-notes-only");
+    if (modal) {
+      modal.classList.remove("mk-is-notes");
+      modal.classList.add("mk-is-table");
+      modal.classList.remove("mk-notes-only");
+    }
 
     const bundle = getExpandBundleNodes(anyInside);
     const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
@@ -1823,11 +1799,16 @@
     openModalWithNodes(bundle, title, originSectionEl);
   };
 
+  // ✅ NOTES MODE: ONE header (modal header); X inside header via CSS
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
 
     const modal = $("#mkTableModal");
-    if (modal) modal.classList.add("mk-notes-only");
+    if (modal) {
+      modal.classList.remove("mk-is-table");
+      modal.classList.add("mk-is-notes");
+      modal.classList.add("mk-notes-only");
+    }
 
     const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
     const title = (h?.textContent || "Notes").trim();
@@ -2022,7 +2003,6 @@
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
 
-        // If landing on Training Summary, refresh snapshot
         if (targetId === "training-summary") {
           mkSyncSummaryEngagementSnapshot();
         }
@@ -2126,13 +2106,16 @@
       const id = notesExpandBtn.getAttribute("data-notes-id");
       const block = id ? document.getElementById(id) : null;
       if (block) openNotesModalFor(block);
-      else openModalWithNodes([notesExpandBtn.closest(".section-block")], "Notes", notesExpandBtn.closest(".page-section"));
+      else openNotesModalFor(notesExpandBtn.closest(".section-block"));
       return;
     }
 
     const mkTableModal = $("#mkTableModal");
     if (mkTableModal && mkTableModal.classList.contains("open")) {
-      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+      if (
+        t.closest("#mkTableModal .mk-modal-close") ||
+        t.closest("#mkTableModal .mk-modal-backdrop")
+      ) {
         e.preventDefault();
         closeTableModal();
         return;
@@ -2149,13 +2132,15 @@
       setGhostStyles(document);
     }
 
-    // Topbar + summary snapshot sources
-    if (el.id === "dealershipNameInput" || el.id === "dealershipDidInput" || el.id === "dealerGroupInput") {
+    if (
+      el.id === "dealershipNameInput" ||
+      el.id === "dealershipDidInput" ||
+      el.id === "dealerGroupInput"
+    ) {
       mkSyncTopbarTitle();
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // Trainer clones (page 2 additional trainers)
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
@@ -2166,7 +2151,6 @@
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // Lead trainer changes
     if (
       /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
       (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
@@ -2174,18 +2158,18 @@
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // POC clones
-    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
+    if (
+      el.closest(".additional-poc-card") &&
+      el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
+    ) {
       persistAllPocs();
     }
 
-    // Tickets
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
     if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
 
-    // Table cloned rows
     const tr = el.closest("tr");
     const table = el.closest("table.training-table");
     if (tr && table && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") {
@@ -2202,7 +2186,6 @@
       setGhostStyles(document);
     }
 
-    // Date changes should refresh summary snapshot too
     if (el.matches('input[type="date"]')) {
       mkSyncSummaryEngagementSnapshot();
     }
@@ -2296,7 +2279,7 @@
     enforceBaseTicketStatusLock();
     initSummaryActionsDropdown();
 
-    log("Initialized v8.1.");
+    log("Initialized v8.2.");
   };
 
   if (document.readyState === "loading") {
@@ -2304,604 +2287,4 @@
   } else {
     init();
   }
-})();
-
-/* =========================================================
-   FIX — Page 1 Trainers + Page 11 Training Summary Sync
-   ✅ Page 1 "+" adds ONLY ONE line (blocks duplicate handlers)
-   ✅ Page 11 Lead Trainer mirrors #leadTrainerSelect
-   ✅ Page 11 Additional Trainers auto-build inputs (no + button)
-========================================================= */
-
-(function mkFixTrainersAndSummary(){
-  const $  = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-  // ---- Page 1 refs ----
-  const leadTrainerSelect = $("#leadTrainerSelect");
-  const addlBaseInput     = $("#additionalTrainerInput");
-  const addBtn            = $("#trainers-deployment .trainer-add-btn") || $("[data-add-trainer]");
-  const addlContainer     = $("#additionalTrainersContainer");
-
-  // ---- Page 11 refs ----
-  const sumLeadTrainer = $("#mkSum_leadTrainer");
-  const sumRow         = $("#mkSum_addlTrainersRow");
-  const sumStack       = $("#mkSum_addlTrainersStack");
-
-  if (!leadTrainerSelect || !addlBaseInput || !addBtn || !addlContainer) {
-    // If any are missing, don't throw—just exit safely.
-    return;
-  }
-
-  // -----------------------------------------
-  // Build ONE additional trainer row on Page 1
-  // -----------------------------------------
-  function createAddedTrainerRow(value=""){
-    const row = document.createElement("div");
-    row.className = "checklist-row indent-sub";
-
-    const label = document.createElement("label");
-    label.textContent = ""; // keep alignment consistent with your added rows
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Enter additional trainer name";
-    input.autocomplete = "off";
-    input.value = value;
-
-    row.appendChild(label);
-    row.appendChild(input);
-    return row;
-  }
-
-  // -----------------------------------------
-  // Read trainers from Page 1 (base + added)
-  // -----------------------------------------
-  function readAdditionalTrainersPage1(){
-    const vals = [];
-
-    const baseVal = (addlBaseInput.value || "").trim();
-    if (baseVal) vals.push(baseVal);
-
-    // any inputs created in the added container
-    $$("input[type='text']", addlContainer).forEach(inp => {
-      const v = (inp.value || "").trim();
-      if (v) vals.push(v);
-    });
-
-    // de-dupe
-    return Array.from(new Set(vals));
-  }
-
-  // -----------------------------------------
-  // Sync Page 1 -> Page 11
-  // -----------------------------------------
-  function syncToSummary(){
-    // Lead trainer (Page 1 select -> Page 11 input)
-    if (sumLeadTrainer) {
-      sumLeadTrainer.value = leadTrainerSelect.value || "";
-    }
-
-    if (!sumStack) return;
-
-    const trainers = readAdditionalTrainersPage1();
-
-    // show/hide row if needed
-    if (sumRow) sumRow.style.display = trainers.length ? "" : "none";
-
-    // rebuild stack cleanly (NO add button on summary page)
-    sumStack.innerHTML = "";
-
-    // always create base input so layout stays stable
-    const base = document.createElement("input");
-    base.type = "text";
-    base.placeholder = "Additional trainer";
-    base.id = "mkSum_addTrainer_0";
-    base.value = trainers[0] || "";
-    sumStack.appendChild(base);
-
-    for (let i = 1; i < trainers.length; i++){
-      const inp = document.createElement("input");
-      inp.type = "text";
-      inp.placeholder = "Additional trainer";
-      inp.id = `mkSum_addTrainer_${i}`;
-      inp.value = trainers[i];
-      sumStack.appendChild(inp);
-    }
-  }
-
-  // -----------------------------------------
-  // HARD FIX: Stop duplicate "+" handlers
-  // Use CAPTURE listener + stopImmediatePropagation()
-  // so ONLY THIS handler runs.
-  // -----------------------------------------
-  if (!addBtn.dataset.mkSingleAddBound) {
-    addBtn.dataset.mkSingleAddBound = "true";
-    addBtn.type = "button";
-
-    addBtn.addEventListener("click", (e) => {
-      // 🔥 This blocks other click listeners attached elsewhere
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
-      const val = (addlBaseInput.value || "").trim();
-      if (!val) {
-        // If they click + with nothing typed, do nothing.
-        // (If you want it to add a blank row anyway, tell me.)
-        syncToSummary();
-        return;
-      }
-
-      // Add exactly ONE row with the typed value
-      addlContainer.appendChild(createAddedTrainerRow(val));
-
-      // Clear the base input after adding (matches expected UX)
-      addlBaseInput.value = "";
-
-      // Sync summary after add
-      syncToSummary();
-    }, true); // ✅ capture phase
-  }
-
-  // -----------------------------------------
-  // Live sync listeners
-  // -----------------------------------------
-  leadTrainerSelect.addEventListener("change", syncToSummary);
-  addlBaseInput.addEventListener("input", syncToSummary);
-
-  // Event delegation for added trainer inputs on page 1
-  addlContainer.addEventListener("input", (e) => {
-    if (e.target && e.target.matches("input[type='text']")) syncToSummary();
-  });
-
-  // Run once on load
-  syncToSummary();
-})();
-
-/* =========================================================
-   TRAINERS MIRRORING (Page 1 -> Page 11)
-   ✅ Fixes Page 1 + adding two rows (double-binding)
-   ✅ Mirrors Lead Trainer to Page 11 Lead Trainer input
-   ✅ Mirrors Additional Trainers to Page 11 stacked inputs
-========================================================= */
-
-(function mkTrainerMirroringInit(){
-  // Prevent double-binding if script injected / loaded twice
-  if (window.__mkTrainerMirrorBound) return;
-  window.__mkTrainerMirrorBound = true;
-
-  const leadSelect = document.getElementById("leadTrainerSelect");
-  const addBaseInput = document.getElementById("additionalTrainerInput");
-  const addBtn = document.querySelector("[data-add-trainer]");
-  const addContainer = document.getElementById("additionalTrainersContainer");
-
-  // Page 11 targets
-  const sumLeadInput = document.getElementById("mkSum_leadTrainer");
-  const sumStack = document.getElementById("mkSum_addlTrainersStack");
-
-  if (!addContainer || !sumStack) return;
-
-  // ---------- helpers ----------
-  const normalizeName = (v) => (v || "").trim();
-
-  function getAdditionalTrainersFromPage1(){
-    const names = [];
-
-    // base input (only if user typed and then added? we treat it as “pending”)
-    const baseVal = normalizeName(addBaseInput?.value);
-    if (baseVal) names.push(baseVal);
-
-    // added trainer inputs in the container
-    addContainer.querySelectorAll('input[type="text"]').forEach((inp) => {
-      const val = normalizeName(inp.value);
-      if (val) names.push(val);
-    });
-
-    // de-dupe while preserving order
-    return [...new Set(names)];
-  }
-
-  function setSummaryLeadTrainer(){
-    if (!sumLeadInput || !leadSelect) return;
-    const val = normalizeName(leadSelect.value);
-    sumLeadInput.value = val;
-  }
-
-  function rebuildSummaryAdditionalTrainers(){
-    if (!sumStack) return;
-
-    const names = getAdditionalTrainersFromPage1();
-
-    // Keep the base input (mkSum_addTrainer_0) but rebuild everything after it
-    const base = document.getElementById("mkSum_addTrainer_0");
-
-    // remove any dynamically created inputs (everything except base)
-    sumStack.querySelectorAll('input[type="text"]').forEach((inp) => {
-      if (base && inp === base) return;
-      inp.remove();
-    });
-
-    // Ensure base exists
-    if (base) {
-      base.value = names[0] || "";
-      base.classList.add("mk-sum-addl-input");
-    }
-
-    // Add additional inputs for remaining names
-    names.slice(1).forEach((name, idx) => {
-      const i = idx + 1;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = `mkSum_addTrainer_${i}`;
-      input.placeholder = "Additional trainer";
-      input.value = name;
-      input.className = "mk-sum-addl-input";
-      sumStack.appendChild(input);
-    });
-
-    // If ALL empty, keep just base blank
-    if (!names.length && base) base.value = "";
-  }
-
-  // ---------- Page 1: add one trainer per click ----------
-  function addTrainerRow(name){
-    const val = normalizeName(name);
-    if (!val) return;
-
-    // Build one row only
-    const row = document.createElement("div");
-    row.className = "checklist-row integrated-plus indent-sub";
-    row.dataset.base = "false";
-
-    const label = document.createElement("label");
-    label.textContent = "Additional Trainer";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = val;
-    input.autocomplete = "off";
-
-    // match your existing styling in container
-    row.appendChild(label);
-    row.appendChild(input);
-    addContainer.appendChild(row);
-
-    // Clear base input after add
-    if (addBaseInput) addBaseInput.value = "";
-
-    // Mirror to summary immediately
-    rebuildSummaryAdditionalTrainers();
-  }
-
-  // IMPORTANT: bind click ONLY once and stop duplicate handlers
-  if (addBtn) {
-    addBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerRow(addBaseInput?.value);
-    }, { capture: true });
-  }
-
-  // Add on Enter in base field (optional but nice)
-  if (addBaseInput) {
-    addBaseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addTrainerRow(addBaseInput.value);
-      }
-    });
-  }
-
-  // Mirror lead trainer whenever selection changes
-  if (leadSelect) {
-    leadSelect.addEventListener("change", () => {
-      setSummaryLeadTrainer();
-    });
-  }
-
-  // Mirror when any added trainer input changes
-  addContainer.addEventListener("input", (e) => {
-    const t = e.target;
-    if (t && t.matches('input[type="text"]')) rebuildSummaryAdditionalTrainers();
-  });
-
-  // Also mirror when base input changes (so summary shows it even before "+")
-  if (addBaseInput) {
-    addBaseInput.addEventListener("input", () => {
-      rebuildSummaryAdditionalTrainers();
-    });
-  }
-
-  // Initial sync on load
-  setSummaryLeadTrainer();
-  rebuildSummaryAdditionalTrainers();
-})();
-
-/* =========================================================
-   FIX: Page 1 -> Page 11 mirroring (Lead + Additional Trainers)
-   ✅ Fixes "+ adds two rows" by wiping prior click handlers (clone button)
-   ✅ Saves Lead Trainer + ALL Additional Trainers to localStorage
-   ✅ Page 11 auto-populates Lead Trainer
-   ✅ Page 11 auto-creates one input per Additional Trainer (no add button)
-========================================================= */
-
-(function mkTrainerMirrorV2(){
-  if (window.__mkTrainerMirrorV2) return;
-  window.__mkTrainerMirrorV2 = true;
-
-  const LS_LEAD = "mk_leadTrainer";
-  const LS_ADDL = "mk_addlTrainers";
-
-  // ---------- DOM getters ----------
-  function el(id){ return document.getElementById(id); }
-
-  function getLeadTrainer(){
-    const sel = el("leadTrainerSelect");
-    if (!sel) return "";
-    // ignore ghost option
-    const val = (sel.value || "").trim();
-    return val;
-  }
-
-  function setLeadTrainer(val){
-    const clean = (val || "").trim();
-    localStorage.setItem(LS_LEAD, clean);
-  }
-
-  function readLeadTrainer(){
-    return (localStorage.getItem(LS_LEAD) || "").trim();
-  }
-
- function getAddlTrainersFromPage1(){
-  const baseInput = el("additionalTrainerInput"); // Page 1 default textbox
-  const container = el("additionalTrainersContainer");
-  const list = [];
-
-  // 1) include the DEFAULT textbox value too (if it has a name typed)
-  const baseVal = (baseInput?.value || "").trim();
-  if (baseVal) list.push(baseVal);
-
-  // 2) include ALL added trainer inputs
-  if (container){
-    container.querySelectorAll('input[type="text"]').forEach(inp => {
-      const v = (inp.value || "").trim();
-      if (v) list.push(v);
-    });
-  }
-
-  // 3) de-dupe while preserving order (prevents baseVal duplicating an added row)
-  const seen = new Set();
-  return list.filter(v => (seen.has(v) ? false : (seen.add(v), true)));
-}
-
-  function saveAddlTrainers(list){
-    const clean = Array.isArray(list) ? list.map(v => (v || "").trim()).filter(Boolean) : [];
-    localStorage.setItem(LS_ADDL, JSON.stringify(clean));
-  }
-
-  function readAddlTrainers(){
-    try{
-      const raw = localStorage.getItem(LS_ADDL);
-      const arr = JSON.parse(raw || "[]");
-      return Array.isArray(arr) ? arr.map(v => (v || "").trim()).filter(Boolean) : [];
-    }catch{
-      return [];
-    }
-  }
-
-  // ---------- Page 11 builders ----------
-  function syncPage11Lead(){
-    const target = el("mkSum_leadTrainer");
-    if (!target) return;
-
-    const lead = readLeadTrainer();
-    target.value = lead;
-  }
-
-  function syncPage11Addl(){
-    const stack = el("mkSum_addlTrainersStack");
-    const row = el("mkSum_addlTrainersRow"); // optional show/hide
-    if (!stack) return;
-
-    const names = readAddlTrainers();
-
-    // Ensure base exists
-    let base = el("mkSum_addTrainer_0");
-    if (!base) {
-      base = document.createElement("input");
-      base.type = "text";
-      base.id = "mkSum_addTrainer_0";
-      base.placeholder = "Additional trainer";
-      stack.prepend(base);
-    }
-
-    // Remove all dynamically added summary inputs (keep base)
-    stack.querySelectorAll('input[type="text"]').forEach(inp => {
-      if (inp !== base) inp.remove();
-    });
-
-    // Fill base + create the rest (ALL of them)
-    base.value = names[0] || "";
-    for (let i = 1; i < names.length; i++){
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = `mkSum_addTrainer_${i}`;
-      input.placeholder = "Additional trainer";
-      input.value = names[i];
-      stack.appendChild(input);
-    }
-
-    // Optional: hide the row if none exist
-    if (row) row.style.display = names.length ? "" : "none";
-  }
-
-  function syncAllToPage11(){
-    syncPage11Lead();
-    syncPage11Addl();
-  }
-
-  // ---------- Page 1: fix "+" handler (single add) ----------
-  function bindPage1AddButton(){
-    const addBtn = document.querySelector("[data-add-trainer]");
-    const baseInput = el("additionalTrainerInput");
-    const container = el("additionalTrainersContainer");
-
-    if (!addBtn || !baseInput || !container) return;
-
-    // Clone button to wipe ALL old click handlers (fixes “adds two rows”)
-    const freshBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(freshBtn, addBtn);
-
-    function addTrainerFromBase(){
-      const name = (baseInput.value || "").trim();
-      if (!name) return;
-
-      // Create ONE row
-      const row = document.createElement("div");
-      row.className = "checklist-row integrated-plus indent-sub";
-      row.dataset.base = "false";
-
-      const label = document.createElement("label");
-      label.textContent = "Additional Trainer";
-
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = name;
-      input.autocomplete = "off";
-
-      row.appendChild(label);
-      row.appendChild(input);
-      container.appendChild(row);
-
-      baseInput.value = "";
-
-      // Save + sync
-      saveAddlTrainers(getAddlTrainersFromPage1());
-      syncPage11Addl();
-    }
-
-    freshBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerFromBase();
-    });
-
-    baseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter"){
-        e.preventDefault();
-        addTrainerFromBase();
-      }
-    });
-
-    // Any edits to added trainer rows update storage + Page 11
-    container.addEventListener("input", (e) => {
-      if (e.target && e.target.matches('input[type="text"]')){
-        saveAddlTrainers(getAddlTrainersFromPage1());
-        syncPage11Addl();
-      }
-    });
-  }
-
-  // ---------- Page 1: lead trainer save ----------
-  function bindLeadTrainer(){
-    const sel = el("leadTrainerSelect");
-    if (!sel) return;
-
-    sel.addEventListener("change", () => {
-      setLeadTrainer(getLeadTrainer());
-      syncPage11Lead();
-    });
-
-    // Save once on load too
-    setLeadTrainer(getLeadTrainer());
-  }
-
-  // ---------- Re-sync when navigating to Training Summary ----------
-  function bindNavSync(){
-    document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest && e.target.closest(".nav-btn");
-      if (!btn) return;
-
-      // If the nav button activates training-summary, sync after DOM updates
-      const targetId = btn.getAttribute("data-target") || btn.dataset.target;
-      if (targetId === "training-summary") {
-        setTimeout(syncAllToPage11, 0);
-      }
-    });
-  }
-
-  // ---------- init ----------
-  function init(){
-    bindPage1AddButton();
-    bindLeadTrainer();
-    bindNavSync();
-
-    // Save initial additional trainers + sync summary once
-    saveAddlTrainers(getAddlTrainersFromPage1());
-    syncAllToPage11();
-  }
-
-  if (document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-/* =========================================================
-   TABLE POPUPS — Card-level Close X buttons
-========================================================= */
-(function () {
-  function closeMkTableModal() {
-    const modal = document.getElementById("mkTableModal");
-    if (!modal) return;
-
-    // Prefer your existing close button if present (keeps your cleanup logic)
-    const existingClose = modal.querySelector(".mk-modal-close");
-    if (existingClose) {
-      existingClose.click();
-      return;
-    }
-
-    // Fallback close (in case your header is removed)
-    modal.classList.remove("open");
-    modal.classList.remove("mk-notes-only");
-    modal.style.display = "none";
-  }
-
-  function ensureCardCloseButtons() {
-    const modal = document.getElementById("mkTableModal");
-    if (!modal || !modal.classList.contains("open")) return;
-
-    const content = modal.querySelector(".mk-modal-content");
-    if (!content) return;
-
-    // Only on TABLE popups (you asked specifically for table popups)
-    const hasTable = !!content.querySelector("table.training-table");
-    if (!hasTable) return;
-
-    const cards = content.querySelectorAll(".table-container, .section-block");
-    cards.forEach((card) => {
-      if (card.querySelector(".mk-card-close")) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-card-close";
-      btn.setAttribute("aria-label", "Close popup");
-      btn.innerHTML = "&times;";
-      btn.addEventListener("click", closeMkTableModal);
-
-      card.appendChild(btn);
-    });
-  }
-
-  // Run whenever modal opens / content changes
-  const modal = document.getElementById("mkTableModal");
-  if (!modal) return;
-
-  const obs = new MutationObserver(() => ensureCardCloseButtons());
-  obs.observe(modal, { attributes: true, childList: true, subtree: true });
-
-  // Also run once on load (in case modal is already open)
-  ensureCardCloseButtons();
 })();
