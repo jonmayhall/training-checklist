@@ -1815,3 +1815,62 @@ button.remove-row{
 #mkTableModal.mk-is-table .table-footer::after{
   display:none !important;
 }
+
+/* =========================================================
+   PATCH — TABLE POPUPS (mkTableModal)
+   - Remove white square behind orange X
+   - Make X smaller
+   - Remove random line above tables
+   - Reduce top whitespace above tables
+========================================================= */
+
+/* TABLE mode: tighten the entire top area */
+#mkTableModal.mk-is-table .mk-modal-content{
+  padding:12px 14px 16px !important; /* ✅ was huge (62px) */
+}
+
+/* If your JS injected the white strip (.mk-modal-strip), tighten + remove its line */
+#mkTableModal.mk-is-table .mk-modal-strip{
+  padding:8px 10px !important;
+  border-bottom:none !important;      /* ✅ kills the random line */
+  box-shadow:none !important;
+  background:#fff !important;
+}
+
+/* TABLE mode: close button should NOT be absolute (prevents “white behind” look) */
+#mkTableModal.mk-is-table .mk-modal-close{
+  position:static !important;
+  top:auto !important;
+  right:auto !important;
+
+  width:32px !important;              /* ✅ smaller */
+  height:32px !important;             /* ✅ smaller */
+  border-radius:10px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:none !important;
+
+  box-shadow:0 8px 18px rgba(0,0,0,0.20) !important;
+}
+
+/* If any old rules were creating a “button behind the button”, nuke pseudo layers */
+#mkTableModal.mk-is-table .mk-modal-close::before,
+#mkTableModal.mk-is-table .mk-modal-close::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Remove any stray divider lines near the top of the table bundle */
+#mkTableModal.mk-is-table .mk-modal-panel hr,
+#mkTableModal.mk-is-table .mk-modal-content hr{
+  display:none !important;
+}
+
+/* Also ensure the first section-header/table doesn’t get extra top spacing */
+#mkTableModal.mk-is-table .section-header{
+  margin-top:0 !important;
+}
+#mkTableModal.mk-is-table .table-container{
+  margin-top:0 !important;
+}
