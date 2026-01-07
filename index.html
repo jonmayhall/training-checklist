@@ -48,19 +48,20 @@
 
       <!-- ========================= MAIN CONTENT ========================= -->
       <main>
-     <!-- =========================================================
-         PAGE 1 — TRAINERS & mK TEAM
-========================================================= -->
-<section id="trainers-deployment" class="page-section active">
-  <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
-    Reset This Page
-  </button>
 
+    <!-- =========================================================
+     PAGE 1 — TRAINERS & mK TEAM (STANDARDIZED)
+========================================================= -->
+<section id="trainers-deployment" class="page-section active" data-page="1">
   <h1>Trainers &amp; mK Team</h1>
   <p class="page-subtitle">
     Select the assigned lead trainer, add additional trainers, and capture the
     deployment/CEM assignments.
   </p>
+
+  <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
+    Reset This Page
+  </button>
 
   <div class="grid-2">
     <!-- ================= LEAD + ADDITIONAL TRAINERS ================= -->
@@ -69,8 +70,8 @@
 
       <!-- Lead Trainer -->
       <div class="checklist-row">
-        <label class="sr-label">Lead Trainer</label>
-        <select id="leadTrainerSelect">
+        <label for="leadTrainerSelect">Lead Trainer</label>
+        <select id="leadTrainerSelect" name="leadTrainerSelect">
           <option value="" data-ghost="true">Select lead trainer</option>
           <option disabled>──────────</option>
           <option>Christopher Eskew</option>
@@ -97,11 +98,12 @@
 
       <!-- Additional Trainer (+) -->
       <div class="checklist-row integrated-plus indent-sub" data-base="true">
-        <label>Additional Trainer</label>
+        <label for="additionalTrainerInput">Additional Trainer</label>
 
         <div class="input-plus">
           <input
             id="additionalTrainerInput"
+            name="additionalTrainerInput"
             type="text"
             placeholder="Enter additional trainer name"
             autocomplete="off"
@@ -122,16 +124,17 @@
       <!-- Added trainers render here -->
       <div id="additionalTrainersContainer" class="integrated-plus-container"></div>
     </div>
-    <!-- ✅ END Lead & Additional Trainers card -->
+    <!-- END Lead & Additional Trainers card -->
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
       <h2>Deployment &amp; Customer Engagement Manager</h2>
 
       <div class="checklist-row">
-        <label>Deployment Manager</label>
+        <label for="deploymentManager">Deployment Manager</label>
         <input
           id="deploymentManager"
+          name="deploymentManager"
           type="text"
           placeholder="Enter Deployment Manager assigned"
           autocomplete="off"
@@ -139,9 +142,10 @@
       </div>
 
       <div class="checklist-row">
-        <label>ServiceCart ASC</label>
+        <label for="serviceCartASC">ServiceCart ASC</label>
         <input
           id="serviceCartASC"
+          name="serviceCartASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -149,9 +153,10 @@
       </div>
 
       <div class="checklist-row">
-        <label>Scheduler ASC</label>
+        <label for="schedulerASC">Scheduler ASC</label>
         <input
           id="schedulerASC"
+          name="schedulerASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -159,9 +164,10 @@
       </div>
 
       <div class="checklist-row">
-        <label>CEM</label>
+        <label for="cemAssigned">CEM</label>
         <input
           id="cemAssigned"
+          name="cemAssigned"
           type="text"
           placeholder="Enter CEM assigned"
           autocomplete="off"
@@ -171,20 +177,16 @@
   </div>
 </section>
 
-    <!-- ========================================================= -->
-<!-- PAGE 2: DEALERSHIP INFO                                   -->
-<!-- ========================================================= -->
-<section id="dealership-info" class="page-section">
+<!-- =========================================================
+     PAGE 2 — DEALERSHIP INFO (STANDARDIZED)
+========================================================= -->
+<section id="dealership-info" class="page-section" data-page="2">
   <h1>Dealership Info</h1>
   <p class="page-subtitle">
     Core dealership details and key contacts your team will work with.
   </p>
 
-  <button
-    class="clear-page-btn"
-    type="button"
-    data-clear-page="dealership-info"
-  >
+  <button class="clear-page-btn" type="button" data-clear-page="dealership-info">
     Reset This Page
   </button>
 
@@ -192,45 +194,29 @@
   <div class="section-block">
     <h2>Dealership Details</h2>
 
-     <div class="checklist-row">
-      <label>DID</label>
-      <input
-        type="text"
-        id="dealershipDidInput"
-        placeholder="Enter dealership DID"
-      />
+    <div class="checklist-row">
+      <label for="dealershipDidInput">DID</label>
+      <input type="text" id="dealershipDidInput" name="dealershipDidInput" placeholder="Enter dealership DID" />
     </div>
 
     <div class="checklist-row">
-      <label>Dealer Group</label>
-      <input
-        type="text"
-        id="dealerGroupInput"
-        placeholder="Enter dealer group name"
-      />
+      <label for="dealerGroupInput">Dealer Group</label>
+      <input type="text" id="dealerGroupInput" name="dealerGroupInput" placeholder="Enter dealer group name" />
     </div>
 
     <div class="checklist-row">
-      <label>Dealership Name</label>
-      <input
-        type="text"
-        id="dealershipNameInput"
-        placeholder="Enter dealership name"
-      />
+      <label for="dealershipNameInput">Dealership Name</label>
+      <input type="text" id="dealershipNameInput" name="dealershipNameInput" placeholder="Enter dealership name" />
     </div>
 
     <div class="checklist-row">
-      <label>Salesforce Order</label>
-      <input
-        type="text"
-        id="SForderInput"
-        placeholder="Enter SF order link"
-      />
+      <label for="SForderInput">Salesforce Order</label>
+      <input type="text" id="SForderInput" name="SForderInput" placeholder="Enter SF order link" />
     </div>
 
     <div class="checklist-row">
-      <label>DMS</label>
-      <select id="dealershipDmsSelect">
+      <label for="dealershipDmsSelect">DMS</label>
+      <select id="dealershipDmsSelect" name="dealershipDmsSelect">
         <option value="" data-ghost="true">Select DMS</option>
         <option>CDK</option>
         <option>Reynolds &amp; Reynolds</option>
@@ -248,8 +234,8 @@
     <div class="checklist-row training-dates-row">
       <label>Onsite Training Dates</label>
       <div class="date-stack">
-        <input type="date" id="onsiteStartDate" class="is-placeholder" />
-        <input type="date" id="onsiteEndDate" class="is-placeholder" />
+        <input type="date" id="onsiteStartDate" name="onsiteStartDate" class="is-placeholder" />
+        <input type="date" id="onsiteEndDate" name="onsiteEndDate" class="is-placeholder" />
       </div>
     </div>
   </div>
@@ -259,79 +245,79 @@
     <h2>Primary Contacts</h2>
 
     <div class="primary-contacts-grid">
-
       <!-- Service Director -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
-          <label>Service Director</label>
-          <input type="text" placeholder="Enter name" />
+          <label for="serviceDirectorName">Service Director</label>
+          <input id="serviceDirectorName" name="serviceDirectorName" type="text" placeholder="Enter name" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
+          <label for="serviceDirectorCell">Cell</label>
+          <input id="serviceDirectorCell" name="serviceDirectorCell" type="text" placeholder="Enter cell" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
+          <label for="serviceDirectorEmail">Email</label>
+          <input id="serviceDirectorEmail" name="serviceDirectorEmail" type="email" placeholder="Enter company email" />
         </div>
       </div>
 
       <!-- Service Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
-          <label>Service Manager</label>
-          <input type="text" placeholder="Enter name" />
+          <label for="serviceManagerName">Service Manager</label>
+          <input id="serviceManagerName" name="serviceManagerName" type="text" placeholder="Enter name" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
+          <label for="serviceManagerCell">Cell</label>
+          <input id="serviceManagerCell" name="serviceManagerCell" type="text" placeholder="Enter cell" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
+          <label for="serviceManagerEmail">Email</label>
+          <input id="serviceManagerEmail" name="serviceManagerEmail" type="email" placeholder="Enter company email" />
         </div>
       </div>
 
       <!-- General Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
-          <label>General Manager</label>
-          <input type="text" placeholder="Enter name" />
+          <label for="generalManagerName">General Manager</label>
+          <input id="generalManagerName" name="generalManagerName" type="text" placeholder="Enter name" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
+          <label for="generalManagerCell">Cell</label>
+          <input id="generalManagerCell" name="generalManagerCell" type="text" placeholder="Enter cell" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
+          <label for="generalManagerEmail">Email</label>
+          <input id="generalManagerEmail" name="generalManagerEmail" type="email" placeholder="Enter company email" />
         </div>
       </div>
 
       <!-- Parts Manager -->
       <div class="mini-card contact-card">
         <div class="checklist-row">
-          <label>Parts Manager</label>
-          <input type="text" placeholder="Enter name" />
+          <label for="partsManagerName">Parts Manager</label>
+          <input id="partsManagerName" name="partsManagerName" type="text" placeholder="Enter name" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
+          <label for="partsManagerCell">Cell</label>
+          <input id="partsManagerCell" name="partsManagerCell" type="text" placeholder="Enter cell" />
         </div>
         <div class="checklist-row indent-sub">
-          <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
+          <label for="partsManagerEmail">Email</label>
+          <input id="partsManagerEmail" name="partsManagerEmail" type="email" placeholder="Enter company email" />
         </div>
       </div>
 
       <!-- ========== ADDITIONAL POC (BASE) ========== -->
       <div class="mini-card additional-poc-card" data-base="true">
         <div class="checklist-row integrated-plus indent-sub">
-          <label>Additional POC</label>
+          <label for="additionalPocInput">Additional POC</label>
 
           <div class="input-plus">
             <input
               id="additionalPocInput"
+              name="additionalPocInput"
               type="text"
               placeholder="Enter name"
               autocomplete="off"
@@ -351,26 +337,22 @@
 
         <div class="checklist-row indent-sub">
           <label>Role</label>
-          <input type="text" placeholder="Enter role" />
+          <input name="additionalPocRoleBase" type="text" placeholder="Enter role" />
         </div>
 
         <div class="checklist-row indent-sub">
           <label>Cell</label>
-          <input type="text" placeholder="Enter cell" />
+          <input name="additionalPocCellBase" type="text" placeholder="Enter cell" />
         </div>
 
         <div class="checklist-row indent-sub">
           <label>Email</label>
-          <input type="email" placeholder="Enter company email" />
+          <input name="additionalPocEmailBase" type="email" placeholder="Enter company email" />
         </div>
       </div>
 
       <!-- Added POCs render here -->
-      <div
-        id="additionalPocsContainer"
-        class="integrated-plus-container"
-      ></div>
-
+      <div id="additionalPocsContainer" class="integrated-plus-container"></div>
     </div>
   </div>
 
@@ -379,21 +361,18 @@
     <h2>Dealership Address</h2>
 
     <div class="checklist-row">
-      <label>Dealership Address</label>
+      <label for="dealershipAddressInput">Dealership Address</label>
 
       <div class="address-input-wrap">
         <input
           type="text"
           id="dealershipAddressInput"
+          name="dealershipAddressInput"
           class="address-input"
           placeholder="Enter dealership address"
           autocomplete="off"
         />
-        <button
-          type="button"
-          class="small-map-btn"
-          id="openAddressInMapsBtn"
-        >
+        <button type="button" class="small-map-btn" id="openAddressInMapsBtn">
           Map
         </button>
       </div>
@@ -409,26 +388,26 @@
       ></iframe>
     </div>
 
-    <p class="map-helper-text">
-      Select an address above to update this map.
-    </p>
+    <p class="map-helper-text">Select an address above to update this map.</p>
   </div>
 </section>
 
-        <!-- ========================================================= -->
-<!-- PAGE 3: PRE-TRAINING CHECKLIST (UPDATED: notes-block added) -->
-<!-- ========================================================= -->
-<section id="pre-training" class="page-section">
+<!-- =========================================================
+     PAGE 3 — PRE-TRAINING CHECKLIST (STANDARDIZED)
+========================================================= -->
+<section id="pre-training" class="page-section" data-page="3">
   <h1>Pre-Training Checklist</h1>
   <p class="page-subtitle">
     Validate products, integrations, Salesforce notes, and readiness one weeks before
     onsite training.
   </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <button class="clear-page-btn" type="button" data-clear-page="pre-training">
+    Reset This Page
+  </button>
 
   <!-- ROW 1 (Side-by-side): Salesforce Notes + Notes -->
   <div class="cards-grid two-col">
-    <!-- Salesforce Notes -->
     <div class="section-block">
       <h2>Salesforce Notes</h2>
       <div class="checklist-row">
@@ -438,19 +417,13 @@
       <div class="checklist-row indent-sub">
         <label>ServiceCart</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesServiceCartReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-salesforce-notes"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -462,14 +435,13 @@
       <div class="checklist-row indent-sub">
         <label>Scheduler</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesSchedulerReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -481,14 +453,13 @@
       <div class="checklist-row indent-sub">
         <label>Deployment</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesDeploymentReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -500,14 +471,13 @@
       <div class="checklist-row indent-sub">
         <label>Remote Training</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesRemoteTrainingReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -519,14 +489,13 @@
       <div class="checklist-row indent-sub">
         <label>Sales</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesSalesReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -538,14 +507,13 @@
       <div class="checklist-row indent-sub">
         <label>Dealership contract/listed Salesforce products</label>
         <div class="row-actions">
-          <select>
+          <select name="sfNotesContractProductsReviewed">
             <option value="" data-ghost="true">Reviewed</option>
             <option>Yes</option>
             <option>No</option>
             <option>Not Available</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-salesforce-notes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -555,14 +523,13 @@
       </div>
     </div>
 
-    <!-- Notes — Salesforce Notes (UPDATED) -->
-    <div class="section-block notes-block" id="notes-salesforce-notes">
+    <div class="section-block notes-block" id="notes-salesforce-notes" data-notes-block>
       <h2>Notes — Salesforce Notes</h2>
       <textarea placeholder="Comments or concerns about Salesforce notes and product expectations"></textarea>
     </div>
   </div>
 
-  <!-- ROW 2 (Side-by-side): Communications + Notes -->
+  <!-- ROW 2: Communications + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Communications</h2>
@@ -570,13 +537,12 @@
       <div class="checklist-row">
         <label>Customer information present? <span class="muted-note">(historical pull)</span></label>
         <div class="row-actions">
-          <select>
+          <select name="communicationsCustomerInfo">
             <option value="" data-ghost="true">Customer info</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -588,13 +554,12 @@
       <div class="checklist-row">
         <label>Texting, email, &amp; calls errors?</label>
         <div class="row-actions">
-          <select>
+          <select name="communicationsErrors">
             <option value="" data-ghost="true">Errors</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -606,13 +571,12 @@
       <div class="checklist-row">
         <label>Text &amp; email signatures activated?</label>
         <div class="row-actions">
-          <select>
+          <select name="communicationsSignatures">
             <option value="" data-ghost="true">Signature</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -624,13 +588,12 @@
       <div class="checklist-row">
         <label>Area code match the local area?</label>
         <div class="row-actions">
-          <select>
+          <select name="communicationsAreaCodeMatch">
             <option value="" data-ghost="true">Area code</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-communications" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -640,14 +603,13 @@
       </div>
     </div>
 
-    <!-- Notes — Communications (UPDATED) -->
-    <div class="section-block notes-block" id="notes-communications">
+    <div class="section-block notes-block" id="notes-communications" data-notes-block>
       <h2>Notes — Communications</h2>
       <textarea placeholder="Notes on communication deliverability, complaints, and exceptions"></textarea>
     </div>
   </div>
 
-  <!-- ROW 3 (Side-by-side): Payments + Notes -->
+  <!-- ROW 3: Payments + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Payments</h2>
@@ -655,15 +617,14 @@
       <div class="checklist-row">
         <label>Payments activated?</label>
         <div class="row-actions">
-          <select>
+          <select name="paymentsActivated">
             <option value="" data-ghost="true">Payment types</option>
             <option>Online</option>
             <option>Retail</option>
             <option>Online &amp; Retail</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -675,7 +636,7 @@
       <div class="checklist-row">
         <label>Who has refund access?</label>
         <div class="row-actions">
-          <select>
+          <select name="paymentsRefundAccess">
             <option value="" data-ghost="true">UAs align</option>
             <option>Managers</option>
             <option>Managers &amp; Cashiers</option>
@@ -683,8 +644,7 @@
             <option>Managers, Advisors, Parts &amp; Cashiers</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -696,14 +656,13 @@
       <div class="checklist-row">
         <label>Customer invoices appear correctly?</label>
         <div class="row-actions">
-          <select>
+          <select name="paymentsInvoicesCorrect">
             <option value="" data-ghost="true">Invoices</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -715,31 +674,29 @@
       <div class="checklist-row">
         <label>Payment requests errors?</label>
         <div class="row-actions">
-          <select>
+          <select name="paymentsRequestErrors">
             <option value="" data-ghost="true">Errors</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-payments" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4.H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Notes — Payments (UPDATED) -->
-    <div class="section-block notes-block" id="notes-payments">
+    <div class="section-block notes-block" id="notes-payments" data-notes-block>
       <h2>Notes — Payments</h2>
       <textarea placeholder="Notes about payment setup, invoice behavior, and issues"></textarea>
     </div>
   </div>
 
-  <!-- ROW 4 (Side-by-side): Opcodes + Notes -->
+  <!-- ROW 4: Opcodes + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Opcodes</h2>
@@ -747,13 +704,12 @@
       <div class="checklist-row">
         <label>Review flagged opcode for MCI, ServiceCart, &amp; scheduler.</label>
         <div class="row-actions">
-          <select>
+          <select name="opcodesFlaggedReviewed">
             <option value="" data-ghost="true">Opcodes reviewed</option>
             <option>Completed</option>
             <option>Not Completed</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -765,14 +721,13 @@
       <div class="checklist-row">
         <label>Correct opcodes correspond with the inspection?</label>
         <div class="row-actions">
-          <select>
+          <select name="opcodesCorrespond">
             <option value="" data-ghost="true">Corresponding opcodes</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -784,14 +739,13 @@
       <div class="checklist-row">
         <label>Parts/labor pricing showing in opcodes?</label>
         <div class="row-actions">
-          <select>
+          <select name="opcodesPricingShowing">
             <option value="" data-ghost="true">Pricing present</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-opcodes" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -801,14 +755,13 @@
       </div>
     </div>
 
-    <!-- Notes — Opcodes (UPDATED) -->
-    <div class="section-block notes-block" id="notes-opcodes">
+    <div class="section-block notes-block" id="notes-opcodes" data-notes-block>
       <h2>Notes — Opcodes</h2>
       <textarea placeholder="Notes about opcode setup, pricing, and catalog links"></textarea>
     </div>
   </div>
 
-  <!-- ROW 5 (Side-by-side): ServiceCart + Notes -->
+  <!-- ROW 5: ServiceCart + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>ServiceCart</h2>
@@ -816,14 +769,13 @@
       <div class="checklist-row">
         <label>User authorities align with SC notes?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartUAsAlignWithNotes">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -835,14 +787,13 @@
       <div class="checklist-row">
         <label>User authorities consistent and accurate across all users?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartUAsConsistent">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -854,14 +805,13 @@
       <div class="checklist-row">
         <label>Manager emails added to ServiceCart Reporting?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartManagerEmailsReporting">
             <option value="" data-ghost="true">Emails added</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -873,14 +823,13 @@
       <div class="checklist-row">
         <label>Are notifications set up on each status?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartNotificationsByStatus">
             <option value="" data-ghost="true">Correct notifications</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -892,14 +841,13 @@
       <div class="checklist-row">
         <label>Tech video access removed from all techs?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartTechVideoRemoved">
             <option value="" data-ghost="true">Tech video removed</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -911,14 +859,13 @@
       <div class="checklist-row">
         <label>"Add Lines To DMS" button removed for Non-ROWB stores?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartAddLinesRemovedNonRowb">
             <option value="" data-ghost="true">ROWB removed</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -930,14 +877,13 @@
       <div class="checklist-row">
         <label>Is the dealer logo present?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceCartDealerLogoPresent">
             <option value="" data-ghost="true">Logo appears</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-servicecart" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -947,14 +893,13 @@
       </div>
     </div>
 
-    <!-- Notes – ServiceCart (UPDATED) -->
-    <div class="section-block notes-block" id="notes-servicecart">
-      <h2>Notes – ServiceCart</h2>
+    <div class="section-block notes-block" id="notes-servicecart" data-notes-block>
+      <h2>Notes — ServiceCart</h2>
       <textarea rows="5" placeholder="Notes about ServiceCart setup, concerns, or findings"></textarea>
     </div>
   </div>
 
-  <!-- ROW 6 (Side-by-side): Scheduler + Notes -->
+  <!-- ROW 6: Scheduler + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Scheduler</h2>
@@ -962,14 +907,13 @@
       <div class="checklist-row">
         <label>Appointments pull correctly?</label>
         <div class="row-actions">
-          <select>
+          <select name="schedulerAppointmentsPull">
             <option value="" data-ghost="true">Appointments pulling</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -984,14 +928,13 @@
           <span class="muted-note">(time slots, hours, capacity, opcodes, labor codes, etc.)</span>
         </label>
         <div class="row-actions">
-          <select>
+          <select name="schedulerSetupCorrect">
             <option value="" data-ghost="true">Scheduler setup</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1003,14 +946,13 @@
       <div class="checklist-row">
         <label>User authorities consistent and accurate across all users?</label>
         <div class="row-actions">
-          <select>
+          <select name="schedulerUAsConsistent">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1022,14 +964,13 @@
       <div class="checklist-row">
         <label>Is the shop divided by teams?</label>
         <div class="row-actions">
-          <select>
+          <select name="schedulerShopDividedTeams">
             <option value="" data-ghost="true">Divided teams</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1041,15 +982,14 @@
       <div class="checklist-row">
         <label>Assignment rules in place?</label>
         <div class="row-actions">
-          <select>
-            <option value="" data-ghost="true">Asignment rules</option>
+          <select name="schedulerAssignmentRules">
+            <option value="" data-ghost="true">Assignment rules</option>
             <option>Yes</option>
-            <option>Yes, team assignmet rules</option>
+            <option>Yes, team assignment rules</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1061,14 +1001,13 @@
       <div class="checklist-row">
         <label>Transportation options set up?</label>
         <div class="row-actions">
-          <select>
+          <select name="schedulerTransportationOptions">
             <option value="" data-ghost="true">Transportation options</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-scheduler" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1078,14 +1017,13 @@
       </div>
     </div>
 
-    <!-- Notes — Scheduler (UPDATED) -->
-    <div class="section-block notes-block" id="notes-scheduler">
+    <div class="section-block notes-block" id="notes-scheduler" data-notes-block>
       <h2>Notes — Scheduler</h2>
       <textarea placeholder="Comments for Scheduler setup, gaps, and follow-ups"></textarea>
     </div>
   </div>
 
-  <!-- ROW 7 (Side-by-side): MCI + Notes -->
+  <!-- ROW 7: MCI + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Mobile Check-in (MCI)</h2>
@@ -1093,14 +1031,13 @@
       <div class="checklist-row">
         <label>Is MCI configured and enabled?</label>
         <div class="row-actions">
-          <select>
+          <select name="mciConfiguredEnabled">
             <option value="" data-ghost="true">MCI setup</option>
             <option>Yes</option>
             <option>No</option>
             <option>In Progress</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1112,15 +1049,14 @@
       <div class="checklist-row">
         <label>Correct MPI forms &amp; opcodes tied to MCI?</label>
         <div class="row-actions">
-          <select>
+          <select name="mciMpiOpcodesTied">
             <option value="" data-ghost="true">MPI/MCI setup</option>
             <option>Yes</option>
             <option>No</option>
             <option>Partial</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1132,14 +1068,13 @@
       <div class="checklist-row">
         <label>User authorities consistent and accurate across all users?</label>
         <div class="row-actions">
-          <select>
+          <select name="mciUAsConsistent">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-mci" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1149,14 +1084,13 @@
       </div>
     </div>
 
-    <!-- Notes — MCI (UPDATED) -->
-    <div class="section-block notes-block" id="notes-mci">
+    <div class="section-block notes-block" id="notes-mci" data-notes-block>
       <h2>Notes — Mobile Check-in (MCI)</h2>
       <textarea placeholder="Notes specific to MCI setup and workflow"></textarea>
     </div>
   </div>
 
-  <!-- ROW 8 (Side-by-side): ServiceConnect/Declined Services + Notes -->
+  <!-- ROW 8: ServiceConnect + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>ServiceConnect &amp; Declined Services</h2>
@@ -1164,13 +1098,12 @@
       <div class="checklist-row">
         <label>Automation Rules setup?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceConnectAutomationRules">
             <option value="" data-ghost="true">Automation rules</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1182,13 +1115,12 @@
       <div class="checklist-row">
         <label>CSV files uploaded?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceConnectCsvUploaded">
             <option value="" data-ghost="true">CSV files</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1200,13 +1132,12 @@
       <div class="checklist-row">
         <label>Automations activated?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceConnectAutomationsActivated">
             <option value="" data-ghost="true">Automations</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1218,14 +1149,13 @@
       <div class="checklist-row">
         <label>User authorities consistent and accurate across all users?</label>
         <div class="row-actions">
-          <select>
+          <select name="serviceConnectUAsConsistent">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-serviceconnect" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1235,14 +1165,13 @@
       </div>
     </div>
 
-    <!-- Notes — ServiceConnect & Declined Services (UPDATED) -->
-    <div class="section-block notes-block" id="notes-serviceconnect">
+    <div class="section-block notes-block" id="notes-serviceconnect" data-notes-block>
       <h2>Notes — ServiceConnect &amp; Declined Services</h2>
       <textarea placeholder="Notes for ServiceConnect &amp; Declined Services configuration and expectations"></textarea>
     </div>
   </div>
 
-  <!-- ROW 9 (Side-by-side): PU&amp;D + Notes -->
+  <!-- ROW 9: Pickup & Delivery + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Pickup &amp; Delivery</h2>
@@ -1250,13 +1179,12 @@
       <div class="checklist-row">
         <label>DSOs activated for correct users?</label>
         <div class="row-actions">
-          <select>
+          <select name="pudDsosActivated">
             <option value="" data-ghost="true">PU&amp;D DSO</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1266,15 +1194,14 @@
       </div>
 
       <div class="checklist-row">
-        <label>Dispaatcher &amp; drivers setup?</label>
+        <label>Dispatcher &amp; drivers setup?</label>
         <div class="row-actions">
-          <select>
+          <select name="pudDispatcherDriversSetup">
             <option value="" data-ghost="true">PU&amp;D users</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1286,13 +1213,12 @@
       <div class="checklist-row">
         <label>Scheduler integration DSO activated for PU&amp;D?</label>
         <div class="row-actions">
-          <select>
+          <select name="pudSchedulerIntegrationDso">
             <option value="" data-ghost="true">PU&amp;D DSO</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1304,14 +1230,13 @@
       <div class="checklist-row">
         <label>User authorities consistent and accurate across all users?</label>
         <div class="row-actions">
-          <select>
+          <select name="pudUAsConsistent">
             <option value="" data-ghost="true">UAs align</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button type="button" class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes">
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-pud" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
               <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
@@ -1321,28 +1246,27 @@
       </div>
     </div>
 
-    <!-- Notes — PU&D (UPDATED) -->
-    <div class="section-block notes-block" id="notes-pud">
+    <div class="section-block notes-block" id="notes-pud" data-notes-block>
       <h2>Notes — Pickup &amp; Delivery</h2>
       <textarea placeholder="Notes for Pickup &amp; Delivery configuration and expectations"></textarea>
     </div>
   </div>
 </section>
 
-<!-- ========================================================= -->
-<!-- PAGE 4: MONDAY VISIT -->
-<!-- Updated: standardized notes buttons (icon-only), -->
-<!-- uses data-notes-btn + data-notes-target -->
-<!-- Notes cards use the BETTER pattern: section-block notes-block -->
-<!-- ========================================================= -->
-<section id="monday-visit" class="page-section">
+<!-- =========================================================
+     PAGE 4 — MONDAY VISIT (STANDARDIZED)
+========================================================= -->
+<section id="monday-visit" class="page-section" data-page="4">
   <h1>Monday Visit</h1>
   <p class="page-subtitle">
     Confirm expectations, MCI usage, and device readiness with the Service Manager.
   </p>
-  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-  <!-- ROW 1 (Side-by-side): Service Manager Review + Notes -->
+  <button class="clear-page-btn" type="button" data-clear-page="monday-visit">
+    Reset This Page
+  </button>
+
+  <!-- ROW 1: Service Manager Review + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Service Manager Review</h2>
@@ -1353,23 +1277,15 @@
       <div class="checklist-row indent-sub">
         <label>On-site training agenda</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmAgenda">
             <option value="" data-ghost="true">Training agenda</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1378,23 +1294,15 @@
       <div class="checklist-row indent-sub">
         <label>Settings tab</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmSettings">
             <option value="" data-ghost="true">Settings</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1403,23 +1311,15 @@
       <div class="checklist-row indent-sub">
         <label>Workflow setup</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmWorkflow">
             <option value="" data-ghost="true">Workflow</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1428,23 +1328,15 @@
       <div class="checklist-row indent-sub">
         <label>MPI setup</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmMpi">
             <option value="" data-ghost="true">MPI</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1453,23 +1345,15 @@
       <div class="checklist-row indent-sub">
         <label>Parts &amp; labor pricing</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmPricing">
             <option value="" data-ghost="true">Pricing</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1478,7 +1362,7 @@
       <div class="checklist-row indent-sub">
         <label>Dealership using MCI?</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmMciUsers">
             <option value="" data-ghost="true">MCI users</option>
             <option>Advisors</option>
             <option>Porters</option>
@@ -1486,31 +1370,23 @@
             <option>No</option>
             <option>Other</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-review"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-review" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <div class="section-block notes-block" id="notes-sm-review">
+    <div class="section-block notes-block" id="notes-sm-review" data-notes-block>
       <h2>Notes — Service Manager Review</h2>
       <textarea placeholder="Notes from the Service Manager review and expectations"></textarea>
     </div>
   </div>
 
-  <!-- ROW 2 (Side-by-side): Service Manager Alignment + Notes -->
+  <!-- ROW 2: Service Manager Alignment + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Service Manager Alignment</h2>
@@ -1521,23 +1397,15 @@
       <div class="checklist-row indent-sub">
         <label>myKaarma daily arrival</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmArrival">
             <option value="" data-ghost="true">Select arrival time</option>
             <option>7:00 am</option>
             <option>8:00 am</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-alignment"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-alignment" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1546,23 +1414,15 @@
       <div class="checklist-row indent-sub">
         <label>myKaarma daily departure</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmDeparture">
             <option value="" data-ghost="true">Select departure time</option>
             <option>Yes, 5:00 pm</option>
             <option>Different time</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-alignment"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-alignment" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1571,36 +1431,28 @@
       <div class="checklist-row indent-sub">
         <label>Daily morning meetings with managers, techs, &amp; advisors</label>
         <div class="row-actions">
-          <select>
+          <select name="mondaySmDailyMeetings">
             <option value="" data-ghost="true">Morning meetings</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-sm-alignment"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-sm-alignment" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <div class="section-block notes-block" id="notes-sm-alignment">
+    <div class="section-block notes-block" id="notes-sm-alignment" data-notes-block>
       <h2>Notes — Service Manager Alignment</h2>
       <textarea placeholder="Notes about ongoing alignment with the Service Manager"></textarea>
     </div>
   </div>
 
-  <!-- ROW 3 (Side-by-side): Devices & Access + Notes -->
+  <!-- ROW 3: Devices & Access + Notes -->
   <div class="cards-grid two-col">
     <div class="section-block">
       <h2>Devices &amp; Access</h2>
@@ -1608,24 +1460,16 @@
       <div class="checklist-row">
         <label>All technicians have iOS devices?</label>
         <div class="row-actions">
-          <select>
+          <select name="devicesTechIosAll">
             <option value="" data-ghost="true">iOS devices</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1634,19 +1478,11 @@
       <div class="checklist-row indent-sub">
         <label>If no, how many iOS devices short?</label>
         <div class="row-actions">
-          <input type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices" />
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <input name="devicesTechIosShortCount" type="number" min="0" max="50" placeholder="Enter number of missing tech iOS devices" />
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1655,19 +1491,11 @@
       <div class="checklist-row indent-sub">
         <label>How many techs are using Android devices?</label>
         <div class="row-actions">
-          <input type="number" min="0" max="50" placeholder="Enter number of techs on Android" />
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <input name="devicesTechAndroidCount" type="number" min="0" max="50" placeholder="Enter number of techs on Android" />
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1676,24 +1504,16 @@
       <div class="checklist-row">
         <label>All advisors have iOS devices?</label>
         <div class="row-actions">
-          <select>
+          <select name="devicesAdvisorIosAll">
             <option value="" data-ghost="true">iOS devices</option>
             <option>Yes</option>
             <option>No</option>
             <option>N/A</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1702,19 +1522,11 @@
       <div class="checklist-row indent-sub">
         <label>If no, how many iOS devices short?</label>
         <div class="row-actions">
-          <input type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices" />
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <input name="devicesAdvisorIosShortCount" type="number" min="0" max="50" placeholder="Enter number of missing advisor iOS devices" />
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
@@ -1723,842 +1535,858 @@
       <div class="checklist-row">
         <label>Any device or app-access issues that could block training?</label>
         <div class="row-actions">
-          <select>
+          <select name="devicesBlockingIssues">
             <option value="" data-ghost="true">Risk</option>
             <option>Yes</option>
             <option>No</option>
           </select>
-          <button
-            type="button"
-            class="notes-icon-btn notes-icon-btn--sm"
-            data-notes-btn
-            data-notes-target="notes-devices"
-            aria-label="Add/View Notes"
-          >
+          <button type="button" class="notes-icon-btn notes-icon-btn--sm" data-notes-btn data-notes-target="notes-devices" aria-label="Add/View Notes" title="Notes">
             <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"
-              />
-              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35" />
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- UPDATED: added notes-block -->
-    <div class="section-block notes-block" id="notes-devices">
+    <div class="section-block notes-block" id="notes-devices" data-notes-block>
       <h2>Notes — Devices</h2>
       <textarea placeholder="Comments for iOS/Android devices, WiFi, VPN, firewalls, or app store access"></textarea>
     </div>
   </div>
 </section>
 
-      <!-- ========================================================= -->
-      <!-- PAGE 5 : TRAINING CHECKLIST                               -->
-      <!-- ========================================================= -->
-      <section id="training-checklist" class="page-section">
-        <h1>Training Checklist</h1>
-        <p class="page-subtitle">
-          Track adoption by role and ensure every user can work confidently in myKaarma.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
-
-        <!-- Techs & Advisors Morning Meetings -->
-        <div class="section-block">
-          <h2>Techs &amp; Advisors Morning Meetings</h2>
-
-          <div class="checklist-row">
-            <label>Tuesday morning meeting</label>
-            <select>
-              <option value="" data-ghost="true">Who attended</option>
-              <option>Managers, Techs &amp; Advisors</option>
-              <option>Managers &amp; Techs Only</option>
-              <option>Managers &amp; Advisors Only</option>
-              <option>No Meetings</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Wednesday morning meeting</label>
-            <select>
-              <option value="" data-ghost="true">Who attended</option>
-              <option>Managers</option>
-              <option>Techs &amp; Advisors</option>
-              <option>Managers &amp; Techs Only</option>
-              <option>Managers &amp; Advisors Only</option>
-              <option>No Meetings</option>
-            </select>
-          </div>
-
-          <div class="checklist-row">
-            <label>Thursday morning meeting</label>
-            <select>
-              <option value="" data-ghost="true">Who attended</option>
-              <option>Managers</option>
-              <option>Techs &amp; Advisors</option>
-              <option>Managers &amp; Techs Only</option>
-              <option>Managers &amp; Advisors Only</option>
-              <option>No Meetings</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- Technicians – Checklist                                   -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>Technicians – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>DMS ID</th>
-                    <th>Logged In</th>
-                    <th>Workflow Order</th>
-                    <th>OCR</th>
-                    <th>MPI</th>
-                    <th>Self Assign/Take</th>
-                    <th>Dispatch</th>
-                    <th>Left MPI Panel</th>
-                    <th>Prev. Declines</th>
-                    <th>ShopChat</th>
-                    <th>Media</th>
-                    <th>Status Change</th>
-                    <th>Notifications</th>
-                    <th>RO History</th>
-                    <th>Inspection History</th>
-                    <th>MPI History</th>
-                    <th>Filters</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW (Row 1) -->
-                  <tr>
-                    <td>
-                      <input type="checkbox" />
-                      <input type="text" />
-                    </td>
-
-                    <td>
-                      <select>
-                        <option></option>
-                        <option>Fully Adopted</option>
-                        <option>Mostly Adopted</option>
-                        <option>Neutral / Mixed</option>
-                        <option>Needs Support</option>
-                        <option>Not Accepted</option>
-                      </select>
-                    </td>
-
-                    <td>
-                      <select>
-                        <option></option><option>Yes</option><option>No</option><option>N/A</option>
-                      </select>
-                    </td>
-
-                    <td>
-                      <select>
-                        <option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option>
-                      </select>
-                    </td>
-
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Notifications -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Notes -->
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-techs"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- TEMPLATE ROW (Row 2) -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-techs"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- TEMPLATE ROW (Row 3) -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-techs"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-techs" class="section-block">
-          <h2>Notes — Technicians</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- Service Advisors – Checklist                              -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>Service Advisors – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>DMS ID</th>
-                    <th>Logged In</th>
-                    <th>MCI</th>
-                    <th>Prev. Declines</th>
-                    <th>Workflow Order</th>
-                    <th>Status Change</th>
-                    <th>OCR</th>
-                    <th>Custom Recs</th>
-                    <th>ShopChat</th>
-                    <th>Left MPI Panel</th>
-                    <th>Sending MPI</th>
-                    <th>Sending Video</th>
-                    <th>Notifications</th>
-                    <th>RO History</th>
-                    <th>Inspection History</th>
-                    <th>MPI History</th>
-                    <th>Filters</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Notifications -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-advisors"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-advisors" class="section-block">
-          <h2>Notes — Service Advisors</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- Parts Representatives – Checklist                         -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>Parts Representatives – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>DMS ID</th>
-                    <th>Logged In</th>
-                    <th>Left MPI Panel</th>
-                    <th>Workflow Order</th>
-                    <th>Status Change</th>
-                    <th>OCR</th>
-                    <th>Take</th>
-                    <th>Parts Estimate</th>
-                    <th>DMS History</th>
-                    <th>Prev. Declines</th>
-                    <th>ShopChat</th>
-                    <th>SOP</th>
-                    <th>Notifications</th>
-                    <th>Filters</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-
-                    <!-- Notifications -->
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-parts"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-parts" class="section-block">
-          <h2>Notes — Parts Representatives</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- Shop Foreman / Shop Dispatcher – Checklist                -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>Shop Foreman / Shop Dispatcher – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>DMS ID</th>
-                    <th>Logged In</th>
-                    <th>Workflow Order</th>
-                    <th>OCR</th>
-                    <th>MPI</th>
-                    <th>Self Assign/Take</th>
-                    <th>Dispatch</th>
-                    <th>Left MPI Panel</th>
-                    <th>Prev. Declines</th>
-                    <th>ShopChat</th>
-                    <th>Media</th>
-                    <th>Status Change</th>
-                    <th>Notifications</th>
-                    <th>RO History</th>
-                    <th>Inspection History</th>
-                    <th>MPI History</th>
-                    <th>Filters</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Notifications -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <!-- Filters -->
-                    <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-foreman"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-foreman" class="section-block">
-          <h2>Notes — Shop Foreman / Shop Dispatcher</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- BDC / Scheduler – Checklist                               -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>BDC / Scheduler – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>DMS ID</th>
-                    <th>Logged In</th>
-                    <th>Scheduler</th>
-                    <th>Declined Services</th>
-                    <th>ServiceConnect</th>
-                    <th>Routing</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-bdc"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-bdc" class="section-block">
-          <h2>Notes — BDC / Scheduler</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- PU&D Drivers – Checklist                                  -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>PU&amp;D Drivers – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>Logged In</th>
-                    <th>Mobile App</th>
-                    <th>Assigned Trips</th>
-                    <th>Trip Navigation</th>
-                    <th>Notes</th>
-                    <th>Communication</th>
-                    <th>Notifications</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-pud-drivers" class="section-block">
-          <h2>Notes — PU&amp;D Drivers</h2>
-          <textarea></textarea>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- PU&D Dispatcher – Checklist                               -->
-        <!-- ========================================================= -->
-        <div class="section">
-          <div class="section-header">
-            <span>PU&amp;D Dispatcher – Checklist</span>
-          </div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>User Acceptance</th>
-                    <th>Trip Creation</th>
-                    <th>Vehicles</th>
-                    <th>Adding Drivers</th>
-                    <th>Global Map</th>
-                    <th>Notifications</th>
-                    <th>Mobile App</th>
-                    <th>Drivers View</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW -->
-                  <tr>
-                    <td><input type="checkbox" /><input type="text" /></td>
-                    <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-                    <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-pud-dispatch"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-pud-dispatch" class="section-block">
-          <h2>Notes — PU&amp;D Dispatcher</h2>
-          <textarea></textarea>
-        </div>
-      </section>
-
-      <!-- ========================================================= -->
-      <!-- PAGE 6: OPCODES & PRICING                                 -->
-      <!-- ========================================================= -->
-      <section id="opcodes-pricing" class="page-section">
-        <h1>Opcodes &amp; Pricing</h1>
-        <p class="page-subtitle">
-          Assistance in updating opcodes, pricing, and parts to support accurate inspections and MPIs.
-        </p>
-        <button class="clear-page-btn" type="button">Reset This Page</button>
-
-        <div class="section">
-          <div class="section-header">Opcodes</div>
-
-          <div class="table-container">
-            <div class="scroll-wrapper">
-              <table class="training-table">
-                <thead>
-                  <tr>
-                    <th>Updated</th>
-                    <th>Opcode</th>
-                    <th>Opcode Duration</th>
-                    <th>Labor Price</th>
-                    <th>Flat Rate Hours</th>
-                    <th>Parts Price</th>
-                    <th>Pay Type</th>
-                    <th>Order #</th>
-                    <th>Add to Online Scheduler</th>
-                    <th>Add to Dealer App Scheduler</th>
-                    <th>Add to Mobile Service</th>
-                    <th>Add to ServiceCart</th>
-                    <th class="notes-col-head">Notes</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <!-- TEMPLATE ROW (Row 1) -->
-                  <tr>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-opcodes-pricing"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- Row 2 -->
-                  <tr>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="text" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-                    <td><input type="checkbox" /></td>
-
-                    <td class="notes-col-cell">
-                      <button type="button"
-                              class="notes-icon-btn notes-icon-btn--sm"
-                              data-notes-btn
-                              data-notes-target="notes-opcodes-pricing"
-                              aria-label="Add/View Notes">
-                        <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
-                          <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="table-footer">
-              <button class="add-row" type="button">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="notes-opcodes-pricing" class="section-block">
-          <h2>Notes — Opcodes &amp; Pricing</h2>
-          <textarea placeholder="Notes about opcode setup, pricing, and any discrepancies"></textarea>
-        </div>
-      </section>
+    <!-- ========================================================= -->
+<!-- PAGE 5 : TRAINING CHECKLIST                               -->
+<!-- ========================================================= -->
+<section id="training-checklist" class="page-section">
+  <h1>Training Checklist</h1>
+  <p class="page-subtitle">
+    Track adoption by role and ensure every user can work confidently in myKaarma.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <!-- Techs & Advisors Morning Meetings -->
+  <div class="section-block">
+    <h2>Techs &amp; Advisors Morning Meetings</h2>
+
+    <div class="checklist-row">
+      <label>Tuesday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers, Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Wednesday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers</option>
+        <option>Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+
+    <div class="checklist-row">
+      <label>Thursday morning meeting</label>
+      <select>
+        <option value="" data-ghost="true">Who attended</option>
+        <option>Managers</option>
+        <option>Techs &amp; Advisors</option>
+        <option>Managers &amp; Techs Only</option>
+        <option>Managers &amp; Advisors Only</option>
+        <option>No Meetings</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Technicians – Checklist                                   -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>Technicians – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>Workflow Order</th>
+              <th>OCR</th>
+              <th>MPI</th>
+              <th>Self Assign/Take</th>
+              <th>Dispatch</th>
+              <th>Left MPI Panel</th>
+              <th>Prev. Declines</th>
+              <th>ShopChat</th>
+              <th>Media</th>
+              <th>Status Change</th>
+              <th>Notifications</th>
+              <th>RO History</th>
+              <th>Inspection History</th>
+              <th>MPI History</th>
+              <th>Filters</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW (Row 1) -->
+            <tr>
+              <td>
+                <input type="checkbox" />
+                <input type="text" />
+              </td>
+
+              <td>
+                <select>
+                  <option></option>
+                  <option>Fully Adopted</option>
+                  <option>Mostly Adopted</option>
+                  <option>Neutral / Mixed</option>
+                  <option>Needs Support</option>
+                  <option>Not Accepted</option>
+                </select>
+              </td>
+
+              <td>
+                <select>
+                  <option></option><option>Yes</option><option>No</option><option>N/A</option>
+                </select>
+              </td>
+
+              <td>
+                <select>
+                  <option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option>
+                </select>
+              </td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Notifications -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Notes -->
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-techs"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- TEMPLATE ROW (Row 2) -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-techs"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- TEMPLATE ROW (Row 3) -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-techs"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-techs" class="section-block notes-block">
+    <h2>Notes — Technicians</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Service Advisors – Checklist                              -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>Service Advisors – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>MCI</th>
+              <th>Prev. Declines</th>
+              <th>Workflow Order</th>
+              <th>Status Change</th>
+              <th>OCR</th>
+              <th>Custom Recs</th>
+              <th>ShopChat</th>
+              <th>Left MPI Panel</th>
+              <th>Sending MPI</th>
+              <th>Sending Video</th>
+              <th>Notifications</th>
+              <th>RO History</th>
+              <th>Inspection History</th>
+              <th>MPI History</th>
+              <th>Filters</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Notifications -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-advisors"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-advisors" class="section-block notes-block">
+    <h2>Notes — Service Advisors</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Parts Representatives – Checklist                         -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>Parts Representatives – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>Left MPI Panel</th>
+              <th>Workflow Order</th>
+              <th>Status Change</th>
+              <th>OCR</th>
+              <th>Take</th>
+              <th>Parts Estimate</th>
+              <th>DMS History</th>
+              <th>Prev. Declines</th>
+              <th>ShopChat</th>
+              <th>SOP</th>
+              <th>Notifications</th>
+              <th>Filters</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <!-- Notifications -->
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-parts"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-parts" class="section-block notes-block">
+    <h2>Notes — Parts Representatives</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Shop Foreman / Shop Dispatcher – Checklist                -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>Shop Foreman / Shop Dispatcher – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>Workflow Order</th>
+              <th>OCR</th>
+              <th>MPI</th>
+              <th>Self Assign/Take</th>
+              <th>Dispatch</th>
+              <th>Left MPI Panel</th>
+              <th>Prev. Declines</th>
+              <th>ShopChat</th>
+              <th>Media</th>
+              <th>Status Change</th>
+              <th>Notifications</th>
+              <th>RO History</th>
+              <th>Inspection History</th>
+              <th>MPI History</th>
+              <th>Filters</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Notifications -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <!-- Filters -->
+              <td><select><option></option><option>Web</option><option>Mobile</option><option>Web &amp; Mobile</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-foreman"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-foreman" class="section-block notes-block">
+    <h2>Notes — Shop Foreman / Shop Dispatcher</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- BDC / Scheduler – Checklist                               -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>BDC / Scheduler – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>DMS ID</th>
+              <th>Logged In</th>
+              <th>Scheduler</th>
+              <th>Declined Services</th>
+              <th>ServiceConnect</th>
+              <th>Routing</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>N/A</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-bdc"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-bdc" class="section-block notes-block">
+    <h2>Notes — BDC / Scheduler</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- PU&D Drivers – Checklist                                  -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>PU&amp;D Drivers – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>Logged In</th>
+              <th>Mobile App</th>
+              <th>Assigned Trips</th>
+              <th>Trip Navigation</th>
+              <th>Notes</th>
+              <th>Communication</th>
+              <th>Notifications</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-pud-drivers" class="section-block notes-block">
+    <h2>Notes — PU&amp;D Drivers</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- PU&D Dispatcher – Checklist                               -->
+  <!-- ========================================================= -->
+  <div class="section">
+    <div class="section-header">
+      <span>PU&amp;D Dispatcher – Checklist</span>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>User Acceptance</th>
+              <th>Trip Creation</th>
+              <th>Vehicles</th>
+              <th>Adding Drivers</th>
+              <th>Global Map</th>
+              <th>Notifications</th>
+              <th>Mobile App</th>
+              <th>Drivers View</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW -->
+            <tr>
+              <td><input type="checkbox" /><input type="text" /></td>
+              <td><select><option></option><option>Fully Adopted</option><option>Mostly Adopted</option><option>Neutral / Mixed</option><option>Needs Support</option><option>Not Accepted</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+              <td><select><option></option><option>Yes</option><option>No</option><option>Not Trained</option></select></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-pud-dispatch"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-pud-dispatch" class="section-block notes-block">
+    <h2>Notes — PU&amp;D Dispatcher</h2>
+    <div class="mk-ta-wrap">
+      <textarea></textarea>
+    </div>
+  </div>
+
+</section>
+
+<!-- ========================================================= -->
+<!-- PAGE 6: OPCODES & PRICING                                 -->
+<!-- ========================================================= -->
+<section id="opcodes-pricing" class="page-section">
+  <h1>Opcodes &amp; Pricing</h1>
+  <p class="page-subtitle">
+    Assistance in updating opcodes, pricing, and parts to support accurate inspections and MPIs.
+  </p>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
+
+  <div class="section">
+    <div class="section-header">Opcodes</div>
+
+    <div class="table-container">
+      <div class="scroll-wrapper">
+        <table class="training-table">
+          <thead>
+            <tr>
+              <th>Updated</th>
+              <th>Opcode</th>
+              <th>Opcode Duration</th>
+              <th>Labor Price</th>
+              <th>Flat Rate Hours</th>
+              <th>Parts Price</th>
+              <th>Pay Type</th>
+              <th>Order #</th>
+              <th>Add to Online Scheduler</th>
+              <th>Add to Dealer App Scheduler</th>
+              <th>Add to Mobile Service</th>
+              <th>Add to ServiceCart</th>
+              <th class="notes-col-head">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- TEMPLATE ROW (Row 1) -->
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-opcodes-pricing"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="text" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" /></td>
+
+              <td class="notes-col-cell">
+                <button type="button"
+                        class="notes-icon-btn notes-icon-btn--sm"
+                        data-notes-btn
+                        data-notes-target="notes-opcodes-pricing"
+                        aria-label="Add/View Notes">
+                  <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+                    <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <button class="add-row" type="button">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATED NOTES (consistent structure) -->
+  <div id="notes-opcodes-pricing" class="section-block notes-block">
+    <h2>Notes — Opcodes &amp; Pricing</h2>
+    <div class="mk-ta-wrap">
+      <textarea placeholder="Notes about opcode setup, pricing, and any discrepancies"></textarea>
+    </div>
+  </div>
+</section>
 
     <!-- ========================================================= -->
 <!-- PAGE 7: SUPPORT TICKETS                                   -->
@@ -3373,43 +3201,120 @@
   </div>
 </section>
 
-        <!-- ========================================================= -->
-      <!-- PAGE 10: RESOURCES                                        -->
       <!-- ========================================================= -->
-      <section id="resources" class="page-section">
-        <h1>Resources</h1>
-        <p class="page-subtitle">
-          Helpful reference material, links, documents, and dealership support information.
-        </p>
+<!-- PAGE 10: RESOURCES                                        -->
+<!-- Standardized: notes buttons (icon-only)                    -->
+<!-- uses data-notes-btn + data-notes-target                    -->
+<!-- Notes card uses: section-block notes-block + matching id   -->
+<!-- ========================================================= -->
+<section id="resources" class="page-section">
+  <h1>Resources</h1>
+  <p class="page-subtitle">
+    Helpful reference material, links, documents, and dealership support information.
+  </p>
 
-        <button class="clear-page-btn" type="button">Reset This Page</button>
+  <button class="clear-page-btn" type="button">Reset This Page</button>
 
-        <div class="grid-2">
-          <div class="section-block">
-            <h2>Resource Links</h2>
+  <!-- 2-col row: left = resources, right = notes -->
+  <div class="cards-grid two-col">
 
-            <div class="checklist-row">
-              <label>Training Outline</label>
-              <input type="text" placeholder="Paste link to training playbook" />
-            </div>
+    <!-- LEFT CARD -->
+    <div class="section-block">
+      <h2>Resource Links</h2>
 
-            <div class="checklist-row">
-              <label>myKaarma Knowledge Base</label>
-              <input type="text" placeholder="Paste link to myKaarma KB" />
-            </div>
+      <div class="checklist-row">
+        <label>Training Outline</label>
+        <div class="row-actions">
+          <input type="text" placeholder="Paste link to training playbook" />
 
-            <div class="checklist-row">
-              <label>Manufacturer Parts Catalog</label>
-              <input type="text" placeholder="Paste link to manufacturer parts catalog" />
-            </div>
-          </div>
-
-          <div class="section-block">
-            <h2>Notes — Resources</h2>
-            <textarea placeholder="Notes or additional reference material"></textarea>
-          </div>
+          <!-- Notes button (targets the right-side notes card) -->
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-resources"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
         </div>
-      </section>
+      </div>
+
+      <div class="checklist-row">
+        <label>myKaarma Knowledge Base</label>
+        <div class="row-actions">
+          <input type="text" placeholder="Paste link to myKaarma KB" />
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-resources"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="checklist-row">
+        <label>Manufacturer Parts Catalog</label>
+        <div class="row-actions">
+          <input type="text" placeholder="Paste link to manufacturer parts catalog" />
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-resources"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Optional extra resource fields (kept consistent) -->
+      <div class="checklist-row">
+        <label>Other Link</label>
+        <div class="row-actions">
+          <input type="text" placeholder="Paste any other helpful link" />
+
+          <button
+            type="button"
+            class="notes-icon-btn notes-icon-btn--sm"
+            data-notes-btn
+            data-notes-target="notes-resources"
+            aria-label="Add/View Notes"
+          >
+            <svg class="notes-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 14.5c0 1.9-1.6 3.5-3.5 3.5H9l-4.2 2.6c-.5.3-1.1-.1-1.1-.7V18c-1-.6-1.7-1.8-1.7-3.1V7.5C2 5.6 3.6 4 5.5 4h11C18.4 4 20 5.6 20 7.5v7z"/>
+              <path d="M22 9.2v6.1c0 2.4-2 4.4-4.4 4.4H10.7" opacity=".35"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT CARD (NOTES) -->
+    <div class="section-block notes-block" id="notes-resources">
+      <h2>Notes — Resources</h2>
+      <div class="mk-ta-wrap">
+        <textarea placeholder="Notes or additional reference material"></textarea>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <!-- ========================================================= -->
 <!-- PAGE 11: TRAINING SUMMARY (CLEAN / FIXED STRUCTURE)        -->
