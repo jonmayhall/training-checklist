@@ -1,6 +1,16 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.2)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3)
+
+   ✅ FIXES / UPDATES vs v8.2:
+   - ✅ Stable field IDs across reloads (no more random data-mk-id each load)
+     → state restore works reliably again
+   - ✅ Notes popups: ONE header (modal header). Internal notes header is hidden while expanded.
+     → X sits INSIDE that header (CSS can position)
+   - ✅ Table popups: NO orange header bar; builds a WHITE strip at top
+     → X moved into the white strip (top-right)
+     → "+" (Add Row) cloned into the white strip above the table
+     → content pushed down naturally by strip
 
    ✅ INCLUDES:
    - Full state save/restore for inputs/selects/textareas/contenteditable
@@ -16,11 +26,7 @@
    - Training Summary (Page 11) Engagement Snapshot autopull:
        DID / Dealer / Group / Dates / Lead Trainer / Additional Trainers
 
-   ✅ MODAL BEHAVIOR (per your latest request):
-   - Notes popups: use ONE header (modal header). X sits INSIDE that header.
-   - Table popups: NO orange modal header bar; X sits top-right in white area.
-   - Table popups: content moves DOWN so X and + live in white strip area.
-   - Adds mode classes for CSS targeting:
+   ✅ MODAL MODE CLASSES (for CSS targeting):
        #mkTableModal.mk-is-notes
        #mkTableModal.mk-is-table
 ======================================================= */
@@ -31,7 +37,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_2";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -71,21 +77,126 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const uid = (() => {
-    let n = 0;
-    return (prefix = "mk") =>
-      `${prefix}-${Date.now()}-${(n++).toString(16)}-${Math.random().toString(16).slice(2)}`;
-  })();
-
   const isEl = (x) => x && x.nodeType === 1;
   const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
     isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
+  const slug = (s) =>
+    String(s || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_:-]/g, "")
+      .slice(0, 80);
+
+  const getIndexWithin = (el, selector, root) => {
+    try {
+      const list = Array.from((root || document).querySelectorAll(selector));
+      return Math.max(0, list.indexOf(el));
+    } catch {
+      return 0;
+    }
+  };
+
+  const mkDomPath = (el, maxDepth = 5) => {
+    const parts = [];
+    let cur = el;
+    let depth = 0;
+    while (cur && cur.nodeType === 1 && depth < maxDepth && cur !== document.body) {
+      const tag = cur.tagName.toLowerCase();
+      const parent = cur.parentElement;
+      if (!parent) break;
+
+      const sibs = Array.from(parent.children).filter((c) => c.tagName === cur.tagName);
+      const idx = sibs.indexOf(cur);
+      parts.push(`${tag}:nth-of-type(${idx + 1})`);
+      cur = parent;
+      depth++;
+    }
+    return parts.reverse().join(">");
+  };
+
+  const inDynamicClone = (el) => {
+    if (!el) return false;
+
+    // Trainer clones (inside additional container)
+    if (el.closest("#additionalTrainersContainer")) return true;
+
+    // POC clones (data-base != true)
+    const pocCard = el.closest(".additional-poc-card");
+    if (pocCard && pocCard.getAttribute("data-base") !== "true") return true;
+
+    // Table cloned rows
+    const tr = el.closest("tr");
+    if (tr && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") return true;
+
+    // Ticket clones (data-base != true)
+    const ticket = el.closest(".ticket-group");
+    if (ticket && ticket.getAttribute("data-base") !== "true") return true;
+
+    return false;
+  };
+
+  const stableFieldKey = (el) => {
+    if (!isEl(el)) return "";
+
+    // If it has a real ID, use it (best case)
+    if (el.id) return `id:${el.id}`;
+
+    const sectionId = getSection(el)?.id || "root";
+
+    // Table fields: stable by table key + row/col/field index
+    const table = el.closest("table.training-table");
+    if (table) {
+      const key =
+        table.getAttribute("data-table-key") ||
+        table.id ||
+        `table-${getIndexWithin(table, "table.training-table", document)}`;
+
+      const td = el.closest("td, th");
+      const tr = el.closest("tr");
+      const tbody = tr?.parentElement;
+
+      const rowIndex = tr && tbody ? Array.from(tbody.querySelectorAll("tr")).indexOf(tr) : 0;
+      const colIndex = td && tr ? Array.from(tr.children).indexOf(td) : 0;
+
+      const withinCell = td
+        ? Array.from(td.querySelectorAll("input,select,textarea,[contenteditable='true']")).indexOf(el)
+        : 0;
+
+      const tag = el.tagName.toLowerCase();
+      const type = (el.getAttribute("type") || "").toLowerCase();
+
+      return `sec:${sectionId}|tbl:${key}|r:${rowIndex}|c:${colIndex}|f:${withinCell}|${tag}|${type}`;
+    }
+
+    // Checklist row fields: stable by label text + field index
+    const row = el.closest(".checklist-row");
+    if (row) {
+      const lab = row.querySelector("label");
+      const labelSlug = slug(lab?.textContent || "row");
+      const fields = Array.from(row.querySelectorAll("input,select,textarea,[contenteditable='true']"));
+      const idx = Math.max(0, fields.indexOf(el));
+      const tag = el.tagName.toLowerCase();
+      const type = (el.getAttribute("type") || "").toLowerCase();
+      const ph = slug(el.getAttribute("placeholder") || "");
+      return `sec:${sectionId}|row:${labelSlug}|i:${idx}|${tag}|${type}|ph:${ph}`;
+    }
+
+    // Fallback: section + DOM path
+    const tag = el.tagName.toLowerCase();
+    const type = (el.getAttribute("type") || "").toLowerCase();
+    return `sec:${sectionId}|path:${mkDomPath(el)}|${tag}|${type}`;
+  };
+
   const ensureId = (el) => {
     if (!isEl(el)) return null;
-    if (!el.getAttribute(AUTO_ID_ATTR)) el.setAttribute(AUTO_ID_ATTR, uid("fld"));
+    if (!el.getAttribute(AUTO_ID_ATTR)) {
+      const key = stableFieldKey(el);
+      if (key) el.setAttribute(AUTO_ID_ATTR, key);
+    }
     return el.getAttribute(AUTO_ID_ATTR);
   };
 
@@ -136,8 +247,11 @@
 
   const saveField = (el) => {
     if (!isFormField(el)) return;
+    if (inDynamicClone(el)) return; // ✅ clones are persisted via cloneState (not __fields)
     ensureId(el);
     const id = el.getAttribute(AUTO_ID_ATTR);
+    if (!id) return;
+
     const state = readState();
     state.__fields = state.__fields || {};
     state.__fields[id] = getFieldValue(el);
@@ -149,6 +263,9 @@
     const fieldsState = state.__fields || {};
     const fields = $$(`[${AUTO_ID_ATTR}]`);
     fields.forEach((el) => {
+      if (!isFormField(el)) return;
+      if (inDynamicClone(el)) return;
+
       const id = el.getAttribute(AUTO_ID_ATTR);
       if (!(id in fieldsState)) return;
       setFieldValue(el, fieldsState[id]);
@@ -636,8 +753,8 @@
     wrap.appendChild(label);
     wrap.appendChild(inputPlus);
 
+    // (clone fields saved via cloneState)
     ensureId(input);
-    saveField(input);
     return wrap;
   };
 
@@ -658,7 +775,7 @@
     cloneState.set(clones);
 
     input.value = "";
-    saveField(input);
+    saveField(input); // base field (not clone)
     input.focus();
 
     mkSyncSummaryEngagementSnapshot();
@@ -688,7 +805,6 @@
     [name, role, cell, email].forEach((el) => {
       if (!el) return;
       ensureId(el);
-      saveField(el);
       triggerInputChange(el);
     });
   };
@@ -718,7 +834,6 @@
       else el.value = "";
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      saveField(el);
     });
 
     if (p) writePocCardValues(clone, p);
@@ -769,7 +884,6 @@
       }
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      saveField(el);
       triggerInputChange(el);
     });
   };
@@ -785,8 +899,8 @@
     if (!fields.length) return;
     fields.forEach((el, i) => {
       setFieldValue(el, Array.isArray(values) ? values[i] : "");
+      el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      saveField(el);
       triggerInputChange(el);
     });
   };
@@ -880,7 +994,6 @@
           else el.value = "";
           el.removeAttribute(AUTO_ID_ATTR);
           ensureId(el);
-          saveField(el);
         });
 
         tbody.appendChild(clone);
@@ -1134,6 +1247,7 @@
         btn.classList.add("is-notes-active");
 
         ensureId(ta);
+        // notes textarea is NOT a clone; ok to save
         saveField(ta);
         triggerInputChange(ta);
       });
@@ -1215,14 +1329,12 @@
       else el.value = "";
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      saveField(el);
     });
 
     const status = $(".ticket-status-select", clone);
     if (status) {
       status.disabled = true;
       ensureId(status);
-      saveField(status);
     }
     return clone;
   };
@@ -1264,8 +1376,8 @@
 
     [num, url, sum, status].forEach((el) => {
       if (!el) return;
+      el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      saveField(el);
       triggerInputChange(el);
     });
   };
@@ -1337,9 +1449,6 @@
     const hasNum = (inputEl.value || "").trim().length > 0;
     status.disabled = !hasNum;
 
-    saveField(inputEl);
-    saveField(status);
-
     persistAllTickets();
   };
 
@@ -1357,7 +1466,6 @@
     const dest = containers[statusVal] || containers.Open;
     if (dest) dest.appendChild(card);
 
-    saveField(selectEl);
     persistAllTickets();
   };
 
@@ -1573,9 +1681,10 @@
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES)
      ✅ Modal styling matches page exactly by ID-swapping wrapper
+     ✅ v8.3: Table white strip + hide internal notes header
 ========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8_2";
+    const STYLE_ID = "mk-expand-style-v8_3";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1610,6 +1719,19 @@
         #mkTableModal .mk-modal-content{
           padding: 0 !important;
         }
+        /* helper strip (table mode) */
+        #mkTableModal .mk-modal-strip{
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          display:flex;
+          align-items:center;
+          justify-content:flex-end;
+          gap:10px;
+          padding:10px 12px;
+          background:#fff;
+          border-bottom:1px solid rgba(0,0,0,.10);
+        }
       `;
       document.head.appendChild(s);
     };
@@ -1627,6 +1749,73 @@
       tempId: "",
       wrapperEl: null,
     },
+    temp: {
+      strip: null,
+      stripCloseHome: null,
+      stripAddBtn: null,
+      hiddenHeaders: [], // {el, display}
+    },
+  };
+
+  const buildTableStrip = (modal, contentRoot) => {
+    // Creates top white strip for table mode (X + +)
+    if (!modal || !contentRoot) return null;
+
+    // remove existing strip if any
+    const old = contentRoot.querySelector(".mk-modal-strip");
+    if (old) old.remove();
+
+    const strip = document.createElement("div");
+    strip.className = "mk-modal-strip";
+
+    // Move close button into strip
+    const closeBtn = modal.querySelector(".mk-modal-close");
+    if (closeBtn) {
+      tableModal.temp.stripCloseHome = closeBtn.parentElement || null;
+      strip.appendChild(closeBtn);
+    }
+
+    // Clone first Add Row button into strip (calls original)
+    const firstAdd = contentRoot.querySelector(".table-footer button.add-row");
+    if (firstAdd) {
+      const addClone = firstAdd.cloneNode(true);
+      addClone.removeAttribute("id");
+      addClone.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        firstAdd.click(); // triggers existing add-row handler
+      });
+      strip.insertBefore(addClone, strip.firstChild);
+      tableModal.temp.stripAddBtn = addClone;
+    }
+
+    // Insert strip at top of modal content
+    contentRoot.insertBefore(strip, contentRoot.firstChild);
+    tableModal.temp.strip = strip;
+
+    return strip;
+  };
+
+  const hideNotesInternalHeader = (notesHostEl) => {
+    if (!notesHostEl) return;
+    // The notes blocks usually have their own header (h2 or .section-header)
+    const h =
+      notesHostEl.querySelector("h2") ||
+      notesHostEl.querySelector(".section-header") ||
+      null;
+    if (!h) return;
+
+    const display = h.style.display || "";
+    h.style.display = "none";
+    tableModal.temp.hiddenHeaders.push({ el: h, display });
+  };
+
+  const restoreHiddenNotesHeaders = () => {
+    (tableModal.temp.hiddenHeaders || []).forEach(({ el, display }) => {
+      if (!el) return;
+      el.style.display = display || "";
+    });
+    tableModal.temp.hiddenHeaders = [];
   };
 
   const openModalWithNodes = (nodes, titleText, originSectionEl) => {
@@ -1653,6 +1842,10 @@
     tableModal.content = content;
     tableModal.title = titleEl;
     tableModal.moved = [];
+    tableModal.temp.strip = null;
+    tableModal.temp.stripAddBtn = null;
+    tableModal.temp.stripCloseHome = null;
+    tableModal.temp.hiddenHeaders = [];
     content.innerHTML = "";
 
     if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
@@ -1692,6 +1885,11 @@
       wrapper.appendChild(node);
     });
 
+    // ✅ If table mode, build top strip (white) with X + +
+    if (modal.classList.contains("mk-is-table")) {
+      buildTableStrip(modal, content);
+    }
+
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     tableModal.bodyOverflow = document.body.style.overflow || "";
@@ -1705,6 +1903,27 @@
   const closeTableModal = () => {
     const modal = tableModal.modal;
     if (!modal) return;
+
+    // Restore internal notes headers if any were hidden
+    restoreHiddenNotesHeaders();
+
+    // Restore close button back to its original home (if we moved it)
+    const closeBtn = modal.querySelector(".mk-modal-close");
+    if (closeBtn && tableModal.temp.stripCloseHome) {
+      try {
+        tableModal.temp.stripCloseHome.appendChild(closeBtn);
+      } catch {}
+    }
+
+    // Remove strip nodes
+    if (tableModal.temp.strip) {
+      try {
+        tableModal.temp.strip.remove();
+      } catch {}
+    }
+    tableModal.temp.strip = null;
+    tableModal.temp.stripAddBtn = null;
+    tableModal.temp.stripCloseHome = null;
 
     (tableModal.moved || []).forEach(({ node, placeholder }) => {
       if (!node || !placeholder || !placeholder.parentNode) return;
@@ -1721,8 +1940,8 @@
 
     modal.classList.remove("open");
     modal.classList.remove("mk-notes-only");
-    modal.classList.remove("mk-is-table");   // ✅ IMPORTANT
-    modal.classList.remove("mk-is-notes");   // ✅ IMPORTANT
+    modal.classList.remove("mk-is-table");
+    modal.classList.remove("mk-is-notes");
     modal.setAttribute("aria-hidden", "true");
 
     const content = $(".mk-modal-content", modal);
@@ -1736,6 +1955,7 @@
     tableModal.bodyOverflow = "";
     tableModal.moved = [];
     tableModal.origin = { sectionEl: null, originalId: "", tempId: "", wrapperEl: null };
+    tableModal.temp = { strip: null, stripCloseHome: null, stripAddBtn: null, hiddenHeaders: [] };
   };
 
   const getExpandBundleNodes = (anyInside) => {
@@ -1782,7 +2002,7 @@
     return uniq;
   };
 
-  // ✅ TABLE MODE: no orange header bar; X in white strip via CSS
+  // ✅ TABLE MODE: no orange header bar; strip provides X + +
   const openTableModalFor = (anyInside) => {
     const modal = $("#mkTableModal");
     if (modal) {
@@ -1799,7 +2019,7 @@
     openModalWithNodes(bundle, title, originSectionEl);
   };
 
-  // ✅ NOTES MODE: ONE header (modal header); X inside header via CSS
+  // ✅ NOTES MODE: ONE header (modal header); hide internal notes header while expanded
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
 
@@ -1809,6 +2029,9 @@
       modal.classList.add("mk-is-notes");
       modal.classList.add("mk-notes-only");
     }
+
+    // hide the internal header so you don't see 2 headers
+    hideNotesInternalHeader(notesHostEl);
 
     const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
     const title = (h?.textContent || "Notes").trim();
@@ -2110,8 +2333,8 @@
       return;
     }
 
-    const mkTableModal = $("#mkTableModal");
-    if (mkTableModal && mkTableModal.classList.contains("open")) {
+    const mkTableModalEl = $("#mkTableModal");
+    if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
       if (
         t.closest("#mkTableModal .mk-modal-close") ||
         t.closest("#mkTableModal .mk-modal-backdrop")
@@ -2240,8 +2463,8 @@
     }
 
     if (e.key === "Escape") {
-      const mkTableModal = $("#mkTableModal");
-      if (mkTableModal && mkTableModal.classList.contains("open")) {
+      const mkTableModalEl = $("#mkTableModal");
+      if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
         e.preventDefault();
         closeTableModal();
       }
@@ -2253,9 +2476,12 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
+    // ✅ Stable ids BEFORE restore
     assignIdsToAllFields();
+
     initNav();
 
+    // restore clones first (their values live in cloneState)
     rebuildTrainerClones();
     rebuildPocClones();
     rebuildTableClones();
@@ -2263,6 +2489,7 @@
 
     seedStarterRowsToThree();
 
+    // restore base fields
     restoreAllFields();
 
     setGhostStyles(document);
@@ -2279,7 +2506,7 @@
     enforceBaseTicketStatusLock();
     initSummaryActionsDropdown();
 
-    log("Initialized v8.2.");
+    log("Initialized v8.3.");
   };
 
   if (document.readyState === "loading") {
