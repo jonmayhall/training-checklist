@@ -1831,3 +1831,128 @@ button.remove-row{
   transform:translateY(-1px) !important;
 }
 
+/* =========================================================
+   MODAL BEHAVIOR FIX (Notes vs Tables)
+   - Notes: ONE header (modal header). Hide inner card header.
+   - Tables: No orange modal bar. White strip area w/ X + Add Row.
+========================================================= */
+
+/* ---------- NOTES MODE ---------- */
+#mkTableModal.mk-is-notes .mk-modal-header{
+  display:flex !important;
+}
+
+/* Hide the orange card header INSIDE the notes block so you don't see 2 headers */
+#mkTableModal.mk-is-notes .section-block > h2,
+#mkTableModal.mk-is-notes .section-header{
+  display:none !important;
+}
+
+/* Notes mode: X lives INSIDE the orange header (top-right) */
+#mkTableModal.mk-is-notes .mk-modal-close{
+  position:static !important;
+  margin-left:auto !important;
+
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+
+  border:1px solid rgba(255,255,255,0.55) !important;
+  background:rgba(255,255,255,0.15) !important;
+  color:#fff !important;
+
+  box-shadow:none !important;
+}
+#mkTableModal.mk-is-notes .mk-modal-close:hover{
+  background:rgba(255,255,255,0.25) !important;
+  transform:none !important;
+}
+
+/* ---------- TABLE MODE ---------- */
+
+/* Keep header element (so close button exists), but remove orange bar + title */
+#mkTableModal.mk-is-table .mk-modal-header{
+  background:transparent !important;
+  border-bottom:none !important;
+  padding:0 !important;
+  min-height:0 !important;
+  height:0 !important;
+}
+#mkTableModal.mk-is-table .mk-modal-title{
+  display:none !important;
+}
+
+/* Create a WHITE STRIP area above tables by padding modal content */
+#mkTableModal.mk-is-table .mk-modal-content{
+  padding:62px 18px 18px !important; /* ✅ pushes tables/notes down */
+}
+
+/* Table mode: orange X sits in the top-right white strip */
+#mkTableModal.mk-is-table .mk-modal-close{
+  display:flex !important;
+
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:none !important;
+
+  font-size:22px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+
+  box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
+  z-index:100000 !important;
+}
+#mkTableModal.mk-is-table .mk-modal-close:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px) !important;
+}
+
+/* In table popups, the section header should attach to the table container (no gap) */
+#mkTableModal.mk-is-table .section-header{
+  margin:0 !important;
+  border:1px solid var(--border) !important;
+  border-bottom:none !important;
+  border-top-left-radius:var(--radius-lg) !important;
+  border-top-right-radius:var(--radius-lg) !important;
+}
+#mkTableModal.mk-is-table .table-container{
+  margin:0 0 16px 0 !important;
+  border:1px solid var(--border) !important;
+  border-top:none !important;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
+  overflow:hidden !important;
+}
+
+/* Hide expand button inside modal (no need to expand while expanded) */
+#mkTableModal.mk-is-table .mk-table-expand-btn{
+  display:none !important;
+}
+
+/* Move the "+" Add Row button into the white strip above tables */
+#mkTableModal.mk-is-table .table-footer{
+  background:transparent !important;
+  border:none !important;
+  padding:0 !important;
+  height:0 !important;
+  min-height:0 !important;
+}
+#mkTableModal.mk-is-table .table-footer .add-row{
+  position:absolute !important;
+  top:14px !important;
+  right:62px !important; /* leaves room for the X */
+  z-index:100000 !important;
+}
+
+/* If the footer had any other layout artifacts, kill them */
+#mkTableModal.mk-is-table .table-footer::before,
+#mkTableModal.mk-is-table .table-footer::after{
+  display:none !important;
+}
