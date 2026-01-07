@@ -2,33 +2,10 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3)
 
-   ✅ FIXES / UPDATES vs v8.2:
-   - ✅ Stable field IDs across reloads (no more random data-mk-id each load)
-     → state restore works reliably again
-   - ✅ Notes popups: ONE header (modal header). Internal notes header is hidden while expanded.
-     → X sits INSIDE that header (CSS can position)
-   - ✅ Table popups: NO orange header bar; builds a WHITE strip at top
-     → X moved into the white strip (top-right)
-     → "+" (Add Row) cloned into the white strip above the table
-     → content pushed down naturally by strip
+   ✅ FIX (your issue):
+   - Page 11 Lead Trainer + Additional Trainers now autofill correctly from Page 1
+     because MK_IDS.leadTrainer now includes: "leadTrainerSelect"
 
-   ✅ INCLUDES:
-   - Full state save/restore for inputs/selects/textareas/contenteditable
-   - Nav (page-section switching + remember last page)
-   - Notes logic (• main + "  ◦ " caret stays to the RIGHT)
-   - Additional Trainers (+) on Trainers page persistence
-   - Additional POC (+) persistence
-   - Tables: Add Row + persist/restore cloned rows
-   - Support Tickets: add card + status move + persist/restore
-   - Expand modal for tables + notes, with CSS parity via ID-swapping wrapper
-   - Topbar dealer title sync (DID + Group + Dealer)
-   - Training end date auto-set (+3 days after onsite start)
-   - Training Summary (Page 11) Engagement Snapshot autopull:
-       DID / Dealer / Group / Dates / Lead Trainer / Additional Trainers
-
-   ✅ MODAL MODE CLASSES (for CSS targeting):
-       #mkTableModal.mk-is-notes
-       #mkTableModal.mk-is-table
 ======================================================= */
 
 (() => {
@@ -54,7 +31,14 @@
     onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    leadTrainer: ["leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+    // ✅ FIX: add leadTrainerSelect so Page 11 autofills from Page 1 select
+    leadTrainer: [
+      "leadTrainerSelect", // ✅ Page 1
+      "leadTrainerInput",
+      "leadTrainer",
+      "trainerLeadInput",
+      "primaryTrainerInput",
+    ],
   };
 
   // ====== SUMMARY PAGE 11 IDS (Engagement Snapshot) ======
@@ -1247,7 +1231,6 @@
         btn.classList.add("is-notes-active");
 
         ensureId(ta);
-        // notes textarea is NOT a clone; ok to save
         saveField(ta);
         triggerInputChange(ta);
       });
@@ -1680,8 +1663,6 @@
 
   /* =========================================================
      EXPAND BUTTONS (TABLES + NOTES)
-     ✅ Modal styling matches page exactly by ID-swapping wrapper
-     ✅ v8.3: Table white strip + hide internal notes header
 ========================================================= */
   const ensureExpandStyles = (() => {
     const STYLE_ID = "mk-expand-style-v8_3";
@@ -1758,24 +1739,20 @@
   };
 
   const buildTableStrip = (modal, contentRoot) => {
-    // Creates top white strip for table mode (X + +)
     if (!modal || !contentRoot) return null;
 
-    // remove existing strip if any
     const old = contentRoot.querySelector(".mk-modal-strip");
     if (old) old.remove();
 
     const strip = document.createElement("div");
     strip.className = "mk-modal-strip";
 
-    // Move close button into strip
     const closeBtn = modal.querySelector(".mk-modal-close");
     if (closeBtn) {
       tableModal.temp.stripCloseHome = closeBtn.parentElement || null;
       strip.appendChild(closeBtn);
     }
 
-    // Clone first Add Row button into strip (calls original)
     const firstAdd = contentRoot.querySelector(".table-footer button.add-row");
     if (firstAdd) {
       const addClone = firstAdd.cloneNode(true);
@@ -1783,13 +1760,12 @@
       addClone.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        firstAdd.click(); // triggers existing add-row handler
+        firstAdd.click();
       });
       strip.insertBefore(addClone, strip.firstChild);
       tableModal.temp.stripAddBtn = addClone;
     }
 
-    // Insert strip at top of modal content
     contentRoot.insertBefore(strip, contentRoot.firstChild);
     tableModal.temp.strip = strip;
 
@@ -1798,7 +1774,6 @@
 
   const hideNotesInternalHeader = (notesHostEl) => {
     if (!notesHostEl) return;
-    // The notes blocks usually have their own header (h2 or .section-header)
     const h =
       notesHostEl.querySelector("h2") ||
       notesHostEl.querySelector(".section-header") ||
@@ -1885,7 +1860,6 @@
       wrapper.appendChild(node);
     });
 
-    // ✅ If table mode, build top strip (white) with X + +
     if (modal.classList.contains("mk-is-table")) {
       buildTableStrip(modal, content);
     }
@@ -1904,10 +1878,8 @@
     const modal = tableModal.modal;
     if (!modal) return;
 
-    // Restore internal notes headers if any were hidden
     restoreHiddenNotesHeaders();
 
-    // Restore close button back to its original home (if we moved it)
     const closeBtn = modal.querySelector(".mk-modal-close");
     if (closeBtn && tableModal.temp.stripCloseHome) {
       try {
@@ -1915,7 +1887,6 @@
       } catch {}
     }
 
-    // Remove strip nodes
     if (tableModal.temp.strip) {
       try {
         tableModal.temp.strip.remove();
@@ -2002,7 +1973,6 @@
     return uniq;
   };
 
-  // ✅ TABLE MODE: no orange header bar; strip provides X + +
   const openTableModalFor = (anyInside) => {
     const modal = $("#mkTableModal");
     if (modal) {
@@ -2019,7 +1989,6 @@
     openModalWithNodes(bundle, title, originSectionEl);
   };
 
-  // ✅ NOTES MODE: ONE header (modal header); hide internal notes header while expanded
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
 
@@ -2030,7 +1999,6 @@
       modal.classList.add("mk-notes-only");
     }
 
-    // hide the internal header so you don't see 2 headers
     hideNotesInternalHeader(notesHostEl);
 
     const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
@@ -2389,7 +2357,10 @@
     }
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
-    if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
+    if (
+      el.closest(".ticket-group") &&
+      el.closest(".ticket-group")?.getAttribute("data-base") !== "true"
+    ) {
       persistAllTickets();
     }
 
@@ -2476,12 +2447,10 @@
      INIT / RESTORE
   ======================= */
   const init = () => {
-    // ✅ Stable ids BEFORE restore
     assignIdsToAllFields();
 
     initNav();
 
-    // restore clones first (their values live in cloneState)
     rebuildTrainerClones();
     rebuildPocClones();
     rebuildTableClones();
@@ -2489,7 +2458,6 @@
 
     seedStarterRowsToThree();
 
-    // restore base fields
     restoreAllFields();
 
     setGhostStyles(document);
