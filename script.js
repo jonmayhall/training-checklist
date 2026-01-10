@@ -2483,3 +2483,21 @@
     init();
   }
 })();
+// HARD PATCH: make trainer "+" work even if markup moved or attribute is missing
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-add-trainer], .trainer-add-btn");
+  if (!btn) return;
+
+  // only run this behavior if the target input exists
+  if (!document.getElementById("additionalTrainerInput")) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  // call the existing function if it exists in this scope
+  try {
+    addTrainerRow();
+  } catch (err) {
+    console.warn("addTrainerRow() not available in this scope.", err);
+  }
+});
