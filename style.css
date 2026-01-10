@@ -1874,3 +1874,14 @@ button.remove-row{
 #mkTableModal.mk-is-table .table-container{
   margin-top:0 !important;
 }
+
+/* TABLE POPUPS: hide the cloned Add Row button in the top strip */
+#mkTableModal.mk-is-table .mk-modal-strip .add-row{
+  display:none !important;
+}
+
+/* Keep the strip aligned nicely when only the X remains */
+#mkTableModal.mk-is-table .mk-modal-strip{
+  justify-content:flex-end !important;
+  gap:0 !important;
+}
