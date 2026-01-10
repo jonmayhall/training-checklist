@@ -1885,3 +1885,13 @@ button.remove-row{
   justify-content:flex-end !important;
   gap:0 !important;
 }
+
+/* Page 1: keep Additional Trainer + CEM on one line */
+#trainers-deployment .checklist-row{
+  flex-wrap: nowrap !important;
+}
+#trainers-deployment .checklist-row .input-plus,
+#trainers-deployment .checklist-row select,
+#trainers-deployment .checklist-row input{
+  display: inline-flex !important;
+}
