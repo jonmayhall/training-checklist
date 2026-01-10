@@ -1,10 +1,11 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3.1)
 
    ✅ FIX (your issue):
-   - Page 11 Lead Trainer + Additional Trainers now autofill correctly from Page 1
-     because MK_IDS.leadTrainer now includes: "leadTrainerSelect"
+   - Additional Trainers “+” button now works reliably in ALL markup cases
+     (even if the button moved, lost attributes, or is inside/outside the card)
+   - We expose addTrainerRow safely on window and use a robust click hook
 
 ======================================================= */
 
@@ -14,7 +15,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_1";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -31,7 +32,7 @@
     onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
     trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    // ✅ FIX: add leadTrainerSelect so Page 11 autofills from Page 1 select
+    // ✅ includes leadTrainerSelect so Page 11 autofills from Page 1 select
     leadTrainer: [
       "leadTrainerSelect", // ✅ Page 1
       "leadTrainerInput",
@@ -737,7 +738,6 @@
     wrap.appendChild(label);
     wrap.appendChild(inputPlus);
 
-    // (clone fields saved via cloneState)
     ensureId(input);
     return wrap;
   };
@@ -764,6 +764,11 @@
 
     mkSyncSummaryEngagementSnapshot();
   };
+
+  // ✅ Expose for any external/late-loaded handlers
+  try {
+    window.mkAddTrainerRow = addTrainerRow;
+  } catch {}
 
   /* =======================
      ADD POC (+)
@@ -1734,7 +1739,7 @@
       strip: null,
       stripCloseHome: null,
       stripAddBtn: null,
-      hiddenHeaders: [], // {el, display}
+      hiddenHeaders: [],
     },
   };
 
@@ -1753,6 +1758,7 @@
       strip.appendChild(closeBtn);
     }
 
+    // keep clone support, but your CSS hides it in table mode if desired
     const firstAdd = contentRoot.querySelector(".table-footer button.add-row");
     if (firstAdd) {
       const addClone = firstAdd.cloneNode(true);
@@ -1774,10 +1780,7 @@
 
   const hideNotesInternalHeader = (notesHostEl) => {
     if (!notesHostEl) return;
-    const h =
-      notesHostEl.querySelector("h2") ||
-      notesHostEl.querySelector(".section-header") ||
-      null;
+    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
     if (!h) return;
 
     const display = h.style.display || "";
@@ -2179,6 +2182,54 @@
   };
 
   /* =======================
+     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
+  ======================= */
+  const shouldTreatAsAddTrainerBtn = (btn) => {
+    if (!btn) return false;
+
+    // explicit hooks
+    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
+
+    // fallback: button is in Trainers page + inside .input-plus next to the Additional Trainer input
+    const trainersPage = btn.closest("#trainers-deployment");
+    if (!trainersPage) return false;
+
+    const isBtn = btn.matches("button, a, [role='button']");
+    if (!isBtn) return false;
+
+    const ip = btn.closest(".input-plus");
+    if (!ip) return false;
+
+    // If the input-plus contains #additionalTrainerInput, assume this is the + button
+    if (ip.querySelector("#additionalTrainerInput")) return true;
+
+    // Or if this button sits right next to #additionalTrainerInput
+    const globalInput = document.getElementById("additionalTrainerInput");
+    if (globalInput && ip.contains(globalInput)) return true;
+
+    return false;
+  };
+
+  const hookAddTrainerButtonDirectly = () => {
+    // If markup has a stable button, bind directly too (in addition to delegation)
+    const page = document.getElementById("trainers-deployment");
+    if (!page) return;
+
+    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
+    btns.forEach((b) => {
+      if (!shouldTreatAsAddTrainerBtn(b)) return;
+      if (b.__mkAddTrainerBound) return;
+      b.__mkAddTrainerBound = true;
+
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow();
+      });
+    });
+  };
+
+  /* =======================
      EVENT DELEGATION
   ======================= */
   document.addEventListener("click", (e) => {
@@ -2193,6 +2244,9 @@
       setTimeout(() => {
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
+
+        // re-hook add-trainer button when page becomes active
+        hookAddTrainerButtonDirectly();
 
         if (targetId === "training-summary") {
           mkSyncSummaryEngagementSnapshot();
@@ -2237,12 +2291,16 @@
       return;
     }
 
-    const addTrainerBtn =
-      t.closest("[data-add-trainer]") || t.closest("#trainers-deployment .trainer-add-btn");
-    if (addTrainerBtn) {
-      e.preventDefault();
-      addTrainerRow();
-      return;
+    // ✅ Additional Trainers (+) — SUPER ROBUST
+    const maybeTrainerBtn = t.closest("button, a, [role='button']");
+    if (shouldTreatAsAddTrainerBtn(maybeTrainerBtn)) {
+      // only do this if the expected input exists
+      if (document.getElementById("additionalTrainerInput") && document.getElementById("additionalTrainersContainer")) {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow();
+        return;
+      }
     }
 
     const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
@@ -2303,10 +2361,7 @@
 
     const mkTableModalEl = $("#mkTableModal");
     if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
-      if (
-        t.closest("#mkTableModal .mk-modal-close") ||
-        t.closest("#mkTableModal .mk-modal-backdrop")
-      ) {
+      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
         e.preventDefault();
         closeTableModal();
         return;
@@ -2323,11 +2378,7 @@
       setGhostStyles(document);
     }
 
-    if (
-      el.id === "dealershipNameInput" ||
-      el.id === "dealershipDidInput" ||
-      el.id === "dealerGroupInput"
-    ) {
+    if (el.id === "dealershipNameInput" || el.id === "dealershipDidInput" || el.id === "dealerGroupInput") {
       mkSyncTopbarTitle();
       mkSyncSummaryEngagementSnapshot();
     }
@@ -2349,18 +2400,12 @@
       mkSyncSummaryEngagementSnapshot();
     }
 
-    if (
-      el.closest(".additional-poc-card") &&
-      el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true"
-    ) {
+    if (el.closest(".additional-poc-card") && el.closest(".additional-poc-card")?.getAttribute("data-base") !== "true") {
       persistAllPocs();
     }
 
     if (el.matches(".ticket-number-input")) onTicketNumberInput(el);
-    if (
-      el.closest(".ticket-group") &&
-      el.closest(".ticket-group")?.getAttribute("data-base") !== "true"
-    ) {
+    if (el.closest(".ticket-group") && el.closest(".ticket-group")?.getAttribute("data-base") !== "true") {
       persistAllTickets();
     }
 
@@ -2427,7 +2472,8 @@
       return;
     }
 
-    if (el.id === "additionalTrainerInput" && e.key === "Enter") {
+    // ✅ Press Enter in the "Additional Trainer" input adds it
+    if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow();
       return;
@@ -2474,7 +2520,10 @@
     enforceBaseTicketStatusLock();
     initSummaryActionsDropdown();
 
-    log("Initialized v8.3.");
+    // ✅ bind trainer + button directly too (in case of weird overlays/stopPropagation elsewhere)
+    hookAddTrainerButtonDirectly();
+
+    log("Initialized v8.3.1.");
   };
 
   if (document.readyState === "loading") {
@@ -2483,21 +2532,28 @@
     init();
   }
 })();
-// HARD PATCH: make trainer "+" work even if markup moved or attribute is missing
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-add-trainer], .trainer-add-btn");
-  if (!btn) return;
 
-  // only run this behavior if the target input exists
-  if (!document.getElementById("additionalTrainerInput")) return;
+/* =======================================================
+   SAFETY NET CLICK PATCH (GLOBAL)
+   - If ANYTHING in the page swallows the click before delegation,
+     this captures it late and tries again.
+======================================================= */
+document.addEventListener(
+  "click",
+  (e) => {
+    const btn = e.target.closest("[data-add-trainer], .trainer-add-btn, #trainers-deployment .input-plus button");
+    if (!btn) return;
 
-  e.preventDefault();
-  e.stopPropagation();
+    // only if trainer input exists
+    if (!document.getElementById("additionalTrainerInput")) return;
 
-  // call the existing function if it exists in this scope
-  try {
-    addTrainerRow();
-  } catch (err) {
-    console.warn("addTrainerRow() not available in this scope.", err);
-  }
-});
+    // if project handler already ran, nothing breaks — addTrainerRow() checks input value
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (typeof window.mkAddTrainerRow === "function") {
+      window.mkAddTrainerRow();
+    }
+  },
+  true // capture phase = strongest guarantee
+);
