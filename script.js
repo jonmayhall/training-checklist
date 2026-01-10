@@ -742,33 +742,43 @@
     return wrap;
   };
 
-  const addTrainerRow = () => {
-    const input = $("#additionalTrainerInput");
-    const container = $("#additionalTrainersContainer");
-    if (!input || !container) return;
+  const addTrainerRow = (fromEl = null) => {
+  // Prefer the Trainers page as the search root
+  const root =
+    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+    document.getElementById("trainers-deployment") ||
+    document;
 
-    const name = (input.value || "").trim();
-    if (!name) return;
+  const input =
+    root.querySelector("#additionalTrainerInput") ||
+    document.querySelector("#additionalTrainerInput");
 
-    const row = buildTrainerRow(name);
-    container.appendChild(row);
+  const container =
+    root.querySelector("#additionalTrainersContainer") ||
+    document.querySelector("#additionalTrainersContainer");
 
-    const clones = cloneState.get();
-    clones.trainers = clones.trainers || [];
-    clones.trainers.push({ value: name });
-    cloneState.set(clones);
+  if (!input || !container) return;
 
-    input.value = "";
-    saveField(input); // base field (not clone)
-    input.focus();
+  const name = (input.value || "").trim();
+  if (!name) return;
 
-    mkSyncSummaryEngagementSnapshot();
-  };
+  const row = buildTrainerRow(name);
+  container.appendChild(row);
 
-  // ✅ Expose for any external/late-loaded handlers
-  try {
-    window.mkAddTrainerRow = addTrainerRow;
-  } catch {}
+  const clones = cloneState.get();
+  clones.trainers = clones.trainers || [];
+  clones.trainers.push({ value: name });
+  cloneState.set(clones);
+
+  input.value = "";
+  saveField(input);
+  input.focus();
+
+  mkSyncSummaryEngagementSnapshot();
+};
+
+// keep exposed
+try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
   /* =======================
      ADD POC (+)
@@ -2289,18 +2299,6 @@
       e.preventDefault();
       mkHandleSavePDF();
       return;
-    }
-
-    // ✅ Additional Trainers (+) — SUPER ROBUST
-    const maybeTrainerBtn = t.closest("button, a, [role='button']");
-    if (shouldTreatAsAddTrainerBtn(maybeTrainerBtn)) {
-      // only do this if the expected input exists
-      if (document.getElementById("additionalTrainerInput") && document.getElementById("additionalTrainersContainer")) {
-        e.preventDefault();
-        e.stopPropagation();
-        addTrainerRow();
-        return;
-      }
     }
 
     const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
