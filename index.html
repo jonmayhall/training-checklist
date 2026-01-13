@@ -96,35 +96,24 @@
         </select>
       </div>
 
-      <!-- Additional Trainer (+) -->
-      <div class="checklist-row integrated-plus indent-sub" data-base="true">
-        <label for="additionalTrainerInput">Additional Trainer</label>
+     <div class="input-plus">
+  <input
+    id="additionalTrainerInput"
+    type="text"
+    placeholder="Enter additional trainer name"
+  />
+  <button
+    type="button"
+    class="trainer-add-btn"
+    data-add-trainer
+    aria-label="Add additional trainer"
+  >
+    +
+  </button>
+</div>
 
-        <div class="input-plus">
-          <input
-            id="additionalTrainerInput"
-            name="additionalTrainerInput"
-            type="text"
-            placeholder="Enter additional trainer name"
-            autocomplete="off"
-          />
+<div id="additionalTrainersContainer"></div>
 
-          <button
-            type="button"
-            class="trainer-add-btn"
-            data-add-trainer
-            title="Add another trainer"
-            aria-label="Add another trainer"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      <!-- Added trainers render here -->
-      <div id="additionalTrainersContainer" class="integrated-plus-container"></div>
-    </div>
-    <!-- END Lead & Additional Trainers card -->
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
