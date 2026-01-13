@@ -49,17 +49,22 @@
       <!-- ========================= MAIN CONTENT ========================= -->
       <main>
 
-    <!-- =========================================================
-     PAGE 1 — TRAINERS & mK TEAM (STANDARDIZED)
+   <!-- =========================================================
+     PAGE 1 — TRAINERS & mK TEAM
 ========================================================= -->
 <section id="trainers-deployment" class="page-section active" data-page="1">
   <h1>Trainers &amp; mK Team</h1>
+
   <p class="page-subtitle">
     Select the assigned lead trainer, add additional trainers, and capture the
     deployment/CEM assignments.
   </p>
 
-  <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
+  <button
+    type="button"
+    class="clear-page-btn"
+    data-clear-page="trainers-deployment"
+  >
     Reset This Page
   </button>
 
@@ -96,18 +101,30 @@
         </select>
       </div>
 
-<!-- Additional Trainer (Input + Plus) -->
-<input
-  id="additionalTrainerInput"
-  type="text"
-  placeholder="Enter additional trainer name"
-  autocomplete="off"
-/>
+      <!-- Additional Trainer (Input + Plus) -->
+      <div class="checklist-row integrated-plus">
+        <label for="additionalTrainerInput">Additional Trainer</label>
 
-<button type="button" class="trainer-add-btn" data-add-trainer>+</button>
+        <div class="input-plus">
+          <input
+            id="additionalTrainerInput"
+            type="text"
+            placeholder="Enter additional trainer name"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="trainer-add-btn"
+            data-add-trainer
+            aria-label="Add additional trainer"
+          >
+            +
+          </button>
+        </div>
+      </div>
 
-<div id="additionalTrainersContainer"></div>
-
+      <!-- Added trainers render here -->
+      <div id="additionalTrainersContainer"></div>
     </div>
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
@@ -138,7 +155,6 @@
         <label for="serviceCartASC">ServiceCart ASC</label>
         <input
           id="serviceCartASC"
-          name="serviceCartASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -149,7 +165,6 @@
         <label for="schedulerASC">Scheduler ASC</label>
         <input
           id="schedulerASC"
-          name="schedulerASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -160,7 +175,6 @@
         <label for="cemAssigned">CEM</label>
         <input
           id="cemAssigned"
-          name="cemAssigned"
           type="text"
           placeholder="Enter CEM assigned"
           autocomplete="off"
