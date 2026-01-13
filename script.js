@@ -1,13 +1,14 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — TRAINER + FIX BUILD (v8.3.2)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CONSISTENT ADD BUTTONS (v8.3.3)
 
    ✅ Fix:
-   - Additional Trainers “+” button works even if markup changes,
-     click is swallowed, button is <a>/<div role="button">, etc.
+   - Trainer "+" now matches the other add buttons:
+       Uses [data-add-trainer] and/or .trainer-add-btn (no guessing)
    - Enter on #additionalTrainerInput adds the trainer
    - Exposes window.mkAddTrainerRow
-
+   - Keeps: state save/restore, clones, notes system, tickets, tables, summary sync,
+            expand buttons inject, popup, clear all / clear page, map button, end date auto-set
 ======================================================= */
 
 (() => {
@@ -16,7 +17,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_2";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_3";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -697,7 +698,11 @@
   };
 
   /* =======================
-     ADD TRAINER (+) — FIXED
+     ADD TRAINER (+) — CONSISTENT HOOKS
+     REQUIRED HTML HOOKS:
+       - button has [data-add-trainer] and/or class .trainer-add-btn
+       - input id: #additionalTrainerInput
+       - container id: #additionalTrainersContainer
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -708,7 +713,7 @@
     label.textContent = "Additional Trainer";
 
     const inputPlus = document.createElement("div");
-    inputPlus.className = "input-plus";
+    inputPlus.className = "input-plus mk-solo-input";
 
     const input = document.createElement("input");
     input.type = "text";
@@ -760,58 +765,6 @@
   try {
     window.mkAddTrainerRow = addTrainerRow;
   } catch {}
-
-  // 🔥 Super-robust detection for the "+" button
-  const isTrainerPlusButton = (btn) => {
-    if (!btn) return false;
-
-    // explicit hooks (if you add them in HTML)
-    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
-
-    const trainersPage = btn.closest("#trainers-deployment");
-    if (!trainersPage) return false;
-
-    const isBtnish = btn.matches("button, a, [role='button'], .btn, .icon-btn");
-    if (!isBtnish) return false;
-
-    // Must be near the Additional Trainer input
-    const ip = btn.closest(".input-plus") || btn.parentElement?.closest?.(".input-plus") || null;
-    if (ip && ip.querySelector("#additionalTrainerInput")) return true;
-
-    // or within same row as the input
-    const row = btn.closest(".checklist-row") || btn.closest(".integrated-plus") || null;
-    if (row && row.querySelector("#additionalTrainerInput")) return true;
-
-    // last resort: element right next to the input (common layouts)
-    const input = trainersPage.querySelector("#additionalTrainerInput");
-    if (input) {
-      const near = input.closest(".input-plus") || input.parentElement;
-      if (near && near.contains(btn)) return true;
-    }
-
-    return false;
-  };
-
-  const hookTrainerPlusDirect = () => {
-    const page = document.getElementById("trainers-deployment");
-    if (!page) return;
-
-    const candidates = Array.from(
-      page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button, .input-plus a, .input-plus [role='button']")
-    );
-
-    candidates.forEach((b) => {
-      if (!isTrainerPlusButton(b)) return;
-      if (b.__mkTrainerPlusBound) return;
-      b.__mkTrainerPlusBound = true;
-
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        addTrainerRow(b);
-      });
-    });
-  };
 
   /* =======================
      ADD POC (+)
@@ -1706,8 +1659,7 @@
   };
 
   /* =======================
-     EXPAND BUTTONS (UNCHANGED)
-     (kept minimal — assumes your existing modal HTML/CSS is present)
+     EXPAND BUTTONS (inject)
   ======================= */
   const ensureExpandStyles = (() => {
     const STYLE_ID = "mk-expand-style-v8_3";
@@ -1787,19 +1739,16 @@
     const obs = new MutationObserver(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      hookTrainerPlusDirect();
     });
     obs.observe(document.body, { childList: true, subtree: true });
 
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      hookTrainerPlusDirect();
     }, 250);
     setTimeout(() => {
       ensureTableExpandButtons();
       ensureNotesExpandButtons();
-      hookTrainerPlusDirect();
     }, 900);
   };
 
@@ -1919,11 +1868,7 @@
       setTimeout(() => {
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
-        hookTrainerPlusDirect();
-
-        if (targetId === "training-summary") {
-          mkSyncSummaryEngagementSnapshot();
-        }
+        if (targetId === "training-summary") mkSyncSummaryEngagementSnapshot();
       }, 0);
 
       return;
@@ -1964,15 +1909,13 @@
       return;
     }
 
-    // ✅ Trainer "+" via delegation (normal bubbling)
-    const maybeBtn = t.closest("button, a, [role='button'], .btn, .icon-btn");
-    if (isTrainerPlusButton(maybeBtn)) {
-      if (document.getElementById("additionalTrainerInput") && document.getElementById("additionalTrainersContainer")) {
-        e.preventDefault();
-        e.stopPropagation();
-        addTrainerRow(maybeBtn);
-        return;
-      }
+    /* ✅ TRAINER "+" — matches other add buttons */
+    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
+    if (trainerBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      addTrainerRow(trainerBtn);
+      return;
     }
 
     const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
@@ -2012,6 +1955,20 @@
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
+
+    // Expand buttons click (if you have your modal wired elsewhere, hook it there)
+    const tableExpand = t.closest(".mk-table-expand-btn");
+    if (tableExpand) {
+      // You likely already have a modal implementation elsewhere. Fire an event.
+      document.dispatchEvent(new CustomEvent("mk:expandTable", { detail: { button: tableExpand } }));
+      return;
+    }
+
+    const taExpand = t.closest(".mk-ta-expand");
+    if (taExpand) {
+      document.dispatchEvent(new CustomEvent("mk:expandNotes", { detail: { button: taExpand } }));
+      return;
+    }
   });
 
   document.addEventListener("input", (e) => {
@@ -2028,6 +1985,7 @@
       mkSyncSummaryEngagementSnapshot();
     }
 
+    // Keep trainer clone state in sync if user edits cloned inputs
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
       clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
@@ -2159,35 +2117,9 @@
     enforceBaseTicketStatusLock();
     initSummaryActionsDropdown();
 
-    // ✅ direct bind + observer rebinds too
-    hookTrainerPlusDirect();
-
-    log("Initialized v8.3.2.");
+    log("Initialized v8.3.3.");
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
-
-/* =======================================================
-   SAFETY NET CLICK PATCH (GLOBAL CAPTURE)
-   - If anything swallows click before bubbling handlers,
-     this still fires for the trainer "+" area.
-======================================================= */
-document.addEventListener(
-  "click",
-  (e) => {
-    const btn = e.target.closest(
-      "[data-add-trainer], .trainer-add-btn, #trainers-deployment .input-plus button, #trainers-deployment .input-plus a, #trainers-deployment .input-plus [role='button']"
-    );
-    if (!btn) return;
-
-    if (!document.getElementById("additionalTrainerInput")) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (typeof window.mkAddTrainerRow === "function") window.mkAddTrainerRow(btn);
-  },
-  true
-);
