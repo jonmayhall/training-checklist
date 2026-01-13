@@ -1731,9 +1731,6 @@ button.remove-row{
   transform:none !important;
 }
 
-/* Bigger notes textareas remain (already set above) */
-
-
 /* ---------- TABLE MODE ---------- */
 
 /* No orange header bar (but keep close button element existing) */
