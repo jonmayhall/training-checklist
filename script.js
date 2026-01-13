@@ -631,159 +631,180 @@
   };
 
   /* =======================
-     ADD TRAINER (+)
-     Expected HTML:
-       - #additionalTrainerInput
-       - #additionalTrainersContainer
-       - add button: [data-add-trainer] and/or .trainer-add-btn
-  ======================= */
-  const buildTrainerRow = (value = "") => {
-    const wrap = document.createElement("div");
-    wrap.className = "checklist-row integrated-plus indent-sub";
-    wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
+   ADD TRAINER (+)
+   ✅ Updated behavior:
+   - Clicking + ALWAYS adds a row (blank allowed)
+   - If the input has text, it uses it and clears the input
+   - Works with BOTH:
+       - #additionalTrainerInput (old)
+       - [data-mk-addl-trainer-input] (your current HTML)
+   - Works with BOTH containers:
+       - #additionalTrainersContainer (old)
+       - [data-mk-addl-trainers-container] (your current HTML)
+======================= */
+const buildTrainerRow = (value = "") => {
+  const wrap = document.createElement("div");
+  wrap.className = "checklist-row integrated-plus indent-sub";
+  wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-    const label = document.createElement("label");
-    label.textContent = "Additional Trainer";
+  const label = document.createElement("label");
+  label.textContent = "Additional Trainer";
 
-    const inputPlus = document.createElement("div");
-    inputPlus.className = "input-plus mk-solo-input";
+  const inputPlus = document.createElement("div");
+  inputPlus.className = "input-plus mk-solo-input";
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Enter additional trainer name";
-    input.autocomplete = "off";
-    input.value = value;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Enter additional trainer name";
+  input.autocomplete = "off";
+  input.value = value;
 
-    inputPlus.appendChild(input);
-    wrap.appendChild(label);
-    wrap.appendChild(inputPlus);
+  inputPlus.appendChild(input);
+  wrap.appendChild(label);
+  wrap.appendChild(inputPlus);
 
-    ensureId(input);
-    return wrap;
-  };
+  input.removeAttribute(AUTO_ID_ATTR);
+  ensureId(input);
 
-  const addTrainerRow = (fromEl = null) => {
-    const root =
-      (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
-      document.getElementById("trainers-deployment") ||
-      document;
+  return wrap;
+};
 
-    const input =
-      root.querySelector("#additionalTrainerInput") ||
-      root.querySelector("[data-mk-addl-trainer-input]") ||
-      document.querySelector("#additionalTrainerInput") ||
-      document.querySelector("[data-mk-addl-trainer-input]");
+const addTrainerRow = (fromEl = null) => {
+  const root =
+    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+    document.getElementById("trainers-deployment") ||
+    document;
 
-    const container =
-      root.querySelector("#additionalTrainersContainer") ||
-      root.querySelector("[data-mk-addl-trainers-container]") ||
-      document.querySelector("#additionalTrainersContainer") ||
-      document.querySelector("[data-mk-addl-trainers-container]");
+  const input =
+    root.querySelector("#additionalTrainerInput") ||
+    root.querySelector("[data-mk-addl-trainer-input]") ||
+    document.querySelector("#additionalTrainerInput") ||
+    document.querySelector("[data-mk-addl-trainer-input]") ||
+    null;
 
-    if (!input || !container) return;
+  const container =
+    root.querySelector("#additionalTrainersContainer") ||
+    root.querySelector("[data-mk-addl-trainers-container]") ||
+    document.querySelector("#additionalTrainersContainer") ||
+    document.querySelector("[data-mk-addl-trainers-container]") ||
+    null;
 
-    const name = (input.value || "").trim();
-    if (!name) return;
+  if (!container) return;
 
-    const row = buildTrainerRow(name);
-    container.appendChild(row);
+  const name = (input?.value || "").trim();
 
-    const clones = cloneState.get();
-    clones.trainers = clones.trainers || [];
-    clones.trainers.push({ value: name });
-    cloneState.set(clones);
+  // ✅ ALWAYS add a row (blank allowed)
+  const row = buildTrainerRow(name);
+  container.appendChild(row);
 
+  // persist clone state (blank ok)
+  const clones = cloneState.get();
+  clones.trainers = clones.trainers || [];
+  clones.trainers.push({ value: name });
+  cloneState.set(clones);
+
+  // clear only if we have an input field
+  if (input) {
     input.value = "";
+    input.removeAttribute(AUTO_ID_ATTR);
+    ensureId(input);
     saveField(input);
     input.focus();
+  } else {
+    row.querySelector("input")?.focus?.();
+  }
 
-    mkSyncSummaryEngagementSnapshot();
-  };
+  mkSyncSummaryEngagementSnapshot();
+};
 
-  try {
-    window.mkAddTrainerRow = addTrainerRow;
-  } catch {}
+try {
+  window.mkAddTrainerRow = addTrainerRow;
+} catch {}
 
-  /* =======================
-     ADD POC (+)
-     Expected HTML:
-       - base card: .additional-poc-card[data-base="true"]
-       - add button: [data-add-poc] OR .poc-add-btn
-       - container: #additionalPocsContainer (preferred)
-  ======================= */
-  const readPocCardValues = (card) => ({
-    name: (card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]')?.value || "").trim(),
-    role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
-    cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
-    email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
+/* =======================
+   ADD POC (+)
+   ✅ Updated behavior:
+   - Clicking + ALWAYS adds a new POC card
+   - New cards append into #additionalPocsContainer (preferred)
+   - Clone strips the + button so only base card has it
+   - Clears all values, re-IDs fields for state saving
+======================= */
+const readPocCardValues = (card) => ({
+  name: (card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]')?.value || "").trim(),
+  role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
+  cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
+  email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
+});
+
+const writePocCardValues = (card, p) => {
+  const name = card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]');
+  const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
+  const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
+  const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
+
+  if (name) name.value = p?.name || "";
+  if (role) role.value = p?.role || "";
+  if (cell) cell.value = p?.cell || "";
+  if (email) email.value = p?.email || "";
+
+  [name, role, cell, email].forEach((el) => {
+    if (!el) return;
+    el.removeAttribute(AUTO_ID_ATTR);
+    ensureId(el);
+    triggerInputChange(el);
+  });
+};
+
+const buildPocCard = (p = null) => {
+  const base = document.querySelector('.additional-poc-card[data-base="true"]');
+  if (!base) return null;
+
+  const clone = base.cloneNode(true);
+  clone.setAttribute("data-base", "false");
+  clone.setAttribute(AUTO_CARD_ATTR, "poc");
+
+  // ✅ remove add button inside clones
+  clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
+
+  // ✅ clear values + re-id fields
+  $$("input, textarea, select", clone).forEach((el) => {
+    if (el.matches("input[type='checkbox']")) el.checked = false;
+    else el.value = "";
+
+    el.removeAttribute(AUTO_ID_ATTR);
+    ensureId(el);
+    triggerInputChange(el);
   });
 
-  const writePocCardValues = (card, p) => {
-    const name = card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]');
-    const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
-    const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
-    const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
+  if (p) writePocCardValues(clone, p);
+  return clone;
+};
 
-    if (name) name.value = p?.name || "";
-    if (role) role.value = p?.role || "";
-    if (cell) cell.value = p?.cell || "";
-    if (email) email.value = p?.email || "";
+const persistAllPocs = () => {
+  const clones = cloneState.get();
+  clones.pocs = $$(".additional-poc-card")
+    .filter((c) => c.getAttribute("data-base") !== "true")
+    .map((c) => readPocCardValues(c));
+  cloneState.set(clones);
+};
 
-    [name, role, cell, email].forEach((el) => {
-      if (!el) return;
-      el.removeAttribute(AUTO_ID_ATTR);
-      ensureId(el);
-      triggerInputChange(el);
-    });
-  };
+const addPocCard = () => {
+  const base = document.querySelector('.additional-poc-card[data-base="true"]');
+  if (!base) return;
 
-  const buildPocCard = (p = null) => {
-    const base = document.querySelector('.additional-poc-card[data-base="true"]');
-    if (!base) return null;
+  const newCard = buildPocCard(null);
+  if (!newCard) return;
 
-    const clone = base.cloneNode(true);
-    clone.setAttribute("data-base", "false");
-    clone.setAttribute(AUTO_CARD_ATTR, "poc");
+  // ✅ always append into the container if present
+  const container = document.getElementById("additionalPocsContainer");
+  if (container) container.appendChild(newCard);
+  else base.insertAdjacentElement("afterend", newCard);
 
-    // remove add button inside clones
-    clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
+  persistAllPocs();
 
-    // normalize inputs in clone
-    $$("input, textarea, select", clone).forEach((el) => {
-      if (el.matches("input[type='checkbox']")) el.checked = false;
-      else el.value = "";
-      el.removeAttribute(AUTO_ID_ATTR);
-      ensureId(el);
-    });
-
-    if (p) writePocCardValues(clone, p);
-    return clone;
-  };
-
-  const persistAllPocs = () => {
-    const clones = cloneState.get();
-    clones.pocs = $$(".additional-poc-card")
-      .filter((c) => c.getAttribute("data-base") !== "true")
-      .map((c) => readPocCardValues(c));
-    cloneState.set(clones);
-  };
-
-  const addPocCard = () => {
-    const base = document.querySelector('.additional-poc-card[data-base="true"]');
-    if (!base) return;
-
-    const newCard = buildPocCard(null);
-    if (!newCard) return;
-
-    const container = document.getElementById("additionalPocsContainer");
-    if (container) container.appendChild(newCard);
-    else base.insertAdjacentElement("afterend", newCard);
-
-    persistAllPocs();
-
-    const first = newCard.querySelector('input[type="text"], input[type="email"], input, textarea, select');
-    if (first) first.focus();
-  };
+  const first = newCard.querySelector('input[type="text"], input[type="email"], input, textarea, select');
+  first?.focus?.();
+};
 
   /* =======================
      TABLES: ADD ROW + PERSIST/RESTORE
