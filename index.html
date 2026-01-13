@@ -96,30 +96,29 @@
         </select>
       </div>
 
-      <!-- Additional Trainer (Input + Plus) -->
-      <div class="checklist-row integrated-plus">
-        <label for="additionalTrainerInput">Additional Trainer</label>
+<!-- Additional Trainer (Input + Plus) -->
+<div class="checklist-row integrated-plus">
+  <label>Additional Trainer</label>
 
-        <div class="input-plus">
-          <input
-            id="additionalTrainerInput"
-            type="text"
-            placeholder="Enter additional trainer name"
-            autocomplete="off"
-          />
-          <button
-            type="button"
-            class="trainer-add-btn"
-            data-add-trainer
-            aria-label="Add additional trainer"
-          >
-            +
-          </button>
-        </div>
-      </div>
+  <div class="input-plus">
+    <input
+      type="text"
+      placeholder="Enter additional trainer name"
+      autocomplete="off"
+      data-mk-addl-trainer-input
+    />
+    <button
+      type="button"
+      class="trainer-add-btn"
+      data-mk-addl-trainer-add
+      aria-label="Add trainer"
+    >+</button>
+  </div>
+</div>
 
-      <!-- Added trainers will appear here -->
-      <div id="additionalTrainersContainer"></div>
+<!-- Added trainers will appear here -->
+<div data-mk-addl-trainers-container></div>
+
     </div>
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
