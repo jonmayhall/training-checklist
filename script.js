@@ -1772,6 +1772,8 @@ if (tableExpand) {
   return;
 }
 
+}); // ✅ missing line: closes the click event listener
+
   document.addEventListener("input", (e) => {
     const el = e.target;
 
