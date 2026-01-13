@@ -2123,3 +2123,75 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
+
+/* =======================================================
+   HARD PATCH — Additional Trainer "+" (force bind + force append)
+   Paste at VERY BOTTOM of your JS file
+======================================================= */
+(() => {
+  "use strict";
+
+  function mkAddTrainerRow_FORCE() {
+    const input = document.getElementById("additionalTrainerInput");
+    const container = document.getElementById("additionalTrainersContainer");
+
+    if (!input || !container) {
+      console.warn("[mkAddTrainerRow_FORCE] Missing input/container", { input, container });
+      return;
+    }
+
+    const name = (input.value || "").trim();
+    if (!name) return;
+
+    // Build a row that matches your styling system
+    const row = document.createElement("div");
+    row.className = "checklist-row indent-sub";
+    row.innerHTML = `
+      <label>Additional Trainer</label>
+      <input type="text" value="${name.replace(/"/g, "&quot;")}" />
+    `;
+
+    container.appendChild(row);
+
+    // clear + refocus
+    input.value = "";
+    input.focus();
+
+    // If your main script is tracking clone state, update it if present
+    try {
+      if (window.__mkCloneState && Array.isArray(window.__mkCloneState.trainers)) {
+        window.__mkCloneState.trainers.push({ value: name });
+      }
+    } catch {}
+
+    // If your summary sync exists, call it
+    try {
+      if (typeof window.mkSyncSummaryEngagementSnapshot === "function") {
+        window.mkSyncSummaryEngagementSnapshot();
+      }
+    } catch {}
+  }
+
+  // Expose (so your console test works too)
+  window.mkAddTrainerRow = mkAddTrainerRow_FORCE;
+
+  // Bind click (CAPTURE + BUBBLE) so nothing can swallow it
+  function clickHandler(e) {
+    const btn = e.target.closest("[data-add-trainer]");
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    mkAddTrainerRow_FORCE();
+  }
+  document.addEventListener("click", clickHandler, true);
+  document.addEventListener("click", clickHandler, false);
+
+  // Bind Enter
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const el = e.target;
+    if (!el || el.id !== "additionalTrainerInput") return;
+    e.preventDefault();
+    mkAddTrainerRow_FORCE();
+  });
+})();
