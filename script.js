@@ -1,17 +1,21 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN)
-   CONSISTENT ADD BUTTONS (v8.3.3)
+   CONSISTENT ADD BUTTONS (v8.3.4)
 
    ✅ Fixes in THIS build:
-   - Trainer "+" works with:
-       [data-add-trainer] OR .trainer-add-btn
-   - Enter on #additionalTrainerInput adds the trainer
-   - POC "+" works with:
-       [data-add-poc] OR .poc-add-btn (and appends into #additionalPocsContainer)
+   - Trainer "+" adds a row EVERY time (blank allowed)
+       Hooks: [data-add-trainer]
+       Input: #additionalTrainerInput OR [data-mk-addl-trainer-input]
+       Container: #additionalTrainersContainer OR [data-mk-addl-trainers-container]
+   - POC "+" adds a new card correctly in the grid
+       Hooks: [data-add-poc]
+       Base card: .additional-poc-card[data-base="true"]
+       Inserts BEFORE #additionalPocsContainer placeholder (grid-safe)
+       Removes duplicate IDs inside cloned card (prevents DOM/id conflicts)
    - Ticket "+" works (base card only)
    - Table "+ Add Row" works
-   - Clear All / Clear Page works
+   - Clear All / Reset This Page works
    - State save/restore works (stable keys)
    - Ghost placeholder styles for selects + dates
    - End date auto-set (+3 days from onsite start when empty)
@@ -25,7 +29,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_3";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_4";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -39,8 +43,19 @@
     did: ["dealershipDidInput"],
     dealerGroup: ["dealerGroupInput"],
 
-    onsiteDate: ["onsiteStartDate", "onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
-    trainingEndDate: ["onsiteEndDate", "trainingEndDate", "endDate", "onsiteTrainingEndDate"],
+    onsiteDate: [
+      "onsiteStartDate",
+      "onsiteTrainingDate",
+      "onsiteDate",
+      "onsiteTrainingStartDate",
+      "trainingStartDate",
+    ],
+    trainingEndDate: [
+      "onsiteEndDate",
+      "trainingEndDate",
+      "endDate",
+      "onsiteTrainingEndDate",
+    ],
 
     leadTrainer: [
       "leadTrainerSelect",
@@ -72,10 +87,13 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const isEl = (x) => x && x.nodeType === 1;
-  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
+  const getSection = (el) =>
+    el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
-    isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
+    isEl(el) &&
+    (el.matches("input, select, textarea") ||
+      el.matches("[contenteditable='true']"));
 
   const slug = (s) =>
     String(s || "")
@@ -112,12 +130,13 @@
     return parts.reverse().join(">");
   };
 
+  // ✅ FIXED: no undefined variables, correct classes
   const inDynamicClone = (el) => {
     if (!el) return false;
 
     if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) return true;
 
-    const Card = el.closest(".additional--card");
+    const pocCard = el.closest(".additional-poc-card");
     if (pocCard && pocCard.getAttribute("data-base") !== "true") return true;
 
     const tr = el.closest("tr");
@@ -280,13 +299,6 @@
     });
   };
 
-  const preserveScroll = (fn) => {
-    const x = window.scrollX || 0;
-    const y = window.scrollY || 0;
-    fn();
-    requestAnimationFrame(() => window.scrollTo(x, y));
-  };
-
   const mkFirstValueByIds = (...ids) => {
     for (const id of ids.flat()) {
       const el = document.getElementById(id);
@@ -362,7 +374,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -425,7 +444,8 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) =>
+      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -631,185 +651,173 @@
   };
 
   /* =======================
-   ADD TRAINER (+)
-   ✅ Updated behavior:
-   - Clicking + ALWAYS adds a row (blank allowed)
-   - If the input has text, it uses it and clears the input
-   - Works with BOTH:
-       - #additionalTrainerInput (old)
-       - [data-mk-addl-trainer-input] (your current HTML)
-   - Works with BOTH containers:
-       - #additionalTrainersContainer (old)
-       - [data-mk-addl-trainers-container] (your current HTML)
-======================= */
-const buildTrainerRow = (value = "") => {
-  const wrap = document.createElement("div");
-  wrap.className = "checklist-row integrated-plus indent-sub";
-  wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
+     ADD TRAINER (+)
+     ✅ Adds row EVERY click (blank allowed)
+     Hooks:
+       - button: [data-add-trainer]
+       - input: #additionalTrainerInput OR [data-mk-addl-trainer-input]
+       - container: #additionalTrainersContainer OR [data-mk-addl-trainers-container]
+  ======================= */
+  const buildTrainerRow = (value = "") => {
+    const wrap = document.createElement("div");
+    wrap.className = "checklist-row integrated-plus indent-sub";
+    wrap.setAttribute(AUTO_ROW_ATTR, "cloned");
 
-  const label = document.createElement("label");
-  label.textContent = "Additional Trainer";
+    const label = document.createElement("label");
+    label.textContent = "Additional Trainer";
 
-  const inputPlus = document.createElement("div");
-  inputPlus.className = "input-plus mk-solo-input";
+    const inputPlus = document.createElement("div");
+    inputPlus.className = "input-plus mk-solo-input";
 
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Enter additional trainer name";
-  input.autocomplete = "off";
-  input.value = value;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Enter additional trainer name";
+    input.autocomplete = "off";
+    input.value = value;
 
-  inputPlus.appendChild(input);
-  wrap.appendChild(label);
-  wrap.appendChild(inputPlus);
+    inputPlus.appendChild(input);
+    wrap.appendChild(label);
+    wrap.appendChild(inputPlus);
 
-  input.removeAttribute(AUTO_ID_ATTR);
-  ensureId(input);
-
-  return wrap;
-};
-
-const addTrainerRow = (fromEl = null) => {
-  const root =
-    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
-    document.getElementById("trainers-deployment") ||
-    document;
-
-  const input =
-    root.querySelector("#additionalTrainerInput") ||
-    root.querySelector("[data-mk-addl-trainer-input]") ||
-    document.querySelector("#additionalTrainerInput") ||
-    document.querySelector("[data-mk-addl-trainer-input]") ||
-    null;
-
-  const container =
-    root.querySelector("#additionalTrainersContainer") ||
-    root.querySelector("[data-mk-addl-trainers-container]") ||
-    document.querySelector("#additionalTrainersContainer") ||
-    document.querySelector("[data-mk-addl-trainers-container]") ||
-    null;
-
-  if (!container) return;
-
-  const name = (input?.value || "").trim();
-
-  // ✅ ALWAYS add a row (blank allowed)
-  const row = buildTrainerRow(name);
-  container.appendChild(row);
-
-  // persist clone state (blank ok)
-  const clones = cloneState.get();
-  clones.trainers = clones.trainers || [];
-  clones.trainers.push({ value: name });
-  cloneState.set(clones);
-
-  // clear only if we have an input field
-  if (input) {
-    input.value = "";
     input.removeAttribute(AUTO_ID_ATTR);
     ensureId(input);
-    saveField(input);
-    input.focus();
-  } else {
-    row.querySelector("input")?.focus?.();
-  }
 
-  mkSyncSummaryEngagementSnapshot();
-};
+    return wrap;
+  };
 
-try {
-  window.mkAddTrainerRow = addTrainerRow;
-} catch {}
+  const addTrainerRow = (fromEl = null) => {
+    const root =
+      (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+      document.getElementById("trainers-deployment") ||
+      document;
 
-/* =======================
-   ADD POC (+) — FIXED
-   Expected HTML:
-     - base card: .additional-poc-card[data-base="true"]
-     - add button: [data-add-poc]
-     - placeholder: #additionalPocsContainer (grid anchor)
-======================= */
-const readPocCardValues = (card) => ({
-  name: (card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]')?.value || "").trim(),
-  role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
-  cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
-  email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
-});
+    const input =
+      root.querySelector("#additionalTrainerInput") ||
+      root.querySelector("[data-mk-addl-trainer-input]") ||
+      document.querySelector("#additionalTrainerInput") ||
+      document.querySelector("[data-mk-addl-trainer-input]") ||
+      null;
 
-const writePocCardValues = (card, p) => {
-  const name = card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]');
-  const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
-  const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
-  const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
+    const container =
+      root.querySelector("#additionalTrainersContainer") ||
+      root.querySelector("[data-mk-addl-trainers-container]") ||
+      document.querySelector("#additionalTrainersContainer") ||
+      document.querySelector("[data-mk-addl-trainers-container]") ||
+      null;
 
-  if (name) name.value = p?.name || "";
-  if (role) role.value = p?.role || "";
-  if (cell) cell.value = p?.cell || "";
-  if (email) email.value = p?.email || "";
+    if (!container) return;
 
-  [name, role, cell, email].forEach((el) => {
-    if (!el) return;
-    el.removeAttribute(AUTO_ID_ATTR);
-    ensureId(el);
-    triggerInputChange(el);
-  });
-};
+    const name = (input?.value || "").trim();
 
-const buildPocCard = (p = null) => {
-  const base = document.querySelector('.additional-poc-card[data-base="true"]');
-  if (!base) return null;
+    const row = buildTrainerRow(name);
+    container.appendChild(row);
 
-  const clone = base.cloneNode(true);
-  clone.setAttribute("data-base", "false");
-  clone.setAttribute(AUTO_CARD_ATTR, "poc");
+    const clones = cloneState.get();
+    clones.trainers = clones.trainers || [];
+    clones.trainers.push({ value: name });
+    cloneState.set(clones);
 
-  // ✅ remove the + button from clones
-  clone.querySelectorAll("[data-add-poc]").forEach((btn) => btn.remove());
+    if (input) {
+      input.value = "";
+      input.removeAttribute(AUTO_ID_ATTR);
+      ensureId(input);
+      saveField(input);
+      input.focus();
+    } else {
+      row.querySelector("input")?.focus?.();
+    }
 
-  // ✅ prevent duplicate IDs (base has #additionalPocInput)
-  clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+    mkSyncSummaryEngagementSnapshot();
+  };
 
-  // ✅ clear values + re-id fields for storage
-  clone.querySelectorAll("input, textarea, select").forEach((el) => {
-    if (el.type === "checkbox" || el.type === "radio") el.checked = false;
-    else el.value = "";
+  try {
+    window.mkAddTrainerRow = addTrainerRow;
+  } catch {}
 
-    el.removeAttribute(AUTO_ID_ATTR);
-    ensureId(el);
-    triggerInputChange(el);
+  /* =======================
+     ADD POC (+) — GRID-SAFE
+     Expected HTML:
+       - base card: .additional-poc-card[data-base="true"]
+       - add button: [data-add-poc]
+       - placeholder anchor: #additionalPocsContainer
+  ======================= */
+  const readPocCardValues = (card) => ({
+    name: (card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]')?.value || "").trim(),
+    role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
+    cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
+    email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
   });
 
-  if (p) writePocCardValues(clone, p);
-  return clone;
-};
+  const writePocCardValues = (card, p) => {
+    const name = card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]');
+    const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
+    const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
+    const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
 
-const persistAllPocs = () => {
-  const clones = cloneState.get();
-  clones.pocs = Array.from(document.querySelectorAll(".additional-poc-card"))
-    .filter((c) => c.getAttribute("data-base") !== "true")
-    .map((c) => readPocCardValues(c));
-  cloneState.set(clones);
-};
+    if (name) name.value = p?.name || "";
+    if (role) role.value = p?.role || "";
+    if (cell) cell.value = p?.cell || "";
+    if (email) email.value = p?.email || "";
 
-const addPocCard = () => {
-  const base = document.querySelector('.additional-poc-card[data-base="true"]');
-  if (!base) return;
+    [name, role, cell, email].forEach((el) => {
+      if (!el) return;
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      triggerInputChange(el);
+    });
+  };
 
-  const newCard = buildPocCard(null);
-  if (!newCard) return;
+  const buildPocCard = (p = null) => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return null;
 
-  // ✅ IMPORTANT: insert as a GRID SIBLING (before placeholder)
-  const anchor = document.getElementById("additionalPocsContainer");
-  if (anchor) {
-    anchor.insertAdjacentElement("beforebegin", newCard);
-  } else {
-    base.insertAdjacentElement("afterend", newCard);
-  }
+    const clone = base.cloneNode(true);
+    clone.setAttribute("data-base", "false");
+    clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-  persistAllPocs();
+    // remove + button from clones
+    clone.querySelectorAll("[data-add-poc]").forEach((btn) => btn.remove());
 
-  const first = newCard.querySelector('input[type="text"], input[type="email"], input, textarea, select');
-  first?.focus?.();
-};
+    // remove duplicate IDs (base has #additionalPocInput)
+    clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+
+    // clear values + re-id for storage
+    clone.querySelectorAll("input, textarea, select").forEach((el) => {
+      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+      else el.value = "";
+      el.removeAttribute(AUTO_ID_ATTR);
+      ensureId(el);
+      triggerInputChange(el);
+    });
+
+    if (p) writePocCardValues(clone, p);
+    return clone;
+  };
+
+  const persistAllPocs = () => {
+    const clones = cloneState.get();
+    clones.pocs = Array.from(document.querySelectorAll(".additional-poc-card"))
+      .filter((c) => c.getAttribute("data-base") !== "true")
+      .map((c) => readPocCardValues(c));
+    cloneState.set(clones);
+  };
+
+  const addPocCard = () => {
+    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    if (!base) return;
+
+    const newCard = buildPocCard(null);
+    if (!newCard) return;
+
+    // GRID-SAFE: insert as a sibling card (before placeholder div)
+    const anchor = document.getElementById("additionalPocsContainer");
+    if (anchor) anchor.insertAdjacentElement("beforebegin", newCard);
+    else base.insertAdjacentElement("afterend", newCard);
+
+    persistAllPocs();
+
+    newCard.querySelector('input[type="text"], input[type="email"], input, textarea, select')?.focus?.();
+  };
 
   /* =======================
      TABLES: ADD ROW + PERSIST/RESTORE
@@ -1196,22 +1204,24 @@ const addPocCard = () => {
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
 
-    const container = document.getElementById("additionalPocsContainer");
     const base = document.querySelector('.additional-poc-card[data-base="true"]');
     if (!base) return;
+
+    // Insert clones before placeholder to maintain grid order
+    const anchor = document.getElementById("additionalPocsContainer");
 
     clones.pocs.forEach((p) => {
       const card = buildPocCard(p);
       if (!card) return;
-      if (container) container.appendChild(card);
+
+      if (anchor) anchor.insertAdjacentElement("beforebegin", card);
       else base.insertAdjacentElement("afterend", card);
     });
   };
 
   const rebuildTrainerClones = () => {
     const clones = cloneState.get();
-    const container =
-      $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
+    const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
     if (!container) return;
 
     container.innerHTML = "";
@@ -1272,16 +1282,12 @@ const addPocCard = () => {
   ======================= */
   const mkGetTrainerCloneValues = () => {
     const clones = cloneState.get();
-    const arr = (clones.trainers || [])
-      .map((t) => String(t?.value || "").trim())
-      .filter(Boolean);
+    const arr = (clones.trainers || []).map((t) => String(t?.value || "").trim());
 
     if (!arr.length) {
       const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
       if (container) {
-        return $$("input[type='text']", container)
-          .map((i) => (i.value || "").trim())
-          .filter(Boolean);
+        return $$("input[type='text']", container).map((i) => (i.value || "").trim());
       }
     }
     return arr;
@@ -1300,7 +1306,7 @@ const addPocCard = () => {
 
     const values = mkGetTrainerCloneValues();
 
-    base.value = values[0] || "";
+    base.value = values[0] ?? "";
     ensureId(base);
     saveField(base);
 
@@ -1309,7 +1315,7 @@ const addPocCard = () => {
       inp.type = "text";
       inp.id = `mkSum_addTrainer_${i}`;
       inp.placeholder = "Additional trainer";
-      inp.value = values[i];
+      inp.value = values[i] ?? "";
       stack.appendChild(inp);
 
       ensureId(inp);
@@ -1372,7 +1378,7 @@ const addPocCard = () => {
      EXPAND BUTTONS (inject)
   ======================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8_3_3";
+    const STYLE_ID = "mk-expand-style-v8_3_4";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1488,8 +1494,9 @@ const addPocCard = () => {
       });
       return;
     }
- // ✅ POC "+"
-    const pocBtn = t.closest("[data-add-poc], .poc-add-btn, .additional-poc-add");
+
+    // ✅ POC "+" (ONLY data-add-poc)
+    const pocBtn = t.closest("[data-add-poc]");
     if (pocBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -1512,9 +1519,9 @@ const addPocCard = () => {
       addTicketCard();
       return;
     }
-     
-    // ✅ TRAINER "+"
-    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
+
+    // ✅ TRAINER "+" (ONLY data-add-trainer)
+    const trainerBtn = t.closest("[data-add-trainer]");
     if (trainerBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -1562,8 +1569,7 @@ const addPocCard = () => {
 
     // Keep trainer clone state synced if user edits cloned trainer fields
     if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) {
-      const container =
-        $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
+      const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
       const clones = cloneState.get();
       clones.trainers = container
         ? $$("input[type='text']", container).map((i) => ({ value: (i.value || "").trim() }))
@@ -1613,8 +1619,12 @@ const addPocCard = () => {
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // ✅ Enter adds trainer
-    if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
+    // ✅ Enter adds trainer (supports BOTH input variants)
+    const isTrainerInput =
+      (el && el.id === "additionalTrainerInput") ||
+      (el && el.matches && el.matches("[data-mk-addl-trainer-input]"));
+
+    if (isTrainerInput && e.key === "Enter") {
       e.preventDefault();
       addTrainerRow(el);
       return;
@@ -1654,7 +1664,7 @@ const addPocCard = () => {
 
     enforceBaseTicketStatusLock();
 
-    log("Initialized v8.3.3.");
+    log("Initialized v8.3.4.");
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
