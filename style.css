@@ -1891,7 +1891,9 @@ button.remove-row{
   flex-wrap: nowrap !important;
 }
 #trainers-deployment .checklist-row .input-plus,
-#trainers-deployment .checklist-row select,
+#trainers-deployment .checklist-row select{
+  display:inline-flex !important;
+}
 #trainers-deployment .checklist-row input{
-  display: inline-flex !important;
+  display:block !important;
 }
