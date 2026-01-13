@@ -117,7 +117,7 @@
 
     if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) return true;
 
-    const pocCard = el.closest(".additional-poc-card");
+    const Card = el.closest(".additional--card");
     if (pocCard && pocCard.getAttribute("data-base") !== "true") return true;
 
     const tr = el.closest("tr");
@@ -722,22 +722,21 @@ try {
 } catch {}
 
 /* =======================
-   ADD POC (+)
-   ✅ Updated behavior:
-   - Clicking + ALWAYS adds a new POC card
-   - New cards append into #additionalPocsContainer (preferred)
-   - Clone strips the + button so only base card has it
-   - Clears all values, re-IDs fields for state saving
+   ADD POC (+) — FIXED
+   Expected HTML:
+     - base card: .additional-poc-card[data-base="true"]
+     - add button: [data-add-poc]
+     - placeholder: #additionalPocsContainer (grid anchor)
 ======================= */
 const readPocCardValues = (card) => ({
-  name: (card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]')?.value || "").trim(),
+  name: (card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]')?.value || "").trim(),
   role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
   cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
   email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
 });
 
 const writePocCardValues = (card, p) => {
-  const name = card.querySelector('input[name="additionalPocInput"], #additionalPocInput, input[placeholder="Enter name"]');
+  const name = card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]');
   const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
   const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
   const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
@@ -763,12 +762,15 @@ const buildPocCard = (p = null) => {
   clone.setAttribute("data-base", "false");
   clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-  // ✅ remove add button inside clones
-  clone.querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn").forEach((btn) => btn.remove());
+  // ✅ remove the + button from clones
+  clone.querySelectorAll("[data-add-poc]").forEach((btn) => btn.remove());
 
-  // ✅ clear values + re-id fields
-  $$("input, textarea, select", clone).forEach((el) => {
-    if (el.matches("input[type='checkbox']")) el.checked = false;
+  // ✅ prevent duplicate IDs (base has #additionalPocInput)
+  clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+
+  // ✅ clear values + re-id fields for storage
+  clone.querySelectorAll("input, textarea, select").forEach((el) => {
+    if (el.type === "checkbox" || el.type === "radio") el.checked = false;
     else el.value = "";
 
     el.removeAttribute(AUTO_ID_ATTR);
@@ -782,7 +784,7 @@ const buildPocCard = (p = null) => {
 
 const persistAllPocs = () => {
   const clones = cloneState.get();
-  clones.pocs = $$(".additional-poc-card")
+  clones.pocs = Array.from(document.querySelectorAll(".additional-poc-card"))
     .filter((c) => c.getAttribute("data-base") !== "true")
     .map((c) => readPocCardValues(c));
   cloneState.set(clones);
@@ -795,10 +797,13 @@ const addPocCard = () => {
   const newCard = buildPocCard(null);
   if (!newCard) return;
 
-  // ✅ always append into the container if present
-  const container = document.getElementById("additionalPocsContainer");
-  if (container) container.appendChild(newCard);
-  else base.insertAdjacentElement("afterend", newCard);
+  // ✅ IMPORTANT: insert as a GRID SIBLING (before placeholder)
+  const anchor = document.getElementById("additionalPocsContainer");
+  if (anchor) {
+    anchor.insertAdjacentElement("beforebegin", newCard);
+  } else {
+    base.insertAdjacentElement("afterend", newCard);
+  }
 
   persistAllPocs();
 
@@ -1483,17 +1488,7 @@ const addPocCard = () => {
       });
       return;
     }
-
-    // ✅ TRAINER "+"
-    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
-    if (trainerBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerRow(trainerBtn);
-      return;
-    }
-
-    // ✅ POC "+"
+ // ✅ POC "+"
     const pocBtn = t.closest("[data-add-poc], .poc-add-btn, .additional-poc-add");
     if (pocBtn) {
       e.preventDefault();
@@ -1515,6 +1510,15 @@ const addPocCard = () => {
     if (ticketAddBtn) {
       e.preventDefault();
       addTicketCard();
+      return;
+    }
+     
+    // ✅ TRAINER "+"
+    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
+    if (trainerBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      addTrainerRow(trainerBtn);
       return;
     }
 
