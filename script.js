@@ -1,6 +1,6 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN) — CONSISTENT ADD BUTTONS (v8.3.3)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CONSISTENT ADD BUTTONS (v8.3.3
 
    ✅ Fix:
    - Trainer "+" now matches the other add buttons:
