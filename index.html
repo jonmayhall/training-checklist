@@ -96,39 +96,52 @@
         </select>
       </div>
 
-     <div class="input-plus">
-  <input
-    id="additionalTrainerInput"
-    type="text"
-    placeholder="Enter additional trainer name"
-  />
-  <button
-    type="button"
-    class="trainer-add-btn"
-    data-add-trainer
-    aria-label="Add additional trainer"
-  >
-    +
-  </button>
-</div>
+      <!-- Additional Trainer (Input + Plus) -->
+      <div class="checklist-row integrated-plus">
+        <label for="additionalTrainerInput">Additional Trainer</label>
 
-<div id="additionalTrainersContainer"></div>
+        <div class="input-plus">
+          <input
+            id="additionalTrainerInput"
+            type="text"
+            placeholder="Enter additional trainer name"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="trainer-add-btn"
+            data-add-trainer
+            aria-label="Add additional trainer"
+          >
+            +
+          </button>
         </div>
-    </div>
-  </div>
+      </div>
 
+      <!-- Added trainers will appear here -->
+      <div id="additionalTrainersContainer"></div>
+    </div>
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
-      <h2>Deployment &amp; Customer Engagement Manager</h2>
+      <h2>Deployment Manager &amp; CEM</h2>
 
       <div class="checklist-row">
-        <label for="deploymentManager">Deployment Manager</label>
+        <label for="deploymentManagerInput">Deployment Manager</label>
         <input
-          id="deploymentManager"
-          name="deploymentManager"
+          id="deploymentManagerInput"
           type="text"
-          placeholder="Enter Deployment Manager assigned"
+          placeholder="Enter deployment manager"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="checklist-row">
+        <label for="cemInput">CEM Assigned</label>
+        <input
+          id="cemInput"
+          type="text"
+          placeholder="Enter CEM name"
           autocomplete="off"
         />
       </div>
