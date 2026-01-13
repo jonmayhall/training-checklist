@@ -6,7 +6,7 @@
    - Additional Trainers “+” button works even if markup changes,
      click is swallowed, button is <a>/<div role="button">, etc.
    - Enter on #additionalTrainerInput adds the trainer
-   - Exposes window.mkAddTrainerRow()
+   - Exposes window.mkAddTrainerRow
 
 ======================================================= */
 
