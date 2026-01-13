@@ -1447,6 +1447,206 @@
     }, 900);
   };
 
+/* =======================
+   NOTES + EXPAND MODALS (RESTORED)
+   - Works with .notes-btn / .notes-icon-btn
+   - Works with injected .mk-ta-expand
+   - Works with injected .mk-table-expand-btn
+======================= */
+const mkModal = (() => {
+  const STYLE_ID = "mk-modal-style-v1";
+  let active = null;
+  let restoreFn = null;
+
+  const ensureStyles = () => {
+    if (document.getElementById(STYLE_ID)) return;
+    const s = document.createElement("style");
+    s.id = STYLE_ID;
+    s.textContent = `
+      .mk-modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100000;
+        display:flex; align-items:flex-start; justify-content:center; padding:90px 18px 18px;}
+      .mk-modal{width:min(980px, calc(100vw - 24px)); max-height:calc(100vh - 120px);
+        background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.35);
+        border:1px solid rgba(0,0,0,.12); display:flex; flex-direction:column;}
+      .mk-modal-head{background:#EF6D22; color:#fff; padding:12px 16px; font-weight:900;
+        display:flex; align-items:center; justify-content:space-between; gap:12px;}
+      .mk-modal-title{font-size:14px; letter-spacing:.02em;}
+      .mk-modal-close{border:none; background:rgba(255,255,255,.18); color:#fff; cursor:pointer;
+        width:34px; height:34px; border-radius:999px; font-weight:900;}
+      .mk-modal-close:hover{background:rgba(255,255,255,.28);}
+      .mk-modal-body{padding:14px 16px 16px; overflow:auto;}
+      .mk-modal-actions{display:flex; justify-content:flex-end; gap:10px; padding:0 16px 16px;}
+      .mk-modal-btn{border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900;
+        font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;}
+      .mk-modal-btn--save{background:#EF6D22; color:#fff;}
+      .mk-modal-btn--save:hover{background:#ff8b42;}
+      .mk-modal-btn--cancel{background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);}
+      .mk-modal-btn--cancel:hover{background:#e5e7eb;}
+
+      .mk-modal textarea{width:100%; min-height:340px; resize:vertical; font-size:13px; line-height:1.5;
+        border:1px solid rgba(0,0,0,.15); border-radius:14px; padding:12px 12px; outline:none;}
+      .mk-modal textarea:focus{border-color:#EF6D22; box-shadow:0 0 0 3px rgba(239,109,34,.25);}
+
+      .mk-table-pop{width:100%; overflow:auto;}
+      .mk-table-pop table{width:100%; border-collapse:separate;}
+    `;
+    document.head.appendChild(s);
+  };
+
+  const close = () => {
+    if (!active) return;
+    try { if (typeof restoreFn === "function") restoreFn(); } catch {}
+    restoreFn = null;
+    active.remove();
+    active = null;
+    document.removeEventListener("keydown", onKey);
+  };
+
+  const onKey = (e) => {
+    if (!active) return;
+    if (e.key === "Escape") close();
+  };
+
+  const openBase = ({ title, bodyEl, onSave, showSave = true } = {}) => {
+    ensureStyles();
+    close();
+
+    const back = document.createElement("div");
+    back.className = "mk-modal-backdrop";
+
+    const modal = document.createElement("div");
+    modal.className = "mk-modal";
+
+    const head = document.createElement("div");
+    head.className = "mk-modal-head";
+
+    const t = document.createElement("div");
+    t.className = "mk-modal-title";
+    t.textContent = title || "Details";
+
+    const x = document.createElement("button");
+    x.type = "button";
+    x.className = "mk-modal-close";
+    x.textContent = "✕";
+    x.addEventListener("click", close);
+
+    head.appendChild(t);
+    head.appendChild(x);
+
+    const body = document.createElement("div");
+    body.className = "mk-modal-body";
+    if (bodyEl) body.appendChild(bodyEl);
+
+    const actions = document.createElement("div");
+    actions.className = "mk-modal-actions";
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "mk-modal-btn mk-modal-btn--cancel";
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", close);
+    actions.appendChild(cancel);
+
+    if (showSave) {
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "mk-modal-btn mk-modal-btn--save";
+      save.textContent = "Save";
+      save.addEventListener("click", () => {
+        if (typeof onSave === "function") onSave();
+        close();
+      });
+      actions.appendChild(save);
+    }
+
+    modal.appendChild(head);
+    modal.appendChild(body);
+    modal.appendChild(actions);
+    back.appendChild(modal);
+
+    back.addEventListener("click", (e) => {
+      if (e.target === back) close();
+    });
+
+    document.body.appendChild(back);
+    active = back;
+    document.addEventListener("keydown", onKey);
+
+    return { close };
+  };
+
+  const openTextarea = ({ title, sourceTextarea } = {}) => {
+    if (!sourceTextarea) return;
+
+    const ta = document.createElement("textarea");
+    ta.value = sourceTextarea.value || "";
+
+    openBase({
+      title: title || "Notes",
+      bodyEl: ta,
+      onSave: () => {
+        sourceTextarea.value = ta.value || "";
+        triggerInputChange(sourceTextarea);
+
+        // Toggle "has-notes" on nearby notes buttons if they exist
+        const card = sourceTextarea.closest(".mini-card, .section-block, .checklist-row, .ticket-group") || document;
+        const has = (sourceTextarea.value || "").trim().length > 0;
+        card.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
+          b.classList.toggle("has-notes", has);
+        });
+      },
+      showSave: true,
+    });
+
+    setTimeout(() => ta.focus(), 0);
+  };
+
+  const openTable = ({ title, table } = {}) => {
+    if (!table) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "mk-table-pop";
+    const clone = table.cloneNode(true);
+    wrap.appendChild(clone);
+
+    openBase({
+      title: title || "Table",
+      bodyEl: wrap,
+      showSave: false,
+    });
+  };
+
+  return { openTextarea, openTable, close };
+})();
+
+const mkFindNearestNotesTextarea = (btn) => {
+  if (!btn) return null;
+
+  // Most common: notes button sits in same section-block/card as its textarea
+  const scope =
+    btn.closest(".section-block") ||
+    btn.closest(".mini-card") ||
+    btn.closest(".checklist-row") ||
+    btn.closest(".ticket-group") ||
+    btn.closest("section") ||
+    document;
+
+  // Try explicit links first
+  const targetId = btn.getAttribute("data-notes-target") || btn.dataset?.notesTarget;
+  if (targetId) {
+    const hit = document.getElementById(targetId);
+    if (hit && hit.matches("textarea")) return hit;
+  }
+
+  // Otherwise pick the nearest textarea in scope
+  const ta = scope.querySelector("textarea");
+  if (ta) return ta;
+
+  // Last resort: look nearby in DOM
+  const near = btn.parentElement?.querySelector("textarea") || btn.closest("div")?.querySelector("textarea");
+  return near || null;
+};
+
   /* =======================
      EVENT DELEGATION
   ======================= */
@@ -1539,19 +1739,38 @@
       return;
     }
 
-    // Expand buttons (events only)
-    const tableExpand = t.closest(".mk-table-expand-btn");
-    if (tableExpand) {
-      document.dispatchEvent(new CustomEvent("mk:expandTable", { detail: { button: tableExpand } }));
-      return;
-    }
+    // ✅ Notes buttons (open modal)
+const notesBtn = t.closest(".notes-btn, .notes-icon-btn, [data-notes-target]");
+if (notesBtn) {
+  e.preventDefault();
+  const ta = mkFindNearestNotesTextarea(notesBtn);
+  if (ta) mkModal.openTextarea({ title: "Notes", sourceTextarea: ta });
+  return;
+}
 
-    const taExpand = t.closest(".mk-ta-expand");
-    if (taExpand) {
-      document.dispatchEvent(new CustomEvent("mk:expandNotes", { detail: { button: taExpand } }));
-      return;
-    }
-  });
+// ✅ Expand textarea button (open modal)
+const taExpand = t.closest(".mk-ta-expand");
+if (taExpand) {
+  e.preventDefault();
+  const ta = taExpand.closest(".mk-ta-wrap")?.querySelector("textarea") || null;
+  if (ta) mkModal.openTextarea({ title: "Expand Notes", sourceTextarea: ta });
+  return;
+}
+
+// ✅ Expand table button (open table modal)
+const tableExpand = t.closest(".mk-table-expand-btn");
+if (tableExpand) {
+  e.preventDefault();
+  const footer = tableExpand.closest(".table-footer");
+  const table =
+    footer?.closest(".section")?.querySelector("table.training-table") ||
+    footer?.closest(".section-block")?.querySelector("table.training-table") ||
+    footer?.parentElement?.querySelector("table.training-table") ||
+    footer?.closest(".table-container")?.querySelector("table.training-table") ||
+    footer?.closest("table.training-table");
+  if (table) mkModal.openTable({ title: "Expand Table", table });
+  return;
+}
 
   document.addEventListener("input", (e) => {
     const el = e.target;
