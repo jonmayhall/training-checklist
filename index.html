@@ -97,23 +97,16 @@
       </div>
 
 <!-- Additional Trainer (Input + Plus) -->
-<div class="checklist-row integrated-plus">
-  <label>Additional Trainer</label>
+<input
+  id="additionalTrainerInput"
+  type="text"
+  placeholder="Enter additional trainer name"
+  autocomplete="off"
+/>
 
-  <div class="input-plus">
-    <input
-      type="text"
-      placeholder="Enter additional trainer name"
-      autocomplete="off"
-      data-mk-addl-trainer-input
-    />
-   <button type="button" class="trainer-add-btn" data-add-trainer>+</button>
+<button type="button" class="trainer-add-btn" data-add-trainer>+</button>
 
-  </div>
-</div>
-
-<!-- Added trainers will appear here -->
-<div data-mk-addl-trainers-container></div>
+<div id="additionalTrainersContainer"></div>
 
     </div>
 
