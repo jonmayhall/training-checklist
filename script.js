@@ -864,6 +864,56 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     if (first) first.focus();
   };
 
+   /* =======================
+   ✅ HARD FIX: Additional POC (+) click hook (robust)
+======================= */
+const shouldTreatAsAddPocBtn = (btn) => {
+  if (!btn) return false;
+
+  // explicit hooks
+  if (btn.matches("[data-add-poc], .additional-poc-add, .poc-add-btn")) return true;
+
+  // fallback: base POC card + button inside its input-plus
+  const baseCard = btn.closest('#dealership-info .additional-poc-card[data-base="true"]');
+  if (!baseCard) return false;
+
+  const ip = btn.closest(".input-plus");
+  if (!ip) return false;
+
+  // If the input-plus contains a "Name" text input, assume this is the add button
+  const nameInput =
+    ip.querySelector('input[type="text"][placeholder*="name" i]') ||
+    ip.querySelector('input[type="text"]');
+
+  return !!nameInput;
+};
+
+const hookAddPocButtonDirectly = () => {
+  const page = document.getElementById("dealership-info");
+  if (!page) return;
+
+  const btns = Array.from(
+    page.querySelectorAll(
+      "[data-add-poc], .additional-poc-add, .poc-add-btn, .additional-poc-card[data-base='true'] .input-plus button"
+    )
+  );
+
+  btns.forEach((b) => {
+    if (!shouldTreatAsAddPocBtn(b)) return;
+    if (b.__mkAddPocBound) return;
+    b.__mkAddPocBound = true;
+
+    // avoid accidental form submits
+    if (b.tagName === "BUTTON" && !b.getAttribute("type")) b.type = "button";
+
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addPocCard();
+    });
+  });
+};
+
   /* =======================
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
@@ -2257,6 +2307,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
         // re-hook add-trainer button when page becomes active
         hookAddTrainerButtonDirectly();
+         hookAddPocButtonDirectly();
 
         if (targetId === "training-summary") {
           mkSyncSummaryEngagementSnapshot();
@@ -2520,6 +2571,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
     // ✅ bind trainer + button directly too (in case of weird overlays/stopPropagation elsewhere)
     hookAddTrainerButtonDirectly();
+     hookAddPocButtonDirectly();
 
     log("Initialized v8.3.1.");
   };
