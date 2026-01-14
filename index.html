@@ -49,22 +49,17 @@
       <!-- ========================= MAIN CONTENT ========================= -->
       <main>
 
-   <!-- =========================================================
-     PAGE 1 — TRAINERS & mK TEAM
+    <!-- =========================================================
+     PAGE 1 — TRAINERS & mK TEAM (STANDARDIZED)
 ========================================================= -->
 <section id="trainers-deployment" class="page-section active" data-page="1">
   <h1>Trainers &amp; mK Team</h1>
-
   <p class="page-subtitle">
     Select the assigned lead trainer, add additional trainers, and capture the
     deployment/CEM assignments.
   </p>
 
-  <button
-    type="button"
-    class="clear-page-btn"
-    data-clear-page="trainers-deployment"
-  >
+  <button type="button" class="clear-page-btn" data-clear-page="trainers-deployment">
     Reset This Page
   </button>
 
@@ -101,22 +96,25 @@
         </select>
       </div>
 
-      <!-- Additional Trainer (Input + Plus) -->
-      <div class="checklist-row integrated-plus">
+      <!-- Additional Trainer (+) -->
+      <div class="checklist-row integrated-plus indent-sub" data-base="true">
         <label for="additionalTrainerInput">Additional Trainer</label>
 
         <div class="input-plus">
           <input
             id="additionalTrainerInput"
+            name="additionalTrainerInput"
             type="text"
             placeholder="Enter additional trainer name"
             autocomplete="off"
           />
+
           <button
             type="button"
             class="trainer-add-btn"
             data-add-trainer
-            aria-label="Add additional trainer"
+            title="Add another trainer"
+            aria-label="Add another trainer"
           >
             +
           </button>
@@ -124,29 +122,21 @@
       </div>
 
       <!-- Added trainers render here -->
-      <div id="additionalTrainersContainer"></div>
+      <div id="additionalTrainersContainer" class="integrated-plus-container"></div>
     </div>
+    <!-- END Lead & Additional Trainers card -->
 
     <!-- ================= DEPLOYMENT MANAGER & CEM ================= -->
     <div class="section-block">
-      <h2>Deployment Manager &amp; CEM</h2>
+      <h2>Deployment &amp; Customer Engagement Manager</h2>
 
       <div class="checklist-row">
-        <label for="deploymentManagerInput">Deployment Manager</label>
+        <label for="deploymentManager">Deployment Manager</label>
         <input
-          id="deploymentManagerInput"
+          id="deploymentManager"
+          name="deploymentManager"
           type="text"
-          placeholder="Enter deployment manager"
-          autocomplete="off"
-        />
-      </div>
-
-      <div class="checklist-row">
-        <label for="cemInput">CEM Assigned</label>
-        <input
-          id="cemInput"
-          type="text"
-          placeholder="Enter CEM name"
+          placeholder="Enter Deployment Manager assigned"
           autocomplete="off"
         />
       </div>
@@ -155,6 +145,7 @@
         <label for="serviceCartASC">ServiceCart ASC</label>
         <input
           id="serviceCartASC"
+          name="serviceCartASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -165,6 +156,7 @@
         <label for="schedulerASC">Scheduler ASC</label>
         <input
           id="schedulerASC"
+          name="schedulerASC"
           type="text"
           placeholder="Enter ASC assigned"
           autocomplete="off"
@@ -175,6 +167,7 @@
         <label for="cemAssigned">CEM</label>
         <input
           id="cemAssigned"
+          name="cemAssigned"
           type="text"
           placeholder="Enter CEM assigned"
           autocomplete="off"
@@ -330,8 +323,15 @@
               autocomplete="off"
             />
 
-           <button type="button" class="poc-add-btn" data-add-poc>+</button>
-
+            <button
+              type="button"
+              class="trainer-add-btn poc-add-btn"
+              data-add-poc
+              title="Add another contact"
+              aria-label="Add another contact"
+            >
+              +
+            </button>
           </div>
         </div>
 
