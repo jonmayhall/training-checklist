@@ -1,25 +1,22 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN)
-   CONSISTENT ADD BUTTONS (v8.3.4)
+   CARD-STYLE NOTES + TABLE EXPAND RESTORED (v8.3.5)
 
-   ✅ Fixes in THIS build:
-   - Trainer "+" adds a row EVERY time (blank allowed)
-       Hooks: [data-add-trainer]
-       Input: #additionalTrainerInput OR [data-mk-addl-trainer-input]
-       Container: #additionalTrainersContainer OR [data-mk-addl-trainers-container]
-   - POC "+" adds a new card correctly in the grid
-       Hooks: [data-add-poc]
-       Base card: .additional-poc-card[data-base="true"]
-       Inserts BEFORE #additionalPocsContainer placeholder (grid-safe)
-       Removes duplicate IDs inside cloned card (prevents DOM/id conflicts)
-   - Ticket "+" works (base card only)
+   ✅ In this build:
+   - Menu/Nav buttons work (nav delegation fixed + no syntax breaks)
+   - Notes buttons work (.notes-btn / .notes-icon-btn / [data-notes-target])
+   - Notes modal is card-styled (matches your UI feel)
+   - Table expand modal is card-styled AND includes Notes card underneath (auto-finds)
+   - Trainer "+" adds row every click (blank allowed)
+   - POC "+" adds a new card (grid-safe before placeholder)
+   - Tickets "+" works (base card only)
    - Table "+ Add Row" works
-   - Clear All / Reset This Page works
    - State save/restore works (stable keys)
+   - Clear All / Reset Page works
    - Ghost placeholder styles for selects + dates
-   - End date auto-set (+3 days from onsite start when empty)
-   - Expand buttons injected (events fired: mk:expandTable / mk:expandNotes)
+   - End date auto-set (+3 days)
+   - Expand buttons injected for tables + notes textareas
 
 ======================================================= */
 
@@ -29,7 +26,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_4";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_5";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -43,27 +40,10 @@
     did: ["dealershipDidInput"],
     dealerGroup: ["dealerGroupInput"],
 
-    onsiteDate: [
-      "onsiteStartDate",
-      "onsiteTrainingDate",
-      "onsiteDate",
-      "onsiteTrainingStartDate",
-      "trainingStartDate",
-    ],
-    trainingEndDate: [
-      "onsiteEndDate",
-      "trainingEndDate",
-      "endDate",
-      "onsiteTrainingEndDate",
-    ],
+    onsiteDate: ["onsiteStartDate", "onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
+    trainingEndDate: ["onsiteEndDate", "trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    leadTrainer: [
-      "leadTrainerSelect",
-      "leadTrainerInput",
-      "leadTrainer",
-      "trainerLeadInput",
-      "primaryTrainerInput",
-    ],
+    leadTrainer: ["leadTrainerSelect", "leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
   };
 
   // ====== SUMMARY PAGE IDS (Engagement Snapshot) ======
@@ -87,13 +67,10 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const isEl = (x) => x && x.nodeType === 1;
-  const getSection = (el) =>
-    el?.closest?.(".page-section") || el?.closest?.("section") || null;
+  const getSection = (el) => el?.closest?.(".page-section") || el?.closest?.("section") || null;
 
   const isFormField = (el) =>
-    isEl(el) &&
-    (el.matches("input, select, textarea") ||
-      el.matches("[contenteditable='true']"));
+    isEl(el) && (el.matches("input, select, textarea") || el.matches("[contenteditable='true']"));
 
   const slug = (s) =>
     String(s || "")
@@ -130,7 +107,6 @@
     return parts.reverse().join(">");
   };
 
-  // ✅ FIXED: no undefined variables, correct classes
   const inDynamicClone = (el) => {
     if (!el) return false;
 
@@ -249,6 +225,12 @@
     }
   };
 
+  const triggerInputChange = (el) => {
+    if (!el) return;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
   const saveField = (el) => {
     if (!isFormField(el)) return;
     if (inDynamicClone(el)) return;
@@ -279,12 +261,6 @@
   const assignIdsToAllFields = (root = document) => {
     const fields = $$("input, select, textarea, [contenteditable='true']", root);
     fields.forEach((el) => ensureId(el));
-  };
-
-  const triggerInputChange = (el) => {
-    if (!el) return;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
   };
 
   const setGhostStyles = (root = document) => {
@@ -374,14 +350,7 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({
-      title = "Notice",
-      message = "",
-      okText = "OK",
-      cancelText = "",
-      onOk,
-      onCancel,
-    } = {}) => {
+    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
       ensureStyles();
       close();
 
@@ -444,8 +413,7 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) =>
-      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -654,9 +622,7 @@
      ADD TRAINER (+)
      ✅ Adds row EVERY click (blank allowed)
      Hooks:
-       - button: [data-add-trainer]
-       - input: #additionalTrainerInput OR [data-mk-addl-trainer-input]
-       - container: #additionalTrainersContainer OR [data-mk-addl-trainers-container]
+       - button: [data-add-trainer] OR .trainer-add-btn
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -708,7 +674,6 @@
     if (!container) return;
 
     const name = (input?.value || "").trim();
-
     const row = buildTrainerRow(name);
     container.appendChild(row);
 
@@ -738,7 +703,7 @@
      ADD POC (+) — GRID-SAFE
      Expected HTML:
        - base card: .additional-poc-card[data-base="true"]
-       - add button: [data-add-poc]
+       - add button: [data-add-poc] OR .poc-add-btn
        - placeholder anchor: #additionalPocsContainer
   ======================= */
   const readPocCardValues = (card) => ({
@@ -776,9 +741,9 @@
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
     // remove + button from clones
-    clone.querySelectorAll("[data-add-poc]").forEach((btn) => btn.remove());
+    clone.querySelectorAll("[data-add-poc], .poc-add-btn, .additional-poc-add").forEach((btn) => btn.remove());
 
-    // remove duplicate IDs (base has #additionalPocInput)
+    // remove duplicate IDs (base uses #additionalPocInput)
     clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
 
     // clear values + re-id for storage
@@ -823,9 +788,7 @@
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
   const getTableKey = (table) =>
-    table?.getAttribute("data-table-key") ||
-    table?.id ||
-    `table-${$$("table.training-table").indexOf(table)}`;
+    table?.getAttribute("data-table-key") || table?.id || `table-${$$("table.training-table").indexOf(table)}`;
 
   const clearRowFields = (tr) => {
     $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
@@ -924,9 +887,7 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
-        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
-      );
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -1199,7 +1160,6 @@
     const clones = cloneState.get();
     if (!clones.pocs || !clones.pocs.length) return;
 
-    // remove existing clones
     $$(".additional-poc-card").forEach((c) => {
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
@@ -1207,7 +1167,6 @@
     const base = document.querySelector('.additional-poc-card[data-base="true"]');
     if (!base) return;
 
-    // Insert clones before placeholder to maintain grid order
     const anchor = document.getElementById("additionalPocsContainer");
 
     clones.pocs.forEach((p) => {
@@ -1247,13 +1206,9 @@
      END DATE AUTO-SET (+3)
   ======================= */
   const mkAutoSetTrainingEndDate = () => {
-    const start =
-      document.getElementById("onsiteStartDate") ||
-      MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
+    const start = document.getElementById("onsiteStartDate") || MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
 
-    const end =
-      document.getElementById("onsiteEndDate") ||
-      MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
+    const end = document.getElementById("onsiteEndDate") || MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
 
     if (!start || !end) return;
 
@@ -1286,9 +1241,7 @@
 
     if (!arr.length) {
       const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
-      if (container) {
-        return $$("input[type='text']", container).map((i) => (i.value || "").trim());
-      }
+      if (container) return $$("input[type='text']", container).map((i) => (i.value || "").trim());
     }
     return arr;
   };
@@ -1305,7 +1258,6 @@
     });
 
     const values = mkGetTrainerCloneValues();
-
     base.value = values[0] ?? "";
     ensureId(base);
     saveField(base);
@@ -1333,10 +1285,8 @@
     const didEl = document.getElementById(MK_SUMMARY_IDS.did);
     const dealerEl = document.getElementById(MK_SUMMARY_IDS.dealership);
     const groupEl = document.getElementById(MK_SUMMARY_IDS.dealerGroup);
-
     const startEl = document.getElementById(MK_SUMMARY_IDS.dateStart);
     const endEl = document.getElementById(MK_SUMMARY_IDS.dateEnd);
-
     const leadEl = document.getElementById(MK_SUMMARY_IDS.leadTrainer);
 
     const did = mkFirstValueByIds(MK_IDS.did);
@@ -1347,20 +1297,11 @@
     if (dealerEl && (dealerEl.value || "").trim() !== dealership) dealerEl.value = dealership || "";
     if (groupEl && (groupEl.value || "").trim() !== dealerGroup) groupEl.value = dealerGroup || "";
 
-    const startSrc =
-      document.getElementById("onsiteStartDate") ||
-      MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
+    const startSrc = document.getElementById("onsiteStartDate") || MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
+    const endSrc = document.getElementById("onsiteEndDate") || MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
 
-    const endSrc =
-      document.getElementById("onsiteEndDate") ||
-      MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
-
-    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) {
-      startEl.value = startSrc.value || "";
-    }
-    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) {
-      endEl.value = endSrc.value || "";
-    }
+    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) startEl.value = startSrc.value || "";
+    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) endEl.value = endSrc.value || "";
 
     const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
     if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
@@ -1375,10 +1316,10 @@
   };
 
   /* =======================
-     EXPAND BUTTONS (inject)
+     EXPAND BUTTONS + STYLES
   ======================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8_3_4";
+    const STYLE_ID = "mk-expand-style-v8_3_5";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
@@ -1447,205 +1388,329 @@
     }, 900);
   };
 
-/* =======================
-   NOTES + EXPAND MODALS (RESTORED)
-   - Works with .notes-btn / .notes-icon-btn
-   - Works with injected .mk-ta-expand
-   - Works with injected .mk-table-expand-btn
-======================= */
-const mkModal = (() => {
-  const STYLE_ID = "mk-modal-style-v1";
-  let active = null;
-  let restoreFn = null;
+  /* =======================
+     NOTES + EXPAND MODALS (CARD-STYLE)
+  ======================= */
+  const mkModal = (() => {
+    const STYLE_ID = "mk-modal-style-card-v2";
+    let active = null;
 
-  const ensureStyles = () => {
-    if (document.getElementById(STYLE_ID)) return;
-    const s = document.createElement("style");
-    s.id = STYLE_ID;
-    s.textContent = `
-      .mk-modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100000;
-        display:flex; align-items:flex-start; justify-content:center; padding:90px 18px 18px;}
-      .mk-modal{width:min(980px, calc(100vw - 24px)); max-height:calc(100vh - 120px);
-        background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.35);
-        border:1px solid rgba(0,0,0,.12); display:flex; flex-direction:column;}
-      .mk-modal-head{background:#EF6D22; color:#fff; padding:12px 16px; font-weight:900;
-        display:flex; align-items:center; justify-content:space-between; gap:12px;}
-      .mk-modal-title{font-size:14px; letter-spacing:.02em;}
-      .mk-modal-close{border:none; background:rgba(255,255,255,.18); color:#fff; cursor:pointer;
-        width:34px; height:34px; border-radius:999px; font-weight:900;}
-      .mk-modal-close:hover{background:rgba(255,255,255,.28);}
-      .mk-modal-body{padding:14px 16px 16px; overflow:auto;}
-      .mk-modal-actions{display:flex; justify-content:flex-end; gap:10px; padding:0 16px 16px;}
-      .mk-modal-btn{border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900;
-        font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;}
-      .mk-modal-btn--save{background:#EF6D22; color:#fff;}
-      .mk-modal-btn--save:hover{background:#ff8b42;}
-      .mk-modal-btn--cancel{background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);}
-      .mk-modal-btn--cancel:hover{background:#e5e7eb;}
+    const ensureStyles = () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement("style");
+      s.id = STYLE_ID;
+      s.textContent = `
+        .mk-modal-backdrop{
+          position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100000;
+          display:flex; align-items:flex-start; justify-content:center; padding:90px 18px 18px;
+        }
+        .mk-modal{
+          width:min(1100px, calc(100vw - 24px));
+          max-height:calc(100vh - 120px);
+          display:flex; flex-direction:column;
+          border-radius:18px;
+          overflow:hidden;
+          background:#fff;
+          border:1px solid rgba(0,0,0,.12);
+          box-shadow:0 18px 60px rgba(0,0,0,.35);
+        }
+        .mk-modal-head{
+          background:#EF6D22; color:#fff; padding:12px 16px; font-weight:900;
+          display:flex; align-items:center; justify-content:space-between; gap:12px;
+        }
+        .mk-modal-title{font-size:14px; letter-spacing:.02em;}
+        .mk-modal-close{
+          border:none; background:rgba(255,255,255,.18); color:#fff; cursor:pointer;
+          width:34px; height:34px; border-radius:999px; font-weight:900;
+        }
+        .mk-modal-close:hover{background:rgba(255,255,255,.28);}
+        .mk-modal-body{padding:14px 16px 16px; overflow:auto;}
 
-      .mk-modal textarea{width:100%; min-height:340px; resize:vertical; font-size:13px; line-height:1.5;
-        border:1px solid rgba(0,0,0,.15); border-radius:14px; padding:12px 12px; outline:none;}
-      .mk-modal textarea:focus{border-color:#EF6D22; box-shadow:0 0 0 3px rgba(239,109,34,.25);}
+        .mk-modal-cardstack{display:flex; flex-direction:column; gap:14px;}
+        .mk-modal-cardlike{
+          border-radius:16px;
+          border:1px solid rgba(0,0,0,.10);
+          background:#fff;
+          box-shadow:0 10px 28px rgba(0,0,0,.10);
+          padding:14px;
+        }
+        .mk-modal-cardlike h3{
+          margin:0 0 10px;
+          font-size:14px;
+          font-weight:900;
+          color:#111827;
+        }
 
-      .mk-table-pop{width:100%; overflow:auto;}
-      .mk-table-pop table{width:100%; border-collapse:separate;}
-    `;
-    document.head.appendChild(s);
-  };
+        .mk-modal textarea{
+          width:100%;
+          min-height:280px;
+          resize:vertical;
+          font-size:13px;
+          line-height:1.5;
+          border:1px solid rgba(0,0,0,.15);
+          border-radius:14px;
+          padding:12px;
+          outline:none;
+        }
+        .mk-modal textarea:focus{
+          border-color:#EF6D22;
+          box-shadow:0 0 0 3px rgba(239,109,34,.25);
+        }
 
-  const close = () => {
-    if (!active) return;
-    try { if (typeof restoreFn === "function") restoreFn(); } catch {}
-    restoreFn = null;
-    active.remove();
-    active = null;
-    document.removeEventListener("keydown", onKey);
-  };
+        .mk-modal-tablewrap{width:100%; overflow:auto;}
+        .mk-modal-tablewrap table{width:100%; border-collapse:separate;}
 
-  const onKey = (e) => {
-    if (!active) return;
-    if (e.key === "Escape") close();
-  };
+        .mk-modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:10px;}
+        .mk-modal-btn{
+          border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900;
+          font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;
+        }
+        .mk-modal-btn--save{background:#EF6D22; color:#fff;}
+        .mk-modal-btn--save:hover{background:#ff8b42;}
+        .mk-modal-btn--cancel{background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);}
+        .mk-modal-btn--cancel:hover{background:#e5e7eb;}
+      `;
+      document.head.appendChild(s);
+    };
 
-  const openBase = ({ title, bodyEl, onSave, showSave = true } = {}) => {
-    ensureStyles();
-    close();
+    const close = () => {
+      if (!active) return;
+      active.remove();
+      active = null;
+      document.removeEventListener("keydown", onKey);
+    };
 
-    const back = document.createElement("div");
-    back.className = "mk-modal-backdrop";
+    const onKey = (e) => {
+      if (!active) return;
+      if (e.key === "Escape") close();
+    };
 
-    const modal = document.createElement("div");
-    modal.className = "mk-modal";
+    const openBase = ({ title, bodyEl } = {}) => {
+      ensureStyles();
+      close();
 
-    const head = document.createElement("div");
-    head.className = "mk-modal-head";
+      const back = document.createElement("div");
+      back.className = "mk-modal-backdrop";
 
-    const t = document.createElement("div");
-    t.className = "mk-modal-title";
-    t.textContent = title || "Details";
+      const modal = document.createElement("div");
+      modal.className = "mk-modal";
 
-    const x = document.createElement("button");
-    x.type = "button";
-    x.className = "mk-modal-close";
-    x.textContent = "✕";
-    x.addEventListener("click", close);
+      const head = document.createElement("div");
+      head.className = "mk-modal-head";
 
-    head.appendChild(t);
-    head.appendChild(x);
+      const t = document.createElement("div");
+      t.className = "mk-modal-title";
+      t.textContent = title || "Details";
 
-    const body = document.createElement("div");
-    body.className = "mk-modal-body";
-    if (bodyEl) body.appendChild(bodyEl);
+      const x = document.createElement("button");
+      x.type = "button";
+      x.className = "mk-modal-close";
+      x.textContent = "✕";
+      x.addEventListener("click", close);
 
-    const actions = document.createElement("div");
-    actions.className = "mk-modal-actions";
+      head.appendChild(t);
+      head.appendChild(x);
 
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.className = "mk-modal-btn mk-modal-btn--cancel";
-    cancel.textContent = "Cancel";
-    cancel.addEventListener("click", close);
-    actions.appendChild(cancel);
+      const body = document.createElement("div");
+      body.className = "mk-modal-body";
+      if (bodyEl) body.appendChild(bodyEl);
 
-    if (showSave) {
+      modal.appendChild(head);
+      modal.appendChild(body);
+      back.appendChild(modal);
+
+      back.addEventListener("click", (e) => {
+        if (e.target === back) close();
+      });
+
+      document.body.appendChild(back);
+      active = back;
+
+      document.addEventListener("keydown", onKey);
+    };
+
+    const openNotesEditor = ({ title, sourceTextarea } = {}) => {
+      if (!sourceTextarea) return;
+
+      const stack = document.createElement("div");
+      stack.className = "mk-modal-cardstack";
+
+      const card = document.createElement("div");
+      card.className = "mk-modal-cardlike";
+
+      const h = document.createElement("h3");
+      h.textContent = title || "Notes";
+
+      const ta = document.createElement("textarea");
+      ta.value = sourceTextarea.value || "";
+
+      const actions = document.createElement("div");
+      actions.className = "mk-modal-actions";
+
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "mk-modal-btn mk-modal-btn--cancel";
+      cancel.textContent = "Cancel";
+      cancel.addEventListener("click", close);
+
       const save = document.createElement("button");
       save.type = "button";
       save.className = "mk-modal-btn mk-modal-btn--save";
       save.textContent = "Save";
       save.addEventListener("click", () => {
-        if (typeof onSave === "function") onSave();
-        close();
-      });
-      actions.appendChild(save);
-    }
-
-    modal.appendChild(head);
-    modal.appendChild(body);
-    modal.appendChild(actions);
-    back.appendChild(modal);
-
-    back.addEventListener("click", (e) => {
-      if (e.target === back) close();
-    });
-
-    document.body.appendChild(back);
-    active = back;
-    document.addEventListener("keydown", onKey);
-
-    return { close };
-  };
-
-  const openTextarea = ({ title, sourceTextarea } = {}) => {
-    if (!sourceTextarea) return;
-
-    const ta = document.createElement("textarea");
-    ta.value = sourceTextarea.value || "";
-
-    openBase({
-      title: title || "Notes",
-      bodyEl: ta,
-      onSave: () => {
         sourceTextarea.value = ta.value || "";
         triggerInputChange(sourceTextarea);
 
-        // Toggle "has-notes" on nearby notes buttons if they exist
-        const card = sourceTextarea.closest(".mini-card, .section-block, .checklist-row, .ticket-group") || document;
+        const scope =
+          sourceTextarea.closest(".mini-card") ||
+          sourceTextarea.closest(".section-block") ||
+          sourceTextarea.closest(".checklist-row") ||
+          sourceTextarea.closest(".ticket-group") ||
+          document;
+
         const has = (sourceTextarea.value || "").trim().length > 0;
-        card.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
+        scope.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
           b.classList.toggle("has-notes", has);
         });
-      },
-      showSave: true,
-    });
 
-    setTimeout(() => ta.focus(), 0);
+        close();
+      });
+
+      actions.appendChild(cancel);
+      actions.appendChild(save);
+
+      card.appendChild(h);
+      card.appendChild(ta);
+      card.appendChild(actions);
+
+      stack.appendChild(card);
+
+      openBase({ title: title || "Notes", bodyEl: stack });
+      setTimeout(() => ta.focus(), 0);
+    };
+
+    const openExpandedTableCardStyle = ({ title, table, notesTextarea } = {}) => {
+      if (!table) return;
+
+      const stack = document.createElement("div");
+      stack.className = "mk-modal-cardstack";
+
+      // TABLE card
+      const tableCard = document.createElement("div");
+      tableCard.className = "mk-modal-cardlike";
+
+      const h1 = document.createElement("h3");
+      h1.textContent = title || "Expanded Table";
+
+      const wrap = document.createElement("div");
+      wrap.className = "mk-modal-tablewrap";
+
+      const clone = table.cloneNode(true);
+      clone.querySelectorAll(".mk-table-expand-btn, .mk-ta-expand").forEach((b) => b.remove());
+
+      wrap.appendChild(clone);
+      tableCard.appendChild(h1);
+      tableCard.appendChild(wrap);
+      stack.appendChild(tableCard);
+
+      // NOTES card underneath
+      if (notesTextarea) {
+        const notesCard = document.createElement("div");
+        notesCard.className = "mk-modal-cardlike";
+
+        const h2 = document.createElement("h3");
+        h2.textContent = "Notes";
+
+        const ta = document.createElement("textarea");
+        ta.value = notesTextarea.value || "";
+
+        const actions = document.createElement("div");
+        actions.className = "mk-modal-actions";
+
+        const cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.className = "mk-modal-btn mk-modal-btn--cancel";
+        cancel.textContent = "Cancel";
+        cancel.addEventListener("click", close);
+
+        const save = document.createElement("button");
+        save.type = "button";
+        save.className = "mk-modal-btn mk-modal-btn--save";
+        save.textContent = "Save";
+        save.addEventListener("click", () => {
+          notesTextarea.value = ta.value || "";
+          triggerInputChange(notesTextarea);
+
+          const scope = notesTextarea.closest(".section-block") || document;
+          const has = (notesTextarea.value || "").trim().length > 0;
+          scope.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
+            b.classList.toggle("has-notes", has);
+          });
+
+          close();
+        });
+
+        actions.appendChild(cancel);
+        actions.appendChild(save);
+
+        notesCard.appendChild(h2);
+        notesCard.appendChild(ta);
+        notesCard.appendChild(actions);
+        stack.appendChild(notesCard);
+      }
+
+      openBase({ title: title || "Expanded Table", bodyEl: stack });
+    };
+
+    return { openNotesEditor, openExpandedTableCardStyle, close };
+  })();
+
+  const mkFindNearestNotesTextarea = (btn) => {
+    if (!btn) return null;
+
+    const targetId = btn.getAttribute("data-notes-target") || btn.dataset?.notesTarget;
+    if (targetId) {
+      const hit = document.getElementById(targetId);
+      if (hit && hit.matches("textarea")) return hit;
+    }
+
+    const scope =
+      btn.closest(".section-block") ||
+      btn.closest(".mini-card") ||
+      btn.closest(".checklist-row") ||
+      btn.closest(".ticket-group") ||
+      btn.closest("section") ||
+      document;
+
+    const ta = scope.querySelector("textarea");
+    return ta || null;
   };
 
-  const openTable = ({ title, table } = {}) => {
-    if (!table) return;
-
-    const wrap = document.createElement("div");
-    wrap.className = "mk-table-pop";
-    const clone = table.cloneNode(true);
-    wrap.appendChild(clone);
-
-    openBase({
-      title: title || "Table",
-      bodyEl: wrap,
-      showSave: false,
-    });
+  const mkFindTableForExpandBtn = (expandBtn) => {
+    const footer = expandBtn.closest(".table-footer");
+    return (
+      footer?.closest(".section")?.querySelector("table.training-table") ||
+      footer?.closest(".section-block")?.querySelector("table.training-table") ||
+      footer?.parentElement?.querySelector("table.training-table") ||
+      footer?.closest(".table-container")?.querySelector("table.training-table") ||
+      footer?.closest("table.training-table") ||
+      null
+    );
   };
 
-  return { openTextarea, openTable, close };
-})();
+  const mkFindNotesTextareaForTable = (table) => {
+    if (!table) return null;
 
-const mkFindNearestNotesTextarea = (btn) => {
-  if (!btn) return null;
+    const targetId = table.getAttribute("data-notes-target");
+    if (targetId) {
+      const hit = document.getElementById(targetId);
+      if (hit && hit.matches("textarea")) return hit;
+    }
 
-  // Most common: notes button sits in same section-block/card as its textarea
-  const scope =
-    btn.closest(".section-block") ||
-    btn.closest(".mini-card") ||
-    btn.closest(".checklist-row") ||
-    btn.closest(".ticket-group") ||
-    btn.closest("section") ||
-    document;
-
-  // Try explicit links first
-  const targetId = btn.getAttribute("data-notes-target") || btn.dataset?.notesTarget;
-  if (targetId) {
-    const hit = document.getElementById(targetId);
-    if (hit && hit.matches("textarea")) return hit;
-  }
-
-  // Otherwise pick the nearest textarea in scope
-  const ta = scope.querySelector("textarea");
-  if (ta) return ta;
-
-  // Last resort: look nearby in DOM
-  const near = btn.parentElement?.querySelector("textarea") || btn.closest("div")?.querySelector("textarea");
-  return near || null;
-};
+    const block = table.closest(".section-block") || table.closest(".section") || table.closest("section") || document;
+    const candidates = Array.from(block.querySelectorAll("textarea")).filter((ta) => !ta.closest("table"));
+    return candidates[0] || null;
+  };
 
   /* =======================
      EVENT DELEGATION
@@ -1653,6 +1718,7 @@ const mkFindNearestNotesTextarea = (btn) => {
   document.addEventListener("click", (e) => {
     const t = e.target;
 
+    // NAV
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -1667,6 +1733,7 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
+    // Clear All
     const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
@@ -1679,6 +1746,7 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
+    // Reset Page
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -1695,8 +1763,8 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ POC "+" (ONLY data-add-poc)
-    const pocBtn = t.closest("[data-add-poc]");
+    // POC +
+    const pocBtn = t.closest("[data-add-poc], .poc-add-btn, .additional-poc-add");
     if (pocBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -1704,7 +1772,7 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ Table Add Row
+    // Table Add Row
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -1712,7 +1780,7 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ Tickets "+"
+    // Tickets +
     const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
@@ -1720,8 +1788,8 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ TRAINER "+" (ONLY data-add-trainer)
-    const trainerBtn = t.closest("[data-add-trainer]");
+    // Trainer +
+    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
     if (trainerBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -1729,7 +1797,7 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ Map button
+    // Map button
     const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
@@ -1739,40 +1807,37 @@ const mkFindNearestNotesTextarea = (btn) => {
       return;
     }
 
-    // ✅ Notes buttons (open modal)
-const notesBtn = t.closest(".notes-btn, .notes-icon-btn, [data-notes-target]");
-if (notesBtn) {
-  e.preventDefault();
-  const ta = mkFindNearestNotesTextarea(notesBtn);
-  if (ta) mkModal.openTextarea({ title: "Notes", sourceTextarea: ta });
-  return;
-}
+    // Notes buttons
+    const notesBtn = t.closest(".notes-btn, .notes-icon-btn, [data-notes-target]");
+    if (notesBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const ta = mkFindNearestNotesTextarea(notesBtn);
+      if (ta) mkModal.openNotesEditor({ title: "Notes", sourceTextarea: ta });
+      return;
+    }
 
-// ✅ Expand textarea button (open modal)
-const taExpand = t.closest(".mk-ta-expand");
-if (taExpand) {
-  e.preventDefault();
-  const ta = taExpand.closest(".mk-ta-wrap")?.querySelector("textarea") || null;
-  if (ta) mkModal.openTextarea({ title: "Expand Notes", sourceTextarea: ta });
-  return;
-}
+    // Expand textarea (injected)
+    const taExpand = t.closest(".mk-ta-expand");
+    if (taExpand) {
+      e.preventDefault();
+      e.stopPropagation();
+      const ta = taExpand.closest(".mk-ta-wrap")?.querySelector("textarea") || null;
+      if (ta) mkModal.openNotesEditor({ title: "Expand Notes", sourceTextarea: ta });
+      return;
+    }
 
-// ✅ Expand table button (open table modal)
-const tableExpand = t.closest(".mk-table-expand-btn");
-if (tableExpand) {
-  e.preventDefault();
-  const footer = tableExpand.closest(".table-footer");
-  const table =
-    footer?.closest(".section")?.querySelector("table.training-table") ||
-    footer?.closest(".section-block")?.querySelector("table.training-table") ||
-    footer?.parentElement?.querySelector("table.training-table") ||
-    footer?.closest(".table-container")?.querySelector("table.training-table") ||
-    footer?.closest("table.training-table");
-  if (table) mkModal.openTable({ title: "Expand Table", table });
-  return;
-}
-
-}); // ✅ missing line: closes the click event listener
+    // Expand table (card-style + notes underneath)
+    const tableExpand = t.closest(".mk-table-expand-btn");
+    if (tableExpand) {
+      e.preventDefault();
+      e.stopPropagation();
+      const table = mkFindTableForExpandBtn(tableExpand);
+      const notesTa = mkFindNotesTextareaForTable(table);
+      if (table) mkModal.openExpandedTableCardStyle({ title: "Expanded Table", table, notesTextarea: notesTa });
+      return;
+    }
+  }); // ✅ END click handler
 
   document.addEventListener("input", (e) => {
     const el = e.target;
@@ -1788,13 +1853,10 @@ if (tableExpand) {
       mkSyncSummaryEngagementSnapshot();
     }
 
-    // Keep trainer clone state synced if user edits cloned trainer fields
     if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) {
       const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
       const clones = cloneState.get();
-      clones.trainers = container
-        ? $$("input[type='text']", container).map((i) => ({ value: (i.value || "").trim() }))
-        : [];
+      clones.trainers = container ? $$("input[type='text']", container).map((i) => ({ value: (i.value || "").trim() })) : [];
       cloneState.set(clones);
       mkSyncSummaryEngagementSnapshot();
     }
@@ -1824,10 +1886,7 @@ if (tableExpand) {
       setGhostStyles(document);
     }
 
-    if (el.matches('input[type="date"]')) {
-      mkSyncSummaryEngagementSnapshot();
-    }
-
+    if (el.matches('input[type="date"]')) mkSyncSummaryEngagementSnapshot();
     if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
 
     const tr = el.closest("tr");
@@ -1840,7 +1899,6 @@ if (tableExpand) {
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // ✅ Enter adds trainer (supports BOTH input variants)
     const isTrainerInput =
       (el && el.id === "additionalTrainerInput") ||
       (el && el.matches && el.matches("[data-mk-addl-trainer-input]"));
@@ -1853,6 +1911,7 @@ if (tableExpand) {
 
     if (e.key === "Escape") {
       mkPopup.close();
+      mkModal.close();
     }
   });
 
@@ -1885,7 +1944,7 @@ if (tableExpand) {
 
     enforceBaseTicketStatusLock();
 
-    log("Initialized v8.3.4.");
+    log("Initialized v8.3.5.");
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
