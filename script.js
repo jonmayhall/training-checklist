@@ -818,8 +818,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
     clone
   .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn, .input-plus button")
-  .forEach((btn) => btn.remove());
-
+  .forEach((btn) => btn.remove())
 
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
@@ -2353,7 +2352,7 @@ const hookAddPocButtonDirectly = () => {
       return;
     }
 
-    const pocBtn = t.closest(
+   const pocBtn = t.closest(
   "[data-add-poc], .additional-poc-add, .poc-add-btn, #dealership-info .additional-poc-card[data-base='true'] .input-plus button"
 );
 if (pocBtn && shouldTreatAsAddPocBtn(pocBtn)) {
@@ -2609,4 +2608,26 @@ document.addEventListener(
     }
   },
   true // capture phase = strongest guarantee
+);
+
+document.addEventListener(
+  "click",
+  (e) => {
+    const btn = e.target.closest(
+      "[data-add-poc], .additional-poc-add, .poc-add-btn, #dealership-info .additional-poc-card[data-base='true'] .input-plus button"
+    );
+    if (!btn) return;
+
+    // only in dealership-info + only base card
+    if (!btn.closest("#dealership-info .additional-poc-card[data-base='true']")) return;
+
+    // validate it's really the add button
+    if (typeof window.shouldTreatAsAddPocBtn === "function" && !window.shouldTreatAsAddPocBtn(btn)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (typeof window.mkAddPocCard === "function") window.mkAddPocCard();
+  },
+  true
 );
