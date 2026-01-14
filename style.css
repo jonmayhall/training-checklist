@@ -1,3 +1,4 @@
+
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS
    CLEAN / CONSOLIDATED (Stable Consolidation Build)
@@ -1731,6 +1732,9 @@ button.remove-row{
   transform:none !important;
 }
 
+/* Bigger notes textareas remain (already set above) */
+
+
 /* ---------- TABLE MODE ---------- */
 
 /* No orange header bar (but keep close button element existing) */
@@ -1888,9 +1892,7 @@ button.remove-row{
   flex-wrap: nowrap !important;
 }
 #trainers-deployment .checklist-row .input-plus,
-#trainers-deployment .checklist-row select{
-  display:inline-flex !important;
-}
+#trainers-deployment .checklist-row select,
 #trainers-deployment .checklist-row input{
-  display:block !important;
+  display: inline-flex !important;
 }
