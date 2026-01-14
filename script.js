@@ -1,22 +1,11 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   (SINGLE SCRIPT / HARDENED / DROP-IN)
-   CARD-STYLE NOTES + TABLE EXPAND RESTORED (v8.3.5)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3.1)
 
-   ✅ In this build:
-   - Menu/Nav buttons work (nav delegation fixed + no syntax breaks)
-   - Notes buttons work (.notes-btn / .notes-icon-btn / [data-notes-target])
-   - Notes modal is card-styled (matches your UI feel)
-   - Table expand modal is card-styled AND includes Notes card underneath (auto-finds)
-   - Trainer "+" adds row every click (blank allowed)
-   - POC "+" adds a new card (grid-safe before placeholder)
-   - Tickets "+" works (base card only)
-   - Table "+ Add Row" works
-   - State save/restore works (stable keys)
-   - Clear All / Reset Page works
-   - Ghost placeholder styles for selects + dates
-   - End date auto-set (+3 days)
-   - Expand buttons injected for tables + notes textareas
+   ✅ FIX (your issue):
+   - Additional Trainers “+” button now works reliably in ALL markup cases
+     (even if the button moved, lost attributes, or is inside/outside the card)
+   - We expose addTrainerRow safely on window and use a robust click hook
 
 ======================================================= */
 
@@ -26,7 +15,7 @@
   /* =======================
      CONFIG
   ======================= */
-  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_5";
+  const STORAGE_KEY = "mykaarma_interactive_checklist__state_v8_3_1";
   const AUTO_ID_ATTR = "data-mk-id";
   const AUTO_ROW_ATTR = "data-mk-row";
   const AUTO_CARD_ATTR = "data-mk-card";
@@ -40,13 +29,20 @@
     did: ["dealershipDidInput"],
     dealerGroup: ["dealerGroupInput"],
 
-    onsiteDate: ["onsiteStartDate", "onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
-    trainingEndDate: ["onsiteEndDate", "trainingEndDate", "endDate", "onsiteTrainingEndDate"],
+    onsiteDate: ["onsiteTrainingDate", "onsiteDate", "onsiteTrainingStartDate", "trainingStartDate"],
+    trainingEndDate: ["trainingEndDate", "endDate", "onsiteTrainingEndDate"],
 
-    leadTrainer: ["leadTrainerSelect", "leadTrainerInput", "leadTrainer", "trainerLeadInput", "primaryTrainerInput"],
+    // ✅ includes leadTrainerSelect so Page 11 autofills from Page 1 select
+    leadTrainer: [
+      "leadTrainerSelect", // ✅ Page 1
+      "leadTrainerInput",
+      "leadTrainer",
+      "trainerLeadInput",
+      "primaryTrainerInput",
+    ],
   };
 
-  // ====== SUMMARY PAGE IDS (Engagement Snapshot) ======
+  // ====== SUMMARY PAGE 11 IDS (Engagement Snapshot) ======
   const MK_SUMMARY_IDS = {
     did: "mkSum_did_2",
     dealership: "mkSum_dealership_2",
@@ -110,14 +106,18 @@
   const inDynamicClone = (el) => {
     if (!el) return false;
 
-    if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) return true;
+    // Trainer clones (inside additional container)
+    if (el.closest("#additionalTrainersContainer")) return true;
 
+    // POC clones (data-base != true)
     const pocCard = el.closest(".additional-poc-card");
     if (pocCard && pocCard.getAttribute("data-base") !== "true") return true;
 
+    // Table cloned rows
     const tr = el.closest("tr");
     if (tr && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") return true;
 
+    // Ticket clones (data-base != true)
     const ticket = el.closest(".ticket-group");
     if (ticket && ticket.getAttribute("data-base") !== "true") return true;
 
@@ -126,10 +126,13 @@
 
   const stableFieldKey = (el) => {
     if (!isEl(el)) return "";
+
+    // If it has a real ID, use it (best case)
     if (el.id) return `id:${el.id}`;
 
     const sectionId = getSection(el)?.id || "root";
 
+    // Table fields: stable by table key + row/col/field index
     const table = el.closest("table.training-table");
     if (table) {
       const key =
@@ -154,6 +157,7 @@
       return `sec:${sectionId}|tbl:${key}|r:${rowIndex}|c:${colIndex}|f:${withinCell}|${tag}|${type}`;
     }
 
+    // Checklist row fields: stable by label text + field index
     const row = el.closest(".checklist-row");
     if (row) {
       const lab = row.querySelector("label");
@@ -166,6 +170,7 @@
       return `sec:${sectionId}|row:${labelSlug}|i:${idx}|${tag}|${type}|ph:${ph}`;
     }
 
+    // Fallback: section + DOM path
     const tag = el.tagName.toLowerCase();
     const type = (el.getAttribute("type") || "").toLowerCase();
     return `sec:${sectionId}|path:${mkDomPath(el)}|${tag}|${type}`;
@@ -225,15 +230,9 @@
     }
   };
 
-  const triggerInputChange = (el) => {
-    if (!el) return;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-  };
-
   const saveField = (el) => {
     if (!isFormField(el)) return;
-    if (inDynamicClone(el)) return;
+    if (inDynamicClone(el)) return; // ✅ clones are persisted via cloneState (not __fields)
     ensureId(el);
     const id = el.getAttribute(AUTO_ID_ATTR);
     if (!id) return;
@@ -263,16 +262,30 @@
     fields.forEach((el) => ensureId(el));
   };
 
+  const triggerInputChange = (el) => {
+    if (!el) return;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
   const setGhostStyles = (root = document) => {
     root.querySelectorAll("select").forEach((sel) => {
       const first = sel.options?.[0];
-      const isGhost = !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
+      const isGhost =
+        !sel.value || (first && first.dataset?.ghost === "true" && sel.value === "");
       sel.classList.toggle("is-placeholder", !!isGhost);
     });
 
     root.querySelectorAll('input[type="date"]').forEach((d) => {
       d.classList.toggle("is-placeholder", !d.value);
     });
+  };
+
+  const preserveScroll = (fn) => {
+    const x = window.scrollX || 0;
+    const y = window.scrollY || 0;
+    fn();
+    requestAnimationFrame(() => window.scrollTo(x, y));
   };
 
   const mkFirstValueByIds = (...ids) => {
@@ -292,6 +305,7 @@
 
     if (!d && !n) return "";
     if (!d) return n;
+
     if (g) return `DID - ${d} ${g} ${n}`.replace(/\s+/g, " ").trim();
     return `DID - ${d} ${n}`.replace(/\s+/g, " ").trim();
   };
@@ -308,7 +322,51 @@
   };
 
   /* =======================
-     POPUP (tiny)
+     LABEL + PLACEHOLDER FINDERS (best-effort)
+  ======================= */
+  const mkFindFieldByLabelText = (sectionEl, labelIncludes) => {
+    if (!sectionEl) return null;
+    const want = String(labelIncludes || "").toLowerCase().trim();
+    if (!want) return null;
+
+    const rows = $$(".checklist-row", sectionEl);
+    for (const row of rows) {
+      const lab = row.querySelector("label");
+      const t = (lab?.textContent || "").toLowerCase().trim();
+      if (!t) continue;
+      if (!t.includes(want)) continue;
+
+      const field =
+        row.querySelector(
+          "input:not([type='button']):not([type='submit']):not([type='reset']), select, textarea"
+        ) || null;
+      if (field) return field;
+    }
+    return null;
+  };
+
+  const mkFindDateInputByLabelOrId = (root, ids, labelIncludes) => {
+    for (const id of ids || []) {
+      const el = document.getElementById(id);
+      if (el && el.matches('input[type="date"]')) return el;
+    }
+    const sections = $$(".page-section", root);
+    for (const sec of sections) {
+      const found = mkFindFieldByLabelText(sec, labelIncludes);
+      if (found && found.matches('input[type="date"]')) return found;
+    }
+    const allDates = $$('input[type="date"]', root);
+    for (const d of allDates) {
+      const id = (d.id || "").toLowerCase();
+      const nm = (d.name || "").toLowerCase();
+      const want = String(labelIncludes || "").toLowerCase();
+      if (want && (id.includes(want) || nm.includes(want))) return d;
+    }
+    return null;
+  };
+
+  /* =======================
+     OS-STYLE POPUPS (OK + OK/CANCEL)
   ======================= */
   const mkPopup = (() => {
     const STYLE_ID = "mk-popup-style-v1";
@@ -319,21 +377,42 @@
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
-        .mk-pop-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100000;
-          display:flex; align-items:flex-start; justify-content:center; padding-top:110px;}
-        .mk-pop-box{width:min(520px, calc(100vw - 28px)); background:#fff; border:1px solid rgba(0,0,0,.10);
-          border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25); overflow:hidden;}
-        .mk-pop-head{background:#EF6D22; color:#fff; padding:10px 16px; font-weight:900;
-          display:flex; align-items:center; justify-content:space-between;}
-        .mk-pop-title{font-size:15px;}
-        .mk-pop-body{padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap;}
-        .mk-pop-actions{padding:12px 16px 14px; display:flex; justify-content:flex-end; gap:10px;}
-        .mk-pop-btn{border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900;
-          font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;}
-        .mk-pop-btn--ok{background:#EF6D22; color:#fff; box-shadow:0 3px 10px rgba(239,109,34,.35);}
-        .mk-pop-btn--ok:hover{background:#ff8b42;}
-        .mk-pop-btn--cancel{background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);}
-        .mk-pop-btn--cancel:hover{background:#e5e7eb;}
+        .mk-pop-backdrop{
+          position:fixed; inset:0; background:rgba(0,0,0,.35);
+          z-index:100000; display:flex; align-items:flex-start; justify-content:center;
+          padding-top:110px;
+        }
+        .mk-pop-box{
+          width:min(520px, calc(100vw - 28px));
+          background:#fff; border:1px solid rgba(0,0,0,.10);
+          border-radius:18px; box-shadow:0 18px 50px rgba(0,0,0,.25);
+          overflow:hidden;
+        }
+        .mk-pop-head{
+          background:#EF6D22; color:#fff;
+          padding:10px 16px;
+          font-weight:900; letter-spacing:.2px;
+          display:flex; align-items:center; justify-content:space-between;
+        }
+        .mk-pop-title{ font-size:15px; }
+        .mk-pop-body{ padding:14px 16px 8px; color:#111827; font-size:13px; line-height:1.45; white-space:pre-wrap;}
+        .mk-pop-actions{
+          padding:12px 16px 14px;
+          display:flex; justify-content:flex-end; gap:10px;
+        }
+        .mk-pop-btn{
+          border:none; cursor:pointer;
+          height:34px; padding:0 16px;
+          border-radius:999px; font-weight:900; font-size:12px;
+          letter-spacing:.08em; text-transform:uppercase;
+          display:inline-flex; align-items:center; justify-content:center;
+        }
+        .mk-pop-btn--ok{ background:#EF6D22; color:#fff; box-shadow:0 3px 10px rgba(239,109,34,.35); }
+        .mk-pop-btn--ok:hover{ background:#ff8b42; }
+        .mk-pop-btn--cancel{
+          background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);
+        }
+        .mk-pop-btn--cancel:hover{ background:#e5e7eb; }
       `;
       document.head.appendChild(s);
     };
@@ -350,7 +429,14 @@
       if (e.key === "Escape") close();
     };
 
-    const open = ({ title = "Notice", message = "", okText = "OK", cancelText = "", onOk, onCancel } = {}) => {
+    const open = ({
+      title = "Notice",
+      message = "",
+      okText = "OK",
+      cancelText = "",
+      onOk,
+      onCancel,
+    } = {}) => {
       ensureStyles();
       close();
 
@@ -366,6 +452,8 @@
       const t = document.createElement("div");
       t.className = "mk-pop-title";
       t.textContent = title;
+
+      head.appendChild(t);
 
       const body = document.createElement("div");
       body.className = "mk-pop-body";
@@ -396,7 +484,6 @@
       });
       actions.appendChild(ok);
 
-      head.appendChild(t);
       box.appendChild(head);
       box.appendChild(body);
       box.appendChild(actions);
@@ -413,7 +500,8 @@
       ok.focus();
     };
 
-    const ok = (message, opts = {}) => open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
+    const ok = (message, opts = {}) =>
+      open({ title: opts.title || "Notice", message, okText: opts.okText || "OK" });
 
     const confirm = (message, opts = {}) =>
       open({
@@ -433,12 +521,17 @@
   } catch {}
 
   /* =======================
-     CLONE STATE
+     CLONE STATE (for restore)
   ======================= */
   const cloneState = {
     get() {
       const state = readState();
-      state.__clones = state.__clones || { trainers: [], pocs: [], tables: {}, tickets: [] };
+      state.__clones = state.__clones || {
+        trainers: [],
+        pocs: [],
+        tables: {},
+        tickets: [],
+      };
       return state.__clones;
     },
     set(next) {
@@ -490,7 +583,7 @@
   };
 
   /* =======================
-     CLEAR HELPERS
+     NOTES BUTTON VISUAL RESET
   ======================= */
   const clearAllNotesButtonStates = (root = document) => {
     root
@@ -503,8 +596,11 @@
       });
   };
 
+  /* =======================
+     CLEAR ALL + RESET PAGE
+  ======================= */
   const removeDynamicClonesIn = (root = document) => {
-    const trainerContainer = $("#additionalTrainersContainer", root) || $("[data-mk-addl-trainers-container]", root);
+    const trainerContainer = $("#additionalTrainersContainer", root);
     if (trainerContainer) trainerContainer.innerHTML = "";
 
     $$(".additional-poc-card", root).forEach((card) => {
@@ -619,10 +715,7 @@
   };
 
   /* =======================
-     ADD TRAINER (+)
-     ✅ Adds row EVERY click (blank allowed)
-     Hooks:
-       - button: [data-add-trainer] OR .trainer-add-btn
+     ADD TRAINER (+) — Trainers page
   ======================= */
   const buildTrainerRow = (value = "") => {
     const wrap = document.createElement("div");
@@ -633,7 +726,7 @@
     label.textContent = "Additional Trainer";
 
     const inputPlus = document.createElement("div");
-    inputPlus.className = "input-plus mk-solo-input";
+    inputPlus.className = "input-plus";
 
     const input = document.createElement("input");
     input.type = "text";
@@ -645,79 +738,63 @@
     wrap.appendChild(label);
     wrap.appendChild(inputPlus);
 
-    input.removeAttribute(AUTO_ID_ATTR);
     ensureId(input);
-
     return wrap;
   };
 
   const addTrainerRow = (fromEl = null) => {
-    const root =
-      (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
-      document.getElementById("trainers-deployment") ||
-      document;
+  // Prefer the Trainers page as the search root
+  const root =
+    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+    document.getElementById("trainers-deployment") ||
+    document;
 
-    const input =
-      root.querySelector("#additionalTrainerInput") ||
-      root.querySelector("[data-mk-addl-trainer-input]") ||
-      document.querySelector("#additionalTrainerInput") ||
-      document.querySelector("[data-mk-addl-trainer-input]") ||
-      null;
+  const input =
+    root.querySelector("#additionalTrainerInput") ||
+    document.querySelector("#additionalTrainerInput");
 
-    const container =
-      root.querySelector("#additionalTrainersContainer") ||
-      root.querySelector("[data-mk-addl-trainers-container]") ||
-      document.querySelector("#additionalTrainersContainer") ||
-      document.querySelector("[data-mk-addl-trainers-container]") ||
-      null;
+  const container =
+    root.querySelector("#additionalTrainersContainer") ||
+    document.querySelector("#additionalTrainersContainer");
 
-    if (!container) return;
+  if (!input || !container) return;
 
-    const name = (input?.value || "").trim();
-    const row = buildTrainerRow(name);
-    container.appendChild(row);
+  const name = (input.value || "").trim();
+  if (!name) return;
 
-    const clones = cloneState.get();
-    clones.trainers = clones.trainers || [];
-    clones.trainers.push({ value: name });
-    cloneState.set(clones);
+  const row = buildTrainerRow(name);
+  container.appendChild(row);
 
-    if (input) {
-      input.value = "";
-      input.removeAttribute(AUTO_ID_ATTR);
-      ensureId(input);
-      saveField(input);
-      input.focus();
-    } else {
-      row.querySelector("input")?.focus?.();
-    }
+  const clones = cloneState.get();
+  clones.trainers = clones.trainers || [];
+  clones.trainers.push({ value: name });
+  cloneState.set(clones);
 
-    mkSyncSummaryEngagementSnapshot();
-  };
+  input.value = "";
+  saveField(input);
+  input.focus();
 
-  try {
-    window.mkAddTrainerRow = addTrainerRow;
-  } catch {}
+  mkSyncSummaryEngagementSnapshot();
+};
+
+// keep exposed
+try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
   /* =======================
-     ADD POC (+) — GRID-SAFE
-     Expected HTML:
-       - base card: .additional-poc-card[data-base="true"]
-       - add button: [data-add-poc] OR .poc-add-btn
-       - placeholder anchor: #additionalPocsContainer
+     ADD POC (+)
   ======================= */
   const readPocCardValues = (card) => ({
-    name: (card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]')?.value || "").trim(),
-    role: (card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]')?.value || "").trim(),
-    cell: (card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]')?.value || "").trim(),
-    email: (card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]')?.value || "").trim(),
+    name: (card.querySelector('input[placeholder="Enter name"]')?.value || "").trim(),
+    role: (card.querySelector('input[placeholder="Enter role"]')?.value || "").trim(),
+    cell: (card.querySelector('input[placeholder="Enter cell"]')?.value || "").trim(),
+    email: (card.querySelector('input[type="email"]')?.value || "").trim(),
   });
 
   const writePocCardValues = (card, p) => {
-    const name = card.querySelector('input[name="additionalPocInput"], input[placeholder="Enter name"]');
-    const role = card.querySelector('input[name="additionalPocRoleBase"], input[placeholder="Enter role"]');
-    const cell = card.querySelector('input[name="additionalPocCellBase"], input[placeholder="Enter cell"]');
-    const email = card.querySelector('input[name="additionalPocEmailBase"], input[type="email"]');
+    const name = card.querySelector('input[placeholder="Enter name"]');
+    const role = card.querySelector('input[placeholder="Enter role"]');
+    const cell = card.querySelector('input[placeholder="Enter cell"]');
+    const email = card.querySelector('input[type="email"]');
 
     if (name) name.value = p?.name || "";
     if (role) role.value = p?.role || "";
@@ -726,7 +803,6 @@
 
     [name, role, cell, email].forEach((el) => {
       if (!el) return;
-      el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       triggerInputChange(el);
     });
@@ -740,19 +816,23 @@
     clone.setAttribute("data-base", "false");
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
-    // remove + button from clones
-    clone.querySelectorAll("[data-add-poc], .poc-add-btn, .additional-poc-add").forEach((btn) => btn.remove());
+    clone
+      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
+      .forEach((btn) => btn.remove());
 
-    // remove duplicate IDs (base uses #additionalPocInput)
-    clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+    const row = clone.querySelector(".checklist-row.integrated-plus");
+    if (row) row.classList.remove("integrated-plus");
 
-    // clear values + re-id for storage
-    clone.querySelectorAll("input, textarea, select").forEach((el) => {
-      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+    const ip = clone.querySelector(".input-plus");
+    if (ip) ip.classList.add("mk-solo-input");
+
+    clone.classList.add("mk-poc-clone", "mk-round-right");
+
+    $$("input, textarea, select", clone).forEach((el) => {
+      if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
-      triggerInputChange(el);
     });
 
     if (p) writePocCardValues(clone, p);
@@ -761,7 +841,7 @@
 
   const persistAllPocs = () => {
     const clones = cloneState.get();
-    clones.pocs = Array.from(document.querySelectorAll(".additional-poc-card"))
+    clones.pocs = $$(".additional-poc-card")
       .filter((c) => c.getAttribute("data-base") !== "true")
       .map((c) => readPocCardValues(c));
     cloneState.set(clones);
@@ -774,27 +854,33 @@
     const newCard = buildPocCard(null);
     if (!newCard) return;
 
-    // GRID-SAFE: insert as a sibling card (before placeholder div)
-    const anchor = document.getElementById("additionalPocsContainer");
-    if (anchor) anchor.insertAdjacentElement("beforebegin", newCard);
-    else base.insertAdjacentElement("afterend", newCard);
+    const allCards = $$(".additional-poc-card");
+    const last = allCards[allCards.length - 1] || base;
+    last.insertAdjacentElement("afterend", newCard);
 
     persistAllPocs();
 
-    newCard.querySelector('input[type="text"], input[type="email"], input, textarea, select')?.focus?.();
+    const first = newCard.querySelector('input[placeholder="Enter name"], input, textarea, select');
+    if (first) first.focus();
   };
 
   /* =======================
      TABLES: ADD ROW + PERSIST/RESTORE
   ======================= */
   const getTableKey = (table) =>
-    table?.getAttribute("data-table-key") || table?.id || `table-${$$("table.training-table").indexOf(table)}`;
+    table?.getAttribute("data-table-key") ||
+    table?.id ||
+    `table-${$$("table.training-table").indexOf(table)}`;
 
   const clearRowFields = (tr) => {
     $$("input, select, textarea, [contenteditable='true']", tr).forEach((el) => {
-      if (el.matches("input[type='checkbox'], input[type='radio']")) el.checked = false;
-      else if (el.matches("[contenteditable='true']")) el.textContent = "";
-      else el.value = "";
+      if (el.matches("input[type='checkbox'], input[type='radio']")) {
+        el.checked = false;
+      } else if (el.matches("[contenteditable='true']")) {
+        el.textContent = "";
+      } else {
+        el.value = "";
+      }
       el.removeAttribute(AUTO_ID_ATTR);
       ensureId(el);
       triggerInputChange(el);
@@ -887,7 +973,9 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
+        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
+      );
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -896,6 +984,7 @@
       const needed = 3 - existing.length;
       for (let i = 0; i < needed; i++) {
         const clone = baseRow.cloneNode(true);
+
         clone.removeAttribute(AUTO_ROW_ATTR);
         clone.removeAttribute("data-base");
 
@@ -910,6 +999,267 @@
       }
     });
   }
+
+  /* =======================
+     NOTES (caret stays RIGHT of "◦ ")
+  ======================= */
+  const Notes = (() => {
+    const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
+    const getNotesTargetId = (btn) =>
+      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+
+    const ZW0 = "\u200B";
+    const ZW1 = "\u200C";
+    const WRAP = "\u2060";
+
+    const zwEncode = (plain) => {
+      const bytes = new TextEncoder().encode(String(plain));
+      let bits = "";
+      for (const b of bytes) bits += b.toString(2).padStart(8, "0");
+      return bits.replace(/0/g, ZW0).replace(/1/g, ZW1);
+    };
+
+    const zwDecode = (zw) => {
+      const bits = zw.replaceAll(ZW0, "0").replaceAll(ZW1, "1");
+      const bytes = [];
+      for (let i = 0; i + 7 < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      try {
+        return new TextDecoder().decode(new Uint8Array(bytes));
+      } catch {
+        return "";
+      }
+    };
+
+    const makeMarker = (key) => `${WRAP}${zwEncode(key)}${WRAP}`;
+
+    const extractKeyFromLine = (line) => {
+      const s = String(line || "");
+      const a = s.indexOf(WRAP);
+      if (a < 0) return null;
+      const b = s.indexOf(WRAP, a + 1);
+      if (b < 0) return null;
+      const payload = s.slice(a + 1, b);
+      const decoded = zwDecode(payload);
+      return decoded || null;
+    };
+
+    const cleanupLegacyVisibleKeys = (text) => {
+      let v = normalizeNL(text || "");
+      v = v.replace(/\s*\[mk:[^\]]+\]\s*/g, "");
+      v = v.replace(/\bmk:[A-Za-z0-9:_-]+/g, "");
+      return v;
+    };
+
+    const getSlotKey = (btn) => {
+      const hostId = getNotesTargetId(btn) || "notes";
+      const tr = btn.closest("tr");
+      if (tr) {
+        const table = btn.closest("table") || tr.closest("table");
+        const tb = tr.parentElement;
+        const rows = tb ? Array.from(tb.querySelectorAll("tr")) : [];
+        const idx = rows.indexOf(tr);
+        const tKey = table?.getAttribute("data-table-key") || table?.id || "table";
+        return `${hostId}::tbl::${tKey}::r${idx}`;
+      }
+      const all = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(hostId)}"]`));
+      const idx = all.indexOf(btn);
+      return `${hostId}::q::${idx >= 0 ? idx : "x"}`;
+    };
+
+    const findOrDerivePromptText = (btn) => {
+      const tr = btn.closest("tr");
+      const table = btn.closest("table");
+      const section = getSection(btn);
+      const secId = section?.id || "";
+
+      if (tr && table) {
+        if (secId === "training-checklist") {
+          const nameInput =
+            tr.querySelector('td:first-child input[type="text"]') ||
+            tr.querySelector('td:nth-child(2) input[type="text"]');
+          const v = (nameInput?.value || "").trim();
+          return v || "(blank)";
+        }
+
+        if (secId === "opcodes-pricing") {
+          const opcodeInput =
+            tr.querySelector('td:nth-child(2) input[type="text"]') ||
+            tr.querySelector(
+              'td:nth-child(2) input:not([type="checkbox"]):not([type="radio"]), td:nth-child(2) select, td:nth-child(2) textarea'
+            );
+          const v = (opcodeInput?.value || opcodeInput?.textContent || "").trim();
+          return v || "(blank)";
+        }
+
+        const field =
+          tr.querySelector(
+            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
+          ) || null;
+        const value = (field?.value || field?.textContent || "").trim();
+        return value || "Item";
+      }
+
+      const row = btn.closest(".checklist-row");
+      const label = row?.querySelector("label");
+      return (label?.textContent || "").trim() || "Notes";
+    };
+
+    const parseBlocks = (text) => {
+      const lines = normalizeNL(text || "").split("\n");
+      const blocks = [];
+      let cur = null;
+
+      const isMain = (line) => String(line || "").trim().startsWith("•");
+
+      const flush = () => {
+        if (cur) blocks.push(cur);
+        cur = null;
+      };
+
+      for (const line of lines) {
+        if (isMain(line)) {
+          flush();
+          const key = extractKeyFromLine(line);
+          cur = { key: key || "__misc__", lines: [line] };
+        } else {
+          if (!cur) cur = { key: "__misc__", lines: [] };
+          cur.lines.push(line);
+        }
+      }
+      flush();
+      return blocks;
+    };
+
+    const buildBlockLines = (promptText, key) => {
+      const main = `• ${promptText}${makeMarker(key)}`;
+      const sub = `  ◦ `;
+      return [main, sub];
+    };
+
+    const rebuildInCanonicalOrder = (targetId, blocks, newlyAddedKey) => {
+      const btns = Array.from(document.querySelectorAll(`[data-notes-target="${CSS.escape(targetId)}"]`));
+      const wanted = btns.map(getSlotKey);
+
+      const map = new Map();
+      const miscChunks = [];
+
+      blocks.forEach((b) => {
+        if (!b || !b.lines) return;
+        if (b.key && b.key !== "__misc__") map.set(b.key, b);
+        else miscChunks.push(b.lines.join("\n"));
+      });
+
+      const out = [];
+      for (const k of wanted) {
+        if (map.has(k)) out.push(map.get(k).lines.join("\n"));
+      }
+
+      if (newlyAddedKey && !wanted.includes(newlyAddedKey) && map.has(newlyAddedKey)) {
+        out.push(map.get(newlyAddedKey).lines.join("\n"));
+      }
+
+      const rebuilt = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+      const miscText = miscChunks.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+
+      if (rebuilt && miscText) return (rebuilt + "\n\n" + miscText).trimEnd();
+      if (rebuilt) return rebuilt.trimEnd();
+      return miscText.trimEnd();
+    };
+
+    const caretAtHollowForKey = (text, key) => {
+      const v = normalizeNL(text || "");
+      const marker = makeMarker(key);
+
+      const markerIdx = v.indexOf(marker);
+      if (markerIdx < 0) return { text: v, caret: v.length };
+
+      const mainLineEnd = v.indexOf("\n", markerIdx);
+      const afterMain = mainLineEnd < 0 ? v.length : mainLineEnd + 1;
+
+      const nextMain = v.indexOf("\n• ", afterMain);
+      const blockEnd = nextMain >= 0 ? nextMain : v.length;
+
+      const hollowNoSpace = "  ◦";
+      const hollowWithSpace = "  ◦ ";
+
+      let out = v;
+
+      let subIdx = out.indexOf(hollowWithSpace, afterMain);
+      if (subIdx >= 0 && subIdx < blockEnd) {
+        return { text: out, caret: subIdx + hollowWithSpace.length };
+      }
+
+      subIdx = out.indexOf(hollowNoSpace, afterMain);
+      if (subIdx >= 0 && subIdx < blockEnd) {
+        const insertAt = subIdx + hollowNoSpace.length;
+        if (out[insertAt] !== " ") {
+          out = out.slice(0, insertAt) + " " + out.slice(insertAt);
+          return { text: out, caret: insertAt + 1 };
+        }
+        return { text: out, caret: insertAt + 1 };
+      }
+
+      const insertion = "  ◦ ";
+      out = out.slice(0, afterMain) + insertion + out.slice(afterMain);
+      return { text: out, caret: afterMain + insertion.length };
+    };
+
+    const handleNotesClick = (btn) => {
+      const targetId = getNotesTargetId(btn);
+      if (!targetId) return;
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      if (target.classList.contains("is-hidden")) target.classList.remove("is-hidden");
+      if (target.hasAttribute("hidden")) target.removeAttribute("hidden");
+
+      const ta = $("textarea", target);
+      if (!ta) return;
+
+      const promptText = findOrDerivePromptText(btn);
+      const slotKey = getSlotKey(btn);
+
+      preserveScroll(() => {
+        ta.value = cleanupLegacyVisibleKeys(ta.value);
+
+        const blocks = parseBlocks(ta.value);
+        const exists = blocks.some((b) => b.key === slotKey);
+
+        if (!exists) blocks.push({ key: slotKey, lines: buildBlockLines(promptText, slotKey) });
+
+        ta.value = rebuildInCanonicalOrder(targetId, blocks, slotKey).trimEnd() + "\n";
+
+        const res = caretAtHollowForKey(ta.value, slotKey);
+        ta.value = res.text;
+
+        try {
+          ta.focus({ preventScroll: true });
+        } catch {
+          ta.focus();
+        }
+        try {
+          ta.setSelectionRange(res.caret, res.caret);
+        } catch {}
+
+        btn.classList.add("has-notes");
+        btn.classList.add("is-notes-active");
+
+        ensureId(ta);
+        saveField(ta);
+        triggerInputChange(ta);
+      });
+    };
+
+    const isNotesTargetTextarea = (ta) => {
+      if (!ta || !ta.matches || !ta.matches("textarea")) return false;
+      const host = ta.closest("[id]");
+      if (!host || !host.id) return false;
+      return !!document.querySelector(`[data-notes-target="${CSS.escape(host.id)}"]`);
+    };
+
+    return { handleNotesClick, isNotesTargetTextarea };
+  })();
 
   /* =======================
      SUPPORT TICKETS
@@ -1154,7 +1504,7 @@
   };
 
   /* =======================
-     TRAINER + POC RESTORE
+     POC / TRAINER CLONE RESTORE
   ======================= */
   const rebuildPocClones = () => {
     const clones = cloneState.get();
@@ -1164,23 +1514,21 @@
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
 
-    const base = document.querySelector('.additional-poc-card[data-base="true"]');
+    const base = $(".additional-poc-card[data-base='true']");
     if (!base) return;
 
-    const anchor = document.getElementById("additionalPocsContainer");
-
+    let anchor = base;
     clones.pocs.forEach((p) => {
       const card = buildPocCard(p);
       if (!card) return;
-
-      if (anchor) anchor.insertAdjacentElement("beforebegin", card);
-      else base.insertAdjacentElement("afterend", card);
+      anchor.insertAdjacentElement("afterend", card);
+      anchor = card;
     });
   };
 
   const rebuildTrainerClones = () => {
     const clones = cloneState.get();
-    const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
+    const container = $("#additionalTrainersContainer");
     if (!container) return;
 
     container.innerHTML = "";
@@ -1203,45 +1551,51 @@
   };
 
   /* =======================
-     END DATE AUTO-SET (+3)
+     TRAINING END DATE AUTO-SET (3 days after onsite)
   ======================= */
   const mkAutoSetTrainingEndDate = () => {
-    const start = document.getElementById("onsiteStartDate") || MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
-
-    const end = document.getElementById("onsiteEndDate") || MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
-
-    if (!start || !end) return;
+    const onsiteInput = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
+    const endInput = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
+    if (!onsiteInput || !endInput) return;
 
     const compute = () => {
-      if (!start.value) return;
-      if (end.value) return;
+      if (!onsiteInput.value) return;
+      if (endInput.value) return;
 
-      const d = new Date(start.value);
-      if (Number.isNaN(d.getTime())) return;
-      d.setDate(d.getDate() + 3);
+      const start = new Date(onsiteInput.value);
+      if (Number.isNaN(start.getTime())) return;
 
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      end.value = `${yyyy}-${mm}-${dd}`;
-      triggerInputChange(end);
+      start.setDate(start.getDate() + 3);
+
+      const yyyy = start.getFullYear();
+      const mm = String(start.getMonth() + 1).padStart(2, "0");
+      const dd = String(start.getDate()).padStart(2, "0");
+
+      endInput.value = `${yyyy}-${mm}-${dd}`;
+      triggerInputChange(endInput);
     };
 
-    start.addEventListener("change", compute);
+    onsiteInput.addEventListener("change", compute);
     setTimeout(compute, 0);
     setTimeout(compute, 300);
   };
 
   /* =======================
-     TRAINING SUMMARY SYNC (safe)
+     TRAINING SUMMARY (PAGE 11) — Engagement Snapshot autopull
   ======================= */
   const mkGetTrainerCloneValues = () => {
     const clones = cloneState.get();
-    const arr = (clones.trainers || []).map((t) => String(t?.value || "").trim());
+    const arr = (clones.trainers || [])
+      .map((t) => String(t?.value || "").trim())
+      .filter(Boolean);
 
     if (!arr.length) {
-      const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
-      if (container) return $$("input[type='text']", container).map((i) => (i.value || "").trim());
+      const container = $("#additionalTrainersContainer");
+      if (container) {
+        return $$("input[type='text']", container)
+          .map((i) => (i.value || "").trim())
+          .filter(Boolean);
+      }
     }
     return arr;
   };
@@ -1258,7 +1612,8 @@
     });
 
     const values = mkGetTrainerCloneValues();
-    base.value = values[0] ?? "";
+
+    base.value = values[0] || "";
     ensureId(base);
     saveField(base);
 
@@ -1267,7 +1622,7 @@
       inp.type = "text";
       inp.id = `mkSum_addTrainer_${i}`;
       inp.placeholder = "Additional trainer";
-      inp.value = values[i] ?? "";
+      inp.value = values[i];
       stack.appendChild(inp);
 
       ensureId(inp);
@@ -1285,8 +1640,10 @@
     const didEl = document.getElementById(MK_SUMMARY_IDS.did);
     const dealerEl = document.getElementById(MK_SUMMARY_IDS.dealership);
     const groupEl = document.getElementById(MK_SUMMARY_IDS.dealerGroup);
+
     const startEl = document.getElementById(MK_SUMMARY_IDS.dateStart);
     const endEl = document.getElementById(MK_SUMMARY_IDS.dateEnd);
+
     const leadEl = document.getElementById(MK_SUMMARY_IDS.leadTrainer);
 
     const did = mkFirstValueByIds(MK_IDS.did);
@@ -1297,11 +1654,15 @@
     if (dealerEl && (dealerEl.value || "").trim() !== dealership) dealerEl.value = dealership || "";
     if (groupEl && (groupEl.value || "").trim() !== dealerGroup) groupEl.value = dealerGroup || "";
 
-    const startSrc = document.getElementById("onsiteStartDate") || MK_IDS.onsiteDate.map((id) => document.getElementById(id)).find(Boolean);
-    const endSrc = document.getElementById("onsiteEndDate") || MK_IDS.trainingEndDate.map((id) => document.getElementById(id)).find(Boolean);
+    const startSrc = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
+    const endSrc = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
 
-    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) startEl.value = startSrc.value || "";
-    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) endEl.value = endSrc.value || "";
+    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) {
+      startEl.value = startSrc.value || "";
+    }
+    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) {
+      endEl.value = endSrc.value || "";
+    }
 
     const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
     if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
@@ -1315,40 +1676,374 @@
     mkSyncAdditionalTrainersToSummary();
   };
 
-  /* =======================
-     EXPAND BUTTONS + STYLES
-  ======================= */
+  /* =========================================================
+     EXPAND BUTTONS (TABLES + NOTES)
+========================================================= */
   const ensureExpandStyles = (() => {
-    const STYLE_ID = "mk-expand-style-v8_3_5";
+    const STYLE_ID = "mk-expand-style-v8_3";
     return () => {
       if (document.getElementById(STYLE_ID)) return;
       const s = document.createElement("style");
       s.id = STYLE_ID;
       s.textContent = `
-        .mk-field-error{box-shadow:0 0 0 3px rgba(239,109,34,.35) !important; border-color:#EF6D22 !important;}
+        .mk-table-expand-btn,
+        .mk-ta-expand{
+          border:1px solid rgba(0,0,0,.15);
+          background:rgba(255,255,255,.92);
+          font-weight:900;
+          cursor:pointer;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          user-select:none;
+        }
+        .mk-field-error{
+          box-shadow:0 0 0 3px rgba(239,109,34,.35) !important;
+          border-color:#EF6D22 !important;
+        }
+        .mk-expand-placeholder{
+          display:block;
+          width:100%;
+        }
+        #mkTableModal .mk-modal-panel{
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        #mkTableModal .mk-modal-content{
+          padding: 0 !important;
+        }
+        /* helper strip (table mode) */
+        #mkTableModal .mk-modal-strip{
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          display:flex;
+          align-items:center;
+          justify-content:flex-end;
+          gap:10px;
+          padding:10px 12px;
+          background:#fff;
+          border-bottom:1px solid rgba(0,0,0,.10);
+        }
       `;
       document.head.appendChild(s);
     };
   })();
 
+  const tableModal = {
+    modal: null,
+    content: null,
+    title: null,
+    moved: [],
+    bodyOverflow: "",
+    origin: {
+      sectionEl: null,
+      originalId: "",
+      tempId: "",
+      wrapperEl: null,
+    },
+    temp: {
+      strip: null,
+      stripCloseHome: null,
+      stripAddBtn: null,
+      hiddenHeaders: [],
+    },
+  };
+
+  const buildTableStrip = (modal, contentRoot) => {
+    if (!modal || !contentRoot) return null;
+
+    const old = contentRoot.querySelector(".mk-modal-strip");
+    if (old) old.remove();
+
+    const strip = document.createElement("div");
+    strip.className = "mk-modal-strip";
+
+    const closeBtn = modal.querySelector(".mk-modal-close");
+    if (closeBtn) {
+      tableModal.temp.stripCloseHome = closeBtn.parentElement || null;
+      strip.appendChild(closeBtn);
+    }
+
+    // keep clone support, but your CSS hides it in table mode if desired
+    const firstAdd = contentRoot.querySelector(".table-footer button.add-row");
+    if (firstAdd) {
+      const addClone = firstAdd.cloneNode(true);
+      addClone.removeAttribute("id");
+      addClone.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        firstAdd.click();
+      });
+      strip.insertBefore(addClone, strip.firstChild);
+      tableModal.temp.stripAddBtn = addClone;
+    }
+
+    contentRoot.insertBefore(strip, contentRoot.firstChild);
+    tableModal.temp.strip = strip;
+
+    return strip;
+  };
+
+  const hideNotesInternalHeader = (notesHostEl) => {
+    if (!notesHostEl) return;
+    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
+    if (!h) return;
+
+    const display = h.style.display || "";
+    h.style.display = "none";
+    tableModal.temp.hiddenHeaders.push({ el: h, display });
+  };
+
+  const restoreHiddenNotesHeaders = () => {
+    (tableModal.temp.hiddenHeaders || []).forEach(({ el, display }) => {
+      if (!el) return;
+      el.style.display = display || "";
+    });
+    tableModal.temp.hiddenHeaders = [];
+  };
+
+  const openModalWithNodes = (nodes, titleText, originSectionEl) => {
+    const modal = $("#mkTableModal");
+    if (!modal) {
+      mkPopup.ok(
+        "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
+        { title: "Missing Expand Modal" }
+      );
+      return;
+    }
+
+    const content = $(".mk-modal-content", modal);
+    const titleEl = $(".mk-modal-title", modal);
+    const panel = $(".mk-modal-panel", modal) || modal;
+    if (!content) {
+      mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", {
+        title: "Modal Markup Issue",
+      });
+      return;
+    }
+
+    tableModal.modal = modal;
+    tableModal.content = content;
+    tableModal.title = titleEl;
+    tableModal.moved = [];
+    tableModal.temp.strip = null;
+    tableModal.temp.stripAddBtn = null;
+    tableModal.temp.stripCloseHome = null;
+    tableModal.temp.hiddenHeaders = [];
+    content.innerHTML = "";
+
+    if (titleEl) titleEl.textContent = String(titleText || "Expanded View").trim();
+
+    let wrapper = content;
+    const originId = originSectionEl?.id ? String(originSectionEl.id).trim() : "";
+    if (originSectionEl && originId) {
+      const holdId = `${originId}__mk_hold`;
+      if (originSectionEl.id === originId) {
+        originSectionEl.id = holdId;
+      }
+
+      wrapper = document.createElement("div");
+      wrapper.id = originId;
+      wrapper.className = "page-section active";
+
+      content.appendChild(wrapper);
+
+      tableModal.origin.sectionEl = originSectionEl;
+      tableModal.origin.originalId = originId;
+      tableModal.origin.tempId = holdId;
+      tableModal.origin.wrapperEl = wrapper;
+    } else {
+      content.classList.add("page-section", "active");
+    }
+
+    nodes.forEach((node) => {
+      if (!node || !node.parentNode) return;
+
+      const rect = node.getBoundingClientRect();
+      const ph = document.createElement("div");
+      ph.className = "mk-expand-placeholder";
+      ph.style.height = `${Math.max(0, rect.height)}px`;
+
+      node.parentNode.insertBefore(ph, node);
+      tableModal.moved.push({ node, placeholder: ph });
+      wrapper.appendChild(node);
+    });
+
+    if (modal.classList.contains("mk-is-table")) {
+      buildTableStrip(modal, content);
+    }
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    tableModal.bodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
+
+    try {
+      panel.scrollTop = 0;
+    } catch {}
+  };
+
+  const closeTableModal = () => {
+    const modal = tableModal.modal;
+    if (!modal) return;
+
+    restoreHiddenNotesHeaders();
+
+    const closeBtn = modal.querySelector(".mk-modal-close");
+    if (closeBtn && tableModal.temp.stripCloseHome) {
+      try {
+        tableModal.temp.stripCloseHome.appendChild(closeBtn);
+      } catch {}
+    }
+
+    if (tableModal.temp.strip) {
+      try {
+        tableModal.temp.strip.remove();
+      } catch {}
+    }
+    tableModal.temp.strip = null;
+    tableModal.temp.stripAddBtn = null;
+    tableModal.temp.stripCloseHome = null;
+
+    (tableModal.moved || []).forEach(({ node, placeholder }) => {
+      if (!node || !placeholder || !placeholder.parentNode) return;
+      placeholder.parentNode.insertBefore(node, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    });
+
+    if (tableModal.origin.sectionEl && tableModal.origin.originalId && tableModal.origin.tempId) {
+      const sec = tableModal.origin.sectionEl;
+      if (sec.id === tableModal.origin.tempId) {
+        sec.id = tableModal.origin.originalId;
+      }
+    }
+
+    modal.classList.remove("open");
+    modal.classList.remove("mk-notes-only");
+    modal.classList.remove("mk-is-table");
+    modal.classList.remove("mk-is-notes");
+    modal.setAttribute("aria-hidden", "true");
+
+    const content = $(".mk-modal-content", modal);
+    if (content) content.classList.remove("page-section", "active");
+
+    document.body.style.overflow = tableModal.bodyOverflow || "";
+
+    tableModal.modal = null;
+    tableModal.content = null;
+    tableModal.title = null;
+    tableModal.bodyOverflow = "";
+    tableModal.moved = [];
+    tableModal.origin = { sectionEl: null, originalId: "", tempId: "", wrapperEl: null };
+    tableModal.temp = { strip: null, stripCloseHome: null, stripAddBtn: null, hiddenHeaders: [] };
+  };
+
+  const getExpandBundleNodes = (anyInside) => {
+    const footer = anyInside?.closest?.(".table-footer");
+    const sectionCard =
+      footer?.closest(".section") ||
+      footer?.closest(".section-block") ||
+      footer?.parentElement ||
+      anyInside?.closest?.(".section-block") ||
+      anyInside?.closest?.(".page-section") ||
+      document.body;
+
+    const tableBlock = footer?.closest(".section-block") || footer?.closest(".section") || null;
+
+    const nodes = [];
+    if (tableBlock) nodes.push(tableBlock);
+
+    const targets = new Set();
+    $$("[data-notes-target]", sectionCard).forEach((btn) => {
+      const id = btn.getAttribute("data-notes-target");
+      if (id) targets.add(id);
+    });
+    targets.forEach((id) => {
+      const block = document.getElementById(id);
+      if (block) nodes.push(block);
+    });
+
+    if (!nodes.length) nodes.push(sectionCard);
+
+    const uniq = [];
+    const seen = new Set();
+    nodes.forEach((n) => {
+      if (!n || seen.has(n)) return;
+      seen.add(n);
+      uniq.push(n);
+    });
+
+    uniq.sort((a, b) => {
+      if (a === b) return 0;
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
+    return uniq;
+  };
+
+  const openTableModalFor = (anyInside) => {
+    const modal = $("#mkTableModal");
+    if (modal) {
+      modal.classList.remove("mk-is-notes");
+      modal.classList.add("mk-is-table");
+      modal.classList.remove("mk-notes-only");
+    }
+
+    const bundle = getExpandBundleNodes(anyInside);
+    const header = bundle[0].querySelector?.(".section-header") || bundle[0].querySelector?.("h2");
+    const title = (header?.textContent || "Expanded View").trim();
+
+    const originSectionEl = anyInside.closest(".page-section") || anyInside.closest("section") || null;
+    openModalWithNodes(bundle, title, originSectionEl);
+  };
+
+  const openNotesModalFor = (notesHostEl) => {
+    if (!notesHostEl) return;
+
+    const modal = $("#mkTableModal");
+    if (modal) {
+      modal.classList.remove("mk-is-table");
+      modal.classList.add("mk-is-notes");
+      modal.classList.add("mk-notes-only");
+    }
+
+    hideNotesInternalHeader(notesHostEl);
+
+    const h = notesHostEl.querySelector("h2") || notesHostEl.querySelector(".section-header") || null;
+    const title = (h?.textContent || "Notes").trim();
+
+    const originSectionEl = notesHostEl.closest(".page-section") || notesHostEl.closest("section") || null;
+    openModalWithNodes([notesHostEl], title, originSectionEl);
+  };
+
   const ensureTableExpandButtons = () => {
     ensureExpandStyles();
     document.querySelectorAll(".table-footer").forEach((footer) => {
       if (footer.querySelector(".mk-table-expand-btn")) return;
+
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mk-table-expand-btn";
+      btn.setAttribute("data-mk-table-expand", "1");
       btn.title = "Expand";
       btn.textContent = "⤢";
+
       footer.appendChild(btn);
     });
   };
 
   const ensureNotesExpandButtons = () => {
     ensureExpandStyles();
+
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
+
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -1360,13 +2055,19 @@
         ta.parentNode.insertBefore(wrap, ta);
         wrap.appendChild(ta);
       }
+
       if (wrap.querySelector(".mk-ta-expand")) return;
 
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mk-ta-expand";
+      btn.setAttribute("data-mk-notes-expand", "1");
       btn.title = "Expand Notes";
       btn.textContent = "⤢";
+
+      const hostId = ta.closest("[id]")?.id || "";
+      if (hostId) btn.setAttribute("data-notes-id", hostId);
+
       wrap.appendChild(btn);
     });
   };
@@ -1389,327 +2090,153 @@
   };
 
   /* =======================
-     NOTES + EXPAND MODALS (CARD-STYLE)
+     SAVE PDF (safe hook)
   ======================= */
-  const mkModal = (() => {
-    const STYLE_ID = "mk-modal-style-card-v2";
-    let active = null;
+  const mkHandleSavePDF = () => {
+    const fn =
+      window.saveAllPagesAsPDF ||
+      window.savePDF ||
+      window.generatePDF ||
+      window.exportPDF ||
+      null;
 
-    const ensureStyles = () => {
-      if (document.getElementById(STYLE_ID)) return;
-      const s = document.createElement("style");
-      s.id = STYLE_ID;
-      s.textContent = `
-        .mk-modal-backdrop{
-          position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100000;
-          display:flex; align-items:flex-start; justify-content:center; padding:90px 18px 18px;
-        }
-        .mk-modal{
-          width:min(1100px, calc(100vw - 24px));
-          max-height:calc(100vh - 120px);
-          display:flex; flex-direction:column;
-          border-radius:18px;
-          overflow:hidden;
-          background:#fff;
-          border:1px solid rgba(0,0,0,.12);
-          box-shadow:0 18px 60px rgba(0,0,0,.35);
-        }
-        .mk-modal-head{
-          background:#EF6D22; color:#fff; padding:12px 16px; font-weight:900;
-          display:flex; align-items:center; justify-content:space-between; gap:12px;
-        }
-        .mk-modal-title{font-size:14px; letter-spacing:.02em;}
-        .mk-modal-close{
-          border:none; background:rgba(255,255,255,.18); color:#fff; cursor:pointer;
-          width:34px; height:34px; border-radius:999px; font-weight:900;
-        }
-        .mk-modal-close:hover{background:rgba(255,255,255,.28);}
-        .mk-modal-body{padding:14px 16px 16px; overflow:auto;}
+    if (typeof fn === "function") {
+      try {
+        fn();
+        return;
+      } catch (e) {
+        mkPopup.ok(`Save PDF failed:\n${e?.message || e}`, { title: "PDF Error" });
+        return;
+      }
+    }
 
-        .mk-modal-cardstack{display:flex; flex-direction:column; gap:14px;}
-        .mk-modal-cardlike{
-          border-radius:16px;
-          border:1px solid rgba(0,0,0,.10);
-          background:#fff;
-          box-shadow:0 10px 28px rgba(0,0,0,.10);
-          padding:14px;
-        }
-        .mk-modal-cardlike h3{
-          margin:0 0 10px;
-          font-size:14px;
-          font-weight:900;
-          color:#111827;
-        }
+    try {
+      document.dispatchEvent(new CustomEvent("mk:savepdf"));
+      mkPopup.ok(
+        "PDF handler not found in this script. I fired a 'mk:savepdf' event. If you have a PDF script, hook into that event or add a global function like window.saveAllPagesAsPDF().",
+        { title: "PDF Hook" }
+      );
+    } catch {
+      mkPopup.ok(
+        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
+        { title: "PDF Hook" }
+      );
+    }
+  };
 
-        .mk-modal textarea{
-          width:100%;
-          min-height:280px;
-          resize:vertical;
-          font-size:13px;
-          line-height:1.5;
-          border:1px solid rgba(0,0,0,.15);
-          border-radius:14px;
-          padding:12px;
-          outline:none;
-        }
-        .mk-modal textarea:focus{
-          border-color:#EF6D22;
-          box-shadow:0 0 0 3px rgba(239,109,34,.25);
-        }
+  /* =======================
+     ACTIONS DROPDOWN (Page 11)
+  ======================= */
+  const initSummaryActionsDropdown = () => {
+    const wrap = document.getElementById("mkSummaryActions");
+    const btn = document.getElementById("mkSummaryActionsBtn");
+    const menu = document.getElementById("mkSummaryActionsMenu");
+    if (!wrap || !btn || !menu) return;
 
-        .mk-modal-tablewrap{width:100%; overflow:auto;}
-        .mk-modal-tablewrap table{width:100%; border-collapse:separate;}
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      menu.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function toggleMenu() {
+      if (menu.hidden) openMenu();
+      else closeMenu();
+    }
 
-        .mk-modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:10px;}
-        .mk-modal-btn{
-          border:none; cursor:pointer; height:34px; padding:0 16px; border-radius:999px; font-weight:900;
-          font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center;
-        }
-        .mk-modal-btn--save{background:#EF6D22; color:#fff;}
-        .mk-modal-btn--save:hover{background:#ff8b42;}
-        .mk-modal-btn--cancel{background:#f3f4f6; color:#111827; border:1px solid rgba(0,0,0,.10);}
-        .mk-modal-btn--cancel:hover{background:#e5e7eb;}
-      `;
-      document.head.appendChild(s);
-    };
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+    });
 
-    const close = () => {
-      if (!active) return;
-      active.remove();
-      active = null;
-      document.removeEventListener("keydown", onKey);
-    };
+    document.addEventListener("click", (e) => {
+      if (!wrap.contains(e.target)) closeMenu();
+    });
 
-    const onKey = (e) => {
-      if (!active) return;
-      if (e.key === "Escape") close();
-    };
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
 
-    const openBase = ({ title, bodyEl } = {}) => {
-      ensureStyles();
-      close();
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest(".mk-action-item");
+      if (!item) return;
 
-      const back = document.createElement("div");
-      back.className = "mk-modal-backdrop";
+      const action = item.getAttribute("data-action");
 
-      const modal = document.createElement("div");
-      modal.className = "mk-modal";
-
-      const head = document.createElement("div");
-      head.className = "mk-modal-head";
-
-      const t = document.createElement("div");
-      t.className = "mk-modal-title";
-      t.textContent = title || "Details";
-
-      const x = document.createElement("button");
-      x.type = "button";
-      x.className = "mk-modal-close";
-      x.textContent = "✕";
-      x.addEventListener("click", close);
-
-      head.appendChild(t);
-      head.appendChild(x);
-
-      const body = document.createElement("div");
-      body.className = "mk-modal-body";
-      if (bodyEl) body.appendChild(bodyEl);
-
-      modal.appendChild(head);
-      modal.appendChild(body);
-      back.appendChild(modal);
-
-      back.addEventListener("click", (e) => {
-        if (e.target === back) close();
-      });
-
-      document.body.appendChild(back);
-      active = back;
-
-      document.addEventListener("keydown", onKey);
-    };
-
-    const openNotesEditor = ({ title, sourceTextarea } = {}) => {
-      if (!sourceTextarea) return;
-
-      const stack = document.createElement("div");
-      stack.className = "mk-modal-cardstack";
-
-      const card = document.createElement("div");
-      card.className = "mk-modal-cardlike";
-
-      const h = document.createElement("h3");
-      h.textContent = title || "Notes";
-
-      const ta = document.createElement("textarea");
-      ta.value = sourceTextarea.value || "";
-
-      const actions = document.createElement("div");
-      actions.className = "mk-modal-actions";
-
-      const cancel = document.createElement("button");
-      cancel.type = "button";
-      cancel.className = "mk-modal-btn mk-modal-btn--cancel";
-      cancel.textContent = "Cancel";
-      cancel.addEventListener("click", close);
-
-      const save = document.createElement("button");
-      save.type = "button";
-      save.className = "mk-modal-btn mk-modal-btn--save";
-      save.textContent = "Save";
-      save.addEventListener("click", () => {
-        sourceTextarea.value = ta.value || "";
-        triggerInputChange(sourceTextarea);
-
-        const scope =
-          sourceTextarea.closest(".mini-card") ||
-          sourceTextarea.closest(".section-block") ||
-          sourceTextarea.closest(".checklist-row") ||
-          sourceTextarea.closest(".ticket-group") ||
-          document;
-
-        const has = (sourceTextarea.value || "").trim().length > 0;
-        scope.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
-          b.classList.toggle("has-notes", has);
-        });
-
-        close();
-      });
-
-      actions.appendChild(cancel);
-      actions.appendChild(save);
-
-      card.appendChild(h);
-      card.appendChild(ta);
-      card.appendChild(actions);
-
-      stack.appendChild(card);
-
-      openBase({ title: title || "Notes", bodyEl: stack });
-      setTimeout(() => ta.focus(), 0);
-    };
-
-    const openExpandedTableCardStyle = ({ title, table, notesTextarea } = {}) => {
-      if (!table) return;
-
-      const stack = document.createElement("div");
-      stack.className = "mk-modal-cardstack";
-
-      // TABLE card
-      const tableCard = document.createElement("div");
-      tableCard.className = "mk-modal-cardlike";
-
-      const h1 = document.createElement("h3");
-      h1.textContent = title || "Expanded Table";
-
-      const wrap = document.createElement("div");
-      wrap.className = "mk-modal-tablewrap";
-
-      const clone = table.cloneNode(true);
-      clone.querySelectorAll(".mk-table-expand-btn, .mk-ta-expand").forEach((b) => b.remove());
-
-      wrap.appendChild(clone);
-      tableCard.appendChild(h1);
-      tableCard.appendChild(wrap);
-      stack.appendChild(tableCard);
-
-      // NOTES card underneath
-      if (notesTextarea) {
-        const notesCard = document.createElement("div");
-        notesCard.className = "mk-modal-cardlike";
-
-        const h2 = document.createElement("h3");
-        h2.textContent = "Notes";
-
-        const ta = document.createElement("textarea");
-        ta.value = notesTextarea.value || "";
-
-        const actions = document.createElement("div");
-        actions.className = "mk-modal-actions";
-
-        const cancel = document.createElement("button");
-        cancel.type = "button";
-        cancel.className = "mk-modal-btn mk-modal-btn--cancel";
-        cancel.textContent = "Cancel";
-        cancel.addEventListener("click", close);
-
-        const save = document.createElement("button");
-        save.type = "button";
-        save.className = "mk-modal-btn mk-modal-btn--save";
-        save.textContent = "Save";
-        save.addEventListener("click", () => {
-          notesTextarea.value = ta.value || "";
-          triggerInputChange(notesTextarea);
-
-          const scope = notesTextarea.closest(".section-block") || document;
-          const has = (notesTextarea.value || "").trim().length > 0;
-          scope.querySelectorAll(".notes-btn, .notes-icon-btn").forEach((b) => {
-            b.classList.toggle("has-notes", has);
-          });
-
-          close();
-        });
-
-        actions.appendChild(cancel);
-        actions.appendChild(save);
-
-        notesCard.appendChild(h2);
-        notesCard.appendChild(ta);
-        notesCard.appendChild(actions);
-        stack.appendChild(notesCard);
+      if (action === "generate") {
+        mkSyncSummaryEngagementSnapshot();
+        mkPopup.ok("Engagement Snapshot refreshed from the project.", { title: "Generate Summary" });
       }
 
-      openBase({ title: title || "Expanded Table", bodyEl: stack });
-    };
+      if (action === "savepdf") {
+        const hiddenBtn = document.getElementById("savePDF");
+        if (hiddenBtn) hiddenBtn.click();
+        else mkHandleSavePDF();
+      }
 
-    return { openNotesEditor, openExpandedTableCardStyle, close };
-  })();
+      if (action === "reset") {
+        const summary = document.getElementById("training-summary");
+        mkPopup.confirm("Reset this page? This will clear only the fields on Training Summary.", {
+          title: "Reset This Page",
+          okText: "Reset Page",
+          cancelText: "Cancel",
+          onOk: () => clearSection(summary),
+        });
+      }
 
-  const mkFindNearestNotesTextarea = (btn) => {
-    if (!btn) return null;
-
-    const targetId = btn.getAttribute("data-notes-target") || btn.dataset?.notesTarget;
-    if (targetId) {
-      const hit = document.getElementById(targetId);
-      if (hit && hit.matches("textarea")) return hit;
-    }
-
-    const scope =
-      btn.closest(".section-block") ||
-      btn.closest(".mini-card") ||
-      btn.closest(".checklist-row") ||
-      btn.closest(".ticket-group") ||
-      btn.closest("section") ||
-      document;
-
-    const ta = scope.querySelector("textarea");
-    return ta || null;
+      closeMenu();
+    });
   };
 
-  const mkFindTableForExpandBtn = (expandBtn) => {
-    const footer = expandBtn.closest(".table-footer");
-    return (
-      footer?.closest(".section")?.querySelector("table.training-table") ||
-      footer?.closest(".section-block")?.querySelector("table.training-table") ||
-      footer?.parentElement?.querySelector("table.training-table") ||
-      footer?.closest(".table-container")?.querySelector("table.training-table") ||
-      footer?.closest("table.training-table") ||
-      null
-    );
+  /* =======================
+     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
+  ======================= */
+  const shouldTreatAsAddTrainerBtn = (btn) => {
+    if (!btn) return false;
+
+    // explicit hooks
+    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
+
+    // fallback: button is in Trainers page + inside .input-plus next to the Additional Trainer input
+    const trainersPage = btn.closest("#trainers-deployment");
+    if (!trainersPage) return false;
+
+    const isBtn = btn.matches("button, a, [role='button']");
+    if (!isBtn) return false;
+
+    const ip = btn.closest(".input-plus");
+    if (!ip) return false;
+
+    // If the input-plus contains #additionalTrainerInput, assume this is the + button
+    if (ip.querySelector("#additionalTrainerInput")) return true;
+
+    // Or if this button sits right next to #additionalTrainerInput
+    const globalInput = document.getElementById("additionalTrainerInput");
+    if (globalInput && ip.contains(globalInput)) return true;
+
+    return false;
   };
 
-  const mkFindNotesTextareaForTable = (table) => {
-    if (!table) return null;
+  const hookAddTrainerButtonDirectly = () => {
+    // If markup has a stable button, bind directly too (in addition to delegation)
+    const page = document.getElementById("trainers-deployment");
+    if (!page) return;
 
-    const targetId = table.getAttribute("data-notes-target");
-    if (targetId) {
-      const hit = document.getElementById(targetId);
-      if (hit && hit.matches("textarea")) return hit;
-    }
+    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
+    btns.forEach((b) => {
+      if (!shouldTreatAsAddTrainerBtn(b)) return;
+      if (b.__mkAddTrainerBound) return;
+      b.__mkAddTrainerBound = true;
 
-    const block = table.closest(".section-block") || table.closest(".section") || table.closest("section") || document;
-    const candidates = Array.from(block.querySelectorAll("textarea")).filter((ta) => !ta.closest("table"));
-    return candidates[0] || null;
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow();
+      });
+    });
   };
 
   /* =======================
@@ -1718,7 +2245,6 @@
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // NAV
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -1728,12 +2254,18 @@
       setTimeout(() => {
         ensureTableExpandButtons();
         ensureNotesExpandButtons();
-        if (targetId === "training-summary") mkSyncSummaryEngagementSnapshot();
+
+        // re-hook add-trainer button when page becomes active
+        hookAddTrainerButtonDirectly();
+
+        if (targetId === "training-summary") {
+          mkSyncSummaryEngagementSnapshot();
+        }
       }, 0);
+
       return;
     }
 
-    // Clear All
     const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
@@ -1746,7 +2278,6 @@
       return;
     }
 
-    // Reset Page
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -1763,8 +2294,14 @@
       return;
     }
 
-    // POC +
-    const pocBtn = t.closest("[data-add-poc], .poc-add-btn, .additional-poc-add");
+    const savePdfBtn = t.closest("#savePDF, [data-mk-action='save-pdf']");
+    if (savePdfBtn) {
+      e.preventDefault();
+      mkHandleSavePDF();
+      return;
+    }
+
+    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
     if (pocBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -1772,7 +2309,6 @@
       return;
     }
 
-    // Table Add Row
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -1780,7 +2316,13 @@
       return;
     }
 
-    // Tickets +
+    const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
+    if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
+      e.preventDefault();
+      Notes.handleNotesClick(notesBtn);
+      return;
+    }
+
     const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
@@ -1788,56 +2330,42 @@
       return;
     }
 
-    // Trainer +
-    const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn");
-    if (trainerBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      addTrainerRow(trainerBtn);
-      return;
-    }
-
-    // Map button
     const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
+      const inp =
+        $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
 
-    // Notes buttons
-    const notesBtn = t.closest(".notes-btn, .notes-icon-btn, [data-notes-target]");
-    if (notesBtn) {
+    const tableExpandBtn = t.closest(".mk-table-expand-btn");
+    if (tableExpandBtn) {
       e.preventDefault();
-      e.stopPropagation();
-      const ta = mkFindNearestNotesTextarea(notesBtn);
-      if (ta) mkModal.openNotesEditor({ title: "Notes", sourceTextarea: ta });
+      openTableModalFor(tableExpandBtn);
       return;
     }
 
-    // Expand textarea (injected)
-    const taExpand = t.closest(".mk-ta-expand");
-    if (taExpand) {
+    const notesExpandBtn = t.closest(".mk-ta-expand");
+    if (notesExpandBtn) {
       e.preventDefault();
-      e.stopPropagation();
-      const ta = taExpand.closest(".mk-ta-wrap")?.querySelector("textarea") || null;
-      if (ta) mkModal.openNotesEditor({ title: "Expand Notes", sourceTextarea: ta });
+      const id = notesExpandBtn.getAttribute("data-notes-id");
+      const block = id ? document.getElementById(id) : null;
+      if (block) openNotesModalFor(block);
+      else openNotesModalFor(notesExpandBtn.closest(".section-block"));
       return;
     }
 
-    // Expand table (card-style + notes underneath)
-    const tableExpand = t.closest(".mk-table-expand-btn");
-    if (tableExpand) {
-      e.preventDefault();
-      e.stopPropagation();
-      const table = mkFindTableForExpandBtn(tableExpand);
-      const notesTa = mkFindNotesTextareaForTable(table);
-      if (table) mkModal.openExpandedTableCardStyle({ title: "Expanded Table", table, notesTextarea: notesTa });
-      return;
+    const mkTableModalEl = $("#mkTableModal");
+    if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
+      if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
+        e.preventDefault();
+        closeTableModal();
+        return;
+      }
     }
-  }); // ✅ END click handler
+  });
 
   document.addEventListener("input", (e) => {
     const el = e.target;
@@ -1853,11 +2381,20 @@
       mkSyncSummaryEngagementSnapshot();
     }
 
-    if (el.closest("#additionalTrainersContainer") || el.closest("[data-mk-addl-trainers-container]")) {
-      const container = $("#additionalTrainersContainer") || $("[data-mk-addl-trainers-container]");
+    if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = container ? $$("input[type='text']", container).map((i) => ({ value: (i.value || "").trim() })) : [];
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
+        value: (i.value || "").trim(),
+      }));
       cloneState.set(clones);
+
+      mkSyncSummaryEngagementSnapshot();
+    }
+
+    if (
+      /lead.*trainer|trainer.*lead|primary.*trainer/i.test(el.id || el.name || "") ||
+      (el.getAttribute("placeholder") || "").toLowerCase().includes("lead trainer")
+    ) {
       mkSyncSummaryEngagementSnapshot();
     }
 
@@ -1886,7 +2423,10 @@
       setGhostStyles(document);
     }
 
-    if (el.matches('input[type="date"]')) mkSyncSummaryEngagementSnapshot();
+    if (el.matches('input[type="date"]')) {
+      mkSyncSummaryEngagementSnapshot();
+    }
+
     if (el.matches(".ticket-status-select")) onTicketStatusChange(el);
 
     const tr = el.closest("tr");
@@ -1899,19 +2439,51 @@
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    const isTrainerInput =
-      (el && el.id === "additionalTrainerInput") ||
-      (el && el.matches && el.matches("[data-mk-addl-trainer-input]"));
-
-    if (isTrainerInput && e.key === "Enter") {
+    if (
+      e.key === "Enter" &&
+      Notes.isNotesTargetTextarea(el) &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
       e.preventDefault();
-      addTrainerRow(el);
+      preserveScroll(() => {
+        const insert = "\n  ◦ ";
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        const before = el.value.slice(0, start);
+        const after = el.value.slice(end);
+        el.value = before + insert + after;
+
+        const caret = start + insert.length;
+        try {
+          el.focus({ preventScroll: true });
+          el.setSelectionRange(caret, caret);
+        } catch {}
+
+        ensureId(el);
+        saveField(el);
+        triggerInputChange(el);
+      });
+      return;
+    }
+
+    // ✅ Press Enter in the "Additional Trainer" input adds it
+    if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
+      e.preventDefault();
+      addTrainerRow();
       return;
     }
 
     if (e.key === "Escape") {
+      const mkTableModalEl = $("#mkTableModal");
+      if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
+        e.preventDefault();
+        closeTableModal();
+      }
       mkPopup.close();
-      mkModal.close();
     }
   });
 
@@ -1931,6 +2503,7 @@
     seedStarterRowsToThree();
 
     restoreAllFields();
+
     setGhostStyles(document);
 
     mkSyncTopbarTitle();
@@ -1943,10 +2516,42 @@
     startExpandObserver();
 
     enforceBaseTicketStatusLock();
+    initSummaryActionsDropdown();
 
-    log("Initialized v8.3.5.");
+    // ✅ bind trainer + button directly too (in case of weird overlays/stopPropagation elsewhere)
+    hookAddTrainerButtonDirectly();
+
+    log("Initialized v8.3.1.");
   };
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
+
+/* =======================================================
+   SAFETY NET CLICK PATCH (GLOBAL)
+   - If ANYTHING in the page swallows the click before delegation,
+     this captures it late and tries again.
+======================================================= */
+document.addEventListener(
+  "click",
+  (e) => {
+    const btn = e.target.closest("[data-add-trainer], .trainer-add-btn, #trainers-deployment .input-plus button");
+    if (!btn) return;
+
+    // only if trainer input exists
+    if (!document.getElementById("additionalTrainerInput")) return;
+
+    // if project handler already ran, nothing breaks — addTrainerRow() checks input value
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (typeof window.mkAddTrainerRow === "function") {
+      window.mkAddTrainerRow();
+    }
+  },
+  true // capture phase = strongest guarantee
+);
