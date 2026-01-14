@@ -817,8 +817,9 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     clone.setAttribute(AUTO_CARD_ATTR, "poc");
 
     clone
-      .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn")
-      .forEach((btn) => btn.remove());
+  .querySelectorAll("[data-add-poc], .additional-poc-add, .poc-add-btn, .input-plus button")
+  .forEach((btn) => btn.remove());
+
 
     const row = clone.querySelector(".checklist-row.integrated-plus");
     if (row) row.classList.remove("integrated-plus");
@@ -2122,11 +2123,11 @@ const hookAddPocButtonDirectly = () => {
     });
   };
 
-  const startExpandObserver = () => {
-    const obs = new MutationObserver(() => {
-      ensureTableExpandButtons();
-      ensureNotesExpandButtons();
-    });
+  const obs = new MutationObserver(() => {
+  ensureTableExpandButtons();
+  ensureNotesExpandButtons();
+  hookAddPocButtonDirectly();
+});
     obs.observe(document.body, { childList: true, subtree: true });
 
     setTimeout(() => {
@@ -2352,13 +2353,15 @@ const hookAddPocButtonDirectly = () => {
       return;
     }
 
-    const pocBtn = t.closest("[data-add-poc], .additional-poc-add, .poc-add-btn");
-    if (pocBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      addPocCard();
-      return;
-    }
+    const pocBtn = t.closest(
+  "[data-add-poc], .additional-poc-add, .poc-add-btn, #dealership-info .additional-poc-card[data-base='true'] .input-plus button"
+);
+if (pocBtn && shouldTreatAsAddPocBtn(pocBtn)) {
+  e.preventDefault();
+  e.stopPropagation();
+  addPocCard();
+  return;
+}
 
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
