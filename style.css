@@ -1767,127 +1767,54 @@ button.remove-row{
 
 /* =========================================================
    MODAL MODE — "PAGE" (mk-is-page)
-   DMS Integration popup that looks identical to the DMS page:
-   - NO orange modal header
-   - NO extra white "panel card" behind everything
+   DMS Integration popup:
+   - NO orange modal header (but header not display:none so X can exist)
+   - NO extra white modal panel behind everything
    - X button pinned top-right
 ========================================================= */
 
-/* Hide the modal orange header entirely */
-#mkTableModal.mk-is-page .mk-modal-header{
-  display:none !important;
-}
-
-/* Transparent modal shell (prevents “random white card behind”) */
+/* 1) Kill the modal panel "white card" entirely */
 #mkTableModal.mk-is-page .mk-modal-panel{
   position:relative !important;
-  width:min(1180px, calc(100vw - 60px)) !important; /* overall popup width */
+  width:min(1180px, calc(100vw - 60px)) !important;
+
   background:transparent !important;
   border:none !important;
   box-shadow:none !important;
+  border-radius:0 !important;
+
   overflow:visible !important;
 }
 
-/* No extra padding on the modal content; the page-section is the only card */
-#mkTableModal.mk-is-page .mk-modal-content{
-  padding:0 !important;
-  background:transparent !important;
-  overflow:auto !important;
-}
-
-/* The moved page-section is the ONLY visible white card */
-#mkTableModal.mk-is-page .page-section{
-  display:block !important;
-  background:var(--card-bg) !important;
-  box-shadow:var(--shadow) !important;
-  border-radius:var(--radius-lg) !important;
-  margin:0 auto !important;
-  max-width:1080px !important;           /* slimmer interior card */
-  width:100% !important;
-  padding:22px 34px 28px !important;      /* match normal page-section padding */
-  position:relative !important;           /* keeps internal absolute children sane */
-}
-
-/* X button pinned to the top-right corner of the popup */
-#mkTableModal.mk-is-page .mk-modal-close{
+/* 2) Hide the orange header visually WITHOUT display:none
+      (because the X button is inside it) */
+#mkTableModal.mk-is-page .mk-modal-header{
   position:absolute !important;
-  top:12px !important;
-  right:12px !important;
+  top:0 !important;
+  left:0 !important;
 
-  width:34px !important;
-  height:34px !important;
-  border-radius:10px !important;
+  height:0 !important;
+  min-height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
 
-  background:var(--orange) !important;
-  color:#fff !important;
+  background:transparent !important;
   border:none !important;
 
-  font-size:20px !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-
-  box-shadow:0 8px 18px rgba(0,0,0,0.25) !important;
-  z-index:100000 !important;
-}
-#mkTableModal.mk-is-page .mk-modal-close:hover{
-  background:#ff8b42 !important;
-  transform:translateY(-1px) !important;
+  overflow:visible !important; /* allows the X to show */
 }
 
-/* Remove Reset This Page button inside the popup */
-#mkTableModal.mk-is-page #dms-integration .clear-page-btn{
-  display:none !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-
-/* Hide any modal title text (header is hidden, but this is extra safe) */
+/* Hide the header title text */
 #mkTableModal.mk-is-page .mk-modal-title{
   display:none !important;
 }
 
-/* Kill any injected card-level close buttons (safety) */
-.mk-card-close{ display:none !important; }
-
-/* Remove any stray top divider/line artifacts */
-#mkTableModal.mk-is-page #dms-integration{
-  border-top:none !important;
-}
-
-/* Keep DMS popup slimmer + big center gap */
-#mkTableModal.mk-is-page #dms-integration .dms-grid{
-  gap:50px !important; /* ~3/4" gap between columns */
-}
-
-/* =========================================================
-   GLOBAL: kill any injected card-level X buttons (safety)
-========================================================= */
-.mk-card-close{ display:none !important; }
-
-
-/* Bigger notes textareas remain (already set above) */
-
-
-/* ---------- TABLE MODE ---------- */
-
-/* No orange header bar (but keep close button element existing) */
-#mkTableModal.mk-is-table .mk-modal-header{
-  background:transparent !important;
-  border-bottom:none !important;
-  padding:0 !important;
-  min-height:0 !important;
-  height:0 !important;
-}
-#mkTableModal.mk-is-table .mk-modal-title{ display:none !important; }
-
-/* Create the white strip space above content */
-#mkTableModal.mk-is-table .mk-modal-content{
-  padding:62px 18px 18px !important;
-}
-
-/* Orange X in the top-right white strip */
-#mkTableModal.mk-is-table .mk-modal-close{
+/* 3) X button: force visible + top-right */
+#mkTableModal.mk-is-page .mk-modal-close{
   display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
   position:absolute !important;
   top:12px !important;
   right:12px !important;
@@ -1907,48 +1834,52 @@ button.remove-row{
   box-shadow:0 10px 22px rgba(0,0,0,0.25) !important;
   z-index:100000 !important;
 }
-#mkTableModal.mk-is-table .mk-modal-close:hover{
+#mkTableModal.mk-is-page .mk-modal-close:hover{
   background:#ff8b42 !important;
   transform:translateY(-1px) !important;
 }
 
-/* In table popups, attach section header to table container */
-#mkTableModal.mk-is-table .section-header{
-  margin:0 !important;
-  border:1px solid var(--border) !important;
-  border-bottom:none !important;
-  border-top-left-radius:var(--radius-lg) !important;
-  border-top-right-radius:var(--radius-lg) !important;
-}
-#mkTableModal.mk-is-table .table-container{
-  margin:0 0 16px 0 !important;
-  border:1px solid var(--border) !important;
-  border-top:none !important;
-  border-radius:0 0 var(--radius-lg) var(--radius-lg) !important;
-  overflow:hidden !important;
-}
-
-/* Hide expand button inside modal */
-#mkTableModal.mk-is-table .mk-table-expand-btn{ display:none !important; }
-
-/* Move "+" Add Row into the white strip */
-#mkTableModal.mk-is-table .table-footer{
-  background:transparent !important;
-  border:none !important;
+/* 4) Modal content: no extra padding/card look */
+#mkTableModal.mk-is-page .mk-modal-content{
   padding:0 !important;
-  height:0 !important;
-  min-height:0 !important;
+  background:transparent !important;
+  overflow:auto !important;
 }
-#mkTableModal.mk-is-table .table-footer .add-row{
-  position:absolute !important;
-  top:14px !important;
-  right:62px !important; /* leaves room for X */
-  z-index:100000 !important;
+
+/* 5) The moved page-section is the ONLY visible "card" */
+#mkTableModal.mk-is-page .page-section{
+  display:block !important;
+
+  background:var(--card-bg) !important;
+  box-shadow:var(--shadow) !important;
+  border-radius:var(--radius-lg) !important;
+
+  width:100% !important;
+  max-width:1080px !important;
+  margin:0 auto !important;
+
+  padding:22px 34px 28px !important;
 }
-#mkTableModal.mk-is-table .table-footer::before,
-#mkTableModal.mk-is-table .table-footer::after{
+
+/* Remove Reset This Page inside DMS popup */
+#mkTableModal.mk-is-page #dms-integration .clear-page-btn{
   display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
 }
+
+/* Remove any stray top divider line artifacts */
+#mkTableModal.mk-is-page #dms-integration{
+  border-top:none !important;
+}
+
+/* Keep the wide center gap between the 2 DMS columns */
+#mkTableModal.mk-is-page #dms-integration .dms-grid{
+  gap:50px !important;
+}
+
+/* Safety: remove any injected extra close buttons */
+.mk-card-close{ display:none !important; }
 
 /* =========================================================
    PATCH — TABLE POPUPS (mkTableModal)
