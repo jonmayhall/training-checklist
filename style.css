@@ -1805,6 +1805,13 @@ button.remove-row{
 }
 
 /* =========================================================
+   DMS MODAL — remove header title text
+========================================================= */
+#mkTableModal.mk-is-page .mk-modal-title{
+  display:none !important;
+}
+
+/* =========================================================
    DMS PAGE (MODAL) — indent title & subtitle
 ========================================================= */
 #mkTableModal.mk-is-page #dms-integration h1{
