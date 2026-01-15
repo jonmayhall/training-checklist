@@ -1799,8 +1799,6 @@ border-bottom-left-radius:var(--radius-lg) !important;
   margin:0 !important;
 }
 
-#mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
-
 /* =========================================================
    DMS MODAL — remove stray top divider line (FINAL)
 ========================================================= */
