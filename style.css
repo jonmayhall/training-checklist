@@ -1804,6 +1804,19 @@ button.remove-row{
 #mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
 
 /* =========================================================
+   DMS PAGE (MODAL) — indent title & subtitle
+========================================================= */
+#mkTableModal.mk-is-page #dms-integration h1{
+  margin-top:18px !important;     /* pushes it down from header */
+  margin-left:12px !important;    /* indent */
+}
+
+#mkTableModal.mk-is-page #dms-integration .page-subtitle{
+  margin-left:12px !important;    /* match title indent */
+  margin-top:6px !important;
+}
+
+/* =========================================================
    ✅ MODAL BEHAVIOR — SINGLE SOURCE OF TRUTH (CLASS-BASED)
    - Notes: ONE header (modal header). Hide inner card header.
    - Notes: X inside orange header.
