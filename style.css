@@ -1757,25 +1757,51 @@ button.remove-row{
    MODAL MODE — "PAGE" (keeps page-section styling)
    Used for DMS Integration popup so it looks identical
 ========================================================= */
+/* =========================================================
+   MODAL MODE — "PAGE" (keeps page-section styling)
+   Used for DMS Integration popup so it looks identical
+   ✅ Fixes: removes “random white card behind”
+   ✅ Also: squares top corners so it aligns with orange header
+========================================================= */
+
+/* Make the modal “shell” invisible so ONLY the page-section shows */
+#mkTableModal.mk-is-page .mk-modal-panel{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+}
+
+/* Remove extra padding so the page-section sits flush under header */
+#mkTableModal.mk-is-page .mk-modal-content{
+  padding:0 !important;
+  background:transparent !important;
+}
+
+/* Keep normal page styling, but square the TOP corners */
 #mkTableModal.mk-is-page .page-section{
   background:var(--card-bg) !important;
   box-shadow:var(--shadow) !important;
-  border-radius:var(--radius-lg) !important;
-  padding:22px 34px 28px !important;
+
+  /* ✅ square top edges to align with orange header */
+  border-top-left-radius:0 !important;
+  border-top-right-radius:0 !important;
+
+  /* keep bottom rounded like the app */
+  border-bottom-left-radius:var(--radius-lg) !important;
+  border-bottom-right-radius:var(--radius-lg) !important;
+
+  margin:0 !important;
 }
 
-/* In page mode, keep the normal page look */
+/* Ensure the orange header remains visible in page mode */
 #mkTableModal.mk-is-page .mk-modal-header{
-  display:flex !important;          /* keep header (title + X) */
+  display:flex !important;
   height:auto !important;
   padding:10px 16px !important;
   background:var(--orange) !important;
   border-bottom:1px solid var(--border) !important;
 }
-
-#mkTableModal.mk-is-page .mk-modal-title{
-  display:block !important;
-}
+#mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
 
 /* =========================================================
    ✅ MODAL BEHAVIOR — SINGLE SOURCE OF TRUTH (CLASS-BASED)
