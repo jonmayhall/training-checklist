@@ -1826,11 +1826,11 @@ button.remove-row{
 ========================================================= */
 #mkTableModal.mk-is-page #dms-integration h1{
   margin-top:18px !important;     /* pushes it down from header */
-  margin-left:108px !important;    /* indent */
+  margin-left:50px !important;    /* indent */
 }
 
 #mkTableModal.mk-is-page #dms-integration .page-subtitle{
-  margin-left:108px !important;    /* match title indent */
+  margin-left:50px !important;    /* match title indent */
   margin-top:6px !important;
 }
 
