@@ -1165,11 +1165,10 @@ main{
 
 #resources-quick-launch .mk-launch-card{
   appearance:none;
-  border:1px solid var(--orange);
-  background:var(--orange);
-  color:#fff;
+  border:1px solid var(--border);
+  background:#fff;
   border-radius:var(--radius-lg);
-  box-shadow:0 3px 10px rgba(239,109,34,0.35);
+  box-shadow:var(--shadow);
   padding:14px 16px;
   cursor:pointer;
   text-align:left;
@@ -1177,33 +1176,34 @@ main{
   flex-direction:column;
   gap:6px;
   min-height:92px;
-  transition:transform .12s ease, background .12s ease, box-shadow .12s ease;
+  position:relative;
+  transition:
+    transform .12s ease,
+    border-color .12s ease,
+    box-shadow .12s ease;
+}
+
+/* subtle left accent */
+#resources-quick-launch .mk-launch-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:10px;
+  bottom:10px;
+  width:3px;
+  border-radius:3px;
+  background:transparent;
+  transition:background .12s ease;
 }
 
 #resources-quick-launch .mk-launch-card:hover{
-  background:#ff8b42;
+  border-color:var(--orange);
   transform:translateY(-1px);
-  box-shadow:0 10px 26px rgba(239,109,34,0.45);
+  box-shadow:0 10px 26px rgba(0,0,0,0.12);
 }
 
-/* Title + sub copy now white */
-#resources-quick-launch .mk-launch-title{
-  font-weight:900;
-  font-size:14px;
-  color:#fff;
-  letter-spacing:.2px;
-}
-
-#resources-quick-launch .mk-launch-sub{
-  font-size:12px;
-  color:rgba(255,255,255,0.85);
-  line-height:1.35;
-  margin-right:8px;
-}
-
-/* REMOVE the OPEN pill entirely */
-#resources-quick-launch .mk-launch-cta{
-  display:none !important;
+#resources-quick-launch .mk-launch-card:hover::before{
+  background:var(--orange);
 }
 
 @media (max-width:980px){
