@@ -1582,6 +1582,23 @@ button.remove-row{
 }
 
 /* =========================================================
+   DMS POPUP (mk-is-page) — REMOVE OUTER PANEL "WHITE CARD"
+   (nuclear override so only the inner .page-section is visible)
+========================================================= */
+#mkTableModal.open.mk-is-page .mk-modal-panel{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
+
+#mkTableModal.open.mk-is-page .mk-modal-content{
+  background:transparent !important;
+  padding:0 !important;
+}
+
+/* =========================================================
    Dealership Address — Map button attached
 ========================================================= */
 #dealership-address-card .checklist-row{ align-items:center !important; }
