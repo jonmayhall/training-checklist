@@ -710,39 +710,50 @@
     return wrap;
   };
 
-  const addTrainerRow = (fromEl = null) => {
-    const root =
-      (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
-      document.getElementById("trainers-deployment") ||
-      document;
+ const addTrainerRow = (fromEl = null) => {
+  // Prefer the Trainers page as the search root
+  const root =
+    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+    document.getElementById("trainers-deployment") ||
+    document;
 
-    const input = root.querySelector("#additionalTrainerInput") || document.querySelector("#additionalTrainerInput");
-    const container =
-      root.querySelector("#additionalTrainersContainer") || document.querySelector("#additionalTrainersContainer");
+  const input =
+    root.querySelector("#additionalTrainerInput") ||
+    document.querySelector("#additionalTrainerInput");
 
-    if (!input || !container) return;
+  const container =
+    root.querySelector("#additionalTrainersContainer") ||
+    document.querySelector("#additionalTrainersContainer");
 
-    const name = (input.value || "").trim();
-    if (!name) return;
+  if (!container) return;
 
-    const row = buildTrainerRow(name);
-    container.appendChild(row);
+  // ✅ Allow blank adds
+  const name = (input?.value || "").trim();
 
-    const clones = cloneState.get();
-    clones.trainers = clones.trainers || [];
-    clones.trainers.push({ value: name });
-    cloneState.set(clones);
+  const row = buildTrainerRow(name); // name may be ""
+  container.appendChild(row);
 
+  // persist clone state (store blank too — or choose to skip blanks, see note below)
+  const clones = cloneState.get();
+  clones.trainers = clones.trainers || [];
+  clones.trainers.push({ value: name });
+  cloneState.set(clones);
+
+  // if they typed something, clear the default input box
+  if (input && name) {
     input.value = "";
     saveField(input);
-    input.focus();
+  }
 
-    mkSyncSummaryEngagementSnapshot();
-  };
+  // focus the new row input
+  const newInput = row.querySelector("input[type='text']");
+  if (newInput) newInput.focus();
 
-  try {
-    window.mkAddTrainerRow = addTrainerRow;
-  } catch {}
+  mkSyncSummaryEngagementSnapshot();
+};
+
+// keep exposed
+try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
   /* =======================
      ADD POC (+)
@@ -2436,11 +2447,153 @@
       return;
     }
 
-    if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
+     /* =======================================================
+   ENTER BEHAVIOR
+   1) Base Additional POC card: Enter = next field (Name→Role→Cell→Email),
+      and after Email adds a new card ONLY when all four are filled.
+   2) Everywhere else: Enter in normal input/select moves to next field,
+      ignoring ALL textareas (including Notes).
+======================================================= */
+
+// -------------------------
+// (1) POC BASE CARD: Enter = next, then add when complete
+// -------------------------
+if (
+  e.key === "Enter" &&
+  !e.shiftKey &&
+  !e.metaKey &&
+  !e.ctrlKey &&
+  !e.altKey &&
+  !e.isComposing
+) {
+  const basePocCard = el?.closest?.("#dealership-info .additional-poc-card[data-base='true']");
+
+  if (basePocCard && el.matches("input, select")) {
+    const nameEl = basePocCard.querySelector('input[placeholder="Enter name"]');
+    const roleEl = basePocCard.querySelector('input[placeholder="Enter role"]');
+    const cellEl = basePocCard.querySelector('input[placeholder="Enter cell"]');
+    const emailEl = basePocCard.querySelector('input[type="email"]');
+
+    const fields = [nameEl, roleEl, cellEl, emailEl].filter(Boolean);
+
+    // only run if the focused element is one of these fields
+    if (fields.includes(el)) {
       e.preventDefault();
-      addTrainerRow(el);
+
+      const idx = fields.indexOf(el);
+      const next = fields[idx + 1];
+
+      // go to next field if it exists
+      if (next) {
+        next.focus();
+        try { next.select?.(); } catch {}
+        return;
+      }
+
+      // last field (email): add new card ONLY if all four are filled
+      const allFilled =
+        !!nameEl?.value?.trim() &&
+        !!roleEl?.value?.trim() &&
+        !!cellEl?.value?.trim() &&
+        !!emailEl?.value?.trim();
+
+      if (allFilled) {
+        addPocCard();
+
+        // focus "Enter name" in the newly created card
+        const cards = Array.from(document.querySelectorAll("#dealership-info .additional-poc-card"));
+        const newCard = cards[cards.length - 1];
+        const first =
+          newCard?.querySelector('input[placeholder="Enter name"]') ||
+          newCard?.querySelector("input, textarea, select");
+
+        if (first) first.focus();
+        return;
+      }
+
+      // not all filled: focus first missing
+      const firstMissing =
+        (!nameEl?.value?.trim() && nameEl) ||
+        (!roleEl?.value?.trim() && roleEl) ||
+        (!cellEl?.value?.trim() && cellEl) ||
+        (!emailEl?.value?.trim() && emailEl) ||
+        nameEl;
+
+      if (firstMissing) firstMissing.focus();
       return;
     }
+  }
+}
+
+// -------------------------
+// (2) GLOBAL: Enter = next field for normal inputs/selects (ignore textareas/notes)
+// -------------------------
+if (
+  e.key === "Enter" &&
+  !e.shiftKey &&
+  !e.metaKey &&
+  !e.ctrlKey &&
+  !e.altKey &&
+  !e.isComposing
+) {
+  // ignore all textareas (including Notes)
+  if (el && el.matches && el.matches("textarea")) return;
+
+  // extra safety: ignore Notes system if someone changes it later
+  if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+    if (Notes.isNotesTargetTextarea(el)) return;
+  }
+
+  // only treat these as "normal" fields
+  const isNormal =
+    el &&
+    el.matches &&
+    (el.matches("select") ||
+      el.matches(
+        "input:not([type]), input[type='text'], input[type='email'], input[type='tel'], input[type='search'], input[type='url'], input[type='number'], input[type='date']"
+      ));
+
+  if (!isNormal) return;
+  if (el.disabled || el.readOnly) return;
+
+  // limit to the active page section so it feels like "below" on the current page
+  const scope = el.closest(".page-section.active") || el.closest(".page-section") || document;
+
+  const fields = Array.from(
+    scope.querySelectorAll(
+      "input:not([type='button']):not([type='submit']):not([type='reset']):not([type='hidden']), select"
+    )
+  ).filter((f) => {
+    if (!f) return false;
+    if (f.disabled || f.readOnly) return false;
+    if (f.offsetParent === null) return false; // hidden
+    if (f.matches("textarea")) return false;
+
+    if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+      if (Notes.isNotesTargetTextarea(f)) return false;
+    }
+    return true;
+  });
+
+  const idx = fields.indexOf(el);
+  if (idx < 0) return;
+
+  const next = fields[idx + 1];
+  if (!next) return;
+
+  e.preventDefault();
+  next.focus();
+  try { next.select?.(); } catch {}
+  return;
+}
+
+   if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
+  const v = (el.value || "").trim();
+  if (!v) return; // only add on Enter if they typed something
+  e.preventDefault();
+  addTrainerRow(el);
+  return;
+}
 
     if (e.key === "Escape") {
       const mkTableModalEl = $("#mkTableModal");
