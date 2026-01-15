@@ -1799,7 +1799,31 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     });
     tableModal.temp.hiddenHeaders = [];
   };
+const openDmsIntegrationModal = () => {
+  const dms = document.getElementById("dms-integration");
+  if (!dms) {
+    mkPopup.ok("Could not find the DMS Integration page section (#dms-integration).", {
+      title: "Missing DMS Section",
+    });
+    return;
+  }
 
+  const modal = document.getElementById("mkTableModal");
+  if (!modal) {
+    mkPopup.ok("Missing #mkTableModal. The DMS popup needs the modal markup.", {
+      title: "Missing Modal",
+    });
+    return;
+  }
+
+  // Switch modal mode
+  modal.classList.remove("mk-is-table", "mk-is-notes", "mk-notes-only");
+  modal.classList.add("mk-is-page");
+
+  // Open with the actual section node so layout is identical
+  openModalWithNodes([dms], "DMS Integration", null);
+};
+   
   const openModalWithNodes = (nodes, titleText, originSectionEl) => {
     const modal = $("#mkTableModal");
     if (!modal) {
@@ -1971,6 +1995,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
       modal.classList.remove("mk-is-notes");
       modal.classList.add("mk-is-table");
       modal.classList.remove("mk-notes-only");
+      modal.classList.remove("mk-is-page"); 
     }
 
     const bundle = getExpandBundleNodes(anyInside);
@@ -2219,6 +2244,14 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
   ======================= */
   document.addEventListener("click", (e) => {
     const t = e.target;
+
+       const dmsLaunch = t.closest("[data-open-dms]");
+  if (dmsLaunch) {
+    e.preventDefault();
+    e.stopPropagation();
+    openDmsIntegrationModal();
+    return;
+  }
 
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
