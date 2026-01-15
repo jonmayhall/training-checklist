@@ -1846,7 +1846,7 @@ button.remove-row{
 
 /* Increase spacing between DMS cards (≈ 3/4 inch) */
 #mkTableModal.mk-is-page #dms-integration .dms-grid{
-  gap:72px !important;
+  gap:68px !important;
 }
 
 /* =========================================================
