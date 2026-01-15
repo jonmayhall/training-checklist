@@ -1858,8 +1858,8 @@ button.remove-row{
 
 /* keep the content centered and not stretching edge-to-edge */
 #mkTableModal.mk-is-page .mk-modal-content{
-  padding-left:18px !important;
-  padding-right:18px !important;
+  padding-left:22px !important;
+  padding-right:22px !important;
 }
 
 /* =========================================================
