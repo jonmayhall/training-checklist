@@ -1767,38 +1767,52 @@ button.remove-row{
 
 /* =========================================================
    MODAL MODE — "PAGE" (mk-is-page)
-   Used for DMS Integration popup (page renders inside modal)
+   DMS Integration popup that looks identical to the DMS page:
    - NO orange modal header
-   - X button floats top-right
+   - NO extra white "panel card" behind everything
+   - X button pinned top-right
 ========================================================= */
 
-/* Hide the orange modal header entirely (title + bar) */
+/* Hide the modal orange header entirely */
 #mkTableModal.mk-is-page .mk-modal-header{
   display:none !important;
 }
 
-/* Modal panel becomes the visible "shell" (white, rounded) */
+/* Transparent modal shell (prevents “random white card behind”) */
 #mkTableModal.mk-is-page .mk-modal-panel{
   position:relative !important;
-  width:min(1180px, calc(100vw - 60px)) !important; /* slimmer overall panel */
-  background:#fff !important;
-  border-radius:18px !important;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35) !important;
-  border:1px solid rgba(0,0,0,0.10) !important;
-  overflow:hidden !important;
-}
-
-/* Content padding (keeps page centered, avoids edge-to-edge) */
-#mkTableModal.mk-is-page .mk-modal-content{
+  width:min(1180px, calc(100vw - 60px)) !important; /* overall popup width */
   background:transparent !important;
-  padding:22px !important; /* gives breathing room since header is gone */
+  border:none !important;
+  box-shadow:none !important;
+  overflow:visible !important;
 }
 
-/* X button: top-right of white panel */
+/* No extra padding on the modal content; the page-section is the only card */
+#mkTableModal.mk-is-page .mk-modal-content{
+  padding:0 !important;
+  background:transparent !important;
+  overflow:auto !important;
+}
+
+/* The moved page-section is the ONLY visible white card */
+#mkTableModal.mk-is-page .page-section{
+  display:block !important;
+  background:var(--card-bg) !important;
+  box-shadow:var(--shadow) !important;
+  border-radius:var(--radius-lg) !important;
+  margin:0 auto !important;
+  max-width:1080px !important;           /* slimmer interior card */
+  width:100% !important;
+  padding:22px 34px 28px !important;      /* match normal page-section padding */
+  position:relative !important;           /* keeps internal absolute children sane */
+}
+
+/* X button pinned to the top-right corner of the popup */
 #mkTableModal.mk-is-page .mk-modal-close{
   position:absolute !important;
-  top:14px !important;
-  right:14px !important;
+  top:12px !important;
+  right:12px !important;
 
   width:34px !important;
   height:34px !important;
@@ -1813,54 +1827,36 @@ button.remove-row{
   cursor:pointer !important;
 
   box-shadow:0 8px 18px rgba(0,0,0,0.25) !important;
-  z-index:1000 !important;
+  z-index:100000 !important;
 }
 #mkTableModal.mk-is-page .mk-modal-close:hover{
   background:#ff8b42 !important;
-  transform:translateY(-1px);
+  transform:translateY(-1px) !important;
 }
 
-/* The moved page-section should look like a normal page card */
-#mkTableModal.mk-is-page .page-section{
-  display:block !important;
-  background:var(--card-bg) !important;
-  box-shadow:var(--shadow) !important;
-  border-radius:var(--radius-lg) !important;
-  margin:0 !important;
-  padding:22px 34px 28px !important; /* match normal page-section padding */
-}
-
-/* Remove any stray top divider/line artifacts on the DMS section */
-#mkTableModal.mk-is-page #dms-integration{
-  border-top:none !important;
-}
-
-/* Remove Reset This Page button inside DMS popup */
+/* Remove Reset This Page button inside the popup */
 #mkTableModal.mk-is-page #dms-integration .clear-page-btn{
   display:none !important;
   visibility:hidden !important;
   pointer-events:none !important;
 }
 
-/* DMS PAGE (MODAL) — title/subtitle indent */
-#mkTableModal.mk-is-page #dms-integration h1{
-  margin-top:0 !important;
-  margin-left:0 !important;
-}
-#mkTableModal.mk-is-page #dms-integration .page-subtitle{
-  margin-left:0 !important;
-  margin-top:6px !important;
+/* Hide any modal title text (header is hidden, but this is extra safe) */
+#mkTableModal.mk-is-page .mk-modal-title{
+  display:none !important;
 }
 
-/* Slimmer DMS content width inside the modal */
+/* Kill any injected card-level close buttons (safety) */
+.mk-card-close{ display:none !important; }
+
+/* Remove any stray top divider/line artifacts */
 #mkTableModal.mk-is-page #dms-integration{
-  max-width:1080px !important;
-  margin:0 auto !important;
+  border-top:none !important;
 }
 
-/* Wide center gap between the two DMS columns (~3/4") */
+/* Keep DMS popup slimmer + big center gap */
 #mkTableModal.mk-is-page #dms-integration .dms-grid{
-  gap:50px !important;
+  gap:50px !important; /* ~3/4" gap between columns */
 }
 
 /* =========================================================
