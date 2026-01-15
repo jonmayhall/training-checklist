@@ -1756,13 +1756,7 @@ button.remove-row{
 /* =========================================================
    MODAL MODE — "PAGE" (keeps page-section styling)
    Used for DMS Integration popup so it looks identical
-========================================================= */
-/* =========================================================
-   MODAL MODE — "PAGE" (keeps page-section styling)
-   Used for DMS Integration popup so it looks identical
-   ✅ Fixes: removes “random white card behind”
-   ✅ Also: squares top corners so it aligns with orange header
-========================================================= */
+========================================================= *
 
 /* Make the modal “shell” invisible so ONLY the page-section shows */
 #mkTableModal.mk-is-page .mk-modal-panel{
@@ -1802,6 +1796,13 @@ button.remove-row{
   border-bottom:1px solid var(--border) !important;
 }
 #mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
+
+/* =========================================================
+   DMS MODAL — remove stray divider line above title
+========================================================= */
+#mkTableModal.mk-is-page #dms-integration h1::after{
+  display:none !important;
+}
 
 /* =========================================================
    DMS PAGE (MODAL) — indent title & subtitle
