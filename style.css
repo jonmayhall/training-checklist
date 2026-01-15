@@ -1798,10 +1798,20 @@ button.remove-row{
 #mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
 
 /* =========================================================
-   DMS MODAL — remove stray divider line above title
+   DMS MODAL — remove stray top divider line (FINAL)
 ========================================================= */
-#mkTableModal.mk-is-page #dms-integration h1::after{
+#mkTableModal.mk-is-page #dms-integration{
+  border-top:none !important;
+  box-shadow:none !important;
+}
+
+/* =========================================================
+   DMS MODAL — remove Reset This Page button
+========================================================= */
+#mkTableModal.mk-is-page #dms-integration .clear-page-btn{
   display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
 }
 
 /* =========================================================
