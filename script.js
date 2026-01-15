@@ -2448,6 +2448,44 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     }
 
      /* =======================================================
+   SUPPORT TICKETS: Enter in Zendesk URL -> Short Summary textarea
+======================================================= */
+if (
+  e.key === "Enter" &&
+  !e.shiftKey &&
+  !e.metaKey &&
+  !e.ctrlKey &&
+  !e.altKey &&
+  !e.isComposing
+) {
+  const el = e.target;
+
+  // Only when inside Support Tickets section
+  const ticketGroup = el?.closest?.("#support-tickets .ticket-group");
+  if (ticketGroup) {
+    // If currently in the Zendesk Ticket URL input...
+    const isZendeskUrl =
+      el.matches(".ticket-zendesk-input") ||
+      (el.matches("input") && (el.placeholder || "").toLowerCase().includes("zendesk")) ||
+      (el.id || "").toLowerCase().includes("zendesk");
+
+    if (isZendeskUrl) {
+      const summary = ticketGroup.querySelector(".ticket-summary-input");
+      if (summary) {
+        e.preventDefault();
+        summary.focus();
+        // put caret at end (optional)
+        try {
+          const len = summary.value?.length ?? 0;
+          summary.setSelectionRange(len, len);
+        } catch {}
+        return;
+      }
+    }
+  }
+}
+
+     /* =======================================================
    ENTER BEHAVIOR
    1) Base Additional POC card: Enter = next field (Name→Role→Cell→Email),
       and after Email adds a new card ONLY when all four are filled.
