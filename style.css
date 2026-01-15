@@ -1789,8 +1789,8 @@ button.remove-row{
   box-shadow:var(--shadow) !important;
 
   /* ✅ square top edges to align with orange header */
-  border-top-left-radius:0 !important;
-  border-top-right-radius:0 !important;
+border-bottom-left-radius:var(--radius-lg) !important;
+  border-bottom-right-radius:var(--radius-lg) !important;
 
   /* keep bottom rounded like the app */
   border-bottom-left-radius:var(--radius-lg) !important;
@@ -1799,14 +1799,6 @@ button.remove-row{
   margin:0 !important;
 }
 
-/* Ensure the orange header remains visible in page mode */
-#mkTableModal.mk-is-page .mk-modal-header{
-  display:flex !important;
-  height:auto !important;
-  padding:10px 16px !important;
-  background:var(--orange) !important;
-  border-bottom:1px solid var(--border) !important;
-}
 #mkTableModal.mk-is-page .mk-modal-title{ display:block !important; }
 
 /* =========================================================
