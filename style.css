@@ -1835,6 +1835,21 @@ button.remove-row{
 }
 
 /* =========================================================
+   DMS MODAL — slimmer layout + wide center gap
+========================================================= */
+
+/* Constrain overall DMS popup width */
+#mkTableModal.mk-is-page #dms-integration{
+  max-width:1080px !important;   /* slimmer than full page */
+  margin:0 auto !important;
+}
+
+/* Increase spacing between DMS cards (≈ 3/4 inch) */
+#mkTableModal.mk-is-page #dms-integration .dms-grid{
+  gap:72px !important;
+}
+
+/* =========================================================
    ✅ MODAL BEHAVIOR — SINGLE SOURCE OF TRUTH (CLASS-BASED)
    - Notes: ONE header (modal header). Hide inner card header.
    - Notes: X inside orange header.
