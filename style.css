@@ -1766,147 +1766,108 @@ button.remove-row{
 #training-summary #mkSum_outcomeWhy{ margin-top:6px !important; }
 
 /* =========================================================
-   MODAL MODE — "PAGE" (keeps page-section styling)
-   Used for DMS Integration popup so it looks identical
-========================================================= *
+   MODAL MODE — "PAGE" (mk-is-page)
+   Used for DMS Integration popup (page renders inside modal)
+   - NO orange modal header
+   - X button floats top-right
+========================================================= */
 
-/* Make the modal “shell” invisible so ONLY the page-section shows */
+/* Hide the orange modal header entirely (title + bar) */
+#mkTableModal.mk-is-page .mk-modal-header{
+  display:none !important;
+}
+
+/* Modal panel becomes the visible "shell" (white, rounded) */
 #mkTableModal.mk-is-page .mk-modal-panel{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
+  position:relative !important;
+  width:min(1180px, calc(100vw - 60px)) !important; /* slimmer overall panel */
+  background:#fff !important;
+  border-radius:18px !important;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35) !important;
+  border:1px solid rgba(0,0,0,0.10) !important;
+  overflow:hidden !important;
 }
 
-/* Remove extra padding so the page-section sits flush under header */
+/* Content padding (keeps page centered, avoids edge-to-edge) */
 #mkTableModal.mk-is-page .mk-modal-content{
-  padding:0 !important;
   background:transparent !important;
+  padding:22px !important; /* gives breathing room since header is gone */
 }
 
-/* Keep normal page styling, but square the TOP corners */
+/* X button: top-right of white panel */
+#mkTableModal.mk-is-page .mk-modal-close{
+  position:absolute !important;
+  top:14px !important;
+  right:14px !important;
+
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+
+  background:var(--orange) !important;
+  color:#fff !important;
+  border:none !important;
+
+  font-size:20px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+
+  box-shadow:0 8px 18px rgba(0,0,0,0.25) !important;
+  z-index:1000 !important;
+}
+#mkTableModal.mk-is-page .mk-modal-close:hover{
+  background:#ff8b42 !important;
+  transform:translateY(-1px);
+}
+
+/* The moved page-section should look like a normal page card */
 #mkTableModal.mk-is-page .page-section{
+  display:block !important;
   background:var(--card-bg) !important;
   box-shadow:var(--shadow) !important;
-
-  /* ✅ square top edges to align with orange header */
-border-bottom-left-radius:var(--radius-lg) !important;
-  border-bottom-right-radius:var(--radius-lg) !important;
-
-  /* keep bottom rounded like the app */
-  border-bottom-left-radius:var(--radius-lg) !important;
-  border-bottom-right-radius:var(--radius-lg) !important;
-
+  border-radius:var(--radius-lg) !important;
   margin:0 !important;
+  padding:22px 34px 28px !important; /* match normal page-section padding */
 }
 
-/* =========================================================
-   DMS MODAL — remove stray top divider line (FINAL)
-========================================================= */
+/* Remove any stray top divider/line artifacts on the DMS section */
 #mkTableModal.mk-is-page #dms-integration{
   border-top:none !important;
-  box-shadow:none !important;
 }
 
-/* =========================================================
-   DMS MODAL — remove Reset This Page button
-========================================================= */
+/* Remove Reset This Page button inside DMS popup */
 #mkTableModal.mk-is-page #dms-integration .clear-page-btn{
   display:none !important;
   visibility:hidden !important;
   pointer-events:none !important;
 }
 
-/* =========================================================
-   DMS MODAL — remove header title text
-========================================================= */
-#mkTableModal.mk-is-page .mk-modal-title{
-  display:none !important;
-}
-
-/* =========================================================
-   DMS PAGE (MODAL) — indent title & subtitle
-========================================================= */
+/* DMS PAGE (MODAL) — title/subtitle indent */
 #mkTableModal.mk-is-page #dms-integration h1{
-  margin-top:22px !important;     /* pushes it down from header */
-  margin-left:0px !important;    /* indent */
+  margin-top:0 !important;
+  margin-left:0 !important;
 }
-
 #mkTableModal.mk-is-page #dms-integration .page-subtitle{
-  margin-left:0px !important;    /* match title indent */
+  margin-left:0 !important;
   margin-top:6px !important;
 }
 
-/* =========================================================
-   DMS MODAL — slimmer layout + wide center gap
-========================================================= */
-
-/* Constrain overall DMS popup width */
+/* Slimmer DMS content width inside the modal */
 #mkTableModal.mk-is-page #dms-integration{
-  max-width:1080px !important;   /* slimmer than full page */
+  max-width:1080px !important;
   margin:0 auto !important;
 }
 
-/* Increase spacing between DMS cards (≈ 3/4 inch) */
+/* Wide center gap between the two DMS columns (~3/4") */
 #mkTableModal.mk-is-page #dms-integration .dms-grid{
   gap:50px !important;
 }
 
 /* =========================================================
-   DMS MODAL — slim the entire popup shell (header + body)
+   GLOBAL: kill any injected card-level X buttons (safety)
 ========================================================= */
-#mkTableModal.mk-is-page .mk-modal-panel{
-  width:min(1180px, calc(100vw - 60px)) !important; /* slimmer overall panel */
-}
-
-/* keep the content centered and not stretching edge-to-edge */
-#mkTableModal.mk-is-page .mk-modal-content{
-  padding-left:22px !important;
-  padding-right:22px !important;
-}
-
-/* =========================================================
-   ✅ MODAL BEHAVIOR — SINGLE SOURCE OF TRUTH (CLASS-BASED)
-   - Notes: ONE header (modal header). Hide inner card header.
-   - Notes: X inside orange header.
-   - Tables: no orange bar; white strip with X + Add Row; content pushed down.
-========================================================= */
-
-/* ---- Kill any injected card-level X buttons ---- */
 .mk-card-close{ display:none !important; }
 
-/* Ensure panel can anchor absolute elements */
-#mkTableModal .mk-modal-panel{ position:relative !important; }
-
-/* ---------- NOTES MODE ---------- */
-#mkTableModal.mk-is-notes .mk-modal-header{
-  display:flex !important;
-}
-
-/* Hide inner section headers so you don't see 2 headers */
-#mkTableModal.mk-is-notes .section-block > h2,
-#mkTableModal.mk-is-notes .section-header{
-  display:none !important;
-}
-
-/* Notes mode: X sits INSIDE orange header */
-#mkTableModal.mk-is-notes .mk-modal-close{
-  position:static !important;
-  margin-left:auto !important;
-
-  width:38px !important;
-  height:38px !important;
-  border-radius:12px !important;
-
-  border:1px solid rgba(255,255,255,0.55) !important;
-  background:rgba(255,255,255,0.15) !important;
-  color:#fff !important;
-
-  box-shadow:none !important;
-}
-#mkTableModal.mk-is-notes .mk-modal-close:hover{
-  background:rgba(255,255,255,0.25) !important;
-  transform:none !important;
-}
 
 /* Bigger notes textareas remain (already set above) */
 
