@@ -2252,6 +2252,15 @@
       return;
     }
 
+     const nextBtn = t.closest(".mk-next-page");
+if (nextBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+  const nextId = nextBtn.getAttribute("data-mk-next");
+  if (nextId) setActiveSection(nextId);
+  return;
+}
+
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -2263,6 +2272,7 @@
         ensureNotesExpandButtons();
         hookAddTrainerButtonDirectly();
         hookAddPocButtonDirectly();
+         mkBuildNextButtons();
 
         if (targetId === "training-summary") mkSyncSummaryEngagementSnapshot();
       }, 0);
@@ -2659,6 +2669,36 @@
     }
   });
 
+   /* =========================================================
+   NEXT PAGE BUTTONS (single per section, no duplicates)
+========================================================= */
+const mkGetSectionOrder = () => $$(".page-section");
+
+const mkBuildNextButtons = () => {
+  const sections = mkGetSectionOrder();
+  if (!sections.length) return;
+
+  // remove any existing next buttons (prevents duplicates)
+  $$(".mk-next-page").forEach((b) => b.remove());
+
+  // add one button to each section except the last
+  sections.forEach((sec, idx) => {
+    if (!sec.id) return;
+    if (idx === sections.length - 1) return; // no Next on last page
+
+    const nextId = sections[idx + 1]?.id;
+    if (!nextId) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-next-page";
+    btn.setAttribute("data-mk-next", nextId);
+    btn.innerHTML = `NEXT PAGE <span aria-hidden="true">›</span>`;
+
+    sec.appendChild(btn);
+  });
+};
+
   /* =======================
      INIT / RESTORE
   ======================= */
@@ -2690,6 +2730,8 @@
 
     hookAddTrainerButtonDirectly();
     hookAddPocButtonDirectly();
+
+     mkBuildNextButtons();
 
     log("Initialized v8.3.2");
   };
