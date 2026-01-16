@@ -1,14 +1,16 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   SINGLE SCRIPT / DROP-IN — CLEAN BUILD (v8.3.2 Updated)
+   (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3.2)
 
-   Includes:
-   ✅ DMS modal fixes (no white card behind)
-   ✅ Notes system
-   ✅ Support tickets cloning
-   ✅ Expand modal
-   ✅ Robust Next Page buttons + scroll-to-top offset
-   ✅ Defines updateNextPageButtons() so init never breaks
+   ✅ FIXES INCLUDED (THIS DROP-IN)
+   - DMS popup:
+       ✅ removes the “random white card behind everything” (was .mk-modal-content getting page-section classes)
+       ✅ puts the X in the top-right INSIDE the white DMS card
+       ✅ keeps all other buttons intact (no capture-phase click swallowing)
+   - Enter behavior:
+       ✅ Support Tickets: Enter in Zendesk URL -> Short Summary
+       ✅ Base Additional POC: Enter moves Name→Role→Cell→Email; after Email adds ONLY when all 4 filled
+       ✅ Global: Enter moves to next normal input/select, ignores ALL textareas (including Notes)
 ======================================================= */
 
 (() => {
@@ -519,12 +521,11 @@
     state.__activeSection = targetId;
     writeState(state);
 
-    // ✅ scroll-to-top with topbar offset (fixes Training Checklist Next)
-    requestAnimationFrame(() => {
-      const headerOffset = 86; // topbar ~70 + padding
-      const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
-      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-    });
+    try {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      target.scrollIntoView(true);
+    }
   };
 
   const initNav = () => {
@@ -971,9 +972,7 @@
       const tbody = table.querySelector("tbody");
       if (!tbody) return;
 
-      const existing = Array.from(tbody.querySelectorAll("tr")).filter(
-        (tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned"
-      );
+      const existing = Array.from(tbody.querySelectorAll("tr")).filter((tr) => tr.getAttribute(AUTO_ROW_ATTR) !== "cloned");
       if (existing.length >= 3) return;
 
       const baseRow = tbody.querySelector('tr[data-base="true"]') || existing[0];
@@ -1003,8 +1002,7 @@
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-    const getNotesTargetId = (btn) =>
-      btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
+    const getNotesTargetId = (btn) => btn.getAttribute("data-notes-target") || btn.getAttribute("href")?.replace("#", "") || "";
 
     const ZW0 = "\u200B";
     const ZW1 = "\u200C";
@@ -1073,8 +1071,7 @@
       if (tr && table) {
         if (secId === "training-checklist") {
           const nameInput =
-            tr.querySelector('td:first-child input[type="text"]') ||
-            tr.querySelector('td:nth-child(2) input[type="text"]');
+            tr.querySelector('td:first-child input[type="text"]') || tr.querySelector('td:nth-child(2) input[type="text"]');
           const v = (nameInput?.value || "").trim();
           return v || "(blank)";
         }
@@ -1090,8 +1087,7 @@
         }
 
         const field =
-          tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
-          null;
+          tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') || null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
@@ -1870,7 +1866,8 @@
     } else {
       // ✅ IMPORTANT:
       // Do NOT turn .mk-modal-content into a .page-section.
-      // (avoids “random white card behind everything”)
+      // That was creating the “random white card behind everything”.
+      // (DMS uses originSectionEl=null, so it hit this branch.)
     }
 
     nodes.forEach((node) => {
@@ -1902,6 +1899,7 @@
     const modal = tableModal.modal;
     if (!modal) return;
 
+    // ✅ restore X to its original home if we moved it into DMS (or any host)
     const movedClose = modal.querySelector(".mk-modal-close");
     if (movedClose && movedClose.__mkHome && movedClose.parentElement !== movedClose.__mkHome) {
       try { movedClose.__mkHome.appendChild(movedClose); } catch {}
@@ -1911,11 +1909,15 @@
 
     const closeBtn = modal.querySelector(".mk-modal-close");
     if (closeBtn && tableModal.temp.stripCloseHome) {
-      try { tableModal.temp.stripCloseHome.appendChild(closeBtn); } catch {}
+      try {
+        tableModal.temp.stripCloseHome.appendChild(closeBtn);
+      } catch {}
     }
 
     if (tableModal.temp.strip) {
-      try { tableModal.temp.strip.remove(); } catch {}
+      try {
+        tableModal.temp.strip.remove();
+      } catch {}
     }
 
     (tableModal.moved || []).forEach(({ node, placeholder }) => {
@@ -2072,52 +2074,7 @@
     });
   };
 
-  /* =======================
-     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
-  ======================= */
-  const shouldTreatAsAddTrainerBtn = (btn) => {
-    if (!btn) return false;
-
-    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
-
-    const trainersPage = btn.closest("#trainers-deployment");
-    if (!trainersPage) return false;
-
-    const isBtn = btn.matches("button, a, [role='button']");
-    if (!isBtn) return false;
-
-    const ip = btn.closest(".input-plus");
-    if (!ip) return false;
-
-    if (ip.querySelector("#additionalTrainerInput")) return true;
-
-    const globalInput = document.getElementById("additionalTrainerInput");
-    if (globalInput && ip.contains(globalInput)) return true;
-
-    return false;
-  };
-
-  const hookAddTrainerButtonDirectly = () => {
-    const page = document.getElementById("trainers-deployment");
-    if (!page) return;
-
-    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
-    btns.forEach((b) => {
-      if (!shouldTreatAsAddTrainerBtn(b)) return;
-      if (b.__mkAddTrainerBound) return;
-      b.__mkAddTrainerBound = true;
-
-      if (b.tagName === "BUTTON" && !b.getAttribute("type")) b.type = "button";
-
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        addTrainerRow(b);
-      });
-    });
-  };
-
-  // ✅ observer (kept from your build) + safe updateNextPageButtons alias
+  // ✅ FIX: define startExpandObserver so init() never crashes
   const startExpandObserver = (() => {
     let obs = null;
     return () => {
@@ -2128,7 +2085,6 @@
         ensureNotesExpandButtons();
         hookAddPocButtonDirectly();
         hookAddTrainerButtonDirectly();
-        updateNextPageButtons();
       });
 
       obs.observe(document.body, { childList: true, subtree: true });
@@ -2138,7 +2094,7 @@
         ensureNotesExpandButtons();
         hookAddPocButtonDirectly();
         hookAddTrainerButtonDirectly();
-        updateNextPageButtons();
+         updateNextPageButtons();
       }, 0);
     };
   })();
@@ -2147,12 +2103,7 @@
      SAVE PDF (safe hook)
   ======================= */
   const mkHandleSavePDF = () => {
-    const fn =
-      window.saveAllPagesAsPDF ||
-      window.savePDF ||
-      window.generatePDF ||
-      window.exportPDF ||
-      null;
+    const fn = window.saveAllPagesAsPDF || window.savePDF || window.generatePDF || window.exportPDF || null;
 
     if (typeof fn === "function") {
       try {
@@ -2171,10 +2122,7 @@
         { title: "PDF Hook" }
       );
     } catch {
-      mkPopup.ok(
-        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
-        { title: "PDF Hook" }
-      );
+      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", { title: "PDF Hook" });
     }
   };
 
@@ -2245,41 +2193,48 @@
     });
   };
 
-  /* =========================================================
-     ✅ updateNextPageButtons() alias (prevents crashes)
-  ========================================================= */
-  function updateNextPageButtons() {
-    if (typeof mkBuildNextButtons === "function") mkBuildNextButtons();
-  }
+  /* =======================
+     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
+  ======================= */
+  const shouldTreatAsAddTrainerBtn = (btn) => {
+    if (!btn) return false;
 
-  /* =========================================================
-     NEXT PAGE BUTTONS (single per section, no duplicates)
-  ========================================================= */
-  const mkGetSectionOrder = () => $$(".page-section");
+    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
 
-  const mkBuildNextButtons = () => {
-    const sections = mkGetSectionOrder();
-    if (!sections.length) return;
+    const trainersPage = btn.closest("#trainers-deployment");
+    if (!trainersPage) return false;
 
-    // remove existing (prevents duplicates)
-    $$(".mk-next-page").forEach((b) => b.remove());
+    const isBtn = btn.matches("button, a, [role='button']");
+    if (!isBtn) return false;
 
-    // add one to each section except last
-    sections.forEach((sec, idx) => {
-      if (!sec.id) return;
-      if (idx === sections.length - 1) return;
+    const ip = btn.closest(".input-plus");
+    if (!ip) return false;
 
-      const nextId = sections[idx + 1]?.id;
-      if (!nextId) return;
+    if (ip.querySelector("#additionalTrainerInput")) return true;
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mk-next-page";
-      btn.setAttribute("data-mk-next", nextId);
-      btn.innerHTML = `NEXT PAGE <span aria-hidden="true">›</span>`;
+    const globalInput = document.getElementById("additionalTrainerInput");
+    if (globalInput && ip.contains(globalInput)) return true;
 
-      // IMPORTANT: append INSIDE section so CSS can position it consistently
-      sec.appendChild(btn);
+    return false;
+  };
+
+  const hookAddTrainerButtonDirectly = () => {
+    const page = document.getElementById("trainers-deployment");
+    if (!page) return;
+
+    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
+    btns.forEach((b) => {
+      if (!shouldTreatAsAddTrainerBtn(b)) return;
+      if (b.__mkAddTrainerBound) return;
+      b.__mkAddTrainerBound = true;
+
+      if (b.tagName === "BUTTON" && !b.getAttribute("type")) b.type = "button";
+
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow(b);
+      });
     });
   };
 
@@ -2289,7 +2244,6 @@
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-    // DMS launch
     const dmsLaunch = t.closest("[data-open-dms]");
     if (dmsLaunch) {
       e.preventDefault();
@@ -2298,17 +2252,15 @@
       return;
     }
 
-    // NEXT PAGE button
-    const nextBtn = t.closest(".mk-next-page");
-    if (nextBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      const nextId = nextBtn.getAttribute("data-mk-next");
-      if (nextId) setActiveSection(nextId);
-      return;
-    }
+     const nextBtn = t.closest(".mk-next-page");
+if (nextBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+  const nextId = nextBtn.getAttribute("data-mk-next");
+  if (nextId) setActiveSection(nextId);
+  return;
+}
 
-    // Left nav
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -2320,7 +2272,7 @@
         ensureNotesExpandButtons();
         hookAddTrainerButtonDirectly();
         hookAddPocButtonDirectly();
-        mkBuildNextButtons();
+         mkBuildNextButtons();
 
         if (targetId === "training-summary") mkSyncSummaryEngagementSnapshot();
       }, 0);
@@ -2328,7 +2280,6 @@
       return;
     }
 
-    // Clear all
     const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
@@ -2341,7 +2292,6 @@
       return;
     }
 
-    // Reset page
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -2358,7 +2308,6 @@
       return;
     }
 
-    // Save PDF
     const savePdfBtn = t.closest("#savePDF, [data-mk-action='save-pdf']");
     if (savePdfBtn) {
       e.preventDefault();
@@ -2366,7 +2315,6 @@
       return;
     }
 
-    // Add trainer (+)
     const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn, #trainers-deployment .input-plus button");
     if (trainerBtn && shouldTreatAsAddTrainerBtn(trainerBtn)) {
       e.preventDefault();
@@ -2375,7 +2323,6 @@
       return;
     }
 
-    // Add POC (+)
     const pocBtn = t.closest(
       "[data-add-poc], .additional-poc-add, .poc-add-btn, #dealership-info .additional-poc-card[data-base='true'] .input-plus button"
     );
@@ -2386,7 +2333,6 @@
       return;
     }
 
-    // Add row in table
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -2394,7 +2340,6 @@
       return;
     }
 
-    // Notes button
     const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
     if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
@@ -2402,7 +2347,6 @@
       return;
     }
 
-    // Add ticket
     const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
@@ -2410,7 +2354,6 @@
       return;
     }
 
-    // Map button
     const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
@@ -2420,7 +2363,6 @@
       return;
     }
 
-    // Expand table
     const tableExpandBtn = t.closest(".mk-table-expand-btn");
     if (tableExpandBtn) {
       e.preventDefault();
@@ -2428,7 +2370,6 @@
       return;
     }
 
-    // Expand notes textarea
     const notesExpandBtn = t.closest(".mk-ta-expand");
     if (notesExpandBtn) {
       e.preventDefault();
@@ -2439,7 +2380,6 @@
       return;
     }
 
-    // Close modal (backdrop or X)
     const mkTableModalEl = $("#mkTableModal");
     if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
       if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
@@ -2450,9 +2390,6 @@
     }
   });
 
-  /* =======================
-     INPUT / CHANGE SAVE HOOKS
-  ======================= */
   document.addEventListener("input", (e) => {
     const el = e.target;
 
@@ -2469,10 +2406,9 @@
 
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
-        value: (i.value || "").trim(),
-      }));
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({ value: (i.value || "").trim() }));
       cloneState.set(clones);
+
       mkSyncSummaryEngagementSnapshot();
     }
 
@@ -2519,13 +2455,10 @@
     }
   });
 
-  /* =======================
-     KEYDOWN (Enter behavior + Escape)
-  ======================= */
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // Notes textarea behavior
+    // NOTES textarea special behavior (your existing)
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -2540,7 +2473,9 @@
         const insert = "\n  ◦ ";
         const start = el.selectionStart ?? el.value.length;
         const end = el.selectionEnd ?? el.value.length;
-        el.value = el.value.slice(0, start) + insert + el.value.slice(end);
+        const before = el.value.slice(0, start);
+        const after = el.value.slice(end);
+        el.value = before + insert + after;
 
         const caret = start + insert.length;
         try {
@@ -2555,8 +2490,17 @@
       return;
     }
 
-    // Support Tickets: Enter in Zendesk URL -> Summary
-    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
+    /* =======================================================
+       SUPPORT TICKETS: Enter in Zendesk URL -> Short Summary
+    ======================================================= */
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
       const ticketGroup = el?.closest?.("#support-tickets .ticket-group");
       if (ticketGroup) {
         const isZendeskUrl =
@@ -2579,9 +2523,25 @@
       }
     }
 
-    // POC BASE CARD: Enter cycles fields, adds new when complete
-    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
+    /* =======================================================
+       ENTER BEHAVIOR
+       1) Base Additional POC card: Enter = next field (Name→Role→Cell→Email),
+          and after Email adds a new card ONLY when all four are filled.
+       2) Everywhere else: Enter in normal input/select moves to next field,
+          ignoring ALL textareas (including Notes).
+    ======================================================= */
+
+    // (1) POC BASE CARD: Enter = next, then add when complete
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
       const basePocCard = el?.closest?.("#dealership-info .additional-poc-card[data-base='true']");
+
       if (basePocCard && el.matches("input, select")) {
         const nameEl = basePocCard.querySelector('input[placeholder="Enter name"]');
         const roleEl = basePocCard.querySelector('input[placeholder="Enter role"]');
@@ -2592,6 +2552,7 @@
 
         if (fields.includes(el)) {
           e.preventDefault();
+
           const idx = fields.indexOf(el);
           const next = fields[idx + 1];
 
@@ -2609,9 +2570,13 @@
 
           if (allFilled) {
             addPocCard();
+
             const cards = Array.from(document.querySelectorAll("#dealership-info .additional-poc-card"));
             const newCard = cards[cards.length - 1];
-            const first = newCard?.querySelector('input[placeholder="Enter name"]') || newCard?.querySelector("input, select");
+            const first =
+              newCard?.querySelector('input[placeholder="Enter name"]') ||
+              newCard?.querySelector("input, textarea, select");
+
             if (first) first.focus();
             return;
           }
@@ -2629,10 +2594,20 @@
       }
     }
 
-    // GLOBAL: Enter moves next for inputs/selects (ignore ALL textareas)
-    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
+    // (2) GLOBAL: Enter = next field for normal inputs/selects (ignore textareas/notes)
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
       if (el && el.matches && el.matches("textarea")) return;
-      if (Notes.isNotesTargetTextarea(el)) return;
+
+      if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+        if (Notes.isNotesTargetTextarea(el)) return;
+      }
 
       const isNormal =
         el &&
@@ -2656,7 +2631,10 @@
         if (f.disabled || f.readOnly) return false;
         if (f.offsetParent === null) return false;
         if (f.matches("textarea")) return false;
-        if (Notes.isNotesTargetTextarea(f)) return false;
+
+        if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+          if (Notes.isNotesTargetTextarea(f)) return false;
+        }
         return true;
       });
 
@@ -2672,7 +2650,7 @@
       return;
     }
 
-    // Additional Trainer: Enter adds if typed
+    // Additional Trainer: Enter adds ONLY if typed text
     if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
       const v = (el.value || "").trim();
       if (!v) return;
@@ -2690,6 +2668,36 @@
       mkPopup.close();
     }
   });
+
+   /* =========================================================
+   NEXT PAGE BUTTONS (single per section, no duplicates)
+========================================================= */
+const mkGetSectionOrder = () => $$(".page-section");
+
+const mkBuildNextButtons = () => {
+  const sections = mkGetSectionOrder();
+  if (!sections.length) return;
+
+  // remove any existing next buttons (prevents duplicates)
+  $$(".mk-next-page").forEach((b) => b.remove());
+
+  // add one button to each section except the last
+  sections.forEach((sec, idx) => {
+    if (!sec.id) return;
+    if (idx === sections.length - 1) return; // no Next on last page
+
+    const nextId = sections[idx + 1]?.id;
+    if (!nextId) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mk-next-page";
+    btn.setAttribute("data-mk-next", nextId);
+    btn.innerHTML = `NEXT PAGE <span aria-hidden="true">›</span>`;
+
+    sec.appendChild(btn);
+  });
+};
 
   /* =======================
      INIT / RESTORE
@@ -2723,12 +2731,11 @@
     hookAddTrainerButtonDirectly();
     hookAddPocButtonDirectly();
 
-    mkBuildNextButtons();
+     mkBuildNextButtons();
 
-    log("Initialized v8.3.2 Updated");
+    log("Initialized v8.3.2");
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
-})(); // end IIFE
-
+})();
