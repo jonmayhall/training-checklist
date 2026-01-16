@@ -1,3 +1,4 @@
+
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT CSS
    CLEAN / CONSOLIDATED (Stable Consolidation Build)
@@ -13,11 +14,6 @@
    - Pages 5–6 notes blocks taller + Training Summary notes taller
    - Primary Contacts spacing tightened
    - Additional POC base card “Name + +” width matches other inputs
-
-   ✅ PATCH INCLUDED:
-   - Fix NEXT PAGE footer positioning across ALL pages:
-       .page-section.active is now display:flex (column)
-       (prevents the later .page-section{display:none} rule from overriding your footer layout)
 ======================================================= */
 
 /* =======================
@@ -110,6 +106,12 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
    NEXT PAGE — Footer placement (consistent on all pages)
    Sits between last card and the bottom border of the page
 ========================================================= */
+
+/* make each page a vertical layout so footer sits at bottom naturally */
+.page-section{
+  display:flex;
+  flex-direction:column;
+}
 
 /* footer strip inside the white page container */
 .page-section .mk-next-footer{
@@ -311,12 +313,7 @@ main{
   width:100%;
   max-width:1240px;
 }
-
-/* ✅ PATCH: Active pages must be flex column so NEXT footer behaves on ALL pages */
-.page-section.active{
-  display:flex !important;
-  flex-direction:column !important;
-}
+.page-section.active{ display:block; }
 
 .page-section h1{
   color:var(--orange);
@@ -1713,7 +1710,7 @@ button.remove-row{
   display:flex !important;
   align-items:stretch !important;
   gap:0 !important;
-  flex:0 0 calc(var(--input-width) * 1.33) !important;
+    flex:0 0 calc(var(--input-width) * 1.33) !important;
   width:calc(var(--input-width) * 1.33) !important;
   max-width:calc(var(--input-width) * 1.33) !important;
   height:34px !important;
