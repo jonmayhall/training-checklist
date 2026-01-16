@@ -102,48 +102,60 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
 }
 
 /* =========================================================
-   NEXT PAGE PILL (one per page-section)
+   NEXT PAGE — Footer placement (consistent on all pages)
+   Sits between last card and the bottom border of the page
 ========================================================= */
+
+/* make each page a vertical layout so footer sits at bottom naturally */
 .page-section{
-  position:relative; /* anchor the button inside the main white page card */
+  display:flex;
+  flex-direction:column;
 }
 
-/* give the page a little bottom breathing room so the button has a home */
-.page-section{
-  padding-bottom:72px; /* adjust 60–90 if you want it tighter/looser */
+/* footer strip inside the white page container */
+.page-section .mk-next-footer{
+  margin-top:14px;              /* gap from last card */
+  padding:16px 22px 20px;       /* space to bottom border */
+  display:flex;
+  justify-content:flex-end;     /* bottom-right */
 }
 
-.mk-next-page{
-  position:absolute;
-  right:22px;
-  bottom:22px;                 /* sits INSIDE the main white card border */
-  z-index:5;
-
+/* orange pill */
+.page-section .mk-next-page{
+  appearance:none;
   border:none;
   cursor:pointer;
+
+  background:var(--orange);
+  color:#fff;
+
+  border-radius:999px;
+  padding:12px 18px;
+
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-size:12px;
+
   display:inline-flex;
   align-items:center;
   gap:10px;
 
-  height:42px;
-  padding:0 18px;
-  border-radius:999px;
-
-  background:var(--orange);
-  color:#fff;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  box-shadow:0 10px 24px rgba(0,0,0,.18);
+  box-shadow:0 10px 24px rgba(239,109,34,0.28);
 }
 
-.mk-next-page:hover{ filter:brightness(1.05); }
-.mk-next-page:active{ transform:translateY(1px); }
+.page-section .mk-next-page:hover{
+  transform:translateY(-1px);
+  box-shadow:0 14px 30px rgba(239,109,34,0.34);
+}
 
-/* optional: keep it from covering content on small screens */
-@media (max-width:900px){
-  .page-section{ padding-bottom:84px; }
-  .mk-next-page{ right:16px; bottom:16px; }
+.page-section .mk-next-page:active{
+  transform:translateY(0);
+}
+
+.page-section .mk-next-page .mk-next-arrow{
+  font-size:16px;
+  line-height:1;
 }
 
 /* =======================
