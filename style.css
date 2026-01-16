@@ -159,6 +159,18 @@ input[type="date"].is-placeholder::-webkit-datetime-edit{ color:#9ca3af; }
   line-height:1;
 }
 
+/* IMPORTANT: active page must be flex (not block) so footer can sit at bottom */
+.page-section.active{
+  display:flex !important;
+}
+
+/* pin footer strip to bottom of the page-section */
+.page-section .mk-next-footer{
+  margin-top:auto !important;         /* pushes footer to bottom */
+  display:flex;
+  justify-content:flex-end;
+}
+
 /* =======================
    TOP BAR
 ======================= */
