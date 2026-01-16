@@ -1154,10 +1154,7 @@ main{
 }
 
 /* =========================================================
-   RESOURCES — Quick Launch mini cards (DROP-IN)
-   - clickable “tile” feel
-   - orange left accent on hover
-   - NO open pill
+   RESOURCES — Quick Launch mini cards (DROP-IN - CLEAN TILE)
 ========================================================= */
 #resources-quick-launch .mk-launch-grid{
   display:grid;
@@ -1166,40 +1163,51 @@ main{
   padding:12px 10px 6px;
 }
 
-/* Make each launcher feel like an app tile */
+/* Tile */
 #resources-quick-launch .mk-launch-card{
+  width:100%;
   appearance:none;
-  border:1px solid var(--border);
-  background:#fff;
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff !important;
+  border-radius:16px;
+  box-shadow:0 10px 26px rgba(0,0,0,.10);
   padding:14px 16px;
   cursor:pointer;
-  text-align:left;
+  text-align:left !important;
 
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   gap:12px;
 
-  min-height:92px;
+  min-height:84px;
   position:relative;
   transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
 
-/* orange left accent (hidden until hover) */
+/* Orange accent bar */
 #resources-quick-launch .mk-launch-card::before{
   content:"";
   position:absolute;
   left:0;
-  top:10px;
-  bottom:10px;
+  top:12px;
+  bottom:12px;
   width:6px;
   border-radius:999px;
-  background:transparent;
+  background:rgba(239,109,34,.18);
   transition:background .12s ease;
 }
 
-/* Optional icon block (only shows if you add .mk-launch-ico in HTML) */
+#resources-quick-launch .mk-launch-card:hover{
+  border-color:rgba(239,109,34,.55);
+  transform:translateY(-1px);
+  box-shadow:0 14px 34px rgba(0,0,0,.14);
+}
+
+#resources-quick-launch .mk-launch-card:hover::before{
+  background:rgba(239,109,34,.85);
+}
+
+/* Icon */
 #resources-quick-launch .mk-launch-ico{
   width:44px;
   height:44px;
@@ -1215,14 +1223,14 @@ main{
 
   color:#fff;
   background:var(--orange);
-  box-shadow:0 6px 16px rgba(239,109,34,.25);
+  box-shadow:0 6px 16px rgba(239,109,34,.22);
 }
 
-/* Text body wrapper (recommended) */
+/* Text */
 #resources-quick-launch .mk-launch-body{
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:4px;
   min-width:0;
   flex:1 1 auto;
 }
@@ -1232,37 +1240,34 @@ main{
   font-size:14px;
   color:#111827;
   letter-spacing:.2px;
+  margin:0;
 }
 
 #resources-quick-launch .mk-launch-sub{
   font-size:12px;
   color:#6b7280;
   line-height:1.35;
-  margin-right:8px;
+  margin:0;
+  max-width:60ch;
 }
 
-/* Optional right arrow (only shows if you add .mk-launch-arrow in HTML) */
+/* Arrow */
 #resources-quick-launch .mk-launch-arrow{
   margin-left:auto;
   font-size:22px;
   font-weight:900;
   color:rgba(17,24,39,.45);
-  padding:0 2px;
   line-height:1;
-}
-
-#resources-quick-launch .mk-launch-card:hover{
-  border-color:rgba(239,109,34,0.55);
-  transform:translateY(-1px);
-  box-shadow:0 10px 26px rgba(0,0,0,0.12);
-}
-#resources-quick-launch .mk-launch-card:hover::before{
-  background:var(--orange);
 }
 
 /* REMOVE the OPEN pill */
 #resources-quick-launch .mk-launch-cta{
   display:none !important;
+}
+
+/* If any old styles are forcing “centered panel” behavior, kill them */
+#resources-quick-launch .mk-launch-card *{
+  text-align:left !important;
 }
 
 @media (max-width:980px){
