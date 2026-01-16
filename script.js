@@ -2094,6 +2094,7 @@
         ensureNotesExpandButtons();
         hookAddPocButtonDirectly();
         hookAddTrainerButtonDirectly();
+         updateNextPageButtons();
       }, 0);
     };
   })();
