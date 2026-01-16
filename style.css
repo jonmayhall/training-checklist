@@ -1154,7 +1154,10 @@ main{
 }
 
 /* =========================================================
-   RESOURCES — Quick Launch mini cards
+   RESOURCES — Quick Launch mini cards (DROP-IN)
+   - clickable “tile” feel
+   - orange left accent on hover
+   - NO open pill
 ========================================================= */
 #resources-quick-launch .mk-launch-grid{
   display:grid;
@@ -1163,6 +1166,7 @@ main{
   padding:12px 10px 6px;
 }
 
+/* Make each launcher feel like an app tile */
 #resources-quick-launch .mk-launch-card{
   appearance:none;
   border:1px solid var(--border);
@@ -1172,38 +1176,55 @@ main{
   padding:14px 16px;
   cursor:pointer;
   text-align:left;
+
   display:flex;
-  flex-direction:column;
-  gap:6px;
+  align-items:flex-start;
+  gap:12px;
+
   min-height:92px;
   position:relative;
-  transition:
-    transform .12s ease,
-    border-color .12s ease,
-    box-shadow .12s ease;
+  transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
 
-/* subtle orange left accent (hidden by default) */
+/* orange left accent (hidden until hover) */
 #resources-quick-launch .mk-launch-card::before{
   content:"";
   position:absolute;
   left:0;
   top:10px;
   bottom:10px;
-  width:3px;
-  border-radius:3px;
+  width:6px;
+  border-radius:999px;
   background:transparent;
   transition:background .12s ease;
 }
 
-#resources-quick-launch .mk-launch-card:hover{
-  border-color:var(--orange);
-  transform:translateY(-1px);
-  box-shadow:0 10px 26px rgba(0,0,0,0.12);
+/* Optional icon block (only shows if you add .mk-launch-ico in HTML) */
+#resources-quick-launch .mk-launch-ico{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.06em;
+
+  color:#fff;
+  background:var(--orange);
+  box-shadow:0 6px 16px rgba(239,109,34,.25);
 }
 
-#resources-quick-launch .mk-launch-card:hover::before{
-  background:var(--orange);
+/* Text body wrapper (recommended) */
+#resources-quick-launch .mk-launch-body{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+  flex:1 1 auto;
 }
 
 #resources-quick-launch .mk-launch-title{
@@ -1218,6 +1239,25 @@ main{
   color:#6b7280;
   line-height:1.35;
   margin-right:8px;
+}
+
+/* Optional right arrow (only shows if you add .mk-launch-arrow in HTML) */
+#resources-quick-launch .mk-launch-arrow{
+  margin-left:auto;
+  font-size:22px;
+  font-weight:900;
+  color:rgba(17,24,39,.45);
+  padding:0 2px;
+  line-height:1;
+}
+
+#resources-quick-launch .mk-launch-card:hover{
+  border-color:rgba(239,109,34,0.55);
+  transform:translateY(-1px);
+  box-shadow:0 10px 26px rgba(0,0,0,0.12);
+}
+#resources-quick-launch .mk-launch-card:hover::before{
+  background:var(--orange);
 }
 
 /* REMOVE the OPEN pill */
