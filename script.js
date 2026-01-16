@@ -2,20 +2,15 @@
    myKaarma Interactive Training Checklist — FULL PROJECT JS
    (SINGLE SCRIPT / HARDENED / DROP-IN) — CLEAN BUILD (v8.3.2)
 
-   ✅ FIXES INCLUDED
-   - Restores ALL button functionality (no destructive capture-phase click swallowing)
-   - Defines startExpandObserver() (your old paste was crashing init)
-   - Robust + buttons:
-       - Additional Trainers (+) works even with markup drift
-       - Additional POC (+) works even with markup drift
-   - Keeps your existing state/clone/notes/table/tickets logic intact
-
-   NOTE:
-   - This script assumes your HTML has:
-       - .page-section sections
-       - .nav-btn[data-target]
-       - #mkTableModal modal markup (for expand)
-       - ticket containers and base ticket markup
+   ✅ FIXES INCLUDED (THIS DROP-IN)
+   - DMS popup:
+       ✅ removes the “random white card behind everything” (was .mk-modal-content getting page-section classes)
+       ✅ puts the X in the top-right INSIDE the white DMS card
+       ✅ keeps all other buttons intact (no capture-phase click swallowing)
+   - Enter behavior:
+       ✅ Support Tickets: Enter in Zendesk URL -> Short Summary
+       ✅ Base Additional POC: Enter moves Name→Role→Cell→Email; after Email adds ONLY when all 4 filled
+       ✅ Global: Enter moves to next normal input/select, ignores ALL textareas (including Notes)
 ======================================================= */
 
 (() => {
@@ -114,18 +109,14 @@
   const inDynamicClone = (el) => {
     if (!el) return false;
 
-    // Trainer clones (inside additional container)
     if (el.closest("#additionalTrainersContainer")) return true;
 
-    // POC clones (data-base != true)
     const pocCard = el.closest(".additional-poc-card");
     if (pocCard && pocCard.getAttribute("data-base") !== "true") return true;
 
-    // Table cloned rows
     const tr = el.closest("tr");
     if (tr && tr.getAttribute(AUTO_ROW_ATTR) === "cloned") return true;
 
-    // Ticket clones (data-base != true)
     const ticket = el.closest(".ticket-group");
     if (ticket && ticket.getAttribute("data-base") !== "true") return true;
 
@@ -134,13 +125,10 @@
 
   const stableFieldKey = (el) => {
     if (!isEl(el)) return "";
-
-    // If it has a real ID, use it (best case)
     if (el.id) return `id:${el.id}`;
 
     const sectionId = getSection(el)?.id || "root";
 
-    // Table fields: stable by table key + row/col/field index
     const table = el.closest("table.training-table");
     if (table) {
       const key =
@@ -165,7 +153,6 @@
       return `sec:${sectionId}|tbl:${key}|r:${rowIndex}|c:${colIndex}|f:${withinCell}|${tag}|${type}`;
     }
 
-    // Checklist row fields: stable by label text + field index
     const row = el.closest(".checklist-row");
     if (row) {
       const lab = row.querySelector("label");
@@ -178,7 +165,6 @@
       return `sec:${sectionId}|row:${labelSlug}|i:${idx}|${tag}|${type}|ph:${ph}`;
     }
 
-    // Fallback: section + DOM path
     const tag = el.tagName.toLowerCase();
     const type = (el.getAttribute("type") || "").toLowerCase();
     return `sec:${sectionId}|path:${mkDomPath(el)}|${tag}|${type}`;
@@ -240,7 +226,7 @@
 
   const saveField = (el) => {
     if (!isFormField(el)) return;
-    if (inDynamicClone(el)) return; // clones persisted via cloneState
+    if (inDynamicClone(el)) return;
     ensureId(el);
     const id = el.getAttribute(AUTO_ID_ATTR);
     if (!id) return;
@@ -710,50 +696,44 @@
     return wrap;
   };
 
- const addTrainerRow = (fromEl = null) => {
-  // Prefer the Trainers page as the search root
-  const root =
-    (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
-    document.getElementById("trainers-deployment") ||
-    document;
+  const addTrainerRow = (fromEl = null) => {
+    const root =
+      (fromEl && fromEl.closest && fromEl.closest("#trainers-deployment")) ||
+      document.getElementById("trainers-deployment") ||
+      document;
 
-  const input =
-    root.querySelector("#additionalTrainerInput") ||
-    document.querySelector("#additionalTrainerInput");
+    const input =
+      root.querySelector("#additionalTrainerInput") ||
+      document.querySelector("#additionalTrainerInput");
 
-  const container =
-    root.querySelector("#additionalTrainersContainer") ||
-    document.querySelector("#additionalTrainersContainer");
+    const container =
+      root.querySelector("#additionalTrainersContainer") ||
+      document.querySelector("#additionalTrainersContainer");
 
-  if (!container) return;
+    if (!container) return;
 
-  // ✅ Allow blank adds
-  const name = (input?.value || "").trim();
+    const name = (input?.value || "").trim();
 
-  const row = buildTrainerRow(name); // name may be ""
-  container.appendChild(row);
+    const row = buildTrainerRow(name);
+    container.appendChild(row);
 
-  // persist clone state (store blank too — or choose to skip blanks, see note below)
-  const clones = cloneState.get();
-  clones.trainers = clones.trainers || [];
-  clones.trainers.push({ value: name });
-  cloneState.set(clones);
+    const clones = cloneState.get();
+    clones.trainers = clones.trainers || [];
+    clones.trainers.push({ value: name });
+    cloneState.set(clones);
 
-  // if they typed something, clear the default input box
-  if (input && name) {
-    input.value = "";
-    saveField(input);
-  }
+    if (input && name) {
+      input.value = "";
+      saveField(input);
+    }
 
-  // focus the new row input
-  const newInput = row.querySelector("input[type='text']");
-  if (newInput) newInput.focus();
+    const newInput = row.querySelector("input[type='text']");
+    if (newInput) newInput.focus();
 
-  mkSyncSummaryEngagementSnapshot();
-};
+    mkSyncSummaryEngagementSnapshot();
+  };
 
-// keep exposed
-try { window.mkAddTrainerRow = addTrainerRow; } catch {}
+  try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
   /* =======================
      ADD POC (+)
@@ -839,9 +819,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     if (first) first.focus();
   };
 
-  try {
-    window.mkAddPocCard = addPocCard;
-  } catch {}
+  try { window.mkAddPocCard = addPocCard; } catch {}
 
   /* =======================
      ✅ HARD FIX: Additional POC (+) click hook (robust)
@@ -863,9 +841,7 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     return !!nameInput;
   };
 
-  try {
-    window.shouldTreatAsAddPocBtn = shouldTreatAsAddPocBtn;
-  } catch {}
+  try { window.shouldTreatAsAddPocBtn = shouldTreatAsAddPocBtn; } catch {}
 
   const hookAddPocButtonDirectly = () => {
     const page = document.getElementById("dealership-info");
@@ -1799,31 +1775,49 @@ try { window.mkAddTrainerRow = addTrainerRow; } catch {}
     });
     tableModal.temp.hiddenHeaders = [];
   };
-const openDmsIntegrationModal = () => {
-  const dms = document.getElementById("dms-integration");
-  if (!dms) {
-    mkPopup.ok("Could not find the DMS Integration page section (#dms-integration).", {
-      title: "Missing DMS Section",
-    });
-    return;
-  }
 
-  const modal = document.getElementById("mkTableModal");
-  if (!modal) {
-    mkPopup.ok("Missing #mkTableModal. The DMS popup needs the modal markup.", {
-      title: "Missing Modal",
-    });
-    return;
-  }
+  /* =========================================================
+     ✅ DMS: move modal close (X) into a host element
+  ========================================================= */
+  const mkMoveModalCloseInto = (hostEl) => {
+    const modal = document.getElementById("mkTableModal");
+    if (!modal || !hostEl) return;
 
-  // Switch modal mode
-  modal.classList.remove("mk-is-table", "mk-is-notes", "mk-notes-only");
-  modal.classList.add("mk-is-page");
+    const closeBtn = modal.querySelector(".mk-modal-close");
+    if (!closeBtn) return;
 
-  // Open with the actual section node so layout is identical
-  openModalWithNodes([dms], "DMS Integration", null);
-};
-   
+    if (!closeBtn.__mkHome) closeBtn.__mkHome = closeBtn.parentElement;
+    if (!hostEl.style.position) hostEl.style.position = "relative";
+
+    hostEl.appendChild(closeBtn);
+  };
+
+  const openDmsIntegrationModal = () => {
+    const dms = document.getElementById("dms-integration");
+    if (!dms) {
+      mkPopup.ok("Could not find the DMS Integration page section (#dms-integration).", {
+        title: "Missing DMS Section",
+      });
+      return;
+    }
+
+    const modal = document.getElementById("mkTableModal");
+    if (!modal) {
+      mkPopup.ok("Missing #mkTableModal. The DMS popup needs the modal markup.", {
+        title: "Missing Modal",
+      });
+      return;
+    }
+
+    modal.classList.remove("mk-is-table", "mk-is-notes", "mk-notes-only");
+    modal.classList.add("mk-is-page");
+
+    openModalWithNodes([dms], "DMS Integration", null);
+
+    // ✅ X goes inside the DMS white card
+    mkMoveModalCloseInto(dms);
+  };
+
   const openModalWithNodes = (nodes, titleText, originSectionEl) => {
     const modal = $("#mkTableModal");
     if (!modal) {
@@ -1870,7 +1864,10 @@ const openDmsIntegrationModal = () => {
       tableModal.origin.tempId = holdId;
       tableModal.origin.wrapperEl = wrapper;
     } else {
-      content.classList.add("page-section", "active");
+      // ✅ IMPORTANT:
+      // Do NOT turn .mk-modal-content into a .page-section.
+      // That was creating the “random white card behind everything”.
+      // (DMS uses originSectionEl=null, so it hit this branch.)
     }
 
     nodes.forEach((node) => {
@@ -1902,6 +1899,12 @@ const openDmsIntegrationModal = () => {
     const modal = tableModal.modal;
     if (!modal) return;
 
+    // ✅ restore X to its original home if we moved it into DMS (or any host)
+    const movedClose = modal.querySelector(".mk-modal-close");
+    if (movedClose && movedClose.__mkHome && movedClose.parentElement !== movedClose.__mkHome) {
+      try { movedClose.__mkHome.appendChild(movedClose); } catch {}
+    }
+
     restoreHiddenNotesHeaders();
 
     const closeBtn = modal.querySelector(".mk-modal-close");
@@ -1928,11 +1931,8 @@ const openDmsIntegrationModal = () => {
       if (sec.id === tableModal.origin.tempId) sec.id = tableModal.origin.originalId;
     }
 
-    modal.classList.remove("open", "mk-notes-only", "mk-is-table", "mk-is-notes");
+    modal.classList.remove("open", "mk-notes-only", "mk-is-table", "mk-is-notes", "mk-is-page");
     modal.setAttribute("aria-hidden", "true");
-
-    const content = $(".mk-modal-content", modal);
-    if (content) content.classList.remove("page-section", "active");
 
     document.body.style.overflow = tableModal.bodyOverflow || "";
 
@@ -1992,10 +1992,9 @@ const openDmsIntegrationModal = () => {
   const openTableModalFor = (anyInside) => {
     const modal = $("#mkTableModal");
     if (modal) {
-      modal.classList.remove("mk-is-notes");
+      modal.classList.remove("mk-is-notes", "mk-is-page");
       modal.classList.add("mk-is-table");
       modal.classList.remove("mk-notes-only");
-      modal.classList.remove("mk-is-page"); 
     }
 
     const bundle = getExpandBundleNodes(anyInside);
@@ -2011,7 +2010,7 @@ const openDmsIntegrationModal = () => {
 
     const modal = $("#mkTableModal");
     if (modal) {
-      modal.classList.remove("mk-is-table");
+      modal.classList.remove("mk-is-table", "mk-is-page");
       modal.classList.add("mk-is-notes");
       modal.classList.add("mk-notes-only");
     }
@@ -2047,7 +2046,6 @@ const openDmsIntegrationModal = () => {
     const textareas = Array.from(document.querySelectorAll(".section-block textarea"));
     textareas.forEach((ta) => {
       if (ta.closest("table")) return;
-
       if (ta.closest("#support-tickets")) return;
       if (ta.classList.contains("ticket-summary-input")) return;
       if (ta.closest(".ticket-group")) return;
@@ -2076,7 +2074,7 @@ const openDmsIntegrationModal = () => {
     });
   };
 
-  // ✅ FIX: actually define startExpandObserver so init() never crashes
+  // ✅ FIX: define startExpandObserver so init() never crashes
   const startExpandObserver = (() => {
     let obs = null;
     return () => {
@@ -2245,13 +2243,13 @@ const openDmsIntegrationModal = () => {
   document.addEventListener("click", (e) => {
     const t = e.target;
 
-       const dmsLaunch = t.closest("[data-open-dms]");
-  if (dmsLaunch) {
-    e.preventDefault();
-    e.stopPropagation();
-    openDmsIntegrationModal();
-    return;
-  }
+    const dmsLaunch = t.closest("[data-open-dms]");
+    if (dmsLaunch) {
+      e.preventDefault();
+      e.stopPropagation();
+      openDmsIntegrationModal();
+      return;
+    }
 
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
@@ -2449,6 +2447,7 @@ const openDmsIntegrationModal = () => {
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
+    // NOTES textarea special behavior (your existing)
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -2480,191 +2479,174 @@ const openDmsIntegrationModal = () => {
       return;
     }
 
-     /* =======================================================
-   SUPPORT TICKETS: Enter in Zendesk URL -> Short Summary textarea
-======================================================= */
-if (
-  e.key === "Enter" &&
-  !e.shiftKey &&
-  !e.metaKey &&
-  !e.ctrlKey &&
-  !e.altKey &&
-  !e.isComposing
-) {
-  const el = e.target;
+    /* =======================================================
+       SUPPORT TICKETS: Enter in Zendesk URL -> Short Summary
+    ======================================================= */
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
+      const ticketGroup = el?.closest?.("#support-tickets .ticket-group");
+      if (ticketGroup) {
+        const isZendeskUrl =
+          el.matches(".ticket-zendesk-input") ||
+          (el.matches("input") && (el.placeholder || "").toLowerCase().includes("zendesk")) ||
+          (el.id || "").toLowerCase().includes("zendesk");
 
-  // Only when inside Support Tickets section
-  const ticketGroup = el?.closest?.("#support-tickets .ticket-group");
-  if (ticketGroup) {
-    // If currently in the Zendesk Ticket URL input...
-    const isZendeskUrl =
-      el.matches(".ticket-zendesk-input") ||
-      (el.matches("input") && (el.placeholder || "").toLowerCase().includes("zendesk")) ||
-      (el.id || "").toLowerCase().includes("zendesk");
-
-    if (isZendeskUrl) {
-      const summary = ticketGroup.querySelector(".ticket-summary-input");
-      if (summary) {
-        e.preventDefault();
-        summary.focus();
-        // put caret at end (optional)
-        try {
-          const len = summary.value?.length ?? 0;
-          summary.setSelectionRange(len, len);
-        } catch {}
-        return;
+        if (isZendeskUrl) {
+          const summary = ticketGroup.querySelector(".ticket-summary-input");
+          if (summary) {
+            e.preventDefault();
+            summary.focus();
+            try {
+              const len = summary.value?.length ?? 0;
+              summary.setSelectionRange(len, len);
+            } catch {}
+            return;
+          }
+        }
       }
     }
-  }
-}
 
-     /* =======================================================
-   ENTER BEHAVIOR
-   1) Base Additional POC card: Enter = next field (Name→Role→Cell→Email),
-      and after Email adds a new card ONLY when all four are filled.
-   2) Everywhere else: Enter in normal input/select moves to next field,
-      ignoring ALL textareas (including Notes).
-======================================================= */
+    /* =======================================================
+       ENTER BEHAVIOR
+       1) Base Additional POC card: Enter = next field (Name→Role→Cell→Email),
+          and after Email adds a new card ONLY when all four are filled.
+       2) Everywhere else: Enter in normal input/select moves to next field,
+          ignoring ALL textareas (including Notes).
+    ======================================================= */
 
-// -------------------------
-// (1) POC BASE CARD: Enter = next, then add when complete
-// -------------------------
-if (
-  e.key === "Enter" &&
-  !e.shiftKey &&
-  !e.metaKey &&
-  !e.ctrlKey &&
-  !e.altKey &&
-  !e.isComposing
-) {
-  const basePocCard = el?.closest?.("#dealership-info .additional-poc-card[data-base='true']");
+    // (1) POC BASE CARD: Enter = next, then add when complete
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
+      const basePocCard = el?.closest?.("#dealership-info .additional-poc-card[data-base='true']");
 
-  if (basePocCard && el.matches("input, select")) {
-    const nameEl = basePocCard.querySelector('input[placeholder="Enter name"]');
-    const roleEl = basePocCard.querySelector('input[placeholder="Enter role"]');
-    const cellEl = basePocCard.querySelector('input[placeholder="Enter cell"]');
-    const emailEl = basePocCard.querySelector('input[type="email"]');
+      if (basePocCard && el.matches("input, select")) {
+        const nameEl = basePocCard.querySelector('input[placeholder="Enter name"]');
+        const roleEl = basePocCard.querySelector('input[placeholder="Enter role"]');
+        const cellEl = basePocCard.querySelector('input[placeholder="Enter cell"]');
+        const emailEl = basePocCard.querySelector('input[type="email"]');
 
-    const fields = [nameEl, roleEl, cellEl, emailEl].filter(Boolean);
+        const fields = [nameEl, roleEl, cellEl, emailEl].filter(Boolean);
 
-    // only run if the focused element is one of these fields
-    if (fields.includes(el)) {
-      e.preventDefault();
+        if (fields.includes(el)) {
+          e.preventDefault();
+
+          const idx = fields.indexOf(el);
+          const next = fields[idx + 1];
+
+          if (next) {
+            next.focus();
+            try { next.select?.(); } catch {}
+            return;
+          }
+
+          const allFilled =
+            !!nameEl?.value?.trim() &&
+            !!roleEl?.value?.trim() &&
+            !!cellEl?.value?.trim() &&
+            !!emailEl?.value?.trim();
+
+          if (allFilled) {
+            addPocCard();
+
+            const cards = Array.from(document.querySelectorAll("#dealership-info .additional-poc-card"));
+            const newCard = cards[cards.length - 1];
+            const first =
+              newCard?.querySelector('input[placeholder="Enter name"]') ||
+              newCard?.querySelector("input, textarea, select");
+
+            if (first) first.focus();
+            return;
+          }
+
+          const firstMissing =
+            (!nameEl?.value?.trim() && nameEl) ||
+            (!roleEl?.value?.trim() && roleEl) ||
+            (!cellEl?.value?.trim() && cellEl) ||
+            (!emailEl?.value?.trim() && emailEl) ||
+            nameEl;
+
+          if (firstMissing) firstMissing.focus();
+          return;
+        }
+      }
+    }
+
+    // (2) GLOBAL: Enter = next field for normal inputs/selects (ignore textareas/notes)
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.isComposing
+    ) {
+      if (el && el.matches && el.matches("textarea")) return;
+
+      if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+        if (Notes.isNotesTargetTextarea(el)) return;
+      }
+
+      const isNormal =
+        el &&
+        el.matches &&
+        (el.matches("select") ||
+          el.matches(
+            "input:not([type]), input[type='text'], input[type='email'], input[type='tel'], input[type='search'], input[type='url'], input[type='number'], input[type='date']"
+          ));
+
+      if (!isNormal) return;
+      if (el.disabled || el.readOnly) return;
+
+      const scope = el.closest(".page-section.active") || el.closest(".page-section") || document;
+
+      const fields = Array.from(
+        scope.querySelectorAll(
+          "input:not([type='button']):not([type='submit']):not([type='reset']):not([type='hidden']), select"
+        )
+      ).filter((f) => {
+        if (!f) return false;
+        if (f.disabled || f.readOnly) return false;
+        if (f.offsetParent === null) return false;
+        if (f.matches("textarea")) return false;
+
+        if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
+          if (Notes.isNotesTargetTextarea(f)) return false;
+        }
+        return true;
+      });
 
       const idx = fields.indexOf(el);
+      if (idx < 0) return;
+
       const next = fields[idx + 1];
+      if (!next) return;
 
-      // go to next field if it exists
-      if (next) {
-        next.focus();
-        try { next.select?.(); } catch {}
-        return;
-      }
-
-      // last field (email): add new card ONLY if all four are filled
-      const allFilled =
-        !!nameEl?.value?.trim() &&
-        !!roleEl?.value?.trim() &&
-        !!cellEl?.value?.trim() &&
-        !!emailEl?.value?.trim();
-
-      if (allFilled) {
-        addPocCard();
-
-        // focus "Enter name" in the newly created card
-        const cards = Array.from(document.querySelectorAll("#dealership-info .additional-poc-card"));
-        const newCard = cards[cards.length - 1];
-        const first =
-          newCard?.querySelector('input[placeholder="Enter name"]') ||
-          newCard?.querySelector("input, textarea, select");
-
-        if (first) first.focus();
-        return;
-      }
-
-      // not all filled: focus first missing
-      const firstMissing =
-        (!nameEl?.value?.trim() && nameEl) ||
-        (!roleEl?.value?.trim() && roleEl) ||
-        (!cellEl?.value?.trim() && cellEl) ||
-        (!emailEl?.value?.trim() && emailEl) ||
-        nameEl;
-
-      if (firstMissing) firstMissing.focus();
+      e.preventDefault();
+      next.focus();
+      try { next.select?.(); } catch {}
       return;
     }
-  }
-}
 
-// -------------------------
-// (2) GLOBAL: Enter = next field for normal inputs/selects (ignore textareas/notes)
-// -------------------------
-if (
-  e.key === "Enter" &&
-  !e.shiftKey &&
-  !e.metaKey &&
-  !e.ctrlKey &&
-  !e.altKey &&
-  !e.isComposing
-) {
-  // ignore all textareas (including Notes)
-  if (el && el.matches && el.matches("textarea")) return;
-
-  // extra safety: ignore Notes system if someone changes it later
-  if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
-    if (Notes.isNotesTargetTextarea(el)) return;
-  }
-
-  // only treat these as "normal" fields
-  const isNormal =
-    el &&
-    el.matches &&
-    (el.matches("select") ||
-      el.matches(
-        "input:not([type]), input[type='text'], input[type='email'], input[type='tel'], input[type='search'], input[type='url'], input[type='number'], input[type='date']"
-      ));
-
-  if (!isNormal) return;
-  if (el.disabled || el.readOnly) return;
-
-  // limit to the active page section so it feels like "below" on the current page
-  const scope = el.closest(".page-section.active") || el.closest(".page-section") || document;
-
-  const fields = Array.from(
-    scope.querySelectorAll(
-      "input:not([type='button']):not([type='submit']):not([type='reset']):not([type='hidden']), select"
-    )
-  ).filter((f) => {
-    if (!f) return false;
-    if (f.disabled || f.readOnly) return false;
-    if (f.offsetParent === null) return false; // hidden
-    if (f.matches("textarea")) return false;
-
-    if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
-      if (Notes.isNotesTargetTextarea(f)) return false;
+    // Additional Trainer: Enter adds ONLY if typed text
+    if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
+      const v = (el.value || "").trim();
+      if (!v) return;
+      e.preventDefault();
+      addTrainerRow(el);
+      return;
     }
-    return true;
-  });
-
-  const idx = fields.indexOf(el);
-  if (idx < 0) return;
-
-  const next = fields[idx + 1];
-  if (!next) return;
-
-  e.preventDefault();
-  next.focus();
-  try { next.select?.(); } catch {}
-  return;
-}
-
-   if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
-  const v = (el.value || "").trim();
-  if (!v) return; // only add on Enter if they typed something
-  e.preventDefault();
-  addTrainerRow(el);
-  return;
-}
 
     if (e.key === "Escape") {
       const mkTableModalEl = $("#mkTableModal");
