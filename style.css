@@ -1977,3 +1977,12 @@ button.remove-row{
 #trainers-deployment .checklist-row input{
   display: inline-flex !important;
 }
+
+/* DMS popup: ensure close button is visible + pinned inside the white DMS card */
+#mkTableModal.open.mk-is-page #dms-integration .mk-modal-close{
+  display:flex !important;
+  position:absolute !important;
+  top:16px !important;
+  right:16px !important;
+  z-index:100000 !important;
+}
