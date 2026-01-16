@@ -503,38 +503,33 @@
   /* =======================
      NAV
   ======================= */
-  const setActiveSection = (targetId) => {
-    if (!targetId) return;
+ const setActiveSection = (targetId) => {
+  if (!targetId) return;
 
-    const allSections = $$(".page-section");
-    const target = document.getElementById(targetId);
-    if (!target) return;
+  const allSections = $$(".page-section");
+  const target = document.getElementById(targetId);
+  if (!target) return;
 
-    allSections.forEach((s) => s.classList.remove("active"));
-    target.classList.add("active");
+  allSections.forEach((s) => s.classList.remove("active"));
+  target.classList.add("active");
 
-    $$(".nav-btn").forEach((b) => b.classList.remove("active"));
-    const activeBtn = $(`.nav-btn[data-target="${CSS.escape(targetId)}"]`);
-    if (activeBtn) activeBtn.classList.add("active");
+  $$(".nav-btn").forEach((b) => b.classList.remove("active"));
+  const activeBtn = $(`.nav-btn[data-target="${CSS.escape(targetId)}"]`);
+  if (activeBtn) activeBtn.classList.add("active");
 
-    const state = readState();
-    state.__activeSection = targetId;
-    writeState(state);
+  const state = readState();
+  state.__activeSection = targetId;
+  writeState(state);
 
-    try {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch {
-      target.scrollIntoView(true);
-    }
-  };
+  // ✅ ALWAYS jump to the very top of the target section (account for fixed topbar)
+  requestAnimationFrame(() => {
+    const topbarH = document.getElementById("topbar")?.offsetHeight || 0;
+    const pad = 10;
 
-  const initNav = () => {
-    const state = readState();
-    const remembered = state.__activeSection;
-    const alreadyActive = $(".page-section.active")?.id;
-    const first = $$(".page-section")[0]?.id;
-    setActiveSection(alreadyActive || remembered || first);
-  };
+    const y = target.getBoundingClientRect().top + window.pageYOffset - (topbarH + pad);
+    window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
+  });
+};
 
   /* =======================
      NOTES BUTTON VISUAL RESET
@@ -2704,6 +2699,7 @@ const mkBuildNextButtons = () => {
     const nextId = sections[idx + 1]?.id;
     if (!nextId) return;
 
+    // footer wrapper (right aligned)
     const footer = document.createElement("div");
     footer.className = "mk-next-footer";
 
