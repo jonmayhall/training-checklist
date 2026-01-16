@@ -2252,12 +2252,27 @@
       return;
     }
 
-     const nextBtn = t.closest(".mk-next-page");
+   const nextBtn = t.closest(".mk-next-page");
 if (nextBtn) {
   e.preventDefault();
   e.stopPropagation();
+
   const nextId = nextBtn.getAttribute("data-mk-next");
-  if (nextId) setActiveSection(nextId);
+  if (nextId) {
+    setActiveSection(nextId);
+
+    // hard scroll to TOP of next page (account for fixed topbar)
+    requestAnimationFrame(() => {
+      const target = document.getElementById(nextId);
+      if (!target) return;
+
+      const topbar = document.getElementById("topbar");
+      const topbarH = topbar ? topbar.getBoundingClientRect().height : 70;
+
+      const y = target.getBoundingClientRect().top + window.scrollY - (topbarH + 12);
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    });
+  }
   return;
 }
 
@@ -2678,10 +2693,10 @@ const mkBuildNextButtons = () => {
   const sections = mkGetSectionOrder();
   if (!sections.length) return;
 
-  // remove any existing next buttons (prevents duplicates)
+  // remove any existing next buttons/footers (prevents duplicates)
   $$(".mk-next-page").forEach((b) => b.remove());
+  $$(".mk-next-footer").forEach((f) => f.remove());
 
-  // add one button to each section except the last
   sections.forEach((sec, idx) => {
     if (!sec.id) return;
     if (idx === sections.length - 1) return; // no Next on last page
@@ -2689,16 +2704,20 @@ const mkBuildNextButtons = () => {
     const nextId = sections[idx + 1]?.id;
     if (!nextId) return;
 
+    const footer = document.createElement("div");
+    footer.className = "mk-next-footer";
+
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "mk-next-page";
     btn.setAttribute("data-mk-next", nextId);
-    btn.innerHTML = `NEXT PAGE <span aria-hidden="true">›</span>`;
+    btn.innerHTML = `NEXT PAGE <span class="mk-next-arrow" aria-hidden="true">›</span>`;
 
-    sec.appendChild(btn);
+    footer.appendChild(btn);
+    sec.appendChild(footer);
   });
 };
-
+   
   /* =======================
      INIT / RESTORE
   ======================= */
