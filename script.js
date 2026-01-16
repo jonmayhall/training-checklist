@@ -1,15 +1,14 @@
 /* =======================================================
    myKaarma Interactive Training Checklist — FULL PROJECT JS
-   UPDATED / HARDENED / DROP-IN — v8.3.2 (Updated)
+   SINGLE SCRIPT / DROP-IN — CLEAN BUILD (v8.3.2 Updated)
 
-   ✅ Updates in THIS version:
-   - NEXT PAGE footer now renders correctly on ALL pages:
-       • builds a .mk-next-footer inside each .page-section
-       • button includes .mk-next-arrow for your CSS
-       • no duplicates
-   - NEXT PAGE click always scrolls to the TOP of the next page
-     (fixed header offset, reliable even on Training Checklist)
-   - Defines updateNextPageButtons() safely (alias)
+   Includes:
+   ✅ DMS modal fixes (no white card behind)
+   ✅ Notes system
+   ✅ Support tickets cloning
+   ✅ Expand modal
+   ✅ Robust Next Page buttons + scroll-to-top offset
+   ✅ Defines updateNextPageButtons() so init never breaks
 ======================================================= */
 
 (() => {
@@ -500,7 +499,7 @@
   };
 
   /* =======================
-     NAV  ✅ UPDATED scroll-to-top behavior
+     NAV
   ======================= */
   const setActiveSection = (targetId) => {
     if (!targetId) return;
@@ -520,9 +519,9 @@
     state.__activeSection = targetId;
     writeState(state);
 
-    // ✅ reliable top scroll w/ fixed topbar offset
+    // ✅ scroll-to-top with topbar offset (fixes Training Checklist Next)
     requestAnimationFrame(() => {
-      const headerOffset = 86; // ~70px topbar + padding
+      const headerOffset = 86; // topbar ~70 + padding
       const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     });
@@ -733,9 +732,7 @@
     mkSyncSummaryEngagementSnapshot();
   };
 
-  try {
-    window.mkAddTrainerRow = addTrainerRow;
-  } catch {}
+  try { window.mkAddTrainerRow = addTrainerRow; } catch {}
 
   /* =======================
      ADD POC (+)
@@ -821,9 +818,7 @@
     if (first) first.focus();
   };
 
-  try {
-    window.mkAddPocCard = addPocCard;
-  } catch {}
+  try { window.mkAddPocCard = addPocCard; } catch {}
 
   /* =======================
      ✅ HARD FIX: Additional POC (+) click hook (robust)
@@ -845,9 +840,7 @@
     return !!nameInput;
   };
 
-  try {
-    window.shouldTreatAsAddPocBtn = shouldTreatAsAddPocBtn;
-  } catch {}
+  try { window.shouldTreatAsAddPocBtn = shouldTreatAsAddPocBtn; } catch {}
 
   const hookAddPocButtonDirectly = () => {
     const page = document.getElementById("dealership-info");
@@ -1006,7 +999,7 @@
   }
 
   /* =======================
-     NOTES  (unchanged from your build)
+     NOTES
   ======================= */
   const Notes = (() => {
     const normalizeNL = (s) => String(s ?? "").replace(/\r\n/g, "\n");
@@ -1097,9 +1090,8 @@
         }
 
         const field =
-          tr.querySelector(
-            'input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea'
-          ) || null;
+          tr.querySelector('input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea') ||
+          null;
         const value = (field?.value || field?.textContent || "").trim();
         return value || "Item";
       }
@@ -1264,56 +1256,38 @@
     return { handleNotesClick, isNotesTargetTextarea };
   })();
 
-  // ---------------------------
-  // END OF "FIRST HALF"
-  // Next message: I’ll send the SECOND HALF (Support Tickets -> Init)
-  // ---------------------------
-
-})();
-
-/* =======================================================
-   myKaarma Interactive Training Checklist — FULL PROJECT JS
-   SECOND HALF (v8.3.2 Updated)
-   Continues from where the first half ended.
-======================================================= */
-
-(() => {
-  "use strict";
-
   /* =======================
      SUPPORT TICKETS
   ======================= */
   const ticketContainersByStatus = () => ({
-    Open: document.querySelector("#openTicketsContainer"),
-    "Tier Two": document.querySelector("#tierTwoTicketsContainer"),
-    "Closed - Resolved": document.querySelector("#closedResolvedTicketsContainer"),
-    "Closed - Feature Not Supported": document.querySelector("#closedFeatureTicketsContainer"),
+    Open: $("#openTicketsContainer"),
+    "Tier Two": $("#tierTwoTicketsContainer"),
+    "Closed - Resolved": $("#closedResolvedTicketsContainer"),
+    "Closed - Feature Not Supported": $("#closedFeatureTicketsContainer"),
   });
 
   const getOpenBaseTicketCard = () => {
-    const openContainer = document.querySelector("#openTicketsContainer");
+    const openContainer = $("#openTicketsContainer");
     if (!openContainer) return null;
-    return openContainer.querySelector(".ticket-group[data-base='true']");
+    return $(".ticket-group[data-base='true']", openContainer);
   };
 
   const enforceBaseTicketStatusLock = () => {
     const base = getOpenBaseTicketCard();
     if (!base) return;
-    const status = base.querySelector(".ticket-status-select");
+    const status = $(".ticket-status-select", base);
     if (!status) return;
     status.value = "Open";
     status.disabled = true;
-    try {
-      ensureId(status);
-      saveField(status);
-    } catch {}
+    ensureId(status);
+    saveField(status);
   };
 
   const readTicketValues = (card) => {
-    const num = card.querySelector(".ticket-number-input")?.value?.trim() || "";
-    const url = card.querySelector(".ticket-zendesk-input")?.value?.trim() || "";
-    const sum = card.querySelector(".ticket-summary-input")?.value?.trim() || "";
-    const status = card.querySelector(".ticket-status-select")?.value || "Open";
+    const num = $(".ticket-number-input", card)?.value?.trim() || "";
+    const url = $(".ticket-zendesk-input", card)?.value?.trim() || "";
+    const sum = $(".ticket-summary-input", card)?.value?.trim() || "";
+    const status = $(".ticket-status-select", card)?.value || "Open";
     return { num, url, sum, status };
   };
 
@@ -1323,9 +1297,9 @@
   };
 
   const markTicketCardErrors = (card) => {
-    const numEl = card.querySelector(".ticket-number-input");
-    const urlEl = card.querySelector(".ticket-zendesk-input");
-    const sumEl = card.querySelector(".ticket-summary-input");
+    const numEl = $(".ticket-number-input", card);
+    const urlEl = $(".ticket-zendesk-input", card);
+    const sumEl = $(".ticket-summary-input", card);
     [numEl, urlEl, sumEl].forEach((el) => {
       if (!el) return;
       const v = (el.value || "").trim();
@@ -1343,21 +1317,17 @@
 
     clone.querySelectorAll(".add-ticket-btn").forEach((b) => b.remove());
 
-    clone.querySelectorAll("input, textarea, select").forEach((el) => {
+    $$("input, textarea, select", clone).forEach((el) => {
       if (el.matches("input[type='checkbox']")) el.checked = false;
       else el.value = "";
       el.removeAttribute(AUTO_ID_ATTR);
-      try {
-        ensureId(el);
-      } catch {}
+      ensureId(el);
     });
 
-    const status = clone.querySelector(".ticket-status-select");
+    const status = $(".ticket-status-select", clone);
     if (status) {
       status.disabled = true;
-      try {
-        ensureId(status);
-      } catch {}
+      ensureId(status);
     }
     return clone;
   };
@@ -1366,9 +1336,7 @@
     const clones = cloneState.get();
     clones.tickets = [];
 
-    const all = Array.from(document.querySelectorAll(".ticket-group")).filter(
-      (g) => g.getAttribute("data-base") !== "true"
-    );
+    const all = $$(".ticket-group").filter((g) => g.getAttribute("data-base") !== "true");
     all.forEach((card) => {
       const v = readTicketValues(card);
       clones.tickets.push({ status: v.status, num: v.num, url: v.url, sum: v.sum });
@@ -1378,10 +1346,10 @@
   };
 
   const setTicketCardValues = (card, data) => {
-    const num = card.querySelector(".ticket-number-input");
-    const url = card.querySelector(".ticket-zendesk-input");
-    const sum = card.querySelector(".ticket-summary-input");
-    const status = card.querySelector(".ticket-status-select");
+    const num = $(".ticket-number-input", card);
+    const url = $(".ticket-zendesk-input", card);
+    const sum = $(".ticket-summary-input", card);
+    const status = $(".ticket-status-select", card);
 
     if (num) num.value = data?.num || "";
     if (url) url.value = data?.url || "";
@@ -1402,35 +1370,31 @@
     [num, url, sum, status].forEach((el) => {
       if (!el) return;
       el.removeAttribute(AUTO_ID_ATTR);
-      try {
-        ensureId(el);
-        triggerInputChange(el);
-      } catch {}
+      ensureId(el);
+      triggerInputChange(el);
     });
   };
 
   const resetBaseTicketCard = (baseCard) => {
     if (!baseCard) return;
-    const num = baseCard.querySelector(".ticket-number-input");
-    const url = baseCard.querySelector(".ticket-zendesk-input");
-    const sum = baseCard.querySelector(".ticket-summary-input");
+    const num = $(".ticket-number-input", baseCard);
+    const url = $(".ticket-zendesk-input", baseCard);
+    const sum = $(".ticket-summary-input", baseCard);
     if (num) num.value = "";
     if (url) url.value = "";
     if (sum) sum.value = "";
     [num, url, sum].forEach((el) => {
       if (!el) return;
-      try {
-        ensureId(el);
-        saveField(el);
-        triggerInputChange(el);
-      } catch {}
+      ensureId(el);
+      saveField(el);
+      triggerInputChange(el);
     });
     enforceBaseTicketStatusLock();
     num?.focus?.();
   };
 
   const addTicketCard = () => {
-    const openContainer = document.querySelector("#openTicketsContainer");
+    const openContainer = $("#openTicketsContainer");
     if (!openContainer) return;
 
     const base = getOpenBaseTicketCard();
@@ -1465,15 +1429,13 @@
     const card = inputEl.closest(".ticket-group");
     if (!card) return;
 
-    const status = card.querySelector(".ticket-status-select");
+    const status = $(".ticket-status-select", card);
     if (!status) return;
 
     const isBase = card.getAttribute("data-base") === "true";
     if (isBase) {
       enforceBaseTicketStatusLock();
-      try {
-        saveField(inputEl);
-      } catch {}
+      saveField(inputEl);
       return;
     }
 
@@ -1508,13 +1470,13 @@
       return;
     }
 
-    const openContainer = document.querySelector("#openTicketsContainer");
+    const openContainer = $("#openTicketsContainer");
     if (!openContainer) return;
 
-    const base = openContainer.querySelector(".ticket-group[data-base='true']");
+    const base = $(".ticket-group[data-base='true']", openContainer);
     if (!base) return;
 
-    document.querySelectorAll(".ticket-group").forEach((g) => {
+    $$(".ticket-group", document).forEach((g) => {
       if (g.getAttribute("data-base") !== "true") g.remove();
     });
 
@@ -1543,11 +1505,11 @@
     const clones = cloneState.get();
     if (!clones.pocs || !clones.pocs.length) return;
 
-    document.querySelectorAll(".additional-poc-card").forEach((c) => {
+    $$(".additional-poc-card").forEach((c) => {
       if (c.getAttribute("data-base") !== "true") c.remove();
     });
 
-    const base = document.querySelector(".additional-poc-card[data-base='true']");
+    const base = $(".additional-poc-card[data-base='true']");
     if (!base) return;
 
     let anchor = base;
@@ -1561,7 +1523,7 @@
 
   const rebuildTrainerClones = () => {
     const clones = cloneState.get();
-    const container = document.querySelector("#additionalTrainersContainer");
+    const container = $("#additionalTrainersContainer");
     if (!container) return;
 
     container.innerHTML = "";
@@ -1575,10 +1537,7 @@
      MAP BTN
   ======================= */
   const updateDealershipMap = (address) => {
-    const frame =
-      document.querySelector("#dealershipMapFrame") ||
-      document.querySelector(".map-frame iframe") ||
-      document.querySelector(".map-wrapper iframe");
+    const frame = $("#dealershipMapFrame") || $(".map-frame iframe") || $(".map-wrapper iframe");
     if (!frame) return;
 
     const a = String(address || "").trim();
@@ -1621,16 +1580,12 @@
   ======================= */
   const mkGetTrainerCloneValues = () => {
     const clones = cloneState.get();
-    const arr = (clones.trainers || [])
-      .map((t) => String(t?.value || "").trim())
-      .filter(Boolean);
+    const arr = (clones.trainers || []).map((t) => String(t?.value || "").trim()).filter(Boolean);
 
     if (!arr.length) {
-      const container = document.querySelector("#additionalTrainersContainer");
+      const container = $("#additionalTrainersContainer");
       if (container) {
-        return Array.from(container.querySelectorAll("input[type='text']"))
-          .map((i) => (i.value || "").trim())
-          .filter(Boolean);
+        return $$("input[type='text']", container).map((i) => (i.value || "").trim()).filter(Boolean);
       }
     }
     return arr;
@@ -1643,7 +1598,7 @@
 
     if (!stack || !base) return;
 
-    Array.from(stack.querySelectorAll(`input[id^="mkSum_addTrainer_"]`)).forEach((el) => {
+    $$(`input[id^="mkSum_addTrainer_"]`, stack).forEach((el) => {
       if (el.id !== MK_SUMMARY_IDS.addlBase) el.remove();
     });
 
@@ -1693,10 +1648,8 @@
     const startSrc = mkFindDateInputByLabelOrId(document, MK_IDS.onsiteDate, "onsite");
     const endSrc = mkFindDateInputByLabelOrId(document, MK_IDS.trainingEndDate, "end");
 
-    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim())
-      startEl.value = startSrc.value || "";
-    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim())
-      endEl.value = endSrc.value || "";
+    if (startEl && startSrc && (startEl.value || "").trim() !== (startSrc.value || "").trim()) startEl.value = startSrc.value || "";
+    if (endEl && endSrc && (endEl.value || "").trim() !== (endSrc.value || "").trim()) endEl.value = endSrc.value || "";
 
     const lead = mkFirstValueByIds(MK_IDS.leadTrainer);
     if (leadEl && (leadEl.value || "").trim() !== lead) leadEl.value = lead || "";
@@ -1870,7 +1823,7 @@
   };
 
   const openModalWithNodes = (nodes, titleText, originSectionEl) => {
-    const modal = document.querySelector("#mkTableModal");
+    const modal = $("#mkTableModal");
     if (!modal) {
       mkPopup.ok(
         "Your expand buttons need the #mkTableModal HTML block on the page. Add it near the bottom of your HTML (before </body>).",
@@ -1879,9 +1832,9 @@
       return;
     }
 
-    const content = modal.querySelector(".mk-modal-content");
-    const titleEl = modal.querySelector(".mk-modal-title");
-    const panel = modal.querySelector(".mk-modal-panel") || modal;
+    const content = $(".mk-modal-content", modal);
+    const titleEl = $(".mk-modal-title", modal);
+    const panel = $(".mk-modal-panel", modal) || modal;
     if (!content) {
       mkPopup.ok("mkTableModal exists, but .mk-modal-content is missing inside it.", { title: "Modal Markup Issue" });
       return;
@@ -1917,6 +1870,7 @@
     } else {
       // ✅ IMPORTANT:
       // Do NOT turn .mk-modal-content into a .page-section.
+      // (avoids “random white card behind everything”)
     }
 
     nodes.forEach((node) => {
@@ -1950,24 +1904,18 @@
 
     const movedClose = modal.querySelector(".mk-modal-close");
     if (movedClose && movedClose.__mkHome && movedClose.parentElement !== movedClose.__mkHome) {
-      try {
-        movedClose.__mkHome.appendChild(movedClose);
-      } catch {}
+      try { movedClose.__mkHome.appendChild(movedClose); } catch {}
     }
 
     restoreHiddenNotesHeaders();
 
     const closeBtn = modal.querySelector(".mk-modal-close");
     if (closeBtn && tableModal.temp.stripCloseHome) {
-      try {
-        tableModal.temp.stripCloseHome.appendChild(closeBtn);
-      } catch {}
+      try { tableModal.temp.stripCloseHome.appendChild(closeBtn); } catch {}
     }
 
     if (tableModal.temp.strip) {
-      try {
-        tableModal.temp.strip.remove();
-      } catch {}
+      try { tableModal.temp.strip.remove(); } catch {}
     }
 
     (tableModal.moved || []).forEach(({ node, placeholder }) => {
@@ -2011,7 +1959,7 @@
     if (tableBlock) nodes.push(tableBlock);
 
     const targets = new Set();
-    sectionCard.querySelectorAll("[data-notes-target]").forEach((btn) => {
+    $$("[data-notes-target]", sectionCard).forEach((btn) => {
       const id = btn.getAttribute("data-notes-target");
       if (id) targets.add(id);
     });
@@ -2040,7 +1988,7 @@
   };
 
   const openTableModalFor = (anyInside) => {
-    const modal = document.querySelector("#mkTableModal");
+    const modal = $("#mkTableModal");
     if (modal) {
       modal.classList.remove("mk-is-notes", "mk-is-page");
       modal.classList.add("mk-is-table");
@@ -2058,7 +2006,7 @@
   const openNotesModalFor = (notesHostEl) => {
     if (!notesHostEl) return;
 
-    const modal = document.querySelector("#mkTableModal");
+    const modal = $("#mkTableModal");
     if (modal) {
       modal.classList.remove("mk-is-table", "mk-is-page");
       modal.classList.add("mk-is-notes");
@@ -2124,7 +2072,52 @@
     });
   };
 
-  // ✅ FIX: define startExpandObserver so init() never crashes
+  /* =======================
+     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
+  ======================= */
+  const shouldTreatAsAddTrainerBtn = (btn) => {
+    if (!btn) return false;
+
+    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
+
+    const trainersPage = btn.closest("#trainers-deployment");
+    if (!trainersPage) return false;
+
+    const isBtn = btn.matches("button, a, [role='button']");
+    if (!isBtn) return false;
+
+    const ip = btn.closest(".input-plus");
+    if (!ip) return false;
+
+    if (ip.querySelector("#additionalTrainerInput")) return true;
+
+    const globalInput = document.getElementById("additionalTrainerInput");
+    if (globalInput && ip.contains(globalInput)) return true;
+
+    return false;
+  };
+
+  const hookAddTrainerButtonDirectly = () => {
+    const page = document.getElementById("trainers-deployment");
+    if (!page) return;
+
+    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
+    btns.forEach((b) => {
+      if (!shouldTreatAsAddTrainerBtn(b)) return;
+      if (b.__mkAddTrainerBound) return;
+      b.__mkAddTrainerBound = true;
+
+      if (b.tagName === "BUTTON" && !b.getAttribute("type")) b.type = "button";
+
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addTrainerRow(b);
+      });
+    });
+  };
+
+  // ✅ observer (kept from your build) + safe updateNextPageButtons alias
   const startExpandObserver = (() => {
     let obs = null;
     return () => {
@@ -2154,7 +2147,12 @@
      SAVE PDF (safe hook)
   ======================= */
   const mkHandleSavePDF = () => {
-    const fn = window.saveAllPagesAsPDF || window.savePDF || window.generatePDF || window.exportPDF || null;
+    const fn =
+      window.saveAllPagesAsPDF ||
+      window.savePDF ||
+      window.generatePDF ||
+      window.exportPDF ||
+      null;
 
     if (typeof fn === "function") {
       try {
@@ -2173,7 +2171,10 @@
         { title: "PDF Hook" }
       );
     } catch {
-      mkPopup.ok("PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).", { title: "PDF Hook" });
+      mkPopup.ok(
+        "PDF handler not found. Add your PDF export function (e.g., window.saveAllPagesAsPDF).",
+        { title: "PDF Hook" }
+      );
     }
   };
 
@@ -2244,64 +2245,26 @@
     });
   };
 
-  /* =======================
-     ✅ HARD FIX: Additional Trainers (+) click hook (robust)
-  ======================= */
-  const shouldTreatAsAddTrainerBtn = (btn) => {
-    if (!btn) return false;
-
-    if (btn.matches("[data-add-trainer], .trainer-add-btn")) return true;
-
-    const trainersPage = btn.closest("#trainers-deployment");
-    if (!trainersPage) return false;
-
-    const isBtn = btn.matches("button, a, [role='button']");
-    if (!isBtn) return false;
-
-    const ip = btn.closest(".input-plus");
-    if (!ip) return false;
-
-    if (ip.querySelector("#additionalTrainerInput")) return true;
-
-    const globalInput = document.getElementById("additionalTrainerInput");
-    if (globalInput && ip.contains(globalInput)) return true;
-
-    return false;
-  };
-
-  const hookAddTrainerButtonDirectly = () => {
-    const page = document.getElementById("trainers-deployment");
-    if (!page) return;
-
-    const btns = Array.from(page.querySelectorAll("[data-add-trainer], .trainer-add-btn, .input-plus button"));
-    btns.forEach((b) => {
-      if (!shouldTreatAsAddTrainerBtn(b)) return;
-      if (b.__mkAddTrainerBound) return;
-      b.__mkAddTrainerBound = true;
-
-      if (b.tagName === "BUTTON" && !b.getAttribute("type")) b.type = "button";
-
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        addTrainerRow(b);
-      });
-    });
-  };
+  /* =========================================================
+     ✅ updateNextPageButtons() alias (prevents crashes)
+  ========================================================= */
+  function updateNextPageButtons() {
+    if (typeof mkBuildNextButtons === "function") mkBuildNextButtons();
+  }
 
   /* =========================================================
-     ✅ NEXT PAGE BUTTONS (footer version, consistent)
+     NEXT PAGE BUTTONS (single per section, no duplicates)
   ========================================================= */
-  const mkGetSectionOrder = () => Array.from(document.querySelectorAll(".page-section"));
+  const mkGetSectionOrder = () => $$(".page-section");
 
   const mkBuildNextButtons = () => {
     const sections = mkGetSectionOrder();
     if (!sections.length) return;
 
-    // Remove any prior footers/buttons (prevents duplicates)
-    sections.forEach((sec) => sec.querySelector(".mk-next-footer")?.remove());
-    document.querySelectorAll(".mk-next-page").forEach((b) => b.remove());
+    // remove existing (prevents duplicates)
+    $$(".mk-next-page").forEach((b) => b.remove());
 
+    // add one to each section except last
     sections.forEach((sec, idx) => {
       if (!sec.id) return;
       if (idx === sections.length - 1) return;
@@ -2309,26 +2272,16 @@
       const nextId = sections[idx + 1]?.id;
       if (!nextId) return;
 
-      const footer = document.createElement("div");
-      footer.className = "mk-next-footer";
-
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mk-next-page";
       btn.setAttribute("data-mk-next", nextId);
+      btn.innerHTML = `NEXT PAGE <span aria-hidden="true">›</span>`;
 
-      btn.innerHTML = `NEXT PAGE <span class="mk-next-arrow" aria-hidden="true">›</span>`;
-
-      footer.appendChild(btn);
-      sec.appendChild(footer);
+      // IMPORTANT: append INSIDE section so CSS can position it consistently
+      sec.appendChild(btn);
     });
   };
-
-  // Alias used elsewhere (prevents undefined errors)
-  const updateNextPageButtons = () => mkBuildNextButtons();
-  try {
-    window.updateNextPageButtons = updateNextPageButtons;
-  } catch {}
 
   /* =======================
      EVENT DELEGATION
@@ -2336,6 +2289,7 @@
   document.addEventListener("click", (e) => {
     const t = e.target;
 
+    // DMS launch
     const dmsLaunch = t.closest("[data-open-dms]");
     if (dmsLaunch) {
       e.preventDefault();
@@ -2344,7 +2298,7 @@
       return;
     }
 
-    // ✅ Next Page click (delegated) -> activate + scroll handled in setActiveSection()
+    // NEXT PAGE button
     const nextBtn = t.closest(".mk-next-page");
     if (nextBtn) {
       e.preventDefault();
@@ -2354,6 +2308,7 @@
       return;
     }
 
+    // Left nav
     const navBtn = t.closest(".nav-btn[data-target]");
     if (navBtn) {
       e.preventDefault();
@@ -2373,6 +2328,7 @@
       return;
     }
 
+    // Clear all
     const clearAllBtn = t.closest("#clearAllBtn");
     if (clearAllBtn) {
       e.preventDefault();
@@ -2385,6 +2341,7 @@
       return;
     }
 
+    // Reset page
     const resetBtn = t.closest(".clear-page-btn");
     if (resetBtn) {
       e.preventDefault();
@@ -2401,6 +2358,7 @@
       return;
     }
 
+    // Save PDF
     const savePdfBtn = t.closest("#savePDF, [data-mk-action='save-pdf']");
     if (savePdfBtn) {
       e.preventDefault();
@@ -2408,6 +2366,7 @@
       return;
     }
 
+    // Add trainer (+)
     const trainerBtn = t.closest("[data-add-trainer], .trainer-add-btn, #trainers-deployment .input-plus button");
     if (trainerBtn && shouldTreatAsAddTrainerBtn(trainerBtn)) {
       e.preventDefault();
@@ -2416,6 +2375,7 @@
       return;
     }
 
+    // Add POC (+)
     const pocBtn = t.closest(
       "[data-add-poc], .additional-poc-add, .poc-add-btn, #dealership-info .additional-poc-card[data-base='true'] .input-plus button"
     );
@@ -2426,6 +2386,7 @@
       return;
     }
 
+    // Add row in table
     const addRowBtn = t.closest("button.add-row");
     if (addRowBtn && addRowBtn.closest(".table-footer")) {
       e.preventDefault();
@@ -2433,6 +2394,7 @@
       return;
     }
 
+    // Notes button
     const notesBtn = t.closest("[data-notes-target], .notes-btn, .notes-icon-btn");
     if (notesBtn && notesBtn.getAttribute("data-notes-target")) {
       e.preventDefault();
@@ -2440,6 +2402,7 @@
       return;
     }
 
+    // Add ticket
     const ticketAddBtn = t.closest(".add-ticket-btn");
     if (ticketAddBtn) {
       e.preventDefault();
@@ -2447,18 +2410,17 @@
       return;
     }
 
+    // Map button
     const mapBtn = t.closest(".small-map-btn, [data-map-btn]");
     if (mapBtn) {
       e.preventDefault();
       const wrap = mapBtn.closest(".address-input-wrap") || mapBtn.parentElement;
-      const inp =
-        wrap.querySelector("input[type='text']") ||
-        document.querySelector("#dealershipAddressInput") ||
-        document.querySelector("#dealershipAddress");
+      const inp = $("input[type='text']", wrap) || $("#dealershipAddressInput") || $("#dealershipAddress");
       updateDealershipMap(inp ? inp.value : "");
       return;
     }
 
+    // Expand table
     const tableExpandBtn = t.closest(".mk-table-expand-btn");
     if (tableExpandBtn) {
       e.preventDefault();
@@ -2466,6 +2428,7 @@
       return;
     }
 
+    // Expand notes textarea
     const notesExpandBtn = t.closest(".mk-ta-expand");
     if (notesExpandBtn) {
       e.preventDefault();
@@ -2476,7 +2439,8 @@
       return;
     }
 
-    const mkTableModalEl = document.querySelector("#mkTableModal");
+    // Close modal (backdrop or X)
+    const mkTableModalEl = $("#mkTableModal");
     if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
       if (t.closest("#mkTableModal .mk-modal-close") || t.closest("#mkTableModal .mk-modal-backdrop")) {
         e.preventDefault();
@@ -2486,6 +2450,9 @@
     }
   });
 
+  /* =======================
+     INPUT / CHANGE SAVE HOOKS
+  ======================= */
   document.addEventListener("input", (e) => {
     const el = e.target;
 
@@ -2502,11 +2469,10 @@
 
     if (el.closest("#additionalTrainersContainer")) {
       const clones = cloneState.get();
-      clones.trainers = Array.from(document.querySelectorAll("#additionalTrainersContainer input[type='text']")).map((i) => ({
+      clones.trainers = $$("#additionalTrainersContainer input[type='text']").map((i) => ({
         value: (i.value || "").trim(),
       }));
       cloneState.set(clones);
-
       mkSyncSummaryEngagementSnapshot();
     }
 
@@ -2553,10 +2519,13 @@
     }
   });
 
+  /* =======================
+     KEYDOWN (Enter behavior + Escape)
+  ======================= */
   document.addEventListener("keydown", (e) => {
     const el = e.target;
 
-    // NOTES textarea special behavior
+    // Notes textarea behavior
     if (
       e.key === "Enter" &&
       Notes.isNotesTargetTextarea(el) &&
@@ -2571,9 +2540,7 @@
         const insert = "\n  ◦ ";
         const start = el.selectionStart ?? el.value.length;
         const end = el.selectionEnd ?? el.value.length;
-        const before = el.value.slice(0, start);
-        const after = el.value.slice(end);
-        el.value = before + insert + after;
+        el.value = el.value.slice(0, start) + insert + el.value.slice(end);
 
         const caret = start + insert.length;
         try {
@@ -2588,15 +2555,8 @@
       return;
     }
 
-    // SUPPORT TICKETS: Enter in Zendesk URL -> Short Summary
-    if (
-      e.key === "Enter" &&
-      !e.shiftKey &&
-      !e.metaKey &&
-      !e.ctrlKey &&
-      !e.altKey &&
-      !e.isComposing
-    ) {
+    // Support Tickets: Enter in Zendesk URL -> Summary
+    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
       const ticketGroup = el?.closest?.("#support-tickets .ticket-group");
       if (ticketGroup) {
         const isZendeskUrl =
@@ -2619,17 +2579,9 @@
       }
     }
 
-    // POC BASE CARD: Enter = next, then add when complete
-    if (
-      e.key === "Enter" &&
-      !e.shiftKey &&
-      !e.metaKey &&
-      !e.ctrlKey &&
-      !e.altKey &&
-      !e.isComposing
-    ) {
+    // POC BASE CARD: Enter cycles fields, adds new when complete
+    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
       const basePocCard = el?.closest?.("#dealership-info .additional-poc-card[data-base='true']");
-
       if (basePocCard && el.matches("input, select")) {
         const nameEl = basePocCard.querySelector('input[placeholder="Enter name"]');
         const roleEl = basePocCard.querySelector('input[placeholder="Enter role"]');
@@ -2640,30 +2592,26 @@
 
         if (fields.includes(el)) {
           e.preventDefault();
-
           const idx = fields.indexOf(el);
           const next = fields[idx + 1];
 
           if (next) {
             next.focus();
-            try {
-              next.select?.();
-            } catch {}
+            try { next.select?.(); } catch {}
             return;
           }
 
           const allFilled =
-            !!nameEl?.value?.trim() && !!roleEl?.value?.trim() && !!cellEl?.value?.trim() && !!emailEl?.value?.trim();
+            !!nameEl?.value?.trim() &&
+            !!roleEl?.value?.trim() &&
+            !!cellEl?.value?.trim() &&
+            !!emailEl?.value?.trim();
 
           if (allFilled) {
             addPocCard();
-
             const cards = Array.from(document.querySelectorAll("#dealership-info .additional-poc-card"));
             const newCard = cards[cards.length - 1];
-            const first =
-              newCard?.querySelector('input[placeholder="Enter name"]') ||
-              newCard?.querySelector("input, textarea, select");
-
+            const first = newCard?.querySelector('input[placeholder="Enter name"]') || newCard?.querySelector("input, select");
             if (first) first.focus();
             return;
           }
@@ -2681,20 +2629,10 @@
       }
     }
 
-    // GLOBAL: Enter = next field for normal inputs/selects (ignore textareas/notes)
-    if (
-      e.key === "Enter" &&
-      !e.shiftKey &&
-      !e.metaKey &&
-      !e.ctrlKey &&
-      !e.altKey &&
-      !e.isComposing
-    ) {
+    // GLOBAL: Enter moves next for inputs/selects (ignore ALL textareas)
+    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !e.isComposing) {
       if (el && el.matches && el.matches("textarea")) return;
-
-      if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
-        if (Notes.isNotesTargetTextarea(el)) return;
-      }
+      if (Notes.isNotesTargetTextarea(el)) return;
 
       const isNormal =
         el &&
@@ -2718,10 +2656,7 @@
         if (f.disabled || f.readOnly) return false;
         if (f.offsetParent === null) return false;
         if (f.matches("textarea")) return false;
-
-        if (typeof Notes !== "undefined" && typeof Notes.isNotesTargetTextarea === "function") {
-          if (Notes.isNotesTargetTextarea(f)) return false;
-        }
+        if (Notes.isNotesTargetTextarea(f)) return false;
         return true;
       });
 
@@ -2733,13 +2668,11 @@
 
       e.preventDefault();
       next.focus();
-      try {
-        next.select?.();
-      } catch {}
+      try { next.select?.(); } catch {}
       return;
     }
 
-    // Additional Trainer: Enter adds ONLY if typed text
+    // Additional Trainer: Enter adds if typed
     if (el && el.id === "additionalTrainerInput" && e.key === "Enter") {
       const v = (el.value || "").trim();
       if (!v) return;
@@ -2749,7 +2682,7 @@
     }
 
     if (e.key === "Escape") {
-      const mkTableModalEl = document.querySelector("#mkTableModal");
+      const mkTableModalEl = $("#mkTableModal");
       if (mkTableModalEl && mkTableModalEl.classList.contains("open")) {
         e.preventDefault();
         closeTableModal();
@@ -2792,9 +2725,10 @@
 
     mkBuildNextButtons();
 
-    log("Initialized v8.3.2 (Updated)");
+    log("Initialized v8.3.2 Updated");
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
-})();
+})(); // end IIFE
+
